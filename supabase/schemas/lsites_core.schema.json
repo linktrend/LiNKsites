@@ -1,0 +1,401 @@
+{
+  "schema": "lsites_core",
+  "tables": [
+    {
+      "name": "sites",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "name", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "template_id", "type": "text" },
+        { "name": "primary_domain", "type": "text" },
+        { "name": "default_locale", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "site_domains",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "domain", "type": "text" },
+        { "name": "is_primary", "type": "boolean" },
+        { "name": "created_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "languages",
+      "primaryKey": "code",
+      "columns": [
+        { "name": "code", "type": "text" },
+        { "name": "name", "type": "text" },
+        { "name": "is_default", "type": "boolean" }
+      ]
+    },
+    {
+      "name": "navigation",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "site_settings",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "media",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "pages",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "offer_pages",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "case_study_pages",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "video_pages",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "faq_pages",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "terms_pages",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "privacy_pages",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "cookie_policy_pages",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "articles",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "videos",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "testimonials",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "locations",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "team_members",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "help_articles",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "help_categories",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "article_categories",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "offer_categories",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "case_study_categories",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "video_categories",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "locale", "type": "text" },
+        { "name": "slug", "type": "text" },
+        { "name": "title", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "data", "type": "jsonb" },
+        { "name": "source_hash", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    },
+    {
+      "name": "sync_jobs",
+      "primaryKey": "id",
+      "columns": [
+        { "name": "id", "type": "uuid" },
+        { "name": "site_id", "type": "uuid" },
+        { "name": "entity", "type": "text" },
+        { "name": "entity_id", "type": "text" },
+        { "name": "action", "type": "text" },
+        { "name": "status", "type": "text" },
+        { "name": "attempts", "type": "integer" },
+        { "name": "last_error", "type": "text" },
+        { "name": "created_at", "type": "timestamptz" },
+        { "name": "updated_at", "type": "timestamptz" }
+      ]
+    }
+  ]
+}

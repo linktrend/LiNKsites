@@ -1,0 +1,240 @@
+{
+  "buttons": {
+    "login": "登入",
+    "signup": "免費開始",
+    "createAccount": "建立帳戶",
+    "joinNewsletter": "訂閱電子報",
+    "learnMore": "了解更多",
+    "getStarted": "開始使用",
+    "viewAll": "查看全部",
+    "readMore": "閱讀更多",
+    "contactUs": "聯絡我們",
+    "submit": "提交",
+    "send": "發送",
+    "save": "儲存",
+    "cancel": "取消",
+    "search": "搜尋"
+  },
+  "labels": {
+    "email": "電子郵件",
+    "phone": "電話",
+    "name": "姓名",
+    "message": "訊息",
+    "subject": "主題",
+    "query": "搜尋查詢"
+  },
+  "placeholders": {
+    "email": "你的郵箱@example.com",
+    "phone": "+886 (555) 000-0000",
+    "enterEmail": "輸入您的電子郵件",
+    "enterName": "輸入您的姓名",
+    "enterMessage": "我們能幫您什麼？",
+    "search": "搜尋說明文章..."
+  },
+  "legal": {
+    "acceptTerms": "繼續即表示您接受我們的：",
+    "privacyPolicy": "隱私權政策",
+    "termsOfUse": "使用條款",
+    "and": "和"
+  },
+  "newsletter": {
+    "title": "訂閱我們的電子報",
+    "description": "輸入您的電子郵件，接收我們的定期電子報。",
+    "acceptTermsText": "繼續即表示您接受我們的 {privacyPolicy} 和 {termsOfUse}"
+  },
+  "trust": {
+    "noCreditCard": "無需信用卡",
+    "cancelAnytime": "隨時取消",
+    "skipOnboarding": "跳過入門",
+    "privacyFriendly": "隱私友善"
+  },
+  "divider": {
+    "or": "或"
+  },
+  "forms": {
+    "validation": {
+      "nameMin": "姓名至少需要2個字元",
+      "nameMax": "姓名最多100個字元",
+      "emailInvalid": "請輸入有效的電子郵件地址",
+      "emailOrPhoneRequired": "請提供電子郵件或電話號碼",
+      "phoneMin": "電話號碼至少需要10位數字",
+      "phoneMax": "電話號碼最多20位數字",
+      "messageMin": "訊息至少需要10個字元",
+      "messageMax": "訊息最多1000個字元",
+      "searchMin": "搜尋查詢至少需要2個字元",
+      "searchMax": "搜尋查詢最多200個字元",
+      "minLength": "此欄位至少需要 {min} 個字元",
+      "maxLength": "此欄位最多 {max} 個字元",
+      "termsRequired": "您必須接受條款和條件",
+      "captchaRequired": "請驗證您不是機器人",
+      "required": "此欄位為必填項"
+    },
+    "errors": {
+      "submissionFailed": "提交失敗",
+      "networkError": "網路錯誤。請重試或直接透過電子郵件聯絡我們。",
+      "validationError": "請檢查您的表單輸入並重試",
+      "unknownError": "發生意外錯誤。請重試。"
+    },
+    "success": {
+      "title": "成功！",
+      "contactSubmitted": "您的訊息已成功發送。我們會盡快回覆您。",
+      "newsletterSubscribed": "您已成功訂閱我們的電子報。",
+      "preferencesUpdated": "您的偏好設定已成功儲存。"
+    },
+    "loading": {
+      "submitting": "提交中...",
+      "loading": "載入中..."
+    }
+  },
+  "cookies": {
+    "preferences": "Cookie 偏好設定",
+    "functional": "功能性",
+    "analytics": "分析",
+    "marketing": "行銷",
+    "functionalDesc": "網站功能所必需的 Cookie",
+    "analyticsDesc": "透過追蹤使用情況幫助我們改進",
+    "marketingDesc": "個人化內容和廣告",
+    "banner": {
+      "message": "{siteName} 使用 Cookie 來個人化內容和衡量使用情況。閱讀我們的{privacyPolicy}了解詳情。",
+      "manageCookies": "管理 Cookies",
+      "acceptAll": "全部接受",
+      "cookiePolicyLink": "Cookie 政策"
+    },
+    "modal": {
+      "title": "Cookie 偏好設定",
+      "description": "控制 {siteName} 如何使用 Cookie 來提供客製化體驗。",
+      "necessary": "必要 Cookies",
+      "necessaryDesc": "{siteName} 需要記住您的身份驗證和語言偏好。",
+      "functionalCookies": "功能性 Cookies",
+      "functionalCookiesDesc": "啟用產品個人化、已儲存的篩選器和更流暢的導覽。",
+      "analyticsCookies": "分析 Cookies",
+      "analyticsCookiesDesc": "幫助我們了解使用模式，以便改進工作流程和效能。",
+      "marketingCookies": "行銷 Cookies",
+      "marketingCookiesDesc": "允許我們分享更相關的 {siteName} 更新和發布公告。",
+      "policyTitle": "Cookie 政策",
+      "policyText": "{siteName} 僅收集保持會話安全和衡量匿名使用趨勢所需的最少資訊。您可以隨時更新這些偏好。",
+      "policyContact": "如需更多詳情，請聯絡 privacy@{siteNameLower}.com 或查看隱私權政策。必要 Cookie 絕不會儲存客戶資料或文件。",
+      "rejectAll": "全部拒絕",
+      "acceptAll": "全部接受",
+      "savePreferences": "儲存偏好設定"
+    }
+  },
+  "breadcrumbs": {
+    "home": "首頁",
+    "contact": "聯絡我們",
+    "pricing": "定價",
+    "about": "關於",
+    "helpCentre": "幫助中心"
+  },
+  "help": {
+    "feedback": {
+      "question": "這回答了您的問題嗎？",
+      "yes": "是",
+      "no": "否",
+      "thanks": "感謝您的回饋！"
+    },
+    "search": {
+      "heading": "我們能幫您什麼？",
+      "description": "查找所有問題的答案和指導",
+      "label": "搜尋幫助文章"
+    },
+    "noArticles": "此類別中未找到文章。",
+    "checkBackSoon": "請稍後查看新內容或",
+    "contactSupport": "聯絡支援",
+    "forAssistance": "尋求幫助。",
+    "relatedArticles": "相關文章"
+  },
+  "contact": {
+    "getInTouch": "聯絡我們",
+    "intents": {
+      "title": "我們能幫您什麼？",
+      "subtitle": "選擇最能描述您諮詢的選項"
+    },
+    "channels": {
+      "title": "其他聯絡方式",
+      "subtitle": "更喜歡其他溝通方式？我們為您提供服務",
+      "sendEmail": "發送郵件",
+      "scheduleNow": "立即預約",
+      "startChat": "開始對話"
+    }
+  },
+  "comingSoon": "即將推出",
+  "cta": {
+    "ready": "準備開始了嗎？",
+    "description": "加入已經使用 {siteName} 編排 AI 驅動的洞察和自動化的團隊。",
+    "getStartedFree": "免費開始",
+    "trustIndicators": {
+      "noCreditCard": "無需信用卡",
+      "freeTemplates": "免費自動化範本",
+      "cancelAnytime": "隨時取消"
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "簡單透明的定價",
+      "subtitle": "選擇適合您需求的方案。沒有隱藏費用，隨時取消。"
+    },
+    "features": "功能",
+    "mostPopular": "最受歡迎",
+    "startNow": "立即開始",
+    "custom": {
+      "title": "需要客製化解決方案？",
+      "description": "我們的團隊可以建立符合您特定需求的客製化方案",
+      "getStarted": "開始使用",
+      "viewAllOffers": "查看所有優惠"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "關於 {siteName}",
+      "subtitle": "了解我們是誰以及是什麼驅動我們前進"
+    },
+    "productEcosystem": "我們的產品生態系統",
+    "missionValues": {
+      "title": "我們的使命與價值觀",
+      "subtitle": "以目標為驅動，以原則為指導",
+      "coreValuesTitle": "核心價值觀"
+    },
+    "cta": {
+      "title": "準備好轉型您的業務了嗎？",
+      "description": "加入數百家已經使用我們的 AI 驅動自動化平台來簡化營運、提高生產力和推動成長的公司。我們的團隊隨時準備幫助您開始自動化之旅。",
+      "connectTitle": "讓我們聯繫",
+      "connectSubtitle": "與我們合作共建未來",
+      "buttonText": "讓我們一起工作"
+    }
+  },
+  "copyright": "© Copyright 2025. {siteName}",
+  "manageCookies": "管理 Cookies",
+  "adminLogin": "管理員登入",
+  "readMore": "閱讀更多",
+  "readArticle": "閱讀文章",
+  "readCaseStudy": "閱讀案例研究",
+  "closeModal": "關閉對話框",
+  "closeForm": "關閉表單",
+  "scrollToTop": "返回頂部",
+  "errors": {
+    "global": {
+      "title": "發生錯誤",
+      "description": "我們遇到了一個意外錯誤。請重試，如果問題仍然存在，請聯絡支援。",
+      "retry": "重試",
+      "goHome": "返回首頁"
+    },
+    "notFound": {
+      "title": "頁面未找到",
+      "description": "您要查找的頁面不存在或已被移動。",
+      "goHome": "返回首頁",
+      "backToPrevious": "返回上一頁"
+    },
+    "cms": {
+      "dataUnavailable": "內容暫時不可用",
+      "loadingFailed": "載入內容失敗。請稍後重試。",
+      "noData": "目前沒有可用內容。"
+    }
+  },
+  "loading": {
+    "default": "載入中...",
+    "page": "載入頁面中...",
+    "content": "載入內容中...",
+    "pleaseWait": "請稍候"
+  }
+}

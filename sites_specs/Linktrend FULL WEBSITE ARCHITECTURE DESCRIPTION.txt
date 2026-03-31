@@ -1,0 +1,244 @@
+** FULL WEBSITE ARCHITECTURE DESCRIPTION **
+
+```markdown
+# LinkTrend Website Architecture Specification (AI-First, Multi-Language, CMS-Driven)
+
+## 1. Overview
+This document defines the required architecture for building the LinkTrend website.
+The system must support:
+- Multi-language content (EN, ES, ZH-TW, ZH-CN)
+- CMS-driven content via CMS Payload JSON (synced from Supabase schema)
+- AI-first search optimisation (topic clusters, structured data, internal linking)
+- Modular reusable templates for all pages
+- Automatic article image selection (CMS image → fallback pool)
+- YouTube video resource integration with thumbnail generation
+- Interactive Google Maps on contact page
+- CTA integration across the site
+- Legal pages per language
+
+The website will be implemented using:
+- Next.js 14+ (App Router)
+- Supabase client for CMS fetch (or FSM fetcher)
+- Tailwind + shadcn/ui (optional)
+- Static generation where possible
+- Schema.org structured data via JSON-LD
+
+---
+
+## 2. Multi-Language Routing
+
+### Language Root
+Each language has its own root folder:
+```
+
+/en
+/es
+/zh-tw
+/zh-cn
+
+```
+
+### Behavior
+- All pages exist inside each language folder.
+- Language switcher triggers route change only (no auto-translation).
+- Each page implements `hreflang` tags for all language equivalents.
+- Canonicals must be language-specific.
+- No automatic browser-language redirects.
+
+---
+
+## 3. Global Directory Structure
+```
+
+/{lang}/
+/offers/
+/{offer-slug}/
+index.html
+faq.html
+/resources/
+{article-slug}.html
+/cases/
+{case-slug}.html
+/docs/        (optional for SaaS)
+{doc-slug}.html
+/resources/
+/category/{category-slug}/
+{article-slug}.html
+/videos/
+{video-slug}.html
+/about/
+index.html
+company.html
+team.html
+mission.html
+careers.html
+/contact/
+index.html
+/legal/
+terms-of-use.html
+privacy-policy.html
+cookies-policy.html
+gdpr.html
+disclaimer.html
+
+```
+
+---
+
+## 4. CMS Integration
+
+### CMS Payload
+Each page pulls content from the CMS Payload (JSON) delivered by Supabase.
+The CMS provides:
+- Offer metadata
+- Page titles, descriptions, headings
+- Resource articles (title, body, excerpt, image URL)
+- Categories
+- Videos (title, description, YouTube ID)
+- Contact information
+- Legal documents
+- Placeholder flags
+
+### Image Handling Logic
+Each article requires:
+```
+
+image = cms.image ?? fallbackPool[randomIndex]
+
+```
+
+Fallback pool stored in:
+```
+
+/public/placeholders/articles/img-{n}.jpg
+
+```
+
+### Video Handling Logic
+Each video page:
+- Loads metadata from CMS
+- Thumbnail generated via YouTube:
+```
+
+[https://img.youtube.com/vi/{youtubeId}/maxresdefault.jpg](https://img.youtube.com/vi/{youtubeId}/maxresdefault.jpg)
+
+```
+
+---
+
+## 5. Page Templates
+
+### 5.1 Offer Page Template
+Components:
+- Hero section (title, subtitle, description)
+- Features grid
+- Use cases
+- Pricing (if defined)
+- Testimonials/Case Studies preview
+- Related resources (3–5 articles)
+- Global CTA component
+- Schema: Product or Service
+
+### 5.2 Offer Resources Article Template
+Components:
+- Article hero (title, excerpt)
+- Published date
+- Article image (CMS or fallback)
+- Body content (rich text)
+- Related articles (within same offer)
+- CTA
+- Schema: Article
+
+### 5.3 Global Resources Article Template
+Similar to offer-article but category-based.
+
+### 5.4 Video Resource Template
+Components:
+- Video player (YouTube embed)
+- Thumbnail preview
+- Title + description
+- Related videos
+- Related articles
+- Schema: VideoObject
+
+### 5.5 About Pages Template
+Static content but sourced from CMS so multilingual.
+
+### 5.6 Contact Page Template
+Components:
+- Google Maps embedded iframe (office coordinates provided via CMS)
+- Contact form:
+  - name
+  - email
+  - message
+  - device-checked captcha
+- Support email links
+- “Schedule a call” CTA linking to Calendly or preferred tool
+- Schema: ContactPage
+
+### 5.7 Legal Pages Template
+Each page fetches its content from CMS in the correct language.
+
+---
+
+## 6. Navigation
+
+### Header
+- Offers (dropdown)
+- Resources
+- About
+- Contact
+- CTA button
+- Language switcher
+
+### Footer
+- Mini-sitemap
+- Legal links
+- Social icons
+
+---
+
+## 7. SEO Requirements
+- All Offer pages: Service/Product schema
+- All Articles: Article schema
+- FAQ pages: FAQPage schema
+- Videos: VideoObject schema
+- Use canonical + hreflang properly
+- Internal linking mandatory:
+  - Offer → related articles
+  - Articles → related offers
+  - Category → articles
+- Clean URL structure (no query strings for content)
+
+---
+
+## 8. Performance and Accessibility
+- Pre-render static pages where possible
+- Lazy-load non-critical images
+- Use Next.js Image component
+- Lighthouse targets:
+  - Performance 90+
+  - Accessibility 95+
+  - SEO 100
+
+---
+
+## 9. Deployment Structure
+- Git repo using branch-per-feature
+- CI pipeline builds static assets
+- CDN caching for all static content
+- CMS Payload fetched at build time (ISR fallback for updates)
+
+---
+
+## 10. Summary
+
+This architecture ensures:
+- AI-first SEO structure
+- Modular multi-language capability
+- Fully CMS-driven content
+- Robust developer-friendly templates
+- Scalable to 50+ offers and 500+ articles
+- Full compatibility with LinkTrend Website Factory & Centralized Text Content System
+```
+

@@ -1,0 +1,1204 @@
+{
+  "site": {
+    "id": "company-site",
+    "languages": [
+      "en",
+      "es",
+      "zh-tw",
+      "zh-cn"
+    ],
+    "primaryLanguage": "en",
+    "themeId": "default",
+    "designSystemVersion": "v1"
+  },
+  "navigation": {
+    "primary": [
+      {
+        "label": "Offers",
+        "slug": "/offers"
+      },
+      {
+        "label": "Resources",
+        "slug": "/resources"
+      },
+      {
+        "label": "About",
+        "slug": "/about"
+      },
+      {
+        "label": "Contact",
+        "slug": "/contact"
+      }
+    ],
+    "cta": {
+      "label": "Get started",
+      "slug": "/contact"
+    },
+    "override_enabled": false,
+    "override_reason": null,
+    "computed_label_override": null
+  },
+  "offers": [
+    {
+      "slug": "ai-automation-platform",
+      "title": "AI Automation Platform",
+      "subtitle": "Intelligent workflow automation that scales with your business",
+      "type": "product",
+      "short_description": "Transform operations with AI-powered automation. Reduce manual work by 80% and scale effortlessly.",
+      "description": "Enterprise-grade AI automation platform that combines machine learning with workflow orchestration to eliminate repetitive tasks and accelerate business processes.",
+      "hero_content": {
+        "title": "AI Automation Platform",
+        "subtitle": "Intelligent workflow automation that scales with your business",
+        "body": "Transform your business operations with AI-powered automation. Reduce manual work by 80%, eliminate errors, and scale effortlessly across your entire organization.",
+        "cta_label": "Start Free Trial",
+        "cta_url": "/contact"
+      },
+      "body_content": "<p>Our AI Automation Platform combines cutting-edge artificial intelligence with robust workflow orchestration to help businesses operate more efficiently. From intelligent document processing to automated customer service, our solutions adapt to your unique needs and scale with your growth.</p><p>Built for modern enterprises, our platform integrates seamlessly with your existing tools and provides real-time visibility into all automated processes.</p>",
+      "features": [
+        "Intelligent Document Processing",
+        "Workflow Orchestration Engine",
+        "Natural Language Processing",
+        "Computer Vision Integration",
+        "Real-time Process Monitoring",
+        "Custom AI Model Training"
+      ],
+      "useCases": [
+        "Invoice & Document Processing",
+        "Customer Service Automation",
+        "Data Entry & Validation",
+        "Email & Communication Routing",
+        "Quality Control & Inspection",
+        "Compliance & Risk Management"
+      ],
+      "pricing": [
+        "Starter",
+        "Professional",
+        "Enterprise"
+      ],
+      "testimonials": [
+        "Reduced processing time by 85% in first month",
+        "ROI achieved within 6 months of deployment",
+        "Seamless integration with our existing systems"
+      ],
+      "relatedResources": [
+        "ai-automation-101",
+        "automation-best-practices"
+      ],
+      "seo_meta": {
+        "title": "AI Automation Platform | Intelligent Workflow Automation | Company",
+        "description": "Transform operations with AI-powered automation. Reduce manual work by 80% and scale effortlessly with our enterprise automation platform.",
+        "keywords": "ai automation, workflow automation, intelligent automation, business process automation, rpa, document processing",
+        "og_image": null
+      },
+      "theme_variant": "default",
+      "sort_order": 1,
+      "status": "published"
+    },
+    {
+      "slug": "data-analytics-suite",
+      "title": "Data Analytics Suite",
+      "subtitle": "Real-time insights and predictive analytics for data-driven decisions",
+      "type": "product",
+      "short_description": "Centralize your data and unlock actionable insights with real-time dashboards and AI-powered predictions.",
+      "description": "Comprehensive analytics platform that unifies your data sources, provides real-time visibility, and delivers predictive insights to drive strategic decisions.",
+      "hero_content": {
+        "title": "Data Analytics Suite",
+        "subtitle": "Real-time insights and predictive analytics for data-driven decisions",
+        "body": "Centralize your data, visualize trends, and predict outcomes with our comprehensive analytics platform. Make confident decisions backed by real-time insights.",
+        "cta_label": "See Demo",
+        "cta_url": "/contact"
+      },
+      "body_content": "<p>Our Data Analytics Suite brings together all your data sources into a unified platform, providing real-time visibility and predictive insights. Built for business users and data scientists alike, our platform makes complex analytics accessible to everyone.</p><p>From executive dashboards to advanced machine learning models, we provide the tools you need to turn data into competitive advantage.</p>",
+      "features": [
+        "Unified Data Integration",
+        "Real-time Dashboards",
+        "Predictive Analytics Engine",
+        "Custom Report Builder",
+        "Automated Alerts & Notifications",
+        "Advanced Visualization Tools"
+      ],
+      "useCases": [
+        "Executive Performance Dashboards",
+        "Sales & Revenue Forecasting",
+        "Customer Behavior Analysis",
+        "Operational Efficiency Tracking",
+        "Financial Planning & Analysis",
+        "Marketing Campaign Optimization"
+      ],
+      "pricing": [
+        "Starter",
+        "Professional",
+        "Enterprise"
+      ],
+      "testimonials": [
+        "Improved forecast accuracy by 85%",
+        "Reduced reporting time from days to minutes",
+        "Enabled data-driven culture across organization"
+      ],
+      "relatedResources": [
+        "data-insights-overview",
+        "predictive-analytics-guide"
+      ],
+      "seo_meta": {
+        "title": "Data Analytics Suite | Real-time Business Intelligence | Company",
+        "description": "Centralize your data and unlock actionable insights with real-time dashboards and AI-powered predictions.",
+        "keywords": "data analytics, business intelligence, predictive analytics, real-time dashboards, data visualization",
+        "og_image": null
+      },
+      "theme_variant": "default",
+      "sort_order": 2,
+      "status": "published"
+    },
+    {
+      "slug": "ai-consulting-services",
+      "title": "AI Strategy & Implementation",
+      "subtitle": "Expert guidance to design and deploy AI solutions that deliver results",
+      "type": "service",
+      "short_description": "Partner with AI experts to build a winning strategy and implement solutions that drive measurable business value.",
+      "description": "Comprehensive AI consulting services from strategy development to full implementation. Our experts guide you through every step of your AI transformation journey.",
+      "hero_content": {
+        "title": "AI Strategy & Implementation",
+        "subtitle": "Expert guidance to design and deploy AI solutions that deliver results",
+        "body": "Partner with our AI experts to develop a winning strategy, select the right technologies, and implement solutions that drive measurable business value.",
+        "cta_label": "Book Consultation",
+        "cta_url": "/contact"
+      },
+      "body_content": "<p>Our AI Strategy & Implementation services help organizations navigate the complex landscape of artificial intelligence. We work closely with your team to understand your business challenges, identify high-impact opportunities, and build a roadmap for successful AI adoption.</p><p>From initial assessment to full deployment, our experts provide hands-on guidance to ensure your AI initiatives deliver real business value.</p>",
+      "features": [
+        "AI Readiness Assessment",
+        "Custom Strategy Development",
+        "Technology Selection & Architecture",
+        "Proof of Concept Development",
+        "Full-scale Implementation",
+        "Change Management & Training"
+      ],
+      "useCases": [
+        "AI Transformation Roadmap",
+        "Pilot Project Development",
+        "Enterprise AI Deployment",
+        "Team Capability Building",
+        "Vendor Selection & Integration",
+        "AI Governance Framework"
+      ],
+      "pricing": [
+        "Assessment Package",
+        "Implementation Project",
+        "Ongoing Advisory"
+      ],
+      "testimonials": [
+        "Helped us identify $5M in AI opportunities",
+        "Delivered working prototype in 8 weeks",
+        "Expert guidance throughout our AI journey"
+      ],
+      "relatedResources": [
+        "ai-automation-101",
+        "ai-ethics-considerations"
+      ],
+      "seo_meta": {
+        "title": "AI Strategy & Implementation Services | AI Consulting | Company",
+        "description": "Partner with AI experts to build a winning strategy and implement solutions that drive measurable business value.",
+        "keywords": "ai consulting, ai strategy, ai implementation, ai transformation, machine learning consulting",
+        "og_image": null
+      },
+      "theme_variant": "default",
+      "sort_order": 3,
+      "status": "published"
+    },
+    {
+      "slug": "data-engineering-services",
+      "title": "Data Engineering & Integration",
+      "subtitle": "Build scalable data infrastructure that powers your analytics and AI",
+      "type": "service",
+      "short_description": "Design and implement robust data pipelines, warehouses, and integration solutions that scale with your business.",
+      "description": "End-to-end data engineering services to build, optimize, and maintain the data infrastructure that powers your analytics and AI initiatives.",
+      "hero_content": {
+        "title": "Data Engineering & Integration",
+        "subtitle": "Build scalable data infrastructure that powers your analytics and AI",
+        "body": "Design and implement robust data pipelines, warehouses, and integration solutions. Transform fragmented data into a unified, reliable foundation for analytics and AI.",
+        "cta_label": "Schedule Assessment",
+        "cta_url": "/contact"
+      },
+      "body_content": "<p>Our Data Engineering & Integration services help organizations build the robust data infrastructure needed for modern analytics and AI. We design and implement scalable data pipelines, optimize data warehouses, and create seamless integrations across your entire data ecosystem.</p><p>Whether you're starting from scratch or modernizing existing infrastructure, our engineers bring deep expertise in cloud platforms, big data technologies, and data architecture best practices.</p>",
+      "features": [
+        "Data Pipeline Development",
+        "Cloud Data Warehouse Design",
+        "ETL/ELT Implementation",
+        "Real-time Data Streaming",
+        "Data Quality & Governance",
+        "API & Integration Development"
+      ],
+      "useCases": [
+        "Data Warehouse Migration",
+        "Real-time Data Pipeline",
+        "Multi-source Data Integration",
+        "Data Lake Architecture",
+        "Legacy System Modernization",
+        "Cloud Data Platform Setup"
+      ],
+      "pricing": [
+        "Assessment & Design",
+        "Implementation Project",
+        "Managed Services"
+      ],
+      "testimonials": [
+        "Reduced data processing time by 90%",
+        "Successfully migrated 10TB to cloud platform",
+        "Built reliable foundation for our AI initiatives"
+      ],
+      "relatedResources": [
+        "data-insights-overview",
+        "data-governance-framework"
+      ],
+      "seo_meta": {
+        "title": "Data Engineering & Integration Services | Data Pipeline Development | Company",
+        "description": "Design and implement robust data pipelines, warehouses, and integration solutions that scale with your business.",
+        "keywords": "data engineering, data pipeline, etl, data warehouse, data integration, cloud data platform",
+        "og_image": null
+      },
+      "theme_variant": "default",
+      "sort_order": 4,
+      "status": "published"
+    }
+  ],
+  "resources": [
+    {
+      "slug": "ai-automation-101",
+      "title": "Getting Started with AI Automation",
+      "excerpt": "Learn the fundamentals of AI automation and how it can transform your business workflows.",
+      "body": "<h2>Introduction to AI Automation</h2><p>AI automation is revolutionizing how businesses operate by combining artificial intelligence with workflow automation. This powerful combination enables organizations to handle complex tasks that previously required human intervention.</p><h3>What is AI Automation?</h3><p>AI automation uses machine learning algorithms and natural language processing to automate decision-making processes, data analysis, and repetitive tasks. Unlike traditional automation, AI can learn from patterns and adapt to new situations.</p><h3>Key Benefits</h3><ul><li>Reduced operational costs by up to 40%</li><li>Improved accuracy and consistency</li><li>24/7 availability without human fatigue</li><li>Scalability to handle growing workloads</li><li>Faster processing times</li></ul><h3>Common Use Cases</h3><p>Organizations across industries are implementing AI automation for various purposes:</p><ul><li><strong>Customer Service:</strong> AI chatbots handle routine inquiries</li><li><strong>Data Processing:</strong> Automated data entry and validation</li><li><strong>Document Management:</strong> Intelligent classification and routing</li><li><strong>Quality Control:</strong> Automated inspection and defect detection</li></ul><h2>Getting Started</h2><p>To begin your AI automation journey, start by identifying repetitive tasks in your workflow that consume significant time. Focus on processes with clear rules and patterns, as these are ideal candidates for automation.</p>",
+      "image": "https://picsum.photos/id/180/800/600",
+      "date": "2025-11-20",
+      "offerSlug": "ai-automation",
+      "category": "automation"
+    },
+    {
+      "slug": "data-insights-overview",
+      "title": "Unlocking Business Value with Data Insights",
+      "excerpt": "Discover how to centralize your analytics and make data-driven decisions that drive growth.",
+      "body": "<h2>The Power of Data Insights</h2><p>In today's competitive landscape, data-driven decision making is no longer optional\u2014it's essential. Organizations that effectively leverage their data insights gain significant advantages over competitors.</p><h3>Why Data Insights Matter</h3><p>Data insights transform raw information into actionable intelligence. By analyzing patterns, trends, and correlations, businesses can predict outcomes, optimize operations, and identify new opportunities.</p><h3>Building a Data-Driven Culture</h3><p>Success with data insights requires more than just technology\u2014it requires a cultural shift:</p><ul><li>Leadership commitment to data-driven decisions</li><li>Investment in analytics infrastructure</li><li>Training teams on data literacy</li><li>Establishing clear metrics and KPIs</li><li>Creating feedback loops for continuous improvement</li></ul><h2>Key Components of Effective Analytics</h2><h3>1. Data Collection</h3><p>Gather data from multiple sources including CRM systems, web analytics, social media, and operational databases.</p><h3>2. Data Integration</h3><p>Centralize data in a unified platform to enable cross-functional analysis and eliminate silos.</p><h3>3. Visualization</h3><p>Create intuitive dashboards that make complex data accessible to stakeholders at all levels.</p><h3>4. Predictive Analytics</h3><p>Use machine learning models to forecast trends and anticipate future outcomes.</p>",
+      "image": "https://picsum.photos/id/119/800/600",
+      "date": "2025-11-18",
+      "offerSlug": "data-insights",
+      "category": "analytics"
+    },
+    {
+      "slug": "automation-best-practices",
+      "title": "Best Practices for Workflow Automation",
+      "excerpt": "Essential strategies and tips for implementing successful automation projects in your organization.",
+      "body": "<h2>Automation Best Practices</h2><p>Successful automation requires careful planning and execution. Follow these proven best practices to maximize your return on investment.</p><h3>Start Small, Scale Fast</h3><p>Begin with pilot projects that deliver quick wins. This builds momentum and demonstrates value to stakeholders. Once you've proven success, expand to more complex processes.</p><h3>Document Everything</h3><p>Before automating, thoroughly document your current processes. This helps identify inefficiencies and ensures the automated version improves upon the manual workflow.</p><h3>Involve End Users</h3><p>Include the people who will use the automated systems in the design process. Their insights are invaluable for creating practical, user-friendly solutions.</p><h3>Monitor and Optimize</h3><p>Automation isn't set-and-forget. Continuously monitor performance metrics and gather user feedback to identify optimization opportunities.</p><h2>Common Pitfalls to Avoid</h2><ul><li>Automating broken processes without fixing them first</li><li>Neglecting change management and training</li><li>Over-engineering solutions for simple problems</li><li>Failing to plan for exceptions and edge cases</li><li>Ignoring security and compliance requirements</li></ul>",
+      "image": "https://picsum.photos/id/326/800/600",
+      "date": "2025-11-15",
+      "offerSlug": "ai-automation",
+      "category": "automation"
+    },
+    {
+      "slug": "predictive-analytics-guide",
+      "title": "A Complete Guide to Predictive Analytics",
+      "excerpt": "Learn how predictive analytics can help you forecast trends and make proactive business decisions.",
+      "body": "<h2>Understanding Predictive Analytics</h2><p>Predictive analytics uses historical data, statistical algorithms, and machine learning to identify the likelihood of future outcomes. This powerful approach enables organizations to move from reactive to proactive decision-making.</p><h3>How Predictive Analytics Works</h3><p>The process involves several key steps:</p><ol><li><strong>Data Collection:</strong> Gather historical data from relevant sources</li><li><strong>Data Preparation:</strong> Clean and structure data for analysis</li><li><strong>Model Development:</strong> Create statistical models using machine learning</li><li><strong>Validation:</strong> Test models against known outcomes</li><li><strong>Deployment:</strong> Implement models in production systems</li><li><strong>Monitoring:</strong> Track accuracy and refine as needed</li></ol><h3>Business Applications</h3><p>Predictive analytics drives value across many business functions:</p><ul><li><strong>Sales:</strong> Forecast revenue and identify high-value prospects</li><li><strong>Marketing:</strong> Predict customer churn and optimize campaigns</li><li><strong>Operations:</strong> Anticipate equipment failures and optimize inventory</li><li><strong>Finance:</strong> Assess credit risk and detect fraud</li><li><strong>HR:</strong> Predict employee turnover and identify top talent</li></ul>",
+      "image": "https://picsum.photos/id/60/800/600",
+      "date": "2025-11-12",
+      "offerSlug": "data-insights",
+      "category": "analytics"
+    },
+    {
+      "slug": "machine-learning-basics",
+      "title": "Machine Learning Fundamentals for Business",
+      "excerpt": "Demystify machine learning and understand how it can solve real business problems.",
+      "body": "<h2>Introduction to Machine Learning</h2><p>Machine learning (ML) is a subset of artificial intelligence that enables systems to learn and improve from experience without being explicitly programmed. For business leaders, understanding ML fundamentals is crucial for identifying opportunities and making informed decisions.</p><h3>Types of Machine Learning</h3><p><strong>Supervised Learning:</strong> The algorithm learns from labeled training data. Common applications include spam detection, image recognition, and price prediction.</p><p><strong>Unsupervised Learning:</strong> The algorithm finds patterns in unlabeled data. Used for customer segmentation, anomaly detection, and recommendation systems.</p><p><strong>Reinforcement Learning:</strong> The algorithm learns through trial and error, receiving rewards for correct actions. Applied in robotics, game playing, and autonomous systems.</p><h3>Business Impact</h3><p>Machine learning is transforming industries by enabling:</p><ul><li>Personalized customer experiences at scale</li><li>Automated decision-making in complex scenarios</li><li>Real-time fraud detection and prevention</li><li>Predictive maintenance reducing downtime</li><li>Dynamic pricing optimization</li></ul>",
+      "image": "https://picsum.photos/id/1/800/600",
+      "date": "2025-11-10",
+      "offerSlug": "ai-automation",
+      "category": "automation"
+    },
+    {
+      "slug": "dashboard-design-principles",
+      "title": "Designing Effective Analytics Dashboards",
+      "excerpt": "Create dashboards that drive action with these proven design principles and best practices.",
+      "body": "<h2>Dashboard Design Principles</h2><p>An effective dashboard transforms complex data into clear, actionable insights. Poor dashboard design can obscure important information and lead to bad decisions.</p><h3>Know Your Audience</h3><p>Different stakeholders need different information. Executives want high-level trends, while analysts need detailed metrics. Design dashboards with specific user needs in mind.</p><h3>Follow the Visual Hierarchy</h3><p>Place the most important information in the top-left corner where eyes naturally start. Use size, color, and position to guide attention to key metrics.</p><h3>Choose the Right Visualizations</h3><ul><li><strong>Line charts:</strong> Show trends over time</li><li><strong>Bar charts:</strong> Compare categories</li><li><strong>Pie charts:</strong> Display proportions (use sparingly)</li><li><strong>Tables:</strong> Present precise values</li><li><strong>Heat maps:</strong> Reveal patterns in large datasets</li></ul><h3>Keep It Simple</h3><p>Avoid clutter and unnecessary decorations. Every element should serve a purpose. White space is your friend\u2014it helps users focus on what matters.</p><h2>Interactive Features</h2><p>Add filters, drill-downs, and date selectors to let users explore data at their own pace. But don't overwhelm with too many options.</p>",
+      "image": "https://picsum.photos/id/gray/800/600",
+      "date": "2025-11-08",
+      "offerSlug": "data-insights",
+      "category": "analytics"
+    },
+    {
+      "slug": "rpa-implementation-guide",
+      "title": "Implementing Robotic Process Automation (RPA)",
+      "excerpt": "A step-by-step guide to successfully implementing RPA in your organization.",
+      "body": "<h2>Getting Started with RPA</h2><p>Robotic Process Automation (RPA) uses software robots to automate repetitive, rule-based tasks. When implemented correctly, RPA can deliver significant efficiency gains and cost savings.</p><h3>Ideal RPA Candidates</h3><p>Look for processes that are:</p><ul><li>High-volume and repetitive</li><li>Rule-based with minimal exceptions</li><li>Prone to human error</li><li>Time-sensitive</li><li>Performed across multiple systems</li></ul><h3>Implementation Steps</h3><ol><li><strong>Process Discovery:</strong> Identify and document automation opportunities</li><li><strong>Feasibility Analysis:</strong> Assess technical and business viability</li><li><strong>Solution Design:</strong> Map out the automated workflow</li><li><strong>Development:</strong> Build and test the RPA bot</li><li><strong>Deployment:</strong> Roll out to production environment</li><li><strong>Maintenance:</strong> Monitor performance and handle updates</li></ol><h3>Measuring Success</h3><p>Track these key metrics to evaluate RPA impact:</p><ul><li>Processing time reduction</li><li>Error rate improvement</li><li>Cost savings per transaction</li><li>Employee satisfaction scores</li><li>ROI and payback period</li></ul>",
+      "image": "https://picsum.photos/id/0/800/600",
+      "date": "2025-11-05",
+      "offerSlug": "ai-automation",
+      "category": "automation"
+    },
+    {
+      "slug": "data-governance-framework",
+      "title": "Building a Data Governance Framework",
+      "excerpt": "Establish policies and procedures to ensure data quality, security, and compliance.",
+      "body": "<h2>Why Data Governance Matters</h2><p>Data governance provides the framework for managing data as a strategic asset. It ensures data is accurate, secure, and used appropriately across the organization.</p><h3>Core Components</h3><p><strong>Data Quality:</strong> Establish standards for accuracy, completeness, and consistency. Implement validation rules and regular audits.</p><p><strong>Data Security:</strong> Define access controls, encryption requirements, and breach response procedures.</p><p><strong>Compliance:</strong> Ensure adherence to regulations like GDPR, CCPA, and industry-specific requirements.</p><p><strong>Data Lifecycle:</strong> Manage data from creation through archival or deletion, including retention policies.</p><h3>Governance Structure</h3><p>Successful data governance requires clear roles and responsibilities:</p><ul><li><strong>Data Stewards:</strong> Subject matter experts who define data standards</li><li><strong>Data Owners:</strong> Business leaders accountable for data domains</li><li><strong>Data Custodians:</strong> IT professionals who implement technical controls</li><li><strong>Governance Council:</strong> Cross-functional team that sets policies</li></ul><h2>Implementation Roadmap</h2><p>Start with a pilot program in one business area. Demonstrate value, refine your approach, then expand governance across the organization.</p>",
+      "image": "https://picsum.photos/id/201/800/600",
+      "date": "2025-11-02",
+      "offerSlug": "data-insights",
+      "category": "analytics"
+    },
+    {
+      "slug": "ai-ethics-considerations",
+      "title": "Ethical Considerations in AI Implementation",
+      "excerpt": "Navigate the ethical challenges of AI deployment with responsible practices and frameworks.",
+      "body": "<h2>AI Ethics Overview</h2><p>As AI becomes more prevalent in business operations, ethical considerations become increasingly important. Organizations must balance innovation with responsibility.</p><h3>Key Ethical Principles</h3><p><strong>Transparency:</strong> Make AI decision-making processes understandable to users and stakeholders. Avoid 'black box' systems where possible.</p><p><strong>Fairness:</strong> Ensure AI systems don't perpetuate or amplify biases. Regularly audit for discriminatory outcomes across different demographic groups.</p><p><strong>Privacy:</strong> Protect personal data and respect user privacy. Implement privacy-by-design principles in AI systems.</p><p><strong>Accountability:</strong> Establish clear responsibility for AI decisions and outcomes. Have processes to address errors and unintended consequences.</p><h3>Bias Mitigation</h3><p>AI systems can inherit biases from training data or design choices. Combat this through:</p><ul><li>Diverse training datasets</li><li>Regular bias audits</li><li>Inclusive development teams</li><li>Stakeholder feedback loops</li><li>Transparent documentation</li></ul><h2>Building Trust</h2><p>Ethical AI practices build trust with customers, employees, and regulators. This trust is essential for long-term success and adoption.</p>",
+      "image": "https://picsum.photos/id/3/800/600",
+      "date": "2025-10-28",
+      "offerSlug": "ai-automation",
+      "category": "automation"
+    },
+    {
+      "slug": "real-time-analytics",
+      "title": "Implementing Real-Time Analytics",
+      "excerpt": "Enable instant insights and rapid decision-making with real-time data analytics.",
+      "body": "<h2>The Need for Real-Time Analytics</h2><p>In fast-moving markets, yesterday's data isn't good enough. Real-time analytics enables organizations to respond to opportunities and threats as they emerge.</p><h3>Use Cases</h3><p><strong>Operational Monitoring:</strong> Track system performance, detect anomalies, and trigger alerts instantly.</p><p><strong>Customer Experience:</strong> Personalize interactions based on current behavior and context.</p><p><strong>Fraud Detection:</strong> Identify suspicious transactions in milliseconds to prevent losses.</p><p><strong>Supply Chain:</strong> Optimize inventory and logistics based on real-time demand signals.</p><h3>Technical Architecture</h3><p>Real-time analytics requires specialized infrastructure:</p><ul><li><strong>Stream Processing:</strong> Tools like Apache Kafka or AWS Kinesis</li><li><strong>In-Memory Databases:</strong> For ultra-fast query performance</li><li><strong>Event-Driven Architecture:</strong> React to data as it arrives</li><li><strong>Scalable Infrastructure:</strong> Handle variable data volumes</li></ul><h2>Implementation Challenges</h2><p>Real-time systems are complex. Start with high-value use cases, invest in robust infrastructure, and ensure your team has the necessary skills.</p>",
+      "image": "https://picsum.photos/id/1/800/600",
+      "date": "2025-10-25",
+      "offerSlug": "data-insights",
+      "category": "analytics"
+    },
+    {
+      "slug": "intelligent-document-processing",
+      "title": "Intelligent Document Processing with AI",
+      "excerpt": "Automate document handling with AI-powered extraction, classification, and validation.",
+      "body": "<h2>Transforming Document Workflows</h2><p>Intelligent Document Processing (IDP) uses AI to automatically extract, classify, and validate information from documents. This eliminates manual data entry and accelerates business processes.</p><h3>How IDP Works</h3><ol><li><strong>Document Ingestion:</strong> Capture documents from email, scanners, or file uploads</li><li><strong>Classification:</strong> AI identifies document types (invoices, contracts, forms)</li><li><strong>Extraction:</strong> OCR and NLP extract relevant data fields</li><li><strong>Validation:</strong> Business rules verify extracted data</li><li><strong>Integration:</strong> Data flows into downstream systems</li></ol><h3>Business Benefits</h3><ul><li>90% reduction in processing time</li><li>99%+ accuracy in data extraction</li><li>Lower operational costs</li><li>Improved compliance and audit trails</li><li>Better customer experience</li></ul><h3>Common Applications</h3><p><strong>Finance:</strong> Invoice processing, expense reports, bank statements</p><p><strong>HR:</strong> Resume screening, onboarding documents, benefits forms</p><p><strong>Legal:</strong> Contract analysis, due diligence, compliance checks</p><p><strong>Healthcare:</strong> Patient records, insurance claims, prescriptions</p>",
+      "image": "https://picsum.photos/id/24/800/600",
+      "date": "2025-10-22",
+      "offerSlug": "ai-automation",
+      "category": "automation"
+    },
+    {
+      "slug": "customer-analytics-strategies",
+      "title": "Customer Analytics Strategies That Drive Growth",
+      "excerpt": "Leverage customer data to increase retention, lifetime value, and satisfaction.",
+      "body": "<h2>Understanding Customer Analytics</h2><p>Customer analytics transforms raw customer data into insights that drive business growth. By understanding customer behavior, preferences, and needs, organizations can deliver better experiences and increase profitability.</p><h3>Key Metrics to Track</h3><p><strong>Customer Lifetime Value (CLV):</strong> Predict total revenue from a customer relationship</p><p><strong>Churn Rate:</strong> Identify customers at risk of leaving</p><p><strong>Net Promoter Score (NPS):</strong> Measure customer satisfaction and loyalty</p><p><strong>Customer Acquisition Cost (CAC):</strong> Optimize marketing spend</p><p><strong>Engagement Metrics:</strong> Track product usage and feature adoption</p><h3>Segmentation Strategies</h3><p>Divide customers into meaningful groups based on:</p><ul><li>Demographics and firmographics</li><li>Behavioral patterns</li><li>Purchase history</li><li>Engagement levels</li><li>Predicted lifetime value</li></ul><h2>Personalization at Scale</h2><p>Use analytics to deliver personalized experiences across all touchpoints. Tailor messaging, product recommendations, and offers to individual customer needs and preferences.</p>",
+      "image": "https://picsum.photos/id/27/800/600",
+      "date": "2025-10-18",
+      "offerSlug": "data-insights",
+      "category": "analytics"
+    }
+  ],
+  "videos": [
+    {
+      "slug": "ai-demo",
+      "title": "AI Demo",
+      "description": "Walkthrough of automation.",
+      "youtubeId": "dQw4w9WgXcQ",
+      "relatedVideos": [],
+      "relatedArticles": [
+        "ai-automation-101"
+      ]
+    }
+  ],
+  "about": {
+    "heroTitle": "About Company",
+    "heroSubtitle": "AI-first transformation partner.",
+    "sections": [
+      {
+        "title": "Mission",
+        "body": "Placeholder mission."
+      },
+      {
+        "title": "Team",
+        "body": "Placeholder team."
+      },
+      {
+        "title": "Careers",
+        "body": "Placeholder careers."
+      }
+    ]
+  },
+  "contact": {
+    "page": {
+      "title": "Contact Us",
+      "subtitle": "Get in touch with our team\u2014we're here to help you succeed",
+      "seoTitle": "Contact Us | Get in Touch with Our Team",
+      "seoDescription": "Reach out to our team for sales inquiries, customer support, partnerships, or general questions. We're here to help."
+    },
+    "intents": [
+      {
+        "id": "sales-inquiry",
+        "title": "Sales Inquiry",
+        "description": "Interested in our products? Let's discuss pricing, demos, and how we can help your business.",
+        "icon": "ShoppingCart",
+        "priorityRank": 1,
+        "action": {
+          "type": "modal",
+          "formId": "sales-form",
+          "url": null
+        },
+        "audienceType": "prospect",
+        "trackingLabel": "contact_intent_sales"
+      },
+      {
+        "id": "customer-support",
+        "title": "Customer Support",
+        "description": "Need help with your account or experiencing technical issues? Our support team is ready to assist.",
+        "icon": "Headphones",
+        "priorityRank": 2,
+        "action": {
+          "type": "modal",
+          "formId": "support-form",
+          "url": null
+        },
+        "audienceType": "customer",
+        "trackingLabel": "contact_intent_support"
+      },
+      {
+        "id": "billing-payments",
+        "title": "Billing & Payments",
+        "description": "Questions about invoices, subscriptions, or payment methods? We're here to help.",
+        "icon": "CreditCard",
+        "priorityRank": 3,
+        "action": {
+          "type": "modal",
+          "formId": "general-form",
+          "url": null
+        },
+        "audienceType": "customer",
+        "trackingLabel": "contact_intent_billing"
+      },
+      {
+        "id": "enterprise-partnerships",
+        "title": "Enterprise & Partnerships",
+        "description": "Looking for custom solutions, integrations, or partnership opportunities? Let's talk.",
+        "icon": "Building2",
+        "priorityRank": 4,
+        "action": {
+          "type": "modal",
+          "formId": "sales-form",
+          "url": null
+        },
+        "audienceType": "partner",
+        "trackingLabel": "contact_intent_enterprise"
+      },
+      {
+        "id": "media-press",
+        "title": "Media & Press",
+        "description": "Press inquiries, interview requests, or looking for company information? Contact our media team.",
+        "icon": "Newspaper",
+        "priorityRank": 5,
+        "action": {
+          "type": "modal",
+          "formId": "general-form",
+          "url": null
+        },
+        "audienceType": "media",
+        "trackingLabel": "contact_intent_media"
+      },
+      {
+        "id": "technical-consultation",
+        "title": "Technical Consultation",
+        "description": "Need architecture guidance, implementation support, or technical expertise? Our engineers can help.",
+        "icon": "Code2",
+        "priorityRank": 6,
+        "action": {
+          "type": "modal",
+          "formId": "support-form",
+          "url": null
+        },
+        "audienceType": "customer",
+        "trackingLabel": "contact_intent_technical"
+      },
+      {
+        "id": "feedback-suggestions",
+        "title": "Feedback & Suggestions",
+        "description": "Have ideas for new features or feedback on our products? We'd love to hear from you.",
+        "icon": "MessageCircle",
+        "priorityRank": 7,
+        "action": {
+          "type": "modal",
+          "formId": "general-form",
+          "url": null
+        },
+        "audienceType": "customer",
+        "trackingLabel": "contact_intent_feedback"
+      },
+      {
+        "id": "general-inquiry",
+        "title": "General Inquiry",
+        "description": "Have a question that doesn't fit the other categories? Send us a message.",
+        "icon": "Mail",
+        "priorityRank": 8,
+        "action": {
+          "type": "modal",
+          "formId": "general-form",
+          "url": null
+        },
+        "audienceType": "prospect",
+        "trackingLabel": "contact_intent_general"
+      }
+    ],
+    "channels": [
+      {
+        "id": "email",
+        "channelType": "email",
+        "displayName": "Email Us",
+        "description": "Send us an email and we'll respond within 24 hours",
+        "icon": "Mail",
+        "availabilityText": "Response within 24 hours",
+        "badgeText": null,
+        "contactValue": "hello@example.com",
+        "priorityWeight": 1
+      },
+      {
+        "id": "live-chat",
+        "channelType": "chat",
+        "displayName": "Live Chat",
+        "description": "Chat with our support team in real-time",
+        "icon": "MessageSquare",
+        "availabilityText": "Available Mon-Fri 9am-5pm EST",
+        "badgeText": "Online",
+        "contactValue": "#",
+        "priorityWeight": 2
+      },
+      {
+        "id": "schedule-call",
+        "channelType": "calendar",
+        "displayName": "Schedule a Call",
+        "description": "Book time with our team for a personalized discussion",
+        "icon": "Calendar",
+        "availabilityText": "15-30 min sessions available",
+        "badgeText": null,
+        "contactValue": "https://calendar.google.com/calendar/appointments",
+        "priorityWeight": 3
+      }
+    ],
+    "helpDeflection": {
+      "enabled": true,
+      "title": "Looking for quick answers?",
+      "description": "Browse our help centre for instant solutions to common questions",
+      "ctaText": "Visit Help Centre",
+      "ctaUrl": "/resources/faq",
+      "featuredCategories": [
+        "getting-started",
+        "billing",
+        "troubleshooting"
+      ]
+    },
+    "trust": {
+      "responseTimeText": "We typically respond within 1 business day",
+      "serviceTierNote": "Enterprise customers: use your priority support portal for faster assistance",
+      "reassuranceText": "Your information is secure and will never be shared with third parties",
+      "legalLinks": [
+        {
+          "label": "Privacy Policy",
+          "url": "/legal/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "url": "/legal/terms-of-use"
+        }
+      ]
+    }
+  },
+  "legal": [
+    {
+      "slug": "privacy-policy",
+      "title": "Privacy Policy",
+      "body": "Placeholder privacy policy."
+    },
+    {
+      "slug": "terms-of-use",
+      "title": "Terms of Use",
+      "body": "Placeholder terms."
+    },
+    {
+      "slug": "cookies-policy",
+      "title": "Cookies Policy",
+      "body": "Placeholder cookies policy."
+    },
+    {
+      "slug": "gdpr",
+      "title": "GDPR",
+      "body": "Placeholder GDPR."
+    },
+    {
+      "slug": "disclaimer",
+      "title": "Disclaimer",
+      "body": "Placeholder disclaimer."
+    }
+  ],
+  "faq": [
+    {
+      "question": "What is Company?",
+      "answer": "Placeholder answer."
+    },
+    {
+      "question": "How do I start?",
+      "answer": "Placeholder answer."
+    }
+  ],
+  "cases": [
+    {
+      "slug": "global-retail-automation",
+      "title": "Global Retail Chain Transforms Operations with AI Automation",
+      "summary": "A Fortune 500 retail company reduced operational costs by 45% and improved customer satisfaction by implementing AI-powered automation across 2,000+ stores.",
+      "challenge": "The retail chain struggled with manual inventory management, inconsistent customer service, and inefficient supply chain processes across their global network. Staff spent 60% of their time on repetitive administrative tasks, leading to high turnover and poor customer experiences. The company needed a scalable solution to standardize operations while maintaining local flexibility.",
+      "solution": "We implemented an AI automation platform that integrated with existing systems to automate inventory tracking, demand forecasting, and customer service workflows. The solution included intelligent chatbots for customer inquiries, automated reordering systems, and predictive analytics for staffing optimization. We deployed the system in phases, starting with 50 pilot stores before rolling out globally over 18 months.",
+      "impact": "45% reduction in operational costs, 60% decrease in inventory stockouts, 35% improvement in customer satisfaction scores, and 50% reduction in staff time spent on administrative tasks. The company achieved ROI within 14 months and now processes 10 million automated transactions monthly.",
+      "relatedOffers": [
+        "ai-automation"
+      ]
+    },
+    {
+      "slug": "financial-services-analytics",
+      "title": "Investment Firm Gains Competitive Edge with Real-Time Analytics",
+      "summary": "A mid-sized investment firm increased portfolio returns by 28% using real-time data analytics and predictive modeling.",
+      "challenge": "The investment firm relied on end-of-day reports and manual analysis, causing them to miss time-sensitive opportunities. Their analysts spent hours consolidating data from multiple sources, leaving little time for strategic analysis. Competitors with better technology were consistently outperforming them in volatile markets.",
+      "solution": "We built a real-time analytics platform that aggregated data from market feeds, news sources, and internal systems. The platform used machine learning to identify patterns and generate actionable insights. Custom dashboards provided portfolio managers with instant visibility into market movements, risk exposure, and opportunity alerts. We integrated the system with their existing trading platforms for seamless execution.",
+      "impact": "28% increase in portfolio returns, 75% reduction in time spent on data consolidation, 40% faster decision-making, and 90% improvement in risk detection accuracy. The firm now analyzes 50TB of market data daily and has become a market leader in their segment.",
+      "relatedOffers": [
+        "data-insights"
+      ]
+    },
+    {
+      "slug": "healthcare-document-processing",
+      "title": "Healthcare Network Streamlines Patient Records with IDP",
+      "summary": "A regional healthcare network reduced document processing time by 85% and improved accuracy to 99.5% using intelligent document processing.",
+      "challenge": "The healthcare network processed over 50,000 patient documents monthly across 15 facilities. Manual data entry led to frequent errors, delayed patient care, and compliance risks. Staff burnout was high, and the backlog of unprocessed documents grew daily. The organization needed to improve accuracy while reducing processing time and costs.",
+      "solution": "We deployed an intelligent document processing system that automatically classified, extracted, and validated information from medical records, insurance forms, and referrals. The AI-powered solution integrated with their electronic health record (EHR) system and included human-in-the-loop validation for complex cases. We provided comprehensive training and change management support to ensure smooth adoption.",
+      "impact": "85% reduction in processing time, 99.5% accuracy rate, 70% cost savings in document processing, and 95% staff satisfaction improvement. The network now processes 200,000 documents monthly with the same team size and has eliminated the processing backlog entirely.",
+      "relatedOffers": [
+        "ai-automation"
+      ]
+    },
+    {
+      "slug": "manufacturing-predictive-maintenance",
+      "title": "Manufacturing Plant Prevents Downtime with Predictive Analytics",
+      "summary": "An automotive parts manufacturer reduced unplanned downtime by 60% and saved $4.2M annually through predictive maintenance.",
+      "challenge": "The manufacturing plant experienced frequent unexpected equipment failures that halted production lines, costing an average of $50,000 per hour in lost productivity. Traditional preventive maintenance was either too frequent (wasting resources) or too infrequent (leading to failures). The plant needed a data-driven approach to optimize maintenance schedules and prevent costly breakdowns.",
+      "solution": "We implemented IoT sensors across critical equipment and built a predictive analytics platform that monitored machine health in real-time. Machine learning models analyzed vibration patterns, temperature fluctuations, and performance metrics to predict failures before they occurred. The system automatically generated maintenance work orders and optimized scheduling to minimize production impact.",
+      "impact": "60% reduction in unplanned downtime, $4.2M annual cost savings, 40% increase in equipment lifespan, and 50% reduction in maintenance costs. The plant achieved 99.2% uptime and became the company's most efficient facility globally.",
+      "relatedOffers": [
+        "data-insights"
+      ]
+    },
+    {
+      "slug": "insurance-claims-automation",
+      "title": "Insurance Company Accelerates Claims Processing with RPA",
+      "summary": "A national insurance provider reduced claims processing time from 14 days to 2 hours using robotic process automation.",
+      "challenge": "The insurance company processed 100,000 claims annually, with each claim requiring manual review across multiple systems. The average processing time of 14 days frustrated customers and increased operational costs. Claims adjusters spent 80% of their time on data entry and validation rather than complex case analysis. The company risked losing market share to more agile competitors.",
+      "solution": "We designed and deployed RPA bots that automated data extraction from claim forms, validation against policy terms, fraud detection checks, and payment processing. The bots integrated with legacy systems and modern APIs, working 24/7 without errors. We established a center of excellence to manage bot performance and continuously identify new automation opportunities.",
+      "impact": "93% reduction in processing time (14 days to 2 hours), 99.7% accuracy rate, 65% cost reduction per claim, and 40-point increase in Net Promoter Score. The company now processes 250,000 claims annually with the same team size and has become an industry leader in customer satisfaction.",
+      "relatedOffers": [
+        "ai-automation"
+      ]
+    },
+    {
+      "slug": "ecommerce-personalization",
+      "title": "E-Commerce Platform Boosts Revenue with Customer Analytics",
+      "summary": "An online marketplace increased revenue by 42% through AI-powered personalization and customer analytics.",
+      "challenge": "The e-commerce platform had 5 million users but struggled with low conversion rates and high cart abandonment. Their one-size-fits-all approach to product recommendations and marketing resulted in poor engagement. Customer lifetime value was declining, and they were losing market share to competitors with better personalization capabilities.",
+      "solution": "We built a customer analytics platform that tracked behavior across all touchpoints and created detailed customer profiles. Machine learning models generated personalized product recommendations, dynamic pricing, and targeted marketing campaigns. The system performed A/B testing automatically and optimized strategies in real-time based on performance data.",
+      "impact": "42% revenue increase, 65% improvement in conversion rates, 50% reduction in cart abandonment, and 3x increase in customer lifetime value. The platform now serves 15 million personalized recommendations daily and has achieved industry-leading engagement metrics.",
+      "relatedOffers": [
+        "data-insights"
+      ]
+    },
+    {
+      "slug": "logistics-route-optimization",
+      "title": "Logistics Company Cuts Delivery Costs with AI Optimization",
+      "summary": "A regional logistics provider reduced fuel costs by 35% and improved on-time delivery to 98% using AI-powered route optimization.",
+      "challenge": "The logistics company operated 500 delivery vehicles across 3 states but struggled with inefficient routing, high fuel costs, and inconsistent delivery times. Manual route planning couldn't account for real-time traffic, weather, or last-minute changes. Customer complaints about late deliveries were increasing, and profit margins were shrinking due to rising fuel costs.",
+      "solution": "We developed an AI-powered route optimization system that considered traffic patterns, weather conditions, delivery time windows, vehicle capacity, and driver schedules. The system dynamically adjusted routes in real-time and provided drivers with mobile apps for turn-by-turn navigation. We integrated with their dispatch system and customer notification platform for seamless operations.",
+      "impact": "35% reduction in fuel costs, 98% on-time delivery rate (up from 78%), 25% increase in deliveries per vehicle, and 40% reduction in customer complaints. The company now handles 50% more deliveries with the same fleet size and has expanded into two new markets.",
+      "relatedOffers": [
+        "ai-automation",
+        "data-insights"
+      ]
+    },
+    {
+      "slug": "telecom-churn-prediction",
+      "title": "Telecom Provider Reduces Customer Churn by 40% with Predictive Analytics",
+      "summary": "A telecommunications company saved $18M annually by predicting and preventing customer churn using advanced analytics.",
+      "challenge": "The telecom provider lost 15% of their customer base annually to competitors, costing millions in lost revenue and high customer acquisition expenses. They couldn't identify at-risk customers until after they had already decided to leave. Traditional retention campaigns were ineffective because they weren't targeted or timely enough.",
+      "solution": "We built a predictive analytics platform that analyzed customer behavior, usage patterns, support interactions, and billing history to identify churn risk. Machine learning models scored each customer's likelihood to leave and recommended personalized retention strategies. The system triggered automated interventions for high-risk customers and provided retention specialists with detailed insights for personal outreach.",
+      "impact": "40% reduction in customer churn, $18M annual revenue retention, 5x ROI on retention campaigns, and 60% improvement in customer lifetime value. The company now proactively engages 50,000 at-risk customers monthly with personalized offers, achieving an 85% retention rate.",
+      "relatedOffers": [
+        "data-insights"
+      ]
+    },
+    {
+      "slug": "banking-fraud-detection",
+      "title": "Bank Stops $50M in Fraud with Real-Time AI Detection",
+      "summary": "A commercial bank reduced fraud losses by 80% using real-time AI-powered transaction monitoring and anomaly detection.",
+      "challenge": "The bank processed 10 million transactions daily but their rule-based fraud detection system generated too many false positives (95% false alarm rate) while missing sophisticated fraud patterns. Customers were frustrated by legitimate transactions being blocked, and the bank was losing millions to undetected fraud. Manual review teams were overwhelmed and couldn't keep pace with transaction volumes.",
+      "solution": "We implemented a real-time AI fraud detection system that analyzed transaction patterns, device fingerprints, location data, and behavioral biometrics. The machine learning models adapted to new fraud tactics automatically and reduced false positives through continuous learning. The system integrated with the bank's core banking platform and provided instant risk scores for each transaction.",
+      "impact": "80% reduction in fraud losses (preventing $50M in fraudulent transactions annually), 90% reduction in false positives, 99.9% accuracy in fraud detection, and 70% decrease in customer complaints about blocked transactions. The bank now processes transactions 40% faster while maintaining superior security.",
+      "relatedOffers": [
+        "ai-automation",
+        "data-insights"
+      ]
+    },
+    {
+      "slug": "energy-demand-forecasting",
+      "title": "Utility Company Optimizes Grid Management with Predictive Analytics",
+      "summary": "An electric utility improved demand forecasting accuracy by 85% and reduced energy waste by $12M annually.",
+      "challenge": "The utility company served 2 million customers across a diverse geographic area with highly variable energy demand. Inaccurate demand forecasting led to either excess capacity (wasting resources) or shortfalls (requiring expensive emergency purchases). Weather patterns, economic activity, and seasonal variations made manual forecasting unreliable. The company needed better predictions to optimize grid management and reduce costs.",
+      "solution": "We developed a predictive analytics platform that combined historical consumption data, weather forecasts, economic indicators, and special events to predict energy demand at granular levels. Machine learning models provided hourly forecasts up to 7 days ahead with confidence intervals. The system integrated with grid management tools to automatically optimize energy generation and distribution.",
+      "impact": "85% improvement in forecast accuracy, $12M annual cost savings, 30% reduction in emergency energy purchases, and 25% improvement in grid efficiency. The utility now provides more reliable service while reducing environmental impact through optimized renewable energy integration.",
+      "relatedOffers": [
+        "data-insights"
+      ]
+    },
+    {
+      "slug": "hospitality-revenue-management",
+      "title": "Hotel Chain Increases Revenue by 38% with Dynamic Pricing",
+      "summary": "A boutique hotel chain optimized pricing strategies using AI analytics, increasing revenue per available room by 38%.",
+      "challenge": "The hotel chain's 25 properties used static pricing models that didn't account for demand fluctuations, competitor rates, or local events. They frequently left money on the table during high-demand periods and struggled to fill rooms during slow periods. Revenue managers spent hours manually adjusting prices but couldn't react quickly enough to market changes.",
+      "solution": "We implemented a dynamic pricing platform that analyzed booking patterns, competitor rates, local events, weather, and market trends to optimize room rates in real-time. The AI system automatically adjusted prices every hour based on demand forecasts and revenue optimization algorithms. We provided revenue managers with dashboards showing pricing recommendations and performance analytics.",
+      "impact": "38% increase in revenue per available room, 92% occupancy rate (up from 68%), 45% improvement in booking lead times, and 50% reduction in time spent on pricing decisions. The hotel chain now commands premium rates during peak periods while maintaining competitive pricing during slower times.",
+      "relatedOffers": [
+        "data-insights"
+      ]
+    },
+    {
+      "slug": "pharmaceutical-supply-chain",
+      "title": "Pharma Company Ensures Drug Availability with Supply Chain Analytics",
+      "summary": "A pharmaceutical manufacturer eliminated stockouts and reduced inventory costs by 30% using predictive supply chain analytics.",
+      "challenge": "The pharmaceutical company managed a complex global supply chain for 200+ products across 50 countries. Stockouts of critical medications created patient safety risks and regulatory issues, while excess inventory tied up working capital. Manual demand planning couldn't account for seasonal variations, disease outbreaks, or regulatory changes. The company needed better visibility and predictive capabilities.",
+      "solution": "We built an end-to-end supply chain analytics platform that integrated data from manufacturing, distribution, sales, and external sources like disease surveillance systems. Predictive models forecasted demand at the product-country level and optimized inventory levels across the network. The system provided early warning alerts for potential stockouts and recommended proactive interventions.",
+      "impact": "Zero stockouts of critical medications, 30% reduction in inventory carrying costs, 40% improvement in forecast accuracy, and 25% reduction in expedited shipping costs. The company now maintains optimal inventory levels while ensuring consistent drug availability for patients worldwide.",
+      "relatedOffers": [
+        "data-insights"
+      ]
+    }
+  ],
+  "contactForms": [
+    {
+      "id": "sales-form",
+      "title": "Sales Inquiry",
+      "description": "Tell us about your needs and we'll connect you with the right team member",
+      "fields": [
+        {
+          "id": "firstName",
+          "type": "text",
+          "label": "First Name",
+          "placeholder": "John",
+          "required": true,
+          "validation": {
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        {
+          "id": "lastName",
+          "type": "text",
+          "label": "Last Name",
+          "placeholder": "Doe",
+          "required": true,
+          "validation": {
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        {
+          "id": "email",
+          "type": "email",
+          "label": "Work Email",
+          "placeholder": "john@company.com",
+          "required": true,
+          "validation": {
+            "pattern": "email"
+          }
+        },
+        {
+          "id": "company",
+          "type": "text",
+          "label": "Company Name",
+          "placeholder": "Acme Corp",
+          "required": true,
+          "validation": {
+            "minLength": 2,
+            "maxLength": 100
+          }
+        },
+        {
+          "id": "companySize",
+          "type": "select",
+          "label": "Company Size",
+          "placeholder": "Select size",
+          "required": true,
+          "options": [
+            {
+              "value": "1-10",
+              "label": "1-10 employees"
+            },
+            {
+              "value": "11-50",
+              "label": "11-50 employees"
+            },
+            {
+              "value": "51-200",
+              "label": "51-200 employees"
+            },
+            {
+              "value": "201-1000",
+              "label": "201-1000 employees"
+            },
+            {
+              "value": "1000+",
+              "label": "1000+ employees"
+            }
+          ]
+        },
+        {
+          "id": "timeline",
+          "type": "select",
+          "label": "When are you looking to start?",
+          "placeholder": "Select timeline",
+          "required": true,
+          "options": [
+            {
+              "value": "immediate",
+              "label": "Immediately"
+            },
+            {
+              "value": "1-3-months",
+              "label": "1-3 months"
+            },
+            {
+              "value": "3-6-months",
+              "label": "3-6 months"
+            },
+            {
+              "value": "exploring",
+              "label": "Just exploring"
+            }
+          ]
+        },
+        {
+          "id": "message",
+          "type": "textarea",
+          "label": "Tell us about your needs",
+          "placeholder": "What challenges are you looking to solve?",
+          "required": true,
+          "validation": {
+            "minLength": 20,
+            "maxLength": 1000
+          }
+        }
+      ],
+      "submitButtonText": "Send Inquiry",
+      "successMessage": "Thank you! We'll be in touch within 24 hours.",
+      "submissionConfig": {
+        "endpoint": "/api/contact",
+        "method": "POST",
+        "intentTag": "sales-inquiry"
+      }
+    },
+    {
+      "id": "support-form",
+      "title": "Customer Support",
+      "description": "Describe your issue and we'll help you resolve it",
+      "fields": [
+        {
+          "id": "firstName",
+          "type": "text",
+          "label": "First Name",
+          "placeholder": "John",
+          "required": true,
+          "validation": {
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        {
+          "id": "lastName",
+          "type": "text",
+          "label": "Last Name",
+          "placeholder": "Doe",
+          "required": true,
+          "validation": {
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        {
+          "id": "email",
+          "type": "email",
+          "label": "Email Address",
+          "placeholder": "john@company.com",
+          "required": true,
+          "validation": {
+            "pattern": "email"
+          }
+        },
+        {
+          "id": "accountId",
+          "type": "text",
+          "label": "Account ID (if applicable)",
+          "placeholder": "ACC-12345",
+          "required": false,
+          "validation": {
+            "maxLength": 50
+          }
+        },
+        {
+          "id": "issueCategory",
+          "type": "select",
+          "label": "Issue Category",
+          "placeholder": "Select category",
+          "required": true,
+          "options": [
+            {
+              "value": "technical",
+              "label": "Technical Issue"
+            },
+            {
+              "value": "account",
+              "label": "Account Access"
+            },
+            {
+              "value": "billing",
+              "label": "Billing Question"
+            },
+            {
+              "value": "feature",
+              "label": "Feature Request"
+            },
+            {
+              "value": "other",
+              "label": "Other"
+            }
+          ]
+        },
+        {
+          "id": "priority",
+          "type": "select",
+          "label": "Priority",
+          "placeholder": "Select priority",
+          "required": true,
+          "options": [
+            {
+              "value": "low",
+              "label": "Low - General question"
+            },
+            {
+              "value": "medium",
+              "label": "Medium - Affecting my work"
+            },
+            {
+              "value": "high",
+              "label": "High - Blocking critical work"
+            },
+            {
+              "value": "urgent",
+              "label": "Urgent - System down"
+            }
+          ]
+        },
+        {
+          "id": "message",
+          "type": "textarea",
+          "label": "Describe your issue",
+          "placeholder": "Please provide as much detail as possible...",
+          "required": true,
+          "validation": {
+            "minLength": 20,
+            "maxLength": 2000
+          }
+        }
+      ],
+      "submitButtonText": "Submit Support Request",
+      "successMessage": "Support ticket created. Check your email for updates.",
+      "submissionConfig": {
+        "endpoint": "/api/contact",
+        "method": "POST",
+        "intentTag": "customer-support"
+      }
+    },
+    {
+      "id": "general-form",
+      "title": "Contact Us",
+      "description": "Send us a message and we'll get back to you soon",
+      "fields": [
+        {
+          "id": "firstName",
+          "type": "text",
+          "label": "First Name",
+          "placeholder": "John",
+          "required": true,
+          "validation": {
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        {
+          "id": "lastName",
+          "type": "text",
+          "label": "Last Name",
+          "placeholder": "Doe",
+          "required": true,
+          "validation": {
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        {
+          "id": "email",
+          "type": "email",
+          "label": "Email Address",
+          "placeholder": "john@example.com",
+          "required": true,
+          "validation": {
+            "pattern": "email"
+          }
+        },
+        {
+          "id": "subject",
+          "type": "text",
+          "label": "Subject",
+          "placeholder": "What is this regarding?",
+          "required": true,
+          "validation": {
+            "minLength": 5,
+            "maxLength": 100
+          }
+        },
+        {
+          "id": "message",
+          "type": "textarea",
+          "label": "Message",
+          "placeholder": "Tell us how we can help you...",
+          "required": true,
+          "validation": {
+            "minLength": 20,
+            "maxLength": 1000
+          }
+        }
+      ],
+      "submitButtonText": "Send Message",
+      "successMessage": "Message received. We'll respond within 1-2 business days.",
+      "submissionConfig": {
+        "endpoint": "/api/contact",
+        "method": "POST",
+        "intentTag": "general-inquiry"
+      }
+    }
+  ],
+  "pricing": {
+    "ai-automation": {
+      "plans": [
+        {
+          "name": "Free",
+          "price": "$0",
+          "period": "forever",
+          "description": "Perfect for trying out AI automation",
+          "features": [
+            "2 automation workflows",
+            "100 executions per month",
+            "Community support",
+            "Basic templates",
+            "Email notifications"
+          ],
+          "cta": "Get Started",
+          "ctaUrl": "/contact",
+          "popular": false
+        },
+        {
+          "name": "Pro",
+          "price": "$49",
+          "period": "per month",
+          "description": "Best for teams scaling AI workflows",
+          "features": [
+            "Unlimited workflows",
+            "10,000 executions per month",
+            "Priority support",
+            "Advanced AI models",
+            "Custom integrations",
+            "Team collaboration",
+            "Advanced analytics",
+            "API access"
+          ],
+          "cta": "Start Free Trial",
+          "ctaUrl": "/contact",
+          "popular": true
+        },
+        {
+          "name": "Enterprise",
+          "price": "Custom",
+          "period": "contact sales",
+          "description": "For organizations with advanced needs",
+          "features": [
+            "Unlimited everything",
+            "Dedicated account manager",
+            "Custom SLA",
+            "On-premise deployment",
+            "Advanced security",
+            "SSO integration",
+            "Custom contracts",
+            "24/7 phone support"
+          ],
+          "cta": "Contact Sales",
+          "ctaUrl": "/contact",
+          "popular": false
+        }
+      ]
+    },
+    "data-insights": {
+      "plans": [
+        {
+          "name": "Starter",
+          "price": "$29",
+          "period": "per month",
+          "description": "Essential analytics for small teams",
+          "features": [
+            "Up to 5 data sources",
+            "10 dashboards",
+            "Basic visualizations",
+            "Email reports",
+            "7-day data retention",
+            "Community support"
+          ],
+          "cta": "Get Started",
+          "ctaUrl": "/contact",
+          "popular": false
+        },
+        {
+          "name": "Pro",
+          "price": "$99",
+          "period": "per month",
+          "description": "Advanced analytics for growing teams",
+          "features": [
+            "Unlimited data sources",
+            "Unlimited dashboards",
+            "Advanced visualizations",
+            "Real-time data",
+            "Custom alerts",
+            "90-day data retention",
+            "Priority support",
+            "API access"
+          ],
+          "cta": "Start Free Trial",
+          "ctaUrl": "/contact",
+          "popular": true
+        },
+        {
+          "name": "Enterprise",
+          "price": "Custom",
+          "period": "contact sales",
+          "description": "Enterprise-grade analytics platform",
+          "features": [
+            "Everything in Pro",
+            "Unlimited data retention",
+            "White-label options",
+            "Dedicated infrastructure",
+            "Advanced security",
+            "Custom SLA",
+            "24/7 support",
+            "Training & onboarding"
+          ],
+          "cta": "Contact Sales",
+          "ctaUrl": "/contact",
+          "popular": false
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "extends": "../../tooling/configs/tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@/config/runtime": [
+        "./src/config/runtime.ts"
+      ],
+      "@/config": [
+        "./config/index.ts"
+      ],
+      "@/config/*": [
+        "./config/*"
+      ],
+      "@/runtime-config": [
+        "./src/config/runtime.ts"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "config/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

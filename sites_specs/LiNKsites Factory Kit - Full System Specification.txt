@@ -1,0 +1,493 @@
+# 🌐 LiNKsites Factory Kit — Full System Specification
+**Version:** 2.0  
+**Integrated With:** LinkTrend Centralized Text Content System  
+**Purpose:** Multi-site, multi-language, themeable, CMS-driven system with centralized text authority.  
+**Audience:** Senior engineers implementing the entire system end-to-end.
+
+NOTE: This document is a renamed copy of `Website Factory – Full System Specification.txt` to reflect the new product name.
+
+---
+
+# 1. PURPOSE
+
+The Website Factory allows:
+
+1. Creating unlimited independent websites  
+2. Each site is a separate GitHub repository  
+3. Each site hosted on VPS infrastructure  
+4. All content stored centrally in Payload’s `ContentItems` (from GitHub → n8n → Supabase → Payload)  
+5. Website Factory CMS contains **only structural bindings**, never text  
+6. Themes stored in frontend code; CMS stores theme ID  
+7. AI enhances content generation workflows  
+8. Automatic domain + SSL provisioning  
+9. Versioned layouts & versioned design system  
+10. Deterministic and scalable for 100+ sites
+
+The Website Factory now uses the **Centralized Text Content System as the single source of truth** for all text.
+
+---
+
+# 2. HIGH-LEVEL SYSTEM ARCHITECTURE
+
+## 2.1 Components
+
+| Component | Description |
+|----------|-------------|
+| **Dashboard (Next.js)** | Creates sites, binds text, sets themes, manages pages, navigation, SEO, domains. |
+| **Payload CMS** | Stores *structural* data + exposes `ContentItems` (central text). |
+| **Supabase** | Auth for Dashboard + DB for Payload. |
+| **Frontend Template Repo** | Cloned per site; contains layouts, themes, and rendering logic. |
+| **Individual Site Repos** | Each website is isolated and deployed independently. |
+| **Centralized Text System** | GitHub → n8n → Supabase → Payload.ContentItems. All text lives here. |
+| **Redis** | ISR-like caching for dynamic content. |
+| **NGINX/Traefik** | Domain routing + SSL provisioning. |
+| **GitHub Actions** | CI/CD for each generated site. |
+| **AI Layer** | Generates forms, sections, slot defaults, nav labels, SEO pages, meta tags, etc. |
+
+---
+
+# 3. CENTRALIZED TEXT FLOW
+
+All canonical text flows like this:
+
+```
+GitHub “Truth Repo”
+ → n8n Text Remix Pipeline
+ → Supabase: content_items
+ → Payload “ContentItems” Collection
+ → Website Factory CMS (bindings only)
+ → Frontend fetches ContentItems by doc_id + language
+ → Rendered on sites
+```
+
+Website Factory **never stores text**, only:
+
+- doc_id references  
+- content block bindings  
+- SEO block bindings  
+- navigation label bindings
+
+---
+
+# 4. DATABASE + CMS STRUCTURE
+
+Two schemas:
+
+```
+supabase
+ ├── cms          # Website Factory structural data
+ └── dashboard    # Dashboard + operational data
+```
+
+Payload exposes:
+
+- Website Factory collections (structural)
+- `ContentItems` (text source of truth)
+
+---
+
+# 5. CMS STRUCTURE — STRUCTURAL ONLY (NO TEXT)
+
+## 5.1 cms.sites
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | uuid | |
+| name | text | Site name |
+| domain | text | |
+| languages | json[] | Enabled locales |
+| primaryLanguage | text | |
+| themeId | text | |
+| navMode | enum | header / side-left / side-right |
+| designSystemVersion | text | current DS version |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
+
+---
+
+## 5.2 cms.pages  
+**One page per language**, linked via `pageGroupId`.
+
+| Field | Type |
+|-------|------|
+| id | uuid |
+| siteId | uuid |
+| pageGroupId | uuid |
+| slug | text |
+| language | text |
+| layout | text |
+| layoutVersion | text |
+| seoDocId | text (doc_id) |
+| status | draft/published |
+| createdAt | timestamp |
+
+---
+
+## 5.3 cms.slots  
+Slots contain **bindings**, not text.
+
+| Field | Type |
+|-------|------|
+| id | uuid |
+| siteId | uuid |
+| pageId | uuid |
+| slotName | text |
+| slotType | text |
+| language | text |
+| contentSource | "central" or "local" |
+| contentBindings | JSON (doc_id map) |
+| localData | JSON (only when contentSource=local) |
+
+**Example contentBindings:**
+```json
+{
+  "title": "hero-title",
+  "subtitle": "hero-subtitle",
+  "body": "hero-body",
+  "ctaLabel": "cta-primary-label"
+}
+```
+
+Frontend will:
+
+1. See slot  
+2. Read contentBindings  
+3. Fetch ContentItems for each doc_id  
+4. Render with the layout component
+
+---
+
+## 5.4 cms.navigation  
+Navigation stores **doc_ids**, not labels.
+
+```json
+{
+  "items": [
+    {
+      "labelDocId": "nav-home",
+      "slug": "/",
+      "children": [
+        {
+          "labelDocId": "nav-features",
+          "slug": "/features"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Frontend resolves:
+
+- language  
+- siteId  
+- doc_id  
+
+then fetches text from `ContentItems`.
+
+---
+
+## 5.5 cms.themeOverrides
+
+```json
+{
+  "siteId": "...",
+  "variables": {
+    "--accent-color": "#FF7A00",
+    "--radius-xl": "32px"
+  }
+}
+```
+
+---
+
+## 5.6 cms.seoPages  
+SEO pages reference doc_ids for meta + content.
+
+```json
+{
+  "siteId": "...",
+  "language": "en",
+  "slug": "/best-crm-2025",
+  "titleDocId": "seo-best-crm-title",
+  "descriptionDocId": "seo-best-crm-description",
+  "contentBlockDocIds": [
+    "seo-best-crm-section1",
+    "seo-best-crm-section2"
+  ]
+}
+```
+
+---
+
+# 6. HOW CENTRALIZED TEXT SYSTEM IS CONSUMED
+
+The Website Factory does **not** duplicate any text.
+
+It fetches from:
+
+### Payload → `ContentItems` collection
+
+Filtered by:
+
+- `doc_id`
+- `language`
+- `app_scope` (`shared`, `ltm-starter-kit`, etc.)
+- `category` (`content_block`, `seo`, `legal`, etc.)
+
+Example frontend fetch:
+
+```ts
+getContent(docId, lang) {
+  return payload.find({
+    collection: "contentItems",
+    where: {
+      doc_id: { equals: docId },
+      language: { equals: lang }
+    }
+  })
+}
+```
+
+---
+
+# 7. TEMPLATE CONFIGURATION (CRITICAL)
+
+The template configuration JSON (from centralized text repo) defines:
+
+- navigation doc_ids  
+- legal page doc_ids  
+- SEO doc_ids  
+- content block doc_ids  
+- hero/feature/CTA mappings  
+- template structure  
+- multi-language constraints  
+
+Dashboard reads:
+
+```
+/config/templates/templateName.json
+```
+
+Example:
+
+```json
+{
+  "template": "marketing-v1",
+  "navigation": {
+    "home": "nav-home",
+    "features": "nav-features",
+    "pricing": "nav-pricing"
+  },
+  "seo": {
+    "homeTitle": "seo-home-title",
+    "homeDescription": "seo-home-description"
+  },
+  "legal": {
+    "privacy": "privacy-policy",
+    "terms": "terms-of-use"
+  },
+  "pages": {
+    "/": {
+      "layout": "hero-basic",
+      "slots": {
+        "hero": {
+          "title": "hero-title",
+          "subtitle": "hero-subtitle",
+          "ctaLabel": "cta-primary-label"
+        }
+      }
+    }
+  }
+}
+```
+
+Dashboard uses this to:
+
+- Create pages
+- Create slots with doc_id bindings
+- Preconfigure navigation
+- Bind SEO doc_ids
+- Bind legal doc_ids
+
+---
+
+# 8. FRONTEND TEMPLATE REPO (UPDATED)
+
+### Structure:
+```
+src/
+ ├── app/
+ │    ├── [lang]/[...slug]/page.tsx
+ │    └── layout.tsx
+ ├── lib/
+ │    ├── cmsStructureClient.ts       # fetch Website Factory structural data
+ │    ├── contentClient.ts            # fetch ContentItems by doc_id
+ │    ├── cache.ts                    # Redis layer
+ │    ├── slotRenderer.ts             # central renderer
+ │    └── themeManager.ts
+ ├── layouts/
+ │    ├── hero/
+ │    │   ├── v1/
+ │    │   ├── v2/
+ │    │   └── slotSchema.json
+ │    └── ...
+ ├── themes/
+ ├── components/
+ ├── styles/
+```
+
+---
+
+# 9. FRONTEND RENDERING FLOW (UPDATED)
+
+1. Resolve site from domain or SITE_ID env  
+2. Resolve language from URL/domain/cookie  
+3. Resolve page slug  
+4. Fetch structural data:
+   - page  
+   - layout  
+   - slotBindings  
+   - nav tree  
+   - theme + overrides  
+
+5. For each slot:
+   - read `contentBindings` (doc_ids)
+   - fetch text via `ContentItems`
+
+6. Deep-merge theme variables  
+7. Render layout version with slot content  
+8. Cache in Redis  
+9. Serve page
+
+---
+
+# 10. CACHING (UNCHANGED BUT NOW TEXT-AWARE)
+
+Cache keys include:
+
+- `siteId`
+- `lang`
+- `slug`
+- layoutVersion
+- themeVersion
+- doc_ids used
+
+Cache invalidation triggers when:
+
+- Any referenced `ContentItems.doc_id` changes  
+- Page/slot structure changes  
+- Navigation doc_ids change  
+
+---
+
+# 11. AI INTEGRATION (UPDATED)
+
+AI now generates:
+
+- Mapping of doc_ids (e.g., “nav-settings”)  
+- SEO doc_ids + structure  
+- Guidance for template config  
+- Form definitions (structural)
+
+AI never writes text into Website Factory CMS.  
+AI writes text into Centralized Text System or outputs doc_ids referencing existing items.
+
+---
+
+# 12. LEGAL SYSTEM (UPDATED)
+
+Legal pages are:
+
+- Standard pages in Website Factory
+- With slot bindings pointing to legal doc_ids
+- Pulled from `/shared/legal` in ContentItems
+
+No local legal content is stored.
+
+---
+
+# 13. SITE CREATION WORKFLOW (UPDATED)
+
+Dashboard → Create Site:
+
+1. Select template  
+2. Load template config JSON  
+3. Pre-bind:
+   - navigation doc_ids  
+   - hero/feature slots doc_ids  
+   - legal doc_ids  
+   - SEO doc_ids  
+4. Generate pages + slots with doc_id bindings  
+5. Create site repo  
+6. Set env vars  
+7. Push repo + CI  
+8. Deploy  
+9. Provision domain  
+10. SSL  
+11. Cache invalidate  
+
+No text is entered anywhere.
+
+---
+
+# 14. SITE UPDATE WORKFLOW (UPDATED)
+
+Changes propagate through these layers:
+
+- Change in GitHub truth repo → n8n → Supabase → Payload.ContentItems  
+- Cache invalidation for pages referencing those doc_ids  
+- Sites instantly show updated text
+
+No redeploy needed.
+
+---
+
+# 15. SITE CLONING (UNCHANGED)
+
+Structure-only clone:
+
+- Pages  
+- Layout assignment  
+- Navigation structure  
+- doc_id bindings  
+
+No content duplication.
+
+---
+
+# 16. SEO SYSTEM (UPDATED)
+
+SEO pages store:
+
+```
+titleDocId
+descriptionDocId
+contentBlockDocIds[]
+```
+
+Frontend fetches everything from ContentItems.
+
+---
+
+# 17. FINAL SUMMARY OF CHANGES
+
+The Website Factory system remains the same **structurally**, but:
+
+### 🔥 **Slots store doc_ids, not raw text**  
+### 🔥 **Navigation labels store doc_ids**  
+### 🔥 **SEO pages store doc_ids**  
+### 🔥 **Legal pages bind to centralized legal doc_ids**  
+### 🔥 **Dashboard imports template config JSON and auto-wires bindings**  
+### 🔥 **Frontend fetches all text from ContentItems, not from Website Factory**  
+
+This achieves:
+
+- Single source of truth for all text  
+- Perfect consistency  
+- Zero duplication  
+- Full determinism  
+- Easy multi-language  
+- Future-proof AI workflows  
+
+The Website Factory now cleanly integrates with your Centralized Text Content System.

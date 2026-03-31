@@ -1,0 +1,76 @@
+{
+  "home": {
+    "title": "AI-Powered Automation Platform",
+    "description": "Transform your business with AI-powered automation and intelligent workflow solutions. Scale effortlessly with enterprise-grade tools that reduce manual work by 80%.",
+    "exploreMore": "Explore More",
+    "caseStudies": {
+      "title": "Real Solutions",
+      "subtitle": "Discover how leading companies achieve measurable results with our platform."
+    },
+    "articles": {
+      "title": "Industry Insights",
+      "subtitle": "Expert perspectives and actionable strategies for your business."
+    },
+    "offers": {
+      "titleSingle": "Our Solution",
+      "subtitleSingle": "Discover how we can help transform your business",
+      "titleMultiple": "Our Solutions",
+      "subtitleMultiple": "Explore our suite of products and services designed to transform your business",
+      "viewAllSolutions": "View All Solutions",
+      "viewPricing": "View Pricing"
+    },
+    "signup": {
+      "title": "Free Sign Up",
+      "subtitle": "Connect in seconds, just two steps required",
+      "continueWith": "Continue with",
+      "oauth": {
+        "google": "Google",
+        "apple": "Apple",
+        "microsoft": "Microsoft"
+      },
+      "emailPhoneToggle": "Sign up with email or phone"
+    },
+    "socialProof": {
+      "testimonials": [
+        {
+          "quote": "Transformed our workflow efficiency in weeks, not months.",
+          "author": "Alex Chen",
+          "title": "Operations Lead, Tech Startup"
+        },
+        {
+          "quote": "Trusted by teams worldwide to automate critical business processes.",
+          "author": "Jordan Smith",
+          "title": "Product Manager, Global Enterprise"
+        }
+      ],
+      "media": [
+        {
+          "publication": "Industry Insights",
+          "quote": "Emerging leader in automation platforms",
+          "featuredIn": "Featured in {publication}"
+        },
+        {
+          "publication": "Tech Innovators",
+          "quote": "Built for modern automation workflows",
+          "featuredIn": "Featured in {publication}"
+        }
+      ]
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "description": "Learn more about our mission and values"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "description": "Choose the perfect plan for your needs"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Get in touch with our team"
+  },
+  "offers": {
+    "title": "Our Offers",
+    "description": "Explore our special offers and promotions"
+  }
+}

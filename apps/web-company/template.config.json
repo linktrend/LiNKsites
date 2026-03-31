@@ -1,0 +1,85 @@
+{
+  "template": "company-site",
+  "designSystemVersion": "v1",
+  "navigation": {
+    "primary": [
+      { "labelDocId": "nav-offers", "slug": "/offers" },
+      { "labelDocId": "nav-resources", "slug": "/resources" },
+      { "labelDocId": "nav-about", "slug": "/about" },
+      { "labelDocId": "nav-contact", "slug": "/contact" }
+    ],
+    "cta": { "labelDocId": "nav-cta", "slug": "/contact" }
+  },
+  "legal": {
+    "privacy": "legal-privacy",
+    "terms": "legal-terms",
+    "cookies": "legal-cookies",
+    "gdpr": "legal-gdpr",
+    "disclaimer": "legal-disclaimer"
+  },
+  "pages": {
+    "/": {
+      "layout": "offer-index",
+      "slots": {
+        "hero": {
+          "title": "home-hero-title",
+          "subtitle": "home-hero-subtitle",
+          "body": "home-hero-body",
+          "ctaLabel": "home-hero-cta"
+        },
+        "offers": { "collectionDocId": "home-offers-collection" },
+        "resources": { "collectionDocId": "home-resources-collection" }
+      }
+    },
+    "/offers/[offerSlug]": {
+      "layout": "offer-page",
+      "slots": {
+        "hero": { "title": "offer-hero-title", "subtitle": "offer-hero-subtitle", "body": "offer-hero-body" },
+        "features": { "collectionDocId": "offer-features" },
+        "useCases": { "collectionDocId": "offer-usecases" },
+        "pricing": { "collectionDocId": "offer-pricing" },
+        "testimonials": { "collectionDocId": "offer-testimonials" },
+        "relatedResources": { "collectionDocId": "offer-related-resources" }
+      }
+    },
+    "/resources/[articleSlug]": {
+      "layout": "article",
+      "slots": {
+        "hero": { "title": "article-title", "excerpt": "article-excerpt" },
+        "body": { "contentDocId": "article-body" },
+        "related": { "collectionDocId": "article-related" }
+      }
+    },
+    "/videos/[videoSlug]": {
+      "layout": "video",
+      "slots": {
+        "hero": { "title": "video-title", "excerpt": "video-excerpt" },
+        "body": { "contentDocId": "video-body" },
+        "relatedVideos": { "collectionDocId": "video-related" },
+        "relatedArticles": { "collectionDocId": "video-related-articles" }
+      }
+    },
+    "/about": {
+      "layout": "about-index",
+      "slots": {
+        "hero": { "title": "about-hero-title", "subtitle": "about-hero-subtitle" },
+        "sections": { "collectionDocId": "about-sections" }
+      }
+    },
+    "/contact": {
+      "layout": "contact",
+      "slots": {
+        "hero": { "title": "contact-hero-title", "subtitle": "contact-hero-subtitle" },
+        "form": { "formDocId": "contact-form-def" },
+        "map": { "coordinatesDocId": "contact-coordinates" },
+        "cta": { "label": "contact-cta-label", "url": "contact-cta-url" }
+      }
+    },
+    "/legal/[legalSlug]": {
+      "layout": "legal",
+      "slots": {
+        "body": { "contentDocId": "legal-body" }
+      }
+    }
+  }
+}

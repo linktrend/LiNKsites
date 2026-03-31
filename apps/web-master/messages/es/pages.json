@@ -1,0 +1,76 @@
+{
+  "home": {
+    "title": "Plataforma de Automatización con IA",
+    "description": "Transforma tu negocio con automatización impulsada por IA y soluciones de flujo de trabajo inteligentes. Escala sin esfuerzo con herramientas de nivel empresarial que reducen el trabajo manual en un 80%.",
+    "exploreMore": "Explorar Más",
+    "caseStudies": {
+      "title": "Soluciones Reales",
+      "subtitle": "Descubre cómo las empresas líderes logran resultados medibles con nuestra plataforma."
+    },
+    "articles": {
+      "title": "Perspectivas de la Industria",
+      "subtitle": "Perspectivas expertas y estrategias accionables para tu negocio."
+    },
+    "offers": {
+      "titleSingle": "Nuestra Solución",
+      "subtitleSingle": "Descubre cómo podemos ayudar a transformar tu negocio",
+      "titleMultiple": "Nuestras Soluciones",
+      "subtitleMultiple": "Explora nuestra suite de productos y servicios diseñados para transformar tu negocio",
+      "viewAllSolutions": "Ver Todas las Soluciones",
+      "viewPricing": "Ver Precios"
+    },
+    "signup": {
+      "title": "Registro Gratuito",
+      "subtitle": "Conéctate en segundos, solo se requieren dos pasos",
+      "continueWith": "Continuar con",
+      "oauth": {
+        "google": "Google",
+        "apple": "Apple",
+        "microsoft": "Microsoft"
+      },
+      "emailPhoneToggle": "Registrarse con correo o teléfono"
+    },
+    "socialProof": {
+      "testimonials": [
+        {
+          "quote": "Transformó la eficiencia de nuestro flujo de trabajo en semanas, no meses.",
+          "author": "Alex Chen",
+          "title": "Líder de Operaciones, Startup Tecnológica"
+        },
+        {
+          "quote": "Confiado por equipos de todo el mundo para automatizar procesos comerciales críticos.",
+          "author": "Jordan Smith",
+          "title": "Gerente de Producto, Empresa Global"
+        }
+      ],
+      "media": [
+        {
+          "publication": "Industry Insights",
+          "quote": "Líder emergente en plataformas de automatización",
+          "featuredIn": "Destacado en {publication}"
+        },
+        {
+          "publication": "Tech Innovators",
+          "quote": "Construido para flujos de trabajo de automatización modernos",
+          "featuredIn": "Destacado en {publication}"
+        }
+      ]
+    }
+  },
+  "about": {
+    "title": "Acerca de Nosotros",
+    "description": "Conoce más sobre nuestra misión y valores"
+  },
+  "pricing": {
+    "title": "Precios",
+    "description": "Elige el plan perfecto para tus necesidades"
+  },
+  "contact": {
+    "title": "Contáctenos",
+    "description": "Ponte en contacto con nuestro equipo"
+  },
+  "offers": {
+    "title": "Nuestras Ofertas",
+    "description": "Explora nuestras ofertas especiales y promociones"
+  }
+}

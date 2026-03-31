@@ -1,0 +1,76 @@
+{
+  "home": {
+    "title": "AI 驅動的自動化平台",
+    "description": "利用 AI 驅動的自動化和智慧工作流程解決方案轉型您的業務。使用企業級工具輕鬆擴展，減少 80% 的手動工作。",
+    "exploreMore": "探索更多",
+    "caseStudies": {
+      "title": "真實解決方案",
+      "subtitle": "探索領先企業如何透過我們的平台實現可衡量的成果。"
+    },
+    "articles": {
+      "title": "產業洞察",
+      "subtitle": "專家觀點和可行的業務策略。"
+    },
+    "offers": {
+      "titleSingle": "我們的解決方案",
+      "subtitleSingle": "探索我們如何協助轉型您的業務",
+      "titleMultiple": "我們的解決方案",
+      "subtitleMultiple": "探索我們為轉型您的業務而設計的產品和服務套件",
+      "viewAllSolutions": "查看所有解決方案",
+      "viewPricing": "查看價格"
+    },
+    "signup": {
+      "title": "免費註冊",
+      "subtitle": "幾秒鐘內連接，只需兩個步驟",
+      "continueWith": "繼續使用",
+      "oauth": {
+        "google": "Google",
+        "apple": "Apple",
+        "microsoft": "Microsoft"
+      },
+      "emailPhoneToggle": "使用電子郵件或電話註冊"
+    },
+    "socialProof": {
+      "testimonials": [
+        {
+          "quote": "在幾週內而非幾個月內轉變了我們的工作流程效率。",
+          "author": "Alex Chen",
+          "title": "營運主管，科技新創公司"
+        },
+        {
+          "quote": "受到全球團隊信賴，用於自動化關鍵業務流程。",
+          "author": "Jordan Smith",
+          "title": "產品經理，全球企業"
+        }
+      ],
+      "media": [
+        {
+          "publication": "Industry Insights",
+          "quote": "自動化平台的新興領導者",
+          "featuredIn": "精選於 {publication}"
+        },
+        {
+          "publication": "Tech Innovators",
+          "quote": "為現代自動化工作流程而建",
+          "featuredIn": "精選於 {publication}"
+        }
+      ]
+    }
+  },
+  "about": {
+    "title": "關於我們",
+    "description": "了解更多關於我們的使命和價值觀"
+  },
+  "pricing": {
+    "title": "價格方案",
+    "description": "選擇最適合您需求的方案"
+  },
+  "contact": {
+    "title": "聯絡我們",
+    "description": "與我們的團隊取得聯繫"
+  },
+  "offers": {
+    "title": "我們的優惠",
+    "description": "探索我們的特別優惠和促銷活動"
+  }
+}

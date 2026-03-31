@@ -1,0 +1,43 @@
+{
+  "collections": {
+    "sites": [
+      {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "name": "LiNKtrend Master",
+        "primary_domain": "linktrend-master.local",
+        "template_id": "marketing-smb-v1",
+        "default_locale": "en",
+        "status": "active"
+      }
+    ],
+    "site-domains": [
+      {
+        "id": "22222222-2222-2222-2222-222222222222",
+        "site_id": "11111111-1111-1111-1111-111111111111",
+        "domain": "linktrend-master.local",
+        "is_primary": true
+      }
+    ],
+    "languages": [
+      { "code": "en", "name": "English", "is_default": true },
+      { "code": "es", "name": "Spanish", "is_default": false },
+      { "code": "zh-tw", "name": "Traditional Chinese", "is_default": false }
+    ],
+    "pages": [
+      {
+        "id": "33333333-3333-3333-3333-333333333333",
+        "site_id": "11111111-1111-1111-1111-111111111111",
+        "locale": "en",
+        "slug": "home",
+        "title": "Home",
+        "status": "published",
+        "data": {
+          "hero": {
+            "title": "Welcome to LiNKtrend",
+            "subtitle": "Sample content seeded from Supabase"
+          }
+        }
+      }
+    ]
+  }
+}

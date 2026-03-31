@@ -1,0 +1,38 @@
+/* TEAM */
+
+Developer: Master Template Team
+Site: https://example.com
+Contact: hello@example.com
+Location: Worldwide
+
+/* THANKS */
+
+Next.js: https://nextjs.org
+React: https://react.dev
+Tailwind CSS: https://tailwindcss.com
+Payload CMS: https://payloadcms.com
+
+/* SITE */
+
+Last update: 2025/12/03
+Language: English / Español / 繁體中文 / 简体中文
+Doctype: HTML5
+IDE: Cursor, VS Code
+Standards: HTML5, CSS3, JavaScript ES2024
+Components: React, TypeScript
+Software: Next.js 14, Tailwind CSS, Payload CMS
+
+/* CUSTOMIZATION GUIDE */
+
+This is a generic humans.txt for the Master Template.
+
+Secondary templates and client sites should customize this file with:
+- Team member names and roles
+- Client/agency information
+- Project-specific technologies
+- Credits and acknowledgments
+- Last update date
+
+To customize, simply replace this file in your project's /public/ directory.
+
+Learn more about humans.txt: http://humanstxt.org/

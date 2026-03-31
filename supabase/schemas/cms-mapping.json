@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "collections": {
+    "sites": { "table": "sites", "siteKey": null, "localeKey": null, "slugKey": "primary_domain", "titleKey": "name", "statusKey": "status", "payloadKey": "data" },
+    "site-domains": { "table": "site_domains", "siteKey": "site_id", "localeKey": null, "slugKey": "domain", "titleKey": null, "statusKey": null, "payloadKey": "data" },
+    "languages": { "table": "languages", "siteKey": null, "localeKey": null, "slugKey": "code", "titleKey": "name", "statusKey": null, "payloadKey": "data" },
+    "navigation": { "table": "navigation", "siteKey": "site_id", "localeKey": "locale", "slugKey": null, "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "site-settings": { "table": "site_settings", "siteKey": "site_id", "localeKey": "locale", "slugKey": null, "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "media": { "table": "media", "siteKey": "site_id", "localeKey": "locale", "slugKey": null, "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "pages": { "table": "pages", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "offer-pages": { "table": "offer_pages", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "case-study-pages": { "table": "case_study_pages", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "video-pages": { "table": "video_pages", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "faq-pages": { "table": "faq_pages", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "terms-pages": { "table": "terms_pages", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "privacy-pages": { "table": "privacy_pages", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "cookie-policy-pages": { "table": "cookie_policy_pages", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "articles": { "table": "articles", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "videos": { "table": "videos", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "testimonials": { "table": "testimonials", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "locations": { "table": "locations", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "team-members": { "table": "team_members", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "help-articles": { "table": "help_articles", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "help-categories": { "table": "help_categories", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "article-categories": { "table": "article_categories", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "offer-categories": { "table": "offer_categories", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "case-study-categories": { "table": "case_study_categories", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" },
+    "video-categories": { "table": "video_categories", "siteKey": "site_id", "localeKey": "locale", "slugKey": "slug", "titleKey": "title", "statusKey": "status", "payloadKey": "data" }
+  }
+}

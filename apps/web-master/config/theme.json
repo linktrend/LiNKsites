@@ -1,0 +1,395 @@
+{
+  "$schema": "./theme.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-05",
+  "description": "Master Template Theme Configuration - AI-editable theme tokens for rapid sub-template creation",
+  "theme": {
+    "id": "default",
+    "name": "Default Light Theme",
+    "designSystemVersion": "v1",
+    "colors": {
+      "description": "Color palette - modify these to change brand colors across the entire site",
+      "background": "#f8fafc",
+      "foreground": "#0f172a",
+      "primary": "#0ea5e9",
+      "primaryForeground": "#ffffff",
+      "brand": "#0ea5e9",
+      "brandForeground": "#ffffff",
+      "secondary": "#64748b",
+      "secondaryForeground": "#ffffff",
+      "muted": "#f1f5f9",
+      "mutedForeground": "#475569",
+      "card": "#ffffff",
+      "cardForeground": "#0f172a",
+      "border": "#e2e8f0",
+      "input": "#e2e8f0",
+      "ring": "#0ea5e9",
+      "accent": "#f43f5e",
+      "accentForeground": "#ffffff",
+      "destructive": "#ef4444",
+      "destructiveForeground": "#ffffff",
+      "success": "#22c55e",
+      "successForeground": "#ffffff",
+      "warning": "#f59e0b",
+      "warningForeground": "#ffffff",
+      "info": "#3b82f6",
+      "infoForeground": "#ffffff"
+    },
+    "typography": {
+      "description": "Typography settings - fonts, sizes, weights, and line heights",
+      "fontFamily": "'Inter', system-ui, -apple-system, sans-serif",
+      "fontFamilyHeading": "'Inter', system-ui, -apple-system, sans-serif",
+      "fontFamilyMono": "'Fira Code', 'Courier New', monospace",
+      "fontSize": {
+        "xs": "0.75rem",
+        "sm": "0.875rem",
+        "base": "1rem",
+        "lg": "1.125rem",
+        "xl": "1.25rem",
+        "2xl": "1.5rem",
+        "3xl": "1.875rem",
+        "4xl": "2.25rem",
+        "5xl": "3rem",
+        "6xl": "3.75rem"
+      },
+      "fontWeight": {
+        "light": 300,
+        "normal": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700,
+        "extrabold": 800
+      },
+      "lineHeight": {
+        "tight": "1.25",
+        "normal": "1.5",
+        "relaxed": "1.75"
+      }
+    },
+    "spacing": {
+      "description": "Spacing scale - consistent padding, margin, and gap values",
+      "xs": "0.5rem",
+      "sm": "0.75rem",
+      "md": "1rem",
+      "lg": "1.5rem",
+      "xl": "2rem",
+      "2xl": "3rem",
+      "3xl": "4rem",
+      "4xl": "6rem",
+      "5xl": "8rem",
+      "6xl": "12rem"
+    },
+    "radius": {
+      "description": "Border radius values - controls roundness of corners",
+      "sm": "6px",
+      "md": "10px",
+      "lg": "14px",
+      "xl": "18px",
+      "2xl": "24px",
+      "full": "9999px"
+    },
+    "shadows": {
+      "description": "Box shadow values - elevation and depth",
+      "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      "md": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+      "lg": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+      "xl": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+      "2xl": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+      "inner": "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)"
+    },
+    "gradients": {
+      "description": "Gradient definitions - background gradients for sections",
+      "primary": "linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)",
+      "secondary": "linear-gradient(135deg, #64748b 0%, #475569 100%)",
+      "accent": "linear-gradient(135deg, #f43f5e 0%, #ec4899 100%)",
+      "footer": "linear-gradient(135deg, hsl(220, 70%, 32%) 0%, hsl(205, 88%, 68%) 100%)",
+      "hero": "linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)"
+    },
+    "motion": {
+      "description": "Animation and transition settings - timing and easing",
+      "duration": {
+        "instant": "0ms",
+        "fast": "150ms",
+        "normal": "300ms",
+        "slow": "500ms",
+        "slower": "700ms"
+      },
+      "easing": {
+        "linear": "linear",
+        "default": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "in": "cubic-bezier(0.4, 0, 1, 1)",
+        "out": "cubic-bezier(0, 0, 0.2, 1)",
+        "inOut": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "bounce": "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        "elastic": "cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+      }
+    }
+  },
+  "darkTheme": {
+    "id": "dark",
+    "name": "Dark Theme",
+    "designSystemVersion": "v1",
+    "colors": {
+      "description": "Dark theme color overrides",
+      "background": "#0f172a",
+      "foreground": "#f8fafc",
+      "primary": "#f8fafc",
+      "primaryForeground": "#0f172a",
+      "muted": "#1e293b",
+      "mutedForeground": "#94a3b8",
+      "card": "#1e293b",
+      "cardForeground": "#f8fafc",
+      "border": "#334155",
+      "input": "#334155",
+      "ring": "#f8fafc",
+      "accent": "#f43f5e",
+      "accentForeground": "#ffffff"
+    }
+  },
+  "industryPresets": {
+    "description": "Pre-configured themes for common industries - use as starting points",
+    "saas": {
+      "name": "SaaS Platform",
+      "colors": {
+        "primary": "#0ea5e9",
+        "accent": "#3b82f6",
+        "background": "#ffffff",
+        "foreground": "#0f172a"
+      },
+      "typography": {
+        "fontFamily": "'Inter', system-ui, sans-serif",
+        "fontFamilyHeading": "'Inter', system-ui, sans-serif"
+      },
+      "radius": {
+        "sm": "8px",
+        "md": "12px",
+        "lg": "16px"
+      }
+    },
+    "healthcare": {
+      "name": "Healthcare & Medical",
+      "colors": {
+        "primary": "#0077b6",
+        "accent": "#00b4d8",
+        "background": "#ffffff",
+        "foreground": "#023e8a"
+      },
+      "typography": {
+        "fontFamily": "'Source Sans Pro', system-ui, sans-serif",
+        "fontFamilyHeading": "'Source Sans Pro', system-ui, sans-serif"
+      },
+      "radius": {
+        "sm": "4px",
+        "md": "8px",
+        "lg": "12px"
+      }
+    },
+    "finance": {
+      "name": "Financial Services",
+      "colors": {
+        "primary": "#1e3a8a",
+        "accent": "#3b82f6",
+        "background": "#ffffff",
+        "foreground": "#1e293b"
+      },
+      "typography": {
+        "fontFamily": "'IBM Plex Sans', system-ui, sans-serif",
+        "fontFamilyHeading": "'IBM Plex Sans', system-ui, sans-serif"
+      },
+      "radius": {
+        "sm": "2px",
+        "md": "4px",
+        "lg": "6px"
+      }
+    },
+    "ecommerce": {
+      "name": "E-commerce",
+      "colors": {
+        "primary": "#ff6b35",
+        "accent": "#f7931e",
+        "background": "#ffffff",
+        "foreground": "#2d3748"
+      },
+      "typography": {
+        "fontFamily": "'Roboto', system-ui, sans-serif",
+        "fontFamilyHeading": "'Roboto', system-ui, sans-serif"
+      },
+      "radius": {
+        "sm": "6px",
+        "md": "10px",
+        "lg": "14px"
+      }
+    },
+    "legal": {
+      "name": "Legal Services",
+      "colors": {
+        "primary": "#1c4587",
+        "accent": "#6d9eeb",
+        "background": "#ffffff",
+        "foreground": "#1a1a1a"
+      },
+      "typography": {
+        "fontFamily": "'Merriweather', Georgia, serif",
+        "fontFamilyHeading": "'Merriweather', Georgia, serif"
+      },
+      "radius": {
+        "sm": "2px",
+        "md": "4px",
+        "lg": "6px"
+      }
+    },
+    "realestate": {
+      "name": "Real Estate",
+      "colors": {
+        "primary": "#2c5f2d",
+        "accent": "#97bc62",
+        "background": "#ffffff",
+        "foreground": "#2d3748"
+      },
+      "typography": {
+        "fontFamily": "'Lato', system-ui, sans-serif",
+        "fontFamilyHeading": "'Playfair Display', serif"
+      },
+      "radius": {
+        "sm": "4px",
+        "md": "8px",
+        "lg": "12px"
+      }
+    },
+    "education": {
+      "name": "Education",
+      "colors": {
+        "primary": "#7c3aed",
+        "accent": "#a78bfa",
+        "background": "#ffffff",
+        "foreground": "#1e293b"
+      },
+      "typography": {
+        "fontFamily": "'Open Sans', system-ui, sans-serif",
+        "fontFamilyHeading": "'Open Sans', system-ui, sans-serif"
+      },
+      "radius": {
+        "sm": "8px",
+        "md": "12px",
+        "lg": "16px"
+      }
+    },
+    "restaurant": {
+      "name": "Restaurant & Food",
+      "colors": {
+        "primary": "#dc2626",
+        "accent": "#f59e0b",
+        "background": "#fffbeb",
+        "foreground": "#78350f"
+      },
+      "typography": {
+        "fontFamily": "'Poppins', system-ui, sans-serif",
+        "fontFamilyHeading": "'Playfair Display', serif"
+      },
+      "radius": {
+        "sm": "6px",
+        "md": "10px",
+        "lg": "14px"
+      }
+    },
+    "agency": {
+      "name": "Creative Agency",
+      "colors": {
+        "primary": "#000000",
+        "accent": "#ff0080",
+        "background": "#ffffff",
+        "foreground": "#000000"
+      },
+      "typography": {
+        "fontFamily": "'Helvetica Neue', system-ui, sans-serif",
+        "fontFamilyHeading": "'Helvetica Neue', system-ui, sans-serif"
+      },
+      "radius": {
+        "sm": "0px",
+        "md": "0px",
+        "lg": "0px"
+      }
+    },
+    "nonprofit": {
+      "name": "Non-Profit",
+      "colors": {
+        "primary": "#059669",
+        "accent": "#10b981",
+        "background": "#ffffff",
+        "foreground": "#1f2937"
+      },
+      "typography": {
+        "fontFamily": "'Nunito', system-ui, sans-serif",
+        "fontFamilyHeading": "'Nunito', system-ui, sans-serif"
+      },
+      "radius": {
+        "sm": "6px",
+        "md": "10px",
+        "lg": "14px"
+      }
+    }
+  },
+  "usage": {
+    "description": "How to use this theme configuration",
+    "manual": {
+      "step1": "Edit the color, typography, or other token values in the 'theme' object above",
+      "step2": "Manually update src/styles/tokens.css with the new values",
+      "step3": "Rebuild the site: pnpm build",
+      "step4": "Test the changes in the browser"
+    },
+    "aiPrompt": {
+      "description": "For AI agents: Use this file to generate themed sub-templates",
+      "example": "To create a healthcare theme, copy values from industryPresets.healthcare into theme object, then update tokens.css accordingly"
+    }
+  },
+  "cssVariableMapping": {
+    "description": "How theme.json values map to CSS variables in tokens.css",
+    "colors": {
+      "primary": "--color-primary",
+      "primaryForeground": "--color-primary-foreground",
+      "background": "--color-background",
+      "foreground": "--color-foreground",
+      "muted": "--color-muted",
+      "mutedForeground": "--color-muted-foreground",
+      "card": "--color-card",
+      "cardForeground": "--color-card-foreground",
+      "border": "--color-border",
+      "input": "--color-input",
+      "ring": "--color-ring",
+      "accent": "--color-accent",
+      "accentForeground": "--color-accent-foreground"
+    },
+    "typography": {
+      "fontFamily": "--font-family"
+    },
+    "spacing": {
+      "xs": "--spacing-xs",
+      "sm": "--spacing-sm",
+      "md": "--spacing-md",
+      "lg": "--spacing-lg",
+      "xl": "--spacing-xl",
+      "2xl": "--spacing-2xl",
+      "3xl": "--spacing-3xl",
+      "4xl": "--spacing-4xl",
+      "5xl": "--spacing-5xl",
+      "6xl": "--spacing-6xl"
+    },
+    "radius": {
+      "sm": "--radius-sm",
+      "md": "--radius-md",
+      "lg": "--radius-lg"
+    },
+    "motion": {
+      "duration": {
+        "fast": "--duration-fast",
+        "normal": "--duration-normal",
+        "slow": "--duration-slow"
+      },
+      "easing": {
+        "default": "--easing-default",
+        "in": "--easing-in",
+        "out": "--easing-out"
+      }
+    }
+  }
+}

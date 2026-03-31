@@ -1,0 +1,240 @@
+{
+  "buttons": {
+    "login": "Log In",
+    "signup": "Start Free",
+    "createAccount": "Create Account",
+    "joinNewsletter": "Join Newsletter",
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "viewAll": "View All",
+    "readMore": "Read More",
+    "contactUs": "Contact Us",
+    "submit": "Submit",
+    "send": "Send",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search"
+  },
+  "labels": {
+    "email": "Email",
+    "phone": "Phone",
+    "name": "Name",
+    "message": "Message",
+    "subject": "Subject",
+    "query": "Search Query"
+  },
+  "placeholders": {
+    "email": "you@example.com",
+    "phone": "+1 (555) 000-0000",
+    "enterEmail": "Enter your email",
+    "enterName": "Enter your name",
+    "enterMessage": "How can we help?",
+    "search": "Search for help articles..."
+  },
+  "legal": {
+    "acceptTerms": "By continuing, you accept our:",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use",
+    "and": "and"
+  },
+  "newsletter": {
+    "title": "Join Our Newsletter",
+    "description": "Enter your email and receive our insightful regular newsletter.",
+    "acceptTermsText": "By continuing, you accept our {privacyPolicy} and {termsOfUse}"
+  },
+  "trust": {
+    "noCreditCard": "No credit card",
+    "cancelAnytime": "Cancel anytime",
+    "skipOnboarding": "Skip onboarding",
+    "privacyFriendly": "Privacy-friendly"
+  },
+  "divider": {
+    "or": "OR"
+  },
+  "forms": {
+    "validation": {
+      "nameMin": "Name must be at least 2 characters",
+      "nameMax": "Name must be at most 100 characters",
+      "emailInvalid": "Please enter a valid email address",
+      "emailOrPhoneRequired": "Please provide either an email or phone number",
+      "phoneMin": "Phone number must be at least 10 digits",
+      "phoneMax": "Phone number must be at most 20 digits",
+      "messageMin": "Message must be at least 10 characters",
+      "messageMax": "Message must be at most 1000 characters",
+      "searchMin": "Search query must be at least 2 characters",
+      "searchMax": "Search query must be at most 200 characters",
+      "minLength": "This field must be at least {min} characters",
+      "maxLength": "This field must be at most {max} characters",
+      "termsRequired": "You must accept the terms and conditions",
+      "captchaRequired": "Please verify you are not a robot",
+      "required": "This field is required"
+    },
+    "errors": {
+      "submissionFailed": "Submission Failed",
+      "networkError": "Network error. Please try again or contact us directly via email.",
+      "validationError": "Please check your form inputs and try again",
+      "unknownError": "An unexpected error occurred. Please try again."
+    },
+    "success": {
+      "title": "Success!",
+      "contactSubmitted": "Your message has been sent successfully. We'll get back to you soon.",
+      "newsletterSubscribed": "You've been successfully subscribed to our newsletter.",
+      "preferencesUpdated": "Your preferences have been saved successfully."
+    },
+    "loading": {
+      "submitting": "Submitting...",
+      "loading": "Loading..."
+    }
+  },
+  "cookies": {
+    "preferences": "Cookie Preferences",
+    "functional": "Functional",
+    "analytics": "Analytics",
+    "marketing": "Marketing",
+    "functionalDesc": "Essential cookies for site functionality",
+    "analyticsDesc": "Help us improve by tracking usage",
+    "marketingDesc": "Personalized content and ads",
+    "banner": {
+      "message": "{siteName} uses cookies to personalize content and measure usage. Read our {privacyPolicy} for details.",
+      "manageCookies": "Manage Cookies",
+      "acceptAll": "Accept All",
+      "cookiePolicyLink": "Cookie Policy"
+    },
+    "modal": {
+      "title": "Cookie Preferences",
+      "description": "Control how {siteName} uses cookies to deliver a tailored experience.",
+      "necessary": "Necessary Cookies",
+      "necessaryDesc": "Required for {siteName} to remember your authentication and language preferences.",
+      "functionalCookies": "Functional Cookies",
+      "functionalCookiesDesc": "Enable product personalization, saved filters, and smoother navigation.",
+      "analyticsCookies": "Analytics Cookies",
+      "analyticsCookiesDesc": "Help us understand usage patterns so we can improve workflows and performance.",
+      "marketingCookies": "Marketing Cookies",
+      "marketingCookiesDesc": "Allow us to share more relevant {siteName} updates and launch announcements.",
+      "policyTitle": "Cookie Policy",
+      "policyText": "{siteName} only collects the minimum amount of information needed to keep your sessions secure and to measure anonymous usage trends. You can update these preferences whenever you like.",
+      "policyContact": "For more details reach out to privacy@{siteNameLower}.com or review the Privacy Policy. Essential cookies never store customer data or documents.",
+      "rejectAll": "Reject All",
+      "acceptAll": "Accept All",
+      "savePreferences": "Save Preferences"
+    }
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "contact": "Contact",
+    "pricing": "Pricing",
+    "about": "About",
+    "helpCentre": "Help Centre"
+  },
+  "help": {
+    "feedback": {
+      "question": "Did this answer your question?",
+      "yes": "Yes",
+      "no": "No",
+      "thanks": "Thanks for your feedback!"
+    },
+    "search": {
+      "heading": "How can we help you?",
+      "description": "Find answers and guidance for all your questions",
+      "label": "Search help articles"
+    },
+    "noArticles": "No articles found in this category.",
+    "checkBackSoon": "Check back soon for new content or",
+    "contactSupport": "contact support",
+    "forAssistance": "for assistance.",
+    "relatedArticles": "Related Articles"
+  },
+  "contact": {
+    "getInTouch": "Get in Touch",
+    "intents": {
+      "title": "How can we help you?",
+      "subtitle": "Choose the option that best describes your inquiry"
+    },
+    "channels": {
+      "title": "Other ways to reach us",
+      "subtitle": "Prefer a different communication method? We've got you covered",
+      "sendEmail": "Send Email",
+      "scheduleNow": "Schedule Now",
+      "startChat": "Start Chat"
+    }
+  },
+  "comingSoon": "Coming Soon",
+  "cta": {
+    "ready": "Ready to get started?",
+    "description": "Join teams already using {siteName} to orchestrate AI-first insights and automation.",
+    "getStartedFree": "Get started free",
+    "trustIndicators": {
+      "noCreditCard": "No credit card required",
+      "freeTemplates": "Free automation templates",
+      "cancelAnytime": "Cancel anytime"
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "Simple, transparent pricing",
+      "subtitle": "Choose the plan that fits your needs. No hidden fees, cancel anytime."
+    },
+    "features": "Features",
+    "mostPopular": "Most Popular",
+    "startNow": "Start Now",
+    "custom": {
+      "title": "Need a custom solution?",
+      "description": "Our team can create a tailored plan that fits your specific requirements",
+      "getStarted": "Get Started",
+      "viewAllOffers": "View All Offers"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "About {siteName}",
+      "subtitle": "Discover who we are and what drives us forward"
+    },
+    "productEcosystem": "Our Product Ecosystem",
+    "missionValues": {
+      "title": "Our Mission & Values",
+      "subtitle": "Driven by purpose, guided by principles",
+      "coreValuesTitle": "Core Values"
+    },
+    "cta": {
+      "title": "Ready to Transform Your Business?",
+      "description": "Join hundreds of companies already using our AI-powered automation platform to streamline operations, boost productivity, and drive growth. Our team is ready to help you get started on your automation journey.",
+      "connectTitle": "Let's Connect",
+      "connectSubtitle": "Partner with us to build the future",
+      "buttonText": "Let's Work Together"
+    }
+  },
+  "copyright": "© Copyright 2025. {siteName}",
+  "manageCookies": "Manage Cookies",
+  "adminLogin": "Admin Login",
+  "readMore": "Read more",
+  "readArticle": "Read article",
+  "readCaseStudy": "Read case study",
+  "closeModal": "Close modal",
+  "closeForm": "Close form",
+  "scrollToTop": "Scroll to top",
+  "errors": {
+    "global": {
+      "title": "Something went wrong",
+      "description": "We encountered an unexpected error. Please try again or contact support if the problem persists.",
+      "retry": "Try Again",
+      "goHome": "Go to Homepage"
+    },
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Go to Homepage",
+      "backToPrevious": "Go Back"
+    },
+    "cms": {
+      "dataUnavailable": "Content temporarily unavailable",
+      "loadingFailed": "Failed to load content. Please try again later.",
+      "noData": "No content available at this time."
+    }
+  },
+  "loading": {
+    "default": "Loading...",
+    "page": "Loading page...",
+    "content": "Loading content...",
+    "pleaseWait": "Please wait"
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "buttons": {
+    "login": "登录",
+    "signup": "免费开始",
+    "createAccount": "创建账户",
+    "joinNewsletter": "订阅通讯",
+    "learnMore": "了解更多",
+    "getStarted": "开始使用",
+    "viewAll": "查看全部",
+    "readMore": "阅读更多",
+    "contactUs": "联系我们",
+    "submit": "提交",
+    "send": "发送",
+    "save": "保存",
+    "cancel": "取消",
+    "search": "搜索"
+  },
+  "labels": {
+    "email": "邮箱",
+    "phone": "电话",
+    "name": "姓名",
+    "message": "留言",
+    "subject": "主题",
+    "query": "搜索查询"
+  },
+  "placeholders": {
+    "email": "你的邮箱@example.com",
+    "phone": "+86 (555) 000-0000",
+    "enterEmail": "输入您的邮箱",
+    "enterName": "输入您的姓名",
+    "enterMessage": "我们能帮您什么？",
+    "search": "搜索帮助文章..."
+  },
+  "legal": {
+    "acceptTerms": "继续即表示您接受我们的：",
+    "privacyPolicy": "隐私政策",
+    "termsOfUse": "使用条款",
+    "and": "和"
+  },
+  "newsletter": {
+    "title": "订阅我们的通讯",
+    "description": "输入您的邮箱，接收我们的定期通讯。",
+    "acceptTermsText": "继续即表示您接受我们的 {privacyPolicy} 和 {termsOfUse}"
+  },
+  "trust": {
+    "noCreditCard": "无需信用卡",
+    "cancelAnytime": "随时取消",
+    "skipOnboarding": "跳过入门",
+    "privacyFriendly": "隐私友好"
+  },
+  "divider": {
+    "or": "或"
+  },
+  "forms": {
+    "validation": {
+      "nameMin": "姓名至少需要2个字符",
+      "nameMax": "姓名最多100个字符",
+      "emailInvalid": "请输入有效的邮箱地址",
+      "emailOrPhoneRequired": "请提供邮箱或电话号码",
+      "phoneMin": "电话号码至少需要10位数字",
+      "phoneMax": "电话号码最多20位数字",
+      "messageMin": "留言至少需要10个字符",
+      "messageMax": "留言最多1000个字符",
+      "searchMin": "搜索查询至少需要2个字符",
+      "searchMax": "搜索查询最多200个字符",
+      "minLength": "此字段至少需要 {min} 个字符",
+      "maxLength": "此字段最多 {max} 个字符",
+      "termsRequired": "您必须接受条款和条件",
+      "captchaRequired": "请验证您不是机器人",
+      "required": "此字段为必填项"
+    },
+    "errors": {
+      "submissionFailed": "提交失败",
+      "networkError": "网络错误。请重试或直接通过邮件联系我们。",
+      "validationError": "请检查您的表单输入并重试",
+      "unknownError": "发生意外错误。请重试。"
+    },
+    "success": {
+      "title": "成功！",
+      "contactSubmitted": "您的消息已成功发送。我们会尽快回复您。",
+      "newsletterSubscribed": "您已成功订阅我们的通讯。",
+      "preferencesUpdated": "您的偏好设置已成功保存。"
+    },
+    "loading": {
+      "submitting": "提交中...",
+      "loading": "加载中..."
+    }
+  },
+  "cookies": {
+    "preferences": "Cookie 偏好设置",
+    "functional": "功能性",
+    "analytics": "分析",
+    "marketing": "营销",
+    "functionalDesc": "网站功能所必需的 Cookie",
+    "analyticsDesc": "通过跟踪使用情况帮助我们改进",
+    "marketingDesc": "个性化内容和广告",
+    "banner": {
+      "message": "{siteName} 使用 Cookie 来个性化内容和衡量使用情况。阅读我们的{privacyPolicy}了解详情。",
+      "manageCookies": "管理 Cookies",
+      "acceptAll": "全部接受",
+      "cookiePolicyLink": "Cookie 政策"
+    },
+    "modal": {
+      "title": "Cookie 偏好设置",
+      "description": "控制 {siteName} 如何使用 Cookie 来提供定制化体验。",
+      "necessary": "必要 Cookies",
+      "necessaryDesc": "{siteName} 需要记住您的身份验证和语言偏好。",
+      "functionalCookies": "功能性 Cookies",
+      "functionalCookiesDesc": "启用产品个性化、保存的过滤器和更流畅的导航。",
+      "analyticsCookies": "分析 Cookies",
+      "analyticsCookiesDesc": "帮助我们了解使用模式，以便改进工作流程和性能。",
+      "marketingCookies": "营销 Cookies",
+      "marketingCookiesDesc": "允许我们分享更相关的 {siteName} 更新和发布公告。",
+      "policyTitle": "Cookie 政策",
+      "policyText": "{siteName} 仅收集保持会话安全和衡量匿名使用趋势所需的最少信息。您可以随时更新这些偏好。",
+      "policyContact": "如需更多详情，请联系 privacy@{siteNameLower}.com 或查看隐私政策。必要 Cookie 绝不会存储客户数据或文档。",
+      "rejectAll": "全部拒绝",
+      "acceptAll": "全部接受",
+      "savePreferences": "保存偏好设置"
+    }
+  },
+  "breadcrumbs": {
+    "home": "首页",
+    "contact": "联系我们",
+    "pricing": "定价",
+    "about": "关于",
+    "helpCentre": "帮助中心"
+  },
+  "help": {
+    "feedback": {
+      "question": "这回答了您的问题吗？",
+      "yes": "是",
+      "no": "否",
+      "thanks": "感谢您的反馈！"
+    },
+    "search": {
+      "heading": "我们能帮您什么？",
+      "description": "查找所有问题的答案和指导",
+      "label": "搜索帮助文章"
+    },
+    "noArticles": "此类别中未找到文章。",
+    "checkBackSoon": "请稍后查看新内容或",
+    "contactSupport": "联系支持",
+    "forAssistance": "寻求帮助。",
+    "relatedArticles": "相关文章"
+  },
+  "contact": {
+    "getInTouch": "联系我们",
+    "intents": {
+      "title": "我们能帮您什么？",
+      "subtitle": "选择最能描述您咨询的选项"
+    },
+    "channels": {
+      "title": "其他联系方式",
+      "subtitle": "更喜欢其他沟通方式？我们为您提供服务",
+      "sendEmail": "发送邮件",
+      "scheduleNow": "立即预约",
+      "startChat": "开始对话"
+    }
+  },
+  "comingSoon": "即将推出",
+  "cta": {
+    "ready": "准备开始了吗？",
+    "description": "加入已经使用 {siteName} 编排 AI 驱动的洞察和自动化的团队。",
+    "getStartedFree": "免费开始",
+    "trustIndicators": {
+      "noCreditCard": "无需信用卡",
+      "freeTemplates": "免费自动化模板",
+      "cancelAnytime": "随时取消"
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "简单透明的定价",
+      "subtitle": "选择适合您需求的计划。没有隐藏费用，随时取消。"
+    },
+    "features": "功能",
+    "mostPopular": "最受欢迎",
+    "startNow": "立即开始",
+    "custom": {
+      "title": "需要定制解决方案？",
+      "description": "我们的团队可以创建符合您特定需求的定制计划",
+      "getStarted": "开始使用",
+      "viewAllOffers": "查看所有优惠"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "关于 {siteName}",
+      "subtitle": "了解我们是谁以及是什么驱动我们前进"
+    },
+    "productEcosystem": "我们的产品生态系统",
+    "missionValues": {
+      "title": "我们的使命与价值观",
+      "subtitle": "以目标为驱动，以原则为指导",
+      "coreValuesTitle": "核心价值观"
+    },
+    "cta": {
+      "title": "准备好转型您的业务了吗？",
+      "description": "加入数百家已经使用我们的 AI 驱动自动化平台来简化运营、提高生产力和推动增长的公司。我们的团队随时准备帮助您开始自动化之旅。",
+      "connectTitle": "让我们联系",
+      "connectSubtitle": "与我们合作共建未来",
+      "buttonText": "让我们一起工作"
+    }
+  },
+  "copyright": "© Copyright 2025. {siteName}",
+  "manageCookies": "管理 Cookies",
+  "adminLogin": "管理员登录",
+  "readMore": "阅读更多",
+  "readArticle": "阅读文章",
+  "readCaseStudy": "阅读案例研究",
+  "closeModal": "关闭模态框",
+  "closeForm": "关闭表单",
+  "scrollToTop": "返回顶部",
+  "errors": {
+    "global": {
+      "title": "出错了",
+      "description": "我们遇到了一个意外错误。请重试，如果问题仍然存在，请联系支持。",
+      "retry": "重试",
+      "goHome": "返回首页"
+    },
+    "notFound": {
+      "title": "页面未找到",
+      "description": "您要查找的页面不存在或已被移动。",
+      "goHome": "返回首页",
+      "backToPrevious": "返回上一页"
+    },
+    "cms": {
+      "dataUnavailable": "内容暂时不可用",
+      "loadingFailed": "加载内容失败。请稍后重试。",
+      "noData": "目前没有可用内容。"
+    }
+  },
+  "loading": {
+    "default": "加载中...",
+    "page": "加载页面中...",
+    "content": "加载内容中...",
+    "pleaseWait": "请稍候"
+  }
+}

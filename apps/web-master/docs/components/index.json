@@ -1,0 +1,1343 @@
+{
+  "$schema": "./schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-05",
+  "description": "Complete component library index for the Master Template. Machine-readable format for AI agents and automated tooling.",
+  "categories": {
+    "marketing": {
+      "description": "Marketing and promotional components for homepage and landing pages",
+      "components": {
+        "SignupHero": {
+          "file": "src/components/marketing/SignupHero.tsx",
+          "type": "client",
+          "description": "Large hero section with email/phone signup form, OAuth buttons, and trust indicators",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true,
+              "description": "Language code for internationalization"
+            }
+          },
+          "useCases": ["homepage", "landing-page", "signup-page"],
+          "tags": ["hero", "form", "signup", "oauth", "email-capture"],
+          "features": ["OAuth integration (Google, Apple, Microsoft)", "Email/phone validation", "Terms acceptance", "Trust indicators", "Responsive design"],
+          "dependencies": ["react-hook-form", "zod", "next-intl"],
+          "example": "<SignupHero lang=\"en\" />"
+        },
+        "CTASection": {
+          "file": "src/components/marketing/CTASection.tsx",
+          "type": "client",
+          "description": "Call-to-action card with trust indicators and primary button",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true,
+              "description": "Language code for routing"
+            }
+          },
+          "useCases": ["homepage", "sidebar", "conversion-point"],
+          "tags": ["cta", "conversion", "card"],
+          "features": ["Trust indicators with checkmarks", "Gradient background", "Responsive sizing"],
+          "example": "<CTASection lang=\"en\" />"
+        },
+        "OfferShowcase": {
+          "file": "src/components/marketing/OfferShowcase.tsx",
+          "type": "client",
+          "description": "Dynamic showcase for offers - displays as featured block (1 offer) or carousel (multiple offers)",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true,
+              "description": "Language code"
+            },
+            "offers": {
+              "type": "CmsOffer[]",
+              "required": true,
+              "description": "Array of offer objects from CMS"
+            }
+          },
+          "useCases": ["homepage", "offers-landing", "product-showcase"],
+          "tags": ["carousel", "offers", "products", "services", "showcase"],
+          "features": ["Auto-rotating carousel", "Single offer featured display", "Icon mapping", "Responsive navigation"],
+          "example": "<OfferShowcase lang=\"en\" offers={offers} />"
+        },
+        "ArticlesGrid": {
+          "file": "src/components/marketing/ArticlesGrid.tsx",
+          "type": "client",
+          "description": "Grid display of article cards with images and metadata",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "articles": {
+              "type": "CmsResource[]",
+              "required": true
+            }
+          },
+          "useCases": ["homepage", "resources-page", "blog-listing"],
+          "tags": ["grid", "articles", "blog", "content"],
+          "example": "<ArticlesGrid lang=\"en\" articles={articles} />"
+        },
+        "CaseStudiesGrid": {
+          "file": "src/components/marketing/CaseStudiesGrid.tsx",
+          "type": "client",
+          "description": "Grid display of case study cards",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "caseStudies": {
+              "type": "CmsCase[]",
+              "required": true
+            }
+          },
+          "useCases": ["homepage", "case-studies-page", "social-proof"],
+          "tags": ["grid", "case-studies", "testimonials"],
+          "example": "<CaseStudiesGrid lang=\"en\" caseStudies={cases} />"
+        },
+        "DynamicBgSection": {
+          "file": "src/components/marketing/DynamicBgSection.tsx",
+          "type": "client",
+          "description": "Hero section with dynamic gradient background",
+          "props": {
+            "title": {
+              "type": "string",
+              "required": true
+            },
+            "subtitle": {
+              "type": "string",
+              "required": false
+            },
+            "ctaLabel": {
+              "type": "string",
+              "required": false
+            },
+            "ctaUrl": {
+              "type": "string",
+              "required": false
+            }
+          },
+          "useCases": ["hero", "landing-page", "feature-section"],
+          "tags": ["hero", "gradient", "dynamic-background"],
+          "example": "<DynamicBgSection title=\"Welcome\" subtitle=\"Get started\" />"
+        },
+        "StaticBgSection": {
+          "file": "src/components/marketing/StaticBgSection.tsx",
+          "type": "client",
+          "description": "Hero section with static background image",
+          "props": {
+            "backgroundImage": {
+              "type": "string",
+              "required": true
+            },
+            "title": {
+              "type": "string",
+              "required": true
+            },
+            "description": {
+              "type": "string",
+              "required": false
+            }
+          },
+          "useCases": ["hero", "about-page", "secondary-pages"],
+          "tags": ["hero", "background-image", "static"],
+          "example": "<StaticBgSection backgroundImage=\"/hero.jpg\" title=\"About Us\" />"
+        },
+        "PlatformFeatures": {
+          "file": "src/components/marketing/PlatformFeatures.tsx",
+          "type": "client",
+          "description": "Feature showcase with icons and descriptions",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["homepage", "features-page", "product-page"],
+          "tags": ["features", "icons", "benefits"],
+          "example": "<PlatformFeatures lang=\"en\" />"
+        },
+        "PricingHomepage": {
+          "file": "src/components/marketing/PricingHomepage.tsx",
+          "type": "client",
+          "description": "Pricing preview section for homepage",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["homepage", "pricing-preview"],
+          "tags": ["pricing", "preview", "plans"],
+          "example": "<PricingHomepage lang=\"en\" />"
+        },
+        "PricingPreview": {
+          "file": "src/components/marketing/PricingPreview.tsx",
+          "type": "client",
+          "description": "Compact pricing preview component",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["sidebar", "quick-preview"],
+          "tags": ["pricing", "compact"],
+          "example": "<PricingPreview lang=\"en\" />"
+        },
+        "SocialProofCarousel": {
+          "file": "src/components/marketing/SocialProofCarousel.tsx",
+          "type": "client",
+          "description": "Auto-rotating carousel of testimonials and social proof",
+          "props": {
+            "testimonials": {
+              "type": "array",
+              "required": true
+            }
+          },
+          "useCases": ["homepage", "testimonials-section", "social-proof"],
+          "tags": ["carousel", "testimonials", "social-proof"],
+          "example": "<SocialProofCarousel testimonials={testimonials} />"
+        },
+        "SolutionsOverview": {
+          "file": "src/components/marketing/SolutionsOverview.tsx",
+          "type": "client",
+          "description": "Overview grid of solutions/services",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["homepage", "solutions-page"],
+          "tags": ["solutions", "grid", "overview"],
+          "example": "<SolutionsOverview lang=\"en\" />"
+        },
+        "ScrollIndicator": {
+          "file": "src/components/marketing/ScrollIndicator.tsx",
+          "type": "client",
+          "description": "Visual scroll progress indicator",
+          "props": {},
+          "useCases": ["long-pages", "articles", "documentation"],
+          "tags": ["scroll", "progress", "indicator"],
+          "example": "<ScrollIndicator />"
+        }
+      }
+    },
+    "common": {
+      "description": "Shared utility components used across the site",
+      "components": {
+        "CTA": {
+          "file": "src/components/common/CTA.tsx",
+          "type": "server",
+          "description": "Simple call-to-action link button",
+          "props": {
+            "href": {
+              "type": "string",
+              "required": true,
+              "description": "Link destination"
+            },
+            "label": {
+              "type": "string",
+              "required": true,
+              "description": "Button text"
+            },
+            "size": {
+              "type": "'sm' | 'md'",
+              "required": false,
+              "default": "md"
+            },
+            "variant": {
+              "type": "'primary' | 'accent'",
+              "required": false,
+              "default": "primary"
+            }
+          },
+          "useCases": ["buttons", "links", "cta"],
+          "tags": ["button", "link", "cta"],
+          "example": "<CTA href=\"/contact\" label=\"Get Started\" variant=\"accent\" />"
+        },
+        "Breadcrumbs": {
+          "file": "src/components/common/Breadcrumbs.tsx",
+          "type": "client",
+          "description": "Navigation breadcrumbs with schema.org markup",
+          "props": {
+            "items": {
+              "type": "Array<{label: string, href: string}>",
+              "required": true
+            }
+          },
+          "useCases": ["navigation", "seo", "deep-pages"],
+          "tags": ["breadcrumbs", "navigation", "seo"],
+          "example": "<Breadcrumbs items={[{label: 'Home', href: '/'}, {label: 'About', href: '/about'}]} />"
+        },
+        "CookieConsentBanner": {
+          "file": "src/components/common/CookieConsentBanner.tsx",
+          "type": "client",
+          "description": "GDPR-compliant cookie consent banner",
+          "props": {},
+          "useCases": ["gdpr", "privacy", "compliance"],
+          "tags": ["cookies", "gdpr", "privacy", "consent"],
+          "features": ["Granular consent (analytics vs marketing)", "LocalStorage persistence", "Consent revocation"],
+          "example": "<CookieConsentBanner />"
+        },
+        "CookiePreferencesButton": {
+          "file": "src/components/common/CookiePreferencesButton.tsx",
+          "type": "client",
+          "description": "Button to open cookie preferences modal",
+          "props": {},
+          "useCases": ["footer", "privacy-settings"],
+          "tags": ["cookies", "preferences", "button"],
+          "example": "<CookiePreferencesButton />"
+        },
+        "ManageCookiesButton": {
+          "file": "src/components/common/ManageCookiesButton.tsx",
+          "type": "client",
+          "description": "Button to manage cookie settings",
+          "props": {},
+          "useCases": ["footer", "settings"],
+          "tags": ["cookies", "manage", "button"],
+          "example": "<ManageCookiesButton />"
+        },
+        "Modal": {
+          "file": "src/components/common/Modal.tsx",
+          "type": "client",
+          "description": "Generic modal dialog component",
+          "props": {
+            "isOpen": {
+              "type": "boolean",
+              "required": true
+            },
+            "onClose": {
+              "type": "() => void",
+              "required": true
+            },
+            "title": {
+              "type": "string",
+              "required": false
+            },
+            "children": {
+              "type": "ReactNode",
+              "required": true
+            }
+          },
+          "useCases": ["dialogs", "popups", "overlays"],
+          "tags": ["modal", "dialog", "overlay"],
+          "example": "<Modal isOpen={open} onClose={handleClose} title=\"Title\">{content}</Modal>"
+        },
+        "NewsletterSection": {
+          "file": "src/components/common/NewsletterSection.tsx",
+          "type": "client",
+          "description": "Newsletter signup form section",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["footer", "sidebar", "content-marketing"],
+          "tags": ["newsletter", "email", "signup"],
+          "example": "<NewsletterSection lang=\"en\" />"
+        },
+        "ScrollToTop": {
+          "file": "src/components/common/ScrollToTop.tsx",
+          "type": "client",
+          "description": "Floating button to scroll to top of page",
+          "props": {},
+          "useCases": ["long-pages", "articles", "documentation"],
+          "tags": ["scroll", "navigation", "utility"],
+          "example": "<ScrollToTop />"
+        },
+        "ClientOnly": {
+          "file": "src/components/common/ClientOnly.tsx",
+          "type": "client",
+          "description": "Wrapper to render children only on client-side (prevents hydration issues)",
+          "props": {
+            "children": {
+              "type": "ReactNode",
+              "required": true
+            }
+          },
+          "useCases": ["hydration-safety", "client-only-features"],
+          "tags": ["hydration", "client-side", "wrapper"],
+          "example": "<ClientOnly>{clientOnlyContent}</ClientOnly>"
+        },
+        "AnalyticsInitializer": {
+          "file": "src/components/common/AnalyticsInitializer.tsx",
+          "type": "client",
+          "description": "Initializes analytics scripts based on consent",
+          "props": {},
+          "useCases": ["analytics", "tracking", "initialization"],
+          "tags": ["analytics", "tracking", "consent"],
+          "example": "<AnalyticsInitializer />"
+        },
+        "WebVitalsMonitor": {
+          "file": "src/components/common/WebVitalsMonitor.tsx",
+          "type": "client",
+          "description": "Monitors and reports Core Web Vitals",
+          "props": {},
+          "useCases": ["performance", "monitoring", "web-vitals"],
+          "tags": ["performance", "web-vitals", "monitoring"],
+          "example": "<WebVitalsMonitor />"
+        }
+      }
+    },
+    "contact": {
+      "description": "Contact page components and forms",
+      "components": {
+        "ContactForm": {
+          "file": "src/components/contact/ContactForm.tsx",
+          "type": "client",
+          "description": "Main contact form with validation",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": false,
+              "default": "en"
+            }
+          },
+          "useCases": ["contact-page", "support", "inquiries"],
+          "tags": ["form", "contact", "validation"],
+          "features": ["Zod validation", "Success/error states", "CAPTCHA", "Internationalization"],
+          "example": "<ContactForm lang=\"en\" />"
+        },
+        "DynamicContactForm": {
+          "file": "src/components/contact/DynamicContactForm.tsx",
+          "type": "client",
+          "description": "Dynamic form that adapts based on intent/purpose",
+          "props": {
+            "intent": {
+              "type": "string",
+              "required": false
+            },
+            "lang": {
+              "type": "string",
+              "required": false
+            }
+          },
+          "useCases": ["multi-purpose-forms", "dynamic-fields"],
+          "tags": ["form", "dynamic", "adaptive"],
+          "example": "<DynamicContactForm intent=\"sales\" lang=\"en\" />"
+        },
+        "ContactFormContext": {
+          "file": "src/components/contact/ContactFormContext.tsx",
+          "type": "client",
+          "description": "Context provider for contact form state management",
+          "props": {
+            "children": {
+              "type": "ReactNode",
+              "required": true
+            }
+          },
+          "useCases": ["state-management", "form-context"],
+          "tags": ["context", "state", "form"],
+          "example": "<ContactFormContext>{children}</ContactFormContext>"
+        },
+        "ContactPageContent": {
+          "file": "src/components/contact/ContactPageContent.tsx",
+          "type": "client",
+          "description": "Complete contact page layout with form and info",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["contact-page"],
+          "tags": ["page", "contact", "layout"],
+          "example": "<ContactPageContent lang=\"en\" />"
+        },
+        "ContactChannelCard": {
+          "file": "src/components/contact/ContactChannelCard.tsx",
+          "type": "client",
+          "description": "Card displaying a contact channel (email, phone, etc.)",
+          "props": {
+            "icon": {
+              "type": "ReactNode",
+              "required": true
+            },
+            "title": {
+              "type": "string",
+              "required": true
+            },
+            "value": {
+              "type": "string",
+              "required": true
+            },
+            "href": {
+              "type": "string",
+              "required": false
+            }
+          },
+          "useCases": ["contact-info", "channels"],
+          "tags": ["card", "contact", "channel"],
+          "example": "<ContactChannelCard icon={<Mail />} title=\"Email\" value=\"hello@example.com\" />"
+        },
+        "ContactChannelList": {
+          "file": "src/components/contact/ContactChannelList.tsx",
+          "type": "client",
+          "description": "List of contact channels",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["contact-page", "footer"],
+          "tags": ["list", "contact", "channels"],
+          "example": "<ContactChannelList lang=\"en\" />"
+        },
+        "GoogleMapEmbed": {
+          "file": "src/components/contact/GoogleMapEmbed.tsx",
+          "type": "client",
+          "description": "Embedded Google Maps location",
+          "props": {
+            "location": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["contact-page", "location", "office"],
+          "tags": ["map", "location", "google-maps"],
+          "example": "<GoogleMapEmbed location=\"New York, NY\" />"
+        },
+        "HelpDeflectionSection": {
+          "file": "src/components/contact/HelpDeflectionSection.tsx",
+          "type": "client",
+          "description": "Section suggesting help articles before contacting support",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["contact-page", "support", "self-service"],
+          "tags": ["help", "deflection", "support"],
+          "example": "<HelpDeflectionSection lang=\"en\" />"
+        },
+        "IntentCard": {
+          "file": "src/components/contact/IntentCard.tsx",
+          "type": "client",
+          "description": "Card for selecting contact intent/purpose",
+          "props": {
+            "intent": {
+              "type": "string",
+              "required": true
+            },
+            "icon": {
+              "type": "ReactNode",
+              "required": true
+            },
+            "title": {
+              "type": "string",
+              "required": true
+            },
+            "description": {
+              "type": "string",
+              "required": true
+            },
+            "onClick": {
+              "type": "() => void",
+              "required": true
+            }
+          },
+          "useCases": ["contact-intent", "routing"],
+          "tags": ["card", "intent", "selection"],
+          "example": "<IntentCard intent=\"sales\" icon={<Briefcase />} title=\"Sales\" onClick={handleClick} />"
+        },
+        "IntentGrid": {
+          "file": "src/components/contact/IntentGrid.tsx",
+          "type": "client",
+          "description": "Grid of intent selection cards",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "onIntentSelect": {
+              "type": "(intent: string) => void",
+              "required": true
+            }
+          },
+          "useCases": ["contact-page", "intent-selection"],
+          "tags": ["grid", "intent", "selection"],
+          "example": "<IntentGrid lang=\"en\" onIntentSelect={handleSelect} />"
+        },
+        "TrustFooter": {
+          "file": "src/components/contact/TrustFooter.tsx",
+          "type": "client",
+          "description": "Trust indicators for contact page footer",
+          "props": {},
+          "useCases": ["contact-page", "trust", "reassurance"],
+          "tags": ["trust", "footer", "indicators"],
+          "example": "<TrustFooter />"
+        }
+      }
+    },
+    "help": {
+      "description": "Help center and documentation components",
+      "components": {
+        "HelpCentreHero": {
+          "file": "src/components/help/HelpCentreHero.tsx",
+          "type": "client",
+          "description": "Hero section for help center with search",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["help-center", "documentation", "support"],
+          "tags": ["hero", "help", "search"],
+          "example": "<HelpCentreHero lang=\"en\" />"
+        },
+        "HelpSearchField": {
+          "file": "src/components/help/HelpSearchField.tsx",
+          "type": "client",
+          "description": "Search input for help articles",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["help-center", "search"],
+          "tags": ["search", "input", "help"],
+          "example": "<HelpSearchField lang=\"en\" />"
+        },
+        "HelpCategoryHeader": {
+          "file": "src/components/help/HelpCategoryHeader.tsx",
+          "type": "client",
+          "description": "Header for help category pages",
+          "props": {
+            "category": {
+              "type": "string",
+              "required": true
+            },
+            "description": {
+              "type": "string",
+              "required": false
+            }
+          },
+          "useCases": ["help-center", "categories"],
+          "tags": ["header", "category", "help"],
+          "example": "<HelpCategoryHeader category=\"Getting Started\" />"
+        },
+        "HelpArticleList": {
+          "file": "src/components/help/HelpArticleList.tsx",
+          "type": "client",
+          "description": "List of help articles",
+          "props": {
+            "articles": {
+              "type": "array",
+              "required": true
+            },
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["help-center", "article-listing"],
+          "tags": ["list", "articles", "help"],
+          "example": "<HelpArticleList articles={articles} lang=\"en\" />"
+        },
+        "HelpArticleHeader": {
+          "file": "src/components/help/HelpArticleHeader.tsx",
+          "type": "client",
+          "description": "Header for individual help article",
+          "props": {
+            "title": {
+              "type": "string",
+              "required": true
+            },
+            "lastUpdated": {
+              "type": "string",
+              "required": false
+            }
+          },
+          "useCases": ["help-article", "documentation"],
+          "tags": ["header", "article", "help"],
+          "example": "<HelpArticleHeader title=\"How to get started\" />"
+        },
+        "HelpArticleBody": {
+          "file": "src/components/help/HelpArticleBody.tsx",
+          "type": "client",
+          "description": "Rich text body content for help articles",
+          "props": {
+            "content": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["help-article", "content"],
+          "tags": ["body", "content", "rich-text"],
+          "example": "<HelpArticleBody content={articleContent} />"
+        },
+        "HelpArticleFeedback": {
+          "file": "src/components/help/HelpArticleFeedback.tsx",
+          "type": "client",
+          "description": "Feedback widget for help articles (Was this helpful?)",
+          "props": {
+            "articleId": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["help-article", "feedback"],
+          "tags": ["feedback", "rating", "help"],
+          "example": "<HelpArticleFeedback articleId=\"123\" />"
+        },
+        "HelpArticleRelated": {
+          "file": "src/components/help/HelpArticleRelated.tsx",
+          "type": "client",
+          "description": "Related articles section",
+          "props": {
+            "articles": {
+              "type": "array",
+              "required": true
+            },
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["help-article", "related-content"],
+          "tags": ["related", "articles", "help"],
+          "example": "<HelpArticleRelated articles={related} lang=\"en\" />"
+        },
+        "HelpBreadcrumbs": {
+          "file": "src/components/help/HelpBreadcrumbs.tsx",
+          "type": "client",
+          "description": "Breadcrumb navigation for help center",
+          "props": {
+            "items": {
+              "type": "array",
+              "required": true
+            }
+          },
+          "useCases": ["help-center", "navigation"],
+          "tags": ["breadcrumbs", "navigation", "help"],
+          "example": "<HelpBreadcrumbs items={breadcrumbs} />"
+        }
+      }
+    },
+    "navigation": {
+      "description": "Site navigation components (header and footer)",
+      "components": {
+        "Header": {
+          "file": "src/components/navigation/Header.tsx",
+          "type": "client",
+          "description": "Main site header with navigation, language selector, and theme toggle",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "navigation": {
+              "type": "CmsNavigation & { offersLabel: string }",
+              "required": true
+            },
+            "showNavigation": {
+              "type": "boolean",
+              "required": true
+            },
+            "offers": {
+              "type": "array",
+              "required": false,
+              "default": "[]"
+            }
+          },
+          "useCases": ["site-header", "navigation", "global"],
+          "tags": ["header", "navigation", "menu", "theme-toggle", "language-selector"],
+          "features": ["Responsive mobile menu", "Dropdown menus", "Theme toggle (light/dark)", "Language selector", "Sticky header"],
+          "example": "<Header lang=\"en\" navigation={nav} showNavigation={true} />"
+        },
+        "Footer": {
+          "file": "src/components/navigation/Footer.tsx",
+          "type": "client",
+          "description": "Site footer with links, social media, and legal",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["site-footer", "global"],
+          "tags": ["footer", "links", "social", "legal"],
+          "features": ["Multi-column layout", "Social media links", "Legal links", "Newsletter signup"],
+          "example": "<Footer lang=\"en\" />"
+        }
+      }
+    },
+    "pricing": {
+      "description": "Pricing and plan components",
+      "components": {
+        "PricingPageContent": {
+          "file": "src/components/pricing/PricingPageContent.tsx",
+          "type": "client",
+          "description": "Complete pricing page with plan comparison",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["pricing-page"],
+          "tags": ["pricing", "plans", "comparison"],
+          "example": "<PricingPageContent lang=\"en\" />"
+        },
+        "PricingToggle": {
+          "file": "src/components/pricing/PricingToggle.tsx",
+          "type": "client",
+          "description": "Toggle between monthly/annual pricing",
+          "props": {
+            "value": {
+              "type": "'monthly' | 'annual'",
+              "required": true
+            },
+            "onChange": {
+              "type": "(value: 'monthly' | 'annual') => void",
+              "required": true
+            }
+          },
+          "useCases": ["pricing-page", "billing-toggle"],
+          "tags": ["toggle", "pricing", "billing"],
+          "example": "<PricingToggle value={billing} onChange={setBilling} />"
+        }
+      }
+    },
+    "resources": {
+      "description": "Resource and content listing components",
+      "components": {
+        "ResourcesPageContent": {
+          "file": "src/components/resources/ResourcesPageContent.tsx",
+          "type": "client",
+          "description": "Main resources landing page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["resources-page", "content-hub"],
+          "tags": ["resources", "landing", "content"],
+          "example": "<ResourcesPageContent lang=\"en\" />"
+        },
+        "ArticlesPageContent": {
+          "file": "src/components/resources/ArticlesPageContent.tsx",
+          "type": "client",
+          "description": "Articles listing page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "articles": {
+              "type": "CmsResource[]",
+              "required": true
+            }
+          },
+          "useCases": ["articles-page", "blog"],
+          "tags": ["articles", "blog", "listing"],
+          "example": "<ArticlesPageContent lang=\"en\" articles={articles} />"
+        },
+        "CaseStudiesPageContent": {
+          "file": "src/components/resources/CaseStudiesPageContent.tsx",
+          "type": "client",
+          "description": "Case studies listing page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "caseStudies": {
+              "type": "CmsCase[]",
+              "required": true
+            }
+          },
+          "useCases": ["case-studies-page", "testimonials"],
+          "tags": ["case-studies", "listing"],
+          "example": "<CaseStudiesPageContent lang=\"en\" caseStudies={cases} />"
+        },
+        "VideosPageContent": {
+          "file": "src/components/resources/VideosPageContent.tsx",
+          "type": "client",
+          "description": "Videos listing page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "videos": {
+              "type": "CmsVideo[]",
+              "required": true
+            }
+          },
+          "useCases": ["videos-page", "media"],
+          "tags": ["videos", "listing", "media"],
+          "example": "<VideosPageContent lang=\"en\" videos={videos} />"
+        },
+        "HelpCentrePageContent": {
+          "file": "src/components/resources/HelpCentrePageContent.tsx",
+          "type": "client",
+          "description": "Help center landing page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["help-center", "support"],
+          "tags": ["help", "support", "documentation"],
+          "example": "<HelpCentrePageContent lang=\"en\" />"
+        }
+      }
+    },
+    "ui": {
+      "description": "Base UI components (shadcn/ui based)",
+      "components": {
+        "Button": {
+          "file": "src/components/ui/button.tsx",
+          "type": "server",
+          "description": "Base button component with variants",
+          "props": {
+            "variant": {
+              "type": "'default' | 'secondary' | 'ghost' | 'outline'",
+              "required": false,
+              "default": "default"
+            },
+            "size": {
+              "type": "'default' | 'sm' | 'lg' | 'icon'",
+              "required": false,
+              "default": "default"
+            },
+            "asChild": {
+              "type": "boolean",
+              "required": false,
+              "default": false,
+              "description": "Render as child component (e.g., Link)"
+            }
+          },
+          "useCases": ["buttons", "actions", "forms"],
+          "tags": ["button", "ui", "base"],
+          "features": ["Multiple variants", "Size options", "Focus states", "Disabled states"],
+          "example": "<Button variant=\"outline\" size=\"lg\">Click me</Button>"
+        },
+        "Card": {
+          "file": "src/components/ui/card.tsx",
+          "type": "server",
+          "description": "Card container with header, content, and footer sections",
+          "props": {},
+          "useCases": ["cards", "containers", "content-blocks"],
+          "tags": ["card", "container", "ui"],
+          "example": "<Card><CardHeader><CardTitle>Title</CardTitle></CardHeader><CardContent>Content</CardContent></Card>"
+        },
+        "Input": {
+          "file": "src/components/ui/input.tsx",
+          "type": "server",
+          "description": "Base input field component",
+          "props": {
+            "type": {
+              "type": "string",
+              "required": false,
+              "default": "text"
+            }
+          },
+          "useCases": ["forms", "inputs", "text-fields"],
+          "tags": ["input", "form", "ui"],
+          "example": "<Input type=\"email\" placeholder=\"Enter email\" />"
+        },
+        "Label": {
+          "file": "src/components/ui/label.tsx",
+          "type": "server",
+          "description": "Form label component",
+          "props": {
+            "htmlFor": {
+              "type": "string",
+              "required": false
+            }
+          },
+          "useCases": ["forms", "labels"],
+          "tags": ["label", "form", "ui"],
+          "example": "<Label htmlFor=\"email\">Email</Label>"
+        },
+        "Checkbox": {
+          "file": "src/components/ui/checkbox.tsx",
+          "type": "client",
+          "description": "Checkbox input component",
+          "props": {
+            "checked": {
+              "type": "boolean",
+              "required": false
+            },
+            "onCheckedChange": {
+              "type": "(checked: boolean) => void",
+              "required": false
+            }
+          },
+          "useCases": ["forms", "checkboxes", "selections"],
+          "tags": ["checkbox", "form", "ui"],
+          "example": "<Checkbox checked={value} onCheckedChange={setValue} />"
+        },
+        "Switch": {
+          "file": "src/components/ui/switch.tsx",
+          "type": "client",
+          "description": "Toggle switch component",
+          "props": {
+            "checked": {
+              "type": "boolean",
+              "required": false
+            },
+            "onCheckedChange": {
+              "type": "(checked: boolean) => void",
+              "required": false
+            }
+          },
+          "useCases": ["toggles", "switches", "settings"],
+          "tags": ["switch", "toggle", "ui"],
+          "example": "<Switch checked={enabled} onCheckedChange={setEnabled} />"
+        },
+        "Dialog": {
+          "file": "src/components/ui/dialog.tsx",
+          "type": "client",
+          "description": "Modal dialog component",
+          "props": {
+            "open": {
+              "type": "boolean",
+              "required": false
+            },
+            "onOpenChange": {
+              "type": "(open: boolean) => void",
+              "required": false
+            }
+          },
+          "useCases": ["modals", "dialogs", "popups"],
+          "tags": ["dialog", "modal", "ui"],
+          "example": "<Dialog open={open} onOpenChange={setOpen}><DialogContent>Content</DialogContent></Dialog>"
+        },
+        "DropdownMenu": {
+          "file": "src/components/ui/dropdown-menu.tsx",
+          "type": "client",
+          "description": "Dropdown menu component",
+          "props": {},
+          "useCases": ["menus", "dropdowns", "navigation"],
+          "tags": ["dropdown", "menu", "ui"],
+          "example": "<DropdownMenu><DropdownMenuTrigger>Open</DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem>Item</DropdownMenuItem></DropdownMenuContent></DropdownMenu>"
+        },
+        "Sheet": {
+          "file": "src/components/ui/sheet.tsx",
+          "type": "client",
+          "description": "Slide-out sheet/drawer component",
+          "props": {
+            "open": {
+              "type": "boolean",
+              "required": false
+            },
+            "onOpenChange": {
+              "type": "(open: boolean) => void",
+              "required": false
+            }
+          },
+          "useCases": ["mobile-menu", "sidebars", "drawers"],
+          "tags": ["sheet", "drawer", "sidebar", "ui"],
+          "example": "<Sheet open={open} onOpenChange={setOpen}><SheetContent>Content</SheetContent></Sheet>"
+        }
+      }
+    },
+    "modals": {
+      "description": "Modal and overlay components",
+      "components": {
+        "CookiePreferencesModal": {
+          "file": "src/components/modals/CookiePreferencesModal.tsx",
+          "type": "client",
+          "description": "Modal for managing cookie preferences",
+          "props": {
+            "isOpen": {
+              "type": "boolean",
+              "required": true
+            },
+            "onClose": {
+              "type": "() => void",
+              "required": true
+            }
+          },
+          "useCases": ["privacy", "cookies", "preferences"],
+          "tags": ["modal", "cookies", "privacy"],
+          "example": "<CookiePreferencesModal isOpen={open} onClose={handleClose} />"
+        }
+      }
+    },
+    "layouts": {
+      "description": "Page layout components",
+      "components": {
+        "MarketingLayoutClient": {
+          "file": "src/components/layouts/MarketingLayoutClient.tsx",
+          "type": "client",
+          "description": "Client-side marketing layout wrapper",
+          "props": {
+            "children": {
+              "type": "ReactNode",
+              "required": true
+            }
+          },
+          "useCases": ["layout", "wrapper"],
+          "tags": ["layout", "marketing"],
+          "example": "<MarketingLayoutClient>{children}</MarketingLayoutClient>"
+        },
+        "OfferPageLayout": {
+          "file": "src/layouts/OfferPageLayout.tsx",
+          "type": "client",
+          "description": "Layout for individual offer/product pages",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "page": {
+              "type": "object",
+              "required": true
+            }
+          },
+          "useCases": ["offer-page", "product-page"],
+          "tags": ["layout", "offer", "product"],
+          "example": "<OfferPageLayout lang=\"en\" page={pageData} />"
+        },
+        "OfferIndexLayout": {
+          "file": "src/layouts/OfferIndexLayout.tsx",
+          "type": "client",
+          "description": "Layout for offers listing page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "offers": {
+              "type": "CmsOffer[]",
+              "required": true
+            }
+          },
+          "useCases": ["offers-listing", "products-listing"],
+          "tags": ["layout", "listing", "offers"],
+          "example": "<OfferIndexLayout lang=\"en\" offers={offers} />"
+        },
+        "ArticleLayout": {
+          "file": "src/layouts/ArticleLayout.tsx",
+          "type": "client",
+          "description": "Layout for article/blog post pages",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "article": {
+              "type": "CmsResource",
+              "required": true
+            }
+          },
+          "useCases": ["article-page", "blog-post"],
+          "tags": ["layout", "article", "blog"],
+          "example": "<ArticleLayout lang=\"en\" article={article} />"
+        },
+        "CaseStudyLayout": {
+          "file": "src/layouts/CaseStudyLayout.tsx",
+          "type": "client",
+          "description": "Layout for case study pages",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "caseStudy": {
+              "type": "CmsCase",
+              "required": true
+            }
+          },
+          "useCases": ["case-study-page"],
+          "tags": ["layout", "case-study"],
+          "example": "<CaseStudyLayout lang=\"en\" caseStudy={caseStudy} />"
+        },
+        "VideoLayout": {
+          "file": "src/layouts/VideoLayout.tsx",
+          "type": "client",
+          "description": "Layout for video pages",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "video": {
+              "type": "CmsVideo",
+              "required": true
+            }
+          },
+          "useCases": ["video-page"],
+          "tags": ["layout", "video"],
+          "example": "<VideoLayout lang=\"en\" video={video} />"
+        },
+        "AboutLayout": {
+          "file": "src/layouts/AboutLayout.tsx",
+          "type": "client",
+          "description": "Layout for about page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["about-page"],
+          "tags": ["layout", "about"],
+          "example": "<AboutLayout lang=\"en\" />"
+        },
+        "ContactLayout": {
+          "file": "src/layouts/ContactLayout.tsx",
+          "type": "client",
+          "description": "Layout for contact page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["contact-page"],
+          "tags": ["layout", "contact"],
+          "example": "<ContactLayout lang=\"en\" />"
+        },
+        "LegalLayout": {
+          "file": "src/layouts/LegalLayout.tsx",
+          "type": "client",
+          "description": "Layout for legal pages (privacy, terms, etc.)",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "content": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["legal-pages", "privacy", "terms"],
+          "tags": ["layout", "legal"],
+          "example": "<LegalLayout lang=\"en\" content={legalContent} />"
+        },
+        "FAQLayout": {
+          "file": "src/layouts/FAQLayout.tsx",
+          "type": "client",
+          "description": "Layout for FAQ page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "faqs": {
+              "type": "CmsFaq[]",
+              "required": true
+            }
+          },
+          "useCases": ["faq-page"],
+          "tags": ["layout", "faq"],
+          "example": "<FAQLayout lang=\"en\" faqs={faqs} />"
+        },
+        "ResourceIndexLayout": {
+          "file": "src/layouts/ResourceIndexLayout.tsx",
+          "type": "client",
+          "description": "Layout for resources landing page",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["resources-page"],
+          "tags": ["layout", "resources"],
+          "example": "<ResourceIndexLayout lang=\"en\" />"
+        },
+        "ResourceCategoryLayout": {
+          "file": "src/layouts/ResourceCategoryLayout.tsx",
+          "type": "client",
+          "description": "Layout for resource category pages",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            },
+            "category": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["resource-category"],
+          "tags": ["layout", "resources", "category"],
+          "example": "<ResourceCategoryLayout lang=\"en\" category=\"automation\" />"
+        }
+      }
+    },
+    "icons": {
+      "description": "Custom icon components",
+      "components": {
+        "FriesIcon": {
+          "file": "src/components/icons/FriesIcon.tsx",
+          "type": "server",
+          "description": "Custom fries icon (example custom icon)",
+          "props": {
+            "className": {
+              "type": "string",
+              "required": false
+            }
+          },
+          "useCases": ["icons", "branding"],
+          "tags": ["icon", "custom"],
+          "example": "<FriesIcon className=\"h-6 w-6\" />"
+        }
+      }
+    },
+    "about": {
+      "description": "About page components",
+      "components": {
+        "AboutPageContent": {
+          "file": "src/components/about/AboutPageContent.tsx",
+          "type": "client",
+          "description": "Complete about page content",
+          "props": {
+            "lang": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "useCases": ["about-page"],
+          "tags": ["about", "company"],
+          "example": "<AboutPageContent lang=\"en\" />"
+        }
+      }
+    }
+  },
+  "stats": {
+    "totalComponents": 77,
+    "totalCategories": 11,
+    "clientComponents": 62,
+    "serverComponents": 15,
+    "layoutComponents": 11
+  },
+  "conventions": {
+    "naming": "PascalCase for component names",
+    "fileExtension": ".tsx for all components",
+    "clientComponents": "Use 'use client' directive at top of file",
+    "serverComponents": "No 'use client' directive (default)",
+    "props": "Define interface with Props suffix (e.g., SignupHeroProps)",
+    "exports": "Named exports for components",
+    "styling": "Tailwind CSS with design tokens from src/styles/tokens.css",
+    "internationalization": "Use next-intl useTranslations() hook",
+    "routing": "Use routes helper from @/lib/routes"
+  },
+  "commonPatterns": {
+    "langProp": "Most components accept a 'lang' prop for internationalization and routing",
+    "cmsData": "Components that display CMS content accept typed CMS objects (CmsOffer, CmsResource, etc.)",
+    "responsiveDesign": "All components use responsive Tailwind classes (sm:, md:, lg:)",
+    "accessibility": "Components include ARIA labels, semantic HTML, and keyboard navigation",
+    "validation": "Forms use react-hook-form with Zod schemas",
+    "stateManagement": "Client components use React hooks (useState, useEffect, etc.)",
+    "errorHandling": "Forms display validation errors and submission states"
+  }
+}

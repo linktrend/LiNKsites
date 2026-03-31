@@ -1,0 +1,240 @@
+{
+  "buttons": {
+    "login": "Iniciar Sesión",
+    "signup": "Comenzar Gratis",
+    "createAccount": "Crear Cuenta",
+    "joinNewsletter": "Unirse al Boletín",
+    "learnMore": "Saber Más",
+    "getStarted": "Comenzar",
+    "viewAll": "Ver Todo",
+    "readMore": "Leer Más",
+    "contactUs": "Contáctenos",
+    "submit": "Enviar",
+    "send": "Enviar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "search": "Buscar"
+  },
+  "labels": {
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "name": "Nombre",
+    "message": "Mensaje",
+    "subject": "Asunto",
+    "query": "Consulta de Búsqueda"
+  },
+  "placeholders": {
+    "email": "tu@ejemplo.com",
+    "phone": "+34 (555) 000-0000",
+    "enterEmail": "Ingresa tu correo electrónico",
+    "enterName": "Ingresa tu nombre",
+    "enterMessage": "¿Cómo podemos ayudarte?",
+    "search": "Buscar artículos de ayuda..."
+  },
+  "legal": {
+    "acceptTerms": "Al continuar, aceptas nuestros:",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfUse": "Términos de Uso",
+    "and": "y"
+  },
+  "newsletter": {
+    "title": "Únete a Nuestro Boletín",
+    "description": "Ingresa tu correo electrónico y recibe nuestro boletín informativo regular.",
+    "acceptTermsText": "Al continuar, aceptas nuestra {privacyPolicy} y {termsOfUse}"
+  },
+  "trust": {
+    "noCreditCard": "Sin tarjeta de crédito",
+    "cancelAnytime": "Cancela en cualquier momento",
+    "skipOnboarding": "Omitir incorporación",
+    "privacyFriendly": "Respetuoso con la privacidad"
+  },
+  "divider": {
+    "or": "O"
+  },
+  "forms": {
+    "validation": {
+      "nameMin": "El nombre debe tener al menos 2 caracteres",
+      "nameMax": "El nombre debe tener como máximo 100 caracteres",
+      "emailInvalid": "Por favor ingresa un correo electrónico válido",
+      "emailOrPhoneRequired": "Por favor proporciona un correo electrónico o número de teléfono",
+      "phoneMin": "El número de teléfono debe tener al menos 10 dígitos",
+      "phoneMax": "El número de teléfono debe tener como máximo 20 dígitos",
+      "messageMin": "El mensaje debe tener al menos 10 caracteres",
+      "messageMax": "El mensaje debe tener como máximo 1000 caracteres",
+      "searchMin": "La consulta de búsqueda debe tener al menos 2 caracteres",
+      "searchMax": "La consulta de búsqueda debe tener como máximo 200 caracteres",
+      "minLength": "Este campo debe tener al menos {min} caracteres",
+      "maxLength": "Este campo debe tener como máximo {max} caracteres",
+      "termsRequired": "Debes aceptar los términos y condiciones",
+      "captchaRequired": "Por favor verifica que no eres un robot",
+      "required": "Este campo es obligatorio"
+    },
+    "errors": {
+      "submissionFailed": "Envío Fallido",
+      "networkError": "Error de red. Por favor intenta de nuevo o contáctanos directamente por correo.",
+      "validationError": "Por favor verifica los datos del formulario e intenta de nuevo",
+      "unknownError": "Ocurrió un error inesperado. Por favor intenta de nuevo."
+    },
+    "success": {
+      "title": "¡Éxito!",
+      "contactSubmitted": "Tu mensaje ha sido enviado exitosamente. Te responderemos pronto.",
+      "newsletterSubscribed": "Te has suscrito exitosamente a nuestro boletín.",
+      "preferencesUpdated": "Tus preferencias han sido guardadas exitosamente."
+    },
+    "loading": {
+      "submitting": "Enviando...",
+      "loading": "Cargando..."
+    }
+  },
+  "cookies": {
+    "preferences": "Preferencias de Cookies",
+    "functional": "Funcional",
+    "analytics": "Analíticas",
+    "marketing": "Marketing",
+    "functionalDesc": "Cookies esenciales para la funcionalidad del sitio",
+    "analyticsDesc": "Ayúdanos a mejorar rastreando el uso",
+    "marketingDesc": "Contenido y anuncios personalizados",
+    "banner": {
+      "message": "{siteName} utiliza cookies para personalizar el contenido y medir el uso. Lee nuestra {privacyPolicy} para más detalles.",
+      "manageCookies": "Gestionar Cookies",
+      "acceptAll": "Aceptar Todas",
+      "cookiePolicyLink": "Política de Cookies"
+    },
+    "modal": {
+      "title": "Preferencias de Cookies",
+      "description": "Controla cómo {siteName} utiliza cookies para ofrecer una experiencia personalizada.",
+      "necessary": "Cookies Necesarias",
+      "necessaryDesc": "Requeridas para que {siteName} recuerde tu autenticación y preferencias de idioma.",
+      "functionalCookies": "Cookies Funcionales",
+      "functionalCookiesDesc": "Habilitan la personalización del producto, filtros guardados y navegación más fluida.",
+      "analyticsCookies": "Cookies Analíticas",
+      "analyticsCookiesDesc": "Nos ayudan a comprender los patrones de uso para mejorar los flujos de trabajo y el rendimiento.",
+      "marketingCookies": "Cookies de Marketing",
+      "marketingCookiesDesc": "Nos permiten compartir actualizaciones y anuncios de lanzamiento de {siteName} más relevantes.",
+      "policyTitle": "Política de Cookies",
+      "policyText": "{siteName} solo recopila la cantidad mínima de información necesaria para mantener tus sesiones seguras y medir tendencias de uso anónimas. Puedes actualizar estas preferencias cuando quieras.",
+      "policyContact": "Para más detalles, contacta a privacy@{siteNameLower}.com o revisa la Política de Privacidad. Las cookies esenciales nunca almacenan datos de clientes o documentos.",
+      "rejectAll": "Rechazar Todas",
+      "acceptAll": "Aceptar Todas",
+      "savePreferences": "Guardar Preferencias"
+    }
+  },
+  "breadcrumbs": {
+    "home": "Inicio",
+    "contact": "Contacto",
+    "pricing": "Precios",
+    "about": "Acerca de",
+    "helpCentre": "Centro de Ayuda"
+  },
+  "help": {
+    "feedback": {
+      "question": "¿Esto respondió tu pregunta?",
+      "yes": "Sí",
+      "no": "No",
+      "thanks": "¡Gracias por tu comentario!"
+    },
+    "search": {
+      "heading": "¿Cómo podemos ayudarte?",
+      "description": "Encuentra respuestas y orientación para todas tus preguntas",
+      "label": "Buscar artículos de ayuda"
+    },
+    "noArticles": "No se encontraron artículos en esta categoría.",
+    "checkBackSoon": "Vuelve pronto para ver nuevo contenido o",
+    "contactSupport": "contacta con soporte",
+    "forAssistance": "para obtener ayuda.",
+    "relatedArticles": "Artículos Relacionados"
+  },
+  "contact": {
+    "getInTouch": "Ponte en Contacto",
+    "intents": {
+      "title": "¿Cómo podemos ayudarte?",
+      "subtitle": "Elige la opción que mejor describa tu consulta"
+    },
+    "channels": {
+      "title": "Otras formas de contactarnos",
+      "subtitle": "¿Prefieres un método de comunicación diferente? Te tenemos cubierto",
+      "sendEmail": "Enviar Correo",
+      "scheduleNow": "Programar Ahora",
+      "startChat": "Iniciar Chat"
+    }
+  },
+  "comingSoon": "Próximamente",
+  "cta": {
+    "ready": "¿Listo para comenzar?",
+    "description": "Únete a los equipos que ya utilizan {siteName} para orquestar información y automatización impulsadas por IA.",
+    "getStartedFree": "Comenzar gratis",
+    "trustIndicators": {
+      "noCreditCard": "No se requiere tarjeta de crédito",
+      "freeTemplates": "Plantillas de automatización gratuitas",
+      "cancelAnytime": "Cancela en cualquier momento"
+    }
+  },
+  "pricing": {
+    "hero": {
+      "title": "Precios simples y transparentes",
+      "subtitle": "Elige el plan que se adapte a tus necesidades. Sin tarifas ocultas, cancela en cualquier momento."
+    },
+    "features": "Características",
+    "mostPopular": "Más Popular",
+    "startNow": "Comenzar Ahora",
+    "custom": {
+      "title": "¿Necesitas una solución personalizada?",
+      "description": "Nuestro equipo puede crear un plan adaptado a tus requisitos específicos",
+      "getStarted": "Comenzar",
+      "viewAllOffers": "Ver Todas las Ofertas"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "Acerca de {siteName}",
+      "subtitle": "Descubre quiénes somos y qué nos impulsa"
+    },
+    "productEcosystem": "Nuestro Ecosistema de Productos",
+    "missionValues": {
+      "title": "Nuestra Misión y Valores",
+      "subtitle": "Impulsados por un propósito, guiados por principios",
+      "coreValuesTitle": "Valores Fundamentales"
+    },
+    "cta": {
+      "title": "¿Listo para Transformar tu Negocio?",
+      "description": "Únete a cientos de empresas que ya utilizan nuestra plataforma de automatización impulsada por IA para optimizar operaciones, aumentar la productividad e impulsar el crecimiento. Nuestro equipo está listo para ayudarte a comenzar tu viaje de automatización.",
+      "connectTitle": "Conectemos",
+      "connectSubtitle": "Asóciate con nosotros para construir el futuro",
+      "buttonText": "Trabajemos Juntos"
+    }
+  },
+  "copyright": "© Copyright 2025. {siteName}",
+  "manageCookies": "Gestionar Cookies",
+  "adminLogin": "Acceso de Administrador",
+  "readMore": "Leer más",
+  "readArticle": "Leer artículo",
+  "readCaseStudy": "Leer caso de estudio",
+  "closeModal": "Cerrar modal",
+  "closeForm": "Cerrar formulario",
+  "scrollToTop": "Volver arriba",
+  "errors": {
+    "global": {
+      "title": "Algo salió mal",
+      "description": "Encontramos un error inesperado. Por favor, inténtalo de nuevo o contacta con soporte si el problema persiste.",
+      "retry": "Intentar de Nuevo",
+      "goHome": "Ir a la Página Principal"
+    },
+    "notFound": {
+      "title": "Página No Encontrada",
+      "description": "La página que buscas no existe o ha sido movida.",
+      "goHome": "Ir a la Página Principal",
+      "backToPrevious": "Volver Atrás"
+    },
+    "cms": {
+      "dataUnavailable": "Contenido temporalmente no disponible",
+      "loadingFailed": "Error al cargar el contenido. Por favor, inténtalo más tarde.",
+      "noData": "No hay contenido disponible en este momento."
+    }
+  },
+  "loading": {
+    "default": "Cargando...",
+    "page": "Cargando página...",
+    "content": "Cargando contenido...",
+    "pleaseWait": "Por favor espera"
+  }
+}

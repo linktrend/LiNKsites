@@ -1,0 +1,106 @@
+/* Import design tokens FIRST - single source of truth */
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: var(--font-family, "Inter", system-ui, sans-serif);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
+  /* Smooth scrolling for better mobile experience */
+  -webkit-overflow-scrolling: touch;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Mobile optimizations */
+@layer utilities {
+  /* Safe area insets for iPhone notch/home indicator */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Touch-friendly minimum sizes (44x44px recommended) - mobile only */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Reset touch target on desktop */
+  @media (min-width: 640px) {
+    .touch-target-auto {
+      min-height: auto;
+      min-width: auto;
+    }
+  }
+  
+  /* Prevent text size adjustment on iOS */
+  @supports (-webkit-touch-callout: none) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+  
+  /* Better tap highlighting */
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Smooth font rendering on mobile */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Accent color utilities - using design tokens */
+@layer components {
+  .btn-cta, .btn-accent-red {
+    background-color: hsl(var(--accent-red)) !important;
+    color: hsl(var(--accent-red-foreground)) !important;
+  }
+  
+  .btn-cta:hover, .btn-accent-red:hover {
+    background-color: hsl(var(--accent-red) / 0.9) !important;
+  }
+  
+  .bg-cta {
+    background-color: hsl(var(--accent-red)) !important;
+  }
+  
+  .bg-cta:hover {
+    background-color: hsl(var(--accent-red) / 0.9) !important;
+  }
+  
+  .text-cta-foreground {
+    color: hsl(var(--accent-red-foreground)) !important;
+  }
+  
+  .border-cta {
+    border-color: hsl(var(--accent-red)) !important;
+  }
+}

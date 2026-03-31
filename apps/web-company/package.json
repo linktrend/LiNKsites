@@ -1,0 +1,24 @@
+{
+  "name": "@linksites/web-company",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@linksites/types": "workspace:*"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5"
+  }
+}

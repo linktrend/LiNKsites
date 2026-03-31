@@ -1,0 +1,187 @@
+/* Design Tokens CSS Variables */
+/* SINGLE SOURCE OF TRUTH - All design tokens defined here */
+/* Changing theme via data-theme attribute changes entire site appearance */
+
+:root,
+:root[data-theme="default"] {
+  /* Core theme colors - Light Theme */
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-primary: #0ea5e9;
+  --color-primary-foreground: #ffffff;
+  --color-brand: #0ea5e9;
+  --color-brand-foreground: #ffffff;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #475569;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #0ea5e9;
+  
+  /* Semantic colors */
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 98%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 98%;
+  --danger: 0 84.2% 60.2%;
+  --danger-foreground: 0 0% 98%;
+  
+  /* Accent colors */
+  --accent-red: 0 84.2% 60.2%;
+  --accent-red-foreground: 0 0% 98%;
+  
+  /* Extended surfaces & gradients */
+  --surface-inverse: 223 39% 13%;
+  --surface-inverse-muted: 223 32% 22%;
+  --surface-overlay: 0 0% 16%;
+  --gradient-brand-from: 217 91% 60%;
+  --gradient-brand-to: 199 94% 74%;
+  --gradient-accent-from: 276 65% 60%;
+  --gradient-accent-to: 199 94% 74%;
+  --gradient-footer-from: 220 70% 32%;
+  --gradient-footer-to: 205 88% 68%;
+  --gradient-surface-footer: linear-gradient(135deg, hsl(var(--gradient-footer-from)) 0%, hsl(var(--gradient-footer-to)) 100%);
+  --gradient-hero-from: 0 0% 15%;
+  --gradient-hero-to: 0 0% 10%;
+  --gradient-surface-hero: linear-gradient(135deg, hsl(var(--gradient-hero-from)) 0%, hsl(var(--gradient-hero-to)) 100%);
+  --gradient-success-from: 142 76% 36%;
+  --gradient-success-to: 142 65% 45%;
+  --gradient-warning-from: 38 92% 50%;
+  --gradient-warning-to: 25 95% 63%;
+  --gradient-danger-from: 0 84.2% 60.2%;
+  --gradient-danger-to: 347 77% 49%;
+  
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  
+  /* Typography */
+  --font-family: "Inter", system-ui, sans-serif;
+  
+  /* Motion & Animation */
+  /* Duration tokens for consistent animation timing */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  
+  /* Easing functions for natural motion */
+  --easing-linear: linear;
+  --easing-default: cubic-bezier(0.4, 0, 0.2, 1); /* ease-in-out */
+  --easing-in: cubic-bezier(0.4, 0, 1, 1); /* ease-in */
+  --easing-out: cubic-bezier(0, 0, 0.2, 1); /* ease-out */
+  --easing-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* ease-in-out */
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --easing-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  /* Common transition combinations */
+  --transition-colors: color var(--duration-normal) var(--easing-default),
+                       background-color var(--duration-normal) var(--easing-default),
+                       border-color var(--duration-normal) var(--easing-default);
+  --transition-opacity: opacity var(--duration-normal) var(--easing-default);
+  --transition-transform: transform var(--duration-normal) var(--easing-default);
+  --transition-all: all var(--duration-normal) var(--easing-default);
+  --transition-shadow: box-shadow var(--duration-normal) var(--easing-default);
+  
+  /* Spacing tokens for consistent layout */
+  --spacing-xs: 0.5rem;    /* 8px */
+  --spacing-sm: 0.75rem;   /* 12px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+  --spacing-4xl: 6rem;     /* 96px */
+  --spacing-5xl: 8rem;     /* 128px */
+  --spacing-6xl: 12rem;    /* 192px */
+}
+
+:root[data-theme="dark"] {
+  /* Core theme colors - Dark Theme */
+  --color-background: hsl(222 47% 5%);
+  --color-foreground: hsl(210 40% 96%);
+  --color-primary: hsl(210 40% 96%);
+  --color-primary-foreground: hsl(222 47% 5%);
+  --color-muted: hsl(217 33% 12%);
+  --color-muted-foreground: hsl(215 20% 65%);
+  --color-card: hsl(222 47% 7%);
+  --color-card-foreground: hsl(210 40% 96%);
+  --color-border: hsl(217 19% 20%);
+  --color-input: hsl(217 19% 20%);
+  --color-ring: hsl(210 40% 96%);
+  
+  /* Semantic colors for dark theme */
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 98%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 98%;
+  --danger: 0 62.8% 30.6%;
+  --danger-foreground: 0 0% 98%;
+  
+  /* Accent colors for dark theme */
+  --accent-red: 0 70% 60%;
+  --accent-red-foreground: 0 0% 98%;
+  
+  /* Extended surfaces & gradients (dark) */
+  --surface-inverse: 223 20% 12%;
+  --surface-inverse-muted: 223 20% 20%;
+  --surface-overlay: 0 0% 16%;
+  --gradient-brand-from: 217 75% 70%;
+  --gradient-brand-to: 199 70% 60%;
+  --gradient-accent-from: 276 70% 70%;
+  --gradient-accent-to: 199 70% 65%;
+  --gradient-footer-from: 220 65% 28%;
+  --gradient-footer-to: 205 85% 58%;
+  --gradient-surface-footer: linear-gradient(135deg, hsl(var(--gradient-footer-from)) 0%, hsl(var(--gradient-footer-to)) 100%);
+  --gradient-success-from: 142 65% 50%;
+  --gradient-success-to: 142 55% 45%;
+  --gradient-warning-from: 38 80% 60%;
+  --gradient-warning-to: 25 80% 55%;
+  --gradient-danger-from: 0 70% 60%;
+  --gradient-danger-to: 347 70% 55%;
+  
+  /* Border radius (same for dark theme) */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  
+  /* Typography (same for dark theme) */
+  --font-family: "Inter", system-ui, sans-serif;
+  
+  /* Motion & Animation (same for dark theme) */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  
+  --easing-linear: linear;
+  --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --easing-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  --transition-colors: color var(--duration-normal) var(--easing-default),
+                       background-color var(--duration-normal) var(--easing-default),
+                       border-color var(--duration-normal) var(--easing-default);
+  --transition-opacity: opacity var(--duration-normal) var(--easing-default);
+  --transition-transform: transform var(--duration-normal) var(--easing-default);
+  --transition-all: all var(--duration-normal) var(--easing-default);
+  --transition-shadow: box-shadow var(--duration-normal) var(--easing-default);
+  
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  --spacing-4xl: 6rem;
+  --spacing-5xl: 8rem;
+  --spacing-6xl: 12rem;
+}

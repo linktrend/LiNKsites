@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  payload:
+    image: node:18-alpine
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    working_dir: /home/node/app/
+    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      # Override DATABASE_URI for local PostgreSQL (optional)
+      # Uncomment to use local postgres instead of external Supabase
+      # DATABASE_URI: postgresql://payload:payload@postgres:5432/payload
+
+  # PostgreSQL Database (Optional - for local development)
+  # By default, the app connects to external Supabase using DATABASE_URI from .env
+  # Uncomment the environment override above to use this local PostgreSQL instead
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payload"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  node_modules:

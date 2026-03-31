@@ -1,0 +1,32 @@
+:root {
+  --theme-bg: #0b1f33;
+  --theme-elevation-100: #102846;
+  --theme-elevation-200: #173557;
+  --theme-text: #f4f8ff;
+  --theme-accent: #00bcd4;
+  --theme-danger: #ff7043;
+}
+
+.app {
+  background: linear-gradient(180deg, var(--theme-bg), #071222);
+}
+
+.app header,
+.app .nav {
+  background-color: rgba(7, 18, 34, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.btn--primary {
+  background-color: var(--theme-accent);
+  border-color: var(--theme-accent);
+}
+
+.btn--primary:hover {
+  background-color: #00a5ba;
+  border-color: #00a5ba;
+}
+
+.dashboard-grid {
+  gap: 1.5rem;
+}
