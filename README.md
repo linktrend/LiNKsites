@@ -39,3 +39,8 @@ The docs include:
 - environment matrix and runbooks
 - business/pricing SOPs
 - links to source specs and active code repositories
+
+## Documentation Map
+- [Docs Index](./docs/README.md)
+- [Branching and Deployment Policy](./docs/BRANCHING_AND_DEPLOYMENT_POLICY.md)
+- [Documentation Governance](./docs/DOCUMENTATION_GOVERNANCE.md)
