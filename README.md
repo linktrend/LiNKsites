@@ -8,7 +8,7 @@ Previously named: "Dev_Sites Website Factory".
 
 ```
 Dev_Sites/ (workspace root)
-├── library/               # Central documentation library (SOPs, runbooks, env matrix)
+├── docs/                  # Central documentation index (SOPs, runbooks, product docs)
 ├── sites_specs/           # Authoritative specifications (system + architectures)
 ├── apps/                  # Runtime apps
 │   ├── cms/               # Payload CMS app (Next.js + Payload)
@@ -27,27 +27,15 @@ Dev_Sites/ (workspace root)
   - Shared platform mode (many sites on one running Next.js platform, by hostname).
   - Premium spin-off mode (dedicated frontend deployment per site, still using the central CMS by `siteId`).
 
-## Documentation Library (Primary Entry Point)
+## Documentation (Primary Entry Point)
 
-Use the central documentation library first:
+Use the central documentation index:
 
-- `/Users/linktrend/Projects/LiNKsites/library/README.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/README.md`
 
-The library includes:
+The docs include:
 - workflow and architecture references
 - implementation and operations SOPs
 - environment matrix and runbooks
 - business/pricing SOPs
 - links to source specs and active code repositories
-
-## Legacy Top-Level Docs
-
-These are still valid and linked from the library:
-- `LINKSITES_FACTORY_KIT_WORKFLOW.md`
-- `IMPLEMENTATION_PLAN.md`
-- `APPROACH_EVALUATION.md`
-- `TEMPLATE_CREATION_GUIDE.md`
-- `LINKSITES_FACTORY_ARCHITECTURE.md`
-- `VPS_DEPLOYMENT_GUIDE.md`
-- `GODADDY_DNS_SETUP.md`
-- `SUPABASE_SETUP.md`
