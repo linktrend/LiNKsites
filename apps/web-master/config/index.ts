@@ -36,6 +36,8 @@ export {
   FEATURE_FLAGS_ENV,
   CONTACT_ENV,
   DATABASE_ENV,
+  AI_ENV,
+  LEGAL_ENV,
   
   // Helper functions
   isProduction,
@@ -75,6 +77,21 @@ export {
   isLanguageSupported,
   getLanguageName,
 } from './site.config';
+
+// ============================================================================
+// AI & SEARCH CONFIGURATION
+// ============================================================================
+
+export {
+  AI_ACTIONS_VERSION,
+  getAiActions,
+  AI_FEATURES,
+} from './ai.config';
+
+export {
+  CRAWL_POLICY,
+  buildLlmsTxt,
+} from './search.config';
 
 // ============================================================================
 // THEME CONFIGURATION
@@ -166,6 +183,8 @@ import envConfigDefault from './env.config';
 import siteConfigDefault from './site.config';
 import themeConfigDefault from './theme.config';
 import cmsConfigDefault from './cms.config';
+import aiConfigDefault from './ai.config';
+import searchConfigDefault from './search.config';
 
 /**
  * Combined configuration object
@@ -176,6 +195,8 @@ export const config = {
   site: siteConfigDefault,
   theme: themeConfigDefault,
   cms: cmsConfigDefault,
+  ai: aiConfigDefault,
+  search: searchConfigDefault,
 } as const;
 
 export default config;

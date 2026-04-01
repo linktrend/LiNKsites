@@ -30,6 +30,8 @@ export interface CmsOffer {
     canonicalUrl?: string;
     keywords?: string[];
   };
+  reviewedAt?: string | null;
+  reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
 }
 
 type OfferPageDoc = {
@@ -41,6 +43,8 @@ type OfferPageDoc = {
   excerpt?: string;
   status?: string;
   seo?: any;
+  reviewedAt?: string;
+  reviewedBy?: any;
 };
 
 const normalizeOffer = (doc: OfferPageDoc): CmsOffer => ({
@@ -54,6 +58,8 @@ const normalizeOffer = (doc: OfferPageDoc): CmsOffer => ({
   description: doc.excerpt ?? undefined,
   status: doc.status,
   seo: doc.seo,
+  reviewedAt: doc.reviewedAt ?? null,
+  reviewedBy: doc.reviewedBy ?? null,
 });
 
 export const listOffers = async ({

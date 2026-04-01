@@ -34,6 +34,10 @@ export default async function OfferIndexPage({ params }: Props) {
   if (publishedOffers.length === 1) {
     const singleOffer = publishedOffers[0];
     const offerPageData = await getOfferPage(locale, siteId, singleOffer.slug);
+    const reviewedBy =
+      typeof (singleOffer as any).reviewedBy === "string"
+        ? (singleOffer as any).reviewedBy
+        : (singleOffer as any).reviewedBy?.name;
     
     // Structured data for single offer
     const productJsonLd = buildProductJsonLd({
@@ -42,6 +46,8 @@ export default async function OfferIndexPage({ params }: Props) {
       image: `${getSiteUrl()}${SEO_CONFIG.openGraph.images.default}`,
       url: `${getSiteUrl()}/${locale}/offers`,
       brand: SITE_CONFIG.siteName,
+      reviewedBy,
+      verificationDate: (singleOffer as any).reviewedAt ?? undefined,
     });
 
     return (

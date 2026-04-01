@@ -23,6 +23,7 @@ import { workflowFields } from '@/fields/workflowFields'
 import { triggerRebuild } from '@/hooks/triggerRebuild'
 import { LocationsBlock } from '@/blocks/LocationsBlock'
 import { TeamMembersBlock } from '@/blocks/TeamMembersBlock'
+import { TrustFeedBlock } from '@/blocks/TrustFeedBlock'
 
 /**
  * Unified Pages collection - aggregates all page types
@@ -76,6 +77,7 @@ export const Pages: CollectionConfig<'pages'> = {
         { label: 'Terms', value: 'terms' },
         { label: 'FAQ', value: 'faq' },
         { label: 'Careers', value: 'careers' },
+        { label: 'Landing', value: 'landing' },
         { label: 'Generic', value: 'generic' },
       ],
       admin: {
@@ -106,6 +108,7 @@ export const Pages: CollectionConfig<'pages'> = {
         VideoEmbedBlock,
         LocationsBlock,
         TeamMembersBlock,
+        TrustFeedBlock,
       ],
       localized: true,
       admin: {

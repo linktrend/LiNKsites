@@ -7,6 +7,7 @@ A production-ready, AI-first, multi-language, CMS-driven corporate/marketing sit
 - **Modern Stack**: Next.js 14 App Router, TypeScript, Tailwind CSS + shadcn/ui
 - **Multi-Language Support**: Built-in internationalization with roots for `/en`, `/es`, `/zh-tw`, `/zh-cn`
 - **SEO Optimized**: Automatic hreflang tags, canonical URLs, and meta tag management
+- **Machine Experience (MX)**: AI markdown views, `llms.txt`, and `/.well-known/ai-actions.json`
 - **CMS Integration**: Payload CMS integration with structured content management
 - **Theme System**: Dynamic theming via CSS variables with `data-theme` attribute
 - **Static Generation**: Pre-rendered pages with Incremental Static Regeneration (ISR)

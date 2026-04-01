@@ -596,6 +596,56 @@ export const NewsletterBlock: Block = {
   ],
 };
 
+// Trust Feed Block - External reviews (positive-only filter)
+export const TrustFeedBlock: Block = {
+  slug: 'trustFeed',
+  labels: {
+    singular: 'Trust Feed',
+    plural: 'Trust Feeds',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      admin: {
+        description: 'Section title',
+      },
+    },
+    {
+      name: 'minRating',
+      type: 'number',
+      defaultValue: 4,
+      min: 1,
+      max: 5,
+      admin: {
+        description: 'Minimum rating to display (default 4)',
+      },
+    },
+    {
+      name: 'allowPositiveOnly',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        description: 'Only show reviews at or above the minimum rating',
+      },
+    },
+    {
+      name: 'reviews',
+      type: 'array',
+      admin: {
+        description: 'Review entries from approved sources',
+      },
+      fields: [
+        { name: 'platform', type: 'text' },
+        { name: 'rating', type: 'number', min: 1, max: 5 },
+        { name: 'quote', type: 'textarea' },
+        { name: 'author', type: 'text' },
+        { name: 'url', type: 'text' },
+      ],
+    },
+  ],
+};
+
 // Export all blocks as an array for easy registration
 export const allBlocks = [
   HeroBlock,
@@ -611,4 +661,5 @@ export const allBlocks = [
   CaseStudiesBlock,
   OfferShowcaseBlock,
   NewsletterBlock,
+  TrustFeedBlock,
 ];

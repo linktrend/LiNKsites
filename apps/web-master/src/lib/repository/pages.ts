@@ -174,6 +174,20 @@ export type SingleTestimonialBlock = PageBlockCommon & {
   image?: any;
 };
 
+export type TrustFeedBlock = PageBlockCommon & {
+  blockType: "trustFeed";
+  title?: string;
+  minRating?: number;
+  allowPositiveOnly?: boolean;
+  reviews?: Array<{
+    platform?: string;
+    rating?: number;
+    quote?: string;
+    author?: string;
+    url?: string;
+  }>;
+};
+
 export type CmsPageBlock =
   | HeroBlock
   | FeaturesBlock
@@ -193,6 +207,7 @@ export type CmsPageBlock =
   | VideoEmbedBlock
   | RelatedContentBlock
   | SingleTestimonialBlock
+  | TrustFeedBlock
   | (PageBlockCommon & Record<string, unknown>);
 
 // Block type map for type-safe block resolution
@@ -216,6 +231,7 @@ export type CmsBlockMap = {
   videoEmbed: VideoEmbedBlock;
   relatedContent: RelatedContentBlock;
   testimonial: SingleTestimonialBlock;
+  trustFeed: TrustFeedBlock;
 };
 
 export type CmsPageSeo = {
@@ -231,8 +247,11 @@ export interface CmsPage {
   locale: string;
   slug: string;
   title: string;
+  pageType?: string;
   content: CmsPageBlock[];
   seo?: CmsPageSeo;
+  reviewedAt?: string | null;
+  reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
 }
 
 type GetPageArgs = {

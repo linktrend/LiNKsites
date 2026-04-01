@@ -59,6 +59,10 @@ export default async function OfferPage({ params }: Props) {
   if (!page.data.offer) return notFound();
   
   const offer = page.data.offer;
+  const reviewedBy =
+    typeof (offer as any).reviewedBy === "string"
+      ? (offer as any).reviewedBy
+      : (offer as any).reviewedBy?.name;
   
   // Structured data for offer page
   const productJsonLd = buildProductJsonLd({
@@ -67,6 +71,8 @@ export default async function OfferPage({ params }: Props) {
     image: `${getSiteUrl()}${SEO_CONFIG.openGraph.images.default}`,
     url: `${getSiteUrl()}/${locale}/offers/${params.offerSlug}`,
     brand: SITE_CONFIG.siteName,
+    reviewedBy,
+    verificationDate: (offer as any).reviewedAt ?? undefined,
   });
 
   return (

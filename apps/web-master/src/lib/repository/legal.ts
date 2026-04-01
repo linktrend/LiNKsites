@@ -1,5 +1,6 @@
 import { payloadFind } from "@/lib/payload-client";
 import { siteLocaleFilter } from "@/lib/repository/shared-filters";
+import { ENV } from "@/config";
 
 export interface CmsLegal {
   id: string;
@@ -17,6 +18,8 @@ export interface CmsLegal {
     canonicalUrl?: string;
     keywords?: string[];
   };
+  reviewedAt?: string | null;
+  reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
 }
 
 type PolicyCollection = "terms-pages" | "privacy-pages" | "cookie-policy-pages";
@@ -30,6 +33,8 @@ type PolicyDoc = {
   status?: string;
   seo?: any;
   content?: Array<{ blockType?: string; content?: unknown }>;
+  reviewedAt?: string;
+  reviewedBy?: any;
 };
 
 const lexicalToPlainText = (value: unknown): string => {
@@ -72,6 +77,33 @@ export const getLegalBySlug = async ({
   locale: string;
   slug: string;
 }): Promise<CmsLegal | null> => {
+  if (ENV.LEGAL.LEGAL_CONTENT_API_URL) {
+    try {
+      const response = await fetch(
+        `${ENV.LEGAL.LEGAL_CONTENT_API_URL.replace(/\/$/, "")}/${slug}?locale=${locale}`,
+        { cache: "no-store" }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          id: String(data.id ?? slug),
+          site: siteId,
+          locale,
+          slug,
+          title: data.title ?? slug,
+          summary: data.summary ?? data.description,
+          body: data.body ?? "",
+          status: data.status,
+          seo: data.seo,
+          reviewedAt: data.reviewedAt ?? null,
+          reviewedBy: data.reviewedBy ?? null,
+        };
+      }
+    } catch {
+      // fallback to CMS
+    }
+  }
+
   const collection = slugToCollection(slug);
   const where = {
     and: [...siteLocaleFilter(siteId, locale).and, { slug: { equals: slug } }],
@@ -98,6 +130,8 @@ export const getLegalBySlug = async ({
     body: blocksToPlainText(doc.content),
     status: doc.status,
     seo: doc.seo,
+    reviewedAt: doc.reviewedAt ?? null,
+    reviewedBy: doc.reviewedBy ?? null,
   };
 };
 

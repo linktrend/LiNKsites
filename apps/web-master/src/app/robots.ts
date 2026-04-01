@@ -15,7 +15,7 @@
 
 import { MetadataRoute } from 'next';
 import { headers } from "next/headers";
-import { ENVIRONMENT } from '@/config';
+import { ENVIRONMENT, CRAWL_POLICY } from '@/config';
 
 export const dynamic = "force-dynamic";
 
@@ -41,25 +41,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
-        disallow: [
-          '/api/',           // Disallow API routes
-          '/admin/',         // Disallow admin routes (if any)
-          '/_next/',         // Disallow Next.js internal routes
-          '/private/',       // Disallow private routes (if any)
-        ],
+        allow: [...CRAWL_POLICY.allow],
+        disallow: [...CRAWL_POLICY.disallow],
       },
-      // Special rules for specific bots (optional)
-      {
-        userAgent: 'GPTBot',
-        disallow: '/',     // Disallow OpenAI's GPTBot from crawling
-      },
-      {
-        userAgent: 'ChatGPT-User',
-        disallow: '/',     // Disallow ChatGPT user agent
-      },
+      ...CRAWL_POLICY.aiBotsDisallow.map((bot) => ({
+        userAgent: bot,
+        disallow: '/',
+      })),
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${baseUrl}${CRAWL_POLICY.sitemapPath}`,
     host: baseUrl,
   };
 }

@@ -8,6 +8,8 @@ import { getPageBySlug } from "@/lib/repository/pages";
 import type { CmsPage } from "@/lib/repository/pages";
 import { getTemplateIdForSite } from "@/lib/template-context";
 import { getTemplateModule } from "@/templates/registry";
+import { ENVIRONMENT } from "@/config";
+import { PageTypeMarker } from "@/components/layouts/PageTypeMarker";
 
 type PageProps = {
   params: {
@@ -105,16 +107,20 @@ export default async function CmsPage({ params }: PageProps) {
     ],
   };
 
-  const resolvedPage = page ?? fallbackPage;
+  const resolvedPage = page ?? (!ENVIRONMENT.isProduction ? fallbackPage : null);
+  if (!resolvedPage) return notFound();
   const template = getTemplateModule(templateId);
 
   return (
-    <template.PageRenderer
-      page={resolvedPage}
-      primaryNav={primaryNav}
-      footerNav={footerNav}
-      siteKey={siteId}
-      locale={locale}
-    />
+    <>
+      <PageTypeMarker pageType={resolvedPage.pageType ?? null} />
+      <template.PageRenderer
+        page={resolvedPage}
+        primaryNav={primaryNav}
+        footerNav={footerNav}
+        siteKey={siteId}
+        locale={locale}
+      />
+    </>
   );
 }

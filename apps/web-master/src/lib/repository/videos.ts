@@ -22,6 +22,8 @@ export interface CmsVideo {
     canonicalUrl?: string;
     keywords?: string[];
   };
+  reviewedAt?: string | null;
+  reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
 }
 
 export const listVideos = async ({

@@ -15,6 +15,11 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+body[data-page-type="landing"] header,
+body[data-page-type="landing"] footer {
+  display: none;
+}
+
 .container {
   width: 100%;
   max-width: 1200px;

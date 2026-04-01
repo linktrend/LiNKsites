@@ -2,41 +2,42 @@
   "collections": {
     "sites": [
       {
-        "id": "11111111-1111-1111-1111-111111111111",
+        "id": "1",
         "name": "LiNKtrend Master",
-        "primary_domain": "linktrend-master.local",
-        "template_id": "marketing-smb-v1",
-        "default_locale": "en",
-        "status": "active"
+        "domain": "linktrend-master.local",
+        "templateId": "marketing-smb-v1",
+        "defaultLanguage": 1,
+        "languages": [
+          1,
+          2,
+          3
+        ]
       }
     ],
     "site-domains": [
       {
-        "id": "22222222-2222-2222-2222-222222222222",
-        "site_id": "11111111-1111-1111-1111-111111111111",
-        "domain": "linktrend-master.local",
-        "is_primary": true
+        "id": "1",
+        "site": 1,
+        "hostname": "linktrend-master.local",
+        "primary": true
       }
-    ],
-    "languages": [
-      { "code": "en", "name": "English", "is_default": true },
-      { "code": "es", "name": "Spanish", "is_default": false },
-      { "code": "zh-tw", "name": "Traditional Chinese", "is_default": false }
     ],
     "pages": [
       {
-        "id": "33333333-3333-3333-3333-333333333333",
-        "site_id": "11111111-1111-1111-1111-111111111111",
+        "id": "1",
+        "site": 1,
         "locale": "en",
         "slug": "home",
         "title": "Home",
+        "pageType": "home",
         "status": "published",
-        "data": {
-          "hero": {
+        "content": [
+          {
+            "blockType": "hero",
             "title": "Welcome to LiNKtrend",
             "subtitle": "Sample content seeded from Supabase"
           }
-        }
+        ]
       }
     ]
   }

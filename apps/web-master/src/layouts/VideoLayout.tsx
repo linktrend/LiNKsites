@@ -2,7 +2,7 @@ import Link from "next/link";
 import { youtubeThumbnail } from "../lib/video";
 import { CmsArticle as CmsResource } from "@/lib/repository/articles";
 import { CmsVideo } from "@/lib/repository/videos";
-import { videoSchema } from "../lib/schemas";
+import { buildVideoJsonLd } from "@/lib/seo";
 import { routes } from "@/lib/routes";
 
 type Props = { lang: string; page: { data: { video?: CmsVideo; relatedVideos: CmsVideo[]; relatedArticles: CmsResource[] } } };
@@ -11,11 +11,17 @@ export function VideoLayout({ lang, page }: Props) {
   const { video, relatedVideos, relatedArticles } = page.data;
   if (!video) return <div className="container py-12">Video not found.</div>;
   const thumb = youtubeThumbnail(video.youtubeId || "");
-  const schema = videoSchema({
+  const reviewedBy =
+    typeof (video as any).reviewedBy === "string"
+      ? (video as any).reviewedBy
+      : (video as any).reviewedBy?.name;
+  const schema = buildVideoJsonLd({
     title: video.title || "Video",
     description: video.description || "",
     url: `https://www.youtube.com/embed/${video.youtubeId ?? ""}`,
-    thumbnailUrl: thumb
+    thumbnailUrl: thumb,
+    reviewedBy,
+    verificationDate: (video as any).reviewedAt ?? undefined,
   });
   return (
     <article className="container space-y-8 py-12">

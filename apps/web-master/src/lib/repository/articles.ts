@@ -26,6 +26,8 @@ export interface CmsArticle {
     canonicalUrl?: string;
     keywords?: string[];
   };
+  reviewedAt?: string | null;
+  reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
 }
 
 type Upload = { url?: string } | string | null | undefined;
@@ -68,6 +70,8 @@ type ArticleDoc = {
   publishedAt?: string;
   category?: Category;
   seo?: any;
+  reviewedAt?: string;
+  reviewedBy?: any;
 };
 
 const normalizeArticle = (doc: ArticleDoc): CmsArticle => ({
@@ -84,6 +88,8 @@ const normalizeArticle = (doc: ArticleDoc): CmsArticle => ({
   status: doc.status,
   date: doc.publishedAt,
   seo: doc.seo,
+  reviewedAt: doc.reviewedAt ?? null,
+  reviewedBy: doc.reviewedBy ?? null,
 });
 
 type ListArgs = {

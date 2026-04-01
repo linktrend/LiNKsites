@@ -13,9 +13,10 @@ type Props = {
   primaryNav?: CmsNavigation | null;
   footerNav?: CmsNavigation | null;
   children: ReactNode;
+  trafficSource?: string;
 };
 
-export function MarketingLayoutClient({ lang, primaryNav, footerNav, children }: Props) {
+export function MarketingLayoutClient({ lang, primaryNav, footerNav, children, trafficSource }: Props) {
   const pathname = usePathname();
   
   const isHomepage = useMemo(() => 
@@ -29,7 +30,7 @@ export function MarketingLayoutClient({ lang, primaryNav, footerNav, children }:
   );
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col" data-traffic-source={trafficSource ?? "direct"}>
       <Header lang={lang} navigation={primaryNav} />
       <main className="flex-1">{children}</main>
       {!isHomepage && !isPricingPage && <NewsletterSection lang={lang} />}

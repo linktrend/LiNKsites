@@ -10,7 +10,7 @@ import { ArticlesGrid } from "@/components/marketing/ArticlesGrid";
 import { PricingHomepage } from "@/components/marketing/PricingHomepage";
 import { ScrollIndicator } from "@/components/marketing/ScrollIndicator";
 import { SignupHero } from "@/components/marketing/SignupHero";
-import { CmsPage, CmsPageBlock, HeroBlock, FeaturesBlock, PricingBlock, TestimonialsBlock, CtaBlock, FaqBlock, RichTextBlock, MediaBlock, ArticlesBlock, CaseStudiesBlock, OfferShowcaseBlock, NewsletterBlock, CalloutBlock, RelatedContentBlock, VideoEmbedBlock, SingleTestimonialBlock } from "@/lib/repository/pages";
+import { CmsPage, CmsPageBlock, HeroBlock, FeaturesBlock, PricingBlock, TestimonialsBlock, CtaBlock, FaqBlock, RichTextBlock, MediaBlock, ArticlesBlock, CaseStudiesBlock, OfferShowcaseBlock, NewsletterBlock, CalloutBlock, RelatedContentBlock, VideoEmbedBlock, SingleTestimonialBlock, TrustFeedBlock } from "@/lib/repository/pages";
 import { CmsCaseStudy } from "@/lib/repository/caseStudies";
 import { CmsArticle } from "@/lib/repository/articles";
 import { CmsTestimonial } from "@/lib/repository/testimonials";
@@ -93,6 +93,8 @@ const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string): Re
       return <RelatedContentSection block={block as RelatedContentBlock} locale={locale} />;
     case "testimonial":
       return <SingleTestimonialSection block={block as SingleTestimonialBlock} />;
+    case "trustFeed":
+      return <TrustFeedSection block={block as TrustFeedBlock} />;
     case "locations":
       return <LocationsSection block={block as any} />;
     case "teamMembers":
@@ -191,7 +193,7 @@ const HeroSection = ({ block, locale, pageSlug }: { block: HeroBlock; locale: st
 
               <div className="flex flex-wrap gap-3">
                 <Button asChild variant="secondary">
-                  <a href={ctaUrl}>{ctaLabel}</a>
+                  <a href={ctaUrl} data-ai-action="contact" data-ai-action-target={ctaUrl}>{ctaLabel}</a>
                 </Button>
                 <ScrollIndicator />
               </div>
@@ -609,6 +611,52 @@ const SingleTestimonialSection = ({ block }: { block: SingleTestimonialBlock }) 
           </CardDescription>
         </CardHeader>
       </Card>
+    </div>
+  );
+};
+
+const TrustFeedSection = ({ block }: { block: TrustFeedBlock }) => {
+  const minRating = block.minRating ?? 4;
+  const allowPositiveOnly = block.allowPositiveOnly !== false;
+  const reviews = Array.isArray(block.reviews) ? block.reviews : [];
+  const filtered = allowPositiveOnly
+    ? reviews.filter((review) => (review.rating ?? 0) >= minRating)
+    : reviews;
+
+  if (filtered.length === 0) return null;
+
+  return (
+    <div className="container px-4 sm:px-6 py-12 sm:py-14">
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-semibold">{block.title ?? "Trusted by customers"}</h2>
+          <p className="text-sm text-muted-foreground">
+            Showing {allowPositiveOnly ? `reviews rated ${minRating}+` : "all reviews"}.
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {filtered.map((review, index) => (
+            <Card key={review.url ?? index} className="border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-base">
+                  {review.platform ?? "Review"} • {review.rating ?? minRating}/5
+                </CardTitle>
+                <CardDescription>
+                  {review.author ? `${review.author}` : "Verified reviewer"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">"{review.quote ?? ""}"</p>
+                {review.url ? (
+                  <a className="mt-2 inline-flex text-xs text-primary hover:underline" href={review.url}>
+                    View source
+                  </a>
+                ) : null}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

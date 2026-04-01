@@ -8,7 +8,7 @@ import { CmsArticle as CmsResource } from "@/lib/repository/articles";
 import { CmsCaseStudy as CmsCase } from "@/lib/repository/caseStudies";
 import { CmsVideo } from "@/lib/repository/videos";
 import { CmsFaq } from "@/lib/repository/faq";
-import { productSchema } from "../lib/schemas";
+import { buildProductJsonLd } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { ScrollToTop } from "@/components/common/ScrollToTop";
@@ -197,10 +197,17 @@ export function OfferPageLayout({ lang, page }: Props) {
   
   if (!offer) return <div className="container py-12">Offer not found.</div>;
   
-  const schema = productSchema({
+  const reviewedBy =
+    typeof (offer as any).reviewedBy === "string"
+      ? (offer as any).reviewedBy
+      : (offer as any).reviewedBy?.name;
+  const schema = buildProductJsonLd({
     name: offer.title,
-    description: offer.subtitle ?? offer.description ?? '',
-    url: `/${lang}/offers/${offer.slug}`
+    description: offer.subtitle ?? offer.description ?? "",
+    image: `${process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"}/og-image.png`,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"}/${lang}/offers/${offer.slug}`,
+    reviewedBy,
+    verificationDate: (offer as any).reviewedAt ?? undefined,
   });
 
   const pricing = getPricingForOffer(offer.slug);

@@ -193,19 +193,34 @@ export function buildOrganizationJsonLd() {
 /**
  * WebSite JSON-LD
  */
-export function buildWebSiteJsonLd() {
+export function buildWebSiteJsonLd(
+  actions: Array<{ name: string; url: string; method?: string; description?: string }> = []
+) {
+  const searchAction = {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${getSiteUrl()}/resources?q={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
+  };
+
+  const actionList = actions.map((action) => ({
+    "@type": "Action",
+    name: action.name,
+    description: action.description,
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: action.url,
+      httpMethod: action.method ?? "GET",
+    },
+  }));
+
   return buildJsonLd("WebSite", {
     name: SITE_CONFIG.siteName,
     url: getSiteUrl(),
     description: SITE_CONFIG.description,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${getSiteUrl()}/resources?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
+    potentialAction: [searchAction, ...actionList],
   });
 }
 
@@ -221,6 +236,8 @@ export function buildArticleJsonLd(params: {
   dateModified?: string;
   author: string;
   section?: string;
+  reviewedBy?: string;
+  verificationDate?: string;
 }) {
   return buildJsonLd("Article", {
     headline: params.title,
@@ -228,7 +245,7 @@ export function buildArticleJsonLd(params: {
     url: params.url,
     image: params.image,
     datePublished: params.datePublished,
-    dateModified: params.dateModified || params.datePublished,
+    dateModified: params.verificationDate || params.dateModified || params.datePublished,
     author: {
       "@type": "Person",
       name: params.author,
@@ -241,6 +258,12 @@ export function buildArticleJsonLd(params: {
         url: `${getSiteUrl()}/logo.png`,
       },
     },
+    ...(params.reviewedBy && {
+      reviewedBy: {
+        "@type": "Person",
+        name: params.reviewedBy,
+      },
+    }),
     ...(params.section && { articleSection: params.section }),
   });
 }
@@ -254,6 +277,8 @@ export function buildProductJsonLd(params: {
   image: string;
   url: string;
   brand?: string;
+  reviewedBy?: string;
+  verificationDate?: string;
   offers?: {
     price: string;
     priceCurrency: string;
@@ -269,12 +294,49 @@ export function buildProductJsonLd(params: {
       "@type": "Brand",
       name: params.brand || SITE_CONFIG.siteName,
     },
+    ...(params.reviewedBy && {
+      reviewedBy: {
+        "@type": "Person",
+        name: params.reviewedBy,
+      },
+    }),
+    ...(params.verificationDate && {
+      dateModified: params.verificationDate,
+    }),
     ...(params.offers && {
       offers: {
         "@type": "Offer",
         price: params.offers.price,
         priceCurrency: params.offers.priceCurrency,
         availability: `https://schema.org/${params.offers.availability}`,
+      },
+    }),
+  });
+}
+
+/**
+ * VideoObject JSON-LD
+ */
+export function buildVideoJsonLd(params: {
+  title: string;
+  description: string;
+  url: string;
+  thumbnailUrl: string;
+  uploadDate?: string;
+  reviewedBy?: string;
+  verificationDate?: string;
+}) {
+  return buildJsonLd("VideoObject", {
+    name: params.title,
+    description: params.description,
+    thumbnailUrl: params.thumbnailUrl,
+    contentUrl: params.url,
+    embedUrl: params.url,
+    uploadDate: params.uploadDate ?? params.verificationDate,
+    ...(params.reviewedBy && {
+      reviewedBy: {
+        "@type": "Person",
+        name: params.reviewedBy,
       },
     }),
   });

@@ -216,6 +216,33 @@ export const DATABASE_ENV = {
 } as const;
 
 // ============================================================================
+// LEGAL & COMPLIANCE
+// ============================================================================
+
+export const LEGAL_ENV = {
+  /** Optional centralized legal content API */
+  LEGAL_CONTENT_API_URL: process.env.LEGAL_CONTENT_API_URL || '',
+} as const;
+
+// ============================================================================
+// AI & MACHINE EXPERIENCE
+// ============================================================================
+
+export const AI_ENV = {
+  /** Enable AI markdown views for bots */
+  ENABLE_MARKDOWN: process.env.NEXT_PUBLIC_ENABLE_AI_MARKDOWN !== 'false',
+
+  /** Optional AI training signal header (requires legal review) */
+  ENABLE_TRAINING_SIGNAL: process.env.NEXT_PUBLIC_ENABLE_AI_TRAINING_SIGNAL === 'true',
+
+  /** Secret token for AI action endpoints */
+  ACTIONS_SECRET: process.env.AI_ACTIONS_SECRET || '',
+
+  /** Rate limit per minute for AI action endpoints */
+  ACTIONS_RATE_LIMIT_PER_MIN: Number(process.env.AI_ACTIONS_RATE_LIMIT_PER_MIN || 30),
+} as const;
+
+// ============================================================================
 // COMBINED ENV OBJECT
 // ============================================================================
 
@@ -250,9 +277,15 @@ export const ENV = {
   
   /** Contact & webhooks */
   CONTACT: CONTACT_ENV,
+
+  /** Legal & compliance */
+  LEGAL: LEGAL_ENV,
   
   /** Database & caching */
   DATABASE: DATABASE_ENV,
+
+  /** AI & machine experience */
+  AI: AI_ENV,
 } as const;
 
 // ============================================================================

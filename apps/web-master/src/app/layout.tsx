@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { SITE_CONFIG, SEO_CONFIG, getSiteUrl } from "@/config";
+import { SiteStructuredData } from "@/components/seo/SiteStructuredData";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -63,7 +64,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <SiteStructuredData />
+        {children}
+      </body>
     </html>
   );
 }

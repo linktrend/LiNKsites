@@ -1,4 +1,151 @@
 import { runtimeConfig } from "@/config/runtime";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const isMockProvider = (process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "mock") !== "payload";
+
+type MockPayloadData = {
+  site?: { id?: string };
+  navigation?: Record<string, Array<{ label?: string; slug?: string }>>;
+  offers?: unknown[];
+  resources?: unknown[];
+  videos?: unknown[];
+  about?: unknown;
+  contact?: unknown;
+  legal?: unknown[];
+  faq?: unknown[];
+  cases?: unknown[];
+  contactForms?: unknown[];
+  pricing?: unknown;
+};
+
+let mockPayloadCache: MockPayloadData | null = null;
+
+const loadMockPayload = (): MockPayloadData | null => {
+  if (mockPayloadCache) return mockPayloadCache;
+  try {
+    const filePath = join(process.cwd(), "data", "cmsPayload.json");
+    const raw = readFileSync(filePath, "utf8");
+    mockPayloadCache = JSON.parse(raw) as MockPayloadData;
+    return mockPayloadCache;
+  } catch {
+    return null;
+  }
+};
+
+const withSiteLocale = <T extends Record<string, any>>(
+  docs: T[],
+  site?: string,
+  locale?: string,
+): T[] => {
+  return docs.map((doc) => ({
+    ...doc,
+    ...(site ? { site } : {}),
+    ...(locale ? { locale } : {}),
+  }));
+};
+
+const matchesEquals = (doc: Record<string, any>, field: string, value: unknown): boolean => {
+  if (value === undefined) return true;
+  return doc[field] === value;
+};
+
+const mockPayloadFind = async <T>({
+  collection,
+  where,
+  limit,
+  locale,
+  site,
+}: {
+  collection: string;
+  where?: Record<string, unknown>;
+  limit?: number;
+  locale?: string;
+  site?: string;
+}): Promise<{
+  docs: T[];
+  page: number;
+  totalDocs: number;
+  totalPages: number;
+  limit: number;
+}> => {
+  const mock = loadMockPayload();
+  const safeLimit = typeof limit === "number" ? limit : 100;
+
+  if (!mock) {
+    return { docs: [], page: 1, totalDocs: 0, totalPages: 1, limit: safeLimit };
+  }
+
+  const siteId = site || mock.site?.id || "company-site";
+  const andFilters = Array.isArray((where as any)?.and) ? (where as any).and : [];
+  const navKeyFilter = andFilters.find((f: any) => f?.navKey?.equals)?.navKey?.equals;
+
+  if (collection === "navigation") {
+    const nav = mock.navigation ?? {};
+    const items = Array.isArray(nav[navKeyFilter]) ? (nav[navKeyFilter] as any[]) : [];
+    const docs = items.map((item, index) => ({
+      id: `${navKeyFilter}-${index + 1}`,
+      label: item.label ?? "",
+      url: item.slug ?? "#",
+      external: false,
+      order: index,
+      navKey: navKeyFilter,
+      site: siteId,
+      locale,
+    }));
+    return {
+      docs: withSiteLocale(docs as any, siteId, locale) as T[],
+      page: 1,
+      totalDocs: docs.length,
+      totalPages: 1,
+      limit: safeLimit,
+    };
+  }
+
+  if (collection === "site-domains") {
+    const hostnameFilter = (where as any)?.hostname?.equals as string | undefined;
+    const doc = hostnameFilter
+      ? { id: "localhost-domain", hostname: hostnameFilter, site: siteId, primary: true }
+      : { id: "localhost-domain", hostname: "localhost", site: siteId, primary: true };
+    return {
+      docs: [doc as any] as T[],
+      page: 1,
+      totalDocs: 1,
+      totalPages: 1,
+      limit: safeLimit,
+    };
+  }
+
+  const collectionsMap: Record<string, unknown[]> = {
+    offers: mock.offers ?? [],
+    resources: mock.resources ?? [],
+    videos: mock.videos ?? [],
+    legal: mock.legal ?? [],
+    faq: mock.faq ?? [],
+    cases: mock.cases ?? [],
+    "contact-forms": mock.contactForms ?? [],
+  };
+
+  if (collection in collectionsMap) {
+    const items = collectionsMap[collection] ?? [];
+    const slugFilter = andFilters.find((f: any) => f?.slug?.equals)?.slug?.equals;
+    const statusFilter = andFilters.find((f: any) => f?.status?.equals)?.status?.equals;
+    const filtered = (items as any[]).filter((doc) => {
+      if (slugFilter && !matchesEquals(doc, "slug", slugFilter)) return false;
+      if (statusFilter && doc.status && !matchesEquals(doc, "status", statusFilter)) return false;
+      return true;
+    });
+    return {
+      docs: withSiteLocale(filtered as any, siteId, locale) as T[],
+      page: 1,
+      totalDocs: filtered.length,
+      totalPages: 1,
+      limit: safeLimit,
+    };
+  }
+
+  return { docs: [], page: 1, totalDocs: 0, totalPages: 1, limit: safeLimit };
+};
 
 type FetchArgs = {
   path: string;
@@ -52,6 +199,9 @@ const appendWhereParams = (
 };
 
 export const payloadFetch = async <T>({ path, init }: FetchArgs): Promise<T> => {
+  if (isMockProvider) {
+    throw new Error(`Payload fetch blocked in mock mode for ${path}`);
+  }
   const response = await fetch(buildUrl(path), {
     cache: "no-store",
     ...init,
@@ -105,6 +255,9 @@ export const payloadFind = async <T>({
   totalPages: number;
   limit: number;
 }> => {
+  if (isMockProvider) {
+    return mockPayloadFind<T>({ collection, where, limit, locale, site });
+  }
   const url = new URL(`api/${collection}`, runtimeConfig.payloadBaseUrl);
 
   if (typeof depth === "number") url.searchParams.set("depth", String(depth));
@@ -127,6 +280,15 @@ export const payloadReadGlobal = async <T>(
   locale?: string,
   site?: string,
 ): Promise<T> => {
+  if (isMockProvider) {
+    const mock = loadMockPayload();
+    if (!mock) return null as T;
+    const globals: Record<string, unknown> = {
+      about: mock.about ?? null,
+      contact: mock.contact ?? null,
+    };
+    return (globals[slug] ?? null) as T;
+  }
   const url = new URL(`api/globals/${slug}`, runtimeConfig.payloadBaseUrl);
   if (locale) url.searchParams.set("locale", locale);
   if (site) url.searchParams.set("site", site);

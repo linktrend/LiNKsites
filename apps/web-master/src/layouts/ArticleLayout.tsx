@@ -2,7 +2,7 @@ import Link from "next/link";
 import { resolveImage } from "../lib/resolveImage";
 import { CmsOffer } from "@/lib/repository/offers";
 import { CmsArticle as CmsResource } from "@/lib/repository/articles";
-import { articleSchema } from "../lib/schemas";
+import { buildArticleJsonLd } from "@/lib/seo";
 import { routes } from "@/lib/routes";
 
 type Props = { lang: string; page: { data: { article?: CmsResource; related: CmsResource[]; offer?: CmsOffer } } };
@@ -19,11 +19,19 @@ export function ArticleLayout({ lang, page }: Props) {
         ? JSON.stringify(article.body, null, 2)
         : "";
   const imageUrl = resolveImage(article.image ?? undefined);
-  const schema = articleSchema({
+  const reviewedBy =
+    typeof (article as any).reviewedBy === "string"
+      ? (article as any).reviewedBy
+      : (article as any).reviewedBy?.name;
+  const schema = buildArticleJsonLd({
     title: article.title,
     description: article.excerpt ?? "",
-    url: `/${lang}/resources/${article.slug}`,
-    image: imageUrl
+    url: `/${lang}/resources/articles/${article.slug}`,
+    image: imageUrl ?? "",
+    datePublished: article.publishedAt ?? article.date ?? new Date().toISOString(),
+    author: reviewedBy ?? "Editorial Team",
+    reviewedBy,
+    verificationDate: (article as any).reviewedAt ?? undefined,
   });
   return (
     <article className="container space-y-8 py-12">

@@ -306,6 +306,44 @@ CONTACT_WEBHOOK_URL=
 
 ---
 
+### AI & Machine Experience
+
+| Variable | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `NEXT_PUBLIC_ENABLE_AI_MARKDOWN` | Public | ❌ | `true` | Enable AI markdown views (`/ai/markdown`, with `/_ai/markdown` rewritten) |
+| `NEXT_PUBLIC_ENABLE_AI_TRAINING_SIGNAL` | Public | ❌ | `false` | Enable `Content-Signal: ai-train=yes` header |
+| `AI_ACTIONS_SECRET` | Server | ⚠️ Production | `""` | Token for AI action endpoints |
+| `AI_ACTIONS_RATE_LIMIT_PER_MIN` | Server | ❌ | `30` | Rate limit for AI actions per minute |
+
+**Access via**: `ENV.AI.*`
+
+**⚠️ SECURITY WARNING**: `AI_ACTIONS_SECRET` is server-only. Never prefix with `NEXT_PUBLIC_`.
+
+**Example**:
+```bash
+NEXT_PUBLIC_ENABLE_AI_MARKDOWN=true
+NEXT_PUBLIC_ENABLE_AI_TRAINING_SIGNAL=false
+AI_ACTIONS_SECRET=your-long-random-token
+AI_ACTIONS_RATE_LIMIT_PER_MIN=30
+```
+
+---
+
+### Legal & Compliance
+
+| Variable | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `LEGAL_CONTENT_API_URL` | Server | ❌ | `""` | Centralized legal content API base URL |
+
+**Access via**: `ENV.LEGAL.*`
+
+**Example**:
+```bash
+LEGAL_CONTENT_API_URL=https://legal.linktrend.systems
+```
+
+---
+
 ### Database & Caching
 
 | Variable | Type | Required | Default | Description |

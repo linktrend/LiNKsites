@@ -50,7 +50,9 @@ export function CTASection({ lang, data }: CTASectionProps) {
           </p>
         </div>
         <Button className="w-full bg-rose-500 text-white hover:bg-rose-600" size="lg" asChild>
-          <Link href={ctaUrl}>{ctaLabel}</Link>
+          <Link href={ctaUrl} data-ai-action="contact" data-ai-action-target={ctaUrl}>
+            {ctaLabel}
+          </Link>
         </Button>
         <div className="space-y-2">
           {trustIndicators.map((item) => (

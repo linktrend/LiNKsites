@@ -27,6 +27,8 @@ export interface CmsCaseStudy {
     canonicalUrl?: string;
     keywords?: string[];
   };
+  reviewedAt?: string | null;
+  reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
 }
 
 type CaseStudyPageDoc = {
@@ -43,6 +45,8 @@ type CaseStudyPageDoc = {
   seo?: any;
   publishedAt?: string;
   updatedAt?: string;
+  reviewedAt?: string;
+  reviewedBy?: any;
 };
 
 const normalizeCaseStudy = (doc: CaseStudyPageDoc): CmsCaseStudy => {
@@ -69,6 +73,8 @@ const normalizeCaseStudy = (doc: CaseStudyPageDoc): CmsCaseStudy => {
     lastUpdated: doc.publishedAt ?? doc.updatedAt,
     status: doc.status,
     seo: doc.seo,
+    reviewedAt: doc.reviewedAt ?? null,
+    reviewedBy: doc.reviewedBy ?? null,
   };
 };
 

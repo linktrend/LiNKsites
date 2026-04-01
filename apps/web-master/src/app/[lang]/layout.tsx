@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { cookies } from "next/headers";
 import { SUPPORTED_LANGUAGES, getThemeFromRequest } from "@/config";
 import { getNavigation } from "@/lib/repository/navigation";
 import { normalizeLocale } from "@/lib/locale-context";
@@ -41,11 +42,17 @@ export default async function LangLayout({
     getNavigation({ siteId, locale, key: "footer" }),
   ]);
   const messages = await getMessages();
+  const trafficSource = cookies().get("lsites_source")?.value;
 
   return (
     <div data-theme={theme.id} data-lang={locale}>
       <NextIntlClientProvider messages={messages}>
-        <MarketingLayoutClient lang={locale} primaryNav={primaryNav} footerNav={footerNav}>
+        <MarketingLayoutClient
+          lang={locale}
+          primaryNav={primaryNav}
+          footerNav={footerNav}
+          trafficSource={trafficSource}
+        >
           {children}
         </MarketingLayoutClient>
       </NextIntlClientProvider>

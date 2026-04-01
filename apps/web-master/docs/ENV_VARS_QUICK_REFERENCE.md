@@ -89,6 +89,20 @@ CONTACT_WEBHOOK_URL=https://n8n.acme.com/webhook/contact
 CONTACT_WEBHOOK_SECRET=your-secret-key
 ```
 
+### AI Actions + Markdown
+
+```bash
+# Enable AI markdown views (default true)
+NEXT_PUBLIC_ENABLE_AI_MARKDOWN=true
+
+# Optional training signal header (requires legal review)
+NEXT_PUBLIC_ENABLE_AI_TRAINING_SIGNAL=false
+
+# AI actions security
+AI_ACTIONS_SECRET=your-long-random-token
+AI_ACTIONS_RATE_LIMIT_PER_MIN=30
+```
+
 ---
 
 ## Environment Groups
@@ -107,6 +121,8 @@ Access via `ENV.*`:
 | `FEATURES` | Feature flags | `ENV.FEATURES.ENABLE_BLOG` |
 | `CONTACT` | Contact form config | `ENV.CONTACT.WEBHOOK_URL` |
 | `DATABASE` | Database config | `ENV.DATABASE.REDIS_URL` |
+| `AI` | AI/MX config | `ENV.AI.ENABLE_MARKDOWN` |
+| `LEGAL` | Legal content | `ENV.LEGAL.LEGAL_CONTENT_API_URL` |
 
 ---
 
