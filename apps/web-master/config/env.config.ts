@@ -351,7 +351,9 @@ export function validateRequiredEnvVars(): void {
     } catch {
       hostname = ''
     }
-    if (!value || hostname.endsWith('example.com')) {
+    const labels = hostname.split('.').filter(Boolean)
+    const rootDomain = labels.length >= 2 ? labels.slice(-2).join('.') : hostname
+    if (!value || rootDomain === 'example.com') {
       errors.push(name);
     }
   }
