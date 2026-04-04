@@ -197,7 +197,7 @@ NEXT_PUBLIC_CMS_PROVIDER=payload
 NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.linktrend.com
 PAYLOAD_PUBLIC_SERVER_URL=https://cms.linktrend.com
 PAYLOAD_SECRET=your-production-secret
-DATABASE_URI=mongodb+srv://user:pass@cluster.mongodb.net/linktrend
+DATABASE_URI=<not-used-in-linksites-supabase-only>
 ```
 
 ### 3.2 Test CMS Switching
