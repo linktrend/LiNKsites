@@ -11,8 +11,13 @@ import type { CmsAbout } from "@/lib/repository/about";
 import type { CmsContact } from "@/lib/repository/contact";
 import type { CmsLegal } from "@/lib/repository/legal";
 
-const escapeYaml = (value: string): string =>
-  value.replace(/"/g, '\\"').replace(/\n/g, " ").trim();
+const escapeYaml = (value: string): string => {
+  const normalized = value
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return normalized.replace(/'/g, "''");
+};
 
 const toPlainText = (value: unknown): string => {
   if (!value) return "";

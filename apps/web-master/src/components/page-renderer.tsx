@@ -524,9 +524,21 @@ const CalloutSection = ({ block }: { block: CalloutBlock }) => {
 
 const VideoEmbedSection = ({ block }: { block: VideoEmbedBlock }) => {
   const raw = block.youtubeId ?? "";
-  const id = raw.includes("youtube.com") || raw.includes("youtu.be")
-    ? raw.split("v=")[1]?.split("&")[0] ?? raw.split("/").pop() ?? raw
-    : raw;
+  const id = (() => {
+    try {
+      const parsed = new URL(raw);
+      const host = parsed.hostname.toLowerCase();
+      if (host === "youtu.be") {
+        return parsed.pathname.replace(/^\/+/, "");
+      }
+      if (host === "www.youtube.com" || host === "youtube.com") {
+        return parsed.searchParams.get("v") ?? parsed.pathname.split("/").pop() ?? raw;
+      }
+      return raw;
+    } catch {
+      return raw;
+    }
+  })();
   const aspect = block.aspectRatio ?? "16:9";
   const ratioClass = aspect === "1:1" ? "aspect-square" : aspect === "4:3" ? "aspect-[4/3]" : "aspect-video";
   const params = new URLSearchParams();

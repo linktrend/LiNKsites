@@ -69,6 +69,14 @@ if (!databaseUri) {
 if (!/^postgres(ql)?:\/\//.test(databaseUri)) {
   throw new Error('DATABASE_URI must be a PostgreSQL connection string (postgres:// or postgresql://).')
 }
+const databaseHostname = (() => {
+  try {
+    return new URL(databaseUri).hostname.toLowerCase()
+  } catch {
+    return ''
+  }
+})()
+const useSupabaseSsl = databaseHostname.endsWith('.supabase.co')
 
 if (!process.env.PAYLOAD_SECRET) {
   console.warn(
@@ -161,7 +169,7 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: databaseUri,
-      ssl: databaseUri.includes('supabase.com')
+      ssl: useSupabaseSsl
         ? { rejectUnauthorized: false }
         : false,
     },

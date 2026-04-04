@@ -4,10 +4,13 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const cookie = request.headers.get('cookie') ?? ''
-  const baseUrl = request.nextUrl.origin
+  const baseUrl = process.env.PAYLOAD_PUBLIC_SERVER_URL
 
   if (!cookie) {
     return NextResponse.json({ message: 'Not authenticated' }, { status: 401 })
+  }
+  if (!baseUrl) {
+    return NextResponse.json({ message: 'Server misconfigured (missing PAYLOAD_PUBLIC_SERVER_URL)' }, { status: 500 })
   }
 
   // Verify the caller can access this user (respects session/permissions via REST)

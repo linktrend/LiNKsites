@@ -345,7 +345,13 @@ export function validateRequiredEnvVars(): void {
   ];
   
   for (const { value, name } of required) {
-    if (!value || value.includes('example.com')) {
+    let hostname = ''
+    try {
+      hostname = new URL(value).hostname.toLowerCase()
+    } catch {
+      hostname = ''
+    }
+    if (!value || hostname.endsWith('example.com')) {
       errors.push(name);
     }
   }
