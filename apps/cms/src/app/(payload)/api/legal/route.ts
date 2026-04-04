@@ -8,19 +8,27 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const searchParams = url.searchParams
+  const internalApiBase = process.env.PAYLOAD_PUBLIC_SERVER_URL
   
   try {
     // Fetch both collections in parallel
-    const baseUrl = `${url.protocol}//${url.host}`
+    if (!internalApiBase) {
+      return NextResponse.json({ error: 'Server misconfigured (missing PAYLOAD_PUBLIC_SERVER_URL)' }, { status: 500 })
+    }
     const queryString = searchParams.toString()
+    const headers = {
+      cookie: request.headers.get('cookie') ?? '',
+      authorization: request.headers.get('authorization') ?? '',
+      'accept-language': request.headers.get('accept-language') ?? '',
+    }
     
     const [termsRes, privacyRes] = await Promise.all([
-      fetch(`${baseUrl}/api/terms-pages${queryString ? `?${queryString}` : ''}`, {
-        headers: Object.fromEntries(request.headers.entries()),
+      fetch(`${internalApiBase}/api/terms-pages${queryString ? `?${queryString}` : ''}`, {
+        headers,
         cache: 'no-store',
       }),
-      fetch(`${baseUrl}/api/privacy-pages${queryString ? `?${queryString}` : ''}`, {
-        headers: Object.fromEntries(request.headers.entries()),
+      fetch(`${internalApiBase}/api/privacy-pages${queryString ? `?${queryString}` : ''}`, {
+        headers,
         cache: 'no-store',
       }),
     ])

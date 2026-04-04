@@ -79,8 +79,12 @@ export const getLegalBySlug = async ({
 }): Promise<CmsLegal | null> => {
   if (ENV.LEGAL.LEGAL_CONTENT_API_URL) {
     try {
+      const apiUrl = new URL(ENV.LEGAL.LEGAL_CONTENT_API_URL);
+      if (apiUrl.protocol !== "https:") {
+        throw new Error("LEGAL_CONTENT_API_URL must use https");
+      }
       const response = await fetch(
-        `${ENV.LEGAL.LEGAL_CONTENT_API_URL.replace(/\/$/, "")}/${slug}?locale=${locale}`,
+        `${apiUrl.toString().replace(/\/$/, "")}/${encodeURIComponent(slug)}?locale=${encodeURIComponent(locale)}`,
         { cache: "no-store" }
       );
       if (response.ok) {
