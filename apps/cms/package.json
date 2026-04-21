@@ -23,6 +23,8 @@
     "validate:contracts": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/validate-contract.ts",
     "validate:supabase": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/validate-supabase.ts",
     "sync:seed": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/sync-supabase-seed.ts",
+    "supabase:seed": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/seed-supabase-lsites-core.ts",
+    "supabase:sync": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/sync-supabase-to-cms.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
