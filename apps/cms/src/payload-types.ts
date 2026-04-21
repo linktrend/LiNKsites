@@ -1765,7 +1765,7 @@ export interface Page {
   /**
    * Type of page for frontend routing
    */
-  pageType: 'home' | 'about' | 'contact' | 'pricing' | 'privacy' | 'terms' | 'faq' | 'careers' | 'generic';
+  pageType: 'home' | 'about' | 'contact' | 'pricing' | 'privacy' | 'terms' | 'faq' | 'careers' | 'landing' | 'generic';
   /**
    * The site this content belongs to
    */
@@ -2102,6 +2102,30 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'teamMembers';
+          }
+        | {
+            title?: string | null;
+            /**
+             * Minimum rating to display (default 4)
+             */
+            minRating?: number | null;
+            /**
+             * Only show reviews at or above the minimum rating
+             */
+            allowPositiveOnly?: boolean | null;
+            reviews?:
+              | {
+                  platform?: string | null;
+                  rating?: number | null;
+                  quote?: string | null;
+                  author?: string | null;
+                  url?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'trustFeed';
           }
       )[]
     | null;
@@ -3746,6 +3770,25 @@ export interface PagesSelect<T extends boolean = true> {
               title?: T;
               subtitle?: T;
               items?: T;
+              id?: T;
+              blockName?: T;
+            };
+        trustFeed?:
+          | T
+          | {
+              title?: T;
+              minRating?: T;
+              allowPositiveOnly?: T;
+              reviews?:
+                | T
+                | {
+                    platform?: T;
+                    rating?: T;
+                    quote?: T;
+                    author?: T;
+                    url?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };

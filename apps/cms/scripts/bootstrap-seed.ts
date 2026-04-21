@@ -24,6 +24,7 @@ const ensureLanguage = async (code: string, name: string, isDefault: boolean) =>
     where: { code: { equals: code } },
     limit: 1,
     depth: 0,
+    overrideAccess: true,
   })
 
   if (existing.totalDocs > 0) {
@@ -34,6 +35,7 @@ const ensureLanguage = async (code: string, name: string, isDefault: boolean) =>
         id: doc.id,
         data: { name, isDefault },
         depth: 0,
+        overrideAccess: true,
       })
       return doc.id
     }
@@ -43,8 +45,9 @@ const ensureLanguage = async (code: string, name: string, isDefault: boolean) =>
     collection: 'languages',
     data: { code, name, isDefault },
     depth: 0,
+    overrideAccess: true,
   })
-  return String(created.id)
+  return created.id
 }
 
 const ensureSuperAdminRole = async () => {
@@ -53,6 +56,7 @@ const ensureSuperAdminRole = async () => {
     where: { name: { equals: SUPER_ADMIN_ROLE } },
     limit: 1,
     depth: 0,
+    overrideAccess: true,
   })
 
   if (existing.totalDocs > 0 && existing.docs[0]) {
@@ -79,16 +83,21 @@ const ensureSuperAdminRole = async () => {
       isDefault: false,
     },
     depth: 0,
+    overrideAccess: true,
   })
-  return String(created.id)
+  return created.id
 }
 
-const ensureDefaultSite = async (languageIds: string[], defaultLanguageId: string) => {
+const ensureDefaultSite = async (
+  languageIds: Array<string | number>,
+  defaultLanguageId: string | number,
+) => {
   const existing = await payload.find({
     collection: 'sites',
     where: { domain: { equals: DEFAULT_DOMAIN } },
     limit: 1,
     depth: 0,
+    overrideAccess: true,
   })
 
   const data = {
@@ -105,19 +114,21 @@ const ensureDefaultSite = async (languageIds: string[], defaultLanguageId: strin
       id: existing.docs[0].id,
       data,
       depth: 0,
+      overrideAccess: true,
     })
-    return String(updated.id)
+    return updated.id
   }
 
   const created = await payload.create({
     collection: 'sites',
     data,
     depth: 0,
+    overrideAccess: true,
   })
-  return String(created.id)
+  return created.id
 }
 
-const ensureSiteDomain = async (hostname: string, siteId: string, primary: boolean) => {
+const ensureSiteDomain = async (hostname: string, siteId: string | number, primary: boolean) => {
   const existing = await payload.find({
     collection: 'site-domains',
     where: { hostname: { equals: hostname } },
@@ -145,7 +156,7 @@ const ensureSiteDomain = async (hostname: string, siteId: string, primary: boole
   })
 }
 
-const ensureSiteSettings = async (siteId: string, locale: string) => {
+const ensureSiteSettings = async (siteId: string | number, locale: string) => {
   const existing = await payload.find({
     collection: 'site-settings',
     where: { and: [{ site: { equals: siteId } }, { locale: { equals: locale } }] },
@@ -183,11 +194,11 @@ const ensureSiteSettings = async (siteId: string, locale: string) => {
 const run = async () => {
   await connect()
 
-  const languageIds: Array<{ id: string; isDefault: boolean }> = []
+  const languageIds: Array<{ id: string | number; isDefault: boolean }> = []
   for (const locale of DEFAULT_LOCALES) {
     const id = await ensureLanguage(locale.code, locale.name, locale.isDefault)
     if (id) {
-      languageIds.push({ id: String(id), isDefault: locale.isDefault })
+      languageIds.push({ id, isDefault: locale.isDefault })
     }
   }
   const defaultLang = languageIds.find((l) => l.isDefault) ?? languageIds[0]

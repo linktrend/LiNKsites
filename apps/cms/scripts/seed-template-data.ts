@@ -17,6 +17,7 @@ const ensureLanguage = async (code: string, name: string, isDefault: boolean) =>
     where: { code: { equals: code } },
     limit: 1,
     depth: 0,
+    overrideAccess: true,
   })
 
   if (existing.totalDocs > 0 && existing.docs[0]) {
@@ -46,6 +47,7 @@ const ensureDefaultSite = async (languageIds: (string | number)[], defaultLangua
     where: { domain: { equals: DEFAULT_DOMAIN } },
     limit: 1,
     depth: 0,
+    overrideAccess: true,
   })
 
   const data = {
@@ -93,25 +95,7 @@ const seedGlobalSettings = async () => {
     console.error('✗ SEO global failed:', error instanceof Error ? error.message : error)
   }
 
-  try {
-    await payload.updateGlobal({
-      slug: 'header',
-      data: {
-        navigation: [
-          { label: 'Home', url: '/' },
-          { label: 'About', url: '/about' },
-          { label: 'Pricing', url: '/pricing' },
-          { label: 'Resources', url: '/resources' },
-          { label: 'Contact', url: '/contact' },
-        ],
-        cta: { text: 'Get Started', url: '/contact' },
-      },
-      overrideAccess: true,
-    })
-    console.log('✓ Header global seeded')
-  } catch (error) {
-    console.error('✗ Header global failed:', error instanceof Error ? error.message : error)
-  }
+  // Header global requires a logo upload (media). Skip seeding for now.
 
   try {
     await payload.updateGlobal({
@@ -142,7 +126,7 @@ const seedGlobalSettings = async () => {
   }
 }
 
-const seedPages = async (siteId: string | number, localeId: string | number) => {
+const seedPages = async (siteId: string | number, localeCode: string) => {
   console.log('\n📄 Seeding pages...')
 
   const pages = [
@@ -738,7 +722,7 @@ const seedPages = async (siteId: string | number, localeId: string | number) => 
       const existing = await payload.find({
         collection: 'pages',
         where: {
-          and: [{ slug: { equals: pageData.slug } }, { site: { equals: siteId } }, { locale: { equals: localeId } }],
+          and: [{ slug: { equals: pageData.slug } }, { site: { equals: siteId } }, { locale: { equals: localeCode } }],
         },
         limit: 1,
         depth: 0,
@@ -748,14 +732,14 @@ const seedPages = async (siteId: string | number, localeId: string | number) => 
         await payload.update({
           collection: 'pages',
           id: existing.docs[0].id,
-          data: { ...pageData, site: siteId as never, locale: localeId as never, status: 'published' },
+          data: { ...pageData, site: siteId as never, locale: localeCode as never, status: 'published' },
           depth: 0,
         })
         console.log(`✓ Updated page: ${pageData.slug}`)
       } else {
         await payload.create({
           collection: 'pages',
-          data: { ...pageData, site: siteId as never, locale: localeId as never, status: 'published' },
+        data: { ...pageData, site: siteId as never, locale: localeCode as never, status: 'published' },
           depth: 0,
           overrideAccess: true,
         })
@@ -767,7 +751,7 @@ const seedPages = async (siteId: string | number, localeId: string | number) => 
   }
 }
 
-const seedNavigation = async (siteId: string | number, localeId: string | number) => {
+const seedNavigation = async (siteId: string | number, localeCode: string) => {
   console.log('\n🧭 Seeding navigation...')
 
   const navItems = [
@@ -783,7 +767,7 @@ const seedNavigation = async (siteId: string | number, localeId: string | number
       const existing = await payload.find({
         collection: 'navigation',
         where: {
-          and: [{ url: { equals: navData.url } }, { site: { equals: siteId } }, { locale: { equals: localeId } }],
+        and: [{ url: { equals: navData.url } }, { site: { equals: siteId } }, { locale: { equals: localeCode } }],
         },
         limit: 1,
         depth: 0,
@@ -793,7 +777,7 @@ const seedNavigation = async (siteId: string | number, localeId: string | number
         await payload.update({
           collection: 'navigation',
           id: existing.docs[0].id,
-          data: { ...navData, site: siteId as never, locale: localeId as never, status: 'published' },
+          data: { ...navData, site: siteId as never, locale: localeCode as never, status: 'published' },
           depth: 0,
         })
         console.log(`✓ Updated navigation: ${navData.label}`)
@@ -803,7 +787,7 @@ const seedNavigation = async (siteId: string | number, localeId: string | number
           data: {
             ...navData,
             site: siteId as never,
-            locale: localeId as never,
+            locale: localeCode as never,
             status: 'published',
             slug: navData.label.toLowerCase().replace(/\s+/g, '-'),
           },
@@ -818,134 +802,9 @@ const seedNavigation = async (siteId: string | number, localeId: string | number
   }
 }
 
-const seedPlaceholderContent = async (siteId: string | number, localeId: string | number) => {
-  console.log('\n📦 Seeding placeholder content...')
-
-  // Article
-  try {
-    const existing = await payload.find({
-      collection: 'articles',
-      where: { slug: { equals: 'getting-started-with-master-template' } },
-      limit: 1,
-      depth: 0,
-    })
-
-    if (existing.totalDocs === 0) {
-      await payload.create({
-        collection: 'articles',
-        data: {
-          slug: 'getting-started-with-master-template',
-          title: 'Getting Started with the Master Template',
-          excerpt: 'Learn how to customize this template for your project',
-          body: 'This is a placeholder article. Replace with your actual content.',
-          date: new Date().toISOString(),
-          site: siteId as never,
-          locale: localeId as never,
-          status: 'published',
-        },
-        depth: 0,
-        overrideAccess: true,
-      })
-      console.log('✓ Created placeholder article')
-    } else {
-      console.log('✓ Article already exists')
-    }
-  } catch (error) {
-    console.error('✗ Article failed:', error instanceof Error ? error.message : error)
-  }
-
-  // Help Category & Article
-  try {
-    const existingCat = await payload.find({
-      collection: 'help-categories',
-      where: { slug: { equals: 'getting-started' } },
-      limit: 1,
-      depth: 0,
-    })
-
-    let categoryId: string
-    if (existingCat.totalDocs > 0 && existingCat.docs[0]) {
-      categoryId = String(existingCat.docs[0].id)
-      console.log('✓ Help category already exists')
-    } else {
-      const created = await payload.create({
-        collection: 'help-categories',
-        data: {
-          slug: 'getting-started',
-          name: 'Getting Started',
-          description: 'Get started with the platform',
-          site: siteId as never,
-          locale: localeId as never,
-          status: 'published',
-        },
-        depth: 0,
-        overrideAccess: true,
-      })
-      categoryId = String(created.id)
-      console.log('✓ Created help category')
-    }
-
-    const existingHelp = await payload.find({
-      collection: 'help-articles',
-      where: { slug: { equals: 'how-to-use-cms' } },
-      limit: 1,
-      depth: 0,
-    })
-
-    if (existingHelp.totalDocs === 0) {
-      await payload.create({
-        collection: 'help-articles',
-        data: {
-          slug: 'how-to-use-cms',
-          title: 'How to Use the CMS',
-          body: 'This is a placeholder help article. Replace with actual documentation.',
-          category: categoryId as never,
-          site: siteId as never,
-          locale: localeId as never,
-          status: 'published',
-        },
-        depth: 0,
-        overrideAccess: true,
-      })
-      console.log('✓ Created placeholder help article')
-    } else {
-      console.log('✓ Help article already exists')
-    }
-  } catch (error) {
-    console.error('✗ Help content failed:', error instanceof Error ? error.message : error)
-  }
-
-  // Video
-  try {
-    const existing = await payload.find({
-      collection: 'videos',
-      where: { slug: { equals: 'product-overview' } },
-      limit: 1,
-      depth: 0,
-    })
-
-    if (existing.totalDocs === 0) {
-      await payload.create({
-        collection: 'videos',
-        data: {
-          slug: 'product-overview',
-          title: 'Product Overview',
-          description: 'An overview of our product features',
-          youtubeId: 'dQw4w9WgXcQ',
-          site: siteId as never,
-          locale: localeId as never,
-          status: 'published',
-        },
-        depth: 0,
-        overrideAccess: true,
-      })
-      console.log('✓ Created placeholder video')
-    } else {
-      console.log('✓ Video already exists')
-    }
-  } catch (error) {
-    console.error('✗ Video failed:', error instanceof Error ? error.message : error)
-  }
+const seedPlaceholderContent = async (_siteId: string | number, _localeCode: string) => {
+  console.log('\n📦 Placeholder content skipped')
+  console.log('   Articles/help/videos require additional relationships; add real content in CMS as needed.')
 }
 
 const run = async () => {
@@ -962,7 +821,8 @@ const run = async () => {
   }
   const defaultLang = languageIds.find((l) => l.isDefault) ?? languageIds[0]
   const defaultLanguageId = defaultLang?.id
-  if (!defaultLanguageId) {
+  const defaultLocaleCode = (DEFAULT_LOCALES.find((l) => l.isDefault) ?? DEFAULT_LOCALES[0])?.code
+  if (!defaultLanguageId || !defaultLocaleCode) {
     throw new Error('No default language found')
   }
   console.log('✓ Languages ensured')
@@ -978,20 +838,20 @@ const run = async () => {
   await seedGlobalSettings()
 
   // 4. Pages
-  await seedPages(siteId, defaultLanguageId)
+  await seedPages(siteId, defaultLocaleCode)
 
   // 5. Navigation
-  await seedNavigation(siteId, defaultLanguageId)
+  await seedNavigation(siteId, defaultLocaleCode)
 
   // 6. Placeholder content
-  await seedPlaceholderContent(siteId, defaultLanguageId)
+  await seedPlaceholderContent(siteId, defaultLocaleCode)
 
   console.log('\n✅ Template data seeding complete!')
   console.log('\n📋 Summary:')
   console.log('  - 8 pages created (home, about, contact, pricing, resources, offers, privacy-policy, terms-of-service)')
   console.log('  - 5 navigation items')
-  console.log('  - 3 globals (SEO, Header, Footer)')
-  console.log('  - 1 article, 1 help category, 1 help article, 1 video')
+  console.log('  - 2 globals (SEO, Footer)')
+  console.log('  - placeholder content skipped (add in CMS as needed)')
 }
 
 void run().then(() => {
