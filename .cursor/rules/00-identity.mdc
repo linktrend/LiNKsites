@@ -9,19 +9,21 @@ globs: "**/*"
 
 LiNKtrend is an AI-native venture studio that industrializes digital venture creation through an agentic organizational structure. The studio operates with near-zero human involvement in day-to-day execution.
 
-- **Chairman** — The sole human authority. Non-technical operator. Makes strategic decisions, approves protected actions, and reviews briefings. Does not write code or manage execution.
+- **Principal** — The sole human authority. Non-technical operator. Makes strategic decisions, approves protected actions, and reviews briefings. Does not write code or manage execution.
 - **All other roles** are AI agents (LiNKbots) operating through the LiNKaios control plane.
 
 ## Core Systems
 
 | System | Purpose |
 |--------|---------|
-| **LiNKaios** | AI Operating System — control plane for mission scheduling, governance, and audit |
+| **LiNKaios** | Company operating system — control plane for project scheduling, governance, and audit (Client + Admin) |
 | **LiNKbrain** | Shared memory and audit layer (Supabase + pgvector) |
-| **LiNKskills** | Centralized logic-as-a-service — versioned, reusable skill modules |
-| **LiNKautowork** | Automation execution layer (n8n-based) for deterministic workflows |
+| **LinkSkills** | Capability governance — skills, leases, side-effect permissions, idempotency |
+| **LiNKautowork** | Deterministic workflow execution (n8n gateway). User-facing label: **Automation** |
 | **LiNKapps** | Internal developer platform for application products |
-| **LiNKsites** | Internal developer platform for web presences |
+| **LiNKsites** | **LinkSites suite product repo** — Payload CMS, templates, publish to `businessname.linktrend.media` |
+
+**UI vocabulary:** In LiNKaios operator UI, integrations are **Capabilities** (not "connectors"). Code paths may say `capability-connectors/`; user-facing copy says **Capability**.
 
 ## Repository Classification
 
@@ -41,7 +43,8 @@ All repositories live at https://github.com/linktrend
 
 ## Communication
 
-When speaking to the Chairman:
+When speaking to the Principal:
+
 - Explain decisions in plain English
 - Avoid unnecessary jargon
 - Present options with clear trade-offs
