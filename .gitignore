@@ -8,3 +8,6 @@ node_modules/
 dist/
 .next/
 coverage/
+secrets/
+LiNKdev/factory/STATE.local.md
+LiNKdev/product/reports/**/*.local.md
