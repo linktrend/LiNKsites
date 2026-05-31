@@ -1,3 +1,9 @@
+# Execute: Wire LiNKdev post–UI automations — **DEPRECATED**
+
+> **Do not use for new wire.** Use [EXECUTE-WIRE-LINKDEV-POST-DISPATCH.md](EXECUTE-WIRE-LINKDEV-POST-DISPATCH.md).
+
+---
+
 # Execute: Wire LiNKdev post–UI automations (Cursor agent — autonomous)
 
 **Principal launch (one line only, after Step B):**  
@@ -20,4 +26,4 @@ You are the **LiNKdev wire completion agent**. Step B (Codex UI automations) is 
 
 > **LiNKdev is wired.** UI automations and wire proof are recorded.  
 > When you are ready to start the program, say **Go** (cloud Planner — `linkdev-go` command).  
-> Do not say Go until you intend to start `linktrend-system` execution.
+> Do not say Go until you intend to start `<product-id>` program execution.

@@ -1,3 +1,9 @@
+# Execute: LiNKdev UI automations — **DEPRECATED**
+
+> **Do not use for new wire.** Use dispatch v2 instead: [EXECUTE-LINKDEV-DISPATCH-INSTALL.md](EXECUTE-LINKDEV-DISPATCH-INSTALL.md) and [../docs/DISPATCH.md](../docs/DISPATCH.md).
+
+---
+
 # Execute: LiNKdev UI automations (Codex agent — autonomous)
 
 **Principal launch (one line only):**  
@@ -25,7 +31,7 @@ You are the **LiNKdev UI automations agent**. Configure **all** Cursor and Codex
 | `LiNKdev-executor-cursor` | Cursor | Labels `linkdev:ready` + `runtime:cursor` |
 | `LiNKdev-executor-codex` | Codex | Labels `linkdev:ready` + `runtime:codex` |
 
-System prompts must reference the matching `LiNKdev/factory/prompts/<role>/ROLE.md` files in **linktrend/LiNKtrend-System** (or the repo you are in).
+System prompts must reference the matching `LiNKdev/factory/prompts/<role>/ROLE.md` files in **this repository**.
 
 Add any extra Codex automations listed in `LiNKdev/product/programs/*/PROGRAM.md` if present.
 
