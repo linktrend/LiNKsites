@@ -2,12 +2,12 @@
 
 Factory-style workspace for generating many SMB websites from reusable templates, backed by a centralized Payload CMS.
 
-Previously named: "Dev_Sites Website Factory".
+Legacy name: Dev_Sites Website Factory (renamed **LiNKsites**).
 
 ## Structure
 
 ```
-Dev_Sites/ (workspace root)
+LiNKsites/ (repository root)
 ├── docs/                  # Central documentation index (SOPs, runbooks, product docs)
 ├── sites_specs/           # Authoritative specifications (system + architectures)
 ├── apps/                  # Runtime apps
@@ -31,7 +31,7 @@ Dev_Sites/ (workspace root)
 
 Use the central documentation index:
 
-- `/Users/linktrend/Projects/LiNKsites/docs/README.md`
+- [docs/README.md](./docs/README.md)
 
 The docs include:
 - workflow and architecture references
