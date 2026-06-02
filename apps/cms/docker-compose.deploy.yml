@@ -15,7 +15,6 @@ services:
       - traefik.http.routers.${TRAEFIK_ROUTER_NAME:-linksites-cms}.rule=Host(`${TRAEFIK_HOST:-cms.linktrend.internal}`)
       - traefik.http.routers.${TRAEFIK_ROUTER_NAME:-linksites-cms}.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
       - traefik.http.routers.${TRAEFIK_ROUTER_NAME:-linksites-cms}.tls=true
-      - traefik.http.routers.${TRAEFIK_ROUTER_NAME:-linksites-cms}.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
       - traefik.http.services.${TRAEFIK_ROUTER_NAME:-linksites-cms}.loadbalancer.server.port=3000
     networks:
       - traefik
