@@ -37,11 +37,11 @@ export const autoGenerateSlug =
     const workingLocale: WorkflowRequest['locale'] =
       workflowReq.locale || (defaultLocaleFromConfig as WorkflowRequest['locale']) || 'en'
 
-    if (!value && !data?.title && !data?.name) {
+    if (!value && !data?.title && !data?.name && !data?.label) {
       return value
     }
 
-    const rawValue = value || data?.title || data?.name
+    const rawValue = value || data?.title || data?.name || data?.label
     const normalized = typeof rawValue === 'string' ? rawValue : ''
 
     if (!normalized) {

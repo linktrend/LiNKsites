@@ -75,6 +75,19 @@ const { connectionString: databaseConnectionString, sslMode } = (() => {
     const url = new URL(databaseUri)
     const mode = url.searchParams.get('sslmode')
     url.searchParams.delete('sslmode')
+    const hostname = url.hostname.toLowerCase()
+    const isSupabaseHost =
+      hostname.endsWith('.supabase.co') ||
+      hostname.endsWith('.supabase.com') ||
+      hostname.includes('pooler.supabase.com')
+    if (isSupabaseHost) {
+      const options = url.searchParams.get('options') ?? ''
+      const prefersLegacyCore = /search_path\s*=\s*lsites_core/i.test(options)
+      if (!options || prefersLegacyCore) {
+        // GSM pooler URIs often set lsites_core first; Payload collections live in public.
+        url.searchParams.set('options', '-c search_path=public')
+      }
+    }
     return { connectionString: url.toString(), sslMode: mode }
   } catch {
     return { connectionString: databaseUri, sslMode: null }

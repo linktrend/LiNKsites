@@ -4,7 +4,8 @@ export interface SEOData {
   title?: string
   description?: string
   keywords?: string
-  ogImage?: string
+  /** Media collection id when stored on a document; URL when rendering meta tags. */
+  ogImage?: string | number
   noIndex?: boolean
 }
 
@@ -13,7 +14,7 @@ export interface DefaultSEOConfig {
   defaultTitle?: string
   defaultDescription?: string
   defaultKeywords?: string
-  defaultOgImage?: string
+  defaultOgImage?: unknown
 }
 
 /**
@@ -29,6 +30,12 @@ const readMediaUrl = (value: unknown): string | undefined => {
   return undefined
 }
 
+const resolveMediaId = (value: unknown): number | undefined => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (isRecord(value) && typeof value.id === 'number' && Number.isFinite(value.id)) return value.id
+  return undefined
+}
+
 export function generateSEO(
   data: SEOData,
   defaults: DefaultSEOConfig,
@@ -39,13 +46,13 @@ export function generateSEO(
     ? defaults.titleTemplate.replace('%s', title)
     : title
 
-  const ogImageValue = readMediaUrl(data.ogImage) || defaults.defaultOgImage || ''
+  const ogImageId = resolveMediaId(data.ogImage) ?? resolveMediaId(defaults.defaultOgImage)
 
   return {
     title: formattedTitle,
     description: data.description || defaults.defaultDescription || '',
     keywords: data.keywords || defaults.defaultKeywords || '',
-    ogImage: ogImageValue,
+    ...(ogImageId != null ? { ogImage: ogImageId } : {}),
     noIndex: data.noIndex ?? false,
   }
 }
@@ -72,14 +79,13 @@ export async function injectDefaultSEO(
     }
 
     const ogImageRaw = seoGlobal?.defaultOgImage
-    const ogImage = readMediaUrl(ogImageRaw) || ''
 
     const defaults: DefaultSEOConfig = {
       titleTemplate: seoGlobal?.titleTemplate || '%s',
       defaultTitle: seoGlobal?.defaultTitle || '',
       defaultDescription: seoGlobal?.defaultDescription || '',
       defaultKeywords: seoGlobal?.defaultKeywords || '',
-      defaultOgImage: ogImage,
+      defaultOgImage: ogImageRaw as DefaultSEOConfig['defaultOgImage'],
     }
 
     typedDoc.seo = generateSEO(typedDoc.seo, defaults, typedDoc.title)
