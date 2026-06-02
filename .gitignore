@@ -5,6 +5,10 @@ node_modules/
 .env.*
 !.env.example
 !.env.local.example
+!apps/cms/deploy/prod/.env.example
+apps/cms/deploy/prod/.env
+apps/cms/deploy/prod/.env.runtime
+**/prod.env.runtime
 dist/
 .next/
 coverage/
