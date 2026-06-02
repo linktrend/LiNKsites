@@ -19,6 +19,7 @@ fi
 export PAYLOAD_PUBLIC_SERVER_URL="${PAYLOAD_PUBLIC_SERVER_URL:-https://cms.linktrend.internal}"
 # Never auto-push schema against the live pooler DB (use public.search_path via payload.config.ts).
 export NODE_ENV="${NODE_ENV:-production}"
+export LINKSITES_FACTORY_MODE="${LINKSITES_FACTORY_MODE:-1}"
 
 BUSINESS_NAME="${MVO_LEAD_BUSINESS_NAME:-Calusa Demo Lawn Care}"
 SLUG_BASE="${MVO_SITE_SLUG:-calusa-demo-mvo}"

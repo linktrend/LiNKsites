@@ -53,9 +53,9 @@ export const validatePublishPermissions: CollectionBeforeChangeHook = async ({
   originalDoc,
 }) => {
   const workflowReq = req as WorkflowRequest
-  
-  // During bootstrap (no users), skip validation
-  if (await isBootstrapMode(workflowReq)) {
+
+  // During bootstrap (no users) or governed factory scripts, skip validation
+  if (await isBootstrapMode(workflowReq) || process.env.LINKSITES_FACTORY_MODE === '1') {
     return data
   }
   
