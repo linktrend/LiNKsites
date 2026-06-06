@@ -1,0 +1,45 @@
+name: cms
+
+services:
+  payload:
+    build:
+      context: ..
+      dockerfile: deploy/docker/cms.Dockerfile
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:-/opt/linktrend/runtime/linksites-cms/prod.env.runtime}
+    restart: unless-stopped
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH:-/etc/linktrend/gcp/linktrend-service-account.json}:${GOOGLE_APPLICATION_CREDENTIALS:-/etc/linktrend/gcp/linktrend-service-account.json}:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.rule=Host(`${TRAEFIK_CMS_HOST:-cms.linktrend.internal}`)
+      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
+      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.tls=true
+      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.priority=100
+      - traefik.http.services.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.loadbalancer.server.port=3000
+    networks:
+      - traefik
+
+  frontend-shared:
+    build:
+      context: ..
+      dockerfile: deploy/docker/web-master.Dockerfile
+      args:
+        NEXT_PUBLIC_PAYLOAD_API_URL: ${NEXT_PUBLIC_PAYLOAD_API_URL:-https://cms.linktrend.internal}
+        PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:-https://cms.linktrend.internal}
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:-/opt/linktrend/runtime/linksites-cms/prod.env.runtime}
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.rule=HostRegexp(`^[a-z0-9-]+\\.linktrend\\.internal$`)
+      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
+      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.tls=true
+      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.priority=10
+      - traefik.http.services.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.loadbalancer.server.port=3000
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true
