@@ -65,11 +65,34 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
   Diagnosed the Dependabot Updates workflow failures as Dependabot correctly reporting
   unresolvable constraints (not a broken pipeline) and fixed the two blocking cases (js-yaml,
   @babel/core) via narrow, same-major-bounded overrides.
+- **DONE (2026-07-13, PR #43):** Established `docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md`
+  — the schema/contract versioning conventions Phase 1 requires before any Program Ledger,
+  Site Specification, Vertical Kit, or Tier Specification schema is built in Phase 2/3.
 - **Next Phase 1 items, not yet started:** resolve GAP-46 (React 18/19 alignment, needed before
   `apps/web-master` can actually be built/deployed); re-triage the remaining ~100 medium/31 low
-  Dependabot findings once PRs #38-#42 merge and Dependabot rescans; get Carlos's decision on
-  `sites_projects/old_linktrend`'s disposition (accept residual risk vs. retire now); establish
-  schema/contract versioning conventions.
+  Dependabot findings once PRs #38-#43 merge and Dependabot rescans; get Carlos's decision on
+  `sites_projects/old_linktrend`'s disposition (accept residual risk vs. retire now).
+- **This closes the batch of Phase 1 work packets started in this session.** Remaining Phase 1
+  scope (per manual §61: repository ownership/contribution rules beyond branch policy, SBOM,
+  dependency review automation, removing mandatory LiNKaios/OpenClaw coupling — already largely
+  satisfied by ADR 0002/0001) can be picked up in a future session using this roadmap and the
+  PR stack (#38 → #39 → #40 → #41 → #42 → #43) as the starting point.
+
+## Open PRs from this session (merge in order)
+
+| PR | Branch | Contents | Depends on |
+|---|---|---|---|
+| #36 | `dev/blackcursor/defactor-linkdev-embedded-framework` | DR-01: remove embedded LiNKdev/agent framework | `development` |
+| #37 | `dev/blackcursor/program-manual-audit-and-decisions` | Manual ingestion + full audit deliverable set + DR-02/03/04/06 | `development` |
+| #38 | `dev/blackcursor/ci-real-build-test-gate` | Real CI gate (lint+typecheck), seo.ts fix | `development` |
+| #39 | `dev/blackcursor/gap44-45-nextjs-16-migration` | GAP-44/45: Next.js 16 async API migration | #38 |
+| #40 | `dev/blackcursor/gap43-cms-test-int-resolution` | GAP-43: test:int module resolution + jsdom fixes | #39 |
+| #41 | `dev/blackcursor/gap47-payload-version-alignment` | GAP-47: Payload version alignment + CVE patches | #40 |
+| #42 | `dev/blackcursor/gap48-jsyaml-override` | GAP-48: js-yaml/@babel/core Dependabot-blocker fixes | #41 |
+| #43 | `dev/blackcursor/p1-contract-schema-versioning-policy` | Contract/schema versioning conventions (docs only) | #42 |
+
+All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
+the rest), then #38 through #43 in order (each depends on the previous).
 - Define versioned schemas/generated types for Site Specification, Vertical Kit, Tier Specification (currently absent) before any code is written against them.
 - Resolve DR-03 (LinkSkills capability-lease boundary) — this materially changes how every subsequent Phase's work packets must be scoped.
 
