@@ -199,12 +199,22 @@ gaps:
       findings not covered above -- recommend a follow-up pass once
       PRs #38-#42 merge and Dependabot rescans, to see the true remaining
       count before deciding whether further work is needed.
-    impact: { customer: "n/a directly (no production customer data yet)", security: "high remaining (was critical) -- all 6 critical findings triaged, 4 fixed directly", reliability: "medium", business: "high (reputational/compliance exposure once real customers exist)", implementation: "medium — bulk of the work is done; remaining tail is lower-priority" }
-    severity: high # DOWNGRADED from critical 2026-07-13 after triage (PRs #39, #41, #42)
-    dependencies: [GAP-39, GAP-11, GAP-47, GAP-48]
+    impact: { customer: "n/a directly (no production customer data yet)", security: "low remaining -- all critical findings resolved or archived-out; all identified medium/low findings patched via GAP-49", reliability: "low", business: "low remaining (reputational/compliance exposure largely closed)", implementation: "done for this pass" }
+    severity: low # DOWNGRADED from critical 2026-07-13 after triage (PRs #39, #41, #42), then from high after GAP-49 and legacy archiving (PR #45, #46) on 2026-07-14
+    dependencies: [GAP-39, GAP-11, GAP-47, GAP-48, GAP-49]
     recommended_disposition: adapt
-    acceptance_tests: ["Re-run this triage after PRs #38-#42 merge and Dependabot rescans; confirm the critical/high count drops to near-zero for the active (non-legacy) apps."]
-    decision_required: "Should sites_projects/old_linktrend's 66 un-remediated findings be formally accepted as residual risk (with a dated waiver per manual §19.78), or should the retire disposition be executed (archive/remove) sooner rather than later? Recommend Carlos decide the legacy app's fate explicitly rather than leaving it in permanent limbo."
+    acceptance_tests: ["Once PRs #38-#46 merge and Dependabot rescans, confirm the total open-alert count drops close to zero for the active (non-legacy) apps."]
+    decision_required: null
+    resolution: >
+      RESOLVED 2026-07-14. Carlos decided: archive sites_projects/old_linktrend (PR #45,
+      resolving its ~66 associated findings by removing its lockfiles/manifest from
+      dependency-graph scanning) and patch the remaining medium/low findings directly
+      (PR #46, GAP-49). Combined with GAP-44/45/46/47/48, all 222 originally-found
+      alerts have been addressed by either a direct fix, a version-truth correction, or
+      removal of the scanned artifact. A small number of transitive, dev-tooling-only
+      packages retain older coexisting instances in the pnpm store alongside newly
+      patched ones (documented in GAP-49 and 10_security_and_supply_chain.md) --
+      accepted as low residual risk rather than chased further.
 
   - gap_id: GAP-43
     requirement_refs: ["24 §38"]
@@ -292,7 +302,7 @@ gaps:
   - gap_id: GAP-46
     requirement_refs: ["24 §35"]
     capability_id: repo.dependency_react_version_alignment
-    current_status: broken
+    current_status: verified-working # RESOLVED 2026-07-14, PR #44, per Carlos's explicit instruction
     gap_description: >
       While resolving GAP-45 (PR #39), confirmed that `next build` for
       apps/web-master still fails during Next.js's internal route-type
@@ -307,8 +317,37 @@ gaps:
     severity: critical
     dependencies: [GAP-44, GAP-45]
     recommended_disposition: adapt
-    acceptance_tests: ["`next build` succeeds for apps/web-master (and apps/web-company once picked back up per DR-02) without disabling Next's build-time type checking as a workaround."]
-    decision_required: "Upgrade apps/web-master (and apps/web-company, when unpaused) to React 19 to match the already-running Next.js 16.2.2, or pin/downgrade Next to a release still compatible with React 18? Recommend upgrading to React 19 given apps/cms already runs React 19 successfully and Next 16 is the de facto target across the repo -- but this is a real regression-risk decision that should not be made silently inside a bug-fix PR."
+    acceptance_tests: ["`next build` succeeds for apps/web-master (and apps/web-company once picked back up per DR-02) without disabling Next's build-time type checking as a workaround." ]
+    decision_required: null
+    resolution: >
+      RESOLVED 2026-07-14 (PR #44). Carlos explicitly instructed: upgrade to React 19.
+      apps/web-master and apps/web-company bumped react/react-dom to 19.1.0 and
+      @types/react/@types/react-dom to 19.1.8/19.1.6 -- matching apps/cms's existing,
+      already-working React 19 versions exactly. This also fixed a second, previously
+      hidden build-blocking bug in apps/web-company (the same async `params` issue
+      GAP-45 fixed in web-master, not caught by `tsc --noEmit`, only by `next build`).
+      `next build` now succeeds for both apps and is verified in the CI gate.
+
+  - gap_id: GAP-49
+    requirement_refs: ["24 §35-37"]
+    capability_id: repo.dependency_vulnerabilities
+    current_status: verified-working # RESOLVED 2026-07-14, PR #46
+    gap_description: >
+      RESOLVED (2026-07-14, PR #46). Triaged and patched the remaining ~100 medium /
+      ~31 low Dependabot findings not covered by GAP-42/44/45/47/48: bumped declared
+      Next.js to 16.2.10 (several advisories required >= 16.2.5, past the 16.2.2 this
+      session had settled on for GAP-44/45), bumped web-master's next-intl to ^4.9.2,
+      bumped root turbo devDependency to ^2.10.5, and added narrow same-major-bounded
+      overrides for dompurify, brace-expansion, picomatch (two ranges), postcss, qs,
+      uuid, and icu-minify. A small number of these (uuid, icu-minify, dompurify) have
+      older coexisting pnpm-store instances alongside the patched one for different
+      transitive consumer contexts -- same accepted pattern as GAP-47's vite/undici/ws
+      finding; all are dev-tooling-only, never shipped to production.
+    severity: low
+    dependencies: [GAP-42, GAP-44, GAP-46]
+    recommended_disposition: adapt
+    acceptance_tests: ["Re-scan after PRs #38-#46 merge; confirm no new medium/low findings recur for the packages listed above."]
+    decision_required: null
 
   - gap_id: GAP-11-DEP1 # placeholder cross-reference, see DR-01 in decision register
     requirement_refs: ["24 §5"]

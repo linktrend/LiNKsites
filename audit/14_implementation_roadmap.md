@@ -83,16 +83,35 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 | PR | Branch | Contents | Depends on |
 |---|---|---|---|
 | #36 | `dev/blackcursor/defactor-linkdev-embedded-framework` | DR-01: remove embedded LiNKdev/agent framework | `development` |
-| #37 | `dev/blackcursor/program-manual-audit-and-decisions` | Manual ingestion + full audit deliverable set + DR-02/03/04/06 | `development` |
+| #37 | `dev/blackcursor/program-manual-audit-and-decisions` | Manual ingestion + full audit deliverable set + all decisions | `development` |
 | #38 | `dev/blackcursor/ci-real-build-test-gate` | Real CI gate (lint+typecheck), seo.ts fix | `development` |
 | #39 | `dev/blackcursor/gap44-45-nextjs-16-migration` | GAP-44/45: Next.js 16 async API migration | #38 |
 | #40 | `dev/blackcursor/gap43-cms-test-int-resolution` | GAP-43: test:int module resolution + jsdom fixes | #39 |
 | #41 | `dev/blackcursor/gap47-payload-version-alignment` | GAP-47: Payload version alignment + CVE patches | #40 |
 | #42 | `dev/blackcursor/gap48-jsyaml-override` | GAP-48: js-yaml/@babel/core Dependabot-blocker fixes | #41 |
 | #43 | `dev/blackcursor/p1-contract-schema-versioning-policy` | Contract/schema versioning conventions (docs only) | #42 |
+| #44 | `dev/blackcursor/gap46-react19-upgrade` | GAP-46: React 19 upgrade, `next build` now succeeds for both frontends | #43 |
+| #45 | `dev/blackcursor/archive-legacy-old-linktrend` | Archive `sites_projects/old_linktrend` per Carlos's instruction | #44 |
+| #46 | `dev/blackcursor/gap49-medium-low-security-triage` | GAP-49: remaining medium/low Dependabot findings patched | #45 |
 
 All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
-the rest), then #38 through #43 in order (each depends on the previous).
+the rest), then #38 through #46 in order (each depends on the previous).
+
+## Second work batch (2026-07-14) — Carlos's explicit instructions, all executed
+
+Carlos reviewed the Phase 1 close-out and gave three direct instructions, all executed in this
+batch: (1) upgrade to React 19 to resolve GAP-46 — done, PR #44; (2) fix the remaining 100
+medium/31 low security findings — done, PR #46 (GAP-49); (3) archive the legacy
+`sites_projects/old_linktrend` app, taking anything genuinely useful and not using the rest —
+done, PR #45 (nothing was ported forward; on review against the manual, the app's only
+distinctive feature, direct Stripe checkout, is explicitly out of LiNKsites' scope per doctrine,
+so nothing beyond preservation-for-reference was warranted). Combined with the first batch, all
+of Phase 0 and the security/stability portion of Phase 1 are now closed. Phase 1's remaining
+scope (repository ownership/contribution rules beyond branch policy, SBOM/dependency-review
+automation) and all of Phases 2-10 (Program Ledger, reusable asset factory, preview pipeline,
+commercial spine, customer fulfilment, autonomous hosting, observability, pilot, expansion) —
+each a substantial, multi-work-packet engineering effort per the manual's own phase doctrine —
+remain to be scoped and built in future sessions.
 - Define versioned schemas/generated types for Site Specification, Vertical Kit, Tier Specification (currently absent) before any code is written against them.
 - Resolve DR-03 (LinkSkills capability-lease boundary) — this materially changes how every subsequent Phase's work packets must be scoped.
 

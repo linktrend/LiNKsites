@@ -88,8 +88,34 @@ assets:
   - asset_id: asset-sites-projects-legacy
     description: "sites_projects/old_linktrend (legacy Next.js app with Stripe checkout starter code), sites_projects/linktrend (build artifacts only)."
     classification: obsolete
-    disposition: retire (preserve, do not delete during audit)
-    rationale: "Not on the active factory path per root README; old_linktrend's Stripe integration code is the only Stripe-related code found anywhere in the repo and may be a useful reference pattern when Phase 5 (commercial spine) is built, even though the app itself is retired."
+    disposition: retired # EXECUTED 2026-07-14, PR #45, per Carlos's explicit instruction
+    rationale: >
+      EXECUTED (2026-07-14, PR #45): moved to archive/old_linktrend-legacy-corporate-site/
+      (git history preserved via rename detection), lockfiles removed, package.json
+      renamed to package.json.snapshot so it is no longer scanned by GitHub's
+      dependency graph. This closed ~66 of the 222 Dependabot findings triaged in
+      GAP-42.
+
+      On reconsideration against the Program Manual (which was not yet fully
+      cross-referenced when this asset was first classified during the Phase 0
+      audit): this app's direct Stripe checkout integration is NOT a reusable pattern
+      for LiNKsites -- the manual's cross-Program contracts doctrine (§21) places
+      Stripe/payment handling exclusively with the LiNKtrend Sales Program; LiNKsites
+      only ever receives a verified Paid Website Activation Package after Sales
+      confirms Stripe+Odoo state. Direct Stripe SDK integration inside LiNKsites
+      itself would be a doctrine violation, not a Phase 5 asset. This correction is
+      recorded in archive/old_linktrend-legacy-corporate-site/ARCHIVED.md.
+
+      The app's actual original purpose -- a LiNKtrend corporate/marketing site -- is
+      superseded by apps/web-company (Decision DR-02). Its page content/structure
+      (pricing, platform, solutions, enterprise, about, resources) may be referenced
+      for content/design ideas if/when apps/web-company's build resumes, but should
+      not be copied as code (predates current shared design-token/component
+      conventions).
+    old_linktrend_build_artifacts_note: >
+      sites_projects/linktrend (the second, smaller item originally in this asset
+      entry) was untracked local .next build output with zero source code -- never
+      committed to git, left untouched on disk as it is not a repository concern.
 
   - asset_id: asset-linkdev-embedded-factory
     description: "LiNKdev/ embedded factory (AGENTS.md, factory/, product/, skills/) and .agent/, .codex/skills/, repo-local .cursor/{rules,skills,commands,agents} — all currently shown as deleted (uncommitted) in the working tree; .cursor is now an untracked symlink to the sibling IDE Development workspace's .cursor/."
