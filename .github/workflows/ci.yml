@@ -56,7 +56,10 @@ jobs:
         run: pnpm --filter @linksites/cms run test:int
 
       # Phase 2 foundation (audit/14_implementation_roadmap.md): the Program Ledger's
-      # exit-gate tests (manual §62 -- duplicate dispatch, worker crash/lease reclaim,
-      # timeout/retry, cancellation, replay, Gate authority, traceability).
-      - name: Program Ledger tests
+      # exit-gate contract tests (manual §62 -- duplicate dispatch, worker crash/lease
+      # reclaim, timeout/retry, cancellation, replay, Gate authority, traceability), run
+      # against BOTH the in-memory store and a real embedded Postgres engine
+      # (@electric-sql/pglite) exercising supabase/migrations/20260714_000001_program_ledger_core.sql
+      # -- no live database connection is required or used.
+      - name: Program Ledger tests (in-memory + pglite-backed Postgres)
         run: pnpm --filter @linksites/program-ledger run test

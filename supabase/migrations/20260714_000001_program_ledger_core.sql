@@ -25,7 +25,12 @@
 -- customer production, validation/publication, economics/observability,
 -- and research/evidence remain to be built in later phases).
 
-create extension if not exists "pgcrypto";
+-- Note: gen_random_uuid() is a PostgreSQL 13+ built-in (no pgcrypto
+-- extension required, unlike older PG versions where it was
+-- pgcrypto-only). Deliberately not requiring the pgcrypto extension here
+-- keeps this migration portable to embedded/lightweight Postgres engines
+-- (e.g. pglite, used to test this migration in packages/program-ledger's
+-- test suite) that may not bundle every extension.
 
 create schema if not exists lsites_ledger;
 

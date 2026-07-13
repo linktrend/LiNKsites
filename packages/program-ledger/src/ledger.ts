@@ -142,11 +142,19 @@ export class ProgramLedger {
     const attemptNumber = issue.attemptCount + 1
     const runId = randomUUID()
 
+    // Reserve the idempotency key BEFORE the Run row exists (runId: null),
+    // and only link it to the Run afterward. This ordering matters for a
+    // real foreign-key-enforcing store (Postgres): inserting an
+    // idempotency_records row that already points at a run_id which
+    // doesn't exist yet violates its FK constraint. The in-memory store
+    // doesn't enforce FKs, so this bug was invisible until this class was
+    // tested against real Postgres (via pglite) -- see
+    // tests/postgres-store.spec.ts.
     const { record, created } = await this.store.reserveIdempotencyKey({
       schemaVersion: SCHEMA_VERSION,
       idempotencyKey,
       issueId,
-      runId,
+      runId: null,
       state: 'reserved',
       createdAt: nowIso(),
     })
@@ -186,7 +194,7 @@ export class ProgramLedger {
     issue.updatedAt = nowIso()
     await this.store.putIssue(issue)
 
-    await this.store.updateIdempotencyRecord({ ...record, state: 'executing' })
+    await this.store.updateIdempotencyRecord({ ...record, runId, state: 'executing' })
     await this.emit(issueId, runId, 'run.dispatched', { attemptNumber })
     return run
   }
