@@ -19,8 +19,8 @@ import { ENVIRONMENT, CRAWL_POLICY } from '@/config';
 
 export const dynamic = "force-dynamic";
 
-export default function robots(): MetadataRoute.Robots {
-  const h = headers();
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "https";
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const baseUrl = host ? `${proto}://${host}` : "https://example.com";

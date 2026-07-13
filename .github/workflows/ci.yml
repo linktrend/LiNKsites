@@ -33,16 +33,22 @@ jobs:
       - name: Lint (cms, web-master)
         run: pnpm exec turbo run lint --filter=@linksites/cms --filter=@linksites/web-master
 
-      # apps/web-master is intentionally excluded from typecheck for now (GAP-45): its code
-      # was written against Next.js 14's synchronous cookies()/headers() App Router APIs, but
-      # (per GAP-44) it actually runs Next.js 16.2.2, where those APIs became async. This
-      # currently produces ~13 real TS2339 errors across layout.tsx, site-context.ts, and
-      # several route handlers. Fixing this correctly means auditing every call site and
-      # threading `await` through the right call chains -- a real, separate Phase 1 work
-      # packet, not something to rush through inside a "fix the CI gate" change. Re-include
-      # it here once that migration lands.
-      - name: Typecheck (cms, types, web-company)
-        run: pnpm exec turbo run typecheck --filter=@linksites/cms --filter=@linksites/types --filter=@linksites/web-company
+      # GAP-45 (cookies()/headers()/params() -> async, Next.js 14->16 App Router migration) is
+      # now fixed -- `tsc --noEmit` passes for apps/web-master. web-master is re-included below.
+      - name: Typecheck (all workspaces)
+        run: pnpm run typecheck
+
+      # NOTE (GAP-46, discovered while closing GAP-45): `next build` for apps/web-master still
+      # fails during Next's internal route-type-checking step (not caught by plain `tsc
+      # --noEmit`, which is why the typecheck step above is genuinely green). The failure is a
+      # React 18 vs React 19 `@types/react` mismatch: Next.js 16.2.2's generated LayoutProps/
+      # PageProps types expect React 19 ReactNode semantics (which include `bigint`), but
+      # apps/web-master still declares and resolves React 18.3.1/@types/react ^18.3.17. Fixing
+      # this properly means deciding whether apps/web-master (and apps/web-company) upgrade to
+      # React 19 to match Next 16, or Next is pinned/downgraded to a React-18-compatible release
+      # -- a real version-alignment decision, not something to force through here. `next build`
+      # for apps/web-master is intentionally NOT run in CI until that decision is made and
+      # implemented (see audit/09_gap_and_risk_register.yaml, GAP-46).
 
       # NOTE (Phase 1, GAP-43): `apps/cms`'s Vitest suite (test:int) currently fails to
       # resolve "@/..." path aliases under the installed vite/vite-tsconfig-paths versions

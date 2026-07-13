@@ -5,7 +5,7 @@ import { buildLlmsTxt } from "@/config";
 export const dynamic = "force-dynamic";
 
 export async function GET(): Promise<NextResponse> {
-  const h = headers();
+  const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "https";
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const baseUrl = host ? `${proto}://${host}` : undefined;

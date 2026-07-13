@@ -19,10 +19,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  // NextRequest.ip was removed in newer Next.js versions; rely on the
+  // forwarded-for/real-ip headers set by the reverse proxy (Traefik/Cloudflare).
   const clientKey =
     request.headers.get("x-forwarded-for") ||
     request.headers.get("x-real-ip") ||
-    request.ip ||
     "unknown";
 
   const limit = ENV.AI.ACTIONS_RATE_LIMIT_PER_MIN;
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const body = await request.text();
-  const h = headers();
+  const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "https";
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const baseUrl = host ? `${proto}://${host}` : "";

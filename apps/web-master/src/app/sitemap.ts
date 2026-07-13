@@ -54,7 +54,7 @@ const CHANGE_FREQ = {
 } as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const h = headers();
+  const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "https";
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const baseUrl = host ? `${proto}://${host}` : "https://example.com";
