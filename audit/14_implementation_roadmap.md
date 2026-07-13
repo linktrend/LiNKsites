@@ -8,12 +8,28 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 - Remaining before Phase 0 can formally close: (a) Carlos resolves DR-01 through DR-05; (b) a live check of the Supabase project's actual RLS/grant state and any pre-existing security findings (manual §47 presumptive-blocker rule) — not reachable in this session; (c) confirm no unresolved data exposure exists in whatever environment is used for the pilot.
 - **Exit gate status:** Not yet closable — blocked on the above three items, all of which require either Carlos or live-environment access this session did not have.
 
-## Phase 1 — Canonical contracts and repository foundations — **not started**
+## Phase 1 — Canonical contracts and repository foundations — **in progress**
 
 - Establish repository ownership/contribution rules (partially exists via `branch-source-policy.yml` — reuse).
-- Fix the CI placeholder (GAP-39) — small, high-value, should be first Phase 1 work packet.
-- Diagnose/fix the Dependabot failure pattern.
-- Decide and document the Next.js/React version-skew resolution (DR-05).
+- **DONE (2026-07-13):** Fixed the CI placeholder (GAP-39) — `ci.yml` now runs a real
+  `pnpm install` + `lint` (cms, web-master) + `typecheck` (all workspaces) gate. While doing
+  this, discovered and partially fixed two related pre-existing bugs:
+  - `apps/web-master`'s `next lint` script was silently broken (Next.js 16 removed that
+    subcommand) because of GAP-44 below — fixed by switching to `eslint src` directly, plus
+    fixing two real pre-existing lint errors it had been hiding.
+  - Confirmed `apps/cms`'s `test:int` Vitest suite currently fails at module-resolution
+    before any test runs (GAP-43) — intentionally left OUT of the new CI gate rather than
+    included as a guaranteed-red or silently-skipped step; needs its own follow-up work packet.
+  - Discovered GAP-44: a dependency-override cascade bug silently force-upgrades every app to
+    Next.js 16.2.2 regardless of declared version — this is now the highest-priority Phase 1
+    technical item, since it already broke tooling once and its full blast radius on
+    `apps/web-master`/`apps/web-company` runtime behavior is unverified.
+  - `apps/web-company`'s lint remains out of CI scope per Decision DR-02 (paused) and because
+    it has no `eslint` devDependency installed at all (separate pre-existing gap, not yet filed
+    as its own GAP — low priority given DR-02).
+- **Next Phase 1 items, not yet started:** diagnose/fix the Dependabot failure pattern and the
+  222-vulnerability finding (GAP-42, GAP-11); resolve GAP-44 (dependency override cascade) and
+  GAP-43 (test:int module resolution); establish schema/contract versioning conventions.
 - Define versioned schemas/generated types for Site Specification, Vertical Kit, Tier Specification (currently absent) before any code is written against them.
 - Resolve DR-03 (LinkSkills capability-lease boundary) — this materially changes how every subsequent Phase's work packets must be scoped.
 

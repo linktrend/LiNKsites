@@ -142,6 +142,53 @@ gaps:
     acceptance_tests: ["All 6 critical and 85 high findings are triaged (fixed, mitigated, or explicitly waived with expiry per manual §19.78) before any real customer data enters the system."]
     decision_required: "Should be the first substantive Phase 1 security work packet, ahead of most feature work, per manual §78 (a release cannot proceed with a critical dependency vulnerability without approved mitigation)."
 
+  - gap_id: GAP-43
+    requirement_refs: ["24 §38"]
+    capability_id: ci.real_build_test_gate
+    current_status: broken
+    gap_description: >
+      apps/cms's Vitest suite (`test:int`, which includes the contract tests
+      under tests/contracts/ and tests/int/) fails at the module-resolution
+      stage for all 6 test files with "Failed to resolve import '@/...'"
+      errors -- before any test assertion executes. Verified locally
+      2026-07-13 while building the Phase 1 CI gate. Root cause not fully
+      diagnosed, but is very likely connected to GAP-44 (the dependency
+      override cascade), since vite/vite-tsconfig-paths versions are also
+      subject to the same root package.json override mechanics.
+    impact: { customer: "n/a directly", security: "medium (the tenant-isolation-relevant site-scoping.spec.ts contract test cannot currently run at all, compounding GAP-06)", reliability: "medium", business: "low", implementation: "medium" }
+    severity: high
+    dependencies: [GAP-44]
+    recommended_disposition: adapt
+    acceptance_tests: ["pnpm --filter @linksites/cms run test:int passes locally and in CI without module-resolution errors."]
+    decision_required: null
+
+  - gap_id: GAP-44
+    requirement_refs: ["24 §35"]
+    capability_id: repo.dependency_override_cascade
+    current_status: broken
+    gap_description: >
+      The root package.json's pnpm.overrides block contains next@ version
+      overrides whose ranges span multiple majors (e.g. "next@>=13.0.0
+      <15.0.8": ">=15.0.8", "next@>=9.5.0 <15.5.13": ">=15.5.13"). pnpm
+      applies overrides cumulatively, so a package declaring an older
+      Next.js major (e.g. apps/web-master's declared 14.2.33) gets silently
+      cascaded upward through each subsequent override until it lands on
+      the newest one -- confirmed to resolve to 16.2.2 in every app
+      (apps/cms, apps/web-master, apps/web-company), regardless of each
+      app's own package.json declaration. Confirmed real, not theoretical:
+      this already broke apps/web-master's and apps/web-company's `next
+      lint` scripts (Next 16 removed the `next lint` subcommand), which was
+      fixed as part of the Phase 1 CI work packet (2026-07-13). It has not
+      been ruled out that other Next-14-to-16 breaking changes silently
+      affect apps/web-master or apps/web-company's runtime behavior --
+      this has not been comprehensively checked.
+    impact: { customer: "unknown -- could affect apps/web-master's actual customer-facing runtime behavior in ways not yet surfaced", security: "medium (unintended, un-reviewed major-version upgrades bypass normal upgrade review)", reliability: "high", business: "medium", implementation: "medium-high -- requires deciding a target Next.js major per app, then rewriting the override ranges to be same-major-scoped" }
+    severity: high
+    dependencies: []
+    recommended_disposition: adapt
+    acceptance_tests: ["Each app's package.json declared Next.js version matches its actually-installed version.", "pnpm.overrides ranges are same-major-scoped (or replaced with a per-app override strategy) so future security-floor bumps cannot silently cross a major version boundary again."]
+    decision_required: "Which Next.js major should apps/web-master and apps/web-company deliberately target -- stay on the already-running 16.x (smaller migration, but unaudited for breaking-change exposure), or force a genuine downgrade back to 14.x (larger effort, but matches original intent)? Not decided in this session -- recommend Carlos or the implementation team decide once GAP-43 is also resolved, since they may share a root cause."
+
   - gap_id: GAP-11-DEP1 # placeholder cross-reference, see DR-01 in decision register
     requirement_refs: ["24 §5"]
     capability_id: repo.working_tree_uncommitted_state

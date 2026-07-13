@@ -69,13 +69,14 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
 
 ---
 
-## DR-05 — Version skew across Next.js/React in one monorepo
+## DR-05 — Version skew across Next.js/React in one monorepo — SUPERSEDED by a Phase 1 finding
 
-- **Claim A (repository evidence):** `apps/cms` runs Next.js 16.1.0/React 19.1.0; `apps/web-master` runs Next.js 14.2.33/React 18.3.1; `apps/web-company` runs Next.js 14.0.0/React 18.2.0.
+- **Claim A (original repository evidence, based on declared `package.json` versions):** `apps/cms` runs Next.js 16.1.0/React 19.1.0; `apps/web-master` runs Next.js 14.2.33/React 18.3.1; `apps/web-company` runs Next.js 14.0.0/React 18.2.0.
 - **Claim B (manual §07.10):** Recommends a consistent Next.js/React/Tailwind/shadcn-compatible stack posture "pending audit confirmation."
-- **Resolution:** This is not a doctrine contradiction so much as an unaddressed drift the manual anticipated needing audit confirmation for. No document found in the repo explains or plans this skew.
-- **Decision required:** Whether to standardize on one Next.js/React major across all three apps (and if so, which), deferred to the implementation roadmap (Phase 1/3), not decided here.
-- **Severity:** Medium.
+- **Original resolution:** Deferred to the roadmap as an unaddressed drift.
+- **Superseding finding (2026-07-13, Phase 1 first work packet):** Claim A was based on *declared* versions only. The *actually-installed* Next.js version in every app is uniformly **16.2.2**, due to a dependency-override cascade bug in the root `package.json`'s `pnpm.overrides` block (full detail in `05_current_architecture.md`, "Version-skew finding — CORRECTED"). There is no real cross-major version skew today — there is a more serious, previously-hidden bug where two apps silently run a Next.js major two versions newer than what their own `package.json` declares, which already broke their lint tooling (fixed in this same Phase 1 work packet) and may have other undiscovered consequences (e.g. removed/changed APIs between Next 14 and Next 16 that `apps/web-master`/`apps/web-company` code may unknowingly depend on the *old* behavior of).
+- **Decision required:** Whether to (a) rewrite the `pnpm.overrides` ranges to be same-major-scoped so each app's declared version is respected, then deliberately choose/upgrade each app's target major, or (b) accept that all apps are on Next 16 today, update their `package.json` `next` fields to reflect reality, and audit each app's code for Next-16-breaking-change exposure. Not decided here — logged as GAP-44, recommended as an early Phase 1 priority given it already broke lint tooling once.
+- **Severity:** Upgraded from Medium to **High** given the confirmed real breakage already found.
 
 ---
 
