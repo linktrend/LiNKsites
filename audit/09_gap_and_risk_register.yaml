@@ -145,16 +145,23 @@ gaps:
   - gap_id: GAP-43
     requirement_refs: ["24 §38"]
     capability_id: ci.real_build_test_gate
-    current_status: broken
+    current_status: verified-working # RESOLVED 2026-07-13, PR #40
     gap_description: >
-      apps/cms's Vitest suite (`test:int`, which includes the contract tests
-      under tests/contracts/ and tests/int/) fails at the module-resolution
-      stage for all 6 test files with "Failed to resolve import '@/...'"
-      errors -- before any test assertion executes. Verified locally
-      2026-07-13 while building the Phase 1 CI gate. Root cause not fully
-      diagnosed, but is very likely connected to GAP-44 (the dependency
-      override cascade), since vite/vite-tsconfig-paths versions are also
-      subject to the same root package.json override mechanics.
+      RESOLVED (2026-07-13, PR #40). apps/cms's Vitest suite (`test:int`)
+      was failing at the module-resolution stage for all 6 test files with
+      "Failed to resolve import '@/...'" errors -- before any test
+      assertion executed. Root cause: vite-tsconfig-paths, without a
+      scoped `projects` option, eagerly discovers every tsconfig.json in
+      the pnpm workspace and could match the wrong one (e.g.
+      sites_projects/old_linktrend's unrelated tsconfig) for files under
+      apps/cms/tests/**, which apps/cms's own tsconfig.json intentionally
+      excludes from its `include`. Fixed via a dedicated
+      apps/cms/tsconfig.vitest.json + a scoped `projects` option in
+      vitest.config.mts. Two smaller, related issues were also fixed:
+      a DATABASE_URI-required-at-import-time crash (src/utils/bootstrap.ts
+      eagerly imports payload.config.ts) and a jsdom/Node
+      native-webstorage localStorage conflict. Suite now passes 18/19
+      tests (1 correctly skipped), 0 failures, and runs in the CI gate.
     impact: { customer: "n/a directly", security: "medium (the tenant-isolation-relevant site-scoping.spec.ts contract test cannot currently run at all, compounding GAP-06)", reliability: "medium", business: "low", implementation: "medium" }
     severity: high
     dependencies: [GAP-44]

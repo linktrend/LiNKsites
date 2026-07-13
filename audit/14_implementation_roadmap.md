@@ -48,10 +48,17 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
   checking (not caught by plain `tsc --noEmit`). This is a real, separate version-alignment
   decision (React 19 upgrade vs. pinning Next to a React-18-compatible release) — intentionally
   not forced through inside the GAP-44/45 fix. `next build` remains out of the CI gate.
+- **DONE (2026-07-13, PR #40):** Resolved GAP-43 — `apps/cms`'s `test:int` Vitest suite was
+  failing at module resolution for all 6 test files (a `vite-tsconfig-paths` workspace-wide
+  tsconfig discovery bug matching the wrong project); fixed via a dedicated
+  `tsconfig.vitest.json` plus a scoped `projects` option, alongside two smaller related fixes
+  (a `DATABASE_URI`-required-at-import-time crash, and a jsdom/Node native-webstorage
+  `localStorage` conflict). Suite now passes 18/19 tests (1 correctly skipped), 0 failures, and
+  runs as part of the CI gate.
 - **Next Phase 1 items, not yet started:** resolve GAP-46 (React 18/19 alignment, needed before
-  `apps/web-master` can actually be built/deployed); resolve GAP-43 (test:int module
-  resolution); diagnose/fix the Dependabot failure pattern and the 222-vulnerability finding
-  (GAP-42, GAP-11); establish schema/contract versioning conventions.
+  `apps/web-master` can actually be built/deployed); diagnose/fix the Dependabot failure
+  pattern and the 222-vulnerability finding (GAP-42, GAP-11); establish schema/contract
+  versioning conventions.
 - Define versioned schemas/generated types for Site Specification, Vertical Kit, Tier Specification (currently absent) before any code is written against them.
 - Resolve DR-03 (LinkSkills capability-lease boundary) — this materially changes how every subsequent Phase's work packets must be scoped.
 
