@@ -1,5 +1,13 @@
 # Company-Site Template
 
+> **Status (2026-07-13, Decision DR-02, approved by Carlos):** This app was originally started as a
+> **special-case build of the LiNKtrend company website itself** (linktrend.media / corporate site),
+> not as a generic customer-factory template. It is **paused, not abandoned** — it may already be
+> partially finished and should be preserved, not deleted, pending review. It is **not** currently
+> part of the active customer-facing LiNKsites production pipeline (that role belongs to
+> `apps/web-master`). See `audit/13_decision_and_contradiction_register.md` (DR-02) and
+> `apps/web-company/STATUS.md` for full context before making further changes here.
+
 AI-first, multi-language, CMS-driven corporate/marketing site starter for the LiNKsites Factory Kit. Aligns with LinkTrend architecture and centralized text system.
 
 ## Key characteristics

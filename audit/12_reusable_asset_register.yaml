@@ -1,0 +1,98 @@
+# Reusable Asset and Open-Source Adoption Register — per manual §35, §51
+
+assets:
+  - asset_id: asset-payload-cms-app
+    description: "apps/cms — Payload 3.69 / Next.js 16 / React 19 CMS with 25 collections, 5 globals, site-scoped access control, role-based publish/approve workflow, translation/moderation queues, custom admin views."
+    classification: reusable
+    disposition: adapt
+    rationale: >
+      This is the single most doctrine-aligned asset in the repository:
+      multi-site data modeling exists, access control is site-scoped, and a
+      draft/publish-adjacent workflow already exists via workflowFields.
+      Gaps are additive (Promotion Service boundary, migration discipline,
+      Local API overrideAccess audit, tenant-isolation negative tests) —
+      none require discarding the app.
+    open_source_dependency: "Payload CMS (MIT-licensed core; verify plugin licenses individually — none currently installed, plugins: [] in payload.config.ts)"
+
+  - asset_id: asset-web-master-frontend
+    description: "apps/web-master — Next.js 14.2 multi-tenant marketing frontend with hostname→Site-ID resolution, CMS-provider abstraction (mock/payload), template registry, page-renderer/block-mapping, design tokens (CSS variables), next-intl localization, component documentation (77 components)."
+    classification: reusable
+    disposition: adapt
+    rationale: >
+      The hostname resolution and CMS-provider abstraction are exactly the
+      shape of thing the manual's shared-frontend-pool doctrine (§07/§12/§15)
+      needs. The component documentation JSON is a strong seed for a real
+      Component Registry once given a governed schema and lifecycle states.
+    open_source_dependency: "Next.js (MIT), next-intl (MIT), Radix UI (MIT)"
+
+  - asset_id: asset-web-company-frontend
+    description: "apps/web-company — smaller Next.js 14.0 template with slot-based layout renderer; no hostname resolution; stub content client."
+    classification: duplicated-or-untested
+    disposition: defer
+    rationale: >
+      Overlaps apps/web-master's purpose without the tenant-resolution
+      maturity. Manual §07.2 explicitly warns against customer-specific
+      forks of shared foundations; this asset's exact intended role (second
+      template family? Enterprise-tier dedicated runtime? early prototype
+      superseded by web-master?) is not stated anywhere found in the repo
+      and needs a Carlos/architecture decision before continued investment
+      (see Decision Register DR-02).
+
+  - asset_id: asset-supabase-migration-and-schema
+    description: "supabase/migrations/20260331_000001_lsites_init.sql + supabase/schemas/*.json — sites/site_domains/content-sync tables, site_id-scoped RLS, JSON schema + CMS-mapping documentation."
+    classification: reusable
+    disposition: adapt
+    rationale: >
+      Correct isolation pattern (RLS by site_id) and a real JSON-schema
+      contract discipline already exist. Needs expansion into the six
+      logical domains manual §12.13 requires (control/orchestration,
+      research/evidence, product capability, preview/customer production,
+      validation/publication, economics/observability) — additive, not
+      a replacement.
+
+  - asset_id: asset-deploy-wave9-docker-traefik
+    description: "deploy/docker-compose.deploy.yml, deploy/docker/*.Dockerfile, deploy/README.md — Traefik-routed CMS + shared-frontend Wave-9 VPS deployment scaffolding."
+    classification: configured-unverified
+    disposition: adapt
+    rationale: >
+      Directionally correct (Traefik reverse proxy, host-based routing,
+      wildcard preview subdomain) per manual §15 doctrine. Needs live
+      verification, Cloudflare-side codification (currently only
+      documented in docs/ops/, not executable), and capacity/monitoring
+      wrap-around before any production trust.
+
+  - asset_id: asset-mvo-live-publish-script
+    description: "scripts/mvo-live-publish.sh — governed demo-site publish flow to Payload + preview URL."
+    classification: prototype
+    disposition: adapt
+    rationale: "A real, working example of an end-to-end publish path exists — useful seed for the eventual Promotion Service and Launch sequence, though it is a script, not the governed service the manual requires."
+
+  - asset_id: asset-ui-ux-pro-max-seed
+    description: "Manual §06 names an upstream 'ui-ux-pro-max-skill' repo as a design-catalog seed. Not located anywhere in this repository."
+    classification: absent
+    disposition: defer
+    rationale: "Must be located (likely in a sibling workspace or external repo) before the Design Intelligence Catalog can be built from it, per manual's explicit instruction that it is a seed to be pinned/reviewed/normalized, not built from scratch."
+
+  - asset_id: asset-sites-specs-narrative-docs
+    description: "sites_specs/*.txt — three narrative architecture/specification documents describing a v2.0 per-site-repo model."
+    classification: outdated
+    disposition: retire (with lineage preserved, not deleted, per manual §5 — no destructive action taken in this audit)
+    rationale: >
+      Describes a per-site-repo/VPS architecture that conflicts with the
+      manual's centralized-Payload/shared-frontend-pool doctrine (manual
+      §01, §12, §15). Should be preserved as historical evidence (manual
+      authority order places it below the reconciled manual) but not used
+      as a current design input. This audit did NOT delete or move these
+      files.
+
+  - asset_id: asset-sites-projects-legacy
+    description: "sites_projects/old_linktrend (legacy Next.js app with Stripe checkout starter code), sites_projects/linktrend (build artifacts only)."
+    classification: obsolete
+    disposition: retire (preserve, do not delete during audit)
+    rationale: "Not on the active factory path per root README; old_linktrend's Stripe integration code is the only Stripe-related code found anywhere in the repo and may be a useful reference pattern when Phase 5 (commercial spine) is built, even though the app itself is retired."
+
+  - asset_id: asset-linkdev-embedded-factory
+    description: "LiNKdev/ embedded factory (AGENTS.md, factory/, product/, skills/) and .agent/, .codex/skills/, repo-local .cursor/{rules,skills,commands,agents} — all currently shown as deleted (uncommitted) in the working tree; .cursor is now an untracked symlink to the sibling IDE Development workspace's .cursor/."
+    classification: unknown (mid-transition)
+    disposition: defer
+    rationale: "See Decision Register DR-01. This audit does not know whether this is an intentional, in-progress migration to a shared cross-repo agent framework (consistent with this session's own workspace rules, which reference a shared LiNKdev template across repos) or an accidental/incomplete deletion. Not resolved here."

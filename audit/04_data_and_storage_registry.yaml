@@ -1,0 +1,62 @@
+# Data and Storage Registry — per manual §15
+
+data_stores:
+  - store_id: postgres-payload
+    kind: PostgreSQL (via @payloadcms/db-postgres adapter)
+    authority: "Payload CMS draft + published content (manual §01/§12 — Payload is content system of record)"
+    tenant_key: "site relationship field (Payload collections reference `Sites`); NOT a `tenant_id` column pattern"
+    environment: dev/prod (unseparated in code — same DATABASE_URI mechanism; env separation is operational/GSM-managed, not verified live)
+    sensitivity: "Customer site content, media metadata, team/testimonial/location personal-adjacent business data"
+    retention_reference: "None found (no Retention Profile object or retention config located)"
+    backup: "Not found in repo"
+    migration_owner: "apps/cms/src/migrations (currently empty array; schema push mode used outside production, per payload.config.ts)"
+    consumers: [svc-web-master (via provider flag, default is mock not payload), svc-cms-scripts]
+    doctrine_gap: >
+      Manual §12.9 requires either a proven-safe schemaName co-location test
+      or a mandatory two-separate-database fallback when Payload and the
+      Supabase working layer might share one Postgres instance. No evidence
+      was found in this repo that this decision has been made or tested either way.
+
+  - store_id: postgres-supabase-lsites_core
+    kind: PostgreSQL (Supabase-hosted), schema `lsites_core`
+    authority: >
+      Working/operational layer per manual §01/§12 doctrine (Program/Run
+      state, site+site-domain records, content sync tables) — but the
+      single migration found (20260331_000001_lsites_init.sql) implements
+      only `sites`, `site_domains`, content/sync tables and RLS by `site_id`;
+      it does NOT yet implement the full Program Ledger domain set required
+      by manual §12.13 (control/orchestration, research/evidence, product
+      capability, preview/customer production, validation/publication,
+      economics/observability).
+    tenant_key: "site_id (uuid), enforced via RLS using current_setting('app.site_id', true) for role svc_linksites_runtime"
+    environment: unknown (project ref not found in inspected files)
+    sensitivity: internal
+    retention_reference: none found
+    backup: not found in repo
+    migration_owner: supabase/migrations/ (1 file)
+    consumers: [svc-payload-cms (if co-located), sync scripts under apps/cms/scripts/]
+    rls_evidence: |
+      supabase/migrations/20260331_000001_lsites_init.sql:381-384
+      create policy lsites_site_isolation on lsites_core.site_domains
+        for all to svc_linksites_runtime
+        using (site_id::text = current_setting('app.site_id', true))
+        with check (site_id::text = current_setting('app.site_id', true));
+
+  - store_id: object-storage
+    kind: unknown/undecided
+    authority: "Manual §11/§12 requires governed object storage for media binaries, but explicitly leaves the provider/bucket-layout decision open (manual §11.51, §12.50)."
+    current_status: absent
+    note: "No object-storage adapter code, bucket config, or provider SDK call was found in the repository."
+
+  - store_id: local-env-secrets
+    kind: local filesystem (.env, gitignored)
+    authority: "Should be Google Secret Manager per always-applied workspace secrets rule and manual §18.45-49"
+    environment: local dev / deploy staging area (apps/cms/deploy/prod/.env exists on disk, gitignored, not committed)
+    sensitivity: secret
+    doctrine_gap: >
+      Manual §18.47 states ordinary .env files are not acceptable as the
+      production secret manager. apps/cms/ops/render-runtime-env-from-gsm.sh
+      suggests GSM is the intended source of truth and .env is only a
+      rendered runtime artifact — this appears aligned with doctrine, but
+      could not be verified live (script logic not executed in this audit).
+    note: "No secret VALUES inspected or reproduced in this or any audit deliverable, per manual §9/§34/§48."
