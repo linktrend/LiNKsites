@@ -37,11 +37,21 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
   declared Next 14.2.33) but the app actually runs Next 16.2.2 (GAP-44), where those APIs became
   async. `apps/web-master`'s typecheck is excluded from the CI gate until this migration is done
   — this is real, separate work, not something to rush through inside a CI-gate fix.
-- **Next Phase 1 items, not yet started:** resolve GAP-44 (dependency override cascade) and
-  GAP-45 (web-master async cookies/headers migration) together, since they share a root cause;
-  resolve GAP-43 (test:int module resolution); diagnose/fix the Dependabot failure pattern and
-  the 222-vulnerability finding (GAP-42, GAP-11); establish schema/contract versioning
-  conventions.
+- **DONE (2026-07-13, PR #39):** Resolved GAP-44/GAP-45 together — accepted Next.js 16.2.2 as
+  the real target for every app (rather than fighting the override cascade to force a
+  downgrade), migrated `apps/web-master`'s `cookies()`/`headers()`/`params` call sites to the
+  async App Router API, updated declared `next` versions in all three apps' `package.json` to
+  match reality, and re-included `apps/web-master` in the CI typecheck gate (verified green
+  locally with a clean `.next`, matching a fresh CI checkout).
+- **Discovered GAP-46** while doing this: `next build` for `apps/web-master` still fails on a
+  React 18 vs React 19 `@types/react` mismatch surfaced by Next 16's internal route-type
+  checking (not caught by plain `tsc --noEmit`). This is a real, separate version-alignment
+  decision (React 19 upgrade vs. pinning Next to a React-18-compatible release) — intentionally
+  not forced through inside the GAP-44/45 fix. `next build` remains out of the CI gate.
+- **Next Phase 1 items, not yet started:** resolve GAP-46 (React 18/19 alignment, needed before
+  `apps/web-master` can actually be built/deployed); resolve GAP-43 (test:int module
+  resolution); diagnose/fix the Dependabot failure pattern and the 222-vulnerability finding
+  (GAP-42, GAP-11); establish schema/contract versioning conventions.
 - Define versioned schemas/generated types for Site Specification, Vertical Kit, Tier Specification (currently absent) before any code is written against them.
 - Resolve DR-03 (LinkSkills capability-lease boundary) — this materially changes how every subsequent Phase's work packets must be scoped.
 

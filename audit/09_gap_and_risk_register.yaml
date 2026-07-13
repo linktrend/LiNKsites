@@ -218,6 +218,27 @@ gaps:
     acceptance_tests: ["apps/web-master's typecheck passes with cookies()/headers() awaited correctly at every call site.", "Manual smoke test confirms robots.txt, sitemap.xml, llms.txt, and the contact API route still behave correctly at runtime after the fix (not just typecheck-clean)."]
     decision_required: null
 
+  - gap_id: GAP-46
+    requirement_refs: ["24 §35"]
+    capability_id: repo.dependency_react_version_alignment
+    current_status: broken
+    gap_description: >
+      While resolving GAP-45 (PR #39), confirmed that `next build` for
+      apps/web-master still fails during Next.js's internal route-type
+      checking step (not caught by plain `tsc --noEmit`, which is why
+      the CI typecheck gate is genuinely green): Next.js 16.2.2's
+      generated LayoutProps/PageProps types expect React 19 ReactNode
+      semantics (which include `bigint`), but apps/web-master (and by
+      the same reasoning, apps/web-company) still declare and resolve
+      React 18.3.1 / @types/react ^18.3.17. Two distinct @types/react
+      versions (18.3.28 and 19.1.8) coexist in the repo's node_modules.
+    impact: { customer: "unknown until resolved -- web-master cannot currently produce a production build via `next build`", security: "low", reliability: "critical (blocks any real deployment of web-master)", business: "high", implementation: "medium-high -- requires a deliberate React 18->19 upgrade decision and regression pass, or pinning Next to a React-18-compatible release" }
+    severity: critical
+    dependencies: [GAP-44, GAP-45]
+    recommended_disposition: adapt
+    acceptance_tests: ["`next build` succeeds for apps/web-master (and apps/web-company once picked back up per DR-02) without disabling Next's build-time type checking as a workaround."]
+    decision_required: "Upgrade apps/web-master (and apps/web-company, when unpaused) to React 19 to match the already-running Next.js 16.2.2, or pin/downgrade Next to a release still compatible with React 18? Recommend upgrading to React 19 given apps/cms already runs React 19 successfully and Next 16 is the de facto target across the repo -- but this is a real regression-risk decision that should not be made silently inside a bug-fix PR."
+
   - gap_id: GAP-11-DEP1 # placeholder cross-reference, see DR-01 in decision register
     requirement_refs: ["24 §5"]
     capability_id: repo.working_tree_uncommitted_state
