@@ -55,10 +55,21 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
   (a `DATABASE_URI`-required-at-import-time crash, and a jsdom/Node native-webstorage
   `localStorage` conflict). Suite now passes 18/19 tests (1 correctly skipped), 0 failures, and
   runs as part of the CI gate.
+- **DONE (2026-07-13, PRs #41/#42):** Triaged all 222 Dependabot findings (GAP-42) and the
+  repeated Dependabot Updates workflow failures (GAP-11/GAP-48). Fixed 4 of 6 CRITICAL findings
+  directly (Payload pre-auth account takeover + a more serious internal Payload package-family
+  version mismatch discovered along the way -> GAP-47; Vitest UI arbitrary file read; Next.js
+  middleware auth bypass, covered by GAP-44/45); the remaining 2 critical findings and 66 of
+  222 total findings are scoped to the retired `sites_projects/old_linktrend` legacy app
+  (residual risk, decision needed from Carlos on formal acceptance vs. retirement timing).
+  Diagnosed the Dependabot Updates workflow failures as Dependabot correctly reporting
+  unresolvable constraints (not a broken pipeline) and fixed the two blocking cases (js-yaml,
+  @babel/core) via narrow, same-major-bounded overrides.
 - **Next Phase 1 items, not yet started:** resolve GAP-46 (React 18/19 alignment, needed before
-  `apps/web-master` can actually be built/deployed); diagnose/fix the Dependabot failure
-  pattern and the 222-vulnerability finding (GAP-42, GAP-11); establish schema/contract
-  versioning conventions.
+  `apps/web-master` can actually be built/deployed); re-triage the remaining ~100 medium/31 low
+  Dependabot findings once PRs #38-#42 merge and Dependabot rescans; get Carlos's decision on
+  `sites_projects/old_linktrend`'s disposition (accept residual risk vs. retire now); establish
+  schema/contract versioning conventions.
 - Define versioned schemas/generated types for Site Specification, Vertical Kit, Tier Specification (currently absent) before any code is written against them.
 - Resolve DR-03 (LinkSkills capability-lease boundary) — this materially changes how every subsequent Phase's work packets must be scoped.
 

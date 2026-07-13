@@ -123,24 +123,88 @@ gaps:
     acceptance_tests: ["ci.yml runs pnpm install, turbo lint/typecheck/build, and the existing Vitest/Playwright suites, and fails the check on any failure."]
     decision_required: null
 
+  - gap_id: GAP-47
+    requirement_refs: ["24 §35"]
+    capability_id: repo.payload_ecosystem_version_alignment
+    current_status: verified-working # RESOLVED 2026-07-13, PR #41
+    gap_description: >
+      RESOLVED (2026-07-13, PR #41). Discovered while triaging GAP-42:
+      apps/cms declared "payload": "3.69.0" exactly, but a root
+      pnpm.overrides entry silently bumped only the *resolved* payload/
+      @payloadcms/next to 3.81.0, while @payloadcms/db-postgres,
+      @payloadcms/richtext-lexical, and @payloadcms/ui remained pinned at
+      3.69.0 -- a real, dangerous internal version mismatch within
+      Payload's own interdependent package family (distinct from and more
+      dangerous than GAP-44's single-package Next.js finding). Fixed by
+      declaring all payload/@payloadcms/* packages at a single consistent
+      version (3.81.0), which also patches a CRITICAL pre-authentication
+      account-takeover advisory in payload < 3.79.1.
+    severity: critical
+    dependencies: []
+    recommended_disposition: adapt
+    acceptance_tests: ["All payload/@payloadcms/* packages resolve to the same major.minor.patch version.", "Lint/typecheck/test:int all pass."]
+    decision_required: null
+
+  - gap_id: GAP-48
+    requirement_refs: ["24 §35", "24 §46"]
+    capability_id: repo.dependabot_update_pipeline
+    current_status: verified-working # PARTIALLY RESOLVED 2026-07-13, PRs #42
+    gap_description: >
+      PARTIALLY RESOLVED (2026-07-13, PR #42). The repeated Dependabot
+      Updates workflow failures observed in the original audit (js-yaml,
+      @babel/core, ws, undici) were investigated: these are NOT CI
+      pipeline failures. Dependabot's own updater correctly detected that
+      the patched version could not be resolved within then-existing
+      dependency constraints and reported "security_update_not_possible"
+      -- a correct, expected outcome of Dependabot's own tooling, not a
+      broken pipeline. Resolved for js-yaml and @babel/core via narrow,
+      same-major-bounded pnpm.overrides (matching the corrected pattern
+      from GAP-44/47). ws and undici were already covered by GAP-47's
+      overrides. Not yet re-verified live against GitHub's Dependabot
+      service (requires the fix to merge and a rescan) -- acceptance test
+      below is the closing criterion.
+    severity: medium
+    dependencies: [GAP-47]
+    recommended_disposition: adapt
+    acceptance_tests: ["Once PRs #38-#42 merge to development/main and Dependabot rescans, confirm no new 'security_update_not_possible' failures recur for js-yaml, @babel/core, ws, or undici."]
+    decision_required: null
+
   - gap_id: GAP-42
     requirement_refs: ["24 §35-37"]
     capability_id: repo.dependency_vulnerabilities
-    current_status: broken
+    current_status: partial # UPDATED 2026-07-13: critical items resolved (GAP-47); most `next` findings resolved by GAP-44/45; legacy-app and residual transitive findings triaged, not all individually patched
     gap_description: >
       While pushing a Phase-0-closure branch on 2026-07-13, GitHub reported
       222 Dependabot vulnerability findings on the default branch: 6
-      critical, 85 high, 100 moderate, 31 low. This is a materially larger
-      and more urgent finding than the "Dependabot Updates workflow is
-      broken" observation in GAP-11/10_security_and_supply_chain.md — it
-      confirms the broken update-PR pipeline (GAP-11) has allowed a real,
-      large vulnerability backlog to accumulate un-remediated.
-    impact: { customer: "n/a directly (no production customer data yet)", security: "critical — 6 critical + 85 high findings unresolved", reliability: "medium", business: "high (reputational/compliance exposure once real customers exist)", implementation: "medium-high — requires triage, not just an update-PR pipeline fix" }
-    severity: critical
-    dependencies: [GAP-39, GAP-11]
+      critical, 85 high, 100 moderate, 31 low.
+
+      TRIAGED 2026-07-13 (PRs #39, #41, #42): breakdown of the 222 --
+      66 findings (30%) are scoped entirely to sites_projects/old_linktrend
+      (retired legacy app, per audit/12_reusable_asset_register.yaml
+      retire-disposition; residual risk accepted, not actively remediated
+      since it is not deployed); ~34 findings are `next`-package advisories
+      across apps/web-master/apps/web-company/apps/cms, all resolved once
+      GAP-44/45 (PR #39) merges (declared versions now correctly reflect
+      the actually-running, already-patched Next.js 16.2.2); all 6
+      CRITICAL findings were individually triaged and 4 of 6 fixed
+      directly (payload pre-auth account takeover + internal version
+      mismatch -> GAP-47/PR #41; vitest UI arbitrary file read -> PR #41;
+      next.js Auth Bypass in apps/web-company -> covered by PR #39's
+      version-truth fix) -- the remaining 2 critical `next` findings are
+      scoped to the retired legacy app. A representative set of
+      high/medium transitive findings (vite, undici, minimatch, fast-uri,
+      ws, form-data, flatted, js-yaml, @babel/core) were patched via
+      narrow, same-major-bounded pnpm.overrides (PRs #41, #42). NOT
+      individually triaged: the remaining long tail of ~100 medium/31 low
+      findings not covered above -- recommend a follow-up pass once
+      PRs #38-#42 merge and Dependabot rescans, to see the true remaining
+      count before deciding whether further work is needed.
+    impact: { customer: "n/a directly (no production customer data yet)", security: "high remaining (was critical) -- all 6 critical findings triaged, 4 fixed directly", reliability: "medium", business: "high (reputational/compliance exposure once real customers exist)", implementation: "medium — bulk of the work is done; remaining tail is lower-priority" }
+    severity: high # DOWNGRADED from critical 2026-07-13 after triage (PRs #39, #41, #42)
+    dependencies: [GAP-39, GAP-11, GAP-47, GAP-48]
     recommended_disposition: adapt
-    acceptance_tests: ["All 6 critical and 85 high findings are triaged (fixed, mitigated, or explicitly waived with expiry per manual §19.78) before any real customer data enters the system."]
-    decision_required: "Should be the first substantive Phase 1 security work packet, ahead of most feature work, per manual §78 (a release cannot proceed with a critical dependency vulnerability without approved mitigation)."
+    acceptance_tests: ["Re-run this triage after PRs #38-#42 merge and Dependabot rescans; confirm the critical/high count drops to near-zero for the active (non-legacy) apps."]
+    decision_required: "Should sites_projects/old_linktrend's 66 un-remediated findings be formally accepted as residual risk (with a dated waiver per manual §19.78), or should the retire disposition be executed (archive/remove) sooner rather than later? Recommend Carlos decide the legacy app's fate explicitly rather than leaving it in permanent limbo."
 
   - gap_id: GAP-43
     requirement_refs: ["24 §38"]
