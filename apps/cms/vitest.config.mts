@@ -6,7 +6,7 @@ export default defineConfig({
   // Scope path-alias discovery to a dedicated tsconfig.vitest.json (GAP-43).
   // Without an explicit `projects` list, vite-tsconfig-paths walks the whole
   // pnpm workspace and "eagerly" loads every tsconfig it finds (including
-  // sites_projects/old_linktrend's legacy, unrelated tsconfig), and can pick
+  // the now-archived old_linktrend app's legacy, unrelated tsconfig), and can pick
   // the wrong project's "@/*" mapping for files it doesn't recognize.
   // apps/cms/tsconfig.json itself intentionally excludes `tests/` from its
   // `include` globs (keeping test files out of the app's own production

@@ -49,7 +49,7 @@ jobs:
 
       # GAP-43 is now fixed: apps/cms's Vitest suite was failing to resolve "@/..." path
       # aliases because vite-tsconfig-paths discovers every tsconfig in the pnpm workspace and
-      # could match the wrong one (e.g. sites_projects/old_linktrend's unrelated tsconfig) for
+      # could match the wrong one (e.g. the now-archived old_linktrend app's unrelated tsconfig) for
       # files under tests/**, which apps/cms's own tsconfig.json intentionally excludes from
       # its `include`. Fixed via a dedicated tsconfig.vitest.json + a scoped `projects` option.
       - name: CMS unit/contract tests
