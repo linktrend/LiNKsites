@@ -54,3 +54,9 @@ jobs:
       # its `include`. Fixed via a dedicated tsconfig.vitest.json + a scoped `projects` option.
       - name: CMS unit/contract tests
         run: pnpm --filter @linksites/cms run test:int
+
+      # Phase 2 foundation (audit/14_implementation_roadmap.md): the Program Ledger's
+      # exit-gate tests (manual §62 -- duplicate dispatch, worker crash/lease reclaim,
+      # timeout/retry, cancellation, replay, Gate authority, traceability).
+      - name: Program Ledger tests
+        run: pnpm --filter @linksites/program-ledger run test
