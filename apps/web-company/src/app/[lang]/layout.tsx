@@ -13,16 +13,17 @@ export default async function LangLayout({
   params,
 }: {
   children: ReactNode;
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }) {
   const theme = await themeFromRequest();
+  const { lang } = await params;
 
   return (
-    <html lang={params.lang} data-theme={theme.id}>
+    <html lang={lang} data-theme={theme.id}>
       <body>
-        <Header lang={params.lang} />
+        <Header lang={lang} />
         <main>{children}</main>
-        <Footer lang={params.lang} />
+        <Footer lang={lang} />
       </body>
     </html>
   );

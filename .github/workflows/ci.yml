@@ -38,17 +38,14 @@ jobs:
       - name: Typecheck (all workspaces)
         run: pnpm run typecheck
 
-      # NOTE (GAP-46, discovered while closing GAP-45): `next build` for apps/web-master still
-      # fails during Next's internal route-type-checking step (not caught by plain `tsc
-      # --noEmit`, which is why the typecheck step above is genuinely green). The failure is a
-      # React 18 vs React 19 `@types/react` mismatch: Next.js 16.2.2's generated LayoutProps/
-      # PageProps types expect React 19 ReactNode semantics (which include `bigint`), but
-      # apps/web-master still declares and resolves React 18.3.1/@types/react ^18.3.17. Fixing
-      # this properly means deciding whether apps/web-master (and apps/web-company) upgrade to
-      # React 19 to match Next 16, or Next is pinned/downgraded to a React-18-compatible release
-      # -- a real version-alignment decision, not something to force through here. `next build`
-      # for apps/web-master is intentionally NOT run in CI until that decision is made and
-      # implemented (see audit/09_gap_and_risk_register.yaml, GAP-46).
+      # GAP-46 is now fixed: apps/web-master and apps/web-company were upgraded to React 19.1.0
+      # to match Next.js 16.2.2's generated route types, resolving the React 18/19 @types/react
+      # mismatch. `next build` now succeeds for both apps and is verified below.
+      - name: Build (web-master)
+        run: pnpm --filter @linksites/web-master run build
+
+      - name: Build (web-company)
+        run: pnpm --filter @linksites/web-company run build
 
       # GAP-43 is now fixed: apps/cms's Vitest suite was failing to resolve "@/..." path
       # aliases because vite-tsconfig-paths discovers every tsconfig in the pnpm workspace and
