@@ -362,6 +362,33 @@ gaps:
     acceptance_tests: ["Re-scan after PRs #38-#46 merge; confirm no new medium/low findings recur for the packages listed above."]
     decision_required: null
 
+  - gap_id: GAP-50
+    requirement_refs: ["20", "24 §45"]
+    capability_id: linksites.execution.program_ledger
+    current_status: configured-unverified
+    gap_description: >
+      A real PostgresLedgerStore implementation exists and is tested
+      against @electric-sql/pglite (a genuine embedded Postgres engine
+      exercising the actual migration SQL) -- see PR #48. This proves
+      the SQL and the store's query logic are correct in isolation, but
+      it has NOT been verified against a live networked Postgres or
+      Supabase connection. Specifically unverified: connection pooling
+      behavior under a real pg.Pool (the store's reserveIdempotencyKey
+      method requires a single dedicated connection for its
+      BEGIN/SELECT-FOR-UPDATE/COMMIT sequence -- documented in code, not
+      yet proven under real pool contention); RLS enforcement under the
+      actual svc_linksites_ledger role's live grants; and migration-apply
+      behavior against an existing, already-populated Supabase database
+      (this session's audit could not reach a live Supabase project at
+      all, per manual §47's presumptive-release-blocker rule, which
+      remains open from the original Phase 0 audit).
+    impact: { customer: "n/a -- no application code uses this store yet", security: "medium -- RLS policies are written but their live enforcement is unverified", reliability: "medium", business: "low", implementation: "medium -- primarily a verification task, not a build task, once live access exists" }
+    severity: medium
+    dependencies: []
+    recommended_disposition: adapt
+    acceptance_tests: ["Apply the migration to a real (dev/staging) Supabase project.", "Run the same 18-test contract suite (tests/ledgerContract.shared.ts) against a PostgresLedgerStore backed by a real pg.Pool-derived Client connected to that project.", "Verify RLS: a connection NOT authenticated as svc_linksites_ledger cannot read/write lsites_ledger tables."]
+    decision_required: "Requires Carlos (or a future session with live infrastructure access) to provision a dev/staging Supabase project (or grant access to an existing one) before this can close."
+
   - gap_id: GAP-11-DEP1 # placeholder cross-reference, see DR-01 in decision register
     requirement_refs: ["24 §5"]
     capability_id: repo.working_tree_uncommitted_state

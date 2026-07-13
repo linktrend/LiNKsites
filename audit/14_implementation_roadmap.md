@@ -94,9 +94,24 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 | #45 | `dev/blackcursor/archive-legacy-old-linktrend` | Archive `sites_projects/old_linktrend` per Carlos's instruction | #44 |
 | #46 | `dev/blackcursor/gap49-medium-low-security-triage` | GAP-49: remaining medium/low Dependabot findings patched | #45 |
 | #47 | `dev/blackcursor/phase2-program-ledger-core` | Phase 2 foundation: Program Ledger Issue/Run/Gate/Event core + exit-gate tests | #46 |
+| #48 | `dev/blackcursor/phase2-postgres-store` | Postgres-backed LedgerStore, tested against real embedded Postgres (pglite) | #47 |
 
 All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
-the rest), then #38 through #47 in order (each depends on the previous).
+the rest), then #38 through #48 in order (each depends on the previous).
+
+## Fourth work batch (2026-07-14) — Postgres store, tested without live infrastructure
+
+Carlos noted the team is working remotely and cannot connect this session to real LiNKsites
+infrastructure right now, and asked for continued development with live-infrastructure testing
+deferred. Rather than shipping the Postgres store untested, this batch used
+`@electric-sql/pglite` — a real, embedded PostgreSQL engine that runs entirely in-process (no
+network, no live server) — to genuinely exercise the migration SQL and a real
+`PostgresLedgerStore` implementation now. This is a meaningfully stronger position than "written
+but untested": the SQL and adapter logic are proven correct against real Postgres semantics
+(two genuine bugs were caught this way), and what remains (GAP-50: live connection pooling, live
+RLS enforcement, migration-apply against a real populated database) is now a narrow, precisely
+scoped verification task for whenever live infrastructure access is available — not an open
+question about whether the code is even correct.
 
 ## Second work batch (2026-07-14) — Carlos's explicit instructions, all executed
 
@@ -136,10 +151,21 @@ the next session, in the order listed in the Phase 2 section below.
   added `supabase/migrations/20260714_000001_program_ledger_core.sql` defining the target
   Postgres persistence shape in a new `lsites_ledger` schema (not yet wired to any application
   code — a live-DB-backed store is a separate follow-up work packet).
+- **DONE (2026-07-14, PR #48):** Built `PostgresLedgerStore` (a real `LedgerStore`
+  implementation targeting the migration's schema) and tested it against
+  `@electric-sql/pglite` — a genuine embedded PostgreSQL engine, not a mock — since no live
+  database connection is available while working remotely. All 9 exit-gate tests pass
+  identically against this store as against the in-memory one (18/18 total). Testing against
+  real Postgres caught two genuine bugs the in-memory store's tests could not have caught
+  (a foreign-key ordering bug in `dispatch()`, and a `pgcrypto`-extension incompatibility in
+  the migration) — both fixed.
 - **Remaining Phase 2 scope, not yet started:**
-  - A Postgres-backed `LedgerStore` implementation (the SQL schema exists; the TypeScript
-    adapter connecting it does not) — needs a live Supabase connection to test against, which
-    this session did not have.
+  - **Live verification of the Postgres store** — pglite proves the SQL and adapter logic are
+    correct in isolation, but connection pooling under a real `pg.Pool`, RLS enforcement under
+    the actual `svc_linksites_ledger` role's live grants, and migration-apply against an
+    existing populated Supabase database all remain unverified and require live infrastructure
+    access this session does not have. **This is now the most concrete, well-scoped remaining
+    blocker for closing Phase 2's persistence layer** — flagged as GAP-50.
   - Program/Module/Stage hierarchy objects (Issues currently reference them only as opaque
     string IDs).
   - The full dependency DAG (`requires_completion`/`requires_gate`/`requires_artifact`/etc.)
