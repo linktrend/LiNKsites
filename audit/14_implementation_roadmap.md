@@ -93,9 +93,10 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 | #44 | `dev/blackcursor/gap46-react19-upgrade` | GAP-46: React 19 upgrade, `next build` now succeeds for both frontends | #43 |
 | #45 | `dev/blackcursor/archive-legacy-old-linktrend` | Archive `sites_projects/old_linktrend` per Carlos's instruction | #44 |
 | #46 | `dev/blackcursor/gap49-medium-low-security-triage` | GAP-49: remaining medium/low Dependabot findings patched | #45 |
+| #47 | `dev/blackcursor/phase2-program-ledger-core` | Phase 2 foundation: Program Ledger Issue/Run/Gate/Event core + exit-gate tests | #46 |
 
 All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
-the rest), then #38 through #46 in order (each depends on the previous).
+the rest), then #38 through #47 in order (each depends on the previous).
 
 ## Second work batch (2026-07-14) — Carlos's explicit instructions, all executed
 
@@ -112,13 +113,54 @@ automation) and all of Phases 2-10 (Program Ledger, reusable asset factory, prev
 commercial spine, customer fulfilment, autonomous hosting, observability, pilot, expansion) —
 each a substantial, multi-work-packet engineering effort per the manual's own phase doctrine —
 remain to be scoped and built in future sessions.
-- Define versioned schemas/generated types for Site Specification, Vertical Kit, Tier Specification (currently absent) before any code is written against them.
-- Resolve DR-03 (LinkSkills capability-lease boundary) — this materially changes how every subsequent Phase's work packets must be scoped.
 
-## Phase 2 — Program core and governed execution — **not started (largest single gap: GAP-01, GAP-31)**
+## Third work batch (2026-07-14) — Phase 2 foundation
 
-- No Program Ledger, Issue/Run/Gate model, executor registry, or idempotency/outbox pattern exists. This is genuinely greenfield work inside this repository, even though it is not a greenfield *product* (the CMS and frontend already have real value).
-- Recommended: build this as its own package/service (e.g. `packages/program-ledger` or a new `apps/ledger`), backed by the Supabase working layer, rather than scattering Issue/Run state across Payload hooks or n8n.
+Carlos asked to continue with "what's next" after reviewing the first two batches. Per the
+roadmap's own dependency ordering (manual §59: "Program core and security foundations" before
+"reusable asset factory"), the Program Ledger was the correct next target — it is what almost
+every later Module (preview production, paid fulfilment, hosting operations) will be built on
+top of. PR #47 delivers a genuine, tested first slice (see the Phase 2 section below), not a
+placeholder — the manual §62 exit-gate scenarios are proven in code, and two real bugs were
+caught and fixed by the tests while building them. What remains before Phase 2 can formally
+close (a live Postgres store, the Program/Module/Stage hierarchy, an executor registry, and at
+least one real executor doing actual LiNKsites work) is substantial and should be the subject of
+the next session, in the order listed in the Phase 2 section below.
+
+## Phase 2 — Program core and governed execution — **in progress (foundation built, PR #47)**
+
+- **DONE (2026-07-14, PR #47):** Built `packages/program-ledger` — the Issue/Run/Gate/Event/
+  Idempotency core with a storage-agnostic `LedgerStore` interface, an in-memory implementation,
+  and 9 tests directly proving the manual §62 exit gate in code (duplicate dispatch, worker
+  crash/lease reclaim, timeout/retry, cancellation, replay, Gate authority, traceability). Also
+  added `supabase/migrations/20260714_000001_program_ledger_core.sql` defining the target
+  Postgres persistence shape in a new `lsites_ledger` schema (not yet wired to any application
+  code — a live-DB-backed store is a separate follow-up work packet).
+- **Remaining Phase 2 scope, not yet started:**
+  - A Postgres-backed `LedgerStore` implementation (the SQL schema exists; the TypeScript
+    adapter connecting it does not) — needs a live Supabase connection to test against, which
+    this session did not have.
+  - Program/Module/Stage hierarchy objects (Issues currently reference them only as opaque
+    string IDs).
+  - The full dependency DAG (`requires_completion`/`requires_gate`/`requires_artifact`/etc.)
+    manual §20 §13-14 describes — this slice assumes dependencies are already satisfied.
+  - The 8-level model-routing ladder (manual §20 §46) — no executor registry or model routing
+    exists yet; this slice's `claim()` takes an opaque `executorId` string with no routing logic.
+  - Compensation Sagas for reversible/destructive side effects (manual §20 §74-79) — this
+    slice's `SideEffectClass` type exists but no compensation logic is implemented.
+  - Cross-Program outbox/inbox (manual §20 §61-63's Transactional Outbox pattern for
+    dispatch, and the Integration Ledger for cross-Program messages, manual §21) — out of
+    reach without the Sales/Odoo/Stripe repositories (see GAP-33/34/35, still a blocker).
+  - A real executor actually calling this ledger to do LiNKsites work (e.g., a first synthetic
+    Issue Type wired to `apps/cms`'s Payload API) — the ledger core is proven correct in
+    isolation; it has not yet been connected to anything that does real work.
+- **Exit gate status:** The synthetic-workflow-survives-X portion of the manual §62 exit gate
+  is met in code (see PR #47's tests). The remaining exit-gate language ("One Issue can be
+  traced through accepted output and cost. No model owns workflow truth or authority.") is
+  partially met — traceability is proven (the event trail test), but cost tracking does not
+  exist yet (that's Phase 8/observability scope per the manual's own phase ordering, though a
+  minimal cost-event hook into this ledger would be reasonable to add early). Phase 2 is not
+  fully closable until a live Postgres store and at least one real executor exist.
 
 ## Phase 3 — Reusable asset and assembly foundation — **partially seeded**
 

@@ -6,13 +6,26 @@ gaps:
   - gap_id: GAP-01
     requirement_refs: ["04","05","20"]
     capability_id: linksites.program.hierarchy
-    current_status: absent
-    gap_description: "No Program Ledger, Module/Stage/Issue/Run objects, or Program Controller exist anywhere in the repository."
-    impact: { customer: "No governed, auditable workflow exists for any production step.", security: "No audit trail for who/what changed production state.", reliability: "No retry/idempotency/compensation is systematic.", business: "Cannot prove autonomous operation to Carlos.", implementation: "Blocks nearly every other Module." }
-    severity: critical
+    current_status: partial # UPDATED 2026-07-14, PR #47: Issue/Run/Gate/Event core built and tested; Program/Module/Stage hierarchy and Program Controller still absent
+    gap_description: >
+      No Module/Stage hierarchy objects or Program Controller exist yet
+      (Programs/Modules/Stages are still opaque string refs). UPDATED
+      2026-07-14 (PR #47): the Issue/Run/Gate/Event/Idempotency core of
+      the Program Ledger now exists at packages/program-ledger, with 9
+      tests directly proving the manual §62 exit gate (duplicate
+      dispatch, worker crash/lease reclaim, timeout/retry, cancellation,
+      replay, Gate authority, traceability) -- see GAP-31 for detail.
+      Remaining: Program/Module/Stage objects, the full dependency DAG,
+      model-routing ladder, compensation Sagas, cross-Program outbox/
+      inbox, and a live Postgres-backed store (a SQL migration defining
+      the target schema exists at supabase/migrations/
+      20260714_000001_program_ledger_core.sql, but no application code
+      reads/writes it yet -- the tested implementation is in-memory only).
+    impact: { customer: "No governed, auditable workflow exists for any production step yet -- but the mechanics to build one now exist and are proven.", security: "No audit trail for who/what changed production state in a live system (append-only event trail exists in the tested core, not yet connected to a live store).", reliability: "Retry/idempotency/compensation mechanics are now proven in code, not yet connected to real executors.", business: "Cannot yet prove autonomous operation to Carlos with real work -- the ledger core is a foundation, not a running system.", implementation: "Foundation built; connecting real executors, a live Postgres store, and the Program/Module/Stage hierarchy remain." }
+    severity: high # DOWNGRADED from critical -- the highest-risk unknown (can this mechanism even work) is now resolved and tested
     dependencies: []
-    recommended_disposition: build-missing
-    acceptance_tests: ["A synthetic workflow survives duplicate dispatch, worker crash, timeout, cancellation, and replay (manual §62 exit gate)."]
+    recommended_disposition: adapt # was build-missing; foundation now exists to adapt/extend
+    acceptance_tests: ["A synthetic workflow survives duplicate dispatch, worker crash, timeout, cancellation, and replay (manual §62 exit gate) -- PASSING as of PR #47 (packages/program-ledger/tests/exit-gate.spec.ts, 9/9 tests)."]
     decision_required: null
 
   - gap_id: GAP-04

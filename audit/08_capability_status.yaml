@@ -153,13 +153,13 @@ capabilities:
   - capability_id: linksites.execution.program_ledger
     manual_requirements: ["04","20"]
     repositories: [repo-linksites]
-    current_status: absent
-    evidence_refs: [EV-23]
-    tests: { present: false, last_verified: null, limitations: [] }
+    current_status: partial # UPDATED 2026-07-14, PR #47
+    evidence_refs: [EV-23, "packages/program-ledger (PR #47, 2026-07-14)"]
+    tests: { present: true, last_verified: "2026-07-14 (packages/program-ledger/tests/exit-gate.spec.ts, 9/9 passing)", limitations: ["In-memory store only -- Postgres schema defined (supabase/migrations/20260714_000001_program_ledger_core.sql) but not yet wired to any application code. No Program/Module/Stage hierarchy, dependency DAG, model-routing ladder, compensation Sagas, or cross-Program outbox/inbox yet."] }
     dependencies: []
-    security_notes: ["Every downstream governance object in the manual (Gates, Exceptions, Approvals, Idempotency Records, Cost Events) is defined in terms of the Program Ledger. Its absence is the single largest architectural gap found in this audit."]
+    security_notes: ["Every downstream governance object in the manual (Gates, Exceptions, Approvals, Idempotency Records, Cost Events) is defined in terms of the Program Ledger. Its core mechanics (idempotent dispatch, lease/fencing crash recovery, cooperative cancellation, Gate-gated completion, append-only event trail) are now built and tested -- this was the single largest architectural gap found in the original audit; it is now a real, tested foundation."]
     gaps: [GAP-01, GAP-31]
-    recommended_disposition: build-missing
+    recommended_disposition: adapt
     confidence: high
 
   - capability_id: linksites.crossprogram.contracts_stripe_odoo_sales

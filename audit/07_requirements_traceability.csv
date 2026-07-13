@@ -29,7 +29,7 @@ linksites.security.secrets_management,18,Secrets manager,apps/cms/ops/render-run
 linksites.security.executor_capability_envelope,18,Executor capability envelope,none found,none,none,none,none,absent,GAP-28
 linksites.quality.gate_hierarchy,19,Quality Gates (G1-G10),none found as governed objects; ad hoc Vitest/Playwright tests exist,apps/cms/vitest.config.mts; apps/cms/playwright.config.ts,9 test files (apps/cms only),none,none,partial (test tooling present; Gate governance objects absent),GAP-29
 linksites.quality.accessibility_wcag22_aa,19,Accessibility,none found (no axe-core dependency located),none,none,none,none,absent,GAP-30
-linksites.execution.program_ledger,20,Program Ledger,none found,none,none,none,none,absent (Critical),GAP-31
+linksites.execution.program_ledger,20,Program Ledger,packages/program-ledger,packages/program-ledger/src/types.ts (schema_version 1.0),packages/program-ledger/tests/exit-gate.spec.ts (9/9 passing),none (in-memory store only; supabase/migrations/20260714_000001_program_ledger_core.sql defines the target Postgres schema, unwired),none,partial,GAP-31 (updated 2026-07-14, PR #47)
 linksites.execution.idempotency,20,Idempotency keys/outbox,apps/cms n8n loop-guard (meta.source==='n8n') is the only dedup-like logic found,none,none,none,none,partial (ad hoc, not systematic),GAP-32
 linksites.crossprogram.integration_ledger,21,Integration Ledger,none found,none,none,none,none,absent (Blocker for Phase 5),GAP-33
 linksites.crossprogram.stripe_ingress,21,Stripe verified event ingress,none found (only legacy/archived code in sites_projects/old_linktrend),none,none,none,none,absent,GAP-34
