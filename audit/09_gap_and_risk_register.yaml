@@ -189,6 +189,35 @@ gaps:
     acceptance_tests: ["Each app's package.json declared Next.js version matches its actually-installed version.", "pnpm.overrides ranges are same-major-scoped (or replaced with a per-app override strategy) so future security-floor bumps cannot silently cross a major version boundary again."]
     decision_required: "Which Next.js major should apps/web-master and apps/web-company deliberately target -- stay on the already-running 16.x (smaller migration, but unaudited for breaking-change exposure), or force a genuine downgrade back to 14.x (larger effort, but matches original intent)? Not decided in this session -- recommend Carlos or the implementation team decide once GAP-43 is also resolved, since they may share a root cause."
 
+  - gap_id: GAP-45
+    requirement_refs: ["24 §35"]
+    capability_id: repo.dependency_override_cascade
+    current_status: broken
+    gap_description: >
+      Confirmed real fallout from GAP-44: apps/web-master's typecheck fails
+      with ~13 TS2339 errors because its code calls Next.js App Router's
+      cookies()/headers() synchronously (correct for the declared Next.js
+      14.2.33), but the app actually runs Next.js 16.2.2 (per GAP-44),
+      where these APIs became async (Promise-returning). Affected files
+      (verified 2026-07-13 via a real GitHub Actions CI run, PR #38):
+      apps/web-master/src/app/[lang]/layout.tsx,
+      apps/web-master/src/lib/site-context.ts,
+      apps/web-master/src/app/api/ai-actions/contact/route.ts,
+      apps/web-master/src/app/llms.txt/route.ts,
+      apps/web-master/src/app/robots.ts,
+      apps/web-master/src/app/sitemap.ts.
+      This is real migration work (thread `await` through every call site
+      and any callers up the chain), not a one-line fix -- intentionally
+      NOT rushed through inside the CI-gate work packet. apps/web-master's
+      typecheck was excluded from the new CI gate (ci.yml) until this is
+      resolved.
+    impact: { customer: "unknown -- if any of these code paths run in production today, they may throw at runtime, not just fail typecheck (a synchronous .get() call on a Promise object returns undefined instead of throwing in some cases, which could silently produce wrong SEO/robots/sitemap/cookie-reading behavior rather than a visible crash)", security: "low-medium", reliability: "high", business: "medium", implementation: "medium" }
+    severity: high
+    dependencies: [GAP-44]
+    recommended_disposition: adapt
+    acceptance_tests: ["apps/web-master's typecheck passes with cookies()/headers() awaited correctly at every call site.", "Manual smoke test confirms robots.txt, sitemap.xml, llms.txt, and the contact API route still behave correctly at runtime after the fix (not just typecheck-clean)."]
+    decision_required: null
+
   - gap_id: GAP-11-DEP1 # placeholder cross-reference, see DR-01 in decision register
     requirement_refs: ["24 §5"]
     capability_id: repo.working_tree_uncommitted_state

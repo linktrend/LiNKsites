@@ -27,9 +27,21 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
   - `apps/web-company`'s lint remains out of CI scope per Decision DR-02 (paused) and because
     it has no `eslint` devDependency installed at all (separate pre-existing gap, not yet filed
     as its own GAP — low priority given DR-02).
-- **Next Phase 1 items, not yet started:** diagnose/fix the Dependabot failure pattern and the
-  222-vulnerability finding (GAP-42, GAP-11); resolve GAP-44 (dependency override cascade) and
-  GAP-43 (test:int module resolution); establish schema/contract versioning conventions.
+- **Also DONE (2026-07-13, same work packet, discovered via the first real GitHub Actions run):**
+  fixed a genuine pre-existing `apps/cms/src/utils/seo.ts` type error (an already-written but
+  unused `readMediaUrl()` helper was wired in to correctly normalize `ogImage`), and confirmed
+  the new CI gate (lint: cms+web-master; typecheck: cms+types+web-company) is **actually green**
+  on GitHub Actions for PR #38, not just passing locally.
+- **Discovered GAP-45** while doing this: `apps/web-master`'s typecheck fails with ~13 real
+  errors because its code calls Next.js's `cookies()`/`headers()` synchronously (correct for its
+  declared Next 14.2.33) but the app actually runs Next 16.2.2 (GAP-44), where those APIs became
+  async. `apps/web-master`'s typecheck is excluded from the CI gate until this migration is done
+  — this is real, separate work, not something to rush through inside a CI-gate fix.
+- **Next Phase 1 items, not yet started:** resolve GAP-44 (dependency override cascade) and
+  GAP-45 (web-master async cookies/headers migration) together, since they share a root cause;
+  resolve GAP-43 (test:int module resolution); diagnose/fix the Dependabot failure pattern and
+  the 222-vulnerability finding (GAP-42, GAP-11); establish schema/contract versioning
+  conventions.
 - Define versioned schemas/generated types for Site Specification, Vertical Kit, Tier Specification (currently absent) before any code is written against them.
 - Resolve DR-03 (LinkSkills capability-lease boundary) — this materially changes how every subsequent Phase's work packets must be scoped.
 
