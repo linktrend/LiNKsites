@@ -50,14 +50,10 @@ jobs:
       # for apps/web-master is intentionally NOT run in CI until that decision is made and
       # implemented (see audit/09_gap_and_risk_register.yaml, GAP-46).
 
-      # NOTE (Phase 1, GAP-43): `apps/cms`'s Vitest suite (test:int) currently fails to
-      # resolve "@/..." path aliases under the installed vite/vite-tsconfig-paths versions
-      # (verified locally 2026-07-13 -- all 6 test files fail at import-resolution, before
-      # any assertion runs). This looks caused by the same root-package.json pnpm.overrides
-      # cascade that was found silently force-upgrading apps/web-master and apps/web-company
-      # from their declared Next.js 14.x to the actually-installed 16.2.2 (see GAP-44 and
-      # ADR-pending "dependency override cascade" writeup in audit/09_gap_and_risk_register.yaml).
-      # Running test:int here would fail on every PR for a pre-existing infra reason unrelated
-      # to code correctness, which is not useful signal. It is intentionally deferred to a
-      # dedicated Phase 1 work packet rather than included here as fake-passing or silently
-      # skipped without explanation.
+      # GAP-43 is now fixed: apps/cms's Vitest suite was failing to resolve "@/..." path
+      # aliases because vite-tsconfig-paths discovers every tsconfig in the pnpm workspace and
+      # could match the wrong one (e.g. sites_projects/old_linktrend's unrelated tsconfig) for
+      # files under tests/**, which apps/cms's own tsconfig.json intentionally excludes from
+      # its `include`. Fixed via a dedicated tsconfig.vitest.json + a scoped `projects` option.
+      - name: CMS unit/contract tests
+        run: pnpm --filter @linksites/cms run test:int

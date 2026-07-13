@@ -16,7 +16,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=--no-deprecation pnpm exec playwright test",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-webstorage\" vitest run --config ./vitest.config.mts",
     "factory:create-demo-site": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/factory/create-demo-site.ts",
     "mvo:live-publish": "bash ../../scripts/mvo-live-publish.sh",
     "factory:attach-domain": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/factory/attach-domain.ts",
