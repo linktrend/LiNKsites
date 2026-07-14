@@ -175,6 +175,62 @@ in `packages/factory-catalog`:
   verified, GAP-50) — this proves the *wiring* is correct, not that it runs against production data
   yet.
 
+## Ninth work batch (2026-07-14) — research-grounded provisional business defaults, launch-time CMS access rule
+
+Carlos clarified that engineering should not wait on final commercial/business decisions, and asked
+for quick web research to ground the tier/vertical/style placeholders in realistic 2026
+small-business-website market norms, on the explicit condition every value stays trivially
+changeable later. Applied directly in `packages/factory-catalog`:
+
+- Standard `maxPages` 8 → 6 (2026 starter packages typically span 5-8 pages); Premium `maxPages`
+  20 → 12 (business/growth-tier packages typically span 10-15 pages); `HOME_SERVICES_KIT` promoted
+  from `candidate` to `active` (already the Decision DR-06 approved pilot vertical, and a
+  well-grounded, common, repeatable SMB category); a new `TRUST_PROFESSIONAL_STYLE` (blue for
+  trust/stability, Montserrat+Open Sans, WCAG contrast independently computed and verified by hand
+  and by a dedicated test, not just asserted) added alongside the existing deliberately-unreviewed
+  `PLACEHOLDER_STYLE_FAMILY` test fixture.
+- **CMS access clarification (Carlos):** `customerCmsAccess` is now `'none'` for every tier at
+  launch, including Enterprise -- no customer of any tier gets CMS access initially; LiNKtrend staff
+  (human or agent) manage all content, mostly through automation. A new `futureCmsAccessCandidate`
+  field records which tiers are plausible future candidates (false for Standard, true for
+  Premium/Enterprise) without granting or changing any current behavior.
+- Added `priceUsdPerMonthProvisional`, illustrative market-rate pricing only (explicitly not an
+  approved price -- LiNKtrend's real cost structure/margins were not researched and still need
+  Carlos), present for Standard/Premium, deliberately omitted for Enterprise (custom-quoted).
+- `packages/factory-catalog` grew from 114 to 128 passing tests; two pre-existing negative-path
+  tests were fixed in place (they had relied on `HOME_SERVICES_KIT`'s old non-active default to
+  trigger a rejection, and now explicitly construct that override instead).
+
+## Tenth work batch (2026-07-14) — Foundation Matching Engine (GAP-16) and pipeline chaining helpers
+
+Continuing Decision DR-08. Two more independent slices, again built via parallel subagents against
+precisely pinned interface contracts (following the GAP-04 pattern):
+
+- **Foundation Matching Engine** (`packages/factory-catalog/src/foundationMatching.ts`): the first
+  real slice of manual §08.16/§08.28/§10.18's Foundation-matching process -- hard filters using only
+  data that genuinely exists today (lifecycle status, Vertical Kit match, tier match, current
+  reservation state), a single real ranking signal (most-recently-created-first, since no
+  engagement/telemetry data exists yet to rank by anything richer), and auto-reservation of the
+  winner via the existing `FoundationReservationManager`. This closes the honestly-scoped part of
+  GAP-16 ("a real Preview Inventory / matching engine ... to decide which new lead an
+  archived-and-recycled Foundation should be re-offered to"), tracked as an open gap across several
+  prior work batches. A new module, `execution/modules/phase4-build-first-preview-path/`, was
+  created for this -- Foundation matching is genuinely Phase 4 scope per the manual's own phase
+  ordering (it decides which Foundation feeds the first real Preview build, not which reusable
+  assets exist), built ahead of the rest of that module because it was concretely unblocked.
+- **Pipeline chaining helpers** (`packages/factory-catalog/src/pipelineChaining.ts`): type-safe
+  mapping/builder functions (`buildSiteAssemblyInputFromSiteSpecification()`,
+  `buildPromotionRequestFromManifest()`) that propagate identifier fields correctly from one
+  executor's accepted output into the next executor's Issue input. This is explicitly NOT a fully
+  autonomous auto-triggering pipeline -- building that would require fabricating a real page/route
+  plan and real prospect content this repository does not have yet (an information-architecture
+  resolver and a content-production pipeline, neither of which exist). It is the honest, real piece
+  of the "no automatic pipeline chaining" gap that IS buildable today without inventing fake content.
+- `packages/factory-catalog` grew from 128 to 147 passing tests across this batch (12 + 7 new);
+  `packages/program-ledger`'s own 36 remained unaffected; full CI-equivalent verification (lint,
+  workspace-wide typecheck, both frontend builds, CMS integration tests) re-run and green before
+  merging into `development`.
+
 ## Eighth work batch (2026-07-14) — merge the full stack into `development`, then close GAP-04
 
 Carlos explicitly authorized clearing and merging the entire open PR stack, and directed that
@@ -395,9 +451,18 @@ the next session, in the order listed in the Phase 2 section below.
   only the reservation-release side effect, not re-matching. Publication (Payload draft → published)
   also remains a separate, later, intentionally out-of-scope authority.
 
-## Phase 4 — Build-first preview path — **not started**
+## Phase 4 — Build-first preview path — **started (Foundation matching first slice real and tested; Preview Inventory, Proof Level engine, conversion-lock still absent)**
 
-- Depends entirely on Phase 2 (Program Ledger) and Phase 3 (Vertical Kit/Tier/Foundation) being real. No Preview Inventory, Proof Level engine, or conversion-lock mechanism exists today (GAP-16, GAP-17).
+- Phase 2 (Program Ledger) and Phase 3 (Vertical Kit/Tier/Foundation) are real, so this phase is now
+  reachable. A real Foundation Matching Engine (`packages/factory-catalog/src/foundationMatching.ts`,
+  module `execution/modules/phase4-build-first-preview-path/`) closes the honestly-scoped first slice
+  of GAP-16: hard filters on real data (status/Kit/tier/reservation) + a recency ranking signal +
+  auto-reserve via the existing `FoundationReservationManager`.
+- Still absent: a real Preview Inventory (tracking Foundation state/history beyond simple
+  reservation), a Proof Level engine (the manual's tiered evidence-of-real-work model, GAP-17), a
+  conversion-lock mechanism for sold previews, and the manual's full multi-factor Foundation ranking
+  (requires engagement/telemetry data this repository does not have). Real Preview generation itself
+  remains blocked on GAP-50 (live Payload/Postgres) and real content production.
 
 ## Phase 5 — Commercial and paid-activation spine — **blocked on cross-Program access (GAP-33/34/35, blocker)**
 
