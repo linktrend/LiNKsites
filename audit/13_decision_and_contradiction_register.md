@@ -115,6 +115,40 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
   symlink chain (`LiNKsites/.cursor -> IDE Development/.cursor -> IDE Development/core`), verified
   by the wiring script.
 
+## DR-09 — Repository cleanup: removing/archiving content unrelated to LiNKsites' intent
+
+- **Instruction from Carlos (2026-07-14):** After confirming there was little further engineering
+  buildable without live Stripe/Odoo/Supabase access, Carlos instructed: clean up the repository
+  of content that does not relate to the LiNKsites Program Manual's intent, then do a
+  hardening/testing pass, before moving to the Supabase and Odoo integration work.
+- **Scope of this cleanup batch (2026-07-14):**
+  1. Deleted four empty, zero-usage scaffold packages (`packages/blocks`, `packages/config`,
+     `packages/ui`, `packages/utils` — see `audit/12_reusable_asset_register.yaml`,
+     `asset-empty-scaffold-packages`).
+  2. Deleted `library/README.md`, a documentation index whose links were already broken/pointing
+     at nonexistent paths (see `asset-stale-library-index`).
+  3. Archived (not deleted) `sites_specs/*.txt`, `docs/product/*.md` (4 files), and 5 of the 9
+     `docs/reference/*.md` files into `archive/pre-manual-planning-docs/`, per the rationale and
+     full accounting in that archive's own `ARCHIVED.md`. This executes the disposition already
+     recorded (but not yet acted on) for `sites_specs` in the original Phase 0 audit
+     (`asset-sites-specs-narrative-docs`).
+  4. Deliberately did NOT archive or remove: `apps/web-company` (Carlos's DR-02 decision: paused,
+     not deleted), the 4 still-useful `docs/reference/*.md` operational how-tos (DNS/Supabase/VPS/
+     security), or any code under `apps/`, `packages/program-ledger`, `packages/factory-catalog`,
+     `supabase/`, `execution/`, or `audit/`.
+- **Deferred to a follow-up Issue, not done in this pass:** `apps/web-master/docs/` and
+  `apps/cms/docs/` contain a large number of files matching an "agent session completion report"
+  naming pattern (`AGENT_*_COMPLETE.md`, `WAVE_*_COMPLETION_REPORT.md`, `*_AUDIT_COMPLETE.md`,
+  `FIXES_COMPLETED.md`, etc.) that appear to be stale build-process logs from whatever process
+  originally built those apps, mixed in with genuine ongoing reference documentation
+  (`ARCHITECTURE.md`, `CMS_SCHEMA.md`, `COMPONENT_LIBRARY.md`, etc.) in the same directories.
+  Classifying which of ~90 files in each are process artifacts versus living reference requires
+  reading each one individually — delegated to a dedicated subagent as a separate, careful pass
+  (see `execution/modules/repo-hardening/issues/app-docs-cleanup-001/` once complete) rather than
+  rushed in this same batch.
+- **Status:** **Resolved for repo-root-level content; app-level `docs/` cleanup deliberately
+  deferred to its own careful, separately-reviewed pass.**
+
 ## Summary table
 
 | ID | Topic | Severity | Resolved? | Decision owner |
@@ -126,3 +160,4 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
 | DR-05 | Next.js/React version skew | Medium | No — deferred | Implementation roadmap (Phase 1/3) |
 | DR-06 | Pilot slice (vertical + tier) | High | **Yes — Home Services / Standard** | Carlos |
 | DR-07 | LiNKdev vs. LiNKdeveloper clarification + symlink regression fix | Medium | **Yes — executed** | Carlos |
+| DR-09 | Repository cleanup of content unrelated to LiNKsites' intent | Medium | **Partial — repo-root-level done; app-level docs deferred** | Carlos |

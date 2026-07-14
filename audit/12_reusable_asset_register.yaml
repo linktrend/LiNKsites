@@ -76,14 +76,22 @@ assets:
   - asset_id: asset-sites-specs-narrative-docs
     description: "sites_specs/*.txt — three narrative architecture/specification documents describing a v2.0 per-site-repo model."
     classification: outdated
-    disposition: retire (with lineage preserved, not deleted, per manual §5 — no destructive action taken in this audit)
+    disposition: retired # EXECUTED 2026-07-14, repo-cleanup batch, per Carlos's explicit cleanup instruction
     rationale: >
+      EXECUTED (2026-07-14): moved to archive/pre-manual-planning-docs/sites_specs/
+      (git history preserved via rename detection), alongside four pre-manual
+      docs/product/ PRD documents and five pre-manual docs/reference/ planning docs
+      describing the same superseded "LiNKsites Factory Kit" model. See
+      archive/pre-manual-planning-docs/ARCHIVED.md for the full rationale and exactly
+      which docs/reference/ files were deliberately kept in place (the still-useful
+      operational how-tos: GODADDY_DNS_SETUP.md, SUPABASE_SETUP.md,
+      VPS_DEPLOYMENT_GUIDE.md, security_best_practices_report.md).
+
       Describes a per-site-repo/VPS architecture that conflicts with the
       manual's centralized-Payload/shared-frontend-pool doctrine (manual
-      §01, §12, §15). Should be preserved as historical evidence (manual
+      §01, §12, §15). Preserved as historical evidence (manual
       authority order places it below the reconciled manual) but not used
-      as a current design input. This audit did NOT delete or move these
-      files.
+      as a current design input.
 
   - asset_id: asset-sites-projects-legacy
     description: "sites_projects/old_linktrend (legacy Next.js app with Stripe checkout starter code), sites_projects/linktrend (build artifacts only)."
@@ -116,6 +124,30 @@ assets:
       sites_projects/linktrend (the second, smaller item originally in this asset
       entry) was untracked local .next build output with zero source code -- never
       committed to git, left untouched on disk as it is not a repository concern.
+
+  - asset_id: asset-empty-scaffold-packages
+    description: "packages/blocks, packages/config, packages/ui, packages/utils — four pnpm workspace packages containing only a package.json and a single `export {}` placeholder file each, version 0.0.0."
+    classification: dead-scaffold
+    disposition: removed # EXECUTED 2026-07-14, repo-cleanup batch
+    rationale: >
+      EXECUTED (2026-07-14): deleted (not archived — genuinely empty, zero unique
+      content, zero git-history value beyond "package.json + export {}"). Verified
+      via repo-wide grep that no app or package imports `@linksites/blocks`,
+      `@linksites/config`, `@linksites/ui`, or `@linksites/utils` anywhere. These
+      were never built out from initial monorepo scaffolding and added no value
+      beyond noise in `pnpm-workspace.yaml`'s `packages/*` wildcard (extra
+      typecheck/build/install overhead for nothing).
+
+  - asset_id: asset-stale-library-index
+    description: "library/README.md — a documentation index whose links pointed at nonexistent root-level file paths (e.g. `/Users/.../LiNKsites/IMPLEMENTATION_PLAN.md`) for files that actually lived under docs/reference/, plus references to library/operations/ and library/business/ subdirectories that never existed in this repository."
+    classification: dead-and-misleading
+    disposition: removed # EXECUTED 2026-07-14, repo-cleanup batch
+    rationale: >
+      EXECUTED (2026-07-14): deleted. `docs/README.md` already serves as the
+      correct, current documentation index with working relative links. This
+      file's own links were already broken before this cleanup touched anything
+      (confirmed by checking every referenced path), so it provided negative
+      value (actively misleading) rather than merely redundant value.
 
   - asset_id: asset-linkdev-embedded-factory
     description: "LiNKdev/ embedded factory (AGENTS.md, factory/, product/, skills/) and .agent/, .codex/skills/, repo-local .cursor/{rules,skills,commands,agents} — all currently shown as deleted (uncommitted) in the working tree; .cursor is now an untracked symlink to the sibling IDE Development workspace's .cursor/."
