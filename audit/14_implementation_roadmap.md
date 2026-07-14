@@ -98,9 +98,44 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 | #49 | `dev/blackcursor/phase2-execution-plan` | Full Phase 2-10 execution plan + Program/Module hierarchy + Executor Registry | #48 |
 | #50 | `dev/blackcursor/phase3-tier-specification` | Tier Specification schema + entitlement enforcement (Phase 3, GAP-12) | #49 |
 | #51 | `dev/blackcursor/phase3-vertical-kit` | Vertical Kit schema, seeded with Home Services pilot candidate (Phase 3) | #50 |
+| #52 | `dev/blackcursor/phase3-reusable-foundation` | Reusable Site Foundation schema, prospect-neutrality scanner, reservation exclusivity (Phase 3) | #51 |
+| #53 | `dev/blackcursor/phase3-design-catalog` | Design Intelligence Catalog token hierarchy + accessibility-gated admission (Phase 3) | #52 |
+| #54 | `dev/blackcursor/phase3-component-registry` | Component Registry governed machine object, seeded from real web-master components (Phase 3) | #53 |
 
 All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
-the rest), then #38 through #51 in order (each depends on the previous).
+the rest), then #38 through #54 in order (each depends on the previous).
+
+## Seventh work batch (2026-07-14) — continuous execution, completing the Phase 3 reusable-asset trio
+
+Continuing Decision DR-08 (no pause between phases; the manual + this roadmap is the plan).
+This batch completes the manual §06-§08 set of five reusable-asset objects as real, tested code
+in `packages/factory-catalog`:
+
+- PR #52: **Reusable Site Foundation** (manual §08.18/§08.24 — the third of the manual's three
+  explicitly distinct objects, after Vertical Kit and Tier Specification). Includes a mechanical
+  first pass at the manual §08.19 prospect-neutrality rule (`scanForProhibitedFields()` /
+  `assertProspectNeutral()`) and a `FoundationReservationManager` enforcing exclusivity (manual
+  §08.28/§10.18) using the same lease/expire pattern already proven in `packages/program-ledger`.
+- PR #53: **Design Intelligence Catalog** token hierarchy (manual §06's exact 7-layer override
+  order: global → semantic → style-family → vertical → tier → site → component) plus an
+  accessibility-gated admission guard — a style must be both lifecycle-active AND
+  accessibility-contrast-passed before it is production-eligible, matching the manual's framing
+  that accessibility constrains admission, not just a downstream check. The one seeded
+  `StyleFamily` is a deliberate, honestly-labeled placeholder: the manual's named upstream design
+  seed (`ui-ux-pro-max-skill`) is not reachable from this repository, so no real style content was
+  invented.
+- PR #54: **Component Registry** — a governed, lifecycle-tracked, tier-gated machine object,
+  distinct from `apps/web-master/docs/components/index.json` (which remains valid human
+  documentation but has no lifecycle/tier/versioning metadata, GAP-07). Seeded with 4 components
+  (`SignupHero`, `CTASection`, `OfferShowcase`, `ArticlesGrid`) whose IDs and source paths were
+  read directly from the real `index.json`, not invented. Custom-code tier enforcement delegates to
+  the existing `checkEntitlement()` rather than duplicating that rule.
+- `packages/factory-catalog` grew from 22 to 65 tests across this batch, all passing; workspace-wide
+  typecheck across all 6 packages remains clean.
+- Next in Phase 3: a **Site Specification** object (the per-site resolved contract combining Kit +
+  Tier + Foundation + Design Profile + Component selections into one versioned record for one real
+  or prospective site) and a **Prospect Adaptation** record (the prospect-specific content overlay
+  applied to a reserved Foundation during Preview Production, manual §09-§10). Both remain open.
 
 ## Sixth work batch (2026-07-14) — continuous execution into Phase 3 (Decision DR-08)
 
@@ -244,11 +279,20 @@ the next session, in the order listed in the Phase 2 section below.
   minimal cost-event hook into this ledger would be reasonable to add early). Phase 2 is not
   fully closable until a live Postgres store and at least one real executor exist.
 
-## Phase 3 — Reusable asset and assembly foundation — **partially seeded**
+## Phase 3 — Reusable asset and assembly foundation — **partially built (5 of 5 named objects now real, tested code; Promotion Service and cross-object Site Specification still absent)**
 
-- Component documentation (`apps/web-master/docs/components/index.json`) and design tokens (`tokens.css`) are real seeds — adapt, don't rebuild.
-- Vertical Kit, Tier Specification, Design Intelligence Catalog, Reusable Site Foundation objects are all absent as machine objects and must be built (GAP-11, GAP-12, GAP-09/10, GAP-13).
-- Promotion Service (GAP-04) must be built before this phase's exit gate ("deterministic assembly produces valid sites from versioned specifications") can be met.
+- Tier Specification (GAP-12), Vertical Kit (GAP-11), Reusable Site Foundation (GAP-13), Design
+  Intelligence Catalog token hierarchy (GAP-09/10), and Component Registry (GAP-07) are now all
+  real, tested machine objects in `packages/factory-catalog` (65 passing tests as of PRs #50-#54).
+  All still carry provisional/placeholder content where the manual defers real values (tier limits,
+  the one seeded Vertical Kit candidate, the one seeded StyleFamily) or where an upstream source
+  this repository cannot reach was named (`ui-ux-pro-max-skill`).
+- `apps/web-master/docs/components/index.json` and `tokens.css` remain the real underlying seeds;
+  they were read from (component IDs/paths verified against `index.json`) rather than replaced.
+- Still absent: a **Site Specification** object combining these five into one per-site resolved
+  contract, a **Prospect Adaptation** record, and the **Promotion Service** (GAP-04) itself — none
+  of this phase's exit gate ("deterministic assembly produces valid sites from versioned
+  specifications") is reachable until those exist and are wired to a real executor.
 
 ## Phase 4 — Build-first preview path — **not started**
 
