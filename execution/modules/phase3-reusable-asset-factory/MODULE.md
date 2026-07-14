@@ -5,14 +5,16 @@ status: "in_progress"
 parent_program: "linksites-manual-alignment"
 objective: "Build the manual's reusable-asset factory objects (Vertical Kit, Tier Specification, Design Intelligence Catalog, Component Registry, Reusable Site Foundation -- manual §06-§08) as real, versioned, tested code, so deterministic assembly can eventually produce valid sites from versioned specifications."
 scope:
-  - "packages/factory-catalog: Tier Specification + entitlement enforcement (this session)"
-  - "Vertical Kit schema and lifecycle (next)"
-  - "Design Intelligence Catalog and token hierarchy (next)"
-  - "Component Registry machine object (apps/web-master/docs/components/index.json is documentation only today, per GAP-07 -- needs a real governed schema)"
-  - "Reusable Site Foundation manifests and adaptation contracts"
+  - "packages/factory-catalog: Tier Specification + entitlement enforcement (done: phase3-tier-specification-001)"
+  - "Vertical Kit schema and lifecycle (done: phase3-vertical-kit-001)"
+  - "Reusable Site Foundation manifests, prospect-neutrality scanner, reservation exclusivity (done: phase3-reusable-foundation-001)"
+  - "Design Intelligence Catalog token hierarchy + accessibility-gated admission (done: phase3-design-catalog-001)"
+  - "Component Registry machine object, seeded from real web-master components (done: phase3-component-registry-001)"
 out_of_scope:
   - "The Promotion Service (Supabase working -> Payload draft) -- separate Phase 3 Issue, needs a live Supabase/Payload connection to test meaningfully beyond types"
   - "Real Vertical Kit content for the Home Services pilot vertical (Decision DR-06) -- that requires business/content input from Carlos or Sales research, not something to invent"
+  - "Site Specification object (per-site resolved contract combining Kit + Tier + Foundation + Design Profile) and Prospect Adaptation record -- next Issues, not yet started"
+  - "Real Design Intelligence Catalog content from ui-ux-pro-max-skill -- not reachable from this repository; only a structural placeholder exists"
 phases: []
 read_first:
   - ".cursor/execution/INDEX.yaml"
@@ -29,7 +31,7 @@ optional_fields:
   risk_summary:
     - "Numeric tier limits (page counts, change allowances, etc.) are explicitly provisional placeholders per manual §03's deferred-decisions list -- must not be treated as real commercial commitments until Carlos approves actual values."
   notes:
-    - "Issues completed so far: phase3-tier-specification-001 (this session)."
+    - "Issues completed so far: phase3-tier-specification-001, phase3-vertical-kit-001, phase3-reusable-foundation-001, phase3-design-catalog-001, phase3-component-registry-001. All five reviewed together will complete the manual §06-§08 reusable-asset trio plus its supporting Design/Component registries. Next: Site Specification object and Prospect Adaptation record (per-site resolution combining all five, and the prospect-specific overlay applied to a reserved Foundation)."
 ---
 
 # Module
