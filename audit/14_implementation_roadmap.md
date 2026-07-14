@@ -103,9 +103,10 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 | #54 | `dev/blackcursor/phase3-component-registry` | Component Registry governed machine object, seeded from real web-master components (Phase 3) | #53 |
 | #55 | `dev/blackcursor/phase3-site-specification` | Site Specification integration resolver, composing all five prior Phase 3 objects (Phase 3) | #54 |
 | #56 | `dev/blackcursor/phase3-prospect-adaptation` | Prospect Adaptation record, reservation-matching guard, close-or-recycle lifecycle (Phase 3) | #55 |
+| #57 | `dev/blackcursor/phase3-ledger-executor-integration` | SiteSpecificationExecutor: first real connection between Program Ledger and factory-catalog (Phase 2/3) | #56 |
 
 All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
-the rest), then #38 through #56 in order (each depends on the previous).
+the rest), then #38 through #57 in order (each depends on the previous).
 
 ## Seventh work batch (2026-07-14) — continuous execution, completing the Phase 3 reusable-asset trio
 
@@ -156,6 +157,15 @@ in `packages/factory-catalog`:
   `packages/factory-catalog`. Remaining Phase 3/4 work either needs Carlos/business input to
   promote provisional content to `active` (not something to invent), or crosses into the Promotion
   Service / Site Assembly Engine (GAP-04), which is Phase 4/5-adjacent, larger-scope work.
+- PR #57 then closed a gap this same roadmap had explicitly flagged under Phase 2: "the ledger core
+  is proven correct in isolation; it has not yet been connected to anything that does real work."
+  `SiteSpecificationExecutor` is a real `ExecutorAdapter` that, when dispatched through the Program
+  Ledger, actually calls `resolveSiteSpecification()` against real Phase 3 catalog data — the first
+  connection between Phase 2 and Phase 3 code in this repository. `packages/factory-catalog` grew to
+  90 tests; `packages/program-ledger`'s own 36 remained unaffected. The executor's catalog lookups
+  are still in-memory (naturally swappable for Supabase-backed lookups once live infrastructure is
+  verified, GAP-50) — this proves the *wiring* is correct, not that it runs against production data
+  yet.
 
 ## Sixth work batch (2026-07-14) — continuous execution into Phase 3 (Decision DR-08)
 
@@ -311,12 +321,16 @@ the next session, in the order listed in the Phase 2 section below.
   cannot reach was named (`ui-ux-pro-max-skill`).
 - `apps/web-master/docs/components/index.json` and `tokens.css` remain the real underlying seeds;
   they were read from (component IDs/paths verified against `index.json`) rather than replaced.
+- A first real executor (`SiteSpecificationExecutor`, PR #57) now connects the Program Ledger to
+  this object model end to end — a real Issue dispatched through the ledger actually resolves a Site
+  Specification and traces a full event history, closing the "ledger not connected to real work" gap
+  this same roadmap flagged under Phase 2.
 - Still absent: the **Promotion Service** (Supabase working → Payload draft, GAP-04) and a real
   **Site Assembly Engine** that turns a resolved Site Specification + Prospect Adaptation into an
-  actual rendered site. Neither of these is wired to a real executor yet, so this phase's exit gate
-  ("deterministic assembly produces valid sites from versioned specifications") is not yet fully
-  reachable — the object model and cross-object validation it depends on is now real; the execution
-  machinery that consumes it is not.
+  actual rendered site. This phase's exit gate ("deterministic assembly produces valid sites from
+  versioned specifications") is not yet fully reachable — the object model, cross-object
+  validation, and a real ledger-to-executor wiring pattern are now proven; the machinery that would
+  assemble an actual site from that resolved specification is not.
 - Also still absent: a real Preview Inventory / matching engine (GAP-16) to decide which new lead an
   archived-and-recycled Foundation should be re-offered to; `archiveAndRecycleFoundation()` performs
   only the reservation-release side effect, not re-matching.

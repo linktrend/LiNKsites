@@ -10,13 +10,15 @@
 > Decision DR-02), a real Program Ledger (Issue/Run/Gate/Event core, Postgres-backed, hierarchy +
 > executor registry) exists and is tested, and all 7 of the manual's named Phase 3 reusable-asset
 > objects (Vertical Kit, Tier Specification, Reusable Site Foundation, Design Intelligence Catalog,
-> Component Registry, Site Specification, Prospect Adaptation) are now real, tested code (85 passing
-> tests in `packages/factory-catalog`). See `audit/14_implementation_roadmap.md`'s "Sixth" and
-> "Seventh" work batches for the full detail. The items below describing what's still missing remain
-> accurate for what they describe (payment/Odoo integration, monitoring/backups, live-Postgres
-> verification, and the Promotion Service/Site Assembly Engine that would actually execute against
-> these new objects) — this addendum only updates what has since changed, it does not re-litigate the
-> rest of the original summary.
+> Component Registry, Site Specification, Prospect Adaptation) are now real, tested code (90 passing
+> tests in `packages/factory-catalog`), and a real executor (`SiteSpecificationExecutor`) now
+> connects the Program Ledger to this factory work end to end for the first time. See
+> `audit/14_implementation_roadmap.md`'s "Sixth", "Seventh", and "Eighth" work batches for the full
+> detail. The items below describing what's still missing remain accurate for what they describe
+> (payment/Odoo integration, monitoring/backups, live-Postgres verification, and the Promotion
+> Service/Site Assembly Engine that would actually execute against these new objects in production)
+> — this addendum only updates what has since changed, it does not re-litigate the rest of the
+> original summary.
 
 ## What I did
 
