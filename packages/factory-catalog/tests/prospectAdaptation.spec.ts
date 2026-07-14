@@ -8,6 +8,7 @@ import {
 } from '../src/prospectAdaptation.js'
 import { FoundationReservationManager } from '../src/reusableFoundation.js'
 import type { SiteSpecification } from '../src/siteSpecification.js'
+import { ConversionLockError, ConversionLockRegistry } from '../src/conversionLock.js'
 
 function buildSiteSpec(overrides: Partial<SiteSpecification> = {}): SiteSpecification {
   return {
@@ -125,5 +126,53 @@ describe('archiveAndRecycleFoundation (manual §MVO step 7: close or recycle)', 
 
     // The stale adaptation's archival must not have touched the newer, unrelated reservation.
     expect(manager.getActiveReservation('foundation-1')?.reservationId).toBe(newReservation.reservationId)
+  })
+})
+
+describe('archiveAndRecycleFoundation with a ConversionLockRegistry (manual §10.33/§10.45)', () => {
+  it('recycles normally when no Conversion Lock exists for the Foundation', () => {
+    const manager = new FoundationReservationManager()
+    const lockRegistry = new ConversionLockRegistry()
+    const reservation = manager.reserve('foundation-1', 'preview-request-1')
+    const siteSpec = buildSiteSpec()
+    const adaptation = createProspectAdaptation('adapt-1', siteSpec, reservation, {})
+
+    const archived = archiveAndRecycleFoundation(adaptation, manager, lockRegistry)
+
+    expect(archived.status).toBe('archived')
+    expect(manager.getActiveReservation('foundation-1')).toBeNull()
+  })
+
+  it('refuses to recycle a Foundation that is locked for conversion, and does not archive the Adaptation', () => {
+    const manager = new FoundationReservationManager()
+    const lockRegistry = new ConversionLockRegistry()
+    const reservation = manager.reserve('foundation-1', 'preview-request-1')
+    const siteSpec = buildSiteSpec()
+    let adaptation = createProspectAdaptation('adapt-1', siteSpec, reservation, {})
+    adaptation = transitionAdaptation(adaptation, 'previewed')
+    adaptation = transitionAdaptation(adaptation, 'published')
+    lockRegistry.createLock({
+      adaptation,
+      previewDeploymentVersionRef: 'deployment-v1',
+      conversionInstructionRef: 'conversion-1',
+      stripePaymentConfirmationRef: 'stripe-1',
+      odooCommercialRecordRef: 'odoo-1',
+    })
+
+    expect(() => archiveAndRecycleFoundation(adaptation, manager, lockRegistry)).toThrow(ConversionLockError)
+    // The Adaptation must remain unarchived -- the whole operation aborts, not just the reservation release.
+    expect(adaptation.status).toBe('published')
+    expect(manager.getActiveReservation('foundation-1')).not.toBeNull()
+  })
+
+  it('remains backward-compatible: omitting the registry entirely still recycles normally', () => {
+    const manager = new FoundationReservationManager()
+    const reservation = manager.reserve('foundation-1', 'preview-request-1')
+    const siteSpec = buildSiteSpec()
+    const adaptation = createProspectAdaptation('adapt-1', siteSpec, reservation, {})
+
+    const archived = archiveAndRecycleFoundation(adaptation, manager)
+
+    expect(archived.status).toBe('archived')
   })
 })

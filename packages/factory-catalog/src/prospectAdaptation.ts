@@ -23,13 +23,23 @@
  * step 7) -- an Adaptation that does not convert must be explicitly
  * archived, which is also the trigger point for the underlying
  * Foundation reservation to be released back to the pool for the next
- * matching lead. Recycling is out of scope here (it requires a real
- * Preview Inventory / matching engine, GAP-16, still absent) -- only
- * the state transition and reservation-release side effect are
- * implemented.
+ * matching lead.
+ *
+ * UPDATE (2026-07-14, Issue phase4-deployment-outcome-wiring-001):
+ * `archiveAndRecycleFoundation()` now accepts an OPTIONAL
+ * `ConversionLockRegistry` and, when supplied, checks
+ * `assertRecycleAllowed()` before recycling -- enforcing manual
+ * §10.33/§10.45's rule that a Foundation locked for conversion must
+ * never be recycled. The parameter is optional and backward-compatible
+ * (existing 2-argument callers are unaffected) because Conversion Lock
+ * (`conversionLock.ts`) was built in a later Issue than this file's
+ * original scope; wiring the check in here, rather than leaving it
+ * purely advisory, closes that specific gap named in
+ * `conversionLock.ts`'s own doc comment and PROOF.md.
  */
 
 import type { SchemaVersion } from '@linksites/types'
+import type { ConversionLockRegistry } from './conversionLock.js'
 import type { FoundationReservation, FoundationReservationManager } from './reusableFoundation.js'
 import type { SiteSpecification } from './siteSpecification.js'
 
@@ -121,14 +131,24 @@ export function transitionAdaptation(adaptation: ProspectAdaptation, to: Prospec
  * Manual §MVO commercial loop step 7 ("close or recycle"): archiving a
  * non-converting Adaptation is also the trigger to release its
  * underlying Foundation reservation, so the Foundation becomes
- * available again for the next matching lead. Real matching/re-offer
- * logic (a Preview Inventory engine, GAP-16) is out of scope -- this
- * only performs the state transition plus the release side effect.
+ * available again for the next matching lead.
+ *
+ * If `conversionLockRegistry` is supplied, this function calls its
+ * `assertRecycleAllowed(adaptation.foundationId)` FIRST and lets any
+ * `ConversionLockError` propagate uncaught -- a Foundation locked for
+ * conversion (manual §10.33) must never be recycled, even if a caller
+ * mistakenly tries. The parameter is optional so existing callers that
+ * predate Conversion Lock's existence remain valid; passing it is
+ * strongly recommended for any real recycling workflow.
  */
 export function archiveAndRecycleFoundation(
   adaptation: ProspectAdaptation,
   reservationManager: FoundationReservationManager,
+  conversionLockRegistry?: ConversionLockRegistry,
 ): ProspectAdaptation {
+  if (conversionLockRegistry) {
+    conversionLockRegistry.assertRecycleAllowed(adaptation.foundationId)
+  }
   const archived = transitionAdaptation(adaptation, 'archived')
   const activeReservation = reservationManager.getActiveReservation(archived.foundationId)
   if (activeReservation && activeReservation.reservationId === archived.reservationId) {
