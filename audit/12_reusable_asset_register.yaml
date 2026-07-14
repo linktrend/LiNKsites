@@ -138,6 +138,30 @@ assets:
       entry) was untracked local .next build output with zero source code -- never
       committed to git, left untouched on disk as it is not a repository concern.
 
+  - asset_id: asset-stray-web-master-lockfile
+    description: "apps/web-master/pnpm-lock.yaml — a second, orphaned pnpm lockfile committed in the original 'initialize LiNKsites monorepo' commit (2025-12-09), predating this repository becoming a proper single-lockfile pnpm workspace."
+    classification: dead-and-misleading
+    disposition: removed # EXECUTED 2026-07-14, discovered while re-syncing development/staging/main
+    rationale: >
+      EXECUTED (2026-07-14): deleted. This repository is a pnpm workspace with
+      exactly one lockfile at the repo root (pnpm-workspace.yaml declares
+      apps/* and packages/* as member packages) -- pnpm install/build never
+      reads or writes a nested per-app lockfile. This orphaned file was frozen
+      at its December 2025 dependency versions and was NEVER updated by any of
+      this session's pnpm.overrides security fixes, since those only affect
+      the root lockfile pnpm actually resolves against.
+
+      Discovered because GitHub's Dependabot scans EVERY committed
+      pnpm-lock.yaml-named file independently of whether pnpm workspaces
+      actually uses it -- it was reporting 26 vulnerabilities (11 high, 13
+      moderate, 2 low) against this dead file's frozen versions of `next`,
+      `next-intl`, `picomatch`, `minimatch`, `postcss`, `js-yaml`, `glob`, and
+      `flatted`, even though `pnpm audit` against the REAL, actively-used root
+      lockfile reported zero known vulnerabilities. Confirmed nothing
+      references this file (no script, config, or CI step) before removing it;
+      full workspace verification (typecheck, all test suites, both frontend
+      builds, lint, pnpm audit) remained green after removal.
+
   - asset_id: asset-empty-scaffold-packages
     description: "packages/blocks, packages/config, packages/ui, packages/utils — four pnpm workspace packages containing only a package.json and a single `export {}` placeholder file each, version 0.0.0."
     classification: dead-scaffold
