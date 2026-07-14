@@ -10,13 +10,18 @@ scope:
   - "Reusable Site Foundation manifests, prospect-neutrality scanner, reservation exclusivity (done: phase3-reusable-foundation-001)"
   - "Design Intelligence Catalog token hierarchy + accessibility-gated admission (done: phase3-design-catalog-001)"
   - "Component Registry machine object, seeded from real web-master components (done: phase3-component-registry-001)"
+  - "Site Assembly Manifest: deterministic resolution of a Site Specification + Prospect Adaptation into an ordered page/component plan (done: phase3-site-assembly-manifest-001, manual §07)"
+  - "Promotion Service: Supabase working package -> Payload draft, with idempotency/checksum-conflict detection and readback verification (done: phase3-promotion-service-001, manual §12)"
+  - "Program Ledger <-> factory-catalog integration for both of the above via real executors (done: phase3-assembly-and-promotion-ledger-integration-001)"
 out_of_scope:
-  - "The Promotion Service (Supabase working -> Payload draft) -- separate Phase 3 Issue, needs a live Supabase/Payload connection to test meaningfully beyond types"
+  - "A real PayloadDraftTarget backed by live Payload/Postgres -- needs live infrastructure not available in this environment (GAP-50); an in-memory test double stands in today"
   - "Real Vertical Kit content for the Home Services pilot vertical (Decision DR-06) -- that requires business/content input from Carlos or Sales research, not something to invent"
   - "Site Specification object (per-site resolved contract combining Kit + Tier + Foundation + Design Profile + Component selections) -- done: phase3-site-specification-001"
   - "Prospect Adaptation record, reservation-matching guard, close-or-recycle lifecycle -- done: phase3-prospect-adaptation-001"
   - "Program Ledger <-> factory-catalog integration via a real executor -- done: phase3-ledger-executor-integration-001"
   - "Real Design Intelligence Catalog content from ui-ux-pro-max-skill -- not reachable from this repository; only a structural placeholder exists"
+  - "Publication (Payload draft -> published) -- a separate, later authority; the Promotion Service in this module only ever writes drafts"
+  - "Automatic pipeline chaining (Site Specification -> Site Assembly -> Promotion as one flow) -- each remains an independently dispatchable Issue type for now"
 phases: []
 read_first:
   - ".cursor/execution/INDEX.yaml"
@@ -33,7 +38,7 @@ optional_fields:
   risk_summary:
     - "Numeric tier limits (page counts, change allowances, etc.) are explicitly provisional placeholders per manual §03's deferred-decisions list -- must not be treated as real commercial commitments until Carlos approves actual values."
   notes:
-    - "Issues completed so far: phase3-tier-specification-001, phase3-vertical-kit-001, phase3-reusable-foundation-001, phase3-design-catalog-001, phase3-component-registry-001, phase3-site-specification-001, phase3-prospect-adaptation-001, phase3-ledger-executor-integration-001. Eight real, tested objects/integrations, 90 passing tests in packages/factory-catalog (plus 36 unaffected in packages/program-ledger). The last Issue connects Phase 2 (Program Ledger) and Phase 3 (factory-catalog) for the first time via a real ExecutorAdapter. Next work in this area is either promotion of provisional/placeholder content to active (needs Carlos/business input, not something to invent) or the Promotion Service / Site Assembly Engine (GAP-04) which is Phase 4/5 territory."
+    - "Issues completed so far: phase3-tier-specification-001, phase3-vertical-kit-001, phase3-reusable-foundation-001, phase3-design-catalog-001, phase3-component-registry-001, phase3-site-specification-001, phase3-prospect-adaptation-001, phase3-ledger-executor-integration-001, phase3-site-assembly-manifest-001, phase3-promotion-service-001, phase3-assembly-and-promotion-ledger-integration-001. Eleven real, tested objects/integrations, 114 passing tests in packages/factory-catalog (plus 36 unaffected in packages/program-ledger). This closes GAP-04 (Promotion Service / Site Assembly Engine) at the code-object level: Site Assembly Manifest (manual §07 deterministic assembly) and Promotion Service (manual §12 Supabase-working-to-Payload-draft) are both real, tested, and now wired to the Program Ledger via dedicated executors, matching the pattern already proven for Site Specification. What remains before Phase 3's exit gate is fully met: a real Payload-backed PayloadDraftTarget (needs live infrastructure, GAP-50) and promotion of provisional/placeholder commercial content to active (needs Carlos/business input, not an engineering task)."
 ---
 
 # Module
