@@ -331,6 +331,9 @@ importers:
 
   packages/factory-catalog:
     dependencies:
+      '@linksites/program-ledger':
+        specifier: workspace:*
+        version: link:../program-ledger
       '@linksites/types':
         specifier: workspace:*
         version: link:../types

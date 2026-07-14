@@ -15,6 +15,7 @@ out_of_scope:
   - "Real Vertical Kit content for the Home Services pilot vertical (Decision DR-06) -- that requires business/content input from Carlos or Sales research, not something to invent"
   - "Site Specification object (per-site resolved contract combining Kit + Tier + Foundation + Design Profile + Component selections) -- done: phase3-site-specification-001"
   - "Prospect Adaptation record, reservation-matching guard, close-or-recycle lifecycle -- done: phase3-prospect-adaptation-001"
+  - "Program Ledger <-> factory-catalog integration via a real executor -- done: phase3-ledger-executor-integration-001"
   - "Real Design Intelligence Catalog content from ui-ux-pro-max-skill -- not reachable from this repository; only a structural placeholder exists"
 phases: []
 read_first:
@@ -32,7 +33,7 @@ optional_fields:
   risk_summary:
     - "Numeric tier limits (page counts, change allowances, etc.) are explicitly provisional placeholders per manual §03's deferred-decisions list -- must not be treated as real commercial commitments until Carlos approves actual values."
   notes:
-    - "Issues completed so far: phase3-tier-specification-001, phase3-vertical-kit-001, phase3-reusable-foundation-001, phase3-design-catalog-001, phase3-component-registry-001, phase3-site-specification-001, phase3-prospect-adaptation-001. Seven real, tested objects, 85 passing tests in packages/factory-catalog. This closes the reusable-asset factory's core object set for this module. Next work in this area is either promotion of provisional/placeholder content to active (needs Carlos/business input, not something to invent) or the Promotion Service / Site Assembly Engine (GAP-04) which is Phase 4/5 territory."
+    - "Issues completed so far: phase3-tier-specification-001, phase3-vertical-kit-001, phase3-reusable-foundation-001, phase3-design-catalog-001, phase3-component-registry-001, phase3-site-specification-001, phase3-prospect-adaptation-001, phase3-ledger-executor-integration-001. Eight real, tested objects/integrations, 90 passing tests in packages/factory-catalog (plus 36 unaffected in packages/program-ledger). The last Issue connects Phase 2 (Program Ledger) and Phase 3 (factory-catalog) for the first time via a real ExecutorAdapter. Next work in this area is either promotion of provisional/placeholder content to active (needs Carlos/business input, not something to invent) or the Promotion Service / Site Assembly Engine (GAP-04) which is Phase 4/5 territory."
 ---
 
 # Module

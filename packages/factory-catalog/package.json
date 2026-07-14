@@ -13,7 +13,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@linksites/types": "workspace:*"
+    "@linksites/types": "workspace:*",
+    "@linksites/program-ledger": "workspace:*"
   },
   "devDependencies": {
     "typescript": "5.7.3",
