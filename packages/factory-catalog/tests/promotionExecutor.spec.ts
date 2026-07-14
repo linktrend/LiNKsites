@@ -107,6 +107,41 @@ describe('PromotionExecutor, driven end-to-end through the Program Ledger', () =
     expect(upsertCallCount).toBe(1)
   })
 
+  it('classifies a PromotionServiceError (idempotency-key reused with a different checksum) as invalid_input, not an unhandled crash', async () => {
+    promotionService = new PromotionService(buildTarget())
+    registry = new ExecutorRegistry()
+    registry.register(new PromotionExecutor({ promotionService }))
+
+    const firstIssue = await ledger.createIssue({
+      issueType: PROMOTE_WORKING_PACKAGE_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: VALID_REQUEST_INPUT,
+    })
+    const firstRun = await runIssueOnce(ledger, registry, firstIssue.issueId)
+    expect(firstRun.state).toBe('succeeded')
+
+    // A second, distinct Issue (different programRef so the Ledger's own idempotency doesn't
+    // dedupe it) reuses the SAME PromotionRequest.idempotencyKey but with a different package
+    // checksum -- PromotionService.promote() itself throws PromotionServiceError for this, and
+    // the executor must classify it as invalid_input, not let it propagate as an unhandled error.
+    const conflictingInput = {
+      ...VALID_REQUEST_INPUT,
+      promotionRequestId: 'promo-req-2',
+      workingPackage: { ...VALID_REQUEST_INPUT.workingPackage, packageChecksum: 'checksum-2-different' },
+    }
+    const secondIssue = await ledger.createIssue({
+      issueType: PROMOTE_WORKING_PACKAGE_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment-second',
+      input: conflictingInput,
+    })
+
+    const secondRun = await runIssueOnce(ledger, registry, secondIssue.issueId)
+
+    expect(secondRun.state).toBe('failed_terminal')
+    expect(secondRun.failure?.failureClass).toBe('invalid_input')
+    expect(secondRun.failure?.message).toContain('contract conflict')
+  })
+
   it('fails with invalid_input on malformed input without throwing', async () => {
     const issue = await ledger.createIssue({
       issueType: PROMOTE_WORKING_PACKAGE_ISSUE_TYPE,

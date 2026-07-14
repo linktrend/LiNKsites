@@ -28,6 +28,42 @@ export interface SqlExecutor {
   query(sql: string, params?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>
 }
 
+/**
+ * Postgres SQLSTATE for "invalid input syntax" (e.g. a non-UUID string
+ * passed where a `uuid`-typed column is compared). A malformed ID can
+ * never match any real row, so this is semantically equivalent to "not
+ * found" -- callers of `getIssue`/`getRun`/`getGateResult` expect a
+ * clean `null`, not a raw driver exception, for an unknown ID. Found by
+ * this hardening pass's `heartbeat()` contract test (an unknown, non-
+ * UUID-shaped runId previously crashed with a raw pg error instead of
+ * producing the expected `LedgerError('not_found')`).
+ */
+const INVALID_INPUT_SYNTAX_SQLSTATE = '22P02'
+
+function isInvalidInputSyntaxError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && (error as { code?: unknown }).code === INVALID_INPUT_SYNTAX_SQLSTATE
+}
+
+/**
+ * Runs a single-row-lookup-by-id query, translating a malformed-ID
+ * "invalid input syntax" error into a clean `null` (not found) instead
+ * of letting the raw driver error propagate.
+ */
+async function queryOneOrNull<T>(
+  db: SqlExecutor,
+  sql: string,
+  params: unknown[],
+  mapRow: (row: Record<string, unknown>) => T,
+): Promise<T | null> {
+  try {
+    const { rows } = await db.query(sql, params)
+    return rows[0] ? mapRow(rows[0]) : null
+  } catch (error) {
+    if (isInvalidInputSyntaxError(error)) return null
+    throw error
+  }
+}
+
 const schemaVersion = (row: Record<string, unknown>): SchemaVersion => ({
   major: Number(row.schema_version_major),
   minor: Number(row.schema_version_minor),
@@ -143,8 +179,7 @@ export class PostgresLedgerStore implements LedgerStore {
   constructor(private readonly db: SqlExecutor) {}
 
   async getIssue(issueId: string): Promise<Issue | null> {
-    const { rows } = await this.db.query('select * from lsites_ledger.issues where issue_id = $1', [issueId])
-    return rows[0] ? toIssue(rows[0]) : null
+    return queryOneOrNull(this.db, 'select * from lsites_ledger.issues where issue_id = $1', [issueId], toIssue)
   }
 
   async putIssue(issue: Issue): Promise<void> {
@@ -183,8 +218,7 @@ export class PostgresLedgerStore implements LedgerStore {
   }
 
   async getRun(runId: string): Promise<Run | null> {
-    const { rows } = await this.db.query('select * from lsites_ledger.runs where run_id = $1', [runId])
-    return rows[0] ? toRun(rows[0]) : null
+    return queryOneOrNull(this.db, 'select * from lsites_ledger.runs where run_id = $1', [runId], toRun)
   }
 
   async putRun(run: Run): Promise<void> {
@@ -316,8 +350,7 @@ export class PostgresLedgerStore implements LedgerStore {
   }
 
   async getGateResult(gateId: string): Promise<GateResult | null> {
-    const { rows } = await this.db.query('select * from lsites_ledger.gate_results where gate_id = $1', [gateId])
-    return rows[0] ? toGate(rows[0]) : null
+    return queryOneOrNull(this.db, 'select * from lsites_ledger.gate_results where gate_id = $1', [gateId], toGate)
   }
 
   async appendEvent(event: LedgerEvent): Promise<void> {

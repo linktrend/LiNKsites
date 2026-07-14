@@ -110,6 +110,47 @@ describe('checkEntitlement', () => {
     const result = checkEntitlement(TIER_SPECIFICATIONS.standard, { kind: 'additional_integration', requestedCount: 1 })
     expect(result.disposition).toBe('requires_upgrade')
   })
+
+  it('reports unsupported for additional locales when even the highest tier cannot satisfy the request', () => {
+    const result = checkEntitlement(TIER_SPECIFICATIONS.enterprise, { kind: 'additional_localization_locale', requestedCount: Number.POSITIVE_INFINITY + 1 })
+    // Enterprise's own limit is POSITIVE_INFINITY, so nothing exceeds it in practice -- exercise the
+    // genuinely-unsupported branch with a synthetic highest-tier spec that has a finite limit instead.
+    expect(result.disposition).toBe('allowed')
+
+    const finiteEnterprise = { ...TIER_SPECIFICATIONS.enterprise, dimensions: { ...TIER_SPECIFICATIONS.enterprise.dimensions, maxAdditionalLocalizationLocales: 5 } }
+    const unsupportedResult = checkEntitlement(finiteEnterprise, { kind: 'additional_localization_locale', requestedCount: 6 })
+    expect(unsupportedResult.disposition).toBe('unsupported')
+  })
+
+  it('reports unsupported for additional integrations when even the highest tier cannot satisfy the request', () => {
+    const finiteEnterprise = { ...TIER_SPECIFICATIONS.enterprise, dimensions: { ...TIER_SPECIFICATIONS.enterprise.dimensions, maxAdditionalIntegrations: 5 } }
+    const result = checkEntitlement(finiteEnterprise, { kind: 'additional_integration', requestedCount: 6 })
+    expect(result.disposition).toBe('unsupported')
+  })
+
+  it('requires an upgrade for dedicated runtime on a tier that does not offer it, when a higher tier does', () => {
+    const result = checkEntitlement(TIER_SPECIFICATIONS.standard, { kind: 'dedicated_runtime' })
+    expect(result.disposition).toBe('requires_upgrade')
+    expect(result.reason).toContain('premium')
+  })
+
+  it('reports unsupported for dedicated runtime when no higher tier offers it either', () => {
+    // None of the 3 real provisional tiers reach this path directly (enterprise, the highest,
+    // already offers dedicatedRuntime), so exercise it with a synthetic highest-tier spec that
+    // also lacks it, to cover the genuinely-unsupported branch.
+    const noDedicatedRuntimeAnywhere = { ...TIER_SPECIFICATIONS.enterprise, dimensions: { ...TIER_SPECIFICATIONS.enterprise.dimensions, dedicatedRuntime: false } }
+    const result = checkEntitlement(noDedicatedRuntimeAnywhere, { kind: 'dedicated_runtime' })
+    expect(result.disposition).toBe('unsupported')
+  })
+
+  it('allows base-product custom code for a synthetic tier configuration that explicitly permits it', () => {
+    // None of the 3 real provisional tiers set permitsBaseProductCustomCode: true (manual §03
+    // §7.1/§7.3 -- always an exception by default), but the 'allowed' branch of checkEntitlement's
+    // base_product_custom_code case must still be exercised for a tier that explicitly does.
+    const hypotheticalTierWithApproval = { ...TIER_SPECIFICATIONS.enterprise, dimensions: { ...TIER_SPECIFICATIONS.enterprise.dimensions, permitsBaseProductCustomCode: true } }
+    const result = checkEntitlement(hypotheticalTierWithApproval, { kind: 'base_product_custom_code' })
+    expect(result.disposition).toBe('allowed')
+  })
 })
 
 describe('resolveMostRestrictive (manual §08.17)', () => {

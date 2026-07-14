@@ -141,6 +141,41 @@ describe('SiteSpecificationExecutor, driven end-to-end through the Program Ledge
     expect(run.failure?.failureClass).toBe('invalid_input')
   })
 
+  it('fails the Run with invalid_input when a selected component is not available for the tier (ComponentRegistryError path, delegated not duplicated)', async () => {
+    const deps = buildDeps()
+    deps.componentRegistry.register({
+      schemaVersion: { major: 1, minor: 0 },
+      componentId: 'EnterpriseOnlyWidget',
+      displayName: 'Enterprise-only widget',
+      status: 'active',
+      category: 'marketing',
+      sourceFile: 'src/components/marketing/EnterpriseOnlyWidget.tsx',
+      requiresCustomCode: true,
+      restrictedToTiers: [],
+    })
+    registry = new ExecutorRegistry()
+    registry.register(new SiteSpecificationExecutor(deps))
+
+    const issue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: {
+        siteSpecId: 'sitespec-1',
+        siteRef: 'site-1',
+        kitId: 'home_services',
+        tierId: 'standard',
+        foundationId: 'foundation-1',
+        selectedComponentIds: ['EnterpriseOnlyWidget'],
+        pageCount: 5,
+      },
+    })
+
+    const run = await runIssueOnce(ledger, registry, issue.issueId)
+
+    expect(run.state).toBe('failed_terminal')
+    expect(run.failure?.failureClass).toBe('invalid_input')
+  })
+
   it('fails the Run with invalid_input when the Issue input is missing required fields, without throwing', async () => {
     const issue = await ledger.createIssue({
       issueType: SITE_SPECIFICATION_ISSUE_TYPE,

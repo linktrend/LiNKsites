@@ -91,6 +91,50 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
     })
   })
 
+  describe(`[${storeName}] heartbeat (lease extension / crash-liveness signal)`, () => {
+    it('extends the lease expiry and records lastHeartbeatAt, without changing the fencing token', async () => {
+      const ledger = await newLedger()
+      const issue = await ledger.createIssue({
+        issueType: 'test.synthetic',
+        programRef: 'program-1',
+        input: { foo: 'bar' },
+      })
+      const run = await ledger.dispatch(issue.issueId)
+      const claimed = await ledger.claim(run.runId, 'executor-a', 50)
+      const fencingToken = claimed.lease!.fencingToken
+      const initialExpiresAt = claimed.lease!.expiresAt
+
+      const heartbeated = await ledger.heartbeat(run.runId, fencingToken, 60_000)
+
+      expect(heartbeated.lease!.fencingToken).toBe(fencingToken)
+      expect(new Date(heartbeated.lease!.expiresAt).getTime()).toBeGreaterThan(new Date(initialExpiresAt).getTime())
+      expect(heartbeated.lastHeartbeatAt).not.toBeNull()
+    })
+
+    it('rejects a heartbeat with a stale fencing token after the lease has been reclaimed by another executor', async () => {
+      const ledger = await newLedger()
+      const issue = await ledger.createIssue({
+        issueType: 'test.synthetic',
+        programRef: 'program-1',
+        input: { foo: 'bar' },
+      })
+      const run = await ledger.dispatch(issue.issueId)
+      const claimedByA = await ledger.claim(run.runId, 'executor-a', 1)
+      const staleFencingToken = claimedByA.lease!.fencingToken
+
+      await new Promise((resolve) => setTimeout(resolve, 5))
+      await ledger.reclaimExpiredLeases()
+      await ledger.claim(run.runId, 'executor-b', 30_000)
+
+      await expect(ledger.heartbeat(run.runId, staleFencingToken)).rejects.toThrow(LedgerError)
+    })
+
+    it('rejects a heartbeat for an unknown Run', async () => {
+      const ledger = await newLedger()
+      await expect(ledger.heartbeat('does-not-exist', 1)).rejects.toThrow(LedgerError)
+    })
+  })
+
   describe(`[${storeName}] timeout / retry`, () => {
     it('schedules a retry on a retryable failure, and a fresh dispatch produces a brand-new Run', async () => {
       const ledger = await newLedger()

@@ -68,3 +68,15 @@ jobs:
       # Specification entitlement-enforcement engine (manual §08.16).
       - name: Factory Catalog tests
         run: pnpm --filter @linksites/factory-catalog run test
+
+      # Hardening pass (2026-07-14, DR-09): catches dependency-vulnerability
+      # regressions automatically. This checks the `development` branch's own
+      # dependency tree via `pnpm audit`, which is authoritative and current --
+      # NOT the same figure as GitHub's Dependabot alert count shown on git
+      # push output, which reflects the separate, not-yet-promoted `main`
+      # (default) branch per this repo's staging->main promotion policy
+      # (docs/BRANCHING_AND_DEPLOYMENT_POLICY.md). Fails the build on any
+      # moderate-or-higher advisory so a new transitive vulnerability is
+      # caught here, not discovered later.
+      - name: Dependency vulnerability audit
+        run: pnpm audit --audit-level=moderate

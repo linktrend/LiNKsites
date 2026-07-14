@@ -122,4 +122,9 @@ describe('FoundationReservationManager (manual §08.28, §10.18)', () => {
     expect(() => manager.reserve('foundation-1', 'req-1')).not.toThrow()
     expect(() => manager.reserve('foundation-2', 'req-2')).not.toThrow()
   })
+
+  it('throws FoundationError when releasing an unknown reservationId', () => {
+    const manager = new FoundationReservationManager()
+    expect(() => manager.release('does-not-exist')).toThrow(FoundationError)
+  })
 })

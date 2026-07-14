@@ -99,6 +99,13 @@ describe('createPreviewDeployment', () => {
     expect(() => createPreviewDeployment(input)).toThrow(PreviewDeploymentError)
   })
 
+  it('defaults `now` to the real current time when omitted from the input', () => {
+    const input = buildInput({ expiresAt: new Date(Date.now() + 60_000).toISOString() })
+    delete (input as Partial<CreatePreviewDeploymentInput>).now
+    const deployment = createPreviewDeployment(input)
+    expect(deployment.status).toBe('active')
+  })
+
   it('rejects an expiresAt exactly equal to now (must be strictly after, not equal)', () => {
     const input = buildInput({ expiresAt: FIXED_NOW.toISOString() })
     expect(() => createPreviewDeployment(input)).toThrow(PreviewDeploymentError)

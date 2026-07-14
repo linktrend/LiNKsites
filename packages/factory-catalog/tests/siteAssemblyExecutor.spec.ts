@@ -138,4 +138,17 @@ describe('SiteAssemblyExecutor, driven end-to-end through the Program Ledger', (
     expect(run.state).toBe('failed_terminal')
     expect(run.failure?.failureClass).toBe('invalid_input')
   })
+
+  it('fails with invalid_input when an adaptationId is supplied but not registered', async () => {
+    const issue = await ledger.createIssue({
+      issueType: SITE_ASSEMBLY_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: { ...VALID_INPUT, adaptationId: 'does-not-exist' },
+    })
+
+    const run = await runIssueOnce(ledger, registry, issue.issueId)
+    expect(run.state).toBe('failed_terminal')
+    expect(run.failure?.failureClass).toBe('invalid_input')
+    expect(run.failure?.message).toContain('does-not-exist')
+  })
 })

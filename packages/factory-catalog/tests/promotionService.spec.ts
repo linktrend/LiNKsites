@@ -159,7 +159,33 @@ describe('PromotionService readback failure', () => {
     expect(receipt.itemResults[0].failureReason).toMatch(/readback verification failed/)
     // The document id from the successful write is still recorded for
     // audit/debugging, even though the item is not considered succeeded.
+
     expect(receipt.itemResults[0].payloadDocumentId).toBe('doc-key-1')
+  })
+
+  it('readback() itself throwing (not just returning null) is also treated as a failed item, not an unhandled crash', async () => {
+    const target: PayloadDraftTarget = {
+      upsertDraft: vi.fn(async (_collection, externalKey) => ({ payloadDocumentId: `doc-${externalKey}`, resultChecksum: `checksum-${externalKey}` })),
+      readback: vi.fn(async () => {
+        throw new Error('simulated readback transport error')
+      }),
+    }
+    const service = new PromotionService(target)
+    const request = buildRequest({
+      workingPackage: {
+        workingPackageId: 'wp-readback-throws',
+        workingPackageVersion: 1,
+        packageChecksum: 'checksum-a',
+        items: [buildItem({ sourceItemId: 'item-1', targetExternalKey: 'key-1' })],
+      },
+    })
+
+    const receipt = await service.promote(request)
+
+    expect(receipt.status).toBe('failed')
+    expect(receipt.itemResults[0].status).toBe('failed')
+    expect(receipt.itemResults[0].payloadDocumentId).toBe('doc-key-1')
+    expect(receipt.itemResults[0].failureReason).toMatch(/readback verification failed.*simulated readback transport error/)
   })
 })
 
