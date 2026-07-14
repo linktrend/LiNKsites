@@ -87,6 +87,34 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
 - **Resolution executed:** Recorded in `audit/14_implementation_roadmap.md` (Proposed Pilot Slice section, now marked Approved) as the approved pilot scope. This unblocks Phase 3 (Vertical Kit/Tier Specification build for Home Services/Standard) once Phase 1/2 foundations exist. Region, payment path, and Odoo mapping remain to be chosen (simplest available option recommended, per the roadmap) — not blocking, since no Vertical Kit or commercial-spine work has started yet.
 - **Status:** **Resolved (vertical + tier); region/payment-path/Odoo-mapping still to be picked at Phase 3/5, non-blocking.**
 
+## DR-07 — Clarification: "LiNKdev" vs. "LiNKdeveloper", and a self-inflicted symlink regression
+
+- **Clarification from Carlos (2026-07-14):** "LiNKdev" (the embedded factory removed per DR-01,
+  PR #36) and "LiNKdeveloper" (the shared execution-doctrine system living in `IDE Development`,
+  wired into this repo via the `repo/.cursor` symlink) are two distinct things and must not be
+  conflated. LiNKsites should actively use LiNKdeveloper's rules, agents, skills, and procedures
+  (`.cursor/execution/`, `.cursor/agents/`, `.cursor/commands/`, `.cursor/skills/` — all reachable
+  through the symlink) for its own development work going forward.
+- **Self-inflicted regression found and fixed:** during DR-01's implementation (branch-switching
+  between `issue/wave9-linksites-prod` and the defactor branch inside git worktrees), a `git
+  checkout` operation had inadvertently restored `.cursor` (and `.agent/`, `.codex/`, `LiNKdev/`,
+  `AGENTS.md`) to their old tracked, present state in the main workspace's local working tree —
+  silently undoing part of the pre-existing uncommitted LiNKdev-removal work that was already
+  present before this session began, and leaving the `.cursor` symlink to `IDE Development` (the
+  actual LiNKdeveloper wiring) missing from the local working tree even though PR #36 correctly
+  captures the intended removal on its own branch.
+- **Resolution executed (2026-07-14):** re-ran the sanctioned `IDE Development/scripts/wire-repo.sh`
+  wiring script (not a manual `ln -s`) against the LiNKsites repo; it reported `PASS` on every
+  check (symlink resolution, `.cursor/README.md`, `.cursor/execution/INDEX.yaml`,
+  `.cursor/templates/INDEX.yaml`, `.cursor/commands/INDEX.yaml` all reachable). Also found and
+  reverted two small stray edits that had leaked into the main workspace early in this session
+  (duplicates of fixes already correctly committed on PR #38's branch) during initial local
+  testing before this session had adopted the worktree-per-branch discipline used for the rest of
+  the session.
+- **Status:** **Resolved.** The main workspace's `.cursor` now correctly resolves through the
+  symlink chain (`LiNKsites/.cursor -> IDE Development/.cursor -> IDE Development/core`), verified
+  by the wiring script.
+
 ## Summary table
 
 | ID | Topic | Severity | Resolved? | Decision owner |
@@ -97,3 +125,4 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
 | DR-04 | Program/Module vocabulary vs. Suite/Project vocabulary | Low-medium | **Yes (ADR 0001)** | Carlos |
 | DR-05 | Next.js/React version skew | Medium | No — deferred | Implementation roadmap (Phase 1/3) |
 | DR-06 | Pilot slice (vertical + tier) | High | **Yes — Home Services / Standard** | Carlos |
+| DR-07 | LiNKdev vs. LiNKdeveloper clarification + symlink regression fix | Medium | **Yes — executed** | Carlos |

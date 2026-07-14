@@ -99,6 +99,38 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
 the rest), then #38 through #48 in order (each depends on the previous).
 
+## Fifth work batch (2026-07-14) — independent review pass, bug fixes, LiNKdeveloper adoption
+
+Carlos asked to "fix any bugs" before continuing, and separately clarified that "LiNKdeveloper"
+(the shared execution-doctrine system in `IDE Development`, wired via the `repo/.cursor` symlink)
+is distinct from "LiNKdev" (the embedded factory removed in PR #36 / DR-01), and asked that this
+repository's own Program Manual implementation work actually use it going forward.
+
+- **Corrected a self-inflicted mistake first**: earlier git branch-switching during DR-01's
+  worktree operations had inadvertently restored `.cursor` (and `.agent/`, `.codex/`, `LiNKdev/`,
+  `AGENTS.md`) to their old tracked, present state on `issue/wave9-linksites-prod`'s local working
+  tree, undoing part of the pre-existing uncommitted LiNKdev-removal work-in-progress that was
+  there before this session started. Re-ran `IDE Development/scripts/wire-repo.sh` (the sanctioned
+  wiring script, not a manual `ln -s`) to restore the correct symlink and verify it. Also found and
+  reverted two small stray edits that had leaked into the main workspace early in this session
+  (a lint-script fix and a JSX-escaping fix, both already correctly committed on PR #38's branch)
+  — the main workspace is now confirmed to genuinely match its pre-session state again, aside from
+  the intentional new additions (`audit/`, `docs/specs/`, `docs/adr/`, etc.).
+- **Performed an independent review pass** over `packages/program-ledger` (Issue
+  `phase2-ledger-review-bugfix-001`, tracked under the newly-adopted `execution/` artifact
+  structure) and found two real concurrency-safety bugs beyond the two already found while
+  building the Postgres store: an unbounded-retry bug (Gate-rejection retries didn't respect
+  `maxAttempts`) and a more serious "zombie write" window (a crashed worker's stale fencing token
+  remained valid until someone else re-claimed the Run, not immediately upon reclaim). Both fixed
+  with regression tests, added to PR #48. Total Program Ledger test count: 22/22 passing.
+- **Adopted the LiNKdeveloper execution doctrine** for this repository's ongoing Program Manual
+  work: `execution/PROGRAM.md` (program-level artifact for this whole engagement),
+  `execution/modules/phase2-program-ledger/MODULE.md`, and the bug-fix work's own `ISSUE.md`/
+  `PROOF.md`, following the Program → Module → Phase → Issue → Proof → Review → Integration model
+  defined in `.cursor/execution/` (via the symlink). Prior Issues in this session's PR stack
+  (#36-#47) were not retroactively converted into this artifact format — that would be low-value
+  busywork at this point — but future work should use it going forward.
+
 ## Fourth work batch (2026-07-14) — Postgres store, tested without live infrastructure
 
 Carlos noted the team is working remotely and cannot connect this session to real LiNKsites
