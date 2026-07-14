@@ -153,6 +153,7 @@ export type LedgerEventType =
   | 'issue.completed'
   | 'issue.retry_scheduled'
   | 'issue.repair_required'
+  | 'issue.retry_budget_exhausted'
 
 export interface LedgerEvent {
   schemaVersion: SchemaVersion

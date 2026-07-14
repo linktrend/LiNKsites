@@ -260,20 +260,34 @@ export class ProgramLedger {
   /**
    * Reclaims Runs whose lease has expired (the crashed-worker scenario,
    * manual §20 §98.4: "a synthetic workflow survives ... worker crash").
-   * Returns the Run to `queued` so it can be claimed again, WITHOUT
-   * bumping the fencing token yet -- the next successful `claim()` call
-   * does that, which is what invalidates the crashed worker's old token.
+   * Returns the Run to `queued` so it can be claimed again.
+   *
+   * BUG FIX (found on review, 2026-07-14): this previously left the old
+   * lease's fencing token unchanged until the NEXT successful `claim()`
+   * bumped it. That left a real window -- between reclaim and the next
+   * claim -- during which the crashed worker's stale-but-still-current
+   * token would pass `assertFencingToken` and let it successfully call
+   * `heartbeat()`/`complete()`/`fail()`, corrupting a Run that had
+   * already been given up on. Confirmed reproducible with a targeted
+   * test before this fix. Fixed by bumping the fencing token
+   * IMMEDIATELY on reclaim (not waiting for the next claim), so the
+   * crashed worker's token becomes permanently stale the instant it is
+   * reclaimed from, with no gap.
    */
   async reclaimExpiredLeases(): Promise<Run[]> {
     const expired = await this.store.listExpiredLeaseRuns(nowIso())
     const reclaimed: Run[] = []
     for (const run of expired) {
+      const previousFencingToken = run.lease?.fencingToken ?? 0
       run.state = 'queued'
-      // Lease is cleared but its fencing token is preserved as the floor
-      // claim() must exceed -- this is what makes the crashed worker's
-      // heartbeat/complete calls (still carrying the old token) fail.
+      run.lease = {
+        leaseId: run.lease?.leaseId ?? randomUUID(),
+        fencingToken: previousFencingToken + 1,
+        executorId: '',
+        expiresAt: nowIso(),
+      }
       await this.store.putRun(run)
-      await this.emit(run.issueId, run.runId, 'run.reclaimed', { previousFencingToken: run.lease?.fencingToken })
+      await this.emit(run.issueId, run.runId, 'run.reclaimed', { previousFencingToken })
       reclaimed.push(run)
     }
     return reclaimed
@@ -475,6 +489,25 @@ export class ProgramLedger {
     if (!issue) throw new LedgerError(`Issue ${issueId} not found`, 'not_found')
     if (!['retry_scheduled', 'repair_required'].includes(issue.state)) {
       throw new LedgerError(`Issue ${issueId} is not retryable from state ${issue.state}`, 'invalid_state')
+    }
+    // BUG FIX (found on review, 2026-07-14): `fail()` checks
+    // retryPolicy.maxAttempts before scheduling a retry, but a Gate
+    // REJECTION (decideGate() -> `repair_required`) previously made the
+    // Issue retry-eligible again unconditionally, with no maxAttempts
+    // check anywhere in the retryIssue()/dispatch() path. That let a
+    // repeatedly-rejected Issue retry forever, bypassing the bounded-
+    // retry policy the manual requires (§20's retry policy doctrine).
+    // Enforced here, uniformly, regardless of which path triggered the
+    // retry-eligible state.
+    if (issue.attemptCount >= issue.retryPolicy.maxAttempts) {
+      issue.state = 'exception'
+      issue.updatedAt = nowIso()
+      await this.store.putIssue(issue)
+      await this.emit(issueId, null, 'issue.retry_budget_exhausted', {})
+      throw new LedgerError(
+        `Issue ${issueId} has exhausted its retry budget (${issue.attemptCount}/${issue.retryPolicy.maxAttempts} attempts)`,
+        'invalid_state',
+      )
     }
     issue.state = 'ready'
     await this.store.putIssue(issue)

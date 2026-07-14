@@ -67,6 +67,28 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       expect(completed.state).toBe('succeeded')
       expect(completed.output).toEqual({ result: 'from-b' })
     })
+
+    it('rejects a zombie write in the window between reclaim and the NEXT claim (not just after re-claim)', async () => {
+      const ledger = await newLedger()
+      const issue = await ledger.createIssue({
+        issueType: 'test.synthetic',
+        programRef: 'program-1',
+        input: { foo: 'bar' },
+      })
+      const run = await ledger.dispatch(issue.issueId)
+      const claimedByA = await ledger.claim(run.runId, 'executor-a', 1)
+      const staleFencingToken = claimedByA.lease!.fencingToken
+
+      await new Promise((resolve) => setTimeout(resolve, 5))
+      await ledger.reclaimExpiredLeases()
+
+      // Nobody has re-claimed the Run yet. The crashed worker's token
+      // must already be invalid at this point, not just after someone
+      // else claims it.
+      await expect(ledger.complete(run.runId, staleFencingToken, { result: 'zombie-write' })).rejects.toThrow(
+        LedgerError,
+      )
+    })
   })
 
   describe(`[${storeName}] timeout / retry`, () => {
@@ -159,6 +181,32 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       await ledger.complete(run2.runId, claimed2.lease!.fencingToken, { draft: 'v2-fixed' })
       const finalGate = await ledger.decideGate(issue.issueId, run2.runId, 'accepted', {}, 'reviewer-1')
       expect(finalGate.decision).toBe('accepted')
+    })
+
+    it('bounds Gate-rejection-triggered retries by maxAttempts too, not just Run-failure retries', async () => {
+      const ledger = await newLedger()
+      const issue = await ledger.createIssue({
+        issueType: 'test.synthetic',
+        programRef: 'program-1',
+        input: { foo: 'bar' },
+        maxAttempts: 2,
+      })
+
+      const run1 = await ledger.dispatch(issue.issueId)
+      const claimed1 = await ledger.claim(run1.runId, 'executor-a')
+      await ledger.complete(run1.runId, claimed1.lease!.fencingToken, { draft: 'v1' })
+      await ledger.decideGate(issue.issueId, run1.runId, 'rejected', {}, 'reviewer-1')
+
+      const run2 = await ledger.retryIssue(issue.issueId)
+      expect(run2.attemptNumber).toBe(2)
+      const claimed2 = await ledger.claim(run2.runId, 'executor-b')
+      await ledger.complete(run2.runId, claimed2.lease!.fencingToken, { draft: 'v2' })
+      await ledger.decideGate(issue.issueId, run2.runId, 'rejected', {}, 'reviewer-1')
+
+      // maxAttempts is 2, and both attempts are now exhausted -- a third
+      // retry must be refused, even though the trigger is a Gate
+      // rejection rather than a Run failure.
+      await expect(ledger.retryIssue(issue.issueId)).rejects.toThrow(LedgerError)
     })
   })
 
