@@ -1,0 +1,187 @@
+# Capability Completion Records — per manual §17
+# Representative set covering every Module (M01-M20, manual §05) and every audit domain (manual §21-§46).
+# This is NOT an exhaustive enumeration of every capability_id extracted from the manual (several hundred
+# were identified across the four section-group extraction reports); it is the audit's judgment sample
+# sufficient to support the executive summary and roadmap. Full extraction notes are preserved as
+# evidence (see evidence_manifest.yaml, EV-06..EV-09) for the next implementation AI to expand.
+
+capabilities:
+  - capability_id: linksites.cms.payload_content_authority
+    manual_requirements: ["01","02","12"]
+    repositories: [repo-linksites]
+    current_status: partial
+    evidence_refs: [EV-10, EV-11]
+    tests: { present: true, last_verified: "2026-07-13 (read-only inspection, not executed)", limitations: ["Contract tests exist for site-scoping/publish-permissions/translation/moderation; no live-DB integration run performed in this audit"] }
+    dependencies: [postgres-payload]
+    security_notes: ["Access control module exists with site-scoped filters; Local API overrideAccess bypass risk not confirmed resolved (manual §18.29 flags this as a required audit item)"]
+    gaps: [GAP-02]
+    recommended_disposition: adapt
+    confidence: medium
+
+  - capability_id: linksites.frontend.multi_tenant_hostname_resolution
+    manual_requirements: ["07","12","15","18"]
+    repositories: [repo-linksites]
+    current_status: partial
+    evidence_refs: [EV-12]
+    tests: { present: false, last_verified: null, limitations: ["No test found for unknown-hostname fail-closed behavior, which manual §15/§18 treat as a release-blocking negative test"] }
+    dependencies: [svc-payload-cms (optional; default provider is mock)]
+    security_notes: ["Priority-ordered resolution (dedicated SITE_ID -> hostname lookup -> DEFAULT_SITE_ID fallback) is a reasonable pattern, but fallback-to-default behavior for an unmatched hostname must be verified fail-closed, not fail-open, before any production trust is placed in it."]
+    gaps: [GAP-22]
+    recommended_disposition: adapt
+    confidence: medium
+
+  - capability_id: linksites.registry.component_catalog
+    manual_requirements: ["07"]
+    repositories: [repo-linksites]
+    current_status: partial
+    evidence_refs: [EV-13]
+    tests: { present: false, last_verified: null, limitations: ["index.json is documentation, not a validated/governed machine object with lifecycle states"] }
+    dependencies: []
+    security_notes: []
+    gaps: [GAP-07]
+    recommended_disposition: adapt
+    confidence: medium
+
+  - capability_id: linksites.design.token_hierarchy
+    manual_requirements: ["06"]
+    repositories: [repo-linksites]
+    current_status: partial
+    evidence_refs: [EV-14]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: []
+    security_notes: []
+    gaps: [GAP-09]
+    recommended_disposition: adapt
+    confidence: low
+
+  - capability_id: linksites.vertical_kit.schema_and_lifecycle
+    manual_requirements: ["05","08"]
+    repositories: [repo-linksites]
+    current_status: absent
+    evidence_refs: [EV-15]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: []
+    security_notes: []
+    gaps: [GAP-11]
+    recommended_disposition: build-missing
+    confidence: high
+
+  - capability_id: linksites.tier.specification_and_enforcement
+    manual_requirements: ["03","08"]
+    repositories: [repo-linksites]
+    current_status: absent
+    evidence_refs: [EV-16]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: []
+    security_notes: ["Manual §03 explicitly warns against hard-coded pricing/tier logic; docs/business/PRICING_PACKAGING_SOP.md should be checked in a follow-up for any hard-coded values before this is built."]
+    gaps: [GAP-12]
+    recommended_disposition: build-missing
+    confidence: high
+
+  - capability_id: linksites.preview_inventory.proof_level_engine
+    manual_requirements: ["09","10"]
+    repositories: [repo-linksites]
+    current_status: absent
+    evidence_refs: [EV-17]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: [linksites.planning.site_specification, linksites.tier.specification_and_enforcement]
+    security_notes: []
+    gaps: [GAP-16, GAP-14, GAP-15]
+    recommended_disposition: build-missing
+    confidence: high
+
+  - capability_id: linksites.dataplane.promotion_service
+    manual_requirements: ["11","12"]
+    repositories: [repo-linksites]
+    current_status: absent
+    evidence_refs: [EV-18]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: [postgres-supabase-lsites_core, postgres-payload]
+    security_notes: ["This is the single trusted write boundary between working and CMS-authoritative content per manual §12.17-22; its absence means any current or future automation writing to Payload has no governed choke point."]
+    gaps: [GAP-04]
+    recommended_disposition: build-missing
+    confidence: high
+
+  - capability_id: linksites.fulfilment.paid_activation_and_launch
+    manual_requirements: ["14"]
+    repositories: [repo-linksites]
+    current_status: absent
+    evidence_refs: [EV-19]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: [linksites.crossprogram.integration_ledger, linksites.crossprogram.stripe_ingress, linksites.crossprogram.odoo_adapter]
+    security_notes: ["Manual §14 explicitly forbids browser-redirect-based activation; nothing in this repo currently implements activation at all, so no violation is currently possible, but nothing is possible either — Phase 5/6 work packet."]
+    gaps: [GAP-19, GAP-20]
+    recommended_disposition: build-missing
+    confidence: high
+
+  - capability_id: linksites.hosting.cloudflare_traefik_routing
+    manual_requirements: ["15","17"]
+    repositories: [repo-linksites]
+    current_status: partial
+    evidence_refs: [EV-20]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: []
+    security_notes: ["Traefik host/hostregexp rules exist in deploy/docker-compose.deploy.yml; Cloudflare-side config (Full-strict TLS, WAF, custom-hostname SaaS pattern) is documented in docs/ops/ but not codified as executable config or verified live."]
+    gaps: [GAP-21]
+    recommended_disposition: adapt
+    confidence: medium
+
+  - capability_id: linksites.ops.monitoring_backup
+    manual_requirements: ["16"]
+    repositories: [repo-linksites]
+    current_status: absent
+    evidence_refs: [EV-21]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: []
+    security_notes: ["No monitoring stack, no backup job, no restore test found anywhere in the repository. This is a Critical gap per manual §16.2.4/§16.46 (a backup job success is not proof of recoverability; nothing exists to even attempt)."]
+    gaps: [GAP-23, GAP-24]
+    recommended_disposition: build-missing
+    confidence: high
+
+  - capability_id: linksites.security.tenant_isolation_negative_tests
+    manual_requirements: ["18"]
+    repositories: [repo-linksites]
+    current_status: absent
+    evidence_refs: [EV-22]
+    tests: { present: false, last_verified: null, limitations: ["9 test files exist; none were confirmed to be negative/cross-tenant-attack tests. site-scoping.spec.ts appears to test positive-path scoping, not a full 10-vector isolation matrix per manual §18.85."] }
+    dependencies: []
+    security_notes: ["Manual §18.84 treats a test suite of only successful paths as explicitly incomplete. This is a release-acceptance blocker per manual §78 if any real customer data enters the system before this is closed."]
+    gaps: [GAP-06]
+    recommended_disposition: build-missing
+    confidence: high
+
+  - capability_id: linksites.execution.program_ledger
+    manual_requirements: ["04","20"]
+    repositories: [repo-linksites]
+    current_status: partial # UPDATED 2026-07-14, PR #47
+    evidence_refs: [EV-23, "packages/program-ledger (PR #47, 2026-07-14)"]
+    tests: { present: true, last_verified: "2026-07-14 (packages/program-ledger: 9/9 in-memory + 9/9 pglite-backed Postgres, 18/18 total, PR #48)", limitations: ["Postgres store (src/postgresStore.ts) is real and tested against @electric-sql/pglite (a genuine embedded Postgres engine exercising the actual migration SQL), but NOT against a live networked Postgres/Supabase connection -- connection pooling, live RLS enforcement under the real svc_linksites_ledger role, and migration-apply against an existing populated database remain unverified. No Program/Module/Stage hierarchy, dependency DAG, model-routing ladder, compensation Sagas, or cross-Program outbox/inbox yet."] }
+    dependencies: []
+    security_notes: ["Every downstream governance object in the manual (Gates, Exceptions, Approvals, Idempotency Records, Cost Events) is defined in terms of the Program Ledger. Its core mechanics (idempotent dispatch, lease/fencing crash recovery, cooperative cancellation, Gate-gated completion, append-only event trail) are now built and tested -- this was the single largest architectural gap found in the original audit; it is now a real, tested foundation."]
+    gaps: [GAP-01, GAP-31]
+    recommended_disposition: adapt
+    confidence: high
+
+  - capability_id: linksites.crossprogram.contracts_stripe_odoo_sales
+    manual_requirements: ["21"]
+    repositories: [repo-linksites]
+    current_status: absent
+    evidence_refs: [EV-24]
+    tests: { present: false, last_verified: null, limitations: [] }
+    dependencies: [repo-linktrend-sales (unreachable), repo-odoo-adapter (unreachable)]
+    security_notes: ["Cannot be built or verified from this repository alone — requires coordination with the Sales/Odoo repositories, which this audit could not reach. Flagged as an explicit blocker requiring Carlos per manual §6.14."]
+    gaps: [GAP-33, GAP-34, GAP-35]
+    recommended_disposition: defer
+    confidence: high
+
+  - capability_id: ci.real_build_test_gate
+    manual_requirements: ["24 §37-39"]
+    repositories: [repo-linksites]
+    current_status: broken
+    evidence_refs: [EV-25]
+    tests: { present: false, last_verified: "2026-07-13 via gh run list", limitations: ["ci.yml executes a placeholder echo only — it reports 'success' without validating anything, which is explicitly the kind of misleading-green result manual §37 warns against ('a badge or workflow file does not prove a healthy pipeline')."] }
+    dependencies: []
+    security_notes: []
+    gaps: [GAP-39]
+    recommended_disposition: adapt
+    confidence: high

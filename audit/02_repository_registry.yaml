@@ -1,0 +1,119 @@
+# Repository Registry — LiNKsites Audit, per manual §13
+# Status values: active|experimental|archived|unknown
+
+repositories:
+  - repository_id: repo-linksites
+    name: LiNKsites
+    url: https://github.com/linktrend/LiNKsites.git
+    visibility: private
+    default_branch: main
+    snapshot_commit: 81ca51618c1c9d6afb87ae0e0398711e4bdc9d10 # HEAD of issue/wave9-linksites-prod at audit time
+    other_branch_heads:
+      development: 08a1719c0db7233339ec35e79a1526fcaa83be2d
+      staging: e7336be0a44267d24c16f3fd44298ea87e8eef21
+      main: e7336be0a44267d24c16f3fd44298ea87e8eef21
+    owner: LiNKtrend
+    programs: [LiNKsites]
+    declared_role: >
+      "LiNKsites is the website factory: many SMB sites from reusable Next.js
+      templates, backed by Payload CMS and optional Supabase" (.cursor/rules/10-foundation.mdc,
+      root README.md).
+    observed_role: >
+      Monorepo containing one substantially built Payload CMS app (apps/cms),
+      one materially developed multi-tenant Next.js marketing frontend
+      (apps/web-master), one thin/stub Next.js frontend (apps/web-company),
+      mostly-empty shared packages, a single Supabase migration with
+      site_id-scoped RLS, narrative (non-machine) architecture specs
+      (sites_specs/), legacy/archived experiment code (sites_projects/),
+      Wave-9 Docker/Traefik deploy scaffolding, and the newly-ingested
+      24-section Program Manual (docs/specs/linksites-program-manual/).
+      Working tree contains large uncommitted structural changes (see
+      13_decision_and_contradiction_register.md, DR-01) removing the
+      embedded LiNKdev factory and .agent/.codex framework files and
+      replacing apps/web-master route/page files.
+    upstream:
+      url: null
+      fork_point: null
+    languages: [TypeScript, SQL, Shell, Markdown]
+    package_managers: [pnpm@10.0.0]
+    deployments:
+      - deployment_id: dep-wave9-vps
+        status: configured-unverified
+        note: >
+          deploy/docker-compose.deploy.yml + deploy/README.md describe a
+          "Wave 9" Traefik-routed VPS deployment (cms.linktrend.internal,
+          wildcard *.linktrend.internal preview). No live VPS was reachable
+          during this audit; classified configured-unverified, not verified-working.
+    ci_workflows:
+      - id: ci.yml
+        status: placeholder-only
+        note: "Echoes a placeholder string on push/PR to main/staging/development. No build/test/lint is executed in CI."
+      - id: branch-source-policy.yml
+        status: active
+        note: "Enforces PR source->target branch policy (issue/*|dev/* -> development -> staging -> main)."
+      - id: CodeQL (GitHub-managed, not in-repo workflow file found by explore agent)
+        status: active
+        note: "Scheduled scans on main passing per `gh run list` (2026-06-23, 06-30, 07-07)."
+      - id: Dependabot Updates
+        status: broken
+        note: >
+          Repeated update-PR CI failures for js-yaml, @babel/core, ws, undici
+          across root and apps/web-master and sites_projects/old_linktrend
+          (2026-06-22 through 2026-07-10 per `gh run list`). Root cause not
+          deep-dived in this pass — Gap Record GAP-11.
+    security_features:
+      - RLS policies present on supabase/migrations/20260331_000001_lsites_init.sql (site_id-scoped)
+      - Payload access-control module (apps/cms/src/access/index.ts) with site-scoped filters and role-based publish/approve permissions
+      - .gitignore excludes .env, apps/cms/deploy/prod/.env
+      - No secret VALUES found tracked in git (git ls-files | grep -i env returned only *.env.example files)
+    status: active
+
+  # Cross-Program repositories noted per manual §8 scope but NOT reachable from this workspace.
+  # Recorded per manual §5 ("do not assume configured services are deployed or reachable") and
+  # §16 (`unknown` classification), not investigated further.
+  - repository_id: repo-linktrend-sales
+    name: LiNKtrend Sales
+    url: unknown
+    visibility: unknown
+    programs: [LiNKtrend Sales]
+    declared_role: "Independent, product-agnostic lead-to-commercial Program (per manual §01/§02)."
+    observed_role: unknown
+    status: unknown
+
+  - repository_id: repo-odoo-adapter
+    name: Odoo Adapter (unnamed)
+    url: unknown
+    visibility: unknown
+    programs: [Cross-Program / Commercial]
+    declared_role: "Narrow, least-privileged Odoo Adapter Service per manual §21."
+    observed_role: "No Odoo integration code found anywhere in the LiNKsites repository (0 grep hits for 'Odoo')."
+    status: absent
+
+  - repository_id: repo-linkautowork-n8n
+    name: LiNKautowork / n8n fork
+    url: unknown
+    visibility: unknown
+    programs: [LiNKautowork]
+    declared_role: "Independent managed-automation factory; not LiNKsites' universal runtime (manual §02, §24 glossary)."
+    observed_role: >
+      LiNKsites repo has an n8n *client* integration only (apps/cms/src/payload/utils/n8n.ts,
+      triggerRebuild.ts, cron scripts calling N8N_WEBHOOK_URL) — the n8n
+      service/workflows themselves live outside this repo and were not reachable.
+    status: unknown
+
+  - repository_id: repo-openclaw
+    name: OpenClaw
+    url: unknown
+    visibility: unknown
+    programs: [Oversight]
+    declared_role: "External, replaceable oversight adapter (manual §22); never a required runtime dependency."
+    observed_role: "0 grep hits for 'OpenClaw' in active code (apps/, packages/, scripts/, deploy/). Only appears in the Program Manual itself."
+    status: absent
+
+  - repository_id: repo-linkaios
+    name: LiNKaios
+    url: known (sibling workspace: IDE Development)
+    programs: [LiNKaios]
+    declared_role: "Company operating system; postponed and explicitly NOT a LiNKsites dependency per manual §01/§24 §4."
+    observed_role: "Present as a sibling Cursor workspace; LiNKsites' .cursor is now a symlink into it (../IDE Development/.cursor). Not inspected further — out of this audit's Program scope by manual doctrine."
+    status: active

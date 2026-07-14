@@ -1,0 +1,192 @@
+# Evidence Manifest — per manual §10-§11
+# No secret values appear in any evidence record.
+
+evidence:
+  - evidence_id: EV-01
+    evidence_type: file
+    source: { repository: "https://github.com/linktrend/LiNKsites.git", path: "docs/specs/linksites-program-manual/" }
+    captured_at: "2026-07-13"
+    captured_by: cursor-agent-session
+    content_digest: "see docs/specs/linksites-program-manual/MANIFEST.csv for per-file SHA-256"
+    summary: "Verbatim, diff-verified copy of the 24-section LiNKsites Program Manual, ingested from Google Drive per manual §85."
+    supports_requirements: ["all"]
+    data_classification: internal
+    limitations: []
+
+  - evidence_id: EV-02
+    evidence_type: file
+    source: { path: "docs/specs/linksites-program-manual/24_repository_audit_implementation_roadmap_acceptance_criteria_and_glossary.md" }
+    captured_at: "2026-07-13"
+    captured_by: cursor-agent-session
+    content_digest: "c61dff0e248ce48815cf7cad70815d8afd9bef030744a5fab667d0b814ae2bd2"
+    summary: "Read in full directly by the primary agent (not delegated); source of the exact §53 deliverable list and audit doctrine applied throughout this audit."
+    supports_requirements: ["24"]
+    data_classification: internal
+    limitations: []
+
+  - evidence_id: EV-06
+    evidence_type: workflow-run
+    source: { path: "sub-agent extraction, sections 01-06" }
+    captured_at: "2026-07-13"
+    captured_by: "generalPurpose sub-agent (task ID f9c4746d-081b-4288-a11e-04f8c3f71f32)"
+    content_digest: null
+    summary: "Structured extraction of settled doctrine, named objects, capability_id candidates, program/actor boundaries, and repo-reconciliation flags for manual sections 01-06. Full text preserved in this session's transcript; not separately filed as a repo artifact in this pass."
+    supports_requirements: ["01","02","03","04","05","06"]
+    data_classification: internal
+    limitations: ["Not independently re-verified by the primary agent line-by-line; used as first-pass extraction."]
+
+  - evidence_id: EV-07
+    evidence_type: workflow-run
+    source: { path: "sub-agent extraction, sections 07-12" }
+    captured_at: "2026-07-13"
+    captured_by: "generalPurpose sub-agent (task ID 5f2d1450-eadc-4469-96b7-b4a502a7e0c6)"
+    content_digest: null
+    summary: "Structured extraction for manual sections 07-12, including the three-layer content architecture and Promotion Service mechanism detail used verbatim in 06_target_architecture.md."
+    supports_requirements: ["07","08","09","10","11","12"]
+    data_classification: internal
+    limitations: ["Same as EV-06."]
+
+  - evidence_id: EV-08
+    evidence_type: workflow-run
+    source: { path: "sub-agent extraction, sections 13-18" }
+    captured_at: "2026-07-13"
+    captured_by: "generalPurpose sub-agent (task ID 17916456-83bf-4b03-b51f-20dfbec5703f)"
+    content_digest: null
+    summary: "Structured extraction for manual sections 13-18, including the full concrete MUST/SHALL security-requirement list used in 10_security_and_supply_chain.md."
+    supports_requirements: ["13","14","15","16","17","18"]
+    data_classification: internal
+    limitations: ["Same as EV-06."]
+
+  - evidence_id: EV-09
+    evidence_type: workflow-run
+    source: { path: "sub-agent extraction, sections 19-23" }
+    captured_at: "2026-07-13"
+    captured_by: "generalPurpose sub-agent (task ID abf9a8f1-ced6-452d-aeaa-e2431ecafcd6)"
+    content_digest: null
+    summary: "Structured extraction for manual sections 19-23, including the execution-grammar rules and cross-program authority matrix used in the roadmap and gap register."
+    supports_requirements: ["19","20","21","22","23"]
+    data_classification: internal
+    limitations: ["Same as EV-06."]
+
+  - evidence_id: EV-10
+    evidence_type: workflow-run
+    source: { path: "read-only repository walk, /Users/linktrend/Projects/LiNKsites" }
+    captured_at: "2026-07-13"
+    captured_by: "explore sub-agent, Ask mode (task ID cb31c1d0-4021-44fa-ad6c-fa79c1c037c0)"
+    content_digest: null
+    summary: >
+      Exhaustive read-only directory inventory, package/dependency inventory,
+      Payload CMS audit, Supabase audit, frontend/runtime audit, sites_specs/
+      and sites_projects/ audit, CI/CD audit, docs audit, test audit,
+      secrets-pattern scan, deploy/hosting audit, design/component-asset
+      grep, and cross-program-integration grep. This is the primary source
+      for 02_repository_registry.yaml, 03_service_and_deployment_registry.yaml,
+      04_data_and_storage_registry.yaml, 05_current_architecture.md, and most
+      rows of 07_requirements_traceability.csv.
+    supports_requirements: ["24 §12-§46"]
+    data_classification: internal
+    limitations: ["Could not run git status/git log/git ls-files (Ask-mode shell restriction) — supplemented by EV-11 through EV-14 below, run directly by the primary agent."]
+
+  - evidence_id: EV-11
+    evidence_type: commit
+    source: { repository: "LiNKsites", commit: "81ca51618c1c9d6afb87ae0e0398711e4bdc9d10" }
+    captured_at: "2026-07-13"
+    captured_by: cursor-agent-session
+    content_digest: "81ca51618c1c9d6afb87ae0e0398711e4bdc9d10"
+    summary: "`git log --oneline -5` and `.git/refs/heads/*` inspection establishing branch HEAD SHAs for issue/wave9-linksites-prod, development, staging, main."
+    supports_requirements: ["24 §11"]
+    data_classification: internal
+    limitations: []
+
+  - evidence_id: EV-12
+    evidence_type: file
+    source: { path: "git working tree, repo root" }
+    captured_at: "2026-07-13"
+    captured_by: cursor-agent-session
+    content_digest: null
+    summary: "`git status --short --branch` output: 1,314 deleted paths, 30 modified paths, 4 untracked paths on issue/wave9-linksites-prod. Basis for DR-01."
+    supports_requirements: ["24 §5", "24 §98"]
+    data_classification: internal
+    limitations: ["Snapshot at time of audit; working tree may change before this is read."]
+
+  - evidence_id: EV-13
+    evidence_type: file
+    source: { path: "git ls-files output" }
+    captured_at: "2026-07-13"
+    captured_by: cursor-agent-session
+    content_digest: null
+    summary: "`git ls-files | grep -i '\\.env'` returned exactly 6 files, all named *.env.example (apps/cms, apps/cms/deploy/prod, apps/web-master x2, apps/web-company, LiNKdev/skills/gstack). No real .env tracked in git at HEAD."
+    supports_requirements: ["24 §34"]
+    data_classification: internal
+    limitations: ["Checked working-tree HEAD only, not full git history/reflog, per audit time-box (see 01_scope_snapshot_and_method.md limitations)."]
+
+  - evidence_id: EV-14
+    evidence_type: workflow-run
+    source: { external_ref: "gh run list --limit 15, github.com/linktrend/LiNKsites" }
+    captured_at: "2026-07-13"
+    captured_by: cursor-agent-session
+    content_digest: null
+    summary: >
+      15 most recent GitHub Actions runs: CI placeholder passing trivially
+      on development push; CodeQL scheduled scans passing on main
+      (2026-06-23, 06-30, 07-07); 10 of 15 Dependabot Updates runs failing
+      (js-yaml, @babel/core, ws, undici across root/apps/web-master/
+      sites_projects/old_linktrend, 2026-06-22 through 2026-07-10).
+    supports_requirements: ["24 §37", "24 §46"]
+    data_classification: internal
+    limitations: ["Run list only (status/name/branch/duration/date); individual failing-run logs were not opened in this pass."]
+
+  - evidence_id: EV-15
+    evidence_type: file
+    source: { path: "supabase/migrations/20260331_000001_lsites_init.sql" }
+    captured_at: "2026-07-13"
+    captured_by: "explore sub-agent (EV-10), quoted directly by primary agent"
+    content_digest: null
+    summary: "RLS policy `lsites_site_isolation` scoping by site_id via current_setting('app.site_id', true) for role svc_linksites_runtime; lines 381-384 quoted in 04_data_and_storage_registry.yaml."
+    supports_requirements: ["12","18"]
+    data_classification: internal
+    limitations: []
+
+  - evidence_id: EV-16
+    evidence_type: file
+    source: { path: "apps/web-master/src/lib/site-context.ts" }
+    captured_at: "2026-07-13"
+    captured_by: "explore sub-agent (EV-10)"
+    content_digest: null
+    summary: "Hostname->Site-ID resolution priority order (dedicated SITE_ID env -> site-domains hostname lookup -> DEFAULT_SITE_ID fallback); lines 70-87 quoted."
+    supports_requirements: ["07","15","18"]
+    data_classification: internal
+    limitations: ["Fail-closed behavior for unmatched hostnames not independently tested — see GAP-22."]
+
+  - evidence_id: EV-17
+    evidence_type: file
+    source: { path: "apps/cms/src/payload.config.ts, apps/cms/src/collections/, apps/cms/src/access/index.ts" }
+    captured_at: "2026-07-13"
+    captured_by: "explore sub-agent (EV-10)"
+    content_digest: null
+    summary: "25 Payload collections, 5 globals, site-scoped access control hooks (enforceSiteScope, validateSiteAccess, validatePublishPermissions), empty migrations array, plugins: []."
+    supports_requirements: ["12","18"]
+    data_classification: internal
+    limitations: []
+
+  - evidence_id: EV-18
+    evidence_type: file
+    source: { path: "apps/web-master/docs/components/index.json" }
+    captured_at: "2026-07-13"
+    captured_by: "explore sub-agent (EV-10)"
+    content_digest: null
+    summary: "Component documentation JSON, v1.0.0, 77 documented components — closest existing analog to manual §07's Component Registry, but documentation-only, not a governed machine object."
+    supports_requirements: ["07"]
+    data_classification: internal
+    limitations: []
+
+evidence_index_note: >
+  Capability-status and traceability records in this audit that cite EV-19
+  through EV-25 refer to specific file-path findings already quoted inline
+  in 05_current_architecture.md, 08_capability_status.yaml, and
+  10_security_and_supply_chain.md (e.g. package.json version fields,
+  deploy/docker-compose.deploy.yml Traefik rules, absence-of-code grep
+  results for Odoo/Stripe/OpenClaw/Integration Ledger). They are not
+  duplicated here verbatim to avoid redundant restatement; each is traceable
+  to EV-10 (the master repository-walk evidence record) plus the specific
+  file path already cited at its point of use.

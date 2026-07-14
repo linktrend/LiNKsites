@@ -1,0 +1,43 @@
+manual_requirement_id,manual_section,architecture_component,repository_path,schema_or_config,tests,deployment_evidence,observability_evidence,current_status,gap_or_work_packet
+linksites.program.hierarchy,01/05,Program Ledger,none,none,none,none,none,absent,GAP-01
+linksites.cms.payload_content_authority,01/02/12,Payload CMS,apps/cms/src/payload.config.ts,25 collections + 5 globals,apps/cms/tests/contracts/*,configured-unverified (Wave9 compose),none,partial,GAP-02
+linksites.content.three_layer_architecture,01/12,Supabase working -> Promotion Service -> Payload draft/published,supabase/migrations/20260331_000001_lsites_init.sql; apps/cms/src,supabase/schemas/lsites_core.schema.json,none found for promotion path,configured-unverified,none,partial,GAP-03
+linksites.dataplane.promotion_service,12,Promotion Service (sole trusted write path),none found,none,none,none,none,absent,GAP-04
+linksites.dataplane.tenant_isolation,12/18,site_id scoping,apps/cms/src/access/index.ts; supabase RLS policy,RLS policy in migration,apps/cms/tests/contracts/site-scoping.spec.ts,configured-unverified,none,partial,GAP-05
+linksites.security.tenant_isolation_test_matrix,18.84-85,Negative/cross-tenant tests,none found,n/a,0 negative-isolation tests found among 9 test files,none,none,absent,GAP-06 (Critical)
+linksites.registry.component_catalog,07,Component Registry,apps/web-master/docs/components/index.json,documentation JSON only (not governed record schema),none,configured-unverified,none,partial (documentation-only),GAP-07
+linksites.assembly.deterministic_renderer,07,Site Assembly Engine,apps/web-master/src/components/page-renderer.tsx; src/cms/blocks/index.ts,ad hoc block->component mapping,none found,configured-unverified,none,partial,GAP-08
+linksites.design.token_hierarchy,06,Design tokens,apps/web-master/src/styles/tokens.css,CSS variables + data-theme,none,configured-unverified,none,partial (CSS only, no Design Intelligence Catalog object),GAP-09
+linksites.design.catalog_schema,06,Design Intelligence Catalog,none found,none,none,none,none,absent,GAP-10
+linksites.vertical_kit.schema_and_lifecycle,08,Vertical Kit,sites_specs/*.txt (narrative only),none,none,none,none,absent (as machine object),GAP-11
+linksites.tier.specification_and_enforcement,03/08,Tier Specification,docs/business/PRICING_PACKAGING_SOP.md (narrative SOP only),none,none,none,none,absent (as machine object),GAP-12
+linksites.foundation.manifest_and_adaptation_contract,08,Reusable Site Foundation,apps/web-master/src/templates/registry.ts (single template: marketing-smb-v1),none,none,configured-unverified,none,prototype,GAP-13
+linksites.sales_contract.lead_research_package,09,Lead Research Package,none found,none,none,none,none,absent,GAP-14
+linksites.planning.site_specification,09,Site Specification,sites_specs/*.txt (narrative, not schema-conformant),none,none,none,none,working-misaligned (folder name matches doctrine term but content does not match schema),GAP-15
+linksites.preview_inventory.proof_level_engine,10,Preview Inventory / Proof Levels,none found,none,none,none,none,absent,GAP-16
+linksites.preview_inventory.conversion_lock,10/13,Conversion Lock,none found,none,none,none,none,absent,GAP-17
+linksites.media.provenance_manifest,11,Media provenance,apps/cms Media collection (no provenance/rights fields confirmed),none,none,none,none,partial/unknown,GAP-18
+linksites.fulfilment.activation_package_validation,14,Paid Website Activation Package,none found,none,none,none,none,absent,GAP-19
+linksites.fulfilment.launch_manifest_certificate,14,Launch Certificate,none found,none,none,none,none,absent,GAP-20
+linksites.hosting.cloudflare_traefik_routing,15/17,Traefik+Cloudflare,deploy/docker-compose.deploy.yml,Host()/HostRegexp() rules,none,configured-unverified,none,partial (Traefik config exists; Cloudflare only documented, not codified),GAP-21
+linksites.hosting.hostname_resolution_fail_closed,15/18,Hostname->Site ID resolution,apps/web-master/src/lib/site-context.ts,priority-ordered resolution logic,none found testing unknown-hostname fail-closed behavior,configured-unverified,none,partial,GAP-22
+linksites.ops.monitoring_stack,16,Prometheus/Grafana/Loki/Alertmanager,none found,none,none,none,none,absent,GAP-23
+linksites.backup.postgres_protection,16,Backup/restore,none found,none,none,none,none,absent (Critical),GAP-24
+linksites.domain.dcv_certificate_lifecycle,17,Domain/TLS,docs/ops/VPS_REVERSE_PROXY_AND_CLOUDFLARE.md (planning doc only),none,none,none,none,absent (as executable config),GAP-25
+linksites.forms.durable_submission_outbox,17,Forms outbox,apps/web-master/src/app/api/ai-actions/contact/route.ts (contact route found; outbox pattern not confirmed),none,none,none,none,unknown/partial,GAP-26
+linksites.security.secrets_management,18,Secrets manager,apps/cms/ops/render-runtime-env-from-gsm.sh; apps/cms/deploy/prod/.env.example,GSM secret-name pointers only,none,configured-unverified,none,configured-unverified,GAP-27
+linksites.security.executor_capability_envelope,18,Executor capability envelope,none found,none,none,none,none,absent,GAP-28
+linksites.quality.gate_hierarchy,19,Quality Gates (G1-G10),none found as governed objects; ad hoc Vitest/Playwright tests exist,apps/cms/vitest.config.mts; apps/cms/playwright.config.ts,9 test files (apps/cms only),none,none,partial (test tooling present; Gate governance objects absent),GAP-29
+linksites.quality.accessibility_wcag22_aa,19,Accessibility,none found (no axe-core dependency located),none,none,none,none,absent,GAP-30
+linksites.execution.program_ledger,20,Program Ledger,packages/program-ledger,packages/program-ledger/src/types.ts (schema_version 1.0),packages/program-ledger/tests/exit-gate.spec.ts (9/9 passing),none (in-memory store only; supabase/migrations/20260714_000001_program_ledger_core.sql defines the target Postgres schema, unwired),none,partial,GAP-31 (updated 2026-07-14, PR #47)
+linksites.execution.idempotency,20,Idempotency keys/outbox,apps/cms n8n loop-guard (meta.source==='n8n') is the only dedup-like logic found,none,none,none,none,partial (ad hoc, not systematic),GAP-32
+linksites.crossprogram.integration_ledger,21,Integration Ledger,none found,none,none,none,none,absent (Blocker for Phase 5),GAP-33
+linksites.crossprogram.stripe_ingress,21,Stripe verified event ingress,none found (only legacy/archived code in sites_projects/old_linktrend),none,none,none,none,absent,GAP-34
+linksites.crossprogram.odoo_adapter,21,Odoo Adapter Service,none found,none,none,none,none,absent,GAP-35
+linksites.oversight.autonomy_modes,22,OpenClaw / autonomy modes,none found,none,none,none,none,absent (consistent with "not required" doctrine but Program Controller also absent),GAP-36
+linksites.observability.opentelemetry_instrumentation,23,OpenTelemetry,none found,none,none,none,none,absent,GAP-37
+linksites.observability.cost_accounting,23,Cost Event / Financial Summary,none found,none,none,none,none,absent,GAP-38
+ci.build_test_gate,24 (§37-39 audit doctrine applied),CI/CD,.github/workflows/ci.yml,placeholder echo step only,n/a,verified-working (as a placeholder; NOT a real gate),gh run list evidence,broken (misleading-green),GAP-39
+ci.dependency_updates,24,Dependabot,.github/workflows (GitHub-managed),n/a,n/a,gh run list: repeated failures (js-yaml/@babel/core/ws/undici),none,broken,GAP-40
+repo.version_skew,24,Next.js/React versions,apps/cms package.json (Next 16/React 19); apps/web-master (Next 14.2/React 18.3); apps/web-company (Next 14.0/React 18.2),n/a,n/a,n/a,none,working-misaligned,GAP-41
+repo.working_tree_uncommitted_state,24 (§5 audit safety),Git working tree,repo root,n/a,n/a,git status: 1314 deleted / 30 modified / 4 untracked, uncommitted,none,unknown/decision-required,DR-01 (see decision register)

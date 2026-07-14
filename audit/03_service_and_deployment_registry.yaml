@@ -1,0 +1,89 @@
+# Service and Deployment Registry — per manual §14
+# All entries are configured-unverified unless evidence of live reachability existed in this audit
+# (none did — this audit had no network path to any live LiNKsites service).
+
+services:
+  - service_id: svc-payload-cms
+    purpose: "Website content system of record (draft + published), per manual §01/§02/§12."
+    repository: repo-linksites (apps/cms)
+    release: unknown (no tagged release found; migrations/index.ts is an empty array — DB schema push mode used outside production)
+    environment: [dev, prod (planned)]
+    host_provider: "VPS (Wave 9 Docker Compose + Traefik), per deploy/README.md"
+    domain_endpoints: ["cms.linktrend.internal (internal, per deploy/docker-compose.deploy.yml)"]
+    data_stores: [postgres-payload]
+    credentials_identity: "GSM-sourced via apps/cms/ops/render-runtime-env-from-gsm.sh (names only inspected, no values)"
+    network_exposure: "Behind Traefik reverse proxy per compose file; not directly exposed per config-as-written"
+    health_monitoring: "Not found in repo (no /health endpoint or monitoring config located)"
+    backup_restore: "Not found in repo (no backup job/script located for Payload/Postgres)"
+    owner: LiNKtrend / LiNKsites Program
+    current_state: configured-unverified
+    cost_source: unknown
+    dependencies: [postgres-payload, gsm-secrets]
+    consumers: [svc-web-master, svc-web-company (planned)]
+
+  - service_id: svc-web-master
+    purpose: "Primary shared multi-tenant Next.js frontend (marketing template), per manual §01/§07/§15."
+    repository: repo-linksites (apps/web-master)
+    release: unknown
+    environment: [dev, prod (planned)]
+    host_provider: "VPS shared frontend pool per deploy/README.md ('frontend-shared')"
+    domain_endpoints: ["HostRegexp wildcard *.linktrend.internal for preview, per deploy/docker-compose.deploy.yml"]
+    data_stores: []
+    credentials_identity: unknown
+    network_exposure: "Behind Traefik; CMS provider defaults to 'mock', not 'payload' (config/env.config.ts) — production wiring to live Payload is NOT the default"
+    health_monitoring: "Not found"
+    backup_restore: n/a (stateless frontend)
+    owner: LiNKtrend / LiNKsites Program
+    current_state: configured-unverified
+    dependencies: [svc-payload-cms (optional, provider-flagged)]
+    consumers: [visitors, Cloudflare edge (planned)]
+
+  - service_id: svc-web-company
+    purpose: "Secondary/alternate Next.js template, per manual §01 tier/isolation doctrine."
+    repository: repo-linksites (apps/web-company)
+    release: unknown
+    current_state: prototype
+    note: "contentClient.ts stub returns null; no hostname-based tenant resolution implemented (unlike web-master); no tests found."
+    dependencies: []
+    consumers: []
+
+  - service_id: svc-supabase-project
+    purpose: "Supabase-hosted Postgres for LiNKsites working layer (per manual §01/§12) and/or Payload's Postgres adapter target."
+    repository: repo-linksites (supabase/)
+    release: "1 migration only: 20260331_000001_lsites_init.sql"
+    environment: unknown (no project ref recorded in inspected files)
+    host_provider: Supabase (managed)
+    data_stores: [postgres-supabase-lsites_core]
+    credentials_identity: "DATABASE_URI (GSM-sourced per apps/cms deploy env); no @supabase/supabase-js client dependency found anywhere in package.json files — Supabase is used purely as a hosted Postgres target, not via its client SDK"
+    network_exposure: unknown (RLS present in migration; Supabase Data API exposure settings not verifiable without live project access)
+    current_state: configured-unverified
+    consumers: [svc-payload-cms (shared Postgres host, per doctrine's centralized-topology preference), svc-cms-scripts (sync/seed scripts)]
+
+  - service_id: svc-n8n
+    purpose: "Rebuild-trigger / cron automation target, referenced as an optional external system by apps/cms code."
+    repository: unknown (external to this repo)
+    current_state: unknown
+    note: "LiNKsites code only issues outbound webhooks (N8N_WEBHOOK_URL) and guards against inbound n8n-sourced loop triggers; the n8n service itself was not reachable or located in this workspace."
+
+  - service_id: svc-stripe
+    purpose: "Payment processor of record, per manual §01/§03/§21 — NOT owned by LiNKsites."
+    repository: n/a (cross-Program)
+    current_state: absent-in-this-repo
+    note: "0 active Stripe integration code found in apps/, packages/, scripts/, deploy/. A legacy Stripe checkout integration exists only in sites_projects/old_linktrend (archived/legacy, not on the active factory path per root README)."
+
+  - service_id: svc-odoo
+    purpose: "Commercial/accounting system of record, per manual §01/§21 — NOT owned by LiNKsites."
+    repository: n/a (cross-Program)
+    current_state: absent-in-this-repo
+    note: "0 grep hits for 'Odoo' in active code paths."
+
+  - service_id: svc-github-actions
+    purpose: "CI/CD"
+    repository: repo-linksites (.github/workflows)
+    current_state: partial
+    note: >
+      branch-source-policy.yml is verified-working (enforced merge policy).
+      ci.yml is stub-placeholder (echoes text only; no build/test/lint gate).
+      CodeQL scheduled scan verified-working (passing per gh run list).
+      Dependabot Updates is broken (repeated failing update PRs for
+      js-yaml/@babel/core/ws/undici, 2026-06-22 through 2026-07-10).
