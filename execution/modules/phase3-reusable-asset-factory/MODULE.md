@@ -13,7 +13,8 @@ scope:
 out_of_scope:
   - "The Promotion Service (Supabase working -> Payload draft) -- separate Phase 3 Issue, needs a live Supabase/Payload connection to test meaningfully beyond types"
   - "Real Vertical Kit content for the Home Services pilot vertical (Decision DR-06) -- that requires business/content input from Carlos or Sales research, not something to invent"
-  - "Site Specification object (per-site resolved contract combining Kit + Tier + Foundation + Design Profile) and Prospect Adaptation record -- next Issues, not yet started"
+  - "Site Specification object (per-site resolved contract combining Kit + Tier + Foundation + Design Profile + Component selections) -- done: phase3-site-specification-001"
+  - "Prospect Adaptation record -- next Issue, not yet started"
   - "Real Design Intelligence Catalog content from ui-ux-pro-max-skill -- not reachable from this repository; only a structural placeholder exists"
 phases: []
 read_first:
@@ -31,7 +32,7 @@ optional_fields:
   risk_summary:
     - "Numeric tier limits (page counts, change allowances, etc.) are explicitly provisional placeholders per manual §03's deferred-decisions list -- must not be treated as real commercial commitments until Carlos approves actual values."
   notes:
-    - "Issues completed so far: phase3-tier-specification-001, phase3-vertical-kit-001, phase3-reusable-foundation-001, phase3-design-catalog-001, phase3-component-registry-001. All five reviewed together will complete the manual §06-§08 reusable-asset trio plus its supporting Design/Component registries. Next: Site Specification object and Prospect Adaptation record (per-site resolution combining all five, and the prospect-specific overlay applied to a reserved Foundation)."
+    - "Issues completed so far: phase3-tier-specification-001, phase3-vertical-kit-001, phase3-reusable-foundation-001, phase3-design-catalog-001, phase3-component-registry-001, phase3-site-specification-001. The first five reviewed together complete the manual §06-§08 reusable-asset trio plus its supporting Design/Component registries; the sixth integrates all five into one resolved per-site contract. Next: Prospect Adaptation record (the prospect-specific content overlay applied to a reserved Foundation during Preview Production, manual §09-§10)."
 ---
 
 # Module
