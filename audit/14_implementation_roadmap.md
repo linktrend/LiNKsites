@@ -272,6 +272,41 @@ Production Model) and Section 09 done specifically for this batch:
   workspace-wide typecheck, both frontend builds, CMS integration tests) re-run and green before
   merging into `development`.
 
+## Twelfth work batch (2026-07-14) — Preview Deployment, Outcome Record, and Conversion Lock wiring
+
+Continuing Decision DR-08, still within `phase4-build-first-preview-path`. Two more parallel
+subagents plus a reviewed follow-up wiring step done directly (not delegated, since it required a
+deliberate, reviewed edit to an already-merged file from a prior Issue):
+
+- **Preview Deployment** (`packages/factory-catalog/src/previewDeployment.ts`, manual §10.25): the
+  record type for a controlled, rendered preview instance -- deployment identity, a SEPARATE
+  analytics identity per preview (manual's isolation doctrine, enforced by
+  `assertNoAnalyticsIdentityCollision()`), and a deliberately restrictive `indexingPolicy` default:
+  every created deployment starts `'noindex'` regardless of `accessPolicy`, and the ONLY path to
+  `'indexable'` (`markDeploymentAsIndexable()`) requires both a `'public'` access policy AND a
+  non-null quality receipt -- matching manual §10.3's "must never be indexable by careless default."
+- **Outcome Record** (`packages/factory-catalog/src/outcomeRecord.ts`, manual §10.31): the manual's
+  explicit separation of authority -- Sales owns commercial outcome, LiNKsites owns technical
+  disposition -- implemented as a single, deterministic mapping function
+  (`mapSalesOutcomeToTechnicalDisposition()`) from the manual's exact 11-value Sales outcome
+  vocabulary to its exact 10-value technical disposition vocabulary, with `createOutcomeRecord()` as
+  the ONLY constructor (a caller cannot supply an internally-inconsistent record pairing, e.g. a
+  `'converted'` outcome with a `'cleanse_and_recycle'` disposition). `requiresConversionLock()`/
+  `requiresRecycling()` are pure predicates only -- deliberately not wired to any real trigger yet.
+- **Conversion Lock wiring** (`phase4-deployment-outcome-wiring-001`): closes the gap Conversion
+  Lock's own prior Issue explicitly deferred -- `archiveAndRecycleFoundation()` in
+  `prospectAdaptation.ts` now accepts an optional `ConversionLockRegistry` and, when supplied, calls
+  `assertRecycleAllowed()` BEFORE any state transition, so a locked Foundation's Adaptation is never
+  partially archived (the whole operation aborts cleanly). Kept optional for backward compatibility.
+  This was done directly rather than by a subagent, since it required a reviewed edit to
+  already-merged shared code from a prior Issue -- exactly the kind of edit the earlier Issues
+  deliberately deferred rather than making unreviewed.
+- `packages/factory-catalog` grew from 179 to 219 passing tests across this batch (17 + 20 + 3 new);
+  `packages/program-ledger`'s own 36 remained unaffected; full CI-equivalent verification (lint,
+  workspace-wide typecheck, both frontend builds, CMS integration tests) re-run and green before
+  merging into `development`. `phase4-build-first-preview-path/MODULE.md` was updated to reflect all
+  seven Issues now completed in this module.
+
 ## Eighth work batch (2026-07-14) — merge the full stack into `development`, then close GAP-04
 
 Carlos explicitly authorized clearing and merging the entire open PR stack, and directed that
@@ -492,11 +527,12 @@ the next session, in the order listed in the Phase 2 section below.
   only the reservation-release side effect, not re-matching. Publication (Payload draft → published)
   also remains a separate, later, intentionally out-of-scope authority.
 
-## Phase 4 — Build-first preview path — **four first slices real and tested; full inventory object model, live Stripe/Odoo, and real Preview generation still absent**
+## Phase 4 — Build-first preview path — **seven first slices real, tested, and wired together where honestly possible; live Stripe/Odoo, live Payload/hosting, and telemetry-dependent metrics/ranking still absent**
 
 - Phase 2 (Program Ledger) and Phase 3 (Vertical Kit/Tier/Foundation) are real, so this phase is now
-  reachable. Four real, honestly-scoped first slices now exist in
-  `execution/modules/phase4-build-first-preview-path/`:
+  reachable. Seven real, honestly-scoped first slices now exist in
+  `execution/modules/phase4-build-first-preview-path/` (219 passing tests in
+  `packages/factory-catalog`):
   - **Foundation Matching Engine** (`foundationMatching.ts`, GAP-16 first slice): hard filters on
     real data (status/Kit/tier/reservation) + a recency ranking signal + auto-reserve via the
     existing `FoundationReservationManager`.
@@ -508,13 +544,24 @@ the next session, in the order listed in the Phase 2 section below.
     of portfolio metrics that data can actually support today.
   - **Conversion Lock** (`conversionLock.ts`, manual §10.33): locks a Foundation relationship once a
     Sales-authorized, Stripe/Odoo-referenced conversion occurs, blocking recycling -- with no live
-    Stripe/Odoo integration behind the opaque refs it accepts (GAP-33/34/35).
-- Still absent: the manual's full seven-object inventory model (Preview Deployment and Outcome
-  Record objects do not exist yet -- both need a real deployed-preview and Sales-outcome integration
-  this repository does not have), cost/conversion/coverage-rate portfolio metrics (need cost ledgers
-  and Sales outcomes), and the manual's full multi-factor Foundation ranking
-  (requires engagement/telemetry data this repository does not have). Real Preview generation itself
-  remains blocked on GAP-50 (live Payload/Postgres) and real content production.
+    Stripe/Odoo integration behind the opaque refs it accepts (GAP-33/34/35). Now WIRED into
+    `archiveAndRecycleFoundation()` (`prospectAdaptation.ts`) as an optional, backward-compatible
+    recycle-blocking gate -- a locked Foundation's Adaptation can no longer be recycled through that
+    function, closing the gap the Conversion Lock Issue itself had explicitly deferred.
+  - **Preview Deployment** (`previewDeployment.ts`, manual §10.25): the record type for a rendered
+    preview instance, with isolation (no shared analytics identity across previews) and a
+    deliberately restrictive `noindex`-by-default policy that only one narrow, explicit path can lift.
+  - **Outcome Record** (`outcomeRecord.ts`, manual §10.31): the manual's explicit Sales-owns-outcome /
+    LiNKsites-owns-disposition separation, implemented as a single deterministic mapping function
+    with a type-enforcing constructor -- a caller cannot create an internally-inconsistent record.
+- Still absent: a real orchestrator connecting an `OutcomeRecord`'s technical disposition to
+  `ConversionLockRegistry.createLock()`/`archiveAndRecycleFoundation()` automatically; the manual's
+  full seven-object inventory model beyond what's built (no real deployed-preview or Sales-outcome
+  integration exists to back further objects); cost/conversion/coverage-rate portfolio metrics (need
+  cost ledgers and real Sales outcomes); the manual's full multi-factor Foundation ranking (requires
+  engagement/telemetry data this repository does not have). Real Preview generation itself remains
+  blocked on GAP-50 (live Payload/Postgres) and real content production; real Conversion Lock
+  verification remains blocked on GAP-33/34/35 (live Stripe/Odoo).
 
 ## Phase 5 — Commercial and paid-activation spine — **blocked on cross-Program access (GAP-33/34/35, blocker)**
 
