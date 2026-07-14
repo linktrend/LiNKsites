@@ -15,6 +15,22 @@ modules:
     path: "audit/14_implementation_roadmap.md"
   - module_id: "phase2-program-ledger"
     path: "execution/modules/phase2-program-ledger/MODULE.md"
+  - module_id: "phase3-reusable-asset-factory"
+    path: "execution/modules/phase3-reusable-asset-factory/MODULE.md"
+  - module_id: "phase4-preview-path"
+    path: "execution/modules/phase4-preview-path/MODULE.md"
+  - module_id: "phase5-commercial-spine"
+    path: "execution/modules/phase5-commercial-spine/MODULE.md"
+  - module_id: "phase6-customer-fulfilment"
+    path: "execution/modules/phase6-customer-fulfilment/MODULE.md"
+  - module_id: "phase7-autonomous-hosting"
+    path: "execution/modules/phase7-autonomous-hosting/MODULE.md"
+  - module_id: "phase8-observability-economics"
+    path: "execution/modules/phase8-observability-economics/MODULE.md"
+  - module_id: "phase9-controlled-pilot"
+    path: "execution/modules/phase9-controlled-pilot/MODULE.md"
+  - module_id: "phase10-expansion"
+    path: "execution/modules/phase10-expansion/MODULE.md"
 read_first:
   - ".cursor/execution/INDEX.yaml"
   - ".cursor/execution/CANONICAL-LAWS.md"
@@ -37,6 +53,7 @@ optional_fields:
     - "audit/13_decision_and_contradiction_register.md"
   notes:
     - "Phase 0 (audit) and most of the security/stability portion of Phase 1 are complete as of PRs #36-#46 (see audit/14_implementation_roadmap.md's PR table). Phase 2 (Program Ledger) foundation is in progress as of PR #47/#48."
+    - "EXECUTION MODE (Decision DR-08, 2026-07-14): Carlos rejected treating this as a slow, session-bounded effort requiring re-approval between phases. Per LiNKdeveloper doctrine, this program executes continuously: pick the next ready Issue by dependency order, execute it, produce proof, stop only at review_ready (draft PR) -- do not pause for conversational check-ins between Issues. Genuine stops are: a failing gate that cannot be resolved with available information/access, a real architectural or business decision only Carlos can make, or exhaustion of what is safely buildable without live infrastructure. This manual (docs/specs/linksites-program-manual/) plus audit/14_implementation_roadmap.md IS the plan -- no separate PRD is being produced, per manual §56's own instruction that a PRD should reference, not duplicate, the manual."
 ---
 
 # Program
@@ -61,12 +78,28 @@ repository).
 
 ## Modules
 
-| Module | Status | Path |
-|---|---|---|
-| Phase 0/1 stabilization | Largely complete | `audit/14_implementation_roadmap.md` |
-| Phase 2: Program Ledger | In progress | `execution/modules/phase2-program-ledger/MODULE.md` |
+Per the manual's own dependency ordering (§59: "Audit and safety baseline → canonical contracts
+and target architecture → Program core and security foundations → reusable asset factory →
+preview production path → paid commercial handoff → customer fulfilment and hosting operations →
+observability, autonomy, and exception oversight → controlled pilot → measured expansion").
 
-Later modules (Phase 3 reusable-asset factory onward) will be added here as they are scoped, per the manual's own dependency ordering (§59).
+| Module | Manual Phase | Status | Path |
+|---|---|---|---|
+| Phase 0/1 stabilization | §60-61 | Largely complete | `audit/14_implementation_roadmap.md` |
+| Phase 2: Program Ledger | §62 | In progress | `execution/modules/phase2-program-ledger/MODULE.md` |
+| Phase 3: Reusable asset factory | §63 | Not started | `execution/modules/phase3-reusable-asset-factory/MODULE.md` |
+| Phase 4: Build-first preview path | §64 | Not started, depends on Phase 3 | `execution/modules/phase4-preview-path/MODULE.md` |
+| Phase 5: Commercial/paid-activation spine | §65 | Blocked on cross-Program access (GAP-33/34/35) | `execution/modules/phase5-commercial-spine/MODULE.md` |
+| Phase 6: Customer finalization/launch | §66 | Not started, depends on Phase 5 | `execution/modules/phase6-customer-fulfilment/MODULE.md` |
+| Phase 7: Autonomous hosting/lifecycle ops | §67 | Not started | `execution/modules/phase7-autonomous-hosting/MODULE.md` |
+| Phase 8: Observability/economics/OpenClaw | §68 | Not started | `execution/modules/phase8-observability-economics/MODULE.md` |
+| Phase 9: Controlled pilot/stabilization | §69 | Not reachable until 0-8 close | `execution/modules/phase9-controlled-pilot/MODULE.md` |
+| Phase 10: Expansion/regional scaling | §70 | Not reachable until 9 closes | `execution/modules/phase10-expansion/MODULE.md` |
+
+Module artifacts for Phases 3-10 are created just-in-time, one phase ahead of execution (per
+Canonical Law 19, progressive disclosure) rather than all up front -- each will be written with a
+concrete Issue breakdown when that phase actually becomes the active module, not sketched in
+detail this far in advance where assumptions would go stale.
 
 ## Progressive Disclosure Inputs
 
