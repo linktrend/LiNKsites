@@ -307,6 +307,47 @@ deliberate, reviewed edit to an already-merged file from a prior Issue):
   merging into `development`. `phase4-build-first-preview-path/MODULE.md` was updated to reflect all
   seven Issues now completed in this module.
 
+## Thirteenth work batch (2026-07-14) — repository cleanup and hardening pass
+
+Carlos confirmed there was little further engineering buildable without live Stripe/Odoo/Supabase
+access, and instructed: clean up repository content unrelated to LiNKsites' intent, then harden and
+test what exists, before moving to the Supabase and Odoo integration phases (recorded as
+Decision DR-09 in `audit/13_decision_and_contradiction_register.md`). A new cross-cutting module,
+`execution/modules/repo-hardening/`, was created for this (distinct from the phase3/phase4
+factory-build modules — this is quality work over what's already built, not new manual-doctrine
+objects). Three Issues:
+
+- **`repo-cleanup-001`**: deleted 4 empty, zero-usage scaffold packages (`packages/blocks`,
+  `packages/config`, `packages/ui`, `packages/utils`) and a stale, broken-link `library/README.md`;
+  archived (git history preserved) `sites_specs/*.txt`, 4 pre-manual `docs/product/*.md` PRDs, and
+  5 pre-manual `docs/reference/*.md` planning docs into `archive/pre-manual-planning-docs/`
+  (deliberately keeping the 4 still-useful operational how-tos — DNS/Supabase/VPS/security — in
+  place); and, via a dedicated subagent's careful, file-by-file classification, archived 11 stale
+  AI-agent session-completion-report docs from `apps/web-master/docs/` and `apps/cms/docs/` into
+  each app's own `docs/archive/agent-session-reports/`, while deliberately keeping ~54 genuine
+  reference docs in place. Full rationale in each archive's own `ARCHIVED.md`/`MANIFEST.md`.
+- **`hardening-security-001`**: independently re-verified the repository's real dependency-vulnerability
+  state via `pnpm audit` on `development` (2 findings: a high-severity `drizzle-orm` SQL-injection
+  advisory and a low-severity `esbuild` file-read advisory, both transitive via Payload's Postgres
+  adapter) — down from the 222 GitHub reports on `main`, which is the unpromoted default branch, not
+  `development` (confirmed via `gh repo view --json defaultBranchRef`; promotion is Principal-only
+  per `docs/BRANCHING_AND_DEPLOYMENT_POLICY.md`). Fixed both with bounded `pnpm.overrides`; `pnpm
+  audit` now reports zero known vulnerabilities. Added a "Dependency vulnerability audit" step to
+  `.github/workflows/ci.yml` so a future regression is caught automatically.
+- **`hardening-test-coverage-001`**: installed `@vitest/coverage-v8` in both `packages/factory-catalog`
+  and `packages/program-ledger`, measured real coverage, and closed the gaps found. factory-catalog:
+  95.55%/92.33% → 97.77%/95.17% (stmts/branches), 219 → 230 tests. program-ledger: 92.22%/82.87% →
+  93.57%/84.81%, 36 → 44 tests — including a `heartbeat()` describe block that was previously
+  **entirely untested**. Writing that test found a real bug: `PostgresLedgerStore.getIssue()`/
+  `getRun()`/`getGateResult()` let a raw Postgres "invalid input syntax for type uuid" error
+  propagate for a malformed id instead of returning the clean `null` every other not-found case
+  produces — fixed via a new `queryOneOrNull()` helper scoped to that specific SQLSTATE, with 2 new
+  regression tests (one proving the fix, one proving it doesn't change correct not-found behavior
+  for a well-formed-but-unknown UUID).
+- Full CI-equivalent gate (lint, workspace-wide typecheck, both frontend builds, CMS integration
+  tests, factory-catalog tests, program-ledger tests) re-run and green after every merge in this
+  batch, exactly as with every prior batch this session.
+
 ## Eighth work batch (2026-07-14) — merge the full stack into `development`, then close GAP-04
 
 Carlos explicitly authorized clearing and merging the entire open PR stack, and directed that

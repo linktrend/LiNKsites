@@ -18,10 +18,20 @@
 > a full re-verification. GAP-04 (Promotion Service / Site Assembly Engine) is now closed at the
 > code-object and ledger-integration level, built partly using parallel subagents against precisely
 > pinned interface contracts. See `audit/14_implementation_roadmap.md`'s "Sixth" through "Eighth" work
-> batches for the full detail. The items below describing what's still missing remain accurate for
-> what they describe (payment/Odoo integration, monitoring/backups, and a real Payload-backed
-> connection for the Promotion Service, which needs live infrastructure not available in this
-> environment, GAP-50) — this addendum only updates what has since changed, it does not re-litigate the rest of the
+> batches for the full detail, through the "Thirteenth" work batch (repository cleanup and a
+> hardening/test-coverage pass, Decision DR-09) — the repository was cleaned of content unrelated to
+> LiNKsites' intent (empty scaffold packages, stale planning docs, stale AI-agent session reports,
+> all archived not deleted), real dependency-vulnerability status was independently re-verified via
+> `pnpm audit` (zero known vulnerabilities on `development` — the "222 vulnerabilities" message
+> shown on every push is a property of the unpromoted default branch, `main`, confirmed via GitHub's
+> own API, not evidence that this session's fixes regressed), and test coverage across
+> `packages/factory-catalog` (97.77%/95.17% stmts/branches) and `packages/program-ledger`
+> (93.57%/84.81%) was measured and improved — finding and fixing one real bug in the process (a
+> malformed Run/Issue ID could crash `PostgresLedgerStore` with a raw database error instead of a
+> clean "not found"). The items below describing what's still missing remain accurate for what they
+> describe (payment/Odoo integration, monitoring/backups, and a real Payload-backed connection for
+> the Promotion Service, which needs live infrastructure not available in this environment, GAP-50)
+> — this addendum only updates what has since changed, it does not re-litigate the rest of the
 > original summary.
 
 ## What I did
