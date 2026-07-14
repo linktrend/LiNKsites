@@ -94,10 +94,34 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 | #45 | `dev/blackcursor/archive-legacy-old-linktrend` | Archive `sites_projects/old_linktrend` per Carlos's instruction | #44 |
 | #46 | `dev/blackcursor/gap49-medium-low-security-triage` | GAP-49: remaining medium/low Dependabot findings patched | #45 |
 | #47 | `dev/blackcursor/phase2-program-ledger-core` | Phase 2 foundation: Program Ledger Issue/Run/Gate/Event core + exit-gate tests | #46 |
-| #48 | `dev/blackcursor/phase2-postgres-store` | Postgres-backed LedgerStore, tested against real embedded Postgres (pglite) | #47 |
+| #48 | `dev/blackcursor/phase2-postgres-store` | Postgres-backed LedgerStore (pglite-tested) + independent-review bug fixes | #47 |
+| #49 | `dev/blackcursor/phase2-execution-plan` | Full Phase 2-10 execution plan + Program/Module hierarchy + Executor Registry | #48 |
+| #50 | `dev/blackcursor/phase3-tier-specification` | Tier Specification schema + entitlement enforcement (Phase 3, GAP-12) | #49 |
+| #51 | `dev/blackcursor/phase3-vertical-kit` | Vertical Kit schema, seeded with Home Services pilot candidate (Phase 3) | #50 |
 
 All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
-the rest), then #38 through #48 in order (each depends on the previous).
+the rest), then #38 through #51 in order (each depends on the previous).
+
+## Sixth work batch (2026-07-14) — continuous execution into Phase 3 (Decision DR-08)
+
+Carlos rejected pausing between phases and confirmed: the manual + this roadmap IS the plan; no
+separate PRD is needed; execution proceeds continuously, Issue after Issue, stopping only at real
+gates or blockers (per Decision DR-08, recorded in `execution/PROGRAM.md`). This batch:
+
+- Closed out Phase 2's core scope: PR #49 added the Program/Module hierarchy (all 20 LiNKsites
+  Modules, manual §05, modeled as real data) and an Executor Registry with a full end-to-end
+  synthetic-workflow proof (36/36 program-ledger tests passing).
+- Started Phase 3 (reusable asset factory): PR #50 built the Tier Specification schema and
+  entitlement-enforcement engine (GAP-12, manual §08.16), and PR #51 built the Vertical Kit schema
+  (manual §08.8) seeded with the Decision DR-06 pilot vertical (Home Services) as a non-production
+  `candidate` — deliberately not promoted to `active`, since real vertical content requires
+  business/research input this repository doesn't have.
+- Every numeric/commercial value introduced (tier page limits, change allowances, etc.) is
+  explicitly marked as a provisional placeholder in code and documentation, per manual §03's
+  own deferred-decisions list — none of this should be read as real pricing or scope commitments.
+- New package `packages/factory-catalog` (22 tests) joins `packages/program-ledger` (36 tests) as
+  tested, working Phase 2/3 foundations. `packages/types` gained a canonical `SchemaVersion` type
+  (relocated from a duplicate in `program-ledger`), per this repo's own contract-versioning policy.
 
 ## Fifth work batch (2026-07-14) — independent review pass, bug fixes, LiNKdeveloper adoption
 
