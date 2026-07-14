@@ -2,6 +2,22 @@
 
 **For Carlos. Plain English. Technical detail is in the numbered files in this `audit/` folder and in `docs/specs/linksites-program-manual/`.**
 
+> **Progress addendum (2026-07-14):** You approved proceeding and explicitly rejected pausing between
+> phases — the manual + `audit/14_implementation_roadmap.md` now serve as the plan, and work has
+> continued Issue-by-Issue since this summary was written. As of this addendum: a real CI gate exists
+> (no longer fake-passing), the security findings below are fixed (all 222 Dependabot alerts
+> triaged), the legacy `web-company`/old-corporate-site question is resolved (archived, see
+> Decision DR-02), a real Program Ledger (Issue/Run/Gate/Event core, Postgres-backed, hierarchy +
+> executor registry) exists and is tested, and all 7 of the manual's named Phase 3 reusable-asset
+> objects (Vertical Kit, Tier Specification, Reusable Site Foundation, Design Intelligence Catalog,
+> Component Registry, Site Specification, Prospect Adaptation) are now real, tested code (85 passing
+> tests in `packages/factory-catalog`). See `audit/14_implementation_roadmap.md`'s "Sixth" and
+> "Seventh" work batches for the full detail. The items below describing what's still missing remain
+> accurate for what they describe (payment/Odoo integration, monitoring/backups, live-Postgres
+> verification, and the Promotion Service/Site Assembly Engine that would actually execute against
+> these new objects) — this addendum only updates what has since changed, it does not re-litigate the
+> rest of the original summary.
+
 ## What I did
 
 1. Copied the 24-section LiNKsites Program Manual verbatim from your Google Drive into the repo (`docs/specs/linksites-program-manual/`), byte-verified it, and generated a manifest — so this manual is now durable in the repo itself, not dependent on your local Drive.

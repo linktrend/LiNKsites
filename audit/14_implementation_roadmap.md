@@ -101,9 +101,11 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 | #52 | `dev/blackcursor/phase3-reusable-foundation` | Reusable Site Foundation schema, prospect-neutrality scanner, reservation exclusivity (Phase 3) | #51 |
 | #53 | `dev/blackcursor/phase3-design-catalog` | Design Intelligence Catalog token hierarchy + accessibility-gated admission (Phase 3) | #52 |
 | #54 | `dev/blackcursor/phase3-component-registry` | Component Registry governed machine object, seeded from real web-master components (Phase 3) | #53 |
+| #55 | `dev/blackcursor/phase3-site-specification` | Site Specification integration resolver, composing all five prior Phase 3 objects (Phase 3) | #54 |
+| #56 | `dev/blackcursor/phase3-prospect-adaptation` | Prospect Adaptation record, reservation-matching guard, close-or-recycle lifecycle (Phase 3) | #55 |
 
 All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
-the rest), then #38 through #54 in order (each depends on the previous).
+the rest), then #38 through #56 in order (each depends on the previous).
 
 ## Seventh work batch (2026-07-14) — continuous execution, completing the Phase 3 reusable-asset trio
 
@@ -132,10 +134,28 @@ in `packages/factory-catalog`:
   the existing `checkEntitlement()` rather than duplicating that rule.
 - `packages/factory-catalog` grew from 22 to 65 tests across this batch, all passing; workspace-wide
   typecheck across all 6 packages remains clean.
-- Next in Phase 3: a **Site Specification** object (the per-site resolved contract combining Kit +
-  Tier + Foundation + Design Profile + Component selections into one versioned record for one real
-  or prospective site) and a **Prospect Adaptation** record (the prospect-specific content overlay
-  applied to a reserved Foundation during Preview Production, manual §09-§10). Both remain open.
+- PR #55 added the **Site Specification** integration resolver: composes the five prior objects
+  into one per-site resolved contract, enforcing every cross-object invariant those Issues defined
+  (Kit lifecycle, Foundation lifecycle + Kit/tier match, component tier-availability, Kit+Tier
+  effective page limit) by delegating to each object's own guard function rather than duplicating
+  any rule — this is the closest current approximation of the manual §63 exit gate language
+  ("deterministic assembly produces valid sites from versioned specifications"), though the real
+  Site Assembly Engine that turns this record into an actual rendered site still does not exist
+  (GAP-04).
+- PR #56 added the **Prospect Adaptation** record (manual §09-§10): the prospect-specific content
+  overlay applied to a reserved Foundation during Preview Production — deliberately the mirror
+  image of the Foundation's own prospect-neutrality rule from PR #52 (this record is *expected* to
+  contain prospect data). Enforces that an Adaptation can only be created against a currently-active
+  reservation for the matching Foundation, implements the manual's required "close or recycle"
+  lifecycle (manual §MVO commercial-loop step 7), and specifically proves that recycling a stale
+  Adaptation never releases a different, unrelated requester's active reservation on the same
+  Foundation.
+- This closes out the reusable-asset factory's core object set for this session: **7 real, tested
+  objects** (Vertical Kit, Tier Specification, Reusable Site Foundation, Design Intelligence
+  Catalog, Component Registry, Site Specification, Prospect Adaptation), **85 passing tests** in
+  `packages/factory-catalog`. Remaining Phase 3/4 work either needs Carlos/business input to
+  promote provisional content to `active` (not something to invent), or crosses into the Promotion
+  Service / Site Assembly Engine (GAP-04), which is Phase 4/5-adjacent, larger-scope work.
 
 ## Sixth work batch (2026-07-14) — continuous execution into Phase 3 (Decision DR-08)
 
@@ -279,20 +299,27 @@ the next session, in the order listed in the Phase 2 section below.
   minimal cost-event hook into this ledger would be reasonable to add early). Phase 2 is not
   fully closable until a live Postgres store and at least one real executor exist.
 
-## Phase 3 — Reusable asset and assembly foundation — **partially built (5 of 5 named objects now real, tested code; Promotion Service and cross-object Site Specification still absent)**
+## Phase 3 — Reusable asset and assembly foundation — **core object set built (7 of 7 objects real, tested code; Promotion Service / Site Assembly Engine still absent)**
 
 - Tier Specification (GAP-12), Vertical Kit (GAP-11), Reusable Site Foundation (GAP-13), Design
-  Intelligence Catalog token hierarchy (GAP-09/10), and Component Registry (GAP-07) are now all
-  real, tested machine objects in `packages/factory-catalog` (65 passing tests as of PRs #50-#54).
-  All still carry provisional/placeholder content where the manual defers real values (tier limits,
-  the one seeded Vertical Kit candidate, the one seeded StyleFamily) or where an upstream source
-  this repository cannot reach was named (`ui-ux-pro-max-skill`).
+  Intelligence Catalog token hierarchy (GAP-09/10), Component Registry (GAP-07), Site Specification
+  (the per-site integration resolver), and Prospect Adaptation (the manual §09-§10 prospect content
+  overlay + close-or-recycle lifecycle) are now all real, tested machine objects in
+  `packages/factory-catalog` (85 passing tests as of PRs #50-#56). All still carry
+  provisional/placeholder content where the manual defers real values (tier limits, the one seeded
+  Vertical Kit candidate, the one seeded StyleFamily) or where an upstream source this repository
+  cannot reach was named (`ui-ux-pro-max-skill`).
 - `apps/web-master/docs/components/index.json` and `tokens.css` remain the real underlying seeds;
   they were read from (component IDs/paths verified against `index.json`) rather than replaced.
-- Still absent: a **Site Specification** object combining these five into one per-site resolved
-  contract, a **Prospect Adaptation** record, and the **Promotion Service** (GAP-04) itself — none
-  of this phase's exit gate ("deterministic assembly produces valid sites from versioned
-  specifications") is reachable until those exist and are wired to a real executor.
+- Still absent: the **Promotion Service** (Supabase working → Payload draft, GAP-04) and a real
+  **Site Assembly Engine** that turns a resolved Site Specification + Prospect Adaptation into an
+  actual rendered site. Neither of these is wired to a real executor yet, so this phase's exit gate
+  ("deterministic assembly produces valid sites from versioned specifications") is not yet fully
+  reachable — the object model and cross-object validation it depends on is now real; the execution
+  machinery that consumes it is not.
+- Also still absent: a real Preview Inventory / matching engine (GAP-16) to decide which new lead an
+  archived-and-recycled Foundation should be re-offered to; `archiveAndRecycleFoundation()` performs
+  only the reservation-release side effect, not re-matching.
 
 ## Phase 4 — Build-first preview path — **not started**
 
