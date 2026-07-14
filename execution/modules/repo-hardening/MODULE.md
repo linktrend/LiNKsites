@@ -9,6 +9,7 @@ scope:
   - "CI: add an automated dependency-audit gate so future vulnerabilities are caught, not just fixed reactively (done: hardening-security-001)"
   - "Test coverage measurement and gap-filling for packages/factory-catalog and packages/program-ledger (done: hardening-test-coverage-001)"
   - "App-level documentation cleanup (apps/web-master/docs, apps/cms/docs) -- see the separate repo-cleanup batch (DR-09), not tracked as its own Issue in this module"
+  - "Recovering the real half of a pre-existing uncommitted local stash (Wave 9 Docker/Traefik deployment scaffolding) and dropping the obsolete half (done: wave9-docker-deploy-recovery-001)"
 out_of_scope:
   - "Live Supabase/Postgres verification -- still blocked on live infrastructure access (GAP-50), explicitly deferred to the next phase per Carlos's own sequencing instruction"
   - "Live Stripe/Odoo integration -- still blocked on cross-Program access (GAP-33/34/35), explicitly deferred to the phase after Supabase"
@@ -29,7 +30,7 @@ optional_fields:
   risk_summary:
     - "GitHub's push-time 'X vulnerabilities' message reflects the default branch (main), not development -- this repeatedly caused confusion this session. It is NOT evidence of a regression in this session's own security fixes, which live on development and have not yet been promoted through staging->main per the branching policy (Principal-only promotion)."
   notes:
-    - "Issues completed so far: hardening-security-001, hardening-test-coverage-001. This module was created directly from Carlos's explicit instruction, distinct from the phase3/phase4 factory-build modules -- it is cross-cutting quality work over everything already built, not a new manual-doctrine object."
+    - "Issues completed so far: hardening-security-001, hardening-test-coverage-001, wave9-docker-deploy-recovery-001. This module was created directly from Carlos's explicit instruction, distinct from the phase3/phase4 factory-build modules -- it is cross-cutting quality work over everything already built, not a new manual-doctrine object."
 ---
 
 # Module

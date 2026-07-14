@@ -1,24 +1,6 @@
-name: linksites-cms
+# Deprecated path — use repo-root deploy/docker-compose.deploy.yml (Wave 9.1).
+# Kept as a pointer for VPS runbooks that still `cd apps/cms`.
+name: cms
 
-services:
-  payload:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - ${LINKSITES_RUNTIME_ENV_FILE:-/opt/linktrend/runtime/linksites-cms/prod.env.runtime}
-    restart: unless-stopped
-    volumes:
-      - ${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH:-/etc/linktrend/gcp/linktrend-service-account.json}:${GOOGLE_APPLICATION_CREDENTIALS:-/etc/linktrend/gcp/linktrend-service-account.json}:ro
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.${TRAEFIK_ROUTER_NAME:-linksites-cms}.rule=Host(`${TRAEFIK_HOST:-cms.linktrend.internal}`)
-      - traefik.http.routers.${TRAEFIK_ROUTER_NAME:-linksites-cms}.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
-      - traefik.http.routers.${TRAEFIK_ROUTER_NAME:-linksites-cms}.tls=true
-      - traefik.http.services.${TRAEFIK_ROUTER_NAME:-linksites-cms}.loadbalancer.server.port=3000
-    networks:
-      - traefik
-
-networks:
-  traefik:
-    external: true
+include:
+  - path: ../../deploy/docker-compose.deploy.yml

@@ -24,6 +24,7 @@ const cmsHosts = Array.from(
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns: [
       {

@@ -53,11 +53,24 @@ assets:
   - asset_id: asset-deploy-wave9-docker-traefik
     description: "deploy/docker-compose.deploy.yml, deploy/docker/*.Dockerfile, deploy/README.md — Traefik-routed CMS + shared-frontend Wave-9 VPS deployment scaffolding."
     classification: configured-unverified
-    disposition: adapt
+    disposition: adapt # RECOVERED 2026-07-14 from an uncommitted local stash and merged, per Carlos's explicit instruction
     rationale: >
+      RECOVERED (2026-07-14): this asset previously existed only as
+      uncommitted local changes on a separate branch (issue/wave9-linksites-prod,
+      still-open PR #31) plus a matching local git stash. Carlos asked for both
+      local stashes to be investigated; this one was confirmed to be real,
+      unmerged, non-duplicate work (unlike a second, purely-duplicate stash that
+      was discarded) and was recovered, cleaned (a same-stash batch of 4
+      LiNKdev/factory/scripts/*.mjs files was deliberately dropped, since the
+      embedded LiNKdev framework they belonged to was already removed this
+      session per Decision DR-01), and merged via
+      execution/modules/repo-hardening/issues/wave9-docker-deploy-recovery-001/.
+
       Directionally correct (Traefik reverse proxy, host-based routing,
-      wildcard preview subdomain) per manual §15 doctrine. Needs live
-      verification, Cloudflare-side codification (currently only
+      wildcard preview subdomain) per manual §15 doctrine. STILL Needs live
+      verification (this sandboxed environment's Docker daemon cannot reach a
+      container registry to pull base images -- attempted and confirmed
+      hung/unreachable), Cloudflare-side codification (currently only
       documented in docs/ops/, not executable), and capacity/monitoring
       wrap-around before any production trust.
 
