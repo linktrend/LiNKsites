@@ -231,6 +231,47 @@ precisely pinned interface contracts (following the GAP-04 pattern):
   workspace-wide typecheck, both frontend builds, CMS integration tests) re-run and green before
   merging into `development`.
 
+## Eleventh work batch (2026-07-14) — Proof Level Engine, Preview Inventory snapshot, Conversion Lock
+
+Continuing Decision DR-08, into Phase 4's `phase4-build-first-preview-path` module. Three more
+independent slices built via three parallel subagents against precisely pinned interface contracts,
+grounded in a dedicated re-read of manual Section 10 (Preview Inventory and Build-First Sell-Later
+Production Model) and Section 09 done specifically for this batch:
+
+- **Proof Level Engine** (`packages/factory-catalog/src/proofLevel.ts`): models the manual's
+  Levels 0-4 proof-level system, explicitly SEPARATE from paid tier (manual §10.9/§09.18) --
+  `ProofSpecification` (versioned, lifecycle-status'd, per-level investment ceiling),
+  `InvestmentAuthorization` + `checkInvestmentAgainstBudget()` (mirrors `tierSpecification.ts`'s own
+  disposition-returning pattern), and `createProofBlock()`/`escalateProofBlock()` -- escalating to a
+  higher level creates a NEW versioned block and marks the prior one `supersededBy`, never
+  overwriting history (manual §10.30: "must not overwrite prior level history"). All dollar-ceiling
+  values are explicitly marked as structural placeholders (manual §10.48 leaves real budgets as open
+  policy).
+- **Preview Inventory portfolio snapshot** (`packages/factory-catalog/src/previewInventory.ts`):
+  `computePreviewInventorySnapshot()`, a pure aggregation over existing `ReusableSiteFoundation[]` +
+  a live `FoundationReservationManager` + `ProspectAdaptation[]` into the subset of manual §10.38's
+  portfolio metrics that are actually computable from data that exists today (status/kit/tier
+  counts, present-tense reservation utilization, adaptation-status breakdown, and foundation reuse
+  distribution -- a real signal for §10.39's similarity/saturation concern). Explicitly does not
+  implement the manual's full seven-object inventory model or its cost/conversion/coverage-rate
+  metrics, which need data (cost ledgers, Sales outcomes) this repository does not have.
+- **Conversion Lock** (`packages/factory-catalog/src/conversionLock.ts`): the manual's §10.33
+  invariant -- "when Sales sends a valid conversion instruction based on Stripe-confirmed payment and
+  the corresponding Odoo commercial record, LiNKsites locks the relevant preview version and
+  foundation relationship for customer finalization" -- implemented as `ConversionLockRegistry`,
+  mirroring `FoundationReservationManager`'s own claim/exclusivity style. Requires the locking
+  adaptation to be `published`; idempotent on repeat calls for the same adaptation; rejects a second,
+  conflicting lock attempt on the same Foundation; and exposes `assertRecycleAllowed()` as the gate a
+  future recycle workflow must call. No real Stripe/Odoo integration exists (GAP-33/34/35) -- all
+  three commercial refs are opaque, caller-supplied strings with no live verification, and
+  `archiveAndRecycleFoundation()` in `prospectAdaptation.ts` was deliberately NOT modified to call
+  this gate automatically, to avoid an unreviewed edit to already-merged shared code within this
+  batch's scope.
+- `packages/factory-catalog` grew from 147 to 179 passing tests across this batch (13 + 8 + 11 new);
+  `packages/program-ledger`'s own 36 remained unaffected; full CI-equivalent verification (lint,
+  workspace-wide typecheck, both frontend builds, CMS integration tests) re-run and green before
+  merging into `development`.
+
 ## Eighth work batch (2026-07-14) — merge the full stack into `development`, then close GAP-04
 
 Carlos explicitly authorized clearing and merging the entire open PR stack, and directed that
@@ -451,16 +492,27 @@ the next session, in the order listed in the Phase 2 section below.
   only the reservation-release side effect, not re-matching. Publication (Payload draft → published)
   also remains a separate, later, intentionally out-of-scope authority.
 
-## Phase 4 — Build-first preview path — **started (Foundation matching first slice real and tested; Preview Inventory, Proof Level engine, conversion-lock still absent)**
+## Phase 4 — Build-first preview path — **four first slices real and tested; full inventory object model, live Stripe/Odoo, and real Preview generation still absent**
 
 - Phase 2 (Program Ledger) and Phase 3 (Vertical Kit/Tier/Foundation) are real, so this phase is now
-  reachable. A real Foundation Matching Engine (`packages/factory-catalog/src/foundationMatching.ts`,
-  module `execution/modules/phase4-build-first-preview-path/`) closes the honestly-scoped first slice
-  of GAP-16: hard filters on real data (status/Kit/tier/reservation) + a recency ranking signal +
-  auto-reserve via the existing `FoundationReservationManager`.
-- Still absent: a real Preview Inventory (tracking Foundation state/history beyond simple
-  reservation), a Proof Level engine (the manual's tiered evidence-of-real-work model, GAP-17), a
-  conversion-lock mechanism for sold previews, and the manual's full multi-factor Foundation ranking
+  reachable. Four real, honestly-scoped first slices now exist in
+  `execution/modules/phase4-build-first-preview-path/`:
+  - **Foundation Matching Engine** (`foundationMatching.ts`, GAP-16 first slice): hard filters on
+    real data (status/Kit/tier/reservation) + a recency ranking signal + auto-reserve via the
+    existing `FoundationReservationManager`.
+  - **Proof Level Engine** (`proofLevel.ts`, manual §10.8): Levels 0-4, versioned Proof
+    Specifications, budget-disposition checking, and history-preserving escalation -- explicitly
+    separate from paid tier.
+  - **Preview Inventory portfolio snapshot** (`previewInventory.ts`, manual §10.38 first slice): a
+    pure aggregation function over existing Foundation/reservation/adaptation data into the subset
+    of portfolio metrics that data can actually support today.
+  - **Conversion Lock** (`conversionLock.ts`, manual §10.33): locks a Foundation relationship once a
+    Sales-authorized, Stripe/Odoo-referenced conversion occurs, blocking recycling -- with no live
+    Stripe/Odoo integration behind the opaque refs it accepts (GAP-33/34/35).
+- Still absent: the manual's full seven-object inventory model (Preview Deployment and Outcome
+  Record objects do not exist yet -- both need a real deployed-preview and Sales-outcome integration
+  this repository does not have), cost/conversion/coverage-rate portfolio metrics (need cost ledgers
+  and Sales outcomes), and the manual's full multi-factor Foundation ranking
   (requires engagement/telemetry data this repository does not have). Real Preview generation itself
   remains blocked on GAP-50 (live Payload/Postgres) and real content production.
 
