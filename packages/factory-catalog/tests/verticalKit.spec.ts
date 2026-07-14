@@ -9,21 +9,21 @@ import {
 } from '../src/verticalKit.js'
 
 describe('HOME_SERVICES_KIT (Decision DR-06 pilot vertical)', () => {
-  it('is deliberately a candidate, not active, until real content review happens', () => {
-    expect(HOME_SERVICES_KIT.status).toBe('candidate')
+  it('is active, promoted 2026-07-14 per Carlos\'s instruction to proceed with a research-grounded provisional default', () => {
+    expect(HOME_SERVICES_KIT.status).toBe('active')
   })
 
   it('defines a tier variant for all 3 tiers', () => {
     expect(HOME_SERVICES_KIT.tierVariants.map((v) => v.tierId).sort()).toEqual(['enterprise', 'premium', 'standard'])
   })
 
-  it('is rejected as production-ready while still a candidate', () => {
-    expect(() => assertKitIsProductionReady(HOME_SERVICES_KIT)).toThrow(VerticalKitError)
+  it('is accepted as production-ready', () => {
+    expect(() => assertKitIsProductionReady(HOME_SERVICES_KIT)).not.toThrow()
   })
 
-  it('would be accepted as production-ready once promoted to active', () => {
-    const promoted = { ...HOME_SERVICES_KIT, status: 'active' as const }
-    expect(() => assertKitIsProductionReady(promoted)).not.toThrow()
+  it('is rejected as production-ready if reverted to a non-active status', () => {
+    const reverted = { ...HOME_SERVICES_KIT, status: 'candidate' as const }
+    expect(() => assertKitIsProductionReady(reverted)).toThrow(VerticalKitError)
   })
 })
 
@@ -40,8 +40,8 @@ describe('getKitTierVariant', () => {
 })
 
 describe('resolveEffectiveMaxPages (manual §08.17)', () => {
-  it('uses the Kit variant limit when it is more restrictive than the base tier', () => {
-    // Standard tier base allows 8 pages; Home Services' Standard variant only expects 6.
+  it('agrees with the base tier when the Kit variant is aligned with it (both research-grounded defaults)', () => {
+    // Standard tier base and Home Services' Standard variant are both 6 pages (kept deliberately aligned).
     const effective = resolveEffectiveMaxPages(TIER_SPECIFICATIONS.standard.dimensions.maxPages, HOME_SERVICES_KIT, 'standard')
     expect(effective).toBe(6)
   })

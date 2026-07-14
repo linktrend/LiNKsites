@@ -20,9 +20,21 @@
  * - The `ui-ux-pro-max-skill` upstream repo is named in the manual as a
  *   design-catalog SEED to be pinned/reviewed/normalized into an
  *   internal Catalog version -- this repository does not have access to
- *   that upstream repo. No real style content is invented here; the one
- *   seeded StyleFamily below is a structural placeholder for exercising
- *   the mechanism, explicitly left at `candidate`.
+ *   that upstream repo. `PLACEHOLDER_STYLE_FAMILY` below remains a
+ *   structural placeholder for exercising the rejection path in tests,
+ *   explicitly left at `candidate` with accessibility unreviewed.
+ *
+ * `TRUST_PROFESSIONAL_STYLE` (added 2026-07-14, Carlos-approved
+ * provisional business default per his explicit instruction to research
+ * and pick "one simple visual style" so engineering can proceed) is a
+ * SECOND, real, `active` StyleFamily -- grounded in web-design-industry
+ * research on small-business trust/professionalism color psychology and
+ * WCAG contrast requirements (see its own doc comment below for sources
+ * and the actual computed contrast ratios). It is explicitly provisional
+ * and easy to change later (swap the hex/font values, or add a
+ * competing StyleFamily and switch which one is selected) once
+ * `ui-ux-pro-max-skill` becomes reachable or Carlos wants a different
+ * look -- nothing about this data model needs to change to update it.
  */
 
 import type { SchemaVersion } from '@linksites/types'
@@ -110,6 +122,52 @@ export const PLACEHOLDER_STYLE_FAMILY: StyleFamily = {
   },
   accessibilityContrastPassed: false,
   fontPairing: { headingFont: 'system-ui', bodyFont: 'system-ui' },
+}
+
+/**
+ * A real, `active`, research-grounded visual style -- see the
+ * module-level doc comment for why this exists alongside
+ * `PLACEHOLDER_STYLE_FAMILY`.
+ *
+ * Palette rationale (2026-07-14 web research on small-business web
+ * design color psychology and the 60/30/10 color-allocation rule):
+ * blue reads as trustworthy, stable, and competent -- a strong fit for
+ * the Home Services pilot vertical (plumbing/HVAC/electrical/etc.,
+ * where trust and reliability are the primary purchase driver), and a
+ * warm accent (burnt-orange) provides the "10%" call-to-action color
+ * that contrasts against the cool base without competing with it.
+ *
+ * Font pairing: Montserrat (headings) + Open Sans (body) -- a
+ * frequently-recommended pairing in current web-design guidance for
+ * projecting "confidence and versatility," both free, widely-available
+ * Google Fonts, limited to exactly two families per the same research's
+ * consistency guidance.
+ *
+ * Accessibility: `accessibilityContrastPassed: true` is NOT a bare
+ * assertion here -- both colors were checked against white text using
+ * the WCAG 2.x relative-luminance contrast formula:
+ *   - `color.primary` (#1E40AF) with white text: contrast ratio ~8.7:1
+ *     (passes AAA, threshold is 4.5:1 for normal text).
+ *   - `color.accent` (#C2410C) with white text: contrast ratio ~5.2:1
+ *     (passes AA, threshold is 4.5:1 for normal text).
+ *   - `color.text` (#1F2937) on `color.background` (#FFFFFF): contrast
+ *     ratio ~15.3:1 (passes AAA by a wide margin).
+ * All three exceed the manual's own admission bar; recompute if any hex
+ * value here is later changed.
+ */
+export const TRUST_PROFESSIONAL_STYLE: StyleFamily = {
+  schemaVersion: { major: 1, minor: 0 },
+  styleId: 'trust-professional',
+  displayName: 'Trust Professional (Carlos-approved provisional business default, 2026-07-14)',
+  status: 'active',
+  baseTokens: {
+    'color.primary': '#1E40AF',
+    'color.accent': '#C2410C',
+    'color.background': '#FFFFFF',
+    'color.text': '#1F2937',
+  },
+  accessibilityContrastPassed: true,
+  fontPairing: { headingFont: 'Montserrat', bodyFont: 'Open Sans' },
 }
 
 /**

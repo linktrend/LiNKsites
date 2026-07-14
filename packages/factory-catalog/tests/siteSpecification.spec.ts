@@ -56,13 +56,13 @@ describe('resolveSiteSpecification: happy path', () => {
     expect(spec.tierId).toBe('standard')
     expect(spec.foundationId).toBe('foundation-1')
     expect(spec.selectedComponentIds).toEqual(['SignupHero', 'CTASection'])
-    expect(spec.effectiveMaxPages).toBe(6) // min(standard tier's 8, Kit's Standard variant 6) per resolveMostRestrictive
+    expect(spec.effectiveMaxPages).toBe(6) // min(standard tier's 6, Kit's Standard variant 6) per resolveMostRestrictive
   })
 })
 
 describe('resolveSiteSpecification: cross-object invariant enforcement', () => {
   it('rejects a non-active Vertical Kit', () => {
-    const input = buildBaseInput({ kit: HOME_SERVICES_KIT }) // still 'candidate'
+    const input = buildBaseInput({ kit: { ...HOME_SERVICES_KIT, status: 'candidate' as const } })
     expect(() => resolveSiteSpecification(input)).toThrow()
   })
 

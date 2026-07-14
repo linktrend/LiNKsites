@@ -114,7 +114,7 @@ describe('assembleSiteManifest: foundation-class manifest with no adaptation', (
 
 describe('assembleSiteManifest: negative paths', () => {
   it('rejects a non-active Vertical Kit', () => {
-    const input = buildBaseInput({ kit: HOME_SERVICES_KIT }) // still 'candidate'
+    const input = buildBaseInput({ kit: { ...HOME_SERVICES_KIT, status: 'candidate' as const } })
     expect(() => assembleSiteManifest(input)).toThrow()
   })
 

@@ -19,6 +19,47 @@ describe('TIER_SPECIFICATIONS', () => {
   })
 })
 
+describe('customerCmsAccess launch default (Carlos-approved, 2026-07-14)', () => {
+  it('every tier -- including Enterprise -- has no customer CMS access at launch', () => {
+    for (const tier of Object.values(TIER_SPECIFICATIONS)) {
+      expect(tier.dimensions.customerCmsAccess).toBe('none')
+    }
+  })
+
+  it('Premium and Enterprise are recorded as future CMS-access candidates; Standard is not', () => {
+    expect(TIER_SPECIFICATIONS.standard.dimensions.futureCmsAccessCandidate).toBe(false)
+    expect(TIER_SPECIFICATIONS.premium.dimensions.futureCmsAccessCandidate).toBe(true)
+    expect(TIER_SPECIFICATIONS.enterprise.dimensions.futureCmsAccessCandidate).toBe(true)
+  })
+})
+
+describe('research-grounded page-count defaults (2026-07-14)', () => {
+  it('Standard sits within the researched 5-8 page starter-package range', () => {
+    expect(TIER_SPECIFICATIONS.standard.dimensions.maxPages).toBeGreaterThanOrEqual(5)
+    expect(TIER_SPECIFICATIONS.standard.dimensions.maxPages).toBeLessThanOrEqual(8)
+  })
+
+  it('Premium sits within the researched 10-15 page business-tier range', () => {
+    expect(TIER_SPECIFICATIONS.premium.dimensions.maxPages).toBeGreaterThanOrEqual(10)
+    expect(TIER_SPECIFICATIONS.premium.dimensions.maxPages).toBeLessThanOrEqual(15)
+  })
+
+  it('Premium always offers strictly more pages than Standard', () => {
+    expect(TIER_SPECIFICATIONS.premium.dimensions.maxPages).toBeGreaterThan(TIER_SPECIFICATIONS.standard.dimensions.maxPages)
+  })
+})
+
+describe('priceUsdPerMonthProvisional (illustrative only, not an approved price)', () => {
+  it('Standard and Premium carry an illustrative monthly price, with Premium priced higher', () => {
+    expect(TIER_SPECIFICATIONS.standard.priceUsdPerMonthProvisional).toBeGreaterThan(0)
+    expect(TIER_SPECIFICATIONS.premium.priceUsdPerMonthProvisional).toBeGreaterThan(TIER_SPECIFICATIONS.standard.priceUsdPerMonthProvisional!)
+  })
+
+  it('Enterprise deliberately omits a flat illustrative price (custom-quoted, not researchable in the abstract)', () => {
+    expect(TIER_SPECIFICATIONS.enterprise.priceUsdPerMonthProvisional).toBeUndefined()
+  })
+})
+
 describe('checkEntitlement', () => {
   it('allows a page count within the Standard tier limit', () => {
     const result = checkEntitlement(TIER_SPECIFICATIONS.standard, { kind: 'page_count', requested: 5 })

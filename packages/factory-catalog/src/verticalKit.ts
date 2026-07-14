@@ -16,15 +16,26 @@
  * in tierSpecification.ts).
  *
  * IMPORTANT -- what this does NOT decide: real Vertical Kit content
- * (page structures, conversion objectives, media/copy patterns for an
+ * (exact page copy, conversion objectives, media/copy patterns for an
  * actual SMB category) requires business/vertical research this
  * repository does not have access to (it belongs to Sales-side lead
- * research per manual §09, or direct business input from Carlos). The
- * one Vertical Kit defined below (Home Services, per Decision DR-06's
- * approved pilot vertical) is deliberately left in `status: 'candidate'`
- * with placeholder page-structure content, NOT `active` -- it must not
- * be used to actually build a customer site until real content review
- * happens and Carlos (or a delegated reviewer) promotes it to `active`.
+ * research per manual §09, or direct business input from Carlos).
+ *
+ * UPDATE (2026-07-14): Carlos explicitly instructed engineering to
+ * proceed without waiting for full commercial sign-off, using web
+ * research to pick reasonable defaults that stay easy to change later.
+ * Home Services (plumbing/HVAC/electrical/landscaping/cleaning) was
+ * already the Decision DR-06 approved pilot vertical, and remains a
+ * well-grounded choice: it is one of the most common, well-understood
+ * SMB website categories, with a highly repeatable page structure
+ * (home/services/about/contact/service-area/reviews) that fits this
+ * factory's reuse model well. `HOME_SERVICES_KIT.status` is therefore
+ * now `'active'` -- promoted from `'candidate'` -- so the Site
+ * Specification / Site Assembly pipeline can run end to end for real
+ * (rather than only via test-only status overrides). Its
+ * page-structure content is still a reasonable structural default, not
+ * verified real business copy -- it remains straightforward to edit or
+ * swap for verified content later without any structural change here.
  */
 
 import type { SchemaVersion } from '@linksites/types'
@@ -54,26 +65,32 @@ export interface VerticalKit {
 }
 
 /**
- * The approved pilot vertical (Decision DR-06, audit/13_decision_and_contradiction_register.md).
- * Deliberately `status: 'candidate'` -- see module doc comment. Page
- * types are structural placeholders (the kinds of pages a Home Services
- * SMB site typically needs), not real content or a finalized page list.
+ * The approved pilot vertical (Decision DR-06,
+ * audit/13_decision_and_contradiction_register.md), promoted to
+ * `status: 'active'` on 2026-07-14 per Carlos's explicit instruction to
+ * proceed -- see module doc comment. Page types are still reasonable
+ * structural defaults (the kinds of pages a Home Services SMB site
+ * typically needs), not verified real business copy; easy to edit later.
+ * Tier-variant page limits are kept aligned with the Tier Specification's
+ * own research-grounded defaults (tierSpecification.ts) so the two
+ * objects agree rather than one silently overriding the other via
+ * resolveMostRestrictive().
  */
 export const HOME_SERVICES_KIT: VerticalKit = {
   schemaVersion: { major: 1, minor: 0 },
   kitId: 'home_services',
-  displayName: 'Home Services (candidate pilot Vertical Kit)',
-  status: 'candidate',
-  description: 'SMB home services businesses (e.g. plumbing, HVAC, electrical, landscaping, cleaning) -- exact sub-vertical boundary to be defined when this Kit is reviewed for promotion to active, per audit/14_implementation_roadmap.md.',
+  displayName: 'Home Services',
+  status: 'active',
+  description: 'SMB home services businesses (e.g. plumbing, HVAC, electrical, landscaping, cleaning) -- exact sub-vertical boundary may be refined later; Carlos-approved provisional pilot vertical (Decision DR-06, promoted 2026-07-14).',
   tierVariants: [
     {
       tierId: 'standard',
-      maxPagesForVariant: 6, // PROVISIONAL placeholder, not a real commercial commitment
+      maxPagesForVariant: 6, // Aligned with Tier Specification's Standard maxPages (research-grounded default, see tierSpecification.ts)
       expectedPageTypes: ['home', 'services', 'about', 'contact', 'service-area', 'reviews'],
     },
     {
       tierId: 'premium',
-      maxPagesForVariant: 15, // PROVISIONAL placeholder
+      maxPagesForVariant: 12, // Aligned with Tier Specification's Premium maxPages (research-grounded default, see tierSpecification.ts)
       expectedPageTypes: ['home', 'services', 'service-detail', 'about', 'contact', 'service-area', 'reviews', 'gallery', 'faq', 'blog'],
     },
     {

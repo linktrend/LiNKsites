@@ -15,13 +15,45 @@
  * IMPORTANT -- what this file does NOT decide: the manual explicitly
  * defers final tier names, exact page/feature limits, prices, revision
  * allowances, contract terms, and most other numeric/commercial details
- * as "decisions intentionally still open" (manual §03 closing list). The
- * three tiers and their PROVISIONAL limits below are structural
- * placeholders illustrating the *shape* of a Tier Specification and
- * exercising the enforcement engine -- they are not real commercial
- * commitments and must not be presented to a customer or used to price
- * anything until Carlos approves real values. Every provisional numeric
- * field is marked as such in its own comment.
+ * as "decisions intentionally still open" (manual §03 closing list).
+ *
+ * UPDATE (2026-07-14): Carlos explicitly instructed that engineering
+ * should not wait on final commercial/business decisions, and asked for
+ * quick web research to ground these numbers in realistic small-business
+ * website market norms rather than arbitrary placeholders, on the
+ * explicit understanding that every value below remains trivially
+ * changeable later (a one-line edit here, nothing structural) once real
+ * pricing/scope decisions are made. The page-count and change-allowance
+ * values below are grounded in 2026 small-business website package/
+ * maintenance-plan market research (starter packages: ~5-8 pages;
+ * business/growth packages: ~10-15 pages; maintenance plans: ~2-6
+ * change requests/month at the lower tiers) -- see
+ * `execution/modules/phase3-reusable-asset-factory/issues/phase3-business-defaults-001/ISSUE.md`
+ * for the full research citations. `priceUsdPerMonthProvisional` on each
+ * tier is similarly research-grounded (illustrative market-rate pricing
+ * for a comparable bundled build+hosting+maintenance subscription), but
+ * is explicitly marked as **illustrative only, not an approved price**
+ * -- LiNKtrend's actual cost structure and margins were not researched
+ * (this repository has no access to that), so the real price must still
+ * come from Carlos. These remain structural placeholders illustrating
+ * the *shape* of a Tier Specification and exercising the enforcement
+ * engine -- they are not final commercial commitments and must not be
+ * presented to a customer until Carlos confirms or adjusts them. Every
+ * provisional numeric field is marked as such in its own comment.
+ *
+ * CMS access clarification (2026-07-14, per Carlos): `customerCmsAccess`
+ * models ONLY the CUSTOMER-facing entitlement, never LiNKtrend's own
+ * operational access. At initial launch, EVERY tier (including
+ * Enterprise) is `'none'` -- no customer, of any tier, gets CMS login
+ * access at launch. All content is managed by LiNKtrend staff (human or
+ * agent) logging into the CMS, mostly through automation. This is a
+ * deliberate, uniform launch default, not an oversight for the lower
+ * tiers. `futureCmsAccessCandidate` records which tiers are the more
+ * likely candidates to receive real customer CMS access in a FUTURE
+ * release once that capability is designed and approved -- it does not
+ * change any current behavior, it is a forward-looking data point only,
+ * exactly as Carlos asked ("provide for the future but immediately on
+ * launch clients will have no access to the CMS").
  */
 
 import type { SchemaVersion } from '@linksites/types'
@@ -49,8 +81,22 @@ export interface TierDimensions {
   dedicatedRuntime: boolean
   /** PROVISIONAL placeholder value -- customer-initiated content/design changes allowed per period. */
   changeAllowancePerMonth: number
-  /** Whether the customer may directly edit CMS content vs. change-request-only (manual §03 §8, "CMS access" dimension). */
+  /**
+   * The CUSTOMER-facing CMS entitlement (manual §03 §8, "CMS access"
+   * dimension) -- NOT LiNKtrend staff's own operational access, which
+   * always exists regardless of tier and is not modeled here. At launch
+   * this is `'none'` for every tier per Carlos's explicit instruction
+   * (2026-07-14); see the module-level doc comment.
+   */
   customerCmsAccess: 'none' | 'content_only' | 'full'
+  /**
+   * Forward-looking only (2026-07-14): whether this tier is a plausible
+   * candidate to receive real customer CMS access in a FUTURE release.
+   * Does not grant or change any current entitlement -- purely a
+   * roadmap marker, per Carlos's instruction to "provide for the future"
+   * without turning it on now.
+   */
+  futureCmsAccessCandidate: boolean
   /** Whether unique, non-catalog component coding is permitted in the base product (manual §03 §7.1: "no unique component coding in base product" for Standard). */
   permitsBaseProductCustomCode: boolean
 }
@@ -62,6 +108,16 @@ export interface TierSpecification {
   displayName: string
   status: 'draft' | 'active' | 'deprecated' | 'retired'
   dimensions: TierDimensions
+  /**
+   * Illustrative-only monthly price in USD for a comparable bundled
+   * build+hosting+maintenance subscription, grounded in 2026 market
+   * research (see module-level doc comment). NOT an approved price --
+   * LiNKtrend's real cost structure/margins were not researched and
+   * must come from Carlos. Deliberately optional so a tier can omit it
+   * entirely once real pricing exists and this field is repurposed or
+   * removed.
+   */
+  priceUsdPerMonthProvisional?: number
 }
 
 /**
@@ -86,7 +142,10 @@ export interface EntitlementCheckResult {
 
 /**
  * The three provisional tiers per manual §03 §7. Numeric limits are
- * PROVISIONAL PLACEHOLDERS ONLY -- see the module-level doc comment.
+ * research-grounded PROVISIONAL defaults (Carlos-approved 2026-07-14 to
+ * unblock engineering) -- see the module-level doc comment for sources
+ * and for what remains a placeholder pending Carlos's final commercial
+ * sign-off (pricing).
  */
 export const TIER_SPECIFICATIONS: Record<TierId, TierSpecification> = {
   standard: {
@@ -95,15 +154,17 @@ export const TIER_SPECIFICATIONS: Record<TierId, TierSpecification> = {
     displayName: 'Standard (provisional name)',
     status: 'active',
     dimensions: {
-      maxPages: 8, // PROVISIONAL
+      maxPages: 6, // Research-grounded default: 2026 starter/small-business packages typically span 5-8 pages; 6 sits at the middle of that range.
       allowsCustomComponentCode: false,
       maxAdditionalLocalizationLocales: 0, // PROVISIONAL
       maxAdditionalIntegrations: 0, // PROVISIONAL
       dedicatedRuntime: false,
-      changeAllowancePerMonth: 2, // PROVISIONAL
-      customerCmsAccess: 'none',
+      changeAllowancePerMonth: 2, // Research-grounded default: comparable small-business maintenance plans in this price band typically include a handful of light edits/month.
+      customerCmsAccess: 'none', // Launch default for every tier -- see module-level doc comment.
+      futureCmsAccessCandidate: false,
       permitsBaseProductCustomCode: false,
     },
+    priceUsdPerMonthProvisional: 197, // Illustrative only -- see module-level doc comment. Not an approved price.
   },
   premium: {
     schemaVersion: { major: 1, minor: 0 },
@@ -111,15 +172,17 @@ export const TIER_SPECIFICATIONS: Record<TierId, TierSpecification> = {
     displayName: 'Premium (provisional name)',
     status: 'active',
     dimensions: {
-      maxPages: 20, // PROVISIONAL
+      maxPages: 12, // Research-grounded default: 2026 business/growth-tier packages typically span 10-15 pages; 12 sits at the middle of that range.
       allowsCustomComponentCode: false,
       maxAdditionalLocalizationLocales: 2, // PROVISIONAL
       maxAdditionalIntegrations: 2, // PROVISIONAL
       dedicatedRuntime: false,
-      changeAllowancePerMonth: 6, // PROVISIONAL
-      customerCmsAccess: 'content_only',
+      changeAllowancePerMonth: 6, // Research-grounded default: comparable mid-tier maintenance plans typically include several edits/month, roughly bi-weekly.
+      customerCmsAccess: 'none', // Launch default for every tier -- see module-level doc comment. (Previously modeled as 'content_only' before Carlos's 2026-07-14 clarification.)
+      futureCmsAccessCandidate: true,
       permitsBaseProductCustomCode: false,
     },
+    priceUsdPerMonthProvisional: 497, // Illustrative only -- see module-level doc comment. Not an approved price.
   },
   enterprise: {
     schemaVersion: { major: 1, minor: 0 },
@@ -133,9 +196,11 @@ export const TIER_SPECIFICATIONS: Record<TierId, TierSpecification> = {
       maxAdditionalIntegrations: Number.POSITIVE_INFINITY,
       dedicatedRuntime: true,
       changeAllowancePerMonth: Number.POSITIVE_INFINITY, // still subject to fair-use/exception review, not modeled here
-      customerCmsAccess: 'full',
+      customerCmsAccess: 'none', // Launch default for every tier -- see module-level doc comment. (Previously modeled as 'full' before Carlos's 2026-07-14 clarification.)
+      futureCmsAccessCandidate: true,
       permitsBaseProductCustomCode: false, // still requires separate approval per manual §03 §7.3 even in Enterprise
     },
+    // priceUsdPerMonthProvisional intentionally omitted -- Enterprise is custom-quoted, not a flat rate; not researchable in the abstract.
   },
 }
 
