@@ -143,9 +143,10 @@ export function generateMetaTags(seo: SEOData): Record<string, string> {
     tags['keywords'] = seo.keywords
   }
 
-  if (seo.ogImage) {
-    tags['og:image'] = seo.ogImage
-    tags['twitter:image'] = seo.ogImage
+  const ogImageUrl = readMediaUrl(seo.ogImage)
+  if (ogImageUrl) {
+    tags['og:image'] = ogImageUrl
+    tags['twitter:image'] = ogImageUrl
   }
 
   if (seo.noIndex) {

@@ -15,9 +15,12 @@ LiNKsites/ (repository root)
 │   ├── web-master/        # Primary Next.js template (starting point)
 │   └── web-company/       # Smaller starter template
 ├── packages/              # Shared packages (types, ui, blocks, config, utils)
-├── supabase/              # Supabase migrations, functions, schemas
-└── sites_projects/        # Experiments / older project copies (not the primary path)
+└── supabase/              # Supabase migrations, functions, schemas
 ```
+
+Older experiment/project copies previously under `sites_projects/` have been archived to
+`archive/` (preserved for reference, not part of the active build/workspace) — see
+`archive/old_linktrend-legacy-corporate-site/ARCHIVED.md`.
 
 ## Usage
 

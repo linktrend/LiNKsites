@@ -36,8 +36,9 @@ const cacheSet = (host: string, siteId: string) => {
   tenantCache.set(host, { siteId, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
 };
 
-export const getHostnameFromRequest = (): string => {
-  return normalizeHost(headers().get("host") ?? "");
+export const getHostnameFromRequest = async (): Promise<string> => {
+  const headerList = await headers();
+  return normalizeHost(headerList.get("host") ?? "");
 };
 
 export const resolveSiteIdByHostname = async (hostname: string): Promise<string | null> => {
@@ -78,7 +79,7 @@ export const getSiteIdFromRequest = async (): Promise<string> => {
   if (runtimeConfig.dedicatedSiteId) return runtimeConfig.dedicatedSiteId;
   if (isMockProvider) return runtimeConfig.defaultSiteId || DEFAULT_MOCK_SITE_ID;
 
-  const host = getHostnameFromRequest();
+  const host = await getHostnameFromRequest();
   const resolved = await resolveSiteIdByHostname(host);
   if (resolved) return resolved;
 

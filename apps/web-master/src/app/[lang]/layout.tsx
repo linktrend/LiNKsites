@@ -32,17 +32,18 @@ export default async function LangLayout({
   params,
 }: {
   children: ReactNode;
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }) {
   const theme = await getThemeFromRequest();
   const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const { lang } = await params;
+  const locale = normalizeLocale(lang);
   const [primaryNav, footerNav] = await Promise.all([
     getNavigation({ siteId, locale, key: "primary" }),
     getNavigation({ siteId, locale, key: "footer" }),
   ]);
   const messages = await getMessages();
-  const trafficSource = cookies().get("lsites_source")?.value;
+  const trafficSource = (await cookies()).get("lsites_source")?.value;
 
   return (
     <div data-theme={theme.id} data-lang={locale}>

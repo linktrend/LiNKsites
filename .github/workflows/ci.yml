@@ -12,6 +12,59 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Repository policy checkpoint
-        run: |
-          echo "CI placeholder: add repository-specific build/test commands."
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # apps/web-company is intentionally excluded (Decision DR-02: paused special-case
+      # LiNKtrend-website build, not on the active customer-factory path; it also has no
+      # eslint devDependency installed, so a lint run would fail for unrelated reasons).
+      - name: Lint (cms, web-master)
+        run: pnpm exec turbo run lint --filter=@linksites/cms --filter=@linksites/web-master
+
+      # GAP-45 (cookies()/headers()/params() -> async, Next.js 14->16 App Router migration) is
+      # now fixed -- `tsc --noEmit` passes for apps/web-master. web-master is re-included below.
+      - name: Typecheck (all workspaces)
+        run: pnpm run typecheck
+
+      # GAP-46 is now fixed: apps/web-master and apps/web-company were upgraded to React 19.1.0
+      # to match Next.js 16.2.2's generated route types, resolving the React 18/19 @types/react
+      # mismatch. `next build` now succeeds for both apps and is verified below.
+      - name: Build (web-master)
+        run: pnpm --filter @linksites/web-master run build
+
+      - name: Build (web-company)
+        run: pnpm --filter @linksites/web-company run build
+
+      # GAP-43 is now fixed: apps/cms's Vitest suite was failing to resolve "@/..." path
+      # aliases because vite-tsconfig-paths discovers every tsconfig in the pnpm workspace and
+      # could match the wrong one (e.g. the now-archived old_linktrend app's unrelated tsconfig) for
+      # files under tests/**, which apps/cms's own tsconfig.json intentionally excludes from
+      # its `include`. Fixed via a dedicated tsconfig.vitest.json + a scoped `projects` option.
+      - name: CMS unit/contract tests
+        run: pnpm --filter @linksites/cms run test:int
+
+      # Phase 2 foundation (audit/14_implementation_roadmap.md): the Program Ledger's
+      # exit-gate contract tests (manual §62 -- duplicate dispatch, worker crash/lease
+      # reclaim, timeout/retry, cancellation, replay, Gate authority, traceability), run
+      # against BOTH the in-memory store and a real embedded Postgres engine
+      # (@electric-sql/pglite) exercising supabase/migrations/20260714_000001_program_ledger_core.sql
+      # -- no live database connection is required or used.
+      - name: Program Ledger tests (in-memory + pglite-backed Postgres)
+        run: pnpm --filter @linksites/program-ledger run test
+
+      # Phase 3 (reusable asset factory, audit/14_implementation_roadmap.md): Tier
+      # Specification entitlement-enforcement engine (manual §08.16).
+      - name: Factory Catalog tests
+        run: pnpm --filter @linksites/factory-catalog run test

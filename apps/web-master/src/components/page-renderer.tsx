@@ -658,7 +658,7 @@ const TrustFeedSection = ({ block }: { block: TrustFeedBlock }) => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">"{review.quote ?? ""}"</p>
+                <p className="text-sm text-muted-foreground">&ldquo;{review.quote ?? ""}&rdquo;</p>
                 {review.url ? (
                   <a className="mt-2 inline-flex text-xs text-primary hover:underline" href={review.url}>
                     View source
