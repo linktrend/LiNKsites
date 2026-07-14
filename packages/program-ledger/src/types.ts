@@ -22,9 +22,11 @@
  * separate, later work packets — see audit/14_implementation_roadmap.md.
  */
 
-export const SCHEMA_VERSION = { major: 1, minor: 0 } as const
+import type { SchemaVersion } from '@linksites/types'
 
-export type SchemaVersion = { major: number; minor: number }
+export const SCHEMA_VERSION: SchemaVersion = { major: 1, minor: 0 }
+
+export type { SchemaVersion }
 
 /** Manual §20 §15: Issue lifecycle states (subset — draft/blocked/dependency-DAG
  * evaluation is deferred; Issues in this slice start at `ready`). */

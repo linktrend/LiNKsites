@@ -63,3 +63,8 @@ jobs:
       # -- no live database connection is required or used.
       - name: Program Ledger tests (in-memory + pglite-backed Postgres)
         run: pnpm --filter @linksites/program-ledger run test
+
+      # Phase 3 (reusable asset factory, audit/14_implementation_roadmap.md): Tier
+      # Specification entitlement-enforcement engine (manual §08.16).
+      - name: Factory Catalog tests
+        run: pnpm --filter @linksites/factory-catalog run test
