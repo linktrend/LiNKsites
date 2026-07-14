@@ -105,8 +105,16 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
 | #56 | `dev/blackcursor/phase3-prospect-adaptation` | Prospect Adaptation record, reservation-matching guard, close-or-recycle lifecycle (Phase 3) | #55 |
 | #57 | `dev/blackcursor/phase3-ledger-executor-integration` | SiteSpecificationExecutor: first real connection between Program Ledger and factory-catalog (Phase 2/3) | #56 |
 
-All PRs are drafts. None have been merged. Recommend merging #36 and #37 first (independent of
-the rest), then #38 through #57 in order (each depends on the previous).
+**Merge status update (2026-07-14):** Carlos explicitly authorized merging this entire stack.
+PRs #36, #37, and #38-#57 (26 commits total) were merged into `development` via three
+consolidated merge commits (`40635f9`, `eb74011`, `e75f102`), each preceded by a full local
+re-verification (lint, workspace-wide typecheck, both frontend builds, CMS integration tests,
+Program Ledger tests, factory-catalog tests) against the merge result before pushing. PRs #39-#57
+were closed with an explanatory comment rather than merged individually via GitHub, since their
+content landed via the consolidated commit instead. #36-#38 auto-closed. A follow-up batch (below)
+then added GAP-04 (Promotion Service / Site Assembly Engine) directly on top and was merged the
+same way (`2518e9b`). **`development` is now the authoritative branch for all of this session's
+work; none of it is only sitting in a draft PR anymore.**
 
 ## Seventh work batch (2026-07-14) — continuous execution, completing the Phase 3 reusable-asset trio
 
@@ -166,6 +174,54 @@ in `packages/factory-catalog`:
   are still in-memory (naturally swappable for Supabase-backed lookups once live infrastructure is
   verified, GAP-50) — this proves the *wiring* is correct, not that it runs against production data
   yet.
+
+## Eighth work batch (2026-07-14) — merge the full stack into `development`, then close GAP-04
+
+Carlos explicitly authorized clearing and merging the entire open PR stack, and directed that
+engineering continue on **(b) the larger-scope Promotion Service / Site Assembly Engine (GAP-04)**
+rather than waiting on commercial/business decisions (tier pricing, real vertical content, real
+visual brand) — those decisions are correctly deferred; they do not block engineering, only the
+first real paying customer.
+
+**Merge:** the full PR stack (#36-#57, 26 commits) was merged into `development` in three
+consolidated, fully-reverified merge commits (see "Merge status update" above). All 22 open PRs from
+this session are now closed; their content lives in `development`, not in draft branches.
+
+**GAP-04 build, using two parallel subagents plus this session's own integration work:**
+
+- **Subagent A** built `packages/factory-catalog/src/siteAssemblyManifest.ts`: `assembleSiteManifest()`
+  deterministically resolves a Site Specification + optional Prospect Adaptation into an ordered
+  page/section plan (manual §07's Site Assembly Manifest), delegating Kit-lifecycle and
+  component-tier-eligibility checks to the existing guards rather than duplicating them. Determinism
+  (manual §07.14) is directly tested: two calls with identical inputs produce byte-identical `pages`
+  arrays. 8 new tests.
+- **Subagent B** built `packages/factory-catalog/src/promotionService.ts`: `PromotionService.promote()`
+  implements manual §12's Promotion Service — the only trusted path from a Supabase working package
+  to a Payload **draft** (never published). Implements the manual's specific idempotency invariant
+  (same idempotency key + same package checksum = safe no-op retry; same key + different checksum =
+  rejected contract conflict) and mandatory readback verification (a write that "succeeds" but fails
+  readback is recorded as failed, not succeeded). 8 new tests, including one that specifically proves
+  a naive "write succeeded = done" implementation would be caught.
+- Both subagents worked from an identical, precisely-pinned interface contract specified up front, so
+  their independently-built branches merged into one consolidated branch with zero conflicts beyond
+  one clean auto-merge in a shared `index.ts` export list.
+- **This session then built the ledger wiring itself** (not delegated): `SiteAssemblyExecutor` and
+  `PromotionExecutor`, extending the same `ExecutorAdapter` pattern proven by
+  `SiteSpecificationExecutor` (PR #57) to both new objects — real, ledger-driven, end-to-end execution
+  paths, not just standalone unit-tested functions. 8 new tests, including one proving the
+  `PromotionExecutor`'s shared `PromotionService` instance's idempotency guarantee survives being
+  driven through the Program Ledger (the underlying write call count does not increase on a repeated
+  invocation with the same idempotency key).
+- `packages/factory-catalog` grew from 90 to **114 passing tests** across this batch (8 + 8 + 8 new);
+  `packages/program-ledger`'s own 36 remained unaffected; full CI-equivalent verification (lint,
+  workspace-wide typecheck, both frontend builds, CMS integration tests) re-run and green before
+  merging into `development`.
+- **What GAP-04 still lacks:** a real `PayloadDraftTarget` implementation backed by live
+  Payload/Postgres — this still requires live infrastructure not available in this environment
+  (GAP-50); today's tests use a fully controllable in-memory test double. Also still absent: automatic
+  pipeline chaining (Site Specification → Site Assembly → Promotion as one flow — each remains an
+  independently dispatchable Issue type today) and publication (draft → published), which is
+  intentionally out of scope for the Promotion Service per the manual's own layering doctrine.
 
 ## Sixth work batch (2026-07-14) — continuous execution into Phase 3 (Decision DR-08)
 
@@ -309,31 +365,35 @@ the next session, in the order listed in the Phase 2 section below.
   minimal cost-event hook into this ledger would be reasonable to add early). Phase 2 is not
   fully closable until a live Postgres store and at least one real executor exist.
 
-## Phase 3 — Reusable asset and assembly foundation — **core object set built (7 of 7 objects real, tested code; Promotion Service / Site Assembly Engine still absent)**
+## Phase 3 — Reusable asset and assembly foundation — **all named objects + GAP-04 built as real, tested code; only live-infrastructure-dependent pieces remain**
 
 - Tier Specification (GAP-12), Vertical Kit (GAP-11), Reusable Site Foundation (GAP-13), Design
   Intelligence Catalog token hierarchy (GAP-09/10), Component Registry (GAP-07), Site Specification
-  (the per-site integration resolver), and Prospect Adaptation (the manual §09-§10 prospect content
-  overlay + close-or-recycle lifecycle) are now all real, tested machine objects in
-  `packages/factory-catalog` (85 passing tests as of PRs #50-#56). All still carry
+  (the per-site integration resolver), Prospect Adaptation (the manual §09-§10 prospect content
+  overlay + close-or-recycle lifecycle), Site Assembly Manifest (manual §07 deterministic assembly),
+  and Promotion Service (manual §12 Supabase-working-to-Payload-draft) are all now real, tested
+  machine objects in `packages/factory-catalog` (114 passing tests). All still carry
   provisional/placeholder content where the manual defers real values (tier limits, the one seeded
   Vertical Kit candidate, the one seeded StyleFamily) or where an upstream source this repository
   cannot reach was named (`ui-ux-pro-max-skill`).
 - `apps/web-master/docs/components/index.json` and `tokens.css` remain the real underlying seeds;
   they were read from (component IDs/paths verified against `index.json`) rather than replaced.
-- A first real executor (`SiteSpecificationExecutor`, PR #57) now connects the Program Ledger to
-  this object model end to end — a real Issue dispatched through the ledger actually resolves a Site
-  Specification and traces a full event history, closing the "ledger not connected to real work" gap
-  this same roadmap flagged under Phase 2.
-- Still absent: the **Promotion Service** (Supabase working → Payload draft, GAP-04) and a real
-  **Site Assembly Engine** that turns a resolved Site Specification + Prospect Adaptation into an
-  actual rendered site. This phase's exit gate ("deterministic assembly produces valid sites from
-  versioned specifications") is not yet fully reachable — the object model, cross-object
-  validation, and a real ledger-to-executor wiring pattern are now proven; the machinery that would
-  assemble an actual site from that resolved specification is not.
+- Three real executors (`SiteSpecificationExecutor`, `SiteAssemblyExecutor`, `PromotionExecutor`) now
+  connect the Program Ledger to this entire object model end to end — a real Issue dispatched through
+  the ledger actually resolves a Site Specification, assembles a Site Assembly Manifest, or promotes
+  a working package into Payload drafts, tracing a full event history for each, closing the "ledger
+  not connected to real work" gap this same roadmap flagged under Phase 2.
+- **GAP-04 (Promotion Service / Site Assembly Engine) is closed at the code-object and
+  ledger-integration level.** What remains before this phase's exit gate ("deterministic assembly
+  produces valid sites from versioned specifications") is fully, literally met in production:
+  (a) a real `PayloadDraftTarget` backed by live Payload/Postgres — needs live infrastructure not
+  available in this environment (GAP-50); today's tests use a controllable in-memory test double; and
+  (b) automatic pipeline chaining across the three executors (Site Specification → Site Assembly →
+  Promotion as one flow) — each is independently dispatchable today, not yet auto-sequenced.
 - Also still absent: a real Preview Inventory / matching engine (GAP-16) to decide which new lead an
   archived-and-recycled Foundation should be re-offered to; `archiveAndRecycleFoundation()` performs
-  only the reservation-release side effect, not re-matching.
+  only the reservation-release side effect, not re-matching. Publication (Payload draft → published)
+  also remains a separate, later, intentionally out-of-scope authority.
 
 ## Phase 4 — Build-first preview path — **not started**
 

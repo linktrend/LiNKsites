@@ -10,14 +10,18 @@
 > Decision DR-02), a real Program Ledger (Issue/Run/Gate/Event core, Postgres-backed, hierarchy +
 > executor registry) exists and is tested, and all 7 of the manual's named Phase 3 reusable-asset
 > objects (Vertical Kit, Tier Specification, Reusable Site Foundation, Design Intelligence Catalog,
-> Component Registry, Site Specification, Prospect Adaptation) are now real, tested code (90 passing
-> tests in `packages/factory-catalog`), and a real executor (`SiteSpecificationExecutor`) now
-> connects the Program Ledger to this factory work end to end for the first time. See
-> `audit/14_implementation_roadmap.md`'s "Sixth", "Seventh", and "Eighth" work batches for the full
-> detail. The items below describing what's still missing remain accurate for what they describe
-> (payment/Odoo integration, monitoring/backups, live-Postgres verification, and the Promotion
-> Service/Site Assembly Engine that would actually execute against these new objects in production)
-> — this addendum only updates what has since changed, it does not re-litigate the rest of the
+> Component Registry, Site Specification, Prospect Adaptation, Site Assembly Manifest, and Promotion
+> Service) are now real, tested code (114 passing tests in `packages/factory-catalog`), and three real
+> executors (`SiteSpecificationExecutor`, `SiteAssemblyExecutor`, `PromotionExecutor`) now connect the
+> Program Ledger to this factory work end to end. **You explicitly authorized merging the entire PR
+> stack from this session, and it is now merged into `development`** (not sitting in draft PRs) after
+> a full re-verification. GAP-04 (Promotion Service / Site Assembly Engine) is now closed at the
+> code-object and ledger-integration level, built partly using parallel subagents against precisely
+> pinned interface contracts. See `audit/14_implementation_roadmap.md`'s "Sixth" through "Eighth" work
+> batches for the full detail. The items below describing what's still missing remain accurate for
+> what they describe (payment/Odoo integration, monitoring/backups, and a real Payload-backed
+> connection for the Promotion Service, which needs live infrastructure not available in this
+> environment, GAP-50) — this addendum only updates what has since changed, it does not re-litigate the rest of the
 > original summary.
 
 ## What I did
