@@ -29,7 +29,7 @@ optional_fields:
   risk_summary:
     - "GAP-50: live-infrastructure verification is blocked while working remotely; pglite testing is real but not equivalent to live verification."
   notes:
-    - "Issues completed so far: phase2-ledger-core (PR #47), phase2-postgres-store (PR #48), phase2-ledger-review-bugfix-001 (this session's bug-fix pass)."
+    - "Issues completed so far: phase2-ledger-core (PR #47), phase2-postgres-store (PR #48), phase2-ledger-review-bugfix-001, phase2-program-hierarchy-001, phase2-executor-registry-001 (all review_ready as of this session)."
 ---
 
 # Module
@@ -85,6 +85,17 @@ Module review is mandatory before this module should be treated as complete. Thi
 
 Read next:
 
-1. `execution/modules/phase2-program-ledger/issues/phase2-ledger-review-bugfix-001/ISSUE.md`
+1. `execution/modules/phase2-program-ledger/issues/phase2-executor-registry-001/ISSUE.md` (most recent Issue)
 2. its `PROOF.md`
 3. `execution/PROGRAM.md` again only if module-level constraints are ambiguous
+
+## Remaining Phase 2 Scope (not yet started)
+
+- A real (non-synthetic) executor connecting this ledger to `apps/cms`/Supabase/an AI model --
+  requires live infrastructure.
+- Live Postgres/Supabase verification of the store (GAP-50) -- requires live infrastructure.
+- Full dependency DAG, model-routing ladder, compensation Sagas, cross-Program outbox/inbox.
+- A production scheduler/runner loop (runIssueOnce() is single-shot/synchronous today).
+
+Once these are addressed (or explicitly deferred with Carlos's sign-off), Phase 2 can move to
+`done` and Phase 3 (reusable asset factory) becomes the active module.

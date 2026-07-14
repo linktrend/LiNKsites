@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { createHash } from 'node:crypto'
 import type { LedgerStore } from './store.js'
+import type { HierarchyRegistry } from './hierarchy.js'
 import {
   SCHEMA_VERSION,
   deriveIdempotencyKey,
@@ -57,7 +58,18 @@ function digestInput(input: Record<string, unknown>): string {
  * tests and the Postgres-backed store in production.
  */
 export class ProgramLedger {
-  constructor(private readonly store: LedgerStore) {}
+  /**
+   * `hierarchy` is optional and opt-in (Issue phase2-program-hierarchy-001):
+   * when provided, `createIssue()` validates `programRef`/`moduleRef`/
+   * `stageRef` against a real, known Program/Module/Stage registry
+   * (see hierarchy.ts) instead of accepting any opaque string. Omitting
+   * it preserves the original behavior for callers/tests that don't yet
+   * need hierarchy validation.
+   */
+  constructor(
+    private readonly store: LedgerStore,
+    private readonly hierarchy?: HierarchyRegistry,
+  ) {}
 
   private async emit(
     issueId: string,
@@ -77,7 +89,20 @@ export class ProgramLedger {
     await this.store.appendEvent(event)
   }
 
+  /** Public read access to an Issue's current state -- used by executor drivers (executor.ts) and callers that need to inspect state without mutating it. */
+  async getIssue(issueId: string): Promise<Issue | null> {
+    return this.store.getIssue(issueId)
+  }
+
+  /** Public read access to a Run's current state, mirroring getIssue(). */
+  async getRun(runId: string): Promise<Run | null> {
+    return this.store.getRun(runId)
+  }
+
   async createIssue(input: CreateIssueInput): Promise<Issue> {
+    if (this.hierarchy) {
+      this.hierarchy.assertValidRefs(input.programRef, input.moduleRef, input.stageRef)
+    }
     const inputDigest = digestInput(input.input)
     const issue: Issue = {
       schemaVersion: SCHEMA_VERSION,
