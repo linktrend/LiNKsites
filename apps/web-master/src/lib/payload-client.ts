@@ -2,7 +2,7 @@ import { runtimeConfig } from "@/config/runtime";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const isMockProvider = (process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "mock") !== "payload";
+const isMockProvider = (process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "payload") !== "payload";
 
 type MockPayloadData = {
   site?: { id?: string };
