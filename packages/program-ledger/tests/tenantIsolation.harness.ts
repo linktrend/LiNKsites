@@ -55,6 +55,10 @@ function resolvePlatformFoundationSql(): string {
 }
 
 const lsitesSitesCoreSql = resolve(__dirname, '../../../supabase/migrations/20260715_000001_lsites_sites_core.sql')
+const lsitesSitesRlsHardeningSql = resolve(
+  __dirname,
+  '../../../supabase/migrations/20260715_000002_lsites_sites_rls_hardening.sql',
+)
 
 /**
  * dbmate-style migration files carry both an up and a down section. We only
@@ -82,7 +86,11 @@ export const IDS = {
   USER_STRANGER: '10000000-0000-0000-0000-0000000000ff',
   SITE_A: '20000000-0000-0000-0000-0000000000aa',
   SITE_B: '20000000-0000-0000-0000-0000000000bb',
-  /** A site row with `org_id IS NULL` (global-looking). See finding F2. */
+  /**
+   * Id used ONLY by the repurposed V5 vector to attempt (and prove rejected) a
+   * NULL-org site insert. No such row is seeded -- after migration
+   * 20260715_000002, `org_id` is NOT NULL, so this row cannot exist. See F2.
+   */
   SITE_GLOBAL: '20000000-0000-0000-0000-0000000000cc',
   PAGE_A: '30000000-0000-0000-0000-0000000000aa',
   PAGE_B: '30000000-0000-0000-0000-0000000000bb',
@@ -156,6 +164,9 @@ export async function createIsolationHarness(): Promise<IsolationHarness> {
 
   await db.exec(upSection(readFileSync(resolvePlatformFoundationSql(), 'utf8')))
   await db.exec(upSection(readFileSync(lsitesSitesCoreSql, 'utf8')))
+  // Applied on top of 000001, exactly as the Principal will apply it in the
+  // Supabase SQL Editor. This is the migration under test for F1/F2.
+  await db.exec(upSection(readFileSync(lsitesSitesRlsHardeningSql, 'utf8')))
 
   // Seed as superuser (RLS is bypassed for the bootstrap superuser), so the
   // fixture is established independent of the policies we are testing.
@@ -178,12 +189,15 @@ export async function createIsolationHarness(): Promise<IsolationHarness> {
       IDS.ORG_B, IDS.USER_B_REVOKED,
     ],
   )
+  // Note: no org_id-null "global" site is seeded any more. After the
+  // 20260715_000002 hardening migration, lsites_sites.sites.org_id is NOT
+  // NULL, so such a row cannot exist. V5 now proves the constraint rejects it
+  // (see IDS.SITE_GLOBAL and the repurposed V5 vector in the spec).
   await db.query(
     `insert into lsites_sites.sites (id, org_id, name, default_locale) values
-       ($1, $2,   'Site A', 'en'),
-       ($3, $4,   'Site B', 'en'),
-       ($5, null, 'Global', 'en')`,
-    [IDS.SITE_A, IDS.ORG_A, IDS.SITE_B, IDS.ORG_B, IDS.SITE_GLOBAL],
+       ($1, $2, 'Site A', 'en'),
+       ($3, $4, 'Site B', 'en')`,
+    [IDS.SITE_A, IDS.ORG_A, IDS.SITE_B, IDS.ORG_B],
   )
   await db.query(
     `insert into lsites_sites.pages (id, site_id, locale, slug, title) values

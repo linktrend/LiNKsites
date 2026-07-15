@@ -16,7 +16,7 @@ import {
  * requires a >=10-vector cross-tenant isolation matrix and treats a suite of
  * only positive/successful paths as explicitly incomplete evidence.
  *
- * These tests run the two REAL migrations that define the tenant boundary
+ * These tests run the three REAL migrations that define the tenant boundary
  * against an embedded PostgreSQL 16 engine (@electric-sql/pglite -- not a
  * mock), so RLS, role, and SECURITY DEFINER semantics are genuinely
  * exercised (see tenantIsolation.harness.ts). Each vector asserts BOTH:
@@ -27,30 +27,41 @@ import {
  * The pairing is deliberate: it proves ISOLATION holds, not merely that
  * "everything fails".
  *
- * The tenant boundary under test (from
- * supabase/migrations/20260715_000001_lsites_sites_core.sql) is, for every
- * table, an OR of three independent checks:
- *   1. id/site_id::text = current_setting('app.site_id')   -- fast-path GUC
- *   2. (sites.)org_id IS NULL                              -- "global" escape
- *   3. platform.has_org_access(org_id, 'client_viewer')    -- real membership
- * Any one passing grants access. Checks 1 and 2 are the source of findings
- * F1 and F2 below.
+ * The tenant boundary under test is defined by
+ * supabase/migrations/20260715_000001_lsites_sites_core.sql AND its hardening
+ * follow-up 20260715_000002_lsites_sites_rls_hardening.sql (which closes F1
+ * and F2 below). After hardening, for every table the policy is:
+ *   ( id/site_id::text = current_setting('app.site_id')      -- fast-path GUC
+ *       AND platform.has_org_access(org_id, 'client_viewer') )  -- gated by
+ *   OR  platform.has_org_access(org_id, 'client_viewer')      -- membership
+ * i.e. membership is required on EVERY path; the app.site_id GUC no longer
+ * grants anything on its own, and there is no `org_id IS NULL` escape (org_id
+ * is now NOT NULL). Access reduces to "is the caller a member of the owning
+ * org?", with the site_id clause retained only to document the (now-gated)
+ * fast-path scoping convenience.
  *
  * FINDINGS surfaced by this matrix (documented, not papered over):
- *   F1 (V3): The `app.site_id` fast-path is an UNCONDITIONAL grant keyed only
- *       on a session variable. A principal who can set `app.site_id` to a
- *       victim site's id reads/writes that site's data regardless of org
- *       membership (proven by V3's `forged app.site_id` case). This is
- *       by-design as a "trusted server-set scoping convenience", but it means
- *       cross-tenant isolation depends ENTIRELY on `app.site_id` being set by
- *       trusted server code from the resolved hostname and NEVER influenced by
- *       client input. RLS provides no defense-in-depth against a forged
- *       `app.site_id`.
- *   F2 (V5): A `sites` row with `org_id IS NULL` is visible (and writable per
- *       WITH CHECK) to EVERY principal, including one with no membership at
- *       all. `org_id` is nullable "until backfilled" per the migration; any
- *       production row left null is exposed cross-tenant. Backfill + a NOT
- *       NULL constraint are required before real customer data is loaded.
+ *   F1 (V3): RESOLVED by 20260715_000002_lsites_sites_rls_hardening.sql. The
+ *       `app.site_id` fast-path used to be an UNCONDITIONAL grant keyed only
+ *       on a session variable: a principal who could set `app.site_id` to a
+ *       victim site's id read/wrote that site's data regardless of org
+ *       membership. The hardening migration ANDs the site_id match with
+ *       `platform.has_org_access(org_id, 'client_viewer')`, so a forged
+ *       `app.site_id` now grants nothing without genuine membership. V3 asserts
+ *       the forgery FAILS. (Consequence: the anonymous public-render path that
+ *       relied on app.site_id alone with no authenticated user is also closed
+ *       at the RLS layer -- see V12 -- because RLS cannot distinguish a
+ *       server-set from a client-forged GUC. Public rendering must serve from
+ *       cache or via a membership-bearing/context, not an unauthenticated
+ *       app.site_id.)
+ *   F2 (V5): RESOLVED by 20260715_000002_lsites_sites_rls_hardening.sql. A
+ *       `sites` row with `org_id IS NULL` used to be visible/writable to EVERY
+ *       principal. The hardening migration sets `org_id` NOT NULL (no backfill
+ *       needed -- Principal-confirmed zero real rows in linkplatform-stage/
+ *       -prod as of 2026-07-15) and removes every `org_id IS NULL` bypass
+ *       clause from the policies. V5 now proves the NOT NULL constraint itself
+ *       rejects an attempted NULL-org insert (a schema-level guarantee that
+ *       supersedes the old runtime check).
  *   F3 (V10): These policies target the service role `svc_linksites_runtime`
  *       exclusively. There is no Supabase `authenticated`/`anon` role wired
  *       into any lsites_sites policy, so there is no DIRECT end-user path to
@@ -127,18 +138,19 @@ describe('Tenant isolation negative matrix (lsites_sites + platform RLS)', () =>
       ])
       expect(res.rows).toHaveLength(1)
     })
-    it('FINDING F1: a FORGED app.site_id equal to a victim site id BYPASSES membership (fast-path is an unconditional grant)', async () => {
+    it('F1 RESOLVED (20260715_000002): a FORGED app.site_id equal to a victim site id no longer bypasses membership (0 rows)', async () => {
       // A principal with NO membership in Org B, forging app.site_id = Site B,
-      // reads Site B and its child rows. This documents that isolation depends
-      // entirely on app.site_id being server-controlled, never client-settable.
+      // now reads NOTHING: the hardening migration ANDs the site_id fast-path
+      // with platform.has_org_access(), so the GUC grants nothing on its own.
+      // This is the exploit from the original F1 finding, now closed.
       const site = await h.asRuntime(IDS.USER_STRANGER, IDS.SITE_B, 'select id from lsites_sites.sites where id = $1', [
         IDS.SITE_B,
       ])
-      expect(site.rows).toHaveLength(1)
+      expect(site.rows).toHaveLength(0)
       const page = await h.asRuntime(IDS.USER_STRANGER, IDS.SITE_B, 'select id from lsites_sites.pages where id = $1', [
         IDS.PAGE_B,
       ])
-      expect(page.rows).toHaveLength(1)
+      expect(page.rows).toHaveLength(0)
     })
   })
 
@@ -163,19 +175,26 @@ describe('Tenant isolation negative matrix (lsites_sites + platform RLS)', () =>
   })
 
   // V5 -----------------------------------------------------------------
-  describe('V5: NULL org_id (global-looking) row visibility', () => {
+  describe('V5: NULL org_id is now impossible at the schema level (F2 RESOLVED)', () => {
     it('DENIES a stranger reading a POPULATED (non-null org) site (isolation holds, 0 rows)', async () => {
       const res = await h.asRuntime(IDS.USER_STRANGER, null, 'select id from lsites_sites.sites where id = $1', [
         IDS.SITE_B,
       ])
       expect(res.rows).toHaveLength(0)
     })
-    it('FINDING F2: a stranger with NO membership CAN read a site whose org_id IS NULL (global cross-tenant visibility)', async () => {
-      const res = await h.asRuntime(IDS.USER_STRANGER, null, 'select id, org_id from lsites_sites.sites where id = $1', [
-        IDS.SITE_GLOBAL,
-      ])
-      expect(res.rows).toHaveLength(1)
-      expect(res.rows[0]?.org_id).toBeNull()
+    it('F2 RESOLVED (20260715_000002): the NOT NULL constraint rejects an attempted NULL-org site insert (no global row can exist)', async () => {
+      // Repurposed from the old F2 finding (a null-org row being globally
+      // readable). The gap is now closed by a schema-level guarantee rather
+      // than a runtime RLS check: a NULL org_id can never be persisted, so the
+      // global-visibility path it enabled cannot arise. We assert the invariant
+      // directly (superuser insert bypasses RLS but NOT the NOT NULL column
+      // constraint).
+      await expect(
+        h.seedAsSuperuser(
+          "insert into lsites_sites.sites (id, org_id, name, default_locale) values ($1, null, 'Global', 'en')",
+          [IDS.SITE_GLOBAL],
+        ),
+      ).rejects.toThrow(/null value in column "org_id"|not-null|violates not-null/i)
     })
   })
 
@@ -343,16 +362,33 @@ describe('Tenant isolation negative matrix (lsites_sites + platform RLS)', () =>
   })
 
   // V12 ----------------------------------------------------------------
-  describe('V12: unauthenticated principal (auth.uid() null) with no app.site_id', () => {
+  describe('V12: unauthenticated principal (auth.uid() null), with or without app.site_id', () => {
     it('DENIES an unauthenticated, unscoped session any populated-org rows (0 rows)', async () => {
       const a = await h.asRuntime(null, null, 'select id from lsites_sites.sites where id = $1', [IDS.SITE_A])
       const b = await h.asRuntime(null, null, 'select id from lsites_sites.sites where id = $1', [IDS.SITE_B])
       expect(a.rows).toHaveLength(0)
       expect(b.rows).toHaveLength(0)
     })
-    it('ALLOWS the legitimate public-render path: no user, but a trusted server-set app.site_id scopes to exactly that one site (1 row)', async () => {
+    it('DENIES the app.site_id-only path with no authenticated user (0 rows) -- consequence of the F1 hardening', async () => {
+      // Before 20260715_000002, an unauthenticated session with a server-set
+      // app.site_id read exactly that one site (the "public-render
+      // convenience"). That path is the SAME mechanism the F1 forgery exploited
+      // -- RLS cannot tell a server-set GUC from a client-forged one -- so
+      // closing F1 necessarily closes it. Membership is now required, and an
+      // anonymous session has none. Public rendering must serve from cache or a
+      // membership-bearing context, not an unauthenticated app.site_id.
       const own = await h.asRuntime(null, IDS.SITE_A, 'select id from lsites_sites.sites where id = $1', [IDS.SITE_A])
       const other = await h.asRuntime(null, IDS.SITE_A, 'select id from lsites_sites.sites where id = $1', [IDS.SITE_B])
+      expect(own.rows).toHaveLength(0)
+      expect(other.rows).toHaveLength(0)
+    })
+    it('ALLOWS a genuine member with a matching app.site_id its own site, and still denies another org\'s (positive pairing, 1 row / 0 rows)', async () => {
+      const own = await h.asRuntime(IDS.USER_A_VIEWER, IDS.SITE_A, 'select id from lsites_sites.sites where id = $1', [
+        IDS.SITE_A,
+      ])
+      const other = await h.asRuntime(IDS.USER_A_VIEWER, IDS.SITE_A, 'select id from lsites_sites.sites where id = $1', [
+        IDS.SITE_B,
+      ])
       expect(own.rows).toHaveLength(1)
       expect(other.rows).toHaveLength(0)
     })
