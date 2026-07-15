@@ -3,6 +3,7 @@ import type {
   IdempotencyRecord,
   IdempotencyState,
   Issue,
+  IssueDependency,
   IssueState,
   LedgerEvent,
   LedgerEventType,
@@ -385,5 +386,31 @@ export class PostgresLedgerStore implements LedgerStore {
       [nowIso],
     )
     return rows.map(toRun)
+  }
+
+  async addIssueDependency(dep: IssueDependency): Promise<void> {
+    await this.db.query(
+      `insert into lsites_ledger.issue_dependencies (issue_id, depends_on_issue_id, created_at)
+       values ($1, $2, $3)
+       on conflict (issue_id, depends_on_issue_id) do nothing`,
+      [dep.issueId, dep.dependsOnIssueId, dep.createdAt],
+    )
+  }
+
+  async getIssueDependencies(issueId: string): Promise<IssueDependency[]> {
+    try {
+      const { rows } = await this.db.query(
+        'select issue_id, depends_on_issue_id, created_at from lsites_ledger.issue_dependencies where issue_id = $1',
+        [issueId],
+      )
+      return rows.map((row) => ({
+        issueId: String(row.issue_id),
+        dependsOnIssueId: String(row.depends_on_issue_id),
+        createdAt: new Date(row.created_at as string).toISOString(),
+      }))
+    } catch (error) {
+      if (isInvalidInputSyntaxError(error)) return []
+      throw error
+    }
   }
 }

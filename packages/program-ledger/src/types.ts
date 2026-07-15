@@ -195,3 +195,22 @@ export interface IdempotencyRecord {
 export function deriveIdempotencyKey(issue: Pick<Issue, 'issueType' | 'programRef' | 'inputDigest'>): string {
   return `${issue.issueType}:${issue.programRef}:${issue.inputDigest}:v${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor}`
 }
+
+/**
+ * Declares that `issueId` cannot be dispatched until `dependsOnIssueId`
+ * has reached `completed` state (i.e. its Gate was accepted).
+ *
+ * Stored as a separate join record — not as an array column on `Issue` —
+ * so the database can enforce both FKs (both issue IDs must exist) and
+ * the relationship is queryable without array unnesting. This mirrors the
+ * shape used by `runs`, `gate_results`, and `idempotency_records`, which
+ * all reference `issues` via FK join records rather than embedding state
+ * directly on the Issue row.
+ */
+export interface IssueDependency {
+  /** The Issue that is blocked until its dependency completes. */
+  issueId: string
+  /** The Issue that must reach `completed` state before `issueId` can be dispatched. */
+  dependsOnIssueId: string
+  createdAt: string
+}
