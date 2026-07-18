@@ -26,6 +26,10 @@ const depsMigrationPath = resolve(
   __dirname,
   '../../../supabase/migrations/20260715_000003_lsites_ledger_dependencies.sql',
 )
+const capabilityColumnsPath = resolve(
+  __dirname,
+  '../../../supabase/migrations/20260718_000002_capability_grant_columns.sql',
+)
 
 let db: PGlite
 
@@ -33,6 +37,7 @@ beforeAll(async () => {
   db = new PGlite()
   await db.exec(readFileSync(coreMigrationPath, 'utf8'))
   await db.exec(readFileSync(depsMigrationPath, 'utf8'))
+  await db.exec(readFileSync(capabilityColumnsPath, 'utf8'))
 })
 
 beforeEach(async () => {

@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { createHash } from 'node:crypto'
+import type { CapabilityGrantLookup } from '@linktrend/platform-contracts'
 import type { LedgerStore } from './store.js'
 import type { HierarchyRegistry } from './hierarchy.js'
+import { assertDispatchCapabilityGrant, CapabilityGateError } from './capability-gate.js'
 import {
   SCHEMA_VERSION,
   deriveIdempotencyKey,
@@ -25,7 +27,10 @@ export class LedgerError extends Error {
       | 'stale_fencing_token'
       | 'lease_expired'
       | 'not_delegated'
-      | 'dependency_not_satisfied',
+      | 'dependency_not_satisfied'
+      | 'capability_required'
+      | 'capability_grant_denied'
+      | 'org_required',
   ) {
     super(message)
     this.name = 'LedgerError'
@@ -39,6 +44,10 @@ export interface CreateIssueInput {
   stageRef?: string
   input: Record<string, unknown>
   sideEffectClass?: SideEffectClass
+  /** platform.organizations id — required with requiredCapabilityId / external side effects. */
+  orgId?: string
+  /** platform.capabilities id — gated via platform.has_capability_grant at dispatch. */
+  requiredCapabilityId?: string
   maxAttempts?: number
   backoffBaseMs?: number
   backoffMaxMs?: number
@@ -74,10 +83,15 @@ export class ProgramLedger {
    * (see hierarchy.ts) instead of accepting any opaque string. Omitting
    * it preserves the original behavior for callers/tests that don't yet
    * need hierarchy validation.
+   *
+   * `capabilityGrants` is optional but required at dispatch time whenever an
+   * Issue declares `requiredCapabilityId` or an external side-effect class
+   * (LiNKplatform shared-foundation-spec §5).
    */
   constructor(
     private readonly store: LedgerStore,
     private readonly hierarchy?: HierarchyRegistry,
+    private readonly capabilityGrants?: CapabilityGrantLookup,
   ) {}
 
   private async emit(
@@ -124,6 +138,8 @@ export class ProgramLedger {
       input: input.input,
       inputDigest,
       sideEffectClass: input.sideEffectClass ?? 'none',
+      requiredCapabilityId: input.requiredCapabilityId ?? null,
+      orgId: input.orgId ?? null,
       retryPolicy: {
         maxAttempts: input.maxAttempts ?? 3,
         backoffBaseMs: input.backoffBaseMs ?? 1000,
@@ -215,6 +231,22 @@ export class ProgramLedger {
     // BEFORE Run creation and idempotency reservation so that a blocked Issue
     // never produces a Run record, idempotency reservation, or event.
     await this.assertDependenciesSatisfied(issueId)
+
+    // Capability-grant gate (LiNKplatform §5): external side effects and any
+    // explicit requiredCapabilityId must pass platform.has_capability_grant
+    // before a Run is created.
+    try {
+      await assertDispatchCapabilityGrant(this.capabilityGrants, {
+        sideEffectClass: issue.sideEffectClass,
+        requiredCapabilityId: issue.requiredCapabilityId,
+        orgId: issue.orgId,
+      })
+    } catch (err) {
+      if (err instanceof CapabilityGateError) {
+        throw new LedgerError(err.message, err.code)
+      }
+      throw err
+    }
 
     const attemptNumber = issue.attemptCount + 1
     const runId = randomUUID()
