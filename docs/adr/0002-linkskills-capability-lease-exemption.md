@@ -1,6 +1,6 @@
 # ADR 0002 — LiNKsites Exemption from LinkSkills Capability Leases (Interim)
 
-- **Status:** Accepted (interim — scheduled for revisit)
+- **Status:** Superseded by ADR 0003
 - **Date:** 2026-07-13
 - **Decided by:** Carlos (Decision DR-03, `audit/13_decision_and_contradiction_register.md`)
 - **Context source:** LiNKsites Program Manual §01/§02/§24 §4 vs. always-applied workspace rules `02-ecosystem-boundaries.mdc`, `05-security-cost-and-side-effects.mdc` (IDE Development workspace)
