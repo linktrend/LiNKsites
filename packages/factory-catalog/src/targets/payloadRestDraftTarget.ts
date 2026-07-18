@@ -86,7 +86,12 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
   private readonly lookupField: string
 
   constructor(config: PayloadRestDraftTargetConfig) {
-    this.baseUrl = config.baseUrl.replace(/\/+$/, '')
+    // Strip trailing slashes without a repeated-quantifier regex (CodeQL js/polynomial-redos).
+    let baseUrl = config.baseUrl
+    while (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, -1)
+    }
+    this.baseUrl = baseUrl
     this.credential = config.credential
     this.lookupField = config.lookupField ?? 'slug'
   }
