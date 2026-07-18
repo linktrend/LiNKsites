@@ -96,6 +96,18 @@ export interface Issue {
   input: Record<string, unknown>
   inputDigest: string
   sideEffectClass: SideEffectClass
+  /**
+   * When set, `ProgramLedger.dispatch` must verify
+   * `platform.has_capability_grant(orgId, requiredCapabilityId)` before
+   * creating a Run. Required for external side-effect classes when a
+   * `CapabilityGrantLookup` is injected into the ledger.
+   */
+  requiredCapabilityId?: string | null
+  /**
+   * Tenant org this Issue belongs to (platform.organizations id). Required
+   * together with `requiredCapabilityId` for the capability grant gate.
+   */
+  orgId?: string | null
   retryPolicy: RetryPolicy
   timeoutMs: number
   attemptCount: number

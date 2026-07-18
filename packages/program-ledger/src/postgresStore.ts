@@ -82,6 +82,8 @@ function toIssue(row: Record<string, unknown>): Issue {
     input: row.input as Record<string, unknown>,
     inputDigest: String(row.input_digest),
     sideEffectClass: row.side_effect_class as Issue['sideEffectClass'],
+    requiredCapabilityId: (row.required_capability_id as string | null) ?? null,
+    orgId: (row.org_id as string | null) ?? null,
     retryPolicy: {
       maxAttempts: Number(row.retry_max_attempts),
       backoffBaseMs: Number(row.retry_backoff_base_ms),
@@ -187,12 +189,15 @@ export class PostgresLedgerStore implements LedgerStore {
     await this.db.query(
       `insert into lsites_ledger.issues (
          issue_id, schema_version_major, schema_version_minor, issue_type, program_ref, module_ref, stage_ref,
-         state, input, input_digest, side_effect_class, retry_max_attempts, retry_backoff_base_ms,
+         state, input, input_digest, side_effect_class, org_id, required_capability_id,
+         retry_max_attempts, retry_backoff_base_ms,
          retry_backoff_max_ms, timeout_ms, attempt_count, cancel_requested, created_at, updated_at
-       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
        on conflict (issue_id) do update set
          state = excluded.state, input = excluded.input, input_digest = excluded.input_digest,
-         side_effect_class = excluded.side_effect_class, attempt_count = excluded.attempt_count,
+         side_effect_class = excluded.side_effect_class,
+         org_id = excluded.org_id, required_capability_id = excluded.required_capability_id,
+         attempt_count = excluded.attempt_count,
          cancel_requested = excluded.cancel_requested, updated_at = excluded.updated_at`,
       [
         issue.issueId,
@@ -206,6 +211,8 @@ export class PostgresLedgerStore implements LedgerStore {
         JSON.stringify(issue.input),
         issue.inputDigest,
         issue.sideEffectClass,
+        issue.orgId ?? null,
+        issue.requiredCapabilityId ?? null,
         issue.retryPolicy.maxAttempts,
         issue.retryPolicy.backoffBaseMs,
         issue.retryPolicy.backoffMaxMs,
