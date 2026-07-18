@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { createHash } from 'node:crypto'
+import type { CapabilityGrantLookup } from '@linktrend/platform-contracts'
 import type { LedgerStore } from './store.js'
 import type { HierarchyRegistry } from './hierarchy.js'
+import { assertDispatchCapabilityGrant, CapabilityGateError } from './capability-gate.js'
 import {
   SCHEMA_VERSION,
   deriveIdempotencyKey,
@@ -9,6 +11,7 @@ import {
   type GateDecision,
   type GateResult,
   type Issue,
+  type IssueDependency,
   type LedgerEvent,
   type LedgerEventType,
   type Run,
@@ -23,7 +26,11 @@ export class LedgerError extends Error {
       | 'invalid_state'
       | 'stale_fencing_token'
       | 'lease_expired'
-      | 'not_delegated',
+      | 'not_delegated'
+      | 'dependency_not_satisfied'
+      | 'capability_required'
+      | 'capability_grant_denied'
+      | 'org_required',
   ) {
     super(message)
     this.name = 'LedgerError'
@@ -37,10 +44,21 @@ export interface CreateIssueInput {
   stageRef?: string
   input: Record<string, unknown>
   sideEffectClass?: SideEffectClass
+  /** platform.organizations id — required with requiredCapabilityId / external side effects. */
+  orgId?: string
+  /** platform.capabilities id — gated via platform.has_capability_grant at dispatch. */
+  requiredCapabilityId?: string
   maxAttempts?: number
   backoffBaseMs?: number
   backoffMaxMs?: number
   timeoutMs?: number
+  /**
+   * Zero or more Issue IDs that this Issue depends on. The Issue cannot
+   * be dispatched until ALL listed dependencies have reached `completed`
+   * state (i.e. their Gate was accepted). An empty or omitted list means
+   * no dependencies — the Issue is immediately dispatchable once created.
+   */
+  dependsOn?: string[]
 }
 
 function nowIso(): string {
@@ -65,10 +83,15 @@ export class ProgramLedger {
    * (see hierarchy.ts) instead of accepting any opaque string. Omitting
    * it preserves the original behavior for callers/tests that don't yet
    * need hierarchy validation.
+   *
+   * `capabilityGrants` is optional but required at dispatch time whenever an
+   * Issue declares `requiredCapabilityId` or an external side-effect class
+   * (LiNKplatform shared-foundation-spec §5).
    */
   constructor(
     private readonly store: LedgerStore,
     private readonly hierarchy?: HierarchyRegistry,
+    private readonly capabilityGrants?: CapabilityGrantLookup,
   ) {}
 
   private async emit(
@@ -115,6 +138,8 @@ export class ProgramLedger {
       input: input.input,
       inputDigest,
       sideEffectClass: input.sideEffectClass ?? 'none',
+      requiredCapabilityId: input.requiredCapabilityId ?? null,
+      orgId: input.orgId ?? null,
       retryPolicy: {
         maxAttempts: input.maxAttempts ?? 3,
         backoffBaseMs: input.backoffBaseMs ?? 1000,
@@ -127,8 +152,43 @@ export class ProgramLedger {
       cancelRequested: false,
     }
     await this.store.putIssue(issue)
+
+    for (const dependsOnIssueId of input.dependsOn ?? []) {
+      const dep: IssueDependency = {
+        issueId: issue.issueId,
+        dependsOnIssueId,
+        createdAt: nowIso(),
+      }
+      await this.store.addIssueDependency(dep)
+    }
+
     await this.emit(issue.issueId, null, 'issue.created', { issueType: issue.issueType })
     return issue
+  }
+
+  /**
+   * Throws `LedgerError('dependency_not_satisfied')` if any declared
+   * dependency of `issueId` has not yet reached `completed` state.
+   * "Completed" is the authoritative ledger state set exclusively by an
+   * accepted Gate decision (ProgramLedger.decideGate), so this check is
+   * equivalent to "all dependency Gates have been accepted". If a
+   * dependency Issue does not exist at all, that is also treated as not
+   * satisfied — a dependency on a non-existent Issue cannot be complete.
+   */
+  private async assertDependenciesSatisfied(issueId: string): Promise<void> {
+    const deps = await this.store.getIssueDependencies(issueId)
+    for (const dep of deps) {
+      const depIssue = await this.store.getIssue(dep.dependsOnIssueId)
+      if (!depIssue || depIssue.state !== 'completed') {
+        const reason = !depIssue
+          ? `dependency Issue ${dep.dependsOnIssueId} does not exist`
+          : `dependency Issue ${dep.dependsOnIssueId} is in state "${depIssue.state}", not "completed"`
+        throw new LedgerError(
+          `Issue ${issueId} cannot be dispatched: ${reason}. All dependencies must have an accepted Gate before dispatch.`,
+          'dependency_not_satisfied',
+        )
+      }
+    }
   }
 
   /**
@@ -162,6 +222,30 @@ export class ProgramLedger {
 
     if (!['ready', 'retry_scheduled'].includes(issue.state)) {
       throw new LedgerError(`Issue ${issueId} is not dispatchable from state ${issue.state}`, 'invalid_state')
+    }
+
+    // Dependency gate: every declared dependency must have reached `completed`
+    // state (the only state the Program Ledger sets via an accepted Gate) before
+    // this Issue may be dispatched. This check runs AFTER the state guard so
+    // that a non-ready Issue still fails on the state check first. It runs
+    // BEFORE Run creation and idempotency reservation so that a blocked Issue
+    // never produces a Run record, idempotency reservation, or event.
+    await this.assertDependenciesSatisfied(issueId)
+
+    // Capability-grant gate (LiNKplatform §5): external side effects and any
+    // explicit requiredCapabilityId must pass platform.has_capability_grant
+    // before a Run is created.
+    try {
+      await assertDispatchCapabilityGrant(this.capabilityGrants, {
+        sideEffectClass: issue.sideEffectClass,
+        requiredCapabilityId: issue.requiredCapabilityId,
+        orgId: issue.orgId,
+      })
+    } catch (err) {
+      if (err instanceof CapabilityGateError) {
+        throw new LedgerError(err.message, err.code)
+      }
+      throw err
     }
 
     const attemptNumber = issue.attemptCount + 1

@@ -1,4 +1,4 @@
-import type { GateResult, IdempotencyRecord, Issue, LedgerEvent, Run } from './types.js'
+import type { GateResult, IdempotencyRecord, Issue, IssueDependency, LedgerEvent, Run } from './types.js'
 
 /**
  * Storage abstraction. Ledger business logic (ledger.ts) depends only on
@@ -44,6 +44,19 @@ export interface LedgerStore {
 
   /** Returns all Runs currently in `claimed`/`executing` state whose lease has expired. */
   listExpiredLeaseRuns(nowIso: string): Promise<Run[]>
+
+  /**
+   * Records a dependency: `dep.issueId` cannot be dispatched until
+   * `dep.dependsOnIssueId` reaches `completed` state. Idempotent: storing
+   * the same pair twice is a no-op (not an error).
+   */
+  addIssueDependency(dep: IssueDependency): Promise<void>
+
+  /**
+   * Returns all dependencies declared for `issueId` — i.e. every Issue
+   * that `issueId` must wait for before it is dispatchable.
+   */
+  getIssueDependencies(issueId: string): Promise<IssueDependency[]>
 }
 
 export class InMemoryLedgerStore implements LedgerStore {
@@ -52,6 +65,7 @@ export class InMemoryLedgerStore implements LedgerStore {
   private idempotency = new Map<string, IdempotencyRecord>()
   private gates = new Map<string, GateResult>()
   private events: LedgerEvent[] = []
+  private dependencies: IssueDependency[] = []
 
   async getIssue(issueId: string): Promise<Issue | null> {
     return this.issues.get(issueId) ?? null
@@ -116,5 +130,18 @@ export class InMemoryLedgerStore implements LedgerStore {
         r.lease !== null &&
         new Date(r.lease.expiresAt).getTime() < now,
     )
+  }
+
+  async addIssueDependency(dep: IssueDependency): Promise<void> {
+    const alreadyExists = this.dependencies.some(
+      (d) => d.issueId === dep.issueId && d.dependsOnIssueId === dep.dependsOnIssueId,
+    )
+    if (!alreadyExists) {
+      this.dependencies.push({ ...dep })
+    }
+  }
+
+  async getIssueDependencies(issueId: string): Promise<IssueDependency[]> {
+    return this.dependencies.filter((d) => d.issueId === issueId).map((d) => ({ ...d }))
   }
 }

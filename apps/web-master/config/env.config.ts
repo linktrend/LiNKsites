@@ -61,8 +61,8 @@ export const SITE_ENV = {
 // ============================================================================
 
 export const CMS_ENV = {
-  /** CMS provider type ('payload' or 'mock') */
-  PROVIDER: (process.env.NEXT_PUBLIC_CMS_PROVIDER as 'payload' | 'mock') || 'mock',
+  /** CMS provider type ('payload' or 'mock'). Defaults to 'payload'; set NEXT_PUBLIC_CMS_PROVIDER=mock to opt into local mock mode. */
+  PROVIDER: (process.env.NEXT_PUBLIC_CMS_PROVIDER as 'payload' | 'mock') || 'payload',
   
   /** Payload CMS public server URL (client-side accessible) */
   PAYLOAD_PUBLIC_SERVER_URL: process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3000',

@@ -19,7 +19,7 @@ const normalizeHost = (host: string): string => {
 
 const TENANT_CACHE_TTL_MS = 5 * 60 * 1000;
 const tenantCache = new Map<string, { siteId: string; expiresAt: number }>();
-const isMockProvider = (process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "mock") !== "payload";
+const isMockProvider = (process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "payload") !== "payload";
 const DEFAULT_MOCK_SITE_ID = "company-site";
 
 const cacheGet = (host: string): string | null => {
