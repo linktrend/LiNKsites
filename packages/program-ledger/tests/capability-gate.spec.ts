@@ -4,7 +4,7 @@ import {
   CapabilityGateError,
   EXTERNAL_CAPABILITY_SIDE_EFFECTS,
 } from '../src/capability-gate.js'
-import type { CapabilityGrantLookup } from '@linktrend/platform-contracts'
+import type { CapabilityGrantLookup } from '../src/capability-lookup.js'
 import { InMemoryLedgerStore } from '../src/store.js'
 import { ProgramLedger, LedgerError } from '../src/ledger.js'
 

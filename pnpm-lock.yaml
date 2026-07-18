@@ -351,9 +351,6 @@ importers:
       '@linksites/types':
         specifier: workspace:*
         version: link:../types
-      '@linktrend/platform-contracts':
-        specifier: file:../../../LiNKplatform/packages/contracts
-        version: file:../LiNKplatform/packages/contracts
     devDependencies:
       '@electric-sql/pglite':
         specifier: 0.5.4
@@ -1261,9 +1258,6 @@ packages:
     resolution: {integrity: sha512-PaKTxSbVC4fpqUjQ7vUL9RkNF1PjL8TFl5jRe03PqoPYpE33buf3VXX6+cOUEfv9+uknSqLCPHoBS/4jN3a97w==}
     peerDependencies:
       yjs: '>=13.5.22'
-
-  '@linktrend/platform-contracts@file:../LiNKplatform/packages/contracts':
-    resolution: {directory: ../LiNKplatform/packages/contracts, type: directory}
 
   '@monaco-editor/loader@1.7.0':
     resolution: {integrity: sha512-gIwR1HrJrrx+vfyOhYmCZ0/JcWqG5kbfG7+d3f/C1LXk2EvzAbHSg3MQ5lO2sMlo9izoAZ04shohfKLVT6crVA==}
@@ -6356,8 +6350,6 @@ snapshots:
       '@lexical/selection': 0.41.0
       lexical: 0.41.0
       yjs: 13.6.30
-
-  '@linktrend/platform-contracts@file:../LiNKplatform/packages/contracts': {}
 
   '@monaco-editor/loader@1.7.0':
     dependencies:
