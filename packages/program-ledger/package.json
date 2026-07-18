@@ -14,8 +14,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@linksites/types": "workspace:*",
-    "@linktrend/platform-contracts": "file:../../../LiNKplatform/packages/contracts"
+    "@linksites/types": "workspace:*"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.4",
