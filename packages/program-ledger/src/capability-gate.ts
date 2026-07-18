@@ -5,13 +5,14 @@
  * dispatch that touches an external system, the Program Ledger must check
  * `platform.capability_grants` (via `platform.has_capability_grant`).
  *
- * This module is the LiNKsites wiring of that hard gate. Pure helpers live in
- * `@linktrend/platform-contracts`; this file decides *when* LiNKsites must call them.
+ * This module is the LiNKsites wiring of that hard gate. Pure lookup helpers
+ * live in `./capability-lookup.ts` (local mirror of platform contracts so CI
+ * does not need a sibling LiNKplatform checkout).
  */
 import {
   assertOrgCapabilityGrant,
   type CapabilityGrantLookup,
-} from '@linktrend/platform-contracts'
+} from './capability-lookup.js'
 import type { SideEffectClass } from './types.js'
 
 /** Side-effect classes that touch an irreversible / external system. */

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { createHash } from 'node:crypto'
-import type { CapabilityGrantLookup } from '@linktrend/platform-contracts'
+import type { CapabilityGrantLookup } from './capability-lookup.js'
 import type { LedgerStore } from './store.js'
 import type { HierarchyRegistry } from './hierarchy.js'
 import { assertDispatchCapabilityGrant, CapabilityGateError } from './capability-gate.js'
