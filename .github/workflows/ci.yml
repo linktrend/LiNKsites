@@ -75,7 +75,7 @@ jobs:
       # NOT the same figure as GitHub's Dependabot alert count shown on git
       # push output, which reflects the separate, not-yet-promoted `main`
       # (default) branch per this repo's staging->main promotion policy
-      # (docs/BRANCHING_AND_DEPLOYMENT_POLICY.md). Fails the build on any
+      # (docs/archive/BRANCHING_AND_DEPLOYMENT_POLICY.md). Fails the build on any
       # moderate-or-higher advisory so a new transitive vulnerability is
       # caught here, not discovered later.
       - name: Dependency vulnerability audit

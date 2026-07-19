@@ -58,7 +58,7 @@ See `MANIFEST.csv` for the machine-readable version (filename, bytes, sha256).
 To re-verify or re-generate this manifest:
 
 ```bash
-cd docs/specs/linksites-program-manual
+cd docs/archive/specs/linksites-program-manual
 { echo "filename,bytes,sha256"; for f in *.md; do sz=$(stat -f%z "$f"); h=$(shasum -a 256 "$f" | awk '{print $1}'); echo "$f,$sz,$h"; done; } > MANIFEST.csv
 ```
 

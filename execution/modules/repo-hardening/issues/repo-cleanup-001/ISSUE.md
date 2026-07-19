@@ -9,11 +9,11 @@ depends_on: []
 objective: "Execute Carlos's explicit instruction (2026-07-14) to clean up repository content unrelated to LiNKsites' current intent before the hardening/testing pass. Full rationale recorded in audit/13_decision_and_contradiction_register.md (DR-09) and audit/12_reusable_asset_register.yaml."
 scope:
   - "Deleted 4 empty scaffold packages (packages/blocks, packages/config, packages/ui, packages/utils) and a stale, broken-link library/README.md index"
-  - "Archived (git mv, history preserved) sites_specs/*.txt, docs/product/*.md, and 5 pre-manual docs/reference/*.md files into archive/pre-manual-planning-docs/"
+  - "Archived (git mv, history preserved) sites_specs/*.txt, docs/product/*.md, and 5 pre-manual docs/archive/reference/*.md files into archive/pre-manual-planning-docs/"
   - "Archived (via a dedicated subagent's careful, file-by-file classification) 11 stale AI-agent session-completion-report docs from apps/web-master/docs/ and apps/cms/docs/ into each app's own docs/archive/agent-session-reports/"
 out_of_scope:
   - "apps/web-company (Carlos's DR-02 decision: paused, not deleted)"
-  - "The 4 still-useful docs/reference/*.md operational how-tos (GODADDY_DNS_SETUP, SUPABASE_SETUP, VPS_DEPLOYMENT_GUIDE, security_best_practices_report)"
+  - "The 4 still-useful docs/archive/reference/*.md operational how-tos (GODADDY_DNS_SETUP, SUPABASE_SETUP, VPS_DEPLOYMENT_GUIDE, security_best_practices_report)"
   - "Any code under apps/ (besides the doc moves), packages/program-ledger, packages/factory-catalog, supabase/, execution/, or audit/"
 inputs:
   - "audit/12_reusable_asset_register.yaml (existing sites_specs disposition, previously recorded but not executed)"

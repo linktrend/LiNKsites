@@ -18,7 +18,7 @@ out_of_scope:
   - "Wiring assertNoAnalyticsIdentityCollision() into any registry/store of Preview Deployments -- no PreviewDeployment registry/store exists in this repository yet; callers are expected to invoke it themselves over whatever collection they maintain"
   - "Persistence -- these are pure functions operating on plain PreviewDeployment records; no new store"
 inputs:
-  - "docs/specs/linksites-program-manual (manual Section 10, §10.3 'not a live customer site', §10.25 'required deployment identity fields', doctrine point 6 'every preview is isolated')"
+  - "docs/archive/specs/linksites-program-manual (manual Section 10, §10.3 'not a live customer site', §10.25 'required deployment identity fields', doctrine point 6 'every preview is isolated')"
   - "packages/factory-catalog/src/siteAssemblyManifest.ts (SiteAssemblyManifest -- prior Issue phase3-site-assembly-manifest-001)"
   - "packages/factory-catalog/src/conversionLock.ts (this repository's most recent similar record+registry/invariant pattern, followed for style)"
 expected_outputs:

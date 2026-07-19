@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-07-13
 - **Decided by:** Carlos (Decision DR-04, `audit/13_decision_and_contradiction_register.md`)
-- **Context source:** LiNKsites Program Manual (`docs/specs/linksites-program-manual/`) vs. always-applied workspace rule `07-suite-project-terminology.mdc` (IDE Development workspace)
+- **Context source:** LiNKsites Program Manual (`docs/archive/specs/linksites-program-manual/`) vs. always-applied workspace rule `07-suite-project-terminology.mdc` (IDE Development workspace)
 
 ## Context
 

@@ -26,7 +26,7 @@ repositories:
       site_id-scoped RLS, narrative (non-machine) architecture specs
       (sites_specs/), legacy/archived experiment code (sites_projects/),
       Wave-9 Docker/Traefik deploy scaffolding, and the newly-ingested
-      24-section Program Manual (docs/specs/linksites-program-manual/).
+      24-section Program Manual (docs/archive/specs/linksites-program-manual/).
       Working tree contains large uncommitted structural changes (see
       13_decision_and_contradiction_register.md, DR-01) removing the
       embedded LiNKdev factory and .agent/.codex framework files and

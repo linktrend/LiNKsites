@@ -16,8 +16,8 @@ out_of_scope:
   - "Real Sales-authority validation -- `authorityRef` is an opaque string reference only; no organizational authority-verification system exists to check against, this module validates budget arithmetic, not who actually granted the authority"
   - "Wiring this module into Site Specification's own `proof.level` field or into a real Preview Production Request object -- ProofBlock deliberately references a Site Specification only via an opaque `siteSpecId` string to stay decoupled, per this Issue's own interface contract"
 inputs:
-  - "docs/specs/linksites-program-manual/10_preview_inventory_and_build_first_sell_later_production_model.md"
-  - "docs/specs/linksites-program-manual/09_execution_definition_of_done_and_agent_autonomy_boundaries.md"
+  - "docs/archive/specs/linksites-program-manual/10_preview_inventory_and_build_first_sell_later_production_model.md"
+  - "docs/archive/specs/linksites-program-manual/09_execution_definition_of_done_and_agent_autonomy_boundaries.md"
   - "packages/factory-catalog/src/tierSpecification.ts (pattern mirrored: versioned lifecycle-status'd spec object + disposition-returning check function)"
 expected_outputs:
   - "packages/factory-catalog/src/proofLevel.ts with a tested Proof Specification schema, budget-check gate, and ProofBlock create/escalate lifecycle"

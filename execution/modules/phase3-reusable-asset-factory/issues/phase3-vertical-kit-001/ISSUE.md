@@ -15,7 +15,7 @@ out_of_scope:
   - "Promoting HOME_SERVICES_KIT to active -- requires Carlos's or a delegated reviewer's content approval, not something to self-approve"
   - "Additional Vertical Kits beyond the one pilot vertical"
 inputs:
-  - "docs/specs/linksites-program-manual/08_vertical_kits_tier_specifications_and_reusable_site_foundations.md"
+  - "docs/archive/specs/linksites-program-manual/08_vertical_kits_tier_specifications_and_reusable_site_foundations.md"
   - "packages/factory-catalog/src/tierSpecification.ts (prior Issue)"
   - "audit/13_decision_and_contradiction_register.md (Decision DR-06: Home Services / Standard)"
 expected_outputs:

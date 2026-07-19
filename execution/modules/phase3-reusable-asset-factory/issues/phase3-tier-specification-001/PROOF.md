@@ -34,7 +34,7 @@ optional_fields:
     - "Vertical Kit and Kit Tier Variant objects don't exist yet -- resolveMostRestrictive() is tested in isolation with plain numbers, not against a real Kit Tier Variant object, since that object doesn't exist yet (next Issue)."
     - "All numeric tier limits are provisional placeholders, explicitly marked as such -- real values require Carlos's business decision."
   notes:
-    - "Found and fixed a minor design smell while building this Issue: SchemaVersion was being duplicated as an inline type in program-ledger/types.ts rather than living in the shared packages/types package, contradicting this repo's own docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md ('one canonical source of truth per schema'). Relocated it."
+    - "Found and fixed a minor design smell while building this Issue: SchemaVersion was being duplicated as an inline type in program-ledger/types.ts rather than living in the shared packages/types package, contradicting this repo's own docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md ('one canonical source of truth per schema'). Relocated it."
 ---
 
 # Proof

@@ -3,7 +3,7 @@
 -- platform foundation (org identity, RLS helper) rather than as a retrofit
 -- of the old mirror-pattern migration.
 --
--- Context/authority: docs/adr/0003-retire-mirror-pattern-and-adopt-shared-
+-- Context/authority: docs/archive/adr/0003-retire-mirror-pattern-and-adopt-shared-
 -- platform-org-model.md. This migration supersedes and replaces
 -- 20260331_000001_lsites_init.sql (archived, not applied to
 -- linkplatform-stage/-prod -- see supabase/migrations/archive/README.md).
