@@ -73,7 +73,7 @@ capabilities:
     evidence_refs: [EV-16]
     tests: { present: false, last_verified: null, limitations: [] }
     dependencies: []
-    security_notes: ["Manual §03 explicitly warns against hard-coded pricing/tier logic; docs/business/PRICING_PACKAGING_SOP.md should be checked in a follow-up for any hard-coded values before this is built."]
+    security_notes: ["Manual §03 explicitly warns against hard-coded pricing/tier logic; docs/archive/business/PRICING_PACKAGING_SOP.md should be checked in a follow-up for any hard-coded values before this is built."]
     gaps: [GAP-12]
     recommended_disposition: build-missing
     confidence: high
@@ -121,7 +121,7 @@ capabilities:
     evidence_refs: [EV-20]
     tests: { present: false, last_verified: null, limitations: [] }
     dependencies: []
-    security_notes: ["Traefik host/hostregexp rules exist in deploy/docker-compose.deploy.yml; Cloudflare-side config (Full-strict TLS, WAF, custom-hostname SaaS pattern) is documented in docs/ops/ but not codified as executable config or verified live."]
+    security_notes: ["Traefik host/hostregexp rules exist in deploy/docker-compose.deploy.yml; Cloudflare-side config (Full-strict TLS, WAF, custom-hostname SaaS pattern) is documented in docs/archive/ops/ but not codified as executable config or verified live."]
     gaps: [GAP-21]
     recommended_disposition: adapt
     confidence: medium

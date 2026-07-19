@@ -14,7 +14,7 @@
 -- reads/writes these tables yet. This is intentional: the schema is
 -- versioned and reviewable now, ahead of wiring a live database
 -- connection into a follow-up work packet, per
--- docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md's requirement
+-- docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md's requirement
 -- that every contract state its own version and have one canonical
 -- source of truth.
 --

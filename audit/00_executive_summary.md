@@ -1,6 +1,6 @@
 # 00 — Executive Summary (LiNKsites Audit, 2026-07-13)
 
-**For Carlos. Plain English. Technical detail is in the numbered files in this `audit/` folder and in `docs/specs/linksites-program-manual/`.**
+**For Carlos. Plain English. Technical detail is in the numbered files in this `audit/` folder and in `docs/archive/specs/linksites-program-manual/`.**
 
 > **Progress addendum (2026-07-14):** You approved proceeding and explicitly rejected pausing between
 > phases — the manual + `audit/14_implementation_roadmap.md` now serve as the plan, and work has
@@ -36,7 +36,7 @@
 
 ## What I did
 
-1. Copied the 24-section LiNKsites Program Manual verbatim from your Google Drive into the repo (`docs/specs/linksites-program-manual/`), byte-verified it, and generated a manifest — so this manual is now durable in the repo itself, not dependent on your local Drive.
+1. Copied the 24-section LiNKsites Program Manual verbatim from your Google Drive into the repo (`docs/archive/specs/linksites-program-manual/`), byte-verified it, and generated a manifest — so this manual is now durable in the repo itself, not dependent on your local Drive.
 2. Read the entire manual (all 24 sections) and used it as the reconciled current doctrine, above any older PRD, README claim, or prior architecture note.
 3. Did a careful, read-only inspection of the LiNKsites repository — every app, package, migration, config file, doc, test, and CI run I could reach — without deleting, renaming, rewriting, or changing anything.
 4. Wrote up the full formal audit the manual requires (16 documents in `audit/`) so a future AI or human can pick this up without needing this conversation.

@@ -15,7 +15,7 @@ out_of_scope:
   - "Real Foundation content (actual page composition, components used) -- no Site Assembly Manifest or Component Registry machine object exists yet (GAP-04/GAP-07), so this Foundation has no real content model to scan against yet, only the mechanism"
   - "Foundation Reservation persistence (Postgres-backed) -- this is an in-memory manager only, matching the pattern this session used for the Program Ledger before its Postgres store existed"
 inputs:
-  - "docs/specs/linksites-program-manual/08_vertical_kits_tier_specifications_and_reusable_site_foundations.md"
+  - "docs/archive/specs/linksites-program-manual/08_vertical_kits_tier_specifications_and_reusable_site_foundations.md"
   - "packages/factory-catalog/src/tierSpecification.ts, verticalKit.ts (prior Issues)"
 expected_outputs:
   - "reusableFoundation.ts with a tested schema, neutrality scanner, and reservation manager"

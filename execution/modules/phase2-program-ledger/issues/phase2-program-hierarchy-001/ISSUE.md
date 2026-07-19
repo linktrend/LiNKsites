@@ -15,7 +15,7 @@ out_of_scope:
   - "Stage-level decomposition within each Module (left as an empty array per Module, to be filled in when each Module's own implementation work defines its Stages)"
   - "Cross-Program Program definitions (Sales, Odoo, Stripe) -- explicitly out of this repository's ownership per manual §02/§21"
 inputs:
-  - "docs/specs/linksites-program-manual/05_program_modules_and_major_handoffs.md (Module descriptions)"
+  - "docs/archive/specs/linksites-program-manual/05_program_modules_and_major_handoffs.md (Module descriptions)"
   - "packages/program-ledger/src/ledger.ts, types.ts (PR #47/#48 state)"
 expected_outputs:
   - "hierarchy.ts with all 20 Modules modeled"
@@ -35,7 +35,7 @@ suggested_role_types:
   - "backend-developer"
 read_first:
   - "packages/program-ledger/src/hierarchy.ts"
-  - "docs/specs/linksites-program-manual/05_program_modules_and_major_handoffs.md"
+  - "docs/archive/specs/linksites-program-manual/05_program_modules_and_major_handoffs.md"
 read_forbidden:
   - "unrelated modules"
 blocking_questions: []

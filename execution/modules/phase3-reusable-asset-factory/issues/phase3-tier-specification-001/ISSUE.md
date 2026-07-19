@@ -16,8 +16,8 @@ out_of_scope:
   - "Vertical Kit and Kit Tier Variant objects themselves (separate future Issue) -- only the entitlement-resolution helper they will need is built here"
   - "Real content for the Home Services pilot vertical (Decision DR-06)"
 inputs:
-  - "docs/specs/linksites-program-manual/03_product_customer_outcomes_tiers_and_commercial_assumptions.md"
-  - "docs/specs/linksites-program-manual/08_vertical_kits_tier_specifications_and_reusable_site_foundations.md"
+  - "docs/archive/specs/linksites-program-manual/03_product_customer_outcomes_tiers_and_commercial_assumptions.md"
+  - "docs/archive/specs/linksites-program-manual/08_vertical_kits_tier_specifications_and_reusable_site_foundations.md"
 expected_outputs:
   - "packages/factory-catalog with a tested Tier Specification + entitlement engine"
 acceptance_criteria:

@@ -6,7 +6,7 @@
 Visitor
    │
    ▼
-[Cloudflare — documented in docs/ops/VPS_REVERSE_PROXY_AND_CLOUDFLARE.md, not present as executable config in deploy/]
+[Cloudflare — documented in docs/archive/ops/VPS_REVERSE_PROXY_AND_CLOUDFLARE.md, not present as executable config in deploy/]
    │
    ▼
 Traefik (deploy/docker-compose.deploy.yml)

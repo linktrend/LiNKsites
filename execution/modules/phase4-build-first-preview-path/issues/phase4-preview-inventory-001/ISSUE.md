@@ -19,7 +19,7 @@ out_of_scope:
   - "Any saturation THRESHOLD or policy action on the foundation reuse distribution -- this Issue only computes the raw per-foundation adaptation count, ranked descending; deciding what count is 'too saturated' is a policy decision out of scope here"
   - "Persistence of snapshots -- this module is a pure aggregation function, no new store"
 inputs:
-  - "docs/specs/linksites-program-manual (manual §10.2, §10.38, §10.39)"
+  - "docs/archive/specs/linksites-program-manual (manual §10.2, §10.38, §10.39)"
   - "packages/factory-catalog/src/reusableFoundation.ts (ReusableSiteFoundation, FoundationReservationManager, FoundationReservation -- prior Issue phase3-reusable-foundation-001)"
   - "packages/factory-catalog/src/prospectAdaptation.ts (ProspectAdaptation, ProspectAdaptationStatus -- prior Issue phase3-prospect-adaptation-001)"
 expected_outputs:

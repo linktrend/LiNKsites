@@ -4,7 +4,7 @@
 -- packages/program-ledger/tests/tenant-isolation.spec.ts (GAP-06,
 -- audit/09_gap_and_risk_register.yaml).
 --
--- Authority: docs/adr/0003-retire-mirror-pattern-and-adopt-shared-platform-
+-- Authority: docs/archive/adr/0003-retire-mirror-pattern-and-adopt-shared-platform-
 -- org-model.md (Decision 2 -- membership via platform.has_org_access() is the
 -- real trust boundary; the app.site_id session variable is a scoping
 -- convenience only, never a standalone grant).

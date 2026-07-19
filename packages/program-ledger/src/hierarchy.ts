@@ -11,7 +11,7 @@
  * with a documented "not yet built" caveat.
  *
  * Scope: this models the LiNKsites Program's own Modules as static,
- * versioned data (per docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md).
+ * versioned data (per docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md).
  * Stage-level decomposition within each Module is deliberately left open
  * (`stages: []`) -- the manual's Section 05 defines Module *purpose* in
  * detail but Stage-level breakdown is Module-specific detail owned by

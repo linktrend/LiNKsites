@@ -4,10 +4,10 @@
 evidence:
   - evidence_id: EV-01
     evidence_type: file
-    source: { repository: "https://github.com/linktrend/LiNKsites.git", path: "docs/specs/linksites-program-manual/" }
+    source: { repository: "https://github.com/linktrend/LiNKsites.git", path: "docs/archive/specs/linksites-program-manual/" }
     captured_at: "2026-07-13"
     captured_by: cursor-agent-session
-    content_digest: "see docs/specs/linksites-program-manual/MANIFEST.csv for per-file SHA-256"
+    content_digest: "see docs/archive/specs/linksites-program-manual/MANIFEST.csv for per-file SHA-256"
     summary: "Verbatim, diff-verified copy of the 24-section LiNKsites Program Manual, ingested from Google Drive per manual §85."
     supports_requirements: ["all"]
     data_classification: internal
@@ -15,7 +15,7 @@ evidence:
 
   - evidence_id: EV-02
     evidence_type: file
-    source: { path: "docs/specs/linksites-program-manual/24_repository_audit_implementation_roadmap_acceptance_criteria_and_glossary.md" }
+    source: { path: "docs/archive/specs/linksites-program-manual/24_repository_audit_implementation_roadmap_acceptance_criteria_and_glossary.md" }
     captured_at: "2026-07-13"
     captured_by: cursor-agent-session
     content_digest: "c61dff0e248ce48815cf7cad70815d8afd9bef030744a5fab667d0b814ae2bd2"
