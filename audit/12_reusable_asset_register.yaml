@@ -71,7 +71,7 @@ assets:
       verification (this sandboxed environment's Docker daemon cannot reach a
       container registry to pull base images -- attempted and confirmed
       hung/unreachable), Cloudflare-side codification (currently only
-      documented in docs/ops/, not executable), and capacity/monitoring
+      documented in docs/archive/ops/, not executable), and capacity/monitoring
       wrap-around before any production trust.
 
   - asset_id: asset-mvo-live-publish-script
@@ -93,10 +93,10 @@ assets:
     rationale: >
       EXECUTED (2026-07-14): moved to archive/pre-manual-planning-docs/sites_specs/
       (git history preserved via rename detection), alongside four pre-manual
-      docs/product/ PRD documents and five pre-manual docs/reference/ planning docs
+      docs/product/ PRD documents and five pre-manual docs/archive/reference/ planning docs
       describing the same superseded "LiNKsites Factory Kit" model. See
       archive/pre-manual-planning-docs/ARCHIVED.md for the full rationale and exactly
-      which docs/reference/ files were deliberately kept in place (the still-useful
+      which docs/archive/reference/ files were deliberately kept in place (the still-useful
       operational how-tos: GODADDY_DNS_SETUP.md, SUPABASE_SETUP.md,
       VPS_DEPLOYMENT_GUIDE.md, security_best_practices_report.md).
 
@@ -176,7 +176,7 @@ assets:
       typecheck/build/install overhead for nothing).
 
   - asset_id: asset-stale-library-index
-    description: "library/README.md — a documentation index whose links pointed at nonexistent root-level file paths (e.g. `/Users/.../LiNKsites/IMPLEMENTATION_PLAN.md`) for files that actually lived under docs/reference/, plus references to library/operations/ and library/business/ subdirectories that never existed in this repository."
+    description: "library/README.md — a documentation index whose links pointed at nonexistent root-level file paths (e.g. `/Users/.../LiNKsites/IMPLEMENTATION_PLAN.md`) for files that actually lived under docs/archive/reference/, plus references to library/operations/ and library/business/ subdirectories that never existed in this repository."
     classification: dead-and-misleading
     disposition: removed # EXECUTED 2026-07-14, repo-cleanup batch
     rationale: >

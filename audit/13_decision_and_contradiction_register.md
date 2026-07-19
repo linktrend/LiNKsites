@@ -13,7 +13,7 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
 
 ## DR-01 — Large uncommitted working-tree restructuring (framework migration)
 
-- **Claim A (repository evidence):** The working tree on branch `issue/wave9-linksites-prod` shows 1,314 uncommitted deletions covering the entire embedded `LiNKdev/` factory (`AGENTS.md`, `factory/`, `product/`, `skills/`), `.agent/` (agents + skills), `.codex/skills/`, and the repo-local `.cursor/{rules,skills,commands,agents}` directories, plus `.github/workflows` appearing in the deletion list. `.cursor` now appears as an untracked symlink pointing to `../IDE Development/.cursor`. 30 files are modified (mostly `apps/web-master` route/page files plus `deploy/docker-compose.deploy.yml`, `deploy/docker/cms.Dockerfile`, two docs files, root `README.md`). 4 paths are untracked (`.cursor` symlink, `apps/web-master/src/lib/route-params.ts`, `docs/policies/UI_TEMPLATE_POLICY.md`, `docs/specs/` — the last of which is this audit's own manual ingestion).
+- **Claim A (repository evidence):** The working tree on branch `issue/wave9-linksites-prod` shows 1,314 uncommitted deletions covering the entire embedded `LiNKdev/` factory (`AGENTS.md`, `factory/`, `product/`, `skills/`), `.agent/` (agents + skills), `.codex/skills/`, and the repo-local `.cursor/{rules,skills,commands,agents}` directories, plus `.github/workflows` appearing in the deletion list. `.cursor` now appears as an untracked symlink pointing to `../IDE Development/.cursor`. 30 files are modified (mostly `apps/web-master` route/page files plus `deploy/docker-compose.deploy.yml`, `deploy/docker/cms.Dockerfile`, two docs files, root `README.md`). 4 paths are untracked (`.cursor` symlink, `apps/web-master/src/lib/route-params.ts`, `docs/archive/policies/UI_TEMPLATE_POLICY.md`, `docs/specs/` — the last of which is this audit's own manual ingestion).
 - **Claim B (workspace rules):** This session's always-applied workspace rules describe a deliberate program of sharing `.cursor/rules/05-agent-behavior.mdc` and `AGENTS.md` across LiNKtrend repos "so Cursor/Codex/Antigravity behave consistently," and describe `LiNKdev/` as a "portable install" pattern with its own bootstrap/versioning conventions — consistent with a repo moving from an embedded, per-repo agent framework to a shared one.
 - **Authority order applied:** Repository evidence (git working tree) is the ground truth for *what currently exists on disk*; it cannot by itself establish *intent* or *completion state*. The workspace rules establish plausible intent but do not confirm this specific change was authorized or is finished.
 - **Resolution:** **Not resolved by this audit.** This is exactly the kind of uncommitted, in-progress structural change manual §5 forbids an auditor from touching ("do not delete, move, rename, archive, or rewrite repositories or files") and §20 requires be surfaced, not silently completed or reverted.
@@ -50,7 +50,7 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
 - **Decision required of Carlos:** Decide whether every LiNKsites external side effect (Payload publish webhooks, n8n triggers, future Stripe/Odoo calls, media-generation provider calls) must be wrapped in a LinkSkills capability lease as the IDE Development ecosystem rules require, or whether LiNKsites' documented independence from LiNKaios (manual §01/§02) exempts it, in whole or in part, from that requirement. This materially affects the shape of every Phase 2+ work packet.
 - **Severity:** High (architecture-shaping; affects most future implementation work).
 - **Carlos's decision (2026-07-13):** Agreed with the audit's recommendation — LiNKsites is **exempt for now**, using its own lighter-weight logging/governance instead of full LinkSkills capability leases, to be revisited once LiNKsites has built its own Program Ledger (Phase 2).
-- **Resolution executed:** Recorded as `docs/adr/0002-linkskills-capability-lease-exemption.md`, including the explicit revisit trigger (Phase 2 completion of the Program Ledger).
+- **Resolution executed:** Recorded as `docs/archive/adr/0002-linkskills-capability-lease-exemption.md`, including the explicit revisit trigger (Phase 2 completion of the Program Ledger).
 - **Status:** **Resolved (interim; scheduled revisit at Phase 2).**
 
 ---
@@ -64,7 +64,7 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
 - **Decision required of Carlos or an approved ADR:** Whether LiNKsites Modules/Stages/Issues will ever need to be projected into LiNKaios's Suite/Project/Phase vocabulary for cross-system visibility, and if so, the exact mapping.
 - **Severity:** Low-medium (does not block Phase 0/1 work, but should be settled before any LiNKaios-facing dashboard surfaces LiNKsites data).
 - **Carlos's decision (2026-07-13):** Define the mapping now, and follow the manual (i.e., the LiNKsites-internal vocabulary remains authoritative for LiNKsites-internal work; the LiNKaios vocabulary is used only at a future presentation/reporting boundary).
-- **Resolution executed:** Recorded as `docs/adr/0001-program-vocabulary-mapping.md`, including a full concept-by-concept mapping table and an explicit warning about the Run-granularity mismatch (LiNKsites' Issue-level Run vs. LiNKaios' Project-level Run/Cycle) that any future reporting adapter must respect.
+- **Resolution executed:** Recorded as `docs/archive/adr/0001-program-vocabulary-mapping.md`, including a full concept-by-concept mapping table and an explicit warning about the Run-granularity mismatch (LiNKsites' Issue-level Run vs. LiNKaios' Project-level Run/Cycle) that any future reporting adapter must respect.
 - **Status:** **Resolved.**
 
 ---
@@ -128,12 +128,12 @@ Per manual §20 (contradiction handling) and the task's Step 2: both claims are 
   2. Deleted `library/README.md`, a documentation index whose links were already broken/pointing
      at nonexistent paths (see `asset-stale-library-index`).
   3. Archived (not deleted) `sites_specs/*.txt`, `docs/product/*.md` (4 files), and 5 of the 9
-     `docs/reference/*.md` files into `archive/pre-manual-planning-docs/`, per the rationale and
+     `docs/archive/reference/*.md` files into `archive/pre-manual-planning-docs/`, per the rationale and
      full accounting in that archive's own `ARCHIVED.md`. This executes the disposition already
      recorded (but not yet acted on) for `sites_specs` in the original Phase 0 audit
      (`asset-sites-specs-narrative-docs`).
   4. Deliberately did NOT archive or remove: `apps/web-company` (Carlos's DR-02 decision: paused,
-     not deleted), the 4 still-useful `docs/reference/*.md` operational how-tos (DNS/Supabase/VPS/
+     not deleted), the 4 still-useful `docs/archive/reference/*.md` operational how-tos (DNS/Supabase/VPS/
      security), or any code under `apps/`, `packages/program-ledger`, `packages/factory-catalog`,
      `supabase/`, `execution/`, or `audit/`.
 - **Deferred to a follow-up Issue, not done in this pass:** `apps/web-master/docs/` and

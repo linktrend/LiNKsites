@@ -1,7 +1,7 @@
 # ARCHIVED — Not part of the active LiNKsites codebase
 
 **Archived:** 2026-07-14, per Carlos's decision (see `audit/13_decision_and_contradiction_register.md`,
-and this repository's active manual doctrine at `docs/specs/linksites-program-manual/`).
+and this repository's active manual doctrine at `docs/archive/specs/linksites-program-manual/`).
 
 ## What this was
 
@@ -21,7 +21,7 @@ historical/content reference.
 ## Why it does NOT get ported into the active codebase
 
 - **Direct Stripe checkout integration is out of scope for LiNKsites** per the Program Manual
-  (`docs/specs/linksites-program-manual/21_cross_program_contracts_with_linktrend_sales_odoo_stripe_and_shared_services.md`):
+  (`docs/archive/specs/linksites-program-manual/21_cross_program_contracts_with_linktrend_sales_odoo_stripe_and_shared_services.md`):
   Stripe/payment handling belongs to the LiNKtrend Sales Program; LiNKsites only ever receives a
   verified **Paid Website Activation Package** after Sales confirms Stripe + Odoo state. This
   legacy app's direct Stripe SDK checkout code represents the *old*, superseded architecture, not

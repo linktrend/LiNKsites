@@ -18,7 +18,7 @@ out_of_scope:
   - "Wiring assertRecycleAllowed() into archiveAndRecycleFoundation() (prospectAdaptation.ts) -- that would mean editing an already-merged file from a prior Issue, kept out of scope here to avoid an unreviewed edit to shared code"
   - "Persistence -- this module is a pure in-memory registry, matching FoundationReservationManager's existing pattern; no new store"
 inputs:
-  - "docs/specs/linksites-program-manual (manual §10 §33 'Conversion lock', §10.45 'conversion and recycling commands conflict', §10.49.13 exact-version-not-lost requirement)"
+  - "docs/archive/specs/linksites-program-manual (manual §10 §33 'Conversion lock', §10.45 'conversion and recycling commands conflict', §10.49.13 exact-version-not-lost requirement)"
   - "packages/factory-catalog/src/prospectAdaptation.ts (ProspectAdaptation, ProspectAdaptationStatus, archiveAndRecycleFoundation() -- prior Issue phase3-prospect-adaptation-001)"
   - "packages/factory-catalog/src/reusableFoundation.ts (FoundationReservationManager -- the existing exclusive-claim pattern this module follows)"
 expected_outputs:

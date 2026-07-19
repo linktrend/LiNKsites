@@ -27,7 +27,7 @@
 
 - No git tags/releases were located.
 - No release/deployment manifest (Launch Manifest / Release record per manual doctrine) exists.
-- `docs/ops/RELEASE_LOG.md` exists but is an empty table template — no releases have been logged through this mechanism yet.
+- `docs/archive/ops/RELEASE_LOG.md` exists but is an empty table template — no releases have been logged through this mechanism yet.
 - Payload migrations directory (`apps/cms/src/migrations/index.ts`) is an **empty array**; schema-push mode is used outside production per `payload.config.ts` logic (`NODE_ENV !== 'production'`), meaning there is currently no versioned, replayable migration history for the Payload schema — a reproducibility gap for any future production database.
 
 ## What "passing CI" currently proves (and does not prove)

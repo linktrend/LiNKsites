@@ -16,7 +16,7 @@ out_of_scope:
   - "Publication (draft -> published) -- explicitly out of scope per the manual's own boundary; this module only ever writes drafts"
   - "Persistence of the idempotency-key -> receipt map across process restarts -- this is an in-memory map only, matching the pattern already used for FoundationReservationManager before any Postgres-backed store existed"
 inputs:
-  - "docs/specs/linksites-program-manual (Section 12, Supabase Working Layer / Payload Draft-Published Layers / Content Promotion doctrine, extracted this session)"
+  - "docs/archive/specs/linksites-program-manual (Section 12, Supabase Working Layer / Payload Draft-Published Layers / Content Promotion doctrine, extracted this session)"
   - "packages/factory-catalog/src/reusableFoundation.ts, prospectAdaptation.ts (prior Issues, for state-machine and doc-comment style conventions)"
 expected_outputs:
   - "promotionService.ts with a tested PromotionService class implementing draft-only promotion, idempotency+checksum-conflict detection, readback verification, and a correctly-derived per-item/overall result ledger"

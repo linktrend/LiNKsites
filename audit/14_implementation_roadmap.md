@@ -65,7 +65,7 @@ This restates the manual's own phase doctrine (§60-§70) filtered through this 
   Diagnosed the Dependabot Updates workflow failures as Dependabot correctly reporting
   unresolvable constraints (not a broken pipeline) and fixed the two blocking cases (js-yaml,
   @babel/core) via narrow, same-major-bounded overrides.
-- **DONE (2026-07-13, PR #43):** Established `docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md`
+- **DONE (2026-07-13, PR #43):** Established `docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md`
   — the schema/contract versioning conventions Phase 1 requires before any Program Ledger,
   Site Specification, Vertical Kit, or Tier Specification schema is built in Phase 2/3.
 - **Next Phase 1 items, not yet started:** resolve GAP-46 (React 18/19 alignment, needed before
@@ -320,7 +320,7 @@ objects). Three Issues:
 - **`repo-cleanup-001`**: deleted 4 empty, zero-usage scaffold packages (`packages/blocks`,
   `packages/config`, `packages/ui`, `packages/utils`) and a stale, broken-link `library/README.md`;
   archived (git history preserved) `sites_specs/*.txt`, 4 pre-manual `docs/product/*.md` PRDs, and
-  5 pre-manual `docs/reference/*.md` planning docs into `archive/pre-manual-planning-docs/`
+  5 pre-manual `docs/archive/reference/*.md` planning docs into `archive/pre-manual-planning-docs/`
   (deliberately keeping the 4 still-useful operational how-tos — DNS/Supabase/VPS/security — in
   place); and, via a dedicated subagent's careful, file-by-file classification, archived 11 stale
   AI-agent session-completion-report docs from `apps/web-master/docs/` and `apps/cms/docs/` into
@@ -331,7 +331,7 @@ objects). Three Issues:
   advisory and a low-severity `esbuild` file-read advisory, both transitive via Payload's Postgres
   adapter) — down from the 222 GitHub reports on `main`, which is the unpromoted default branch, not
   `development` (confirmed via `gh repo view --json defaultBranchRef`; promotion is Principal-only
-  per `docs/BRANCHING_AND_DEPLOYMENT_POLICY.md`). Fixed both with bounded `pnpm.overrides`; `pnpm
+  per `docs/archive/BRANCHING_AND_DEPLOYMENT_POLICY.md`). Fixed both with bounded `pnpm.overrides`; `pnpm
   audit` now reports zero known vulnerabilities. Added a "Dependency vulnerability audit" step to
   `.github/workflows/ci.yml` so a future regression is caught automatically.
 - **`hardening-test-coverage-001`**: installed `@vitest/coverage-v8` in both `packages/factory-catalog`
@@ -433,7 +433,7 @@ repository's own Program Manual implementation work actually use it going forwar
   reverted two small stray edits that had leaked into the main workspace early in this session
   (a lint-script fix and a JSX-escaping fix, both already correctly committed on PR #38's branch)
   — the main workspace is now confirmed to genuinely match its pre-session state again, aside from
-  the intentional new additions (`audit/`, `docs/specs/`, `docs/adr/`, etc.).
+  the intentional new additions (`audit/`, `docs/specs/`, `docs/archive/adr/`, etc.).
 - **Performed an independent review pass** over `packages/program-ledger` (Issue
   `phase2-ledger-review-bugfix-001`, tracked under the newly-adopted `execution/` artifact
   structure) and found two real concurrency-safety bugs beyond the two already found while

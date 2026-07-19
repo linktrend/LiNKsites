@@ -35,14 +35,14 @@ read_first:
   - ".cursor/execution/INDEX.yaml"
   - ".cursor/execution/CANONICAL-LAWS.md"
   - ".cursor/execution/MINIMUM-RUNTIME-MODEL.md"
-  - "docs/specs/linksites-program-manual/24_repository_audit_implementation_roadmap_acceptance_criteria_and_glossary.md"
+  - "docs/archive/specs/linksites-program-manual/24_repository_audit_implementation_roadmap_acceptance_criteria_and_glossary.md"
   - "audit/14_implementation_roadmap.md"
 read_forbidden:
   - "sibling LiNKtrend repositories not reachable from this workspace"
 program_definition_of_done:
-  - "All manual §81 Final Program Acceptance criteria are met with verified evidence (per audit/14_implementation_roadmap.md and docs/specs/linksites-program-manual §81)"
+  - "All manual §81 Final Program Acceptance criteria are met with verified evidence (per audit/14_implementation_roadmap.md and docs/archive/specs/linksites-program-manual §81)"
 global_constraints:
-  - "Follow docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md for every new contract/schema"
+  - "Follow docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md for every new contract/schema"
   - "No live-infrastructure claims without live verification; pglite/mocked verification is clearly labeled as such, never conflated with live-environment proof"
   - "Every PR stays narrowly scoped, verified locally (lint/typecheck/test/build as applicable), and stops at review_ready (draft PR) for independent review before integration"
 release_requirements:
@@ -53,7 +53,7 @@ optional_fields:
     - "audit/13_decision_and_contradiction_register.md"
   notes:
     - "Phase 0 (audit) and most of the security/stability portion of Phase 1 are complete as of PRs #36-#46 (see audit/14_implementation_roadmap.md's PR table). Phase 2 (Program Ledger) foundation is in progress as of PR #47/#48."
-    - "EXECUTION MODE (Decision DR-08, 2026-07-14): Carlos rejected treating this as a slow, session-bounded effort requiring re-approval between phases. Per LiNKdeveloper doctrine, this program executes continuously: pick the next ready Issue by dependency order, execute it, produce proof, stop only at review_ready (draft PR) -- do not pause for conversational check-ins between Issues. Genuine stops are: a failing gate that cannot be resolved with available information/access, a real architectural or business decision only Carlos can make, or exhaustion of what is safely buildable without live infrastructure. This manual (docs/specs/linksites-program-manual/) plus audit/14_implementation_roadmap.md IS the plan -- no separate PRD is being produced, per manual §56's own instruction that a PRD should reference, not duplicate, the manual."
+    - "EXECUTION MODE (Decision DR-08, 2026-07-14): Carlos rejected treating this as a slow, session-bounded effort requiring re-approval between phases. Per LiNKdeveloper doctrine, this program executes continuously: pick the next ready Issue by dependency order, execute it, produce proof, stop only at review_ready (draft PR) -- do not pause for conversational check-ins between Issues. Genuine stops are: a failing gate that cannot be resolved with available information/access, a real architectural or business decision only Carlos can make, or exhaustion of what is safely buildable without live infrastructure. This manual (docs/archive/specs/linksites-program-manual/) plus audit/14_implementation_roadmap.md IS the plan -- no separate PRD is being produced, per manual §56's own instruction that a PRD should reference, not duplicate, the manual."
 ---
 
 # Program
@@ -61,7 +61,7 @@ optional_fields:
 ## Objective
 
 See front matter. This program operationalizes the LiNKsites Program Manual
-(`docs/specs/linksites-program-manual/`) into a bounded, evidence-driven
+(`docs/archive/specs/linksites-program-manual/`) into a bounded, evidence-driven
 implementation roadmap, executed as a stack of small, independently
 verifiable Issues (in practice, one draft GitHub PR per Issue in this
 repository).

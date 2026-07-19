@@ -4,7 +4,7 @@ This package is written so a future implementation AI (with no access to this ch
 
 ## What this package contains, and where to find the rest
 
-- **The complete manual:** `docs/specs/linksites-program-manual/01_*.md` through `24_*.md`, verbatim, in order, with `MANIFEST.md`/`MANIFEST.csv` for integrity verification.
+- **The complete manual:** `docs/archive/specs/linksites-program-manual/01_*.md` through `24_*.md`, verbatim, in order, with `MANIFEST.md`/`MANIFEST.csv` for integrity verification.
 - **Audit snapshot and registries:** `audit/01_scope_snapshot_and_method.md` through `audit/04_data_and_storage_registry.yaml`.
 - **Current and target architecture:** `audit/05_current_architecture.md`, `audit/06_target_architecture.md`.
 - **Traceability Matrix (representative, not exhaustive — see caveat below):** `audit/07_requirements_traceability.csv`.
@@ -15,7 +15,7 @@ This package is written so a future implementation AI (with no access to this ch
 - **Test/CI baseline:** `audit/11_test_ci_and_release_baseline.md`.
 - **Environment and secret-reference map without values:** see "Secrets" below — no values are anywhere in this package.
 - **Known blockers and approvals needed:** see "Blockers requiring Carlos" below.
-- **Definition of Ready and Done:** verbatim in manual §75-§76 (`docs/specs/linksites-program-manual/24_*.md`); do not paraphrase or weaken these when writing work packets.
+- **Definition of Ready and Done:** verbatim in manual §75-§76 (`docs/archive/specs/linksites-program-manual/24_*.md`); do not paraphrase or weaken these when writing work packets.
 
 ## Traceability Matrix caveat
 

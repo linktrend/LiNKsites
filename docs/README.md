@@ -1,18 +1,12 @@
-# LiNKsites Documentation Index
+# LiNKsites Documentation
 
-Owner: LiNKtrend Platform  
-Last updated: 2026-05-31
+**Source of truth (2026-07-19):**
 
-## Core Governance
-- [Branching and Deployment Policy](./BRANCHING_AND_DEPLOYMENT_POLICY.md) — **updated May 2026** for LiNKdev flow (`development` integration; Principal-only `staging`/`main`; see SPEC §8)
-- [Documentation Governance](./DOCUMENTATION_GOVERNANCE.md)
-- [Archive](./archive/README.md)
+- [LINKSITES-INTENT.md](./LINKSITES-INTENT.md)
+- [LINKSITES-TECHNICAL-PRD.md](./LINKSITES-TECHNICAL-PRD.md)
+- [LINKSITES-OPERATIONS-MANUAL.md](./LINKSITES-OPERATIONS-MANUAL.md)
+- [OPEN-ISSUES.md](./OPEN-ISSUES.md) — append-only build log
 
-## Operational Docs
-- [Business Docs](./business)
-- [Ops Docs](./ops)
-- [Policies](./policies)
-- [Reference](./reference)
+Superseded Program docs (manual, ADRs, ops, policies, reference) live under [archive/](./archive/) — see [archive/README.md](./archive/README.md).
 
-## Rule
-If behavior changes, docs must be updated in the same PR.
+Related (not under `docs/`): root `audit/` and `execution/`.

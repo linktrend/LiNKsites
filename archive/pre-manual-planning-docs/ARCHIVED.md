@@ -7,7 +7,7 @@ before the Supabase/Odoo integration phases.
 ## What this is
 
 Early planning documents written before the 24-section LiNKsites Program Manual
-(`docs/specs/linksites-program-manual/`) was ingested into this repository on 2026-07-13. Three
+(`docs/archive/specs/linksites-program-manual/`) was ingested into this repository on 2026-07-13. Three
 groups are archived here:
 
 - `sites_specs/` — three narrative architecture/specification `.txt` documents describing a
@@ -19,9 +19,9 @@ groups are archived here:
   Template Website Improvement Proposal v 4.0"), previously at `docs/product/`.
 - `reference/` — five pre-manual "LiNKsites Factory Kit" planning/workflow docs (architecture
   notes, workflow overview, approach evaluation, implementation plan, template creation guide),
-  previously at `docs/reference/`.
+  previously at `docs/archive/reference/`.
 
-## Why these, specifically, and not the rest of `docs/reference/`
+## Why these, specifically, and not the rest of `docs/archive/reference/`
 
 All eight archived documents describe the same simpler, pre-manual mental model (one shared
 Next.js platform + one central Payload CMS + a simple "template" concept + an optional premium
@@ -29,12 +29,12 @@ dedicated frontend) using vocabulary and structure the Program Manual has since 
 more rigor: Vertical Kit, Tier Specification, Reusable Site Foundation, Component Registry, Site
 Assembly Manifest, Program Ledger, Proof Level, Preview Inventory, Conversion Lock, etc. (all now
 real, tested code in `packages/factory-catalog` and `packages/program-ledger`). Leaving these
-prominently in `docs/reference/` and `docs/product/` risked a future reader citing the old,
+prominently in `docs/archive/reference/` and `docs/product/` risked a future reader citing the old,
 simpler "Template Creation Guide" or "Implementation Plan" as if it were still current doctrine,
 when the manual and this repository's own `execution/` and `packages/factory-catalog/` records are
 now authoritative.
 
-The remaining `docs/reference/` documents (`GODADDY_DNS_SETUP.md`, `SUPABASE_SETUP.md`,
+The remaining `docs/archive/reference/` documents (`GODADDY_DNS_SETUP.md`, `SUPABASE_SETUP.md`,
 `VPS_DEPLOYMENT_GUIDE.md`, `security_best_practices_report.md`) were deliberately **NOT** archived
 — they are narrow, still-useful operational how-to guides (DNS records, a Supabase connection
 walkthrough, a VPS layout outline, a secret-scanning report) that the manual does not replace with

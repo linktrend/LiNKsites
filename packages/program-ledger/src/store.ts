@@ -3,7 +3,7 @@ import type { GateResult, IdempotencyRecord, Issue, IssueDependency, LedgerEvent
 /**
  * Storage abstraction. Ledger business logic (ledger.ts) depends only on
  * this interface, never on a specific database — per
- * docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md's "generated
+ * docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md's "generated
  * types / single source of truth" preference and manual §20's requirement
  * that the Program Ledger be the authoritative state store regardless of
  * which runtime (n8n, CrewAI, Agent Zero, Cursor, ...) executes a Run.
