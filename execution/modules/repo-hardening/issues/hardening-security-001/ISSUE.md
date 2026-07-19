@@ -11,7 +11,7 @@ scope:
   - "package.json: two new bounded pnpm.overrides entries (drizzle-orm, esbuild)"
   - ".github/workflows/ci.yml: new 'Dependency vulnerability audit' step"
 out_of_scope:
-  - "Promoting these fixes (or any other development-branch change) to main -- that promotion is Principal-only per docs/BRANCHING_AND_DEPLOYMENT_POLICY.md, not something an agent session does"
+  - "Promoting these fixes (or any other development-branch change) to main -- that promotion is Principal-only per docs/archive/BRANCHING_AND_DEPLOYMENT_POLICY.md, not something an agent session does"
   - "Investigating GitHub's specific default-branch Dependabot count further -- confirmed to be a main-branch, not development-branch, figure via `gh repo view --json defaultBranchRef`"
 inputs:
   - "pnpm audit (run directly against packages/factory-catalog + workspace root on development)"

@@ -10,7 +10,7 @@ linksites.assembly.deterministic_renderer,07,Site Assembly Engine,apps/web-maste
 linksites.design.token_hierarchy,06,Design tokens,apps/web-master/src/styles/tokens.css,CSS variables + data-theme,none,configured-unverified,none,partial (CSS only, no Design Intelligence Catalog object),GAP-09
 linksites.design.catalog_schema,06,Design Intelligence Catalog,none found,none,none,none,none,absent,GAP-10
 linksites.vertical_kit.schema_and_lifecycle,08,Vertical Kit,sites_specs/*.txt (narrative only),none,none,none,none,absent (as machine object),GAP-11
-linksites.tier.specification_and_enforcement,03/08,Tier Specification,docs/business/PRICING_PACKAGING_SOP.md (narrative SOP only),none,none,none,none,absent (as machine object),GAP-12
+linksites.tier.specification_and_enforcement,03/08,Tier Specification,docs/archive/business/PRICING_PACKAGING_SOP.md (narrative SOP only),none,none,none,none,absent (as machine object),GAP-12
 linksites.foundation.manifest_and_adaptation_contract,08,Reusable Site Foundation,apps/web-master/src/templates/registry.ts (single template: marketing-smb-v1),none,none,configured-unverified,none,prototype,GAP-13
 linksites.sales_contract.lead_research_package,09,Lead Research Package,none found,none,none,none,none,absent,GAP-14
 linksites.planning.site_specification,09,Site Specification,sites_specs/*.txt (narrative, not schema-conformant),none,none,none,none,working-misaligned (folder name matches doctrine term but content does not match schema),GAP-15
@@ -23,7 +23,7 @@ linksites.hosting.cloudflare_traefik_routing,15/17,Traefik+Cloudflare,deploy/doc
 linksites.hosting.hostname_resolution_fail_closed,15/18,Hostname->Site ID resolution,apps/web-master/src/lib/site-context.ts,priority-ordered resolution logic,none found testing unknown-hostname fail-closed behavior,configured-unverified,none,partial,GAP-22
 linksites.ops.monitoring_stack,16,Prometheus/Grafana/Loki/Alertmanager,none found,none,none,none,none,absent,GAP-23
 linksites.backup.postgres_protection,16,Backup/restore,none found,none,none,none,none,absent (Critical),GAP-24
-linksites.domain.dcv_certificate_lifecycle,17,Domain/TLS,docs/ops/VPS_REVERSE_PROXY_AND_CLOUDFLARE.md (planning doc only),none,none,none,none,absent (as executable config),GAP-25
+linksites.domain.dcv_certificate_lifecycle,17,Domain/TLS,docs/archive/ops/VPS_REVERSE_PROXY_AND_CLOUDFLARE.md (planning doc only),none,none,none,none,absent (as executable config),GAP-25
 linksites.forms.durable_submission_outbox,17,Forms outbox,apps/web-master/src/app/api/ai-actions/contact/route.ts (contact route found; outbox pattern not confirmed),none,none,none,none,unknown/partial,GAP-26
 linksites.security.secrets_management,18,Secrets manager,apps/cms/ops/render-runtime-env-from-gsm.sh; apps/cms/deploy/prod/.env.example,GSM secret-name pointers only,none,configured-unverified,none,configured-unverified,GAP-27
 linksites.security.executor_capability_envelope,18,Executor capability envelope,none found,none,none,none,none,absent,GAP-28

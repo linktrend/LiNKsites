@@ -30,7 +30,7 @@ read_first:
   - ".cursor/execution/INDEX.yaml"
   - "execution/PROGRAM.md"
   - "audit/14_implementation_roadmap.md (Phase 3 section)"
-  - "docs/specs/linksites-program-manual/08_vertical_kits_tier_specifications_and_reusable_site_foundations.md"
+  - "docs/archive/specs/linksites-program-manual/08_vertical_kits_tier_specifications_and_reusable_site_foundations.md"
 read_forbidden:
   - "unrelated modules"
 module_definition_of_done:

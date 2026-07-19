@@ -13,7 +13,7 @@ out_of_scope:
   - "Real design content sourced from ui-ux-pro-max-skill -- not reachable from this repository; PLACEHOLDER_STYLE_FAMILY is explicitly non-production content"
   - "Design Decision Record persistence, similarity/anti-repetition detection across previews, agent-judgment ranking -- future Issues once real Catalog content exists"
 inputs:
-  - "docs/specs/linksites-program-manual/06_*.md (design intelligence catalog section)"
+  - "docs/archive/specs/linksites-program-manual/06_*.md (design intelligence catalog section)"
 expected_outputs:
   - "designCatalog.ts with tested token-hierarchy resolution and an accessibility-gated production-readiness guard"
 acceptance_criteria:

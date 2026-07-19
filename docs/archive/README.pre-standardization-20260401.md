@@ -7,30 +7,30 @@
 - `/Users/linktrend/Projects/LiNKsites/docs/product/Master Template Website Improvement Proposal v 4.0.md`
 
 ## Policies
-- `/Users/linktrend/Projects/LiNKsites/docs/policies/BRANCHING_AND_RELEASE_SOP.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/policies/DOCS_POLICY.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/policies/BRANCHING_AND_RELEASE_SOP.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/policies/DOCS_POLICY.md`
 
 ## Operations
-- `/Users/linktrend/Projects/LiNKsites/docs/ops/VPS_REVERSE_PROXY_AND_CLOUDFLARE.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/ops/OPS_RUNBOOK.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/ops/REPO_OPERATOR_SOP.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/ops/GIT_STRATEGY.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/ops/ENVIRONMENT_MATRIX.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/ops/RELEASE_LOG.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/ops/VPS_REVERSE_PROXY_AND_CLOUDFLARE.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/ops/OPS_RUNBOOK.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/ops/REPO_OPERATOR_SOP.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/ops/GIT_STRATEGY.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/ops/ENVIRONMENT_MATRIX.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/ops/RELEASE_LOG.md`
 
 ## Reference
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/IMPLEMENTATION_PLAN.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/SUPABASE_SETUP.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/TEMPLATE_CREATION_GUIDE.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/VPS_DEPLOYMENT_GUIDE.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/GODADDY_DNS_SETUP.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/LINKSITES_FACTORY_ARCHITECTURE.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/LINKSITES_FACTORY_KIT_WORKFLOW.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/APPROACH_EVALUATION.md`
-- `/Users/linktrend/Projects/LiNKsites/docs/reference/security_best_practices_report.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/IMPLEMENTATION_PLAN.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/SUPABASE_SETUP.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/TEMPLATE_CREATION_GUIDE.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/VPS_DEPLOYMENT_GUIDE.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/GODADDY_DNS_SETUP.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/LINKSITES_FACTORY_ARCHITECTURE.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/LINKSITES_FACTORY_KIT_WORKFLOW.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/APPROACH_EVALUATION.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/reference/security_best_practices_report.md`
 
 ## Business
-- `/Users/linktrend/Projects/LiNKsites/docs/business/PRICING_PACKAGING_SOP.md`
+- `/Users/linktrend/Projects/LiNKsites/docs/archive/business/PRICING_PACKAGING_SOP.md`
 
 ## App‑specific docs
 - `apps/web-master/docs` (master template docs)

@@ -14,7 +14,7 @@
 
 ## Method
 
-1. Ingested the 24-section Program Manual verbatim into `docs/specs/linksites-program-manual/` (Step 0), verified byte-identical via `diff`, recorded SHA-256 digests in `MANIFEST.csv`/`MANIFEST.md`.
+1. Ingested the 24-section Program Manual verbatim into `docs/archive/specs/linksites-program-manual/` (Step 0), verified byte-identical via `diff`, recorded SHA-256 digests in `MANIFEST.csv`/`MANIFEST.md`.
 2. Read manual Section 24 (repository-audit doctrine itself) in full directly.
 3. Delegated full-text extraction of Sections 01–23 to four parallel read-only sub-agents (grouped 01–06, 07–12, 13–18, 19–23), each instructed to cite section numbers for every claim and flag repo-reconciliation risks. Outputs retained as source evidence for this audit (§53 traceability inputs).
 4. Delegated a fifth read-only sub-agent to perform an exhaustive repository walk (directory inventory, package/dependency inventory, Payload/Supabase/frontend audit, docs audit, test audit, secrets-pattern scan, cross-program grep) under Ask-mode (no write, no destructive shell).
@@ -36,7 +36,7 @@
 | Local untracked `apps/cms/deploy/prod/.env` | Present on disk, gitignored — not inspected for contents (secret-value handling rule). |
 | CI (`gh run list`, last 15) | "CI" workflow on `development` = placeholder step only, passing trivially. CodeQL scheduled scans on `main` = passing. Dependabot update PRs = repeatedly failing (js-yaml, @babel/core, ws, undici). |
 | pnpm / Node toolchain | `pnpm@10.0.0`, Turbo `^2.5.6`, workspaces `apps/*`, `packages/*` |
-| Manual version audited against | LiNKsites Program Manual, ingested copy at `docs/specs/linksites-program-manual/`, manifest SHA-256 digests in `MANIFEST.csv` (this session, 2026-07-13) |
+| Manual version audited against | LiNKsites Program Manual, ingested copy at `docs/archive/specs/linksites-program-manual/`, manifest SHA-256 digests in `MANIFEST.csv` (this session, 2026-07-13) |
 
 ## Explicit limitations of this audit pass
 

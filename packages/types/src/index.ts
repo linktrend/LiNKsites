@@ -9,7 +9,7 @@ export type SiteId = string
 
 /**
  * Shared data-contract version marker, per
- * docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md: every data
+ * docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md: every data
  * contract carries an explicit MAJOR.MINOR schema_version, not a full
  * semver triple (that's reserved for npm package versions). Lives here
  * (packages/types) as the single canonical source so every contract

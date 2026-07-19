@@ -5,7 +5,7 @@
  * LiNKsites Program Manual §20 (Issues, Runs, Executors, Model Routing,
  * Idempotency, Retry, and Compensation) and §04 (state model doctrine).
  *
- * Versioned per docs/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md:
+ * Versioned per docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md:
  * every contract below carries an explicit `schemaVersion` as a
  * MAJOR.MINOR pair. This is version 1.0 — the first version, not an
  * implicit/unversioned baseline.

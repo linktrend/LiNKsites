@@ -16,7 +16,7 @@ out_of_scope:
   - "The manual's remaining hard filters that have no backing data in this repository yet: content availability, design-profile compatibility, locale/script, runtime mode, integration availability, accessibility status, performance budget, security policy, incident/suspension status"
   - "Persistence of match decisions/history -- this module is a pure decision function plus the existing in-memory FoundationReservationManager, no new store"
 inputs:
-  - "docs/specs/linksites-program-manual (manual §08.16, §08.28, §10.18)"
+  - "docs/archive/specs/linksites-program-manual (manual §08.16, §08.28, §10.18)"
   - "packages/factory-catalog/src/reusableFoundation.ts (ReusableSiteFoundation, FoundationReservationManager, FoundationReservation -- prior Issue phase3-reusable-foundation-001)"
   - "audit/14_implementation_roadmap.md (GAP-16)"
 expected_outputs:
