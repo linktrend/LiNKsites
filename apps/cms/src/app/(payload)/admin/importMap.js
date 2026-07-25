@@ -23,9 +23,11 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_48a75e37b0630d5b8c8066e180c0e6ef } from '../../../admin/graphics/Icon'
 import { default as default_88541c286955dbac4d90fb5ed606381c } from '../../../admin/graphics/Logo'
+import { default as default_308cbbdb93d81f465e74d015b55a322a } from '../../../admin/components/SiteSelectorNav'
 import { default as default_807b0bb11d0e93a76161783ce75e2661 } from '../../../admin/views/ApprovalQueue'
 import { default as default_3faed2e53ac0ec654f1313ac798d1b0d } from '../../../admin/views/TranslationQueue'
 import { default as default_7f7c64c90fe0c75295625d3fefd76897 } from '../../../admin/views/SiteDashboard'
+import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -53,7 +55,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/admin/graphics/Icon#default": default_48a75e37b0630d5b8c8066e180c0e6ef,
   "/admin/graphics/Logo#default": default_88541c286955dbac4d90fb5ed606381c,
+  "/admin/components/SiteSelectorNav#default": default_308cbbdb93d81f465e74d015b55a322a,
   "/admin/views/ApprovalQueue#default": default_807b0bb11d0e93a76161783ce75e2661,
   "/admin/views/TranslationQueue#default": default_3faed2e53ac0ec654f1313ac798d1b0d,
-  "/admin/views/SiteDashboard#default": default_7f7c64c90fe0c75295625d3fefd76897
+  "/admin/views/SiteDashboard#default": default_7f7c64c90fe0c75295625d3fefd76897,
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
