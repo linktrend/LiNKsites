@@ -5,10 +5,11 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   consumePinnedLibraryEntry,
+  assertLibraryEntryContract,
   canonicalJsonChecksum,
   LINKSITES_LIBRARY_CONSUMER,
   LINKLIBRARIES_REPOSITORY,
-  materializeVerifiedLibraryCommit,
+  createOfflineLibraryFixtureTransport,
   submitArchitectCandidate,
   type LibraryCatalog,
   type LibraryCompatibilityRequest,
@@ -74,16 +75,13 @@ function buildTransport(overrides: Partial<{
   readEntryAtCommit: LibraryExactCommitTransport['verifiedCommit']['readEntryAtCommit']
 }> = {}): LibraryExactCommitTransport {
   const catalog = overrides.catalog ?? fixtureCatalog
-  return {
-    verifiedCommit: materializeVerifiedLibraryCommit({
-      request: { repositoryUrl: LINKLIBRARIES_REPOSITORY, commitSha: COMMIT_SHA },
-      catalog,
-      readEntryAtCommit: overrides.readEntryAtCommit ?? (({ entryId }) => ({
+  return createOfflineLibraryFixtureTransport({
+    readCatalog: () => catalog,
+    readEntryAtCommit: overrides.readEntryAtCommit ?? (({ entryId }) => ({
       entry: { ...(overrides.entry ?? fixtureEntry), entryId },
       files: overrides.files ?? fixtureFiles,
-      })),
-    }),
-  }
+    })),
+  })
 }
 
 describe('W1-05 LiNKlibraries consumer', () => {
@@ -142,8 +140,7 @@ describe('W1-05 LiNKlibraries consumer', () => {
           readCatalog: () => fixtureCatalog,
           readEntryAtCommit: () => ({ entry: fixtureEntry, files: fixtureFiles }),
         },
-      },
-    } as unknown as LibraryExactCommitTransport,
+      } as unknown as LibraryExactCommitTransport,
     })).rejects.toThrow(/materialized trusted exact-commit capability/)
 
     let selectedPath: string | undefined
@@ -162,7 +159,7 @@ describe('W1-05 LiNKlibraries consumer', () => {
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
       transport: buildTransport({ entry: { ...fixtureEntry, summary: 'substituted metadata' } }),
-    })).rejects.toThrow(/does not match the pinned catalog/)
+    })).rejects.toThrow(/source-owned immutable fixture/)
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 19, runtimes: compatibility.runtimes }, executable, transport: buildTransport(),
@@ -187,7 +184,16 @@ describe('W1-05 LiNKlibraries consumer', () => {
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
       transport: buildTransport({ entry: { ...fixtureEntry, license: { ...fixtureEntry.license, unexpected: true } } }),
-    })).rejects.toThrow(/outside the authoritative schema/)
+    })).rejects.toThrow(/source-owned immutable fixture/)
+
+    expect(() => assertLibraryEntryContract({
+      ...fixtureEntry,
+      compatibility: { ...fixtureEntry.compatibility, packageManager: 'pnpm' },
+      license: { ...fixtureEntry.license, notes: 'schema-permitted additional property' },
+      securityReview: { ...fixtureEntry.securityReview, evidenceRef: 'offline-review-note' },
+      usage: { ...fixtureEntry.usage, migrationMode: 'fixture' },
+      provenance: { ...fixtureEntry.provenance, sourceBranch: 'development' },
+    })).not.toThrow()
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
@@ -205,7 +211,10 @@ describe('W1-05 LiNKlibraries consumer', () => {
         catalog: { ...fixtureCatalog, entries: [{ ...fixtureCatalog.entries[0], kind: 'vetted_oss' }] },
         entry: { ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'https://example.com/package', versionOrRange: '^1.2.3' } },
       }),
-    })).resolves.toBeDefined()
+    })).rejects.toThrow(/source-owned immutable fixture/)
+
+    expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } })).toThrow(/vetted_oss provenance.sourceUrl/)
+    expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'https://example.com/package', versionOrRange: '^1.2.3' } })).not.toThrow()
   })
 
   it('rejects metadata-only, missing-asset, undeclared, and checksum-mismatch selections', async () => {
@@ -217,22 +226,22 @@ describe('W1-05 LiNKlibraries consumer', () => {
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
       transport: buildTransport({ entry: { ...fixtureEntry, files: fixtureEntry.files.filter(({ path }) => path === 'README.md') } }),
-    })).rejects.toThrow(/missing LiNKsites executable/)
+    })).rejects.toThrow(/source-owned immutable fixture/)
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
       transport: buildTransport({ files: { ...fixtureFiles, 'assets/marketingSmbV1.ts': undefined as unknown as string } }),
-    })).rejects.toThrow(/missing asset/)
+    })).rejects.toThrow(/asset content/)
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
       transport: buildTransport({ files: { ...fixtureFiles, 'assets/marketingSmbV1.ts': 'tampered' } }),
-    })).rejects.toThrow(/failed SHA-256/)
+    })).rejects.toThrow(/asset content/)
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
       transport: buildTransport({ files: { ...fixtureFiles, 'assets/undeclared.ts': 'unexpected' } }),
-    })).rejects.toThrow(/undeclared asset/)
+    })).rejects.toThrow(/fabricated or incomplete immutable asset set/)
   })
 
   it('requires receipts for explicit library selection and durably round-trips an integrity-bound site record', async () => {
@@ -260,7 +269,7 @@ describe('W1-05 LiNKlibraries consumer', () => {
       manifestId: 'manifest-missing-receipt', manifestVersion: 1, siteId: 'site-library-backed', siteClass: 'foundation',
       siteSpec: { ...siteSpec, libraryReceipt: undefined }, kit: { ...HOME_SERVICES_KIT, status: 'active' }, componentRegistry: buildSeededComponentRegistry(),
       platformReleaseRef: 'release-1', pagePlan: [{ route: '/', pageType: 'home', componentIds: ['SignupHero', 'CTASection'] }],
-    })).toThrow(/intrinsic trusted/)
+    })).toThrow(/provenance and receipt bound to the same consumption evidence/)
     const persisted = createPersistedLibraryBackedSite({ siteSpec, manifest })
     const restored = deserializePersistedLibraryBackedSite(serializePersistedLibraryBackedSite(persisted))
     expect(restored.siteSpec.libraryReceipt).toEqual(consumption.receipt)
@@ -274,6 +283,25 @@ describe('W1-05 LiNKlibraries consumer', () => {
     const { integrityChecksum: _oldChecksum, ...tamperedPayload } = tamperedEvidence
     tamperedEvidence.integrityChecksum = canonicalJsonChecksum(tamperedPayload)
     expect(() => deserializePersistedLibraryBackedSite(JSON.stringify(tamperedEvidence))).toThrow(/failed SHA-256|file contents|integrity checksum/)
+
+    const fabricatedReadback = JSON.parse(serializePersistedLibraryBackedSite(persisted)) as typeof persisted
+    fabricatedReadback.libraryConsumption.entry = { ...fabricatedReadback.libraryConsumption.entry, summary: 'fabricated entry' }
+    fabricatedReadback.libraryConsumption.receipt = {
+      ...fabricatedReadback.libraryConsumption.receipt,
+      entryChecksum: canonicalJsonChecksum(fabricatedReadback.libraryConsumption.entry),
+    }
+    fabricatedReadback.libraryConsumption.verification = {
+      ...fabricatedReadback.libraryConsumption.verification,
+      entryChecksum: fabricatedReadback.libraryConsumption.receipt.entryChecksum,
+    }
+    fabricatedReadback.libraryReceipt = fabricatedReadback.libraryConsumption.receipt
+    fabricatedReadback.siteSpec.libraryReceipt = fabricatedReadback.libraryReceipt
+    fabricatedReadback.manifest.libraryReceipt = fabricatedReadback.libraryReceipt
+    fabricatedReadback.siteSpec.libraryConsumption = fabricatedReadback.libraryConsumption
+    fabricatedReadback.manifest.libraryConsumption = fabricatedReadback.libraryConsumption
+    const { integrityChecksum: _fabricatedChecksum, ...fabricatedPayload } = fabricatedReadback
+    fabricatedReadback.integrityChecksum = canonicalJsonChecksum(fabricatedPayload)
+    expect(() => deserializePersistedLibraryBackedSite(JSON.stringify(fabricatedReadback))).toThrow(/source-owned W1-05 offline authority|immutable authority/)
   })
 
   it('keeps Architect candidates proposal-only and cannot replace an approved canonical row', () => {

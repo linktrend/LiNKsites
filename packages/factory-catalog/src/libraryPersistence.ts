@@ -10,10 +10,12 @@ import type { SiteSpecification } from './siteSpecification.js'
 import {
   assertLibraryConsumptionEvidence,
   assertLibraryConsumptionReceipt,
+  assertLibraryVerificationRecord,
   canonicalJsonChecksum,
   canonicalJsonStringify,
   type LibraryConsumption,
   type LibraryConsumptionReceipt,
+  type LibraryVerificationRecord,
 } from './libraryConsumer.js'
 
 export interface PersistedLibraryBackedSite {
@@ -22,6 +24,7 @@ export interface PersistedLibraryBackedSite {
   manifest: SiteAssemblyManifest
   libraryConsumption: LibraryConsumption
   libraryReceipt: LibraryConsumptionReceipt
+  libraryVerification: LibraryVerificationRecord
   integrityChecksum: string
 }
 
@@ -39,7 +42,8 @@ function payloadOf(record: Omit<PersistedLibraryBackedSite, 'integrityChecksum'>
 function assertBound(record: Omit<PersistedLibraryBackedSite, 'integrityChecksum'>): void {
   assertLibraryConsumptionEvidence(record.libraryConsumption)
   assertLibraryConsumptionReceipt(record.libraryReceipt)
-  if (record.libraryConsumption.receipt.receiptId !== record.libraryReceipt.receiptId || record.libraryConsumption.receipt.entryChecksum !== record.libraryReceipt.entryChecksum) {
+  assertLibraryVerificationRecord(record.libraryVerification)
+  if (record.libraryConsumption.receipt.receiptId !== record.libraryReceipt.receiptId || record.libraryConsumption.receipt.entryChecksum !== record.libraryReceipt.entryChecksum || canonicalJsonStringify(record.libraryConsumption.verification) !== canonicalJsonStringify(record.libraryVerification)) {
     throw new LibraryPersistenceError('Persisted library-backed site receipt is not the receipt from the materialized consumption evidence.')
   }
   if (record.siteSpec.libraryEntryId !== record.libraryReceipt.entryId || record.manifest.libraryEntryId !== record.libraryReceipt.entryId || !record.siteSpec.libraryConsumption || !record.manifest.libraryConsumption) {
@@ -63,6 +67,7 @@ export function createPersistedLibraryBackedSite(input: {
     manifest: input.manifest,
     libraryConsumption: input.siteSpec.libraryConsumption,
     libraryReceipt: input.siteSpec.libraryReceipt,
+    libraryVerification: input.siteSpec.libraryConsumption.verification,
   } satisfies Omit<PersistedLibraryBackedSite, 'integrityChecksum'>
   assertBound(base)
   return { ...base, integrityChecksum: canonicalJsonChecksum(payloadOf(base)) }
@@ -87,13 +92,14 @@ export function deserializePersistedLibraryBackedSite(serialized: string): Persi
 export function assertPersistedLibraryBackedSite(value: unknown): asserts value is PersistedLibraryBackedSite {
   if (!value || typeof value !== 'object') throw new LibraryPersistenceError('Persisted library-backed site must be an object.')
   const record = value as Partial<PersistedLibraryBackedSite>
-  if (!record.schemaVersion || record.schemaVersion.major !== 1 || record.schemaVersion.minor !== 0 || !record.siteSpec || !record.manifest || !record.libraryConsumption || !record.libraryReceipt || typeof record.integrityChecksum !== 'string') throw new LibraryPersistenceError('Persisted library-backed site has an invalid shape.')
+  if (!record.schemaVersion || record.schemaVersion.major !== 1 || record.schemaVersion.minor !== 0 || !record.siteSpec || !record.manifest || !record.libraryConsumption || !record.libraryReceipt || !record.libraryVerification || typeof record.integrityChecksum !== 'string') throw new LibraryPersistenceError('Persisted library-backed site has an invalid shape.')
   const base = {
     schemaVersion: record.schemaVersion,
     siteSpec: record.siteSpec,
     manifest: record.manifest,
     libraryConsumption: record.libraryConsumption,
     libraryReceipt: record.libraryReceipt,
+    libraryVerification: record.libraryVerification,
   } as Omit<PersistedLibraryBackedSite, 'integrityChecksum'>
   assertBound(base)
   if (record.integrityChecksum !== canonicalJsonChecksum(payloadOf(base))) throw new LibraryPersistenceError('Persisted library-backed site integrity checksum mismatch.')
