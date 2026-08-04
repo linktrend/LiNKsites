@@ -46,6 +46,7 @@ import type { ProspectAdaptation } from './prospectAdaptation.js'
 import { assertKitIsProductionReady, type VerticalKit } from './verticalKit.js'
 import type { ComponentRegistry } from './componentRegistry.js'
 import { TIER_SPECIFICATIONS } from './tierSpecification.js'
+import type { LibraryConsumptionReceipt } from './libraryConsumer.js'
 
 export type SiteClass = 'foundation' | 'preview' | 'customer'
 
@@ -83,6 +84,8 @@ export interface SiteAssemblyManifest {
   pages: SiteAssemblyPage[]
   lineage: SiteAssemblyLineage
   resolvedAt: string
+  /** Carried forward from the Site Specification as durable Library evidence. */
+  libraryReceipt?: LibraryConsumptionReceipt
 }
 
 export class SiteAssemblyError extends Error {
@@ -194,5 +197,6 @@ export function assembleSiteManifest(input: AssembleSiteManifestInput): SiteAsse
     pages,
     lineage: lineage ?? {},
     resolvedAt: new Date().toISOString(),
+    ...(siteSpec.libraryReceipt ? { libraryReceipt: siteSpec.libraryReceipt } : {}),
   }
 }

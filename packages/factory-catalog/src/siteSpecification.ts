@@ -28,6 +28,7 @@ import { assertKitIsProductionReady, resolveEffectiveMaxPages, type VerticalKit 
 import { checkEntitlement, type TierId, type TierSpecification } from './tierSpecification.js'
 import type { SiteDesignProfile } from './designCatalog.js'
 import type { ComponentRegistry } from './componentRegistry.js'
+import { assertLibraryConsumptionReceipt, type LibraryConsumptionReceipt } from './libraryConsumer.js'
 
 export class SiteSpecificationError extends Error {
   constructor(message: string) {
@@ -49,6 +50,12 @@ export interface SiteSpecification {
   pageCount: number
   effectiveMaxPages: number
   resolvedAt: string
+  /**
+   * Exact Library evidence for library-backed specifications. Optional only
+   * for pre-W1 migration records that still reference the physical template
+   * in apps/web-master; new Library consumption must provide this receipt.
+   */
+  libraryReceipt?: LibraryConsumptionReceipt
 }
 
 export interface ResolveSiteSpecificationInput {
@@ -61,6 +68,7 @@ export interface ResolveSiteSpecificationInput {
   componentRegistry: ComponentRegistry
   selectedComponentIds: string[]
   pageCount: number
+  libraryReceipt?: LibraryConsumptionReceipt
 }
 
 /**
@@ -84,6 +92,8 @@ export interface ResolveSiteSpecificationInput {
  */
 export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): SiteSpecification {
   const { siteSpecId, siteRef, kit, tier, foundation, designProfile, componentRegistry, selectedComponentIds, pageCount } = input
+
+  if (input.libraryReceipt) assertLibraryConsumptionReceipt(input.libraryReceipt)
 
   assertKitIsProductionReady(kit)
   assertFoundationIsProductionReady(foundation)
@@ -119,5 +129,6 @@ export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): 
     pageCount,
     effectiveMaxPages,
     resolvedAt: new Date().toISOString(),
+    ...(input.libraryReceipt ? { libraryReceipt: input.libraryReceipt } : {}),
   }
 }

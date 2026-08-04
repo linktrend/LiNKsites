@@ -299,6 +299,9 @@ importers:
         specifier: ^4.1.13
         version: 4.3.6
     devDependencies:
+      '@electric-sql/pglite':
+        specifier: 0.5.4
+        version: 0.5.4
       '@types/node':
         specifier: ^22.10.2
         version: 22.19.15
@@ -336,9 +339,9 @@ importers:
         specifier: workspace:*
         version: link:../types
     devDependencies:
-      '@electric-sql/pglite':
-        specifier: 0.5.4
-        version: 0.5.4
+      '@types/node':
+        specifier: 22.19.15
+        version: 22.19.15
       '@vitest/coverage-v8':
         specifier: 3.2.6
         version: 3.2.6(vitest@3.2.6(@types/debug@4.1.13)(@types/node@22.19.15)(happy-dom@20.10.6)(jiti@1.21.7)(jsdom@26.1.0)(lightningcss@1.32.0)(sass@1.77.4)(tsx@4.21.0))

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "entryId": "marketing-smb-v1",
+  "entryVersion": "1.0.0",
+  "kind": "template",
+  "name": "Marketing SMB v1",
+  "summary": "LiNKsites master-template composition for a prospect-neutral small-business marketing site.",
+  "problemDomains": ["small-business marketing sites"],
+  "tags": ["master-template", "marketing", "migration-source"],
+  "languages": ["typescript"],
+  "frameworks": ["next", "react"],
+  "status": "approved",
+  "supportedConsumers": ["linksites"],
+  "exportPath": "assets/marketingSmbV1.ts",
+  "compatibility": {
+    "node": ">=20",
+    "runtimes": ["node", "browser"],
+    "runtimeVersions": {"next": "16", "react": "19"}
+  },
+  "requiredContentSchema": {
+    "name": "linksites-page-content",
+    "version": {"major": 1, "minor": 0},
+    "requiredFields": ["site_id", "locale", "page_type"]
+  },
+  "optionalSections": ["testimonials", "faq", "resources"],
+  "designTokens": {
+    "color.brand.primary": "var(--color-brand-primary)",
+    "space.section": "var(--space-section)",
+    "type.heading": "var(--font-heading)"
+  },
+  "testCommand": "pnpm --filter @linksites/web-master typecheck",
+  "testFiles": ["tests/marketingSmbV1.fixture.ts"],
+  "provenance": {
+    "sourceSystem": "migration",
+    "sourceRepository": "https://github.com/linktrend/LiNKsites.git",
+    "sourcePath": "apps/web-master/src/templates/marketing-smb-v1.ts",
+    "contributedAt": "2026-08-04T00:00:00.000Z"
+  },
+  "license": {
+    "spdx": "UNLICENSED",
+    "redistributionAllowed": false
+  },
+  "versionPolicy": {
+    "breakingChangeRule": "Increment major for content/schema or export contract changes.",
+    "compatiblePatchRule": "Increment minor or patch for additive compatible sections and implementation fixes."
+  },
+  "deprecationPolicy": {
+    "status": "active"
+  },
+  "files": [
+    {"path": "README.md", "sha256": "0f9faf270941740e202b6736a3821337699e7b95fb1de0ae1c4219cf000400e1"},
+    {"path": "assets/marketingSmbV1.ts", "sha256": "bc2a1813815d3334364cc936765483ab3135a7c9c457f2fee9b0b325f68386c9"},
+    {"path": "tests/marketingSmbV1.fixture.ts", "sha256": "4d9b6386302b32c887689665efb45186ff0e51f5b3c1af54f342c4197dfd880c"}
+  ]
+}
