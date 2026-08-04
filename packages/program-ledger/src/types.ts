@@ -194,6 +194,20 @@ export type GateDecision = 'pending' | 'accepted' | 'rejected'
 
 export type GateSubjectType = 'issue' | 'phase' | 'module' | 'program'
 
+/**
+ * Fully-qualified, tenant-scoped identity for every Gate subject.
+ * Module and Phase IDs are local to their parent, so a local ID alone is
+ * never sufficient to read or mutate hierarchy Gate history.
+ */
+export interface HierarchySubjectRef {
+  subjectType: GateSubjectType
+  subjectId: string
+  orgId: string
+  programId: string
+  moduleId?: string
+  phaseId?: string
+}
+
 export type { EvidenceReceipt }
 
 /**
@@ -212,6 +226,10 @@ export interface GateResult {
   subjectType: GateSubjectType
   subjectId: string
   orgId: string
+  /** Complete hierarchy identity persisted with the Gate for tenant-safe reads. */
+  subjectProgramId: string
+  subjectModuleId: string | null
+  subjectPhaseId: string | null
   subjectRevision: string
   attempt: number
   evaluator: string
@@ -239,6 +257,7 @@ export type LedgerEventType =
   | 'run.cancel_requested'
   | 'run.cancelled'
   | 'gate.decided'
+  | 'hierarchy.transitioned'
   | 'issue.completed'
   | 'issue.retry_scheduled'
   | 'issue.repair_required'

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { PostgresLedgerStore } from '../src/postgresStore.js'
+import { PostgresLedgerStore, type SqlExecutor } from '../src/postgresStore.js'
 import { ProgramLedger } from '../src/ledger.js'
 import { runLedgerContractTests } from './ledgerContract.shared.js'
 import { canonicalEvidence } from './evidence.js'
@@ -73,7 +73,7 @@ describe('PostgresLedgerStore: malformed-ID robustness (hardening pass, 2026-07-
     // (SQLSTATE 22P02) instead of the clean `null` every other "not found" case produces.
     await expect(store.getIssue('not-a-real-uuid')).resolves.toBeNull()
     await expect(store.getRun('not-a-real-uuid')).resolves.toBeNull()
-    await expect(store.getGateResult('not-a-real-uuid')).resolves.toBeNull()
+    await expect(store.getGateResult('not-a-real-uuid', 'a0000000-a000-a000-a000-a00000000001')).resolves.toBeNull()
   })
 
   it('still returns null (not an error) for a well-formed but non-existent UUID -- the normal not-found path is unaffected by this fix', async () => {
@@ -82,7 +82,7 @@ describe('PostgresLedgerStore: malformed-ID robustness (hardening pass, 2026-07-
 
     await expect(store.getIssue(wellFormedButUnknownUuid)).resolves.toBeNull()
     await expect(store.getRun(wellFormedButUnknownUuid)).resolves.toBeNull()
-    await expect(store.getGateResult(wellFormedButUnknownUuid)).resolves.toBeNull()
+    await expect(store.getGateResult(wellFormedButUnknownUuid, 'a0000000-a000-a000-a000-a00000000001')).resolves.toBeNull()
   })
 })
 
@@ -148,5 +148,56 @@ describe('PostgresLedgerStore: direct SQL composite-FK negative probes', () => {
     await expect(db.query(`insert into lsites_ledger.gate_results (gate_id, issue_id, run_id, org_id, subject_type, subject_id, subject_revision, evaluator, evaluator_version, inputs, reasons, evidence_receipts, decision, evidence) values ($1, $2, $3, $4, 'issue', $2, 'revision', 'test', '1', '{}'::jsonb, '[]'::jsonb, '[]'::jsonb, 'accepted', '{}'::jsonb)`, ['52000000-0000-0000-0000-000000000001', issueA.issueId, runA.runId, orgB])).rejects.toThrow()
     await expect(db.query(`insert into lsites_ledger.ledger_events (event_id, issue_id, org_id, event_type, payload) values ($1, $2, $3, 'probe', '{}'::jsonb)`, ['53000000-0000-0000-0000-000000000001', issueA.issueId, orgB])).rejects.toThrow()
     await expect(db.query(`insert into lsites_ledger.idempotency_records (idempotency_key, issue_id, org_id, state) values ('fk-probe', $1, $2, 'reserved')`, [issueA.issueId, orgB])).rejects.toThrow()
+  })
+})
+
+describe('PostgresLedgerStore: tenant-qualified hierarchy Gate identity and atomicity', () => {
+  it('keeps duplicate local Phase identities separate by tenant and Program', async () => {
+    const orgA = '00000000-0000-0000-0000-0000000000da'
+    const orgB = '00000000-0000-0000-0000-0000000000db'
+    await db.query(`insert into platform.organizations (id, name, kind, status) values ($1, 'Duplicate A', 'client', 'active'), ($2, 'Duplicate B', 'client', 'active') on conflict (id) do nothing`, [orgA, orgB])
+    const ledger = new ProgramLedger(new PostgresLedgerStore(db))
+    const definition = { schemaVersion: { major: 1, minor: 0 }, programId: 'duplicate-postgres-program', title: 'Duplicate', modules: [{ moduleId: 'M1', title: 'Module', purpose: 'Test', band: 'control-improvement' as const, phases: [{ phaseId: 'P1', title: 'Phase', objective: 'Test', issues: [{ issueKey: 'duplicate-postgres-issue', title: 'Issue', issueType: 'test.duplicate', objective: 'Test', dependsOnIssueKeys: [] }] }] }] }
+    const a = await ledger.seedProgramGraph(definition, orgA)
+    const b = await ledger.seedProgramGraph(definition, orgB)
+    for (const issue of [a.issues[0]!, b.issues[0]!]) {
+      const run = await ledger.dispatch(issue.issueId)
+      const claim = await ledger.claim(run.runId, 'worker')
+      const succeeded = await ledger.complete(run.runId, claim.lease!.fencingToken, { ok: true })
+      await ledger.decideGate(issue.issueId, succeeded.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issue.issueId, issue.orgId!), 'reviewer')
+    }
+    const phaseA = { subjectType: 'phase' as const, subjectId: 'P1', orgId: orgA, programId: definition.programId, moduleId: 'M1', phaseId: 'P1' }
+    const phaseB = { ...phaseA, orgId: orgB }
+    const gateA = await ledger.evaluateGate({ ...phaseA, decision: 'accepted', evidence: await canonicalEvidence(ledger, 'phase', 'P1', orgA, phaseA), evaluator: 'reviewer' })
+    const gateB = await ledger.evaluateGate({ ...phaseB, decision: 'accepted', evidence: await canonicalEvidence(ledger, 'phase', 'P1', orgB, phaseB), evaluator: 'reviewer' })
+    expect((await ledger.getCurrentGate(phaseA))?.gateId).toBe(gateA.gateId)
+    expect((await ledger.getCurrentGate(phaseB))?.gateId).toBe(gateB.gateId)
+    expect(await ledger.getCurrentGate({ ...phaseA, programId: 'wrong-program' })).toBeNull()
+  })
+
+  it('rolls back the Gate and hierarchy state when an audit-event write is injected to fail', async () => {
+    const orgId = '00000000-0000-0000-0000-0000000000dc'
+    await db.query(`insert into platform.organizations (id, name, kind, status) values ($1, 'Atomic', 'client', 'active') on conflict (id) do nothing`, [orgId])
+    const seedLedger = new ProgramLedger(new PostgresLedgerStore(db))
+    await seedLedger.seedProgramGraph({ schemaVersion: { major: 1, minor: 0 }, programId: 'atomic-postgres-program', title: 'Atomic', modules: [{ moduleId: 'M1', title: 'Module', purpose: 'Test', band: 'control-improvement' as const, phases: [] }] }, orgId)
+    let inject = true
+    const failingDb: SqlExecutor = {
+      async query(sql, params) {
+        if (inject && /insert into lsites_ledger\.ledger_events/i.test(sql)) {
+          inject = false
+          throw new Error('injected postgres audit-event failure')
+        }
+        return db.query(sql, params)
+      },
+    }
+    const ledger = new ProgramLedger(new PostgresLedgerStore(failingDb))
+    const subject = { subjectType: 'module' as const, subjectId: 'M1', orgId, programId: 'atomic-postgres-program', moduleId: 'M1' }
+    await expect(ledger.evaluateGate({ ...subject, decision: 'rejected', evidence: {}, evaluator: 'fault-injected' })).rejects.toThrow('injected postgres audit-event failure')
+    const module = await db.query('select state, revision from lsites_ledger.modules where program_id = $1 and module_id = $2 and org_id = $3', [subject.programId, subject.moduleId, orgId])
+    expect(module.rows[0]).toMatchObject({ state: 'ready', revision: 1 })
+    const gates = await db.query('select 1 from lsites_ledger.gate_results where org_id = $1 and subject_program_id = $2 and subject_module_id = $3', [orgId, subject.programId, subject.moduleId])
+    expect(gates.rows).toHaveLength(0)
+    const events = await db.query('select 1 from lsites_ledger.ledger_events where org_id = $1 and payload ->> \'programId\' = $2', [orgId, subject.programId])
+    expect(events.rows).toHaveLength(0)
   })
 })

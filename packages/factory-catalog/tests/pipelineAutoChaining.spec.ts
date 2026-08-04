@@ -170,6 +170,27 @@ async function runToAwaitingGate(issueId: string): Promise<Run> {
   return run
 }
 
+async function canonicalIssueEvidence(issueId: string, runId: string): Promise<Record<string, unknown>> {
+  const issue = await ledger.getIssue(issueId)
+  if (!issue) throw new Error(`missing Issue ${issueId}`)
+  return {
+    evidenceReceipts: [{
+      schema_version: { major: 1, minor: 0 },
+      org_id: issue.orgId,
+      correlation_id: `corr-${issueId}`,
+      idempotency_key: `evidence:${issueId}`,
+      receipt_id: `receipt-${issueId}`,
+      producer: 'factory-catalog.test',
+      subject: { type: 'issue', id: issueId },
+      checksum: { algorithm: 'sha256', value: 'a'.repeat(64) },
+      revision_sha: await ledger.getSubjectRevision({ subjectType: 'issue', subjectId: issueId, orgId: issue.orgId!, programId: issue.programRef, moduleId: issue.moduleRef, phaseId: issue.phaseRef }),
+      storage_location: `evidence://issue/${issueId}`,
+      gate_association: `gate:issue:${issueId}:run:${runId}`,
+      timestamp: '2026-08-04T00:00:00.000Z',
+    }],
+  }
+}
+
 describe('Pipeline auto-chaining: Site Specification -> Site Assembly', () => {
   it('(a) spawns a Site Assembly Issue with correctly-mapped input once a Site Specification Issue passes its Gate', async () => {
     const specIssue = await ledger.createIssue({
@@ -180,7 +201,7 @@ describe('Pipeline auto-chaining: Site Specification -> Site Assembly', () => {
     const specRun = await runToAwaitingGate(specIssue.issueId)
 
     // The Gate genuinely passes.
-    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', { reviewed: true }, 'test-gate')
+    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
     expect(gate.decision).toBe('accepted')
 
     const outcome = await chainSiteSpecificationToSiteAssembly(ledger, gate, {
@@ -246,7 +267,7 @@ describe('Pipeline auto-chaining: Site Assembly -> Promotion', () => {
     const assemblyRun = await runToAwaitingGate(assemblyIssue.issueId)
     const manifest = assemblyRun.output as SiteAssemblyManifest
 
-    const gate = await ledger.decideGate(assemblyIssue.issueId, assemblyRun.runId, 'accepted', { reviewed: true }, 'test-gate')
+    const gate = await ledger.decideGate(assemblyIssue.issueId, assemblyRun.runId, 'accepted', await canonicalIssueEvidence(assemblyIssue.issueId, assemblyRun.runId), 'test-gate')
     expect(gate.decision).toBe('accepted')
 
     const outcome = await chainSiteAssemblyToPromotion(ledger, gate, {
@@ -304,7 +325,7 @@ describe('Pipeline auto-chaining: gate-discipline guards and full-chain proof', 
       input: SITE_SPEC_INPUT,
     })
     const specRun = await runToAwaitingGate(specIssue.issueId)
-    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', {}, 'test-gate')
+    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
 
     await expect(
       chainSiteAssemblyToPromotion(ledger, gate, { promotionInput: PROMOTION_EXTRAS, placement: PLACEMENT }),
@@ -319,7 +340,7 @@ describe('Pipeline auto-chaining: gate-discipline guards and full-chain proof', 
       input: SITE_SPEC_INPUT,
     })
     const specRun = await runToAwaitingGate(specIssue.issueId)
-    const specGate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', {}, 'test-gate')
+    const specGate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
 
     const toAssembly = await chainSiteSpecificationToSiteAssembly(ledger, specGate, {
       assemblyInput: ASSEMBLY_EXTRAS,
@@ -330,7 +351,7 @@ describe('Pipeline auto-chaining: gate-discipline guards and full-chain proof', 
 
     // Hop 2: the auto-created Site Assembly Issue runs and passes ITS OWN Gate.
     const assemblyRun = await runToAwaitingGate(toAssembly.nextIssue.issueId)
-    const assemblyGate = await ledger.decideGate(toAssembly.nextIssue.issueId, assemblyRun.runId, 'accepted', {}, 'test-gate')
+    const assemblyGate = await ledger.decideGate(toAssembly.nextIssue.issueId, assemblyRun.runId, 'accepted', await canonicalIssueEvidence(toAssembly.nextIssue.issueId, assemblyRun.runId), 'test-gate')
 
     const toPromotion = await chainSiteAssemblyToPromotion(ledger, assemblyGate, {
       promotionInput: PROMOTION_EXTRAS,

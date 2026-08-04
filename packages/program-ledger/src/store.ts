@@ -14,7 +14,16 @@ import type {
   Program,
   Run,
   UnresolvedDependency,
+  HierarchySubjectRef,
+  WorkState,
 } from './types.js'
+
+export type InMemoryHierarchyGateFailurePoint = 'after_gate' | 'after_subject' | 'after_events'
+
+export interface InMemoryLedgerStoreOptions {
+  /** Test-only fault injection used to prove hierarchy gate rollback. */
+  hierarchyGateFailurePoint?: InMemoryHierarchyGateFailurePoint
+}
 
 /**
  * Storage abstraction. Ledger business logic (ledger.ts) depends only on
@@ -93,12 +102,21 @@ export interface LedgerStore {
     idempotency: IdempotencyRecord | null
     events: LedgerEvent[]
   }): Promise<void>
-  getGateResult(gateId: string): Promise<GateResult | null>
-  getCurrentGate(subjectType: GateResult['subjectType'], subjectId: string): Promise<GateResult | null>
-  listGateResults(subjectType: GateResult['subjectType'], subjectId: string): Promise<GateResult[]>
+  /** Atomically records a non-Issue hierarchy Gate, state transition, and audit events. */
+  recordHierarchyGateDecision(input: {
+    subject: HierarchySubjectRef
+    gate: GateResult
+    subjectState: WorkState
+    expectedRevision: number
+    subjectUpdatedAt: string
+    events: LedgerEvent[]
+  }): Promise<void>
+  getGateResult(gateId: string, orgId: string): Promise<GateResult | null>
+  getCurrentGate(subject: HierarchySubjectRef): Promise<GateResult | null>
+  listGateResults(subject: HierarchySubjectRef): Promise<GateResult[]>
 
   appendEvent(event: LedgerEvent): Promise<void>
-  listEvents(issueId: string): Promise<LedgerEvent[]>
+  listEvents(issueId: string, orgId: string): Promise<LedgerEvent[]>
 
   /** Returns all Runs currently in `claimed`/`executing` state whose lease has expired. */
 
@@ -115,7 +133,7 @@ export interface LedgerStore {
    */
   getIssueDependencies(issueId: string): Promise<IssueDependency[]>
   getUnresolvedDependencies(issueId: string, orgId?: string): Promise<UnresolvedDependency[]>
-  exportSnapshot(): Promise<LedgerSnapshot>
+  exportSnapshot(orgId: string): Promise<LedgerSnapshot>
 }
 
 export class InMemoryLedgerStore implements LedgerStore {
@@ -128,6 +146,8 @@ export class InMemoryLedgerStore implements LedgerStore {
   private gates = new Map<string, GateResult>()
   private events: LedgerEvent[] = []
   private dependencies: IssueDependency[] = []
+
+  constructor(private readonly options: InMemoryLedgerStoreOptions = {}) {}
 
   static fromSnapshot(snapshot: LedgerSnapshot): InMemoryLedgerStore {
     const store = new InMemoryLedgerStore()
@@ -313,6 +333,66 @@ export class InMemoryLedgerStore implements LedgerStore {
     this.gates.set(gate.gateId, { ...gate })
   }
 
+  async recordHierarchyGateDecision(input: {
+    subject: HierarchySubjectRef
+    gate: GateResult
+    subjectState: WorkState
+    expectedRevision: number
+    subjectUpdatedAt: string
+    events: LedgerEvent[]
+  }): Promise<void> {
+    const gates = new Map(this.gates)
+    const programs = new Map(this.programs)
+    const modules = new Map(this.modules)
+    const phases = new Map(this.phases)
+    const events = [...this.events]
+    try {
+      if (this.gates.has(input.gate.gateId)) throw new Error(`Gate ${input.gate.gateId} is immutable`)
+      this.gates.set(input.gate.gateId, { ...input.gate })
+      this.failHierarchyGateIfConfigured('after_gate')
+
+      if (input.subject.subjectType === 'program') {
+        const program = await this.getProgram(input.subject.programId, input.subject.orgId)
+        if (!program || input.subject.subjectId !== program.programId) throw new Error(`Program ${input.subject.subjectId} not found for Gate`)
+        this.assertHierarchyGateIdentity(input.subject, program.programId, null, null, program.orgId)
+        if (program.revision !== input.expectedRevision) throw new Error(`Program ${program.programId} changed while its Gate was being decided`)
+        this.programs.set(`${program.programId}:${program.orgId}`, { ...program, state: input.subjectState, revision: program.revision + 1, updatedAt: input.subjectUpdatedAt })
+      } else if (input.subject.subjectType === 'module') {
+        const module = await this.getModule(input.subject.programId, input.subject.moduleId ?? input.subject.subjectId, input.subject.orgId)
+        if (!module || input.subject.subjectId !== module.moduleId) throw new Error(`Module ${input.subject.subjectId} not found for Gate`)
+        this.assertHierarchyGateIdentity(input.subject, module.programId, module.moduleId, null, module.orgId)
+        if (module.revision !== input.expectedRevision) throw new Error(`Module ${module.moduleId} changed while its Gate was being decided`)
+        this.modules.set(`${module.programId}:${module.moduleId}:${module.orgId}`, { ...module, state: input.subjectState, revision: module.revision + 1, updatedAt: input.subjectUpdatedAt })
+      } else {
+        const phase = await this.getPhase(input.subject.programId, input.subject.moduleId ?? '', input.subject.phaseId ?? input.subject.subjectId, input.subject.orgId)
+        if (!phase || input.subject.subjectId !== phase.phaseId) throw new Error(`Phase ${input.subject.subjectId} not found for Gate`)
+        this.assertHierarchyGateIdentity(input.subject, phase.programId, phase.moduleId, phase.phaseId, phase.orgId)
+        if (phase.revision !== input.expectedRevision) throw new Error(`Phase ${phase.phaseId} changed while its Gate was being decided`)
+        this.phases.set(`${phase.programId}:${phase.moduleId}:${phase.phaseId}:${phase.orgId}`, { ...phase, state: input.subjectState, revision: phase.revision + 1, updatedAt: input.subjectUpdatedAt })
+      }
+      this.failHierarchyGateIfConfigured('after_subject')
+      this.events.push(...input.events.map((event) => ({ ...event })))
+      this.failHierarchyGateIfConfigured('after_events')
+    } catch (error) {
+      this.gates = gates
+      this.programs = programs
+      this.modules = modules
+      this.phases = phases
+      this.events = events
+      throw error
+    }
+  }
+
+  private failHierarchyGateIfConfigured(point: InMemoryHierarchyGateFailurePoint): void {
+    if (this.options.hierarchyGateFailurePoint === point) throw new Error(`injected hierarchy Gate failure at ${point}`)
+  }
+
+  private assertHierarchyGateIdentity(subject: HierarchySubjectRef, programId: string, moduleId: string | null, phaseId: string | null, orgId: string | null): void {
+    if (subject.orgId !== orgId || subject.programId !== programId || (subject.moduleId ?? null) !== moduleId || (subject.phaseId ?? null) !== phaseId) {
+      throw new Error(`Gate subject identity does not match the tenant-scoped hierarchy row`)
+    }
+  }
+
   async recordIssueGateDecision(input: {
     gate: GateResult
     issueState: Issue['state']
@@ -329,25 +409,33 @@ export class InMemoryLedgerStore implements LedgerStore {
     this.events.push(...input.events.map((event) => ({ ...event })))
   }
 
-  async getGateResult(gateId: string): Promise<GateResult | null> {
-    return this.gates.get(gateId) ?? null
+  async getGateResult(gateId: string, orgId: string): Promise<GateResult | null> {
+    const gate = this.gates.get(gateId)
+    return gate && gate.orgId === orgId ? { ...gate } : null
   }
 
-  async getCurrentGate(subjectType: GateResult['subjectType'], subjectId: string): Promise<GateResult | null> {
-    const results = await this.listGateResults(subjectType, subjectId)
+  async getCurrentGate(subject: HierarchySubjectRef): Promise<GateResult | null> {
+    const results = await this.listGateResults(subject)
     return results.at(-1) ?? null
   }
 
-  async listGateResults(subjectType: GateResult['subjectType'], subjectId: string): Promise<GateResult[]> {
-    return [...this.gates.values()].filter((gate) => gate.subjectType === subjectType && gate.subjectId === subjectId).map((gate) => ({ ...gate }))
+  async listGateResults(subject: HierarchySubjectRef): Promise<GateResult[]> {
+    return [...this.gates.values()].filter((gate) =>
+      gate.subjectType === subject.subjectType &&
+      gate.subjectId === subject.subjectId &&
+      gate.orgId === subject.orgId &&
+      gate.subjectProgramId === subject.programId &&
+      gate.subjectModuleId === (subject.moduleId ?? null) &&
+      gate.subjectPhaseId === (subject.phaseId ?? null),
+    ).sort((left, right) => (left.decidedAt ?? '').localeCompare(right.decidedAt ?? '') || left.gateId.localeCompare(right.gateId)).map((gate) => ({ ...gate }))
   }
 
   async appendEvent(event: LedgerEvent): Promise<void> {
     this.events.push({ ...event })
   }
 
-  async listEvents(issueId: string): Promise<LedgerEvent[]> {
-    return this.events.filter((e) => e.issueId === issueId)
+  async listEvents(issueId: string, orgId: string): Promise<LedgerEvent[]> {
+    return this.events.filter((e) => e.issueId === issueId && e.orgId === orgId).map((event) => ({ ...event }))
   }
 
   async reclaimExpiredLeases(nowIso: string): Promise<Run[]> {
@@ -394,18 +482,18 @@ export class InMemoryLedgerStore implements LedgerStore {
     return unresolved
   }
 
-  async exportSnapshot(): Promise<LedgerSnapshot> {
+  async exportSnapshot(orgId: string): Promise<LedgerSnapshot> {
     return {
       schemaVersion: { ...SCHEMA_VERSION },
-      programs: [...this.programs.values()].map((value) => ({ ...value })),
-      modules: [...this.modules.values()].map((value) => ({ ...value })),
-      phases: [...this.phases.values()].map((value) => ({ ...value })),
-      issues: [...this.issues.values()].map((value) => ({ ...value })),
-      runs: [...this.runs.values()].map((value) => ({ ...value })),
-      idempotency: [...this.idempotency.values()].map((value) => ({ ...value })),
-      gates: [...this.gates.values()].map((value) => ({ ...value })),
-      events: this.events.map((value) => ({ ...value })),
-      dependencies: this.dependencies.map((value) => ({ ...value })),
+      programs: [...this.programs.values()].filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
+      modules: [...this.modules.values()].filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
+      phases: [...this.phases.values()].filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
+      issues: [...this.issues.values()].filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
+      runs: [...this.runs.values()].filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
+      idempotency: [...this.idempotency.values()].filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
+      gates: [...this.gates.values()].filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
+      events: this.events.filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
+      dependencies: this.dependencies.filter((value) => value.orgId === orgId).map((value) => ({ ...value })),
     }
   }
 }

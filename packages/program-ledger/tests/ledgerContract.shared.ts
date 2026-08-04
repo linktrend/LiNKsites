@@ -268,7 +268,7 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       await ledger.complete(run.runId, claimed.lease!.fencingToken, { result: 'ok' })
       await ledger.decideGate(issue.issueId, run.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issue.issueId, issue.orgId!), 'reviewer-1')
 
-      const events = await store.listEvents(issue.issueId)
+      const events = await store.listEvents(issue.issueId, issue.orgId!)
       expect(events.map((e) => e.type)).toEqual([
         'issue.created',
         'run.dispatched',

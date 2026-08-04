@@ -75,6 +75,9 @@ alter table lsites_ledger.gate_results
   alter column run_id drop not null,
   add column if not exists subject_type text,
   add column if not exists subject_id text,
+  add column if not exists subject_program_id text,
+  add column if not exists subject_module_id text,
+  add column if not exists subject_phase_id text,
   add column if not exists subject_revision text,
   add column if not exists attempt integer not null default 1,
   add column if not exists evaluator text,
@@ -94,7 +97,7 @@ alter table lsites_ledger.gate_results
   alter column evaluator set not null,
   alter column evaluator_version set not null;
 
-create index if not exists idx_lsites_ledger_gate_subject on lsites_ledger.gate_results(subject_type, subject_id, decided_at);
+create index if not exists idx_lsites_ledger_gate_subject on lsites_ledger.gate_results(subject_type, subject_program_id, subject_module_id, subject_phase_id, subject_id, decided_at);
 
 grant select, insert, update on lsites_ledger.programs to svc_linksites_ledger;
 grant select, insert, update on lsites_ledger.modules to svc_linksites_ledger;

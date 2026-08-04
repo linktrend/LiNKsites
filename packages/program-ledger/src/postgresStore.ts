@@ -1,6 +1,7 @@
 import type {
   GateResult,
   GateSubjectType,
+  HierarchySubjectRef,
   IdempotencyRecord,
   IdempotencyState,
   Issue,
@@ -16,6 +17,7 @@ import type {
   RunState,
   SchemaVersion,
   UnresolvedDependency,
+  WorkState,
 } from './types.js'
 import { DEFAULT_ORG_ID } from './types.js'
 import type { LedgerStore } from './store.js'
@@ -152,6 +154,9 @@ function toGate(row: Record<string, unknown>): GateResult {
     subjectType: (row.subject_type as GateSubjectType) ?? 'issue',
     subjectId: String(row.subject_id ?? row.issue_id),
     orgId: String(row.org_id ?? DEFAULT_ORG_ID),
+    subjectProgramId: String(row.subject_program_id ?? row.program_ref ?? ''),
+    subjectModuleId: (row.subject_module_id as string | null) ?? null,
+    subjectPhaseId: (row.subject_phase_id as string | null) ?? null,
     subjectRevision: String(row.subject_revision ?? row.decided_at ?? ''),
     attempt: Number(row.attempt ?? 1),
     evaluator: String(row.evaluator ?? row.decided_by ?? 'legacy'),
@@ -166,6 +171,17 @@ function toGate(row: Record<string, unknown>): GateResult {
     decidedBy: (row.decided_by as string | null) ?? null,
     decidedAt: row.decided_at ? new Date(row.decided_at as string).toISOString() : null,
   }
+}
+
+const GATE_INSERT_SQL = `insert into lsites_ledger.gate_results (
+  gate_id, schema_version_major, schema_version_minor, issue_id, run_id, org_id,
+  subject_type, subject_id, subject_program_id, subject_module_id, subject_phase_id,
+  subject_revision, attempt, evaluator, evaluator_version, inputs, reasons,
+  evidence_receipts, decision, evidence, decided_by, decided_at
+) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`
+
+function gateParams(gate: GateResult): unknown[] {
+  return [gate.gateId, gate.schemaVersion.major, gate.schemaVersion.minor, gate.issueId, gate.runId, gate.orgId, gate.subjectType, gate.subjectId, gate.subjectProgramId, gate.subjectModuleId, gate.subjectPhaseId, gate.subjectRevision, gate.attempt, gate.evaluator, gate.evaluatorVersion, JSON.stringify(gate.inputs), JSON.stringify(gate.reasons), JSON.stringify(gate.evidenceReceipts), gate.decision, JSON.stringify(gate.evidence), gate.decidedBy, gate.decidedAt]
 }
 
 function toEvent(row: Record<string, unknown>): LedgerEvent {
@@ -570,31 +586,7 @@ export class PostgresLedgerStore implements LedgerStore {
   }
 
   async putGateResult(gate: GateResult): Promise<void> {
-    await this.db.query(
-      `insert into lsites_ledger.gate_results (gate_id, schema_version_major, schema_version_minor, issue_id, run_id, org_id, subject_type, subject_id, subject_revision, attempt, evaluator, evaluator_version, inputs, reasons, evidence_receipts, decision, evidence, decided_by, decided_at)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
-      [
-        gate.gateId,
-        gate.schemaVersion.major,
-        gate.schemaVersion.minor,
-        gate.issueId,
-        gate.runId,
-        gate.orgId,
-        gate.subjectType,
-        gate.subjectId,
-        gate.subjectRevision,
-        gate.attempt,
-        gate.evaluator,
-        gate.evaluatorVersion,
-        JSON.stringify(gate.inputs),
-        JSON.stringify(gate.reasons),
-        JSON.stringify(gate.evidenceReceipts),
-        gate.decision,
-        JSON.stringify(gate.evidence),
-        gate.decidedBy,
-        gate.decidedAt,
-      ],
-    )
+    await this.db.query(GATE_INSERT_SQL, gateParams(gate))
   }
 
   async recordIssueGateDecision(input: {
@@ -606,17 +598,41 @@ export class PostgresLedgerStore implements LedgerStore {
   }): Promise<void> {
     await this.db.query('begin')
     try {
-      await this.db.query(
-        `insert into lsites_ledger.gate_results (gate_id, schema_version_major, schema_version_minor, issue_id, run_id, org_id, subject_type, subject_id, subject_revision, attempt, evaluator, evaluator_version, inputs, reasons, evidence_receipts, decision, evidence, decided_by, decided_at)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
-        [input.gate.gateId, input.gate.schemaVersion.major, input.gate.schemaVersion.minor, input.gate.issueId, input.gate.runId, input.gate.orgId, input.gate.subjectType, input.gate.subjectId, input.gate.subjectRevision, input.gate.attempt, input.gate.evaluator, input.gate.evaluatorVersion, JSON.stringify(input.gate.inputs), JSON.stringify(input.gate.reasons), JSON.stringify(input.gate.evidenceReceipts), input.gate.decision, JSON.stringify(input.gate.evidence), input.gate.decidedBy, input.gate.decidedAt],
-      )
+      await this.db.query(GATE_INSERT_SQL, gateParams(input.gate))
       const issueResult = await this.db.query(
         `update lsites_ledger.issues set state = $2, updated_at = $3 where issue_id = $1 and state = 'awaiting_gate' returning issue_id`,
         [input.gate.subjectId, input.issueState, input.issueUpdatedAt],
       )
       if (!issueResult.rows[0]) throw new Error(`Issue ${input.gate.subjectId} is no longer awaiting a Gate decision`)
       if (input.idempotency) await this.writeIdempotency(input.idempotency)
+      for (const event of input.events) await this.writeEvent(event)
+      await this.db.query('commit')
+    } catch (error) {
+      await this.db.query('rollback')
+      throw error
+    }
+  }
+
+  async recordHierarchyGateDecision(input: {
+    subject: HierarchySubjectRef
+    gate: GateResult
+    subjectState: WorkState
+    expectedRevision: number
+    subjectUpdatedAt: string
+    events: LedgerEvent[]
+  }): Promise<void> {
+    await this.db.query('begin')
+    try {
+      await this.db.query(GATE_INSERT_SQL, gateParams(input.gate))
+      let result: { rows: Record<string, unknown>[] }
+      if (input.subject.subjectType === 'program') {
+        result = await this.db.query(`update lsites_ledger.programs set state = $1, revision = revision + 1, updated_at = $2 where program_id = $3 and org_id = $4 and revision = $5 returning program_id`, [input.subjectState, input.subjectUpdatedAt, input.subject.programId, input.subject.orgId, input.expectedRevision])
+      } else if (input.subject.subjectType === 'module') {
+        result = await this.db.query(`update lsites_ledger.modules set state = $1, revision = revision + 1, updated_at = $2 where program_id = $3 and module_id = $4 and org_id = $5 and revision = $6 returning module_id`, [input.subjectState, input.subjectUpdatedAt, input.subject.programId, input.subject.moduleId, input.subject.orgId, input.expectedRevision])
+      } else {
+        result = await this.db.query(`update lsites_ledger.phases set state = $1, revision = revision + 1, updated_at = $2 where program_id = $3 and module_id = $4 and phase_id = $5 and org_id = $6 and revision = $7 returning phase_id`, [input.subjectState, input.subjectUpdatedAt, input.subject.programId, input.subject.moduleId, input.subject.phaseId, input.subject.orgId, input.expectedRevision])
+      }
+      if (!result.rows[0]) throw new Error(`${input.subject.subjectType} ${input.subject.subjectId} is no longer present in its tenant-scoped hierarchy`)
       for (const event of input.events) await this.writeEvent(event)
       await this.db.query('commit')
     } catch (error) {
@@ -642,16 +658,16 @@ export class PostgresLedgerStore implements LedgerStore {
     )
   }
 
-  async getGateResult(gateId: string): Promise<GateResult | null> {
-    return queryOneOrNull(this.db, 'select * from lsites_ledger.gate_results where gate_id = $1', [gateId], toGate)
+  async getGateResult(gateId: string, orgId: string): Promise<GateResult | null> {
+    return queryOneOrNull(this.db, 'select * from lsites_ledger.gate_results where gate_id = $1 and org_id = $2', [gateId, orgId], toGate)
   }
 
-  async getCurrentGate(subjectType: GateSubjectType, subjectId: string): Promise<GateResult | null> {
-    return queryOneOrNull(this.db, 'select * from lsites_ledger.gate_results where subject_type = $1 and subject_id = $2 order by decided_at desc nulls last, gate_id desc limit 1', [subjectType, subjectId], toGate)
+  async getCurrentGate(subject: HierarchySubjectRef): Promise<GateResult | null> {
+    return queryOneOrNull(this.db, `select * from lsites_ledger.gate_results where subject_type = $1 and subject_id = $2 and org_id = $3 and subject_program_id = $4 and subject_module_id is not distinct from $5 and subject_phase_id is not distinct from $6 order by decided_at desc nulls last, gate_id desc limit 1`, [subject.subjectType, subject.subjectId, subject.orgId, subject.programId, subject.moduleId ?? null, subject.phaseId ?? null], toGate)
   }
 
-  async listGateResults(subjectType: GateSubjectType, subjectId: string): Promise<GateResult[]> {
-    const { rows } = await this.db.query('select * from lsites_ledger.gate_results where subject_type = $1 and subject_id = $2 order by decided_at asc nulls first, gate_id asc', [subjectType, subjectId])
+  async listGateResults(subject: HierarchySubjectRef): Promise<GateResult[]> {
+    const { rows } = await this.db.query('select * from lsites_ledger.gate_results where subject_type = $1 and subject_id = $2 and org_id = $3 and subject_program_id = $4 and subject_module_id is not distinct from $5 and subject_phase_id is not distinct from $6 order by decided_at asc nulls first, gate_id asc', [subject.subjectType, subject.subjectId, subject.orgId, subject.programId, subject.moduleId ?? null, subject.phaseId ?? null])
     return rows.map(toGate)
   }
 
@@ -673,10 +689,10 @@ export class PostgresLedgerStore implements LedgerStore {
     )
   }
 
-  async listEvents(issueId: string): Promise<LedgerEvent[]> {
+  async listEvents(issueId: string, orgId: string): Promise<LedgerEvent[]> {
     const { rows } = await this.db.query(
-      'select * from lsites_ledger.ledger_events where issue_id = $1 order by occurred_at asc',
-      [issueId],
+      'select * from lsites_ledger.ledger_events where issue_id = $1 and org_id = $2 order by occurred_at asc',
+      [issueId, orgId],
     )
     return rows.map(toEvent)
   }
@@ -730,15 +746,15 @@ export class PostgresLedgerStore implements LedgerStore {
     }
   }
 
-  async exportSnapshot(): Promise<LedgerSnapshot> {
-    const programs = await this.listPrograms()
-    const modules = (await Promise.all(programs.map((program) => this.listModules(program.programId)))).flat()
-    const phases = (await Promise.all(modules.map((module) => this.listPhases(module.programId, module.moduleId)))).flat()
-    const issues = await this.listIssues()
+  async exportSnapshot(orgId: string): Promise<LedgerSnapshot> {
+    const programs = await this.listPrograms(orgId)
+    const modules = (await Promise.all(programs.map((program) => this.listModules(program.programId, orgId)))).flat()
+    const phases = (await Promise.all(modules.map((module) => this.listPhases(module.programId, module.moduleId, orgId)))).flat()
+    const issues = await this.listIssues({ orgId })
     const runs = (await Promise.all(issues.map((issue) => this.listRunsForIssue(issue.issueId)))).flat()
-    const idempotencyRows = await this.db.query('select * from lsites_ledger.idempotency_records order by idempotency_key')
-    const gateRows = await this.db.query('select * from lsites_ledger.gate_results order by decided_at nulls first, gate_id')
-    const eventRows = await this.db.query('select * from lsites_ledger.ledger_events order by occurred_at, event_id')
+    const idempotencyRows = await this.db.query('select * from lsites_ledger.idempotency_records where org_id = $1 order by idempotency_key', [orgId])
+    const gateRows = await this.db.query('select * from lsites_ledger.gate_results where org_id = $1 order by decided_at nulls first, gate_id', [orgId])
+    const eventRows = await this.db.query('select * from lsites_ledger.ledger_events where org_id = $1 order by occurred_at, event_id', [orgId])
     const idempotency = idempotencyRows.rows.map(toIdempotency)
     const gates = gateRows.rows.map(toGate)
     const events = eventRows.rows.map(toEvent)

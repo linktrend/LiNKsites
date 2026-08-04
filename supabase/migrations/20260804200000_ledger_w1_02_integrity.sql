@@ -70,6 +70,21 @@ alter table lsites_ledger.idempotency_records
     references lsites_ledger.runs(run_id, org_id)
     not valid;
 
+-- The corrective migration materializes every legacy Phase boundary before
+-- these constraints are installed. Validate them now so the database cannot
+-- retain an apparently-installed but unchecked hierarchy relationship.
+alter table lsites_ledger.issues validate constraint fk_ledger_issue_module_org;
+alter table lsites_ledger.issues validate constraint fk_ledger_issue_phase_org;
+alter table lsites_ledger.issues validate constraint ck_ledger_issue_phase_requires_module;
+alter table lsites_ledger.issue_dependencies validate constraint fk_ledger_dependency_target_org;
+alter table lsites_ledger.gate_results validate constraint fk_ledger_gate_issue_org;
+alter table lsites_ledger.gate_results validate constraint fk_ledger_gate_run_org;
+alter table lsites_ledger.gate_results validate constraint ck_ledger_issue_gate_has_run;
+alter table lsites_ledger.ledger_events validate constraint fk_ledger_event_issue_org;
+alter table lsites_ledger.ledger_events validate constraint fk_ledger_event_run_org;
+alter table lsites_ledger.idempotency_records validate constraint fk_ledger_idempotency_issue_org;
+alter table lsites_ledger.idempotency_records validate constraint fk_ledger_idempotency_run_org;
+
 -- Runtime grants and tenant RLS are inherited from the preceding W1-02
 -- corrective migration; this file adds no broader access.
 

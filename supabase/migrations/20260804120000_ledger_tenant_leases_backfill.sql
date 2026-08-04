@@ -38,6 +38,12 @@ set org_id = coalesce(
   'a0000000-a000-a000-a000-a00000000001'
 )
 where g.org_id is null;
+update lsites_ledger.gate_results g
+set subject_program_id = i.program_ref,
+    subject_module_id = i.module_ref,
+    subject_phase_id = i.phase_ref
+from lsites_ledger.issues i
+where g.subject_type = 'issue' and g.issue_id = i.issue_id;
 update lsites_ledger.ledger_events e set org_id = i.org_id from lsites_ledger.issues i where e.issue_id = i.issue_id and e.org_id is null;
 update lsites_ledger.ledger_events set org_id = 'a0000000-a000-a000-a000-a00000000001' where org_id is null;
 update lsites_ledger.idempotency_records r set org_id = i.org_id from lsites_ledger.issues i where r.issue_id = i.issue_id and r.org_id is null;
@@ -55,6 +61,39 @@ where not exists (
   where p.program_id = i.program_ref and p.org_id = i.org_id
 );
 
+-- A legacy Stage is a Phase identity, not a free-standing value. Materialize
+-- one deterministic compatibility Module and the tenant-scoped Phase row
+-- before hierarchy foreign keys are added. The compatibility branch is
+-- intentionally blocked/non-active until a later packet gives the legacy
+-- workflow a real Module/Phase definition; it is never silently treated as
+-- an active canonical Phase.
+insert into lsites_ledger.modules (program_id, module_id, org_id, title, purpose, state)
+select distinct i.program_ref,
+       coalesce(nullif(i.module_ref, ''), '__legacy_stage__'),
+       i.org_id,
+       'Legacy Stage compatibility boundary',
+       'Quarantined compatibility Module for pre-W1-02 Stage references.',
+       'blocked'
+from lsites_ledger.issues i
+where i.phase_ref is not null
+on conflict do nothing;
+
+insert into lsites_ledger.phases (program_id, module_id, phase_id, org_id, title, objective, state)
+select distinct i.program_ref,
+       coalesce(nullif(i.module_ref, ''), '__legacy_stage__'),
+       i.phase_ref,
+       i.org_id,
+       'Legacy Stage compatibility boundary',
+       'Quarantined compatibility Phase projected from the pre-W1-02 Stage value.',
+       'blocked'
+from lsites_ledger.issues i
+where i.phase_ref is not null
+on conflict do nothing;
+
+update lsites_ledger.issues
+set module_ref = '__legacy_stage__'
+where module_ref is null and phase_ref is not null;
+
 alter table lsites_ledger.programs alter column org_id set not null;
 alter table lsites_ledger.modules alter column org_id set not null;
 alter table lsites_ledger.phases alter column org_id set not null;
@@ -66,12 +105,15 @@ alter table lsites_ledger.idempotency_records alter column org_id set not null;
 alter table lsites_ledger.issue_dependencies alter column org_id set not null;
 alter table lsites_ledger.ledger_events alter column issue_id drop not null;
 alter table lsites_ledger.issues alter column intended_effect set not null;
+alter table lsites_ledger.gate_results alter column subject_program_id set not null;
 
 create unique index if not exists uq_ledger_program_org on lsites_ledger.programs(program_id, org_id);
 create unique index if not exists uq_ledger_module_org on lsites_ledger.modules(program_id, module_id, org_id);
 create unique index if not exists uq_ledger_phase_org on lsites_ledger.phases(program_id, module_id, phase_id, org_id);
 create unique index if not exists uq_ledger_issue_org on lsites_ledger.issues(issue_id, org_id);
 create unique index if not exists uq_ledger_run_org on lsites_ledger.runs(run_id, org_id);
+drop index if exists lsites_ledger.idx_lsites_ledger_gate_subject;
+create index if not exists idx_lsites_ledger_gate_subject on lsites_ledger.gate_results(org_id, subject_type, subject_program_id, subject_module_id, subject_phase_id, subject_id, decided_at);
 
 do $$ begin
   execute 'alter table lsites_ledger.phases drop constraint if exists phases_program_id_module_id_fkey';

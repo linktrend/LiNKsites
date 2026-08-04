@@ -13,6 +13,7 @@ import {
   type GateDecision,
   type GateResult,
   type GateSubjectType,
+  type HierarchySubjectRef,
   type IdempotencyRecord,
   type LedgerEvidenceReceipt,
   type Issue,
@@ -93,8 +94,11 @@ function subjectRevision(subjectType: GateSubjectType, subject: { id: string; st
   return createHash('sha1').update(canonicalSerialize({ subjectType, id: subject.id, state: subject.state, revision: subject.revision ?? null, updatedAt: subject.updatedAt, inputDigest: subject.inputDigest ?? null, attemptCount: subject.attemptCount ?? null })).digest('hex')
 }
 
-function intendedGateAssociation(subjectType: GateSubjectType, subjectId: string, runId?: string): string {
-  return runId ? `gate:${subjectType}:${subjectId}:run:${runId}` : `gate:${subjectType}:${subjectId}`
+function intendedGateAssociation(subject: HierarchySubjectRef, runId?: string): string {
+  const base = subject.subjectType === 'issue'
+    ? `gate:${subject.subjectType}:${subject.subjectId}`
+    : `gate:${subject.subjectType}:${subject.subjectId}:program:${subject.programId}:module:${subject.moduleId ?? ''}:phase:${subject.phaseId ?? ''}`
+  return runId ? `${base}:run:${runId}` : base
 }
 
 function isLedgerEvidenceReceipt(value: unknown): value is LedgerEvidenceReceipt {
@@ -607,7 +611,8 @@ export class ProgramLedger {
     if (decision === 'accepted' && receipts.length === 0) {
       throw new LedgerError(`Issue ${issueId} cannot pass its Gate without evidence receipts`, 'invalid_state')
     }
-    this.assertReceiptsForSubject(receipts, 'issue', issueId, currentRevision, issue.orgId ?? DEFAULT_ORG_ID, runId)
+    const subject: HierarchySubjectRef = { subjectType: 'issue', subjectId: issueId, orgId: issue.orgId ?? DEFAULT_ORG_ID, programId: issue.programRef, moduleId: issue.moduleRef, phaseId: issue.phaseRef }
+    this.assertReceiptsForSubject(receipts, subject, currentRevision, runId)
     const decidedAt = nowIso()
 
     const gate: GateResult = {
@@ -615,6 +620,9 @@ export class ProgramLedger {
       gateId: randomUUID(),
       subjectType: 'issue',
       subjectId: issueId,
+      subjectProgramId: issue.programRef,
+      subjectModuleId: issue.moduleRef ?? null,
+      subjectPhaseId: issue.phaseRef ?? null,
       subjectRevision: currentRevision,
       attempt: issue.attemptCount,
       evaluator: decidedBy,
@@ -661,9 +669,9 @@ export class ProgramLedger {
     return evidence.evidenceReceipts as LedgerEvidenceReceipt[]
   }
 
-  private assertReceiptsForSubject(receipts: LedgerEvidenceReceipt[], subjectType: GateSubjectType, subjectId: string, revision: string, orgId: string, runId?: string): void {
-    const expectedAssociation = intendedGateAssociation(subjectType, subjectId, runId)
-    if (receipts.some((receipt) => receipt.org_id !== orgId || receipt.revision_sha !== revision || receipt.subject.type !== subjectType || receipt.subject.id !== subjectId || receipt.gate_association !== expectedAssociation)) {
+  private assertReceiptsForSubject(receipts: LedgerEvidenceReceipt[], subject: HierarchySubjectRef, revision: string, runId?: string): void {
+    const expectedAssociation = intendedGateAssociation(subject, runId)
+    if (receipts.some((receipt) => receipt.org_id !== subject.orgId || receipt.revision_sha !== revision || receipt.subject.type !== subject.subjectType || receipt.subject.id !== subject.subjectId || receipt.gate_association !== expectedAssociation)) {
       throw new LedgerError('EvidenceReceipt is not bound to the exact gate subject, tenant, revision, and intended gate association', 'invalid_state')
     }
   }
@@ -712,8 +720,8 @@ export class ProgramLedger {
     return this.store.getUnresolvedDependencies(issueId, orgId)
   }
 
-  async getCurrentGate(subjectType: GateSubjectType, subjectId: string) {
-    return this.store.getCurrentGate(subjectType, subjectId)
+  async getCurrentGate(subject: HierarchySubjectRef) {
+    return this.store.getCurrentGate(subject)
   }
 
   async listAttempts(issueId: string) {
@@ -740,11 +748,11 @@ export class ProgramLedger {
     return { programId, state: program.state, totalModules: modules.length, completedModules: modules.filter((module) => module.state === 'completed').length, totalIssues: issues.length, completedIssues: issues.filter((issue) => issue.state === 'completed').length, terminalFailures }
   }
 
-  async evaluateGate(input: { subjectType: GateSubjectType; subjectId: string; decision: GateDecision; evidence: Record<string, unknown>; evaluator: string; evaluatorVersion?: string; reasons?: string[]; subjectRevision?: string; issueId?: string; runId?: string; orgId?: string }): Promise<GateResult> {
+  async evaluateGate(input: { subjectType: GateSubjectType; subjectId: string; decision: GateDecision; evidence: Record<string, unknown>; evaluator: string; evaluatorVersion?: string; reasons?: string[]; subjectRevision?: string; issueId?: string; runId?: string; orgId?: string; programId?: string; moduleId?: string; phaseId?: string }): Promise<GateResult> {
     const knownIssue = input.subjectType === 'issue' ? await this.store.getIssue(input.subjectId) : null
-    const orgId = input.orgId ?? knownIssue?.orgId ?? null
-    if (input.subjectType !== 'issue' && !orgId) throw new LedgerError(`${input.subjectType} ${input.subjectId} requires an explicit tenant-scoped hierarchy lookup`, 'org_required')
-    const currentRevision = await this.currentSubjectRevision(input.subjectType, input.subjectId, orgId ?? undefined)
+    const subject = await this.resolveHierarchySubject(input, knownIssue)
+    const orgId = subject.orgId
+    const currentRevision = await this.currentSubjectRevision(subject)
     if (currentRevision === null) throw new LedgerError(`${input.subjectType} ${input.subjectId} not found`, 'not_found')
     if (input.subjectRevision !== undefined && input.subjectRevision !== currentRevision) throw new LedgerError(`${input.subjectType} ${input.subjectId} Gate carries a stale subject revision`, 'invalid_state')
     if (input.subjectType === 'issue' && knownIssue?.state !== 'awaiting_gate') {
@@ -759,17 +767,18 @@ export class ProgramLedger {
     const receipts = this.receiptsFromEvidence(input.evidence)
     if (input.decision === 'accepted' && (Object.keys(input.evidence).length === 0 || receipts.length === 0)) throw new LedgerError(`${input.subjectType} ${input.subjectId} cannot pass its Gate without evidence`, 'invalid_state')
     if (!orgId) throw new LedgerError(`${input.subjectType} ${input.subjectId} has no tenant`, 'org_required')
-    this.assertReceiptsForSubject(receipts, input.subjectType, input.subjectId, currentRevision, orgId, input.subjectType === 'issue' ? input.runId : undefined)
-    if (input.decision === 'accepted' && !(await this.subjectChildrenComplete(input.subjectType, input.subjectId, orgId))) {
+    this.assertReceiptsForSubject(receipts, subject, currentRevision, input.subjectType === 'issue' ? input.runId : undefined)
+    if (input.decision === 'accepted' && !(await this.subjectChildrenComplete(subject))) {
       throw new LedgerError(`${input.subjectType} ${input.subjectId} cannot pass its Gate before all required children complete`, 'invalid_state')
     }
+    const current = await this.getHierarchySubject(subject)
+    if (!current) throw new LedgerError(`${input.subjectType} ${input.subjectId} not found`, 'not_found')
     if (input.subjectType !== 'issue') {
-      const current = input.subjectType === 'program' ? await this.store.getProgram(input.subjectId, orgId) : input.subjectType === 'module' ? await this.findModule(input.subjectId, orgId) : await this.findPhase(input.subjectId, orgId)
-      if (current) this.assertLegalHierarchyTransition(current.state, input.decision === 'accepted' ? 'completed' : 'blocked')
+      this.assertLegalHierarchyTransition(current.state as WorkState, input.decision === 'accepted' ? 'completed' : 'blocked')
     }
-    const prior = await this.store.getCurrentGate(input.subjectType, input.subjectId)
+    const prior = await this.store.getCurrentGate(subject)
     const decidedAt = nowIso()
-    const gate: GateResult = { schemaVersion: SCHEMA_VERSION, gateId: randomUUID(), subjectType: input.subjectType, subjectId: input.subjectId, orgId, subjectRevision: currentRevision, attempt: (prior?.attempt ?? 0) + 1, evaluator: input.evaluator, evaluatorVersion: input.evaluatorVersion ?? '1', inputs: input.evidence, reasons: input.reasons ?? [], evidenceReceipts: receipts, issueId: input.issueId ?? (input.subjectType === 'issue' ? input.subjectId : null), runId: input.runId ?? null, decision: input.decision, evidence: input.evidence, decidedBy: input.evaluator, decidedAt }
+    const gate: GateResult = { schemaVersion: SCHEMA_VERSION, gateId: randomUUID(), subjectType: input.subjectType, subjectId: input.subjectId, orgId, subjectProgramId: subject.programId, subjectModuleId: subject.moduleId ?? null, subjectPhaseId: subject.phaseId ?? null, subjectRevision: currentRevision, attempt: (prior?.attempt ?? 0) + 1, evaluator: input.evaluator, evaluatorVersion: input.evaluatorVersion ?? '1', inputs: input.evidence, reasons: input.reasons ?? [], evidenceReceipts: receipts, issueId: input.issueId ?? (input.subjectType === 'issue' ? input.subjectId : null), runId: input.runId ?? null, decision: input.decision, evidence: input.evidence, decidedBy: input.evaluator, decidedAt }
     if (gate.issueId) {
       const linkedIssue = await this.store.getIssue(gate.issueId)
       if (!linkedIssue || linkedIssue.orgId !== orgId) throw new LedgerError('Gate issue association is outside the subject tenant', 'invalid_state')
@@ -791,8 +800,13 @@ export class ProgramLedger {
         ],
       })
     } else {
-      await this.store.putGateResult(gate)
-      await this.applyHierarchyDecision(input.subjectType, input.subjectId, input.decision, orgId)
+      const nextState: WorkState = input.decision === 'accepted' ? 'completed' : input.decision === 'rejected' ? 'blocked' : 'awaiting_gate'
+      const events: LedgerEvent[] = [
+        { schemaVersion: SCHEMA_VERSION, eventId: randomUUID(), issueId: gate.issueId, orgId, runId: gate.runId, type: 'gate.decided', payload: { decision: input.decision, gateId: gate.gateId, subjectType: subject.subjectType, subjectId: subject.subjectId, programId: subject.programId, moduleId: subject.moduleId ?? null, phaseId: subject.phaseId ?? null }, occurredAt: decidedAt },
+        { schemaVersion: SCHEMA_VERSION, eventId: randomUUID(), issueId: gate.issueId, orgId, runId: gate.runId, type: 'hierarchy.transitioned', payload: { subjectType: subject.subjectType, subjectId: subject.subjectId, programId: subject.programId, moduleId: subject.moduleId ?? null, phaseId: subject.phaseId ?? null, from: current.state, to: nextState }, occurredAt: decidedAt },
+      ]
+      if (!('revision' in current)) throw new LedgerError(`${input.subjectType} ${input.subjectId} has no hierarchy revision`, 'invalid_state')
+      await this.store.recordHierarchyGateDecision({ subject, gate, subjectState: nextState, expectedRevision: current.revision, subjectUpdatedAt: decidedAt, events })
     }
     return gate
   }
@@ -812,89 +826,68 @@ export class ProgramLedger {
     }
   }
 
-  private async currentSubjectRevision(subjectType: GateSubjectType, subjectId: string, orgId?: string): Promise<string | null> {
-    if (subjectType === 'issue') { const issue = await this.store.getIssue(subjectId); return issue ? subjectRevision('issue', { id: issue.issueId, state: issue.state, updatedAt: issue.updatedAt, inputDigest: issue.inputDigest, attemptCount: issue.attemptCount }) : null }
-    if (subjectType === 'phase') {
-      const phase = await this.findPhase(subjectId, orgId)
-      return phase ? subjectRevision('phase', { id: phase.phaseId, state: phase.state, revision: phase.revision, updatedAt: phase.updatedAt }) : null
+  private async resolveHierarchySubject(input: { subjectType: GateSubjectType; subjectId: string; orgId?: string; programId?: string; moduleId?: string; phaseId?: string }, knownIssue: Issue | null): Promise<HierarchySubjectRef> {
+    if (input.subjectType === 'issue') {
+      if (!knownIssue) throw new LedgerError(`Issue ${input.subjectId} not found`, 'not_found')
+      const orgId = knownIssue.orgId ?? DEFAULT_ORG_ID
+      if (input.orgId !== undefined && input.orgId !== orgId) throw new LedgerError(`Issue ${input.subjectId} is outside tenant ${input.orgId}`, 'invalid_state')
+      return { subjectType: 'issue', subjectId: knownIssue.issueId, orgId, programId: knownIssue.programRef, moduleId: knownIssue.moduleRef, phaseId: knownIssue.phaseRef }
     }
-    if (subjectType === 'module') {
-      const module = await this.findModule(subjectId, orgId)
-      return module ? subjectRevision('module', { id: module.moduleId, state: module.state, revision: module.revision, updatedAt: module.updatedAt }) : null
+    if (!input.orgId) throw new LedgerError(`${input.subjectType} ${input.subjectId} requires an explicit tenant-scoped hierarchy lookup`, 'org_required')
+    const programId = input.programId ?? (input.subjectType === 'program' ? input.subjectId : undefined)
+    if (!programId) throw new LedgerError(`${input.subjectType} ${input.subjectId} requires its complete Program identity`, 'invalid_state')
+    if (input.subjectType === 'program') {
+      if (input.subjectId !== programId || input.moduleId !== undefined || input.phaseId !== undefined) throw new LedgerError(`Program Gate identity is incomplete or ambiguous`, 'invalid_state')
+      return { subjectType: 'program', subjectId: input.subjectId, orgId: input.orgId, programId }
     }
-    const program = await this.store.getProgram(subjectId, orgId)
-    return program ? subjectRevision('program', { id: program.programId, state: program.state, revision: program.revision, updatedAt: program.updatedAt }) : null
+    if (input.subjectType === 'module') {
+      if (!input.moduleId || input.subjectId !== input.moduleId || input.phaseId !== undefined) throw new LedgerError(`Module Gate identity requires Program and exact Module IDs`, 'invalid_state')
+      return { subjectType: 'module', subjectId: input.subjectId, orgId: input.orgId, programId, moduleId: input.moduleId }
+    }
+    if (!input.moduleId || !input.phaseId || input.subjectId !== input.phaseId) throw new LedgerError(`Phase Gate identity requires Program, Module, and exact Phase IDs`, 'invalid_state')
+    return { subjectType: 'phase', subjectId: input.subjectId, orgId: input.orgId, programId, moduleId: input.moduleId, phaseId: input.phaseId }
   }
 
-  async getSubjectRevision(subjectType: GateSubjectType, subjectId: string, orgId?: string): Promise<string> {
-    const revision = await this.currentSubjectRevision(subjectType, subjectId, orgId)
-    if (!revision) throw new LedgerError(`${subjectType} ${subjectId} not found`, 'not_found')
+  private async getHierarchySubject(subject: HierarchySubjectRef): Promise<Issue | Program | Module | Phase | null> {
+    if (subject.subjectType === 'issue') return this.store.getIssue(subject.subjectId)
+    if (subject.subjectType === 'program') return this.store.getProgram(subject.programId, subject.orgId)
+    if (subject.subjectType === 'module') return this.store.getModule(subject.programId, subject.moduleId!, subject.orgId)
+    return this.store.getPhase(subject.programId, subject.moduleId!, subject.phaseId!, subject.orgId)
+  }
+
+  private async currentSubjectRevision(subject: HierarchySubjectRef): Promise<string | null> {
+    const current = await this.getHierarchySubject(subject)
+    if (!current) return null
+    return subjectRevision(subject.subjectType, { id: subject.subjectId, state: current.state, revision: 'revision' in current ? current.revision : undefined, updatedAt: current.updatedAt, inputDigest: 'inputDigest' in current ? current.inputDigest : undefined, attemptCount: 'attemptCount' in current ? current.attemptCount : undefined })
+  }
+
+  async getSubjectRevision(subject: HierarchySubjectRef): Promise<string> {
+    const revision = await this.currentSubjectRevision(subject)
+    if (!revision) throw new LedgerError(`${subject.subjectType} ${subject.subjectId} not found`, 'not_found')
     return revision
   }
 
-  private async subjectChildrenComplete(subjectType: GateSubjectType, subjectId: string, orgId?: string): Promise<boolean> {
-    if (subjectType === 'issue') {
-      const issue = await this.store.getIssue(subjectId)
+  private async subjectChildrenComplete(subject: HierarchySubjectRef): Promise<boolean> {
+    if (subject.subjectType === 'issue') {
+      const issue = await this.store.getIssue(subject.subjectId)
       return issue?.state === 'awaiting_gate'
     }
-    if (subjectType === 'phase') {
-      const phase = await this.findPhase(subjectId, orgId)
+    if (subject.subjectType === 'phase') {
+      const phase = await this.store.getPhase(subject.programId, subject.moduleId!, subject.phaseId!, subject.orgId)
       if (!phase) return false
-      const issues = await this.store.listIssues({ orgId, programId: phase.programId, moduleId: phase.moduleId, phaseId: phase.phaseId })
+      const issues = await this.store.listIssues({ orgId: subject.orgId, programId: phase.programId, moduleId: phase.moduleId, phaseId: phase.phaseId })
       return issues.length > 0 && issues.every((issue) => issue.state === 'completed')
     }
-    if (subjectType === 'module') {
-      const module = await this.findModule(subjectId, orgId)
+    if (subject.subjectType === 'module') {
+      const module = await this.store.getModule(subject.programId, subject.moduleId!, subject.orgId)
       if (!module) return false
-      const phases = await this.store.listPhases(module.programId, module.moduleId, orgId)
+      const phases = await this.store.listPhases(module.programId, module.moduleId, subject.orgId)
       return phases.length > 0 && phases.every((phase) => phase.state === 'completed')
     }
-    const program = await this.store.getProgram(subjectId, orgId)
+    const program = await this.store.getProgram(subject.programId, subject.orgId)
     if (!program) return false
-    const modules = await this.store.listModules(program.programId, orgId)
+    const modules = await this.store.listModules(program.programId, subject.orgId)
     return modules.length > 0 && modules.every((module) => module.state === 'completed')
-  }
-
-  private async findPhase(phaseId: string, orgId?: string): Promise<Phase | null> {
-    for (const program of await this.store.listPrograms(orgId)) for (const module of await this.store.listModules(program.programId, orgId)) {
-      const phase = await this.store.getPhase(program.programId, module.moduleId, phaseId, orgId)
-      if (phase) return phase
-    }
-    return null
-  }
-
-  private async findModule(moduleId: string, orgId?: string): Promise<Module | null> {
-    for (const program of await this.store.listPrograms(orgId)) {
-      const module = await this.store.getModule(program.programId, moduleId, orgId)
-      if (module) return module
-    }
-    return null
-  }
-
-  private async applyHierarchyDecision(subjectType: GateSubjectType, subjectId: string, decision: GateDecision, orgId?: string): Promise<void> {
-    const state: WorkState = decision === 'accepted' ? 'completed' : decision === 'rejected' ? 'blocked' : 'awaiting_gate'
-    if (subjectType === 'issue') {
-      const issue = await this.store.getIssue(subjectId)
-      if (issue) {
-        issue.state = decision === 'accepted' ? 'completed' : decision === 'rejected' ? 'repair_required' : 'awaiting_gate'
-        issue.updatedAt = nowIso()
-        await this.store.putIssue(issue)
-        if (decision === 'rejected') {
-          const idempotencyKey = deriveIdempotencyKey(issue)
-          const existing = await this.store.getIdempotencyRecord(idempotencyKey)
-          if (existing) await this.store.updateIdempotencyRecord({ ...existing, state: 'failed_safe_to_retry', runId: null })
-        }
-      }
-    } else if (subjectType === 'phase') {
-      const phase = await this.findPhase(subjectId, orgId)
-      if (phase) { this.assertLegalHierarchyTransition(phase.state, state); phase.state = state; phase.revision += 1; phase.updatedAt = nowIso(); await this.store.putPhase(phase); await this.emit(null, null, 'gate.decided', { subjectType, subjectId, decision }, phase.orgId ?? DEFAULT_ORG_ID) }
-    } else if (subjectType === 'module') {
-      const module = await this.findModule(subjectId, orgId)
-      if (module) { this.assertLegalHierarchyTransition(module.state, state); module.state = state; module.revision += 1; module.updatedAt = nowIso(); await this.store.putModule(module); await this.emit(null, null, 'gate.decided', { subjectType, subjectId, decision }, module.orgId ?? DEFAULT_ORG_ID) }
-    } else if (subjectType === 'program') {
-      const program = await this.store.getProgram(subjectId, orgId)
-      if (program) { this.assertLegalHierarchyTransition(program.state, state); program.state = state; program.revision += 1; program.updatedAt = nowIso(); await this.store.putProgram(program); await this.emit(null, null, 'gate.decided', { subjectType, subjectId, decision }, program.orgId ?? DEFAULT_ORG_ID) }
-    }
   }
 
   private assertLegalHierarchyTransition(from: WorkState, to: WorkState): void {

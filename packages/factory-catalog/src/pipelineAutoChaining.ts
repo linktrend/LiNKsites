@@ -83,7 +83,7 @@ export type PipelineChainOutcome =
 export interface NextIssuePlacement {
   programRef: string
   moduleRef?: string
-  stageRef?: string
+  phaseRef?: string
   sideEffectClass?: SideEffectClass
   maxAttempts?: number
   backoffBaseMs?: number
@@ -124,7 +124,7 @@ function placementToCreateInput(
     issueType,
     programRef: placement.programRef,
     moduleRef: placement.moduleRef,
-    stageRef: placement.stageRef,
+    phaseRef: placement.phaseRef,
     input,
     sideEffectClass: placement.sideEffectClass,
     maxAttempts: placement.maxAttempts,
@@ -156,6 +156,9 @@ async function resolveAcceptedGateOutput(
     return { ok: false, reason: `Gate ${gateResult.gateId} for Issue ${gateResult.issueId} was not accepted (decision: "${gateResult.decision}") -- not chaining.` }
   }
 
+  if (!gateResult.issueId) {
+    throw new PipelineAutoChainingError(`Gate ${gateResult.gateId} has no source Issue association.`)
+  }
   const issue = await ledger.getIssue(gateResult.issueId)
   if (!issue) {
     throw new PipelineAutoChainingError(`Source Issue ${gateResult.issueId} referenced by Gate ${gateResult.gateId} was not found in the ledger.`)
@@ -177,6 +180,9 @@ async function resolveAcceptedGateOutput(
 
   // 3. The Gate's Run must actually have succeeded and produced output to
   //    map from.
+  if (!gateResult.runId) {
+    throw new PipelineAutoChainingError(`Gate ${gateResult.gateId} has no source Run association.`)
+  }
   const run = await ledger.getRun(gateResult.runId)
   if (!run) {
     throw new PipelineAutoChainingError(`Run ${gateResult.runId} referenced by Gate ${gateResult.gateId} was not found in the ledger.`)
