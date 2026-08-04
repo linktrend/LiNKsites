@@ -12,6 +12,7 @@ import type {
   CompletionSink,
   CycleResult,
   ExecutorRegistry,
+  ExecutorResult,
   HealthReporter,
   HealthSnapshot,
   IdGenerator,
@@ -151,72 +152,76 @@ export class IntakeOrchestrator {
     }
 
     this.lastPollAt = this.dependencies.clock.now()
-    this.readiness = await this.dependencies.ledger.isAvailable()
+    try {
+      this.readiness = await this.dependencies.ledger.isAvailable()
+    } catch {
+      await this.failReadiness()
+      return { pulled: 0, invalid: 0, claimedIntake: 0, claimedIssues: 0, executedIssues: 0, idle: true }
+    }
     if (!this.readiness) {
       this.stalledWork = 0
       await this.reportHealth()
       return { pulled: 0, invalid: 0, claimedIntake: 0, claimedIssues: 0, executedIssues: 0, idle: true }
     }
 
-    await this.dependencies.ledger.reclaimExpiredWork(this.dependencies.clock.now())
-    const pulled = await this.dependencies.intake.pullReady(this.options.batchSize)
-    let invalid = 0
-    let claimedIntake = 0
+    try {
+      await this.dependencies.ledger.reclaimExpiredWork(this.dependencies.clock.now())
+      const pulled = await this.dependencies.intake.pullReady(this.options.batchSize)
+      let invalid = 0
+      let claimedIntake = 0
 
-    for (const item of pulled) {
-      if (this.stopRequested) break
-      if (!isLeadResearchPackage(item.envelope)) {
-        invalid += 1
-        await this.dependencies.intake.acknowledge(item.itemId, {
-          state: 'rejected',
-          reasonCode: 'validation:invalid-lead-research-package',
-        })
-        continue
+      for (const item of pulled) {
+        if (this.stopRequested) break
+        if (!isLeadResearchPackage(item.envelope)) {
+          invalid += 1
+          await this.dependencies.intake.acknowledge(item.itemId, {
+            state: 'rejected',
+            reasonCode: 'validation:invalid-lead-research-package',
+          })
+          continue
+        }
+
+        const claim = await this.dependencies.intake.claim(
+          item.itemId,
+          item.envelope.lead_id,
+          item.envelope.idempotency_key,
+        )
+        if (!claim) continue
+        claimedIntake += 1
+
+        try {
+          await this.dependencies.ledger.createOrResumeProgram(item.envelope)
+          await this.dependencies.intake.acknowledge(item.itemId, { state: 'program_started' })
+        } catch (error) {
+          this.lastFailureClass = 'unknown'
+          await this.dependencies.intake.acknowledge(item.itemId, {
+            state: 'program_failed',
+            reasonCode: 'orchestrator:program-creation-failed',
+          })
+          throw error
+        }
       }
 
-      const claim = await this.dependencies.intake.claim(
-        item.itemId,
-        item.envelope.lead_id,
-        item.envelope.idempotency_key,
-      )
-      if (!claim) continue
-      claimedIntake += 1
+      const programs = await this.dependencies.ledger.listActivePrograms()
+      const result = await this.scheduleReadyIssues(programs)
+      await Promise.all(programs.map((program) => this.maybeEmitCompletion(program)))
 
-      try {
-        await this.dependencies.ledger.createOrResumeProgram(item.envelope)
-        await this.dependencies.intake.acknowledge(item.itemId, { state: 'program_started' })
-      } catch {
-        this.lastFailureClass = 'unknown'
-        await this.dependencies.intake.acknowledge(item.itemId, {
-          state: 'program_failed',
-          reasonCode: 'orchestrator:program-creation-failed',
-        })
+      this.stalledWork = (await Promise.all(
+        programs.map(async (program) => (await this.dependencies.ledger.getProgramStatus(program.programRunId)).stalledWork),
+      )).reduce((total, stalled) => total + stalled, 0)
+      await this.reportHealth()
+
+      return {
+        pulled: pulled.length,
+        invalid,
+        claimedIntake,
+        claimedIssues: result.claimedIssues,
+        executedIssues: result.executedIssues,
+        idle: pulled.length === 0 && result.claimedIssues === 0 && result.executedIssues === 0,
       }
-    }
-
-    const programs = await this.dependencies.ledger.listActivePrograms()
-    let claimedIssues = 0
-    let executedIssues = 0
-    for (const program of programs) {
-      if (this.stopRequested) break
-      const result = await this.scheduleReadyIssues(program)
-      claimedIssues += result.claimedIssues
-      executedIssues += result.executedIssues
-      await this.maybeEmitCompletion(program)
-    }
-
-    this.stalledWork = (await Promise.all(
-      programs.map(async (program) => (await this.dependencies.ledger.getProgramStatus(program.programRunId)).stalledWork),
-    )).reduce((total, stalled) => total + stalled, 0)
-    await this.reportHealth()
-
-    return {
-      pulled: pulled.length,
-      invalid,
-      claimedIntake,
-      claimedIssues,
-      executedIssues,
-      idle: pulled.length === 0 && claimedIssues === 0 && executedIssues === 0,
+    } catch {
+      await this.failReadiness()
+      return { pulled: 0, invalid: 0, claimedIntake: 0, claimedIssues: 0, executedIssues: 0, idle: true }
     }
   }
 
@@ -267,17 +272,24 @@ export class IntakeOrchestrator {
     }
   }
 
-  private async scheduleReadyIssues(program: ProgramRun): Promise<CycleResult> {
+  private async scheduleReadyIssues(programs: readonly ProgramRun[]): Promise<CycleResult> {
     const capacity = this.options.concurrency - this.activeExecutions.size
     if (capacity <= 0) {
       return { pulled: 0, invalid: 0, claimedIntake: 0, claimedIssues: 0, executedIssues: 0, idle: true }
     }
 
-    const readyIssues = await this.dependencies.ledger.listDependencyReadyIssues(program.programRunId)
-    const candidates = readyIssues.slice(0, capacity)
+    const readyByProgram = await Promise.all(
+      programs.map(async (program) => ({
+        program,
+        issues: await this.dependencies.ledger.listDependencyReadyIssues(program.programRunId),
+      })),
+    )
+    const candidates = readyByProgram.flatMap(({ program, issues }) =>
+      issues.map((issue) => ({ program, issue })),
+    ).slice(0, capacity)
     const claimed: ClaimedIssue[] = []
-    for (const issue of candidates) {
-      if (this.stopRequested || this.activeExecutions.size >= this.options.concurrency) break
+    for (const { program, issue } of candidates) {
+      if (this.stopRequested || this.activeExecutions.size + claimed.length >= this.options.concurrency) break
       const claim = await this.dependencies.ledger.claimIssue(
         program.programRunId,
         issue.issueId,
@@ -314,8 +326,31 @@ export class IntakeOrchestrator {
 
     const controller = new AbortController()
     this.activeExecutions.set(issue.runId, controller)
+    let result: ExecutorResult
     try {
-      const result = await this.executeWithTimeout(executor, issue, controller)
+      result = await this.executeWithTimeout(executor, issue, controller)
+    } catch (error) {
+      const aborted = controller.signal.aborted
+      try {
+        await this.handleFailure(issue, {
+          kind: 'failure',
+          failure: safeFailure(
+            this.dependencies.ids,
+            aborted ? 'retryable_dependency_service' : 'unknown',
+            aborted ? 'executor:aborted' : 'executor:unexpected-failure',
+            true,
+          ),
+          evidence: [],
+        })
+      } finally {
+        this.activeExecutions.delete(issue.runId)
+      }
+      this.lastFailureClass = aborted ? 'retryable_dependency_service' : 'unknown'
+      void error
+      return
+    }
+
+    try {
       if (result.kind === 'failure') {
         await this.handleFailure(issue, result)
         return
@@ -331,7 +366,6 @@ export class IntakeOrchestrator {
       }
 
       await this.dependencies.ledger.appendRunEvidence(issue.runId, result.evidence)
-      await this.dependencies.ledger.appendRunOutcome(issue.runId, { kind: 'success', output: result.output })
       const gate = await this.dependencies.ledger.evaluateGate(issue.runId)
       await this.dependencies.ledger.appendGateResult(issue.runId, gate)
       if (gate.decision === 'rejected') {
@@ -344,23 +378,11 @@ export class IntakeOrchestrator {
             gate.retryable,
             gate.diagnosticReference,
           ),
-          evidence: result.evidence,
+          evidence: [],
         })
+        return
       }
-    } catch (error) {
-      const aborted = controller.signal.aborted
-      await this.handleFailure(issue, {
-        kind: 'failure',
-        failure: safeFailure(
-          this.dependencies.ids,
-          aborted ? 'retryable_dependency_service' : 'unknown',
-          aborted ? 'executor:aborted' : 'executor:unexpected-failure',
-          true,
-        ),
-        evidence: [],
-      })
-      this.lastFailureClass = aborted ? 'retryable_dependency_service' : 'unknown'
-      void error
+      await this.dependencies.ledger.appendRunOutcome(issue.runId, { kind: 'success', output: result.output })
     } finally {
       this.activeExecutions.delete(issue.runId)
     }
@@ -434,19 +456,30 @@ export class IntakeOrchestrator {
   private async emitCompletion(programRunId: string, kind: CompletionKind): Promise<void> {
     const reservation = await this.dependencies.ledger.reserveCompletion(programRunId, kind)
     if (!reservation) return
-    try {
-      const envelope = await this.dependencies.ledger.buildCompletion(reservation)
-      if (!isDemoCompletionEnvelope(envelope)) {
-        await this.dependencies.ledger.releaseCompletionReservation(reservation)
-        this.lastFailureClass = 'validation'
-        return
-      }
-      await this.dependencies.completionSink.write(envelope)
-      await this.dependencies.ledger.markCompletionEmitted(reservation)
-    } catch {
+    const envelope = await this.dependencies.ledger.buildCompletion(reservation)
+    if (!isDemoCompletionEnvelope(envelope)) {
       await this.dependencies.ledger.releaseCompletionReservation(reservation)
-      this.lastFailureClass = 'unknown'
+      this.lastFailureClass = 'validation'
+      return
     }
+
+    // Once delivery has started, retain the durable reservation. A restart
+    // must not replay an ambiguous/non-idempotent sink write before the
+    // ledger can prove that the completion was marked emitted.
+    try {
+      await this.dependencies.completionSink.write(envelope)
+    } catch {
+      this.lastFailureClass = 'unknown'
+      return
+    }
+    await this.dependencies.ledger.markCompletionEmitted(reservation)
+  }
+
+  private async failReadiness(): Promise<void> {
+    this.readiness = false
+    this.stalledWork = 0
+    this.lastFailureClass = 'unknown'
+    await this.reportHealth()
   }
 
   private async reportHealth(): Promise<void> {

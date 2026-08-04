@@ -122,6 +122,11 @@ export interface ProgramStatus {
 
 export type CompletionKind = 'completed' | 'failed'
 
+/**
+ * Reservations are durable delivery ownership. Once a sink write starts, the
+ * orchestrator retains the reservation until markCompletionEmitted succeeds;
+ * this prevents a restart from replaying an ambiguous non-idempotent write.
+ */
 export interface CompletionReservation {
   readonly reservationId: string
   readonly programRunId: string
@@ -164,6 +169,7 @@ export interface ProgramLedgerPort {
 }
 
 export interface CompletionSink {
+  /** The call may be non-idempotent; the durable ledger reservation is the replay guard. */
   write(envelope: DemoCompletionEnvelope): Promise<void>
 }
 

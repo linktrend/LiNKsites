@@ -130,9 +130,12 @@ class TestLedger implements ProgramLedgerPort {
   readonly createdLeadIds: string[] = []
   readonly claimedIssues: string[] = []
   readonly gateResults: GateEvaluation[] = []
+  readonly appendSequence: string[] = []
   readonly retrySchedules: Array<{ runId: string; nextAttemptAt: string }> = []
   private readonly forcedGates: Array<'accepted' | 'rejected'> = []
   private available = true
+  private failReclaim = false
+  private failCompletionMark = false
   private now = () => '2026-08-04T00:00:00.000Z'
 
   constructor(graph: (lead: LeadResearchPackage) => Array<Omit<FakeIssue, 'status' | 'attempt' | 'retryAt' | 'expired' | 'runId' | 'evidence' | 'outcome'>>) {
@@ -145,6 +148,14 @@ class TestLedger implements ProgramLedgerPort {
 
   setAvailable(available: boolean): void {
     this.available = available
+  }
+
+  failNextReclaim(): void {
+    this.failReclaim = true
+  }
+
+  failNextCompletionMark(): void {
+    this.failCompletionMark = true
   }
 
   rejectNextGate(): void {
@@ -192,6 +203,10 @@ class TestLedger implements ProgramLedgerPort {
   }
 
   async reclaimExpiredWork(): Promise<void> {
+    if (this.failReclaim) {
+      this.failReclaim = false
+      throw new Error('ledger unavailable during reclaim')
+    }
     for (const program of this.programs.values()) {
       for (const issue of program.issues) {
         if (issue.expired) {
@@ -245,10 +260,12 @@ class TestLedger implements ProgramLedgerPort {
   }
 
   async appendRunEvidence(runId: string, evidence: readonly EvidenceReceipt[]): Promise<void> {
+    this.appendSequence.push(`evidence:${runId}`)
     this.issueForRun(runId).evidence.push(...evidence)
   }
 
   async appendRunOutcome(runId: string, outcome: { kind: 'success'; output: unknown } | { kind: 'failure'; failure: RunFailure }): Promise<void> {
+    this.appendSequence.push(`outcome:${runId}:${outcome.kind}`)
     this.issueForRun(runId).outcome = outcome.kind
   }
 
@@ -265,6 +282,7 @@ class TestLedger implements ProgramLedgerPort {
   }
 
   async appendGateResult(_runId: string, evaluation: GateEvaluation): Promise<void> {
+    this.appendSequence.push(`gate:${_runId}:${evaluation.decision}`)
     this.gateResults.push(evaluation)
     if (evaluation.decision !== 'accepted') return
     const issue = this.issueForRun(_runId)
@@ -326,6 +344,10 @@ class TestLedger implements ProgramLedgerPort {
   }
 
   async markCompletionEmitted(reservation: CompletionReservation): Promise<void> {
+    if (this.failCompletionMark) {
+      this.failCompletionMark = false
+      throw new Error('ledger mark failed after sink write')
+    }
     const program = [...this.programs.values()].find((candidate) => candidate.run.programRunId === reservation.programRunId)
     if (program) {
       program.completionEmitted = true
@@ -435,6 +457,18 @@ test('no work is a normal idle result and unavailable durable state is not ready
   assert.equal(orchestrator.getHealth().readiness, false)
 })
 
+test('readiness fails closed and is reported when a mandatory ledger operation errors', async () => {
+  const setup = makeDependencies()
+  setup.ledger.failNextReclaim()
+  const orchestrator = new IntakeOrchestrator(setup.dependencies)
+
+  const result = await orchestrator.runCycle()
+
+  assert.equal(result.idle, true)
+  assert.equal(orchestrator.getHealth().readiness, false)
+  assert.equal(setup.health.snapshots.at(-1)?.readiness, false)
+})
+
 test('duplicate pull/restart creates one idempotent Program', async () => {
   const setup = makeDependencies()
   addLead(setup.intake)
@@ -459,6 +493,31 @@ test('two ready independent Issues run in parallel within the configured ceiling
   const result = await orchestrator.runCycle()
   assert.equal(result.claimedIssues, 2)
   assert.equal(active.maximum, 2)
+})
+
+test('ready Issues from two Programs run concurrently under one global ceiling', async () => {
+  const setup = makeDependencies({ options: { concurrency: 2, pollIntervalMs: 1 } })
+  const secondLead = {
+    ...manualFirstTestLead,
+    lead_id: 'lead_demo_example_two',
+    idempotency_key: 'lead-demo-example-two-intake',
+  }
+  const ledger = new TestLedger(() => [issue('issue-1')])
+  ledger.setNow(() => setup.clock.now())
+  setup.dependencies = { ...setup.dependencies, ledger }
+  setup.intake.add('item-1', manualFirstTestLead)
+  setup.intake.add('item-2', secondLead)
+  let release!: () => void
+  const wait = new Promise<void>((resolve) => { release = resolve })
+  const active = { current: 0, maximum: 0, wait, release }
+  setup.executors.register(successExecutor(active))
+
+  const orchestrator = new IntakeOrchestrator(setup.dependencies)
+  const result = await orchestrator.runCycle()
+
+  assert.equal(result.claimedIssues, 2)
+  assert.equal(active.maximum, 2)
+  assert.deepEqual(ledger.claimedIssues, ['issue-1', 'issue-1'])
 })
 
 test('dependency-blocked Issue is never claimed until its Gate is accepted', async () => {
@@ -579,12 +638,36 @@ test('completion is emitted once and only after Program PASS', async () => {
   const orchestrator = new IntakeOrchestrator(setup.dependencies)
   await orchestrator.runCycle()
   assert.equal(setup.sink.envelopes.length, 0)
+  assert.deepEqual(setup.ledger.appendSequence.slice(0, 3), [
+    'evidence:run:issue-1:1',
+    'gate:run:issue-1:1:rejected',
+    'outcome:run:issue-1:1:failure',
+  ])
+  assert.equal(setup.ledger.appendSequence.filter((entry) => entry === 'evidence:run:issue-1:1').length, 1)
+  assert.equal(setup.ledger.appendSequence.includes('outcome:run:issue-1:1:success'), false)
   setup.clock.advance(7)
   await orchestrator.runCycle()
   await orchestrator.runCycle()
   assert.equal(setup.sink.envelopes.length, 1)
   assert.equal(setup.sink.envelopes[0]?.status, 'completed')
   assert.equal(setup.sink.envelopes[0]?.error, undefined)
+})
+
+test('completion reservation is retained across post-write mark failure and restart replay', async () => {
+  const setup = makeDependencies()
+  addLead(setup.intake)
+  setup.ledger.failNextCompletionMark()
+  setup.executors.register(successExecutor())
+  const orchestrator = new IntakeOrchestrator(setup.dependencies)
+
+  await orchestrator.runCycle()
+  assert.equal(setup.sink.envelopes.length, 1)
+  assert.equal(orchestrator.getHealth().readiness, false)
+
+  const restarted = new IntakeOrchestrator(setup.dependencies)
+  await restarted.runCycle()
+
+  assert.equal(setup.sink.envelopes.length, 1)
 })
 
 test('executor errors do not leak supplied secret values into health or completion output', async () => {
