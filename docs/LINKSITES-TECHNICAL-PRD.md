@@ -18,7 +18,7 @@ LiNKsites is a monorepo website factory + managed hosting Program:
 | **CMS** | Draft + published website content authority | `apps/cms` — Payload CMS 3.x on Next.js, Postgres `public` schema |
 | **Serving** | Multi-tenant frontend by hostname | `apps/web-master` — shared Next.js platform; optional `apps/web-company` (smaller template; legacy/paused per audit DR-02) |
 | **Edge / origin** | Public edge + VPS reverse proxy | Cloudflare (edge) + Traefik labels in `deploy/docker-compose.deploy.yml` |
-| **Commercial boundary** | Lead research, outcomes, authorization | **LiNKreach-owned** — LiNKsites consumes versioned contracts; payment and CRM systems are not LiNKsites dependencies |
+| **Commercial boundary** | Lead research, outcomes, authorization | **LiNKreach-owned** — LiNKsites continuously pulls and atomically claims eligible CRM work through a versioned adapter; payment and CRM systems remain LiNKreach-owned and are not LiNKsites dependencies |
 | **Shared substrate** | Org/RBAC/capability grants | LiNKplatform `platform.*` schemas; Ledger checks `platform.capability_grants` at dispatch |
 
 ### Process topology (intended)
@@ -245,7 +245,7 @@ Program-controlled Site Assignment registry, automated DNS/TLS issuance, monitor
 ### Historical commercial boundary
 
 - Older documents call the commercial counterpart Sales and mention Stripe/Odoo. The current owner is LiNKreach.
-- LiNKsites consumes `CommercialOutcomeEnvelope` and `ActivationRequest` with LiNKreach authorization; it does not integrate directly with payment or CRM systems.
+- LiNKsites consumes `CommercialOutcomeEnvelope` and `ActivationRequest` with LiNKreach authorization. Its runtime pulls and claims eligible CRM records through a versioned LiNKreach-owned adapter; it does not own or directly integrate with the CRM or payment systems. The live adapter remains deferred, while the manual first-test fixture uses the same `LeadResearchPackage` boundary.
 
 ---
 

@@ -19,7 +19,7 @@ It does two related jobs:
 
 The commercial idea behind it is **build-first, sell-later**: a qualified prospect should see an actual website representing what LiNKsites can provide, not only a promise that one will be built after payment. If they do not buy, the reusable foundation can be cleaned and offered to someone else.
 
-LiNKsites continuously pulls and claims ready work, but does **not** discover leads, make sales calls, or process payments. LiNKreach owns research, commercial decisions, and authorization. LiNKsites receives a `LeadResearchPackage`, `CommercialOutcomeEnvelope`, or `ActivationRequest` and performs the technical work. Historical Sales/Stripe/Odoo references are retained only to explain the former boundary.
+LiNKsites continuously pulls and claims eligible ready work through LiNKreach's owned CRM boundary, but does **not** discover leads, make sales calls, or process payments. LiNKreach owns research, commercial decisions, and authorization. LiNKsites receives a `LeadResearchPackage`, `CommercialOutcomeEnvelope`, or `ActivationRequest` and performs the technical work. Historical Sales/Stripe/Odoo references are retained only to explain the former boundary.
 
 ---
 

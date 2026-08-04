@@ -53,7 +53,7 @@ A healthy LiNKsites production path is done when:
 ### Inputs (what LiNKsites takes)
 
 - Versioned **Product / Tier Specifications** and Vertical Kits (factory capability definitions).
-- **Lead Research Packages** and **Preview Production Requests** from LiNKreach.
+- **Lead Research Packages** and **Preview Production Requests** pulled and claimed through LiNKreach's owned CRM boundary. The future CRM adapter and the manual first-test input use the same versioned contract; LiNKsites does not own the CRM.
 - **Commercial Outcome** and **Activation Request** envelopes authorized by LiNKreach.
 - Customer-supplied facts, logos, media, domain authorization, and approvals where required.
 - Credentials and environment for runtime: Payload, Supabase/Postgres (shared `linkplatform-*` projects), Cloudflare/Traefik/VPS, GSM secrets — see app `.env.example` files and ops notes.

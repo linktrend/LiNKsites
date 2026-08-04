@@ -194,7 +194,9 @@ const containsSensitiveMaterial = (value: unknown, ancestors = new Set<object>()
   if (ancestors.has(value)) return true
 
   ancestors.add(value)
-  const nestedValues = Array.isArray(value) ? value : Object.values(value)
+  const nestedValues = Reflect.ownKeys(value)
+    .filter((key) => !(Array.isArray(value) && key === 'length'))
+    .map((key) => Reflect.get(value, key))
   const found = nestedValues.some((nestedValue) => containsSensitiveMaterial(nestedValue, ancestors))
   ancestors.delete(value)
   return found
@@ -218,14 +220,24 @@ const isCanonicalReference = (value: unknown): value is string =>
   CANONICAL_REFERENCE_PATTERN.test(value) &&
   !isSensitiveString(value)
 
+const hasOnlyIndexedOwnKeys = (value: readonly unknown[]): boolean => {
+  const keys = Reflect.ownKeys(value).filter((key) => key !== 'length')
+  return (
+    keys.length === value.length &&
+    keys.every(
+      (key) => typeof key === 'string' && /^(0|[1-9]\d*)$/.test(key),
+    )
+  )
+}
+
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) &&
-  Object.keys(value).length === value.length &&
+  hasOnlyIndexedOwnKeys(value) &&
   value.every(isNonEmptyString)
 
 const isReferenceArray = (value: unknown): value is string[] =>
   Array.isArray(value) &&
-  Object.keys(value).length === value.length &&
+  hasOnlyIndexedOwnKeys(value) &&
   value.every(isCanonicalReference)
 
 const CANONICAL_UTC_TIMESTAMP_PATTERN =
@@ -302,7 +314,9 @@ const hasExactKeys = (
   const allowedKeys = new Set([...requiredKeys, ...optionalKeys])
   return (
     requiredKeys.every((key) => Object.prototype.hasOwnProperty.call(value, key)) &&
-    Object.keys(value).every((key) => allowedKeys.has(key))
+    Reflect.ownKeys(value).every(
+      (key) => typeof key === 'string' && allowedKeys.has(key),
+    )
   )
 }
 

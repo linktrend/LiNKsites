@@ -173,6 +173,57 @@ test('all seven validators reject unexpected top-level and schema-version keys',
   }
 })
 
+test('all seven validators reject non-enumerable and symbol unknown fields', () => {
+  const contracts: Array<[string, ContractValidator, object]> = [
+    ['lead', isLeadResearchPackage, manualFirstTestLead],
+    ['demo', isDemoCompletionEnvelope, validDemoCompletion],
+    ['commercial', isCommercialOutcomeEnvelope, validCommercialOutcome],
+    ['activation', isActivationRequest, validActivationRequest],
+    ['recycling', isRecyclingRequest, validRecyclingRequest],
+    ['event', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent],
+    ['evidence', isEvidenceReceipt, validEvidenceReceipt],
+  ]
+
+  for (const [name, validator, fixture] of contracts) {
+    const hiddenField = { ...fixture }
+    Object.defineProperty(hiddenField, 'hidden_unknown', { value: true })
+    assert.equal(
+      validator(hiddenField),
+      false,
+      `${name} accepts a non-enumerable unknown field`,
+    )
+
+    const symbolField = { ...fixture }
+    Object.defineProperty(symbolField, Symbol('unknown'), { value: true })
+    assert.equal(
+      validator(symbolField),
+      false,
+      `${name} accepts a symbol unknown field`,
+    )
+  }
+
+  const leadWithHiddenSourceField = {
+    ...manualFirstTestLead,
+    research: {
+      ...manualFirstTestLead.research,
+      sources: [...manualFirstTestLead.research.sources],
+    },
+  }
+  Object.defineProperty(leadWithHiddenSourceField.research.sources, 'hidden_unknown', {
+    value: 'unexpected',
+  })
+  assert.equal(isLeadResearchPackage(leadWithHiddenSourceField), false)
+
+  const demoWithHiddenEvidenceField = {
+    ...validDemoCompletion,
+    evidence_references: [...validDemoCompletion.evidence_references],
+  }
+  Object.defineProperty(demoWithHiddenEvidenceField.evidence_references, Symbol('unknown'), {
+    value: 'unexpected',
+  })
+  assert.equal(isDemoCompletionEnvelope(demoWithHiddenEvidenceField), false)
+})
+
 test('all nested objects use closed schemas and reject credential or payment material', () => {
   const blockedDemo = {
     ...validDemoCompletion,
