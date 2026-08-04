@@ -9,16 +9,21 @@ export type IntakeEnvelope = unknown
 export interface PulledWorkItem {
   readonly itemId: string
   readonly envelope: IntakeEnvelope
+  /** Durable source-attempt number, used to bound Program-creation retries. */
+  readonly attemptNumber?: number
 }
 
 export type IntakeAcknowledgementState =
   | 'rejected'
   | 'program_started'
-  | 'program_failed'
+  | 'program_retry_scheduled'
+  | 'program_manual_attention'
 
 export interface IntakeAcknowledgement {
   readonly state: IntakeAcknowledgementState
   readonly reasonCode?: string
+  readonly nextAttemptAt?: string
+  readonly attemptNumber?: number
 }
 
 export interface IntakeClaim {
@@ -31,11 +36,12 @@ export interface IntakeClaim {
  * canonical envelopes and owns only the source's pull/claim acknowledgement.
  */
 export interface WorkIntakePort {
-  pullReady(limit: number): Promise<readonly PulledWorkItem[]>
+  pullReady(limit: number, nowIso: string): Promise<readonly PulledWorkItem[]>
   claim(
     itemId: string,
     leadId: LeadResearchPackage['lead_id'],
     idempotencyKey: LeadResearchPackage['idempotency_key'],
+    nowIso: string,
   ): Promise<IntakeClaim | null>
   acknowledge(itemId: string, acknowledgement: IntakeAcknowledgement): Promise<void>
 }
@@ -151,11 +157,13 @@ export interface ProgramLedgerPort {
     nowIso: string,
   ): Promise<ClaimedIssue | null>
   appendRunEvidence(runId: string, evidence: readonly EvidenceReceipt[]): Promise<void>
+  /** Must be durable and idempotent before an accepted Gate may unlock dependents. */
   appendRunOutcome(
     runId: string,
     outcome: { readonly kind: 'success'; readonly output: unknown } | { readonly kind: 'failure'; readonly failure: RunFailure },
   ): Promise<void>
   evaluateGate(runId: string): Promise<GateEvaluation>
+  /** Accepted results must fail closed unless a durable successful outcome exists. */
   appendGateResult(runId: string, evaluation: GateEvaluation): Promise<void>
   scheduleRetry(runId: string, failure: RunFailure, nextAttemptAt: string): Promise<RetrySchedule>
   recordTerminalFailure(runId: string, failure: RunFailure): Promise<void>
@@ -176,6 +184,12 @@ export interface CompletionSink {
 export interface Clock {
   now(): string
   sleep(milliseconds: number): Promise<void>
+  setTimeout(callback: () => void, milliseconds: number): CancellableTimer
+}
+
+/** Timer ownership is injected so polling and execution deadlines are testable. */
+export interface CancellableTimer {
+  cancel(): void
 }
 
 export interface IdGenerator {
@@ -205,6 +219,7 @@ export interface OrchestratorOptions {
   readonly concurrency: number
   readonly shutdownTimeoutMs: number
   readonly executionTimeoutMs: number
+  readonly programCreationMaxAttempts: number
 }
 
 export interface CycleResult {

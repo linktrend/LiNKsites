@@ -11,7 +11,13 @@ import type {
 } from './contracts.ts'
 import type { LeadResearchPackage } from '@linksites/types'
 
-type IntakeState = Record<string, { state: 'claimed' | 'rejected' | 'program_started' | 'program_failed'; claimId?: string; reasonCode?: string }>
+type IntakeState = Record<string, {
+  state: 'claimed' | 'rejected' | 'program_started' | 'program_retry_scheduled' | 'program_manual_attention'
+  claimId?: string
+  reasonCode?: string
+  nextAttemptAt?: string
+  attemptNumber?: number
+}>
 
 const EMPTY_STATE: IntakeState = {}
 
@@ -34,7 +40,7 @@ export class FileWorkIntakePort implements WorkIntakePort {
     this.claimsPath = `${statePath}.claims`
   }
 
-  async pullReady(limit: number): Promise<readonly PulledWorkItem[]> {
+  async pullReady(limit: number, nowIso: string): Promise<readonly PulledWorkItem[]> {
     const state = await this.readState()
     const contents = await readFile(this.inputPath, 'utf8').catch((error: unknown) => {
       const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined
@@ -47,22 +53,44 @@ export class FileWorkIntakePort implements WorkIntakePort {
       const trimmed = line.trim()
       if (!trimmed) continue
       const itemId = `line:${index + 1}`
-      if (state[itemId]) continue
-      if (await this.claimExists(itemId)) continue
+      const itemState = state[itemId]
+      const retryDue = itemState?.state === 'program_retry_scheduled' &&
+        (!itemState.nextAttemptAt || itemState.nextAttemptAt <= nowIso)
+      if (itemState && !retryDue) continue
+      if (!retryDue && await this.claimExists(itemId)) continue
       let envelope: unknown
       try {
         envelope = JSON.parse(trimmed) as unknown
       } catch {
         envelope = null
       }
-      items.push({ itemId, envelope })
+      items.push({ itemId, envelope, attemptNumber: itemState?.attemptNumber })
     }
     return items
   }
 
-  async claim(itemId: string, leadId: LeadResearchPackage['lead_id'], idempotencyKey: LeadResearchPackage['idempotency_key']): Promise<IntakeClaim | null> {
+  async claim(itemId: string, leadId: LeadResearchPackage['lead_id'], idempotencyKey: LeadResearchPackage['idempotency_key'], nowIso: string): Promise<IntakeClaim | null> {
     const state = await this.readState()
-    if (state[itemId]) return null
+    const existing = state[itemId]
+    if (existing?.state === 'program_retry_scheduled') {
+      if (existing.nextAttemptAt && existing.nextAttemptAt > nowIso) return null
+      const marker = await this.readClaimMarker(itemId)
+      const claimId = marker?.claimId ?? `claim:${leadId}:${idempotencyKey}`
+      return this.withStateLock(async () => {
+        const current = await this.readState()
+        if (
+          current[itemId]?.state !== 'program_retry_scheduled' ||
+          (current[itemId]?.nextAttemptAt && current[itemId]!.nextAttemptAt! > nowIso)
+        ) return null
+        await this.writeState(itemId, {
+          state: 'claimed',
+          claimId,
+          attemptNumber: current[itemId]?.attemptNumber,
+        })
+        return { itemId, claimId }
+      })
+    }
+    if (existing) return null
     const claimId = `claim:${leadId}:${idempotencyKey}`
     const claimPath = this.claimPath(itemId)
     await mkdir(dirname(claimPath), { recursive: true })
@@ -80,7 +108,7 @@ export class FileWorkIntakePort implements WorkIntakePort {
     } finally {
       await marker.close()
     }
-    await this.updateState(itemId, { state: 'claimed', claimId })
+    await this.updateState(itemId, { state: 'claimed', claimId, attemptNumber: 1 })
     return { itemId, claimId }
   }
 
@@ -90,6 +118,8 @@ export class FileWorkIntakePort implements WorkIntakePort {
       state: acknowledgement.state,
       claimId: marker?.claimId,
       reasonCode: acknowledgement.reasonCode,
+      nextAttemptAt: acknowledgement.nextAttemptAt,
+      attemptNumber: acknowledgement.attemptNumber,
     })
   }
 
@@ -134,6 +164,12 @@ export class FileWorkIntakePort implements WorkIntakePort {
   }
 
   private async updateState(itemId: string, entry: IntakeState[string]): Promise<void> {
+    await this.withStateLock(async () => {
+      await this.writeState(itemId, entry)
+    })
+  }
+
+  private async withStateLock<T>(operation: () => Promise<T>): Promise<T> {
     const lockPath = `${this.statePath}.lock`
     await mkdir(dirname(this.statePath), { recursive: true })
     let lock: Awaited<ReturnType<typeof open>> | undefined
@@ -151,15 +187,19 @@ export class FileWorkIntakePort implements WorkIntakePort {
     }
     if (!lock) throw new Error('intake state lock was not acquired')
     try {
-      const state = await this.readState()
-      state[itemId] = entry
-      const temporaryPath = `${this.statePath}.${process.pid}.${randomUUID()}.tmp`
-      await writeFile(temporaryPath, `${JSON.stringify(state, null, 2)}\n`, 'utf8')
-      await rename(temporaryPath, this.statePath)
+      return await operation()
     } finally {
       await lock.close()
       await unlink(lockPath).catch(() => undefined)
     }
+  }
+
+  private async writeState(itemId: string, entry: IntakeState[string]): Promise<void> {
+    const state = await this.readState()
+    state[itemId] = entry
+    const temporaryPath = `${this.statePath}.${process.pid}.${randomUUID()}.tmp`
+    await writeFile(temporaryPath, `${JSON.stringify(state, null, 2)}\n`, 'utf8')
+    await rename(temporaryPath, this.statePath)
   }
 }
 

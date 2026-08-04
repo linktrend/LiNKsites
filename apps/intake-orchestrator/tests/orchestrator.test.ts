@@ -23,6 +23,7 @@ import type {
   IntakeAcknowledgement,
   IntakeClaim,
   ExecutorResult,
+  CancellableTimer,
 } from '../src/contracts.ts'
 import {
   ExponentialBackoffPolicy,
@@ -33,6 +34,7 @@ import type { DemoCompletionEnvelope, EvidenceReceipt, LeadResearchPackage } fro
 
 class TestClock {
   private milliseconds = Date.parse('2026-08-04T00:00:00.000Z')
+  timerCalls = 0
 
   now(): string {
     return new Date(this.milliseconds).toISOString()
@@ -43,7 +45,15 @@ class TestClock {
   }
 
   async sleep(milliseconds: number): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, milliseconds))
+    await new Promise<void>((resolve) => {
+      this.setTimeout(resolve, milliseconds)
+    })
+  }
+
+  setTimeout(callback: () => void, milliseconds: number): CancellableTimer {
+    this.timerCalls += 1
+    const timeout = setTimeout(callback, milliseconds)
+    return { cancel: () => clearTimeout(timeout) }
   }
 }
 
@@ -77,28 +87,49 @@ class TestIntake implements WorkIntakePort {
   readonly items: Array<{ itemId: string; envelope: unknown }> = []
   readonly claims: IntakeClaim[] = []
   readonly acknowledgements: Array<{ itemId: string; acknowledgement: IntakeAcknowledgement }> = []
-  private readonly states = new Map<string, string>()
+  private readonly states = new Map<string, { state: string; nextAttemptAt?: string; attemptNumber?: number }>()
 
   add(itemId: string, envelope: unknown): void {
     this.items.push({ itemId, envelope })
   }
 
-  async pullReady(limit: number): Promise<readonly PulledWorkItem[]> {
+  async pullReady(limit: number, nowIso: string): Promise<readonly PulledWorkItem[]> {
     return this.items
-      .filter((item) => !this.states.has(item.itemId))
+      .filter((item) => {
+        const state = this.states.get(item.itemId)
+        return !state || (
+          state.state === 'program_retry_scheduled' &&
+          (!state.nextAttemptAt || state.nextAttemptAt <= nowIso)
+        )
+      })
       .slice(0, limit)
+      .map((item) => ({
+        ...item,
+        attemptNumber: this.states.get(item.itemId)?.attemptNumber,
+      }))
   }
 
-  async claim(itemId: string, leadId: string, idempotencyKey: string): Promise<IntakeClaim | null> {
-    if (this.states.has(itemId)) return null
+  async claim(itemId: string, leadId: string, idempotencyKey: string, nowIso: string): Promise<IntakeClaim | null> {
+    const existing = this.states.get(itemId)
+    if (existing && (
+      existing.state !== 'program_retry_scheduled' ||
+      (existing.nextAttemptAt && existing.nextAttemptAt > nowIso)
+    )) return null
     const claim = { itemId, claimId: `claim:${leadId}:${idempotencyKey}` }
-    this.states.set(itemId, 'claimed')
+    this.states.set(itemId, {
+      state: 'claimed',
+      attemptNumber: existing?.attemptNumber ?? 1,
+    })
     this.claims.push(claim)
     return claim
   }
 
   async acknowledge(itemId: string, acknowledgement: IntakeAcknowledgement): Promise<void> {
-    this.states.set(itemId, acknowledgement.state)
+    this.states.set(itemId, {
+      state: acknowledgement.state,
+      nextAttemptAt: acknowledgement.nextAttemptAt,
+      attemptNumber: acknowledgement.attemptNumber,
+    })
     this.acknowledgements.push({ itemId, acknowledgement })
   }
 }
@@ -136,6 +167,8 @@ class TestLedger implements ProgramLedgerPort {
   private available = true
   private failReclaim = false
   private failCompletionMark = false
+  private programCreationFailures = 0
+  private crashAfter: 'evidence' | 'outcome' | 'evaluate' | 'gate' | null = null
   private now = () => '2026-08-04T00:00:00.000Z'
 
   constructor(graph: (lead: LeadResearchPackage) => Array<Omit<FakeIssue, 'status' | 'attempt' | 'retryAt' | 'expired' | 'runId' | 'evidence' | 'outcome'>>) {
@@ -158,6 +191,14 @@ class TestLedger implements ProgramLedgerPort {
     this.failCompletionMark = true
   }
 
+  failProgramCreation(times = 1): void {
+    this.programCreationFailures = times
+  }
+
+  crashAfterPersistence(step: 'evidence' | 'outcome' | 'evaluate' | 'gate'): void {
+    this.crashAfter = step
+  }
+
   rejectNextGate(): void {
     this.forcedGates.push('rejected')
   }
@@ -172,6 +213,15 @@ class TestLedger implements ProgramLedgerPort {
   }
 
   async createOrResumeProgram(lead: LeadResearchPackage): Promise<ProgramRun> {
+    if (this.programCreationFailures > 0) {
+      this.programCreationFailures -= 1
+      throw Object.assign(new Error('transient program creation failure'), {
+        failureClass: 'retryable_dependency_service',
+        retryable: true,
+        safeCode: 'ledger:program-create-transient',
+        diagnosticReference: 'evidence://ledger/program-create-transient',
+      })
+    }
     const existing = this.programs.get(lead.lead_id)
     if (existing) return existing.run
     const run: ProgramRun = {
@@ -262,23 +312,36 @@ class TestLedger implements ProgramLedgerPort {
   async appendRunEvidence(runId: string, evidence: readonly EvidenceReceipt[]): Promise<void> {
     this.appendSequence.push(`evidence:${runId}`)
     this.issueForRun(runId).evidence.push(...evidence)
+    if (this.crashAfter === 'evidence') {
+      this.crashAfter = null
+      throw new Error('crash after evidence persistence')
+    }
   }
 
   async appendRunOutcome(runId: string, outcome: { kind: 'success'; output: unknown } | { kind: 'failure'; failure: RunFailure }): Promise<void> {
     this.appendSequence.push(`outcome:${runId}:${outcome.kind}`)
     this.issueForRun(runId).outcome = outcome.kind
+    if (this.crashAfter === 'outcome') {
+      this.crashAfter = null
+      throw new Error('crash after outcome persistence')
+    }
   }
 
   async evaluateGate(runId: string): Promise<GateEvaluation> {
     const decision = this.forcedGates.shift() ?? 'accepted'
     const issue = this.issueForRun(runId)
-    return {
+    const evaluation = {
       decision,
       evidenceReferences: issue.evidence.map((receipt) => receipt.storage_location),
       retryable: decision === 'rejected',
       safeCode: decision === 'rejected' ? 'gate:quality-rejected' : undefined,
       diagnosticReference: decision === 'rejected' ? 'evidence://gate/rejected' : undefined,
     }
+    if (this.crashAfter === 'evaluate') {
+      this.crashAfter = null
+      throw new Error('crash after gate evaluation')
+    }
+    return evaluation
   }
 
   async appendGateResult(_runId: string, evaluation: GateEvaluation): Promise<void> {
@@ -287,6 +350,10 @@ class TestLedger implements ProgramLedgerPort {
     if (evaluation.decision !== 'accepted') return
     const issue = this.issueForRun(_runId)
     issue.status = 'complete'
+    if (this.crashAfter === 'gate') {
+      this.crashAfter = null
+      throw new Error('crash after gate persistence')
+    }
   }
 
   async scheduleRetry(runId: string, failure: RunFailure, nextAttemptAt: string): Promise<{ nextAttemptAt: string; deadLettered: boolean }> {
@@ -479,6 +546,41 @@ test('duplicate pull/restart creates one idempotent Program', async () => {
   assert.deepEqual(setup.ledger.createdLeadIds, [manualFirstTestLead.lead_id])
 })
 
+test('transient Program creation failure schedules durable intake retry and then succeeds', async () => {
+  const setup = makeDependencies()
+  addLead(setup.intake)
+  setup.ledger.failProgramCreation()
+  setup.executors.register(successExecutor())
+  const orchestrator = new IntakeOrchestrator(setup.dependencies)
+
+  await orchestrator.runCycle()
+  assert.equal(setup.ledger.createdLeadIds.length, 0)
+  assert.equal(setup.intake.acknowledgements.at(-1)?.acknowledgement.state, 'program_retry_scheduled')
+  assert.equal(setup.intake.acknowledgements.at(-1)?.acknowledgement.attemptNumber, 2)
+  assert.equal(setup.backoff.calls.length, 1)
+
+  setup.clock.advance(7)
+  await orchestrator.runCycle()
+  assert.deepEqual(setup.ledger.createdLeadIds, [manualFirstTestLead.lead_id])
+  assert.equal(setup.sink.envelopes.length, 1)
+})
+
+test('Program creation becomes manual attention only after the configured retry limit', async () => {
+  const setup = makeDependencies({ options: { programCreationMaxAttempts: 2 } })
+  addLead(setup.intake)
+  setup.ledger.failProgramCreation(2)
+  const orchestrator = new IntakeOrchestrator(setup.dependencies)
+
+  await orchestrator.runCycle()
+  setup.clock.advance(7)
+  await orchestrator.runCycle()
+  await orchestrator.runCycle()
+
+  assert.equal(setup.intake.acknowledgements.at(-1)?.acknowledgement.state, 'program_manual_attention')
+  assert.equal(setup.ledger.createdLeadIds.length, 0)
+  assert.equal(setup.intake.claims.length, 2)
+})
+
 test('two ready independent Issues run in parallel within the configured ceiling', async () => {
   const setup = makeDependencies({ options: { concurrency: 2, pollIntervalMs: 1 } })
   let release!: () => void
@@ -532,6 +634,32 @@ test('dependency-blocked Issue is never claimed until its Gate is accepted', asy
   assert.deepEqual(ledger.claimedIssues, ['issue-1'])
   await orchestrator.runCycle()
   assert.deepEqual(ledger.claimedIssues, ['issue-1', 'issue-2'])
+})
+
+test('accepted Gate is never persisted before the successful Run outcome, across persistence failures', async () => {
+  for (const step of ['evidence', 'outcome', 'evaluate', 'gate'] as const) {
+    const setup = makeDependencies()
+    const ledger = new TestLedger(() => [issue('issue-1'), issue('issue-2', ['issue-1'])])
+    ledger.setNow(() => setup.clock.now())
+    ledger.crashAfterPersistence(step)
+    setup.dependencies = { ...setup.dependencies, ledger }
+    addLead(setup.intake)
+    setup.executors.register(successExecutor())
+
+    await new IntakeOrchestrator(setup.dependencies).runCycle()
+
+    const firstIssue = ledger.programs.get(manualFirstTestLead.lead_id)!.issues[0]!
+    const outcomeIndex = ledger.appendSequence.findIndex((entry) => entry.endsWith(':success'))
+    const gateIndex = ledger.appendSequence.findIndex((entry) => entry.includes(':accepted'))
+    if (outcomeIndex >= 0 && gateIndex >= 0) assert.ok(outcomeIndex < gateIndex)
+    if (step === 'gate') {
+      assert.equal(firstIssue.status, 'complete')
+      assert.equal(firstIssue.outcome, 'success')
+    } else {
+      assert.notEqual(firstIssue.status, 'complete')
+      assert.equal(ledger.programs.get(manualFirstTestLead.lead_id)!.issues[1]!.status, 'ready')
+    }
+  }
 })
 
 test('retryable failure uses injected backoff and succeeds without unbounded looping', async () => {
@@ -593,6 +721,7 @@ test('shutdown stops new claims and lets bounded in-flight work settle', async (
   const setup = makeDependencies({ options: { pollIntervalMs: 1, shutdownTimeoutMs: 200 } })
   addLead(setup.intake)
   let started = false
+  let aborted = false
   setup.executors.register({
     executorId: 'blocking-executor',
     issueKind: 'test.issue',
@@ -600,7 +729,10 @@ test('shutdown stops new claims and lets bounded in-flight work settle', async (
     async execute(_issue, signal): Promise<ExecutorResult> {
       started = true
       await new Promise<void>((resolve, reject) => {
-        signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true })
+        signal.addEventListener('abort', () => {
+          aborted = true
+          reject(new Error('aborted'))
+        }, { once: true })
       })
       return { kind: 'success', output: {}, evidence: [receipt('issue-1')] }
     },
@@ -611,7 +743,35 @@ test('shutdown stops new claims and lets bounded in-flight work settle', async (
   await orchestrator.stop()
   await running
   assert.equal(setup.intake.claims.length, 1)
+  assert.equal(aborted, true)
   assert.equal(orchestrator.getHealth().liveness, false)
+})
+
+test('shutdown allows an in-flight executor to finish before the deadline without aborting it', async () => {
+  const setup = makeDependencies({ options: { pollIntervalMs: 1, shutdownTimeoutMs: 200 } })
+  addLead(setup.intake)
+  let started = false
+  let aborted = false
+  setup.executors.register({
+    executorId: 'settling-executor',
+    issueKind: 'test.issue',
+    version: '1.0',
+    async execute(_issue, signal): Promise<ExecutorResult> {
+      started = true
+      signal.addEventListener('abort', () => { aborted = true }, { once: true })
+      await new Promise<void>((resolve) => queueMicrotask(resolve))
+      return { kind: 'success', output: {}, evidence: [receipt('issue-1')] }
+    },
+  })
+  const orchestrator = new IntakeOrchestrator(setup.dependencies)
+  const running = orchestrator.start()
+  for (let attempts = 0; !started && attempts < 50; attempts += 1) await new Promise((resolve) => setTimeout(resolve, 1))
+  await orchestrator.stop()
+  await running
+
+  assert.equal(aborted, false)
+  assert.equal(setup.sink.envelopes.length, 1)
+  assert.ok(setup.clock.timerCalls > 0)
 })
 
 test('restart reclaims an expired Issue and resumes it through the same Program', async () => {
@@ -640,11 +800,12 @@ test('completion is emitted once and only after Program PASS', async () => {
   assert.equal(setup.sink.envelopes.length, 0)
   assert.deepEqual(setup.ledger.appendSequence.slice(0, 3), [
     'evidence:run:issue-1:1',
+    'outcome:run:issue-1:1:success',
     'gate:run:issue-1:1:rejected',
-    'outcome:run:issue-1:1:failure',
   ])
   assert.equal(setup.ledger.appendSequence.filter((entry) => entry === 'evidence:run:issue-1:1').length, 1)
-  assert.equal(setup.ledger.appendSequence.includes('outcome:run:issue-1:1:success'), false)
+  assert.equal(setup.ledger.appendSequence.includes('outcome:run:issue-1:1:success'), true)
+  assert.equal(setup.ledger.appendSequence.includes('outcome:run:issue-1:1:failure'), true)
   setup.clock.advance(7)
   await orchestrator.runCycle()
   await orchestrator.runCycle()

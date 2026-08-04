@@ -30,12 +30,22 @@ const DEFAULT_OPTIONS: OrchestratorOptions = {
   concurrency: 4,
   shutdownTimeoutMs: 5_000,
   executionTimeoutMs: 60_000,
+  programCreationMaxAttempts: 3,
 }
 
 const SAFE_REFERENCE = /^(?:[A-Za-z0-9]+)(?:[._:/-][A-Za-z0-9]+)*$/
 
 const isSafeReference = (value: string): boolean =>
   value.length <= 128 && SAFE_REFERENCE.test(value)
+
+const FAILURE_CLASSES: readonly RunFailure['failureClass'][] = [
+  'validation',
+  'retryable_dependency_service',
+  'executor',
+  'gate',
+  'terminal_business',
+  'unknown',
+]
 
 const safeFailure = (
   idGenerator: IdGenerator,
@@ -87,7 +97,14 @@ export class SystemClock implements Clock {
   }
 
   sleep(milliseconds: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, milliseconds))
+    return new Promise((resolve) => {
+      this.setTimeout(resolve, milliseconds)
+    })
+  }
+
+  setTimeout(callback: () => void, milliseconds: number) {
+    const timeout = setTimeout(callback, milliseconds)
+    return { cancel: () => clearTimeout(timeout) }
   }
 }
 
@@ -130,8 +147,12 @@ export class IntakeOrchestrator {
   constructor(dependencies: OrchestratorDependencies) {
     this.dependencies = dependencies
     this.options = { ...DEFAULT_OPTIONS, ...dependencies.options }
-    if (this.options.batchSize < 1 || this.options.concurrency < 1) {
-      throw new Error('batchSize and concurrency must be positive')
+    if (
+      this.options.batchSize < 1 ||
+      this.options.concurrency < 1 ||
+      this.options.programCreationMaxAttempts < 1
+    ) {
+      throw new Error('batchSize, concurrency, and programCreationMaxAttempts must be positive')
     }
   }
 
@@ -166,7 +187,10 @@ export class IntakeOrchestrator {
 
     try {
       await this.dependencies.ledger.reclaimExpiredWork(this.dependencies.clock.now())
-      const pulled = await this.dependencies.intake.pullReady(this.options.batchSize)
+      const pulled = await this.dependencies.intake.pullReady(
+        this.options.batchSize,
+        this.dependencies.clock.now(),
+      )
       let invalid = 0
       let claimedIntake = 0
 
@@ -185,6 +209,7 @@ export class IntakeOrchestrator {
           item.itemId,
           item.envelope.lead_id,
           item.envelope.idempotency_key,
+          this.dependencies.clock.now(),
         )
         if (!claim) continue
         claimedIntake += 1
@@ -193,12 +218,27 @@ export class IntakeOrchestrator {
           await this.dependencies.ledger.createOrResumeProgram(item.envelope)
           await this.dependencies.intake.acknowledge(item.itemId, { state: 'program_started' })
         } catch (error) {
-          this.lastFailureClass = 'unknown'
-          await this.dependencies.intake.acknowledge(item.itemId, {
-            state: 'program_failed',
-            reasonCode: 'orchestrator:program-creation-failed',
-          })
-          throw error
+          const failure = this.classifyProgramCreationFailure(error)
+          this.lastFailureClass = failure.failureClass
+          const attemptNumber = item.attemptNumber ?? 1
+          if (failure.retryable && attemptNumber < this.options.programCreationMaxAttempts) {
+            const delay = this.dependencies.backoff.delayMs(attemptNumber, failure.failureClass)
+            const nextAttemptAt = new Date(
+              new Date(this.dependencies.clock.now()).getTime() + delay,
+            ).toISOString()
+            await this.dependencies.intake.acknowledge(item.itemId, {
+              state: 'program_retry_scheduled',
+              reasonCode: failure.safeCode,
+              nextAttemptAt,
+              attemptNumber: attemptNumber + 1,
+            })
+          } else {
+            await this.dependencies.intake.acknowledge(item.itemId, {
+              state: 'program_manual_attention',
+              reasonCode: failure.safeCode,
+              attemptNumber,
+            })
+          }
         }
       }
 
@@ -241,14 +281,25 @@ export class IntakeOrchestrator {
   async stop(): Promise<void> {
     this.stopRequested = true
     this.wakeLoop?.()
-    for (const controller of this.activeExecutions.values()) controller.abort()
     const loop = this.loopPromise
     if (!loop) {
       this.liveness = false
       await this.reportHealth()
       return
     }
-    await Promise.race([loop, this.dependencies.clock.sleep(this.options.shutdownTimeoutMs)])
+    let deadlineTimer: ReturnType<Clock['setTimeout']> | undefined
+    const deadline = new Promise<boolean>((resolve) => {
+      deadlineTimer = this.dependencies.clock.setTimeout(
+        () => resolve(false),
+        this.options.shutdownTimeoutMs,
+      )
+    })
+    const settled = await Promise.race([loop.then(() => true), deadline])
+    deadlineTimer?.cancel()
+    if (settled) return
+
+    for (const controller of this.activeExecutions.values()) controller.abort()
+    await loop
   }
 
   private async loop(): Promise<void> {
@@ -260,15 +311,7 @@ export class IntakeOrchestrator {
         await this.reportHealth()
       }
       if (this.stopRequested) break
-      await new Promise<void>((resolve) => {
-        this.wakeLoop = resolve
-        const timeout = setTimeout(resolve, this.options.pollIntervalMs)
-        if (this.stopRequested) {
-          clearTimeout(timeout)
-          resolve()
-        }
-      })
-      this.wakeLoop = null
+      await this.waitForNextPoll()
     }
   }
 
@@ -366,6 +409,9 @@ export class IntakeOrchestrator {
       }
 
       await this.dependencies.ledger.appendRunEvidence(issue.runId, result.evidence)
+      // A gate may unlock dependents, so the successful output must already
+      // be durable before an accepted gate can finalize the Issue.
+      await this.dependencies.ledger.appendRunOutcome(issue.runId, { kind: 'success', output: result.output })
       const gate = await this.dependencies.ledger.evaluateGate(issue.runId)
       await this.dependencies.ledger.appendGateResult(issue.runId, gate)
       if (gate.decision === 'rejected') {
@@ -382,7 +428,6 @@ export class IntakeOrchestrator {
         })
         return
       }
-      await this.dependencies.ledger.appendRunOutcome(issue.runId, { kind: 'success', output: result.output })
     } finally {
       this.activeExecutions.delete(issue.runId)
     }
@@ -393,9 +438,9 @@ export class IntakeOrchestrator {
     issue: ClaimedIssue,
     controller: AbortController,
   ) {
-    let timeout: ReturnType<typeof setTimeout> | undefined
+    let timeout: ReturnType<Clock['setTimeout']> | undefined
     const timedOut = new Promise<never>((_, reject) => {
-      timeout = setTimeout(() => {
+      timeout = this.dependencies.clock.setTimeout(() => {
         controller.abort()
         reject(new Error('execution timeout'))
       }, this.options.executionTimeoutMs)
@@ -403,8 +448,52 @@ export class IntakeOrchestrator {
     try {
       return await Promise.race([executor.execute(issue, controller.signal), timedOut])
     } finally {
-      if (timeout) clearTimeout(timeout)
+      timeout?.cancel()
     }
+  }
+
+  private classifyProgramCreationFailure(error: unknown): RunFailure {
+    const metadata = error && typeof error === 'object' ? error as {
+      failureClass?: unknown
+      retryable?: unknown
+      safeCode?: unknown
+      diagnosticReference?: unknown
+    } : {}
+    const failureClass = typeof metadata.failureClass === 'string' &&
+      FAILURE_CLASSES.includes(metadata.failureClass as RunFailure['failureClass'])
+      ? metadata.failureClass as RunFailure['failureClass']
+      : 'retryable_dependency_service'
+    const retryable = typeof metadata.retryable === 'boolean'
+      ? metadata.retryable
+      : failureClass === 'retryable_dependency_service'
+    return safeFailure(
+      this.dependencies.ids,
+      failureClass,
+      typeof metadata.safeCode === 'string'
+        ? metadata.safeCode
+        : 'orchestrator:program-creation-failed',
+      retryable,
+      typeof metadata.diagnosticReference === 'string'
+        ? metadata.diagnosticReference
+        : undefined,
+    )
+  }
+
+  private async waitForNextPoll(): Promise<void> {
+    await new Promise<void>((resolve) => {
+      let finished = false
+      let timer: ReturnType<Clock['setTimeout']> | undefined
+      const finish = (): void => {
+        if (finished) return
+        finished = true
+        timer?.cancel()
+        if (this.wakeLoop === finish) this.wakeLoop = null
+        resolve()
+      }
+      this.wakeLoop = finish
+      timer = this.dependencies.clock.setTimeout(finish, this.options.pollIntervalMs)
+      if (this.stopRequested) finish()
+    })
   }
 
   private async handleFailure(issue: ClaimedIssue, result: Extract<import('./contracts.ts').ExecutorResult, { kind: 'failure' }>): Promise<void> {

@@ -28,7 +28,7 @@ pull -> validate LeadResearchPackage -> atomic source claim
   -> createOrResumeProgram (idempotent stable lead + key)
   -> query ledger dependency-ready Issues
   -> atomic Issue claim -> resolve (kind, version) executor
-  -> append Run output + EvidenceReceipt(s) -> evaluate/append Gate
+  -> append Run evidence + durable success outcome -> evaluate/append Gate
   -> unlocks are observed on the next readiness query
   -> Program PASS -> reserve/write/mark one DemoCompletionEnvelope
 ```
