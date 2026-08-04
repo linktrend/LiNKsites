@@ -228,34 +228,71 @@ describe('working-content persistence and lineage', () => {
     await expect(asRuntime(USER_A, () => repository.readVersion('wp-corrupt', 1))).rejects.toMatchObject({ code: 'checksum_mismatch' })
   })
 
-  it('rejects unknown components and malformed library SHAs at the database boundary', async () => {
-    await db.query(
-      `insert into lsites_sites.working_packages (working_package_id, org_id, lead_id, site_id)
-       values ('wp-db-contract-component', $1, 'lead-db-contract-component', $2)`,
-      [ORG_A, SITE_A],
-    )
-    await expect(db.query(
-      `insert into lsites_sites.working_content_versions
-        (working_package_id, version_number, org_id, lead_id, site_id, program_ref,
-         author_id, executor_id, content_payload, asset_refs, library_refs, provenance,
-         content_checksum)
-       values ('wp-db-contract-component', 1, $1, 'lead-db-contract-component', $2, 'program', 'author', 'executor', $3, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, $4)`,
-      [ORG_A, SITE_A, { pages: [{ pageId: 'home', route: '/', sections: [{ sectionId: 'unknown', componentId: 'UnknownComponent', content: { lang: 'en' } }] }] }, '0000000000000000000000000000000000000000000000000000000000000000'],
-    )).rejects.toThrow(/accepted component contract|marketing-smb-v1/)
+  it('rejects working-content contract type and key bypasses at the database boundary', async () => {
+    const checksum = '0000000000000000000000000000000000000000000000000000000000000000'
+    const insertPackage = async (packageId: string, templateId = 'marketing-smb-v1') => {
+      await db.query(
+        `insert into lsites_sites.working_packages (working_package_id, template_id, org_id, lead_id, site_id)
+         values ($1, $2, $3, $4, $5)`,
+        [packageId, templateId, ORG_A, `lead-${packageId}`, SITE_A],
+      )
+    }
+    const expectRejectedVersion = async (packageId: string, contentPayload: unknown, libraryRefs: unknown = workingContentFixture.libraryRefs) => {
+      await insertPackage(packageId)
+      await expect(db.query(
+        `insert into lsites_sites.working_content_versions
+          (working_package_id, version_number, org_id, lead_id, site_id, program_ref,
+           author_id, executor_id, content_payload, asset_refs, library_refs, provenance,
+           content_checksum)
+         values ($1, 1, $2, $3, $4, 'program', 'author', 'executor', $5, '[]'::jsonb, $6, '[]'::jsonb, $7)`,
+        [packageId, ORG_A, `lead-${packageId}`, SITE_A, contentPayload, libraryRefs, checksum],
+      )).rejects.toThrow()
+    }
 
-    await db.query(
-      `insert into lsites_sites.working_packages (working_package_id, org_id, lead_id, site_id)
-       values ('wp-db-contract-sha', $1, 'lead-db-contract-sha', $2)`,
-      [ORG_A, SITE_A],
-    )
-    await expect(db.query(
-      `insert into lsites_sites.working_content_versions
-        (working_package_id, version_number, org_id, lead_id, site_id, program_ref,
-         author_id, executor_id, content_payload, asset_refs, library_refs, provenance,
-         content_checksum)
-       values ('wp-db-contract-sha', 1, $1, 'lead-db-contract-sha', $2, 'program', 'author', 'executor', $3, '[]'::jsonb, $4, '[]'::jsonb, $5)`,
-      [ORG_A, SITE_A, workingContentFixture.content, [{ libraryId: 'component.hero', sha: 'not-a-git-sha' }], '0000000000000000000000000000000000000000000000000000000000000000'],
-    )).rejects.toThrow(/canonical 40-character Git SHAs/)
+    await expect(insertPackage('wp-db-contract-template', 'unknown-template')).rejects.toThrow()
+
+    const page = workingContentFixture.content.pages[0]
+    const section = page.sections[0]
+    await expectRejectedVersion('wp-db-contract-page-id-number', {
+      pages: [{ ...page, pageId: 7 }],
+    })
+    await expectRejectedVersion('wp-db-contract-route-number', {
+      pages: [{ ...page, route: 7 }],
+    })
+    await expectRejectedVersion('wp-db-contract-section-id-number', {
+      pages: [{ ...page, sections: [{ ...section, sectionId: 7 }] }],
+    })
+    await expectRejectedVersion('wp-db-contract-component-id-number', {
+      pages: [{ ...page, sections: [{ ...section, componentId: 7 }] }],
+    })
+    await expectRejectedVersion('wp-db-contract-lang-number', {
+      pages: [{ ...page, sections: [{ ...section, content: { ...section.content, lang: 7 } }] }],
+    })
+    await expectRejectedVersion('wp-db-contract-library-id-number', workingContentFixture.content, [
+      { libraryId: 7, sha: workingContentFixture.libraryRefs[0].sha },
+    ])
+    await expectRejectedVersion('wp-db-contract-sha-number', workingContentFixture.content, [
+      { libraryId: 'component.hero', sha: 7 },
+    ])
+
+    await expectRejectedVersion('wp-db-contract-page-extra-key', {
+      pages: [{ ...page, unexpected: true }],
+    })
+    await expectRejectedVersion('wp-db-contract-section-extra-key', {
+      pages: [{ ...page, sections: [{ ...section, unexpected: true }] }],
+    })
+    await expectRejectedVersion('wp-db-contract-library-extra-key', workingContentFixture.content, [
+      { ...workingContentFixture.libraryRefs[0], unexpected: true },
+    ])
+    await expectRejectedVersion('wp-db-contract-unknown-component', {
+      pages: [{ ...page, sections: [{ ...section, componentId: 'UnknownComponent' }] }],
+    })
+    await expectRejectedVersion('wp-db-contract-uppercase-sha', workingContentFixture.content, [
+      { libraryId: 'component.hero', sha: '0123456789ABCDEF0123456789abcdef01234567' },
+    ])
+    await expectRejectedVersion('wp-db-contract-short-sha', workingContentFixture.content, [
+      { libraryId: 'component.hero', sha: '0123456789abcdef0123456789abcdef0123456' },
+    ])
   })
 })
 

@@ -140,7 +140,15 @@ begin
     select 1
       from jsonb_array_elements(new.content_payload->'pages') as page(value)
      where coalesce(jsonb_typeof(page.value), '') <> 'object'
+        or case
+             when jsonb_typeof(page.value) = 'object'
+             then (select count(*) from jsonb_object_keys(page.value)) <> 3
+             else true
+           end
+        or not (page.value ?& array['pageId', 'route', 'sections'])
+        or coalesce(jsonb_typeof(page.value->'pageId'), '') <> 'string'
         or coalesce(page.value->>'pageId', '') = ''
+        or coalesce(jsonb_typeof(page.value->'route'), '') <> 'string'
         or coalesce(page.value->>'route', '') = ''
         or coalesce(jsonb_typeof(page.value->'sections'), '') <> 'array'
   ) then
@@ -152,9 +160,18 @@ begin
       from jsonb_array_elements(new.content_payload->'pages') as page(value)
       cross join lateral jsonb_array_elements(page.value->'sections') as section(value)
      where coalesce(jsonb_typeof(section.value), '') <> 'object'
+        or case
+             when jsonb_typeof(section.value) = 'object'
+             then (select count(*) from jsonb_object_keys(section.value)) <> 3
+             else true
+           end
+        or not (section.value ?& array['sectionId', 'componentId', 'content'])
+        or coalesce(jsonb_typeof(section.value->'sectionId'), '') <> 'string'
         or coalesce(section.value->>'sectionId', '') = ''
+        or coalesce(jsonb_typeof(section.value->'componentId'), '') <> 'string'
         or coalesce(section.value->>'componentId', '') not in ('SignupHero', 'CTASection', 'OfferShowcase', 'ArticlesGrid')
         or coalesce(jsonb_typeof(section.value->'content'), '') <> 'object'
+        or coalesce(jsonb_typeof(section.value->'content'->'lang'), '') <> 'string'
         or coalesce(section.value->'content'->>'lang', '') = ''
         or (section.value->>'componentId' = 'OfferShowcase' and coalesce(jsonb_typeof(section.value->'content'->'offers'), '') <> 'array')
         or (section.value->>'componentId' = 'ArticlesGrid' and coalesce(jsonb_typeof(section.value->'content'->'articles'), '') <> 'array')
@@ -166,8 +183,20 @@ begin
     select 1
       from jsonb_array_elements(new.library_refs) as library(value)
      where coalesce(jsonb_typeof(library.value), '') <> 'object'
+        or case
+             when jsonb_typeof(library.value) = 'object'
+             then (select count(*) from jsonb_object_keys(library.value)) <> 2
+             else true
+           end
+        or not (library.value ?& array['libraryId', 'sha'])
+        or coalesce(jsonb_typeof(library.value->'libraryId'), '') <> 'string'
         or coalesce(library.value->>'libraryId', '') = ''
-        or coalesce(library.value->>'sha', '') !~ '^[a-f0-9]{40}$'
+        or coalesce(jsonb_typeof(library.value->'sha'), '') <> 'string'
+        or case
+             when jsonb_typeof(library.value->'sha') = 'string'
+             then coalesce(library.value->>'sha', '') !~ '^[a-f0-9]{40}$'
+             else true
+           end
   ) then
     raise exception 'working content LiNKlibraries references require canonical 40-character Git SHAs';
   end if;
