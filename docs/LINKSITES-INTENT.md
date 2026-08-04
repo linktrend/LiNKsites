@@ -25,7 +25,7 @@ The problem LiNKsites solves is: **repeatedly produce, validate, sell-from-proof
 | **Principal (Carlos)** | Sole human authority. Approves product strategy, material pricing/architecture, destructive or high-spend exceptions, and security/legal matters. Does not write code or manage day-to-day hosting. |
 | **SMB prospects** | Receive a real website preview (build-first, sell-later) before purchase where Sales authorizes the investment. |
 | **SMB customers** | Purchase a managed website outcome: hosted, maintained, recoverable site — not a code dump or DIY builder. |
-| **LiNKtrend Sales Program** | Discovers leads, sells, processes Stripe payment, owns Odoo commercial records; requests previews and sends paid activation packages. |
+| **LiNKreach** | Owns lead research, outreach, commercial decisions, and authorization; sends versioned outcome and activation envelopes. |
 | **LiNKtrend studio (agent roles)** | Planners, executors, graders, and operators work under this Program's Modules, Ledger, and gates. |
 | **OpenClaw** | Optional external operations overseer for exceptions. Not required for normal production or hosting. |
 
@@ -44,7 +44,7 @@ A healthy LiNKsites production path is done when:
 5. The site is **hosted** on LiNKtrend-managed infrastructure (shared Next.js frontend + central Payload CMS), monitored, backed up, and updatable through governed change workflows.
 6. Every material step leaves **Ledger / Gate / cost evidence** — completion is never "an agent said it was done."
 
-**Studio-level "coding done" bar (as of 2026-07-19):** the CMS (`apps/cms`), multi-tenant frontend (`apps/web-master`), Program Ledger (`packages/program-ledger`), factory-catalog objects and executors (`packages/factory-catalog`), and Supabase working/ledger schemas build, typecheck, and pass their automated tests. That is **not** the same as "a real paying customer has been sold, launched, and operated end-to-end in production." Live Stripe/Odoo integration, full autonomous hosting ops (monitoring/backup), and the first real customer pilot remain open (see Technical PRD § deferred / `docs/OPEN-ISSUES.md`).
+**Studio-level "coding done" bar (as of 2026-07-19):** the CMS (`apps/cms`), multi-tenant frontend (`apps/web-master`), Program Ledger (`packages/program-ledger`), factory-catalog objects and executors (`packages/factory-catalog`), and Supabase working/ledger schemas build, typecheck, and pass their automated tests. That is **not** the same as "a real paying customer has been sold, launched, and operated end-to-end in production." Live LiNKreach commercial integration, full autonomous hosting ops (monitoring/backup), and the first real customer pilot remain open (see Technical PRD § deferred / `docs/OPEN-ISSUES.md`). Historical Sales/Stripe/Odoo references describe the former commercial boundary, not LiNKsites runtime dependencies.
 
 ---
 
@@ -53,8 +53,8 @@ A healthy LiNKsites production path is done when:
 ### Inputs (what LiNKsites takes)
 
 - Versioned **Product / Tier Specifications** and Vertical Kits (factory capability definitions).
-- **Lead Research Packages** and **Preview Production Requests** from the Sales Program.
-- **Paid Website Activation Packages** after verified Stripe + Odoo state (via Sales).
+- **Lead Research Packages** and **Preview Production Requests** from LiNKreach.
+- **Commercial Outcome** and **Activation Request** envelopes authorized by LiNKreach.
 - Customer-supplied facts, logos, media, domain authorization, and approvals where required.
 - Credentials and environment for runtime: Payload, Supabase/Postgres (shared `linkplatform-*` projects), Cloudflare/Traefik/VPS, GSM secrets — see app `.env.example` files and ops notes.
 
@@ -64,15 +64,15 @@ A healthy LiNKsites production path is done when:
 - Private/controlled **previews** with quality evidence, cost, analytics refs, and expiration.
 - **Payload draft → published** website content (via Promotion Service; public frontends read published only).
 - Launched **Customer Site Instances** with hosting assignment, domain/TLS, launch manifest.
-- Fulfilment, launch, and service-health packages back to Sales/Odoo.
+- Fulfilment, launch, and service-health evidence back to LiNKreach.
 - Durable Program Ledger audit trail (Issues, Runs, Gates, Events) for factory work.
 
 ### Explicit out of scope (deliberate — not forgotten)
 
 | Out of scope | Why / status |
 |---|---|
-| General SMB discovery, outreach, CRM, quotations | Belongs to LiNKtrend Sales / Odoo. |
-| Payment processing | Stripe via Sales; LiNKsites activates only on verified packages. |
+| General SMB discovery, outreach, CRM, quotations | Belongs to LiNKreach. |
+| Payment processing | Belongs to LiNKreach-owned systems; LiNKsites receives only an authorized outcome or activation envelope. |
 | General managed business automation | Belongs to LiNKautowork (may be sold as add-on; not absorbed). |
 | Unrestricted custom app development per customer | Productized tiers; Enterprise requires explicit approval. |
 | Dependence on postponed LiNKaios | Manual doctrine: operate independently. |
@@ -127,4 +127,4 @@ These are the operational principles this Program is built around. Full doctrine
 
 ## 8. One-sentence Intent
 
-**LiNKsites is LiNKtrend's autonomous website factory and managed SMB website service: it assembles governed reusable foundations into real prospect previews and paying-customer sites, promotes content through a trusted Payload path, hosts them on a shared Next.js/Cloudflare/Traefik platform, and operates them as a continuing service — with Sales owning commercial lifecycle and human day-to-day involvement limited to strategy and exceptional escalation.**
+**LiNKsites is LiNKtrend's autonomous website factory and managed SMB website service: it continuously pulls and claims governed work, assembles reusable foundations into real prospect previews and paying-customer sites, promotes content through a trusted Payload path, hosts them on a shared Next.js/Cloudflare/Traefik platform, and operates them as a continuing service — with LiNKreach owning commercial lifecycle and human day-to-day involvement limited to strategy and exceptional escalation.**

@@ -18,13 +18,13 @@ LiNKsites is a monorepo website factory + managed hosting Program:
 | **CMS** | Draft + published website content authority | `apps/cms` — Payload CMS 3.x on Next.js, Postgres `public` schema |
 | **Serving** | Multi-tenant frontend by hostname | `apps/web-master` — shared Next.js platform; optional `apps/web-company` (smaller template; legacy/paused per audit DR-02) |
 | **Edge / origin** | Public edge + VPS reverse proxy | Cloudflare (edge) + Traefik labels in `deploy/docker-compose.deploy.yml` |
-| **Commercial** | Leads, payment, Odoo | **Not in this repo** — contracts defined; Sales/Stripe/Odoo integration deferred (GAP-33/34/35) |
+| **Commercial boundary** | Lead research, outcomes, authorization | **LiNKreach-owned** — LiNKsites consumes versioned contracts; payment and CRM systems are not LiNKsites dependencies |
 | **Shared substrate** | Org/RBAC/capability grants | LiNKplatform `platform.*` schemas; Ledger checks `platform.capability_grants` at dispatch |
 
 ### Process topology (intended)
 
 ```
-Sales Preview Request / Paid Activation
+LiNKreach Lead / Activation Authorization
         ↓
 Program Ledger (Issue → Run → Gate)
         ↓
@@ -52,7 +52,7 @@ Terms match the Program Manual's vocabulary (ADR 0001: LiNKsites-internal engine
 |---|---|
 | **Program** | LiNKsites as a whole governed factory + managed service |
 | **Module** | One of twenty capability divisions (M01–M20); modeled in `packages/program-ledger` hierarchy |
-| **Stage** | Ordered segment inside a Module |
+| **Phase** | Ordered segment inside a Module |
 | **Issue** | Atomic schedulable work unit in the Program Ledger |
 | **Run** | One execution attempt of an Issue |
 | **Executor** | Adapter that performs a Run (`ExecutorAdapter`) |
@@ -147,7 +147,7 @@ Pipeline chaining helpers exist (`pipelineChaining.ts`, `pipelineAutoChaining.ts
 
 ### 4.3 Paid path (doctrine vs code)
 
-Manual requires: verified Paid Website Activation Package → finalization → publication → domain/TLS → launch certificate. **Code today:** Conversion Lock accepts opaque Stripe/Odoo refs; no live payment/Odoo adapters in this repo.
+Manual requires: verified LiNKreach Activation Request → finalization → publication → domain/TLS → launch certificate. **Code today:** the technical path is not fully wired; historical Conversion Lock records may contain opaque Sales/Stripe/Odoo references, but those systems are not LiNKsites runtime dependencies.
 
 ### 4.4 Recycle
 
@@ -242,16 +242,16 @@ Program-controlled Site Assignment registry, automated DNS/TLS issuance, monitor
 - Separate automation factory. LiNKsites may **consume** approved automation products or hand off form events; it does **not** use LiNKautowork as universal executor.
 - Cross-Program handoffs should use versioned envelopes (`platform.handoff_envelopes` doctrine); full Sales/Autowork contract implementations are deferred.
 
-### LiNKtrend Sales / Stripe / Odoo
+### Historical commercial boundary
 
-- Required contracts (manual §02/§21): Preview Request/Ready, Paid Activation, Fulfilment Status, Launch Completion, etc.
-- **Zero live adapters in this repo** for Stripe/Odoo as of 2026-07-19 (GAP-33/34/35).
+- Older documents call the commercial counterpart Sales and mention Stripe/Odoo. The current owner is LiNKreach.
+- LiNKsites consumes `CommercialOutcomeEnvelope` and `ActivationRequest` with LiNKreach authorization; it does not integrate directly with payment or CRM systems.
 
 ---
 
 ## 9. Out of scope for this version / deliberately deferred
 
-1. **Live Sales/Stripe/Odoo spine** — blocked on cross-Program access (Phase 5).
+1. **Live LiNKreach commercial adapter** — blocked on cross-Program access (Phase 5); payment and CRM implementation remain LiNKreach-owned.
 2. **Full autonomous hosting ops** — monitoring, backup, restore, incident runbooks (Phase 7; GAP-23/24).
 3. **First real paying customer pilot** — Phase 9; not reached.
 4. **Customer CMS self-service** — intentionally `none` at launch for all tiers.

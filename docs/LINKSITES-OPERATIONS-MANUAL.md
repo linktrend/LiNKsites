@@ -19,7 +19,7 @@ It does two related jobs:
 
 The sales idea behind it is **build-first, sell-later**: a qualified prospect should see an actual website representing what LiNKsites can provide, not only a promise that one will be built after payment. If they do not buy, the reusable foundation can be cleaned and offered to someone else.
 
-LiNKsites does **not** find leads, make sales calls, or charge cards. That belongs to the shared **LiNKtrend Sales** process (and Stripe / Odoo). LiNKsites receives “please make a preview” or “this customer paid — activate their site” packages and does the technical work.
+LiNKsites continuously pulls and claims ready work, but does **not** discover leads, make sales calls, or process payments. LiNKreach owns research, commercial decisions, and authorization. LiNKsites receives a `LeadResearchPackage`, `CommercialOutcomeEnvelope`, or `ActivationRequest` and performs the technical work. Historical Sales/Stripe/Odoo references are retained only to explain the former boundary.
 
 ---
 
@@ -39,7 +39,7 @@ LiNKsites does **not** find leads, make sales calls, or charge cards. That belon
 - Write code or approve every small coding task
 - Configure Cloudflare, Traefik, or databases day to day
 - Manually assemble each customer website
-- Run sales outreach or process Stripe payments yourself (Sales Program owns that)
+- Run sales outreach or process payments yourself (LiNKreach owns that)
 
 Someone technical (or an AI agent under factory rules) handles mechanics. Your job is direction and the checkpoints above.
 
@@ -57,7 +57,7 @@ The factory picks the best **reusable foundation** it already has (or builds one
 
 ### 3. Sales presents the preview
 
-If the prospect engages, Sales may ask for a richer preview. If they buy, Sales sends a **paid activation** package after Stripe and Odoo confirm payment.
+If the prospect engages, LiNKreach may request a richer preview. If they buy, LiNKreach sends an authorized `ActivationRequest`; LiNKsites does not receive or process payment credentials.
 
 ### 4. LiNKsites launches the customer site
 
@@ -105,7 +105,7 @@ Until monitoring and backup automation are finished, a real production outage wo
 
 | Topic | Status today |
 | --- | --- |
-| Sell → pay → auto-launch a real customer | **Not wired.** Stripe/Odoo/Sales adapters are not in this repo yet. |
+| LiNKreach outcome → technical activation | **Not wired end to end.** LiNKsites contract validators exist; live LiNKreach adapters are not in this repo. |
 | Full monitoring, backups, automatic recovery | **Not built.** Hosting scaffolding exists; autonomous ops do not. |
 | First real paying customer through this factory | **Not done yet.** Pilot vertical (Home Services / Standard) is chosen; live pilot waits on commercial + ops spine. |
 | Customer editing their own CMS | **Off for everyone at launch** (by your decision). LiNKtrend manages content, mostly via automation. |

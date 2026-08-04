@@ -16,7 +16,7 @@
 
 ## 1. Outcome in plain English
 
-LiNKsites must become a continuously operating website-production Program. It pulls qualified lead information and research from the CRM, safely claims one job, coordinates the agents and software needed to create a complete website, validates the result, deploys a private demonstration, and writes a completion record and URL back to the CRM.
+LiNKsites must become a continuously operating website-production Program. It continuously pulls qualified lead information and research from LiNKreach's authorized source, safely claims one job, coordinates the agents and software needed to create a complete website, validates the result, deploys a private demonstration, and returns a completion envelope and URL to LiNKreach.
 
 LiNKsites does not discover leads, perform outreach, collect payment, negotiate contracts, or own customer service. LiNKreach owns those commercial activities. When LiNKreach later records a sale or no-sale outcome, LiNKsites pulls that outcome and performs the corresponding technical work: public activation and domain configuration after a sale, or cleansing/refactoring/recycling after a no-sale decision.
 
@@ -78,7 +78,7 @@ Post-sales Program
 
 | Concern | Owner | LiNKsites relationship |
 |---|---|---|
-| Lead discovery and research | LiNKreach | Continuously pulls eligible CRM records |
+| Lead discovery and research | LiNKreach | LiNKsites continuously pulls and claims eligible authorized records |
 | Outreach, sale/no-sale decision | LiNKreach | Consumes recorded outcome |
 | Stripe/payment and agreement | LiNKreach or its owned workflow | Acts only on LiNKreach's versioned activation authorization; no direct payment integration |
 | Website creation and private preview | LiNKsites | Owns and executes |
