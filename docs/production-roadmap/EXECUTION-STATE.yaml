@@ -1,0 +1,40 @@
+schema_version: 1
+program: linksites-production-readiness
+overall_goal: delivery_phase_1_pre_vps
+updated_at: "2026-08-04T16:10:41+08:00"
+documentation_milestone:
+  status: complete_awaiting_principal_approval
+  principal_approval_received: false
+delivery_phase_1:
+  status: not_started_awaiting_documentation_approval
+  principal_implementation_approval_received: false
+  active_wave: null
+  active_lane: null
+  release_checkpoint_sha: null
+  final_verdict: null
+delivery_phase_2:
+  status: not_authorized
+  principal_external_apply_approval_received: false
+work_packets:
+  W1-01: { status: planned, checkpoint_sha: null, verdict: null }
+  W1-02: { status: planned, checkpoint_sha: null, verdict: null }
+  W1-03: { status: planned, checkpoint_sha: null, verdict: null }
+  W1-04: { status: planned, checkpoint_sha: null, verdict: null }
+  W1-05: { status: planned, checkpoint_sha: null, verdict: null }
+  W1-06: { status: planned, checkpoint_sha: null, verdict: null }
+  W2-01: { status: planned, checkpoint_sha: null, verdict: null }
+  W2-02: { status: planned, checkpoint_sha: null, verdict: null }
+  W2-03: { status: planned, checkpoint_sha: null, verdict: null }
+  W2-04: { status: planned, checkpoint_sha: null, verdict: null }
+  W2-05: { status: planned, checkpoint_sha: null, verdict: null }
+  W2-06: { status: planned, checkpoint_sha: null, verdict: null }
+  W2-07: { status: planned, checkpoint_sha: null, verdict: null }
+  W2-08: { status: planned, checkpoint_sha: null, verdict: null }
+wave_gates:
+  wave_1_integration_audit: { status: not_started, checkpoint_sha: null, verdict: null }
+  wave_2_phase_1_release_audit: { status: not_started, checkpoint_sha: null, verdict: null }
+blockers: []
+notes:
+  - Documentation is the first milestone of Delivery Phase 1, not the whole Phase.
+  - No implementation, deployment, live mutation, commit, or external action is authorized by this state file.
+  - Replace null SHAs only with full 40-character immutable Git SHAs after independent verdicts.

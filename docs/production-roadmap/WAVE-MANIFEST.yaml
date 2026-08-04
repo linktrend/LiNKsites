@@ -1,0 +1,132 @@
+schema_version: 1
+program: linksites-production-readiness
+overall_goal: delivery_phase_1_pre_vps
+status: draft_awaiting_principal_approval
+prepared_at: "2026-08-04"
+model_policy:
+  master: codex_gpt_5_6_terra_medium
+  implementation_default: codex_luna_high
+  implementation_alternative: grok_4_5_high_via_approved_cli
+  independent_wave_auditor: codex_sol_medium
+  luna_cli_allowed: true
+repositories:
+  linksites: /Users/linktrend/Projects/LiNKsites
+  linklibraries: /Users/linktrend/Projects/LiNKlibraries
+rules:
+  principal_approval_before_implementation: true
+  independent_verification_required: true
+  implementer_self_approval_forbidden: true
+  issue_completion_chain:
+    - proof
+    - independent_review
+    - integration
+    - done
+  full_40_character_sha_required: true
+  checkpoints_are_completion: false
+  machine_state_updates_after_verdict_only: true
+  ordinary_repair_cycle_limit: 3
+  normal_pr_unit: phase
+  issue_pr_mode: explicit_risk_exception_only
+  live_external_apply_requires_principal: true
+  active_term: phase
+waves:
+  - wave: 1
+    name: contracts_and_durable_foundations
+    requires:
+      - principal_phase_1_implementation_approval
+    lanes:
+      - lane: contract_freeze
+        serial:
+          - W1-01
+      - lane: parallel_foundations
+        requires:
+          - W1-01:PASS
+        parallel:
+          - W1-02
+          - W1-03
+          - W1-04
+          - W1-05
+      - lane: integration
+        requires:
+          - W1-02:PASS
+          - W1-03:PASS
+          - W1-04:PASS
+          - W1-05:PASS
+        serial:
+          - W1-06
+    exit_gate: wave_1_sol_integration_audit_PASS
+  - wave: 2
+    name: complete_vertical_slice_and_release_readiness
+    requires:
+      - wave_1_sol_integration_audit_PASS
+    lanes:
+      - lane: parallel_product_capabilities
+        parallel:
+          - W2-01
+          - W2-03
+          - W2-04
+          - W2-05
+      - lane: program_composition
+        requires:
+          - W2-01:PASS
+          - W2-03:PASS
+          - W2-04:PASS
+        serial:
+          - W2-02
+      - lane: lifecycle
+        requires:
+          - W2-02:PASS
+          - W2-05:PASS
+        serial:
+          - W2-06
+      - lane: hardening_and_certification
+        requires:
+          - W2-01:PASS
+          - W2-02:PASS
+          - W2-03:PASS
+          - W2-04:PASS
+          - W2-05:PASS
+          - W2-06:PASS
+        serial:
+          - W2-07
+          - W2-08
+    exit_gate: wave_2_phase_1_sol_release_audit_PASS
+delivery_phase_1_exit_requires:
+  - W1-01:PASS
+  - W1-02:PASS
+  - W1-03:PASS
+  - W1-04:PASS
+  - W1-05:PASS
+  - W1-06:PASS
+  - wave_1_sol_integration_audit_PASS
+  - W2-01:PASS
+  - W2-02:PASS
+  - W2-03:PASS
+  - W2-04:PASS
+  - W2-05:PASS
+  - W2-06:PASS
+  - W2-07:PASS
+  - W2-08:PASS
+  - wave_2_phase_1_sol_release_audit_PASS
+  - clean_exact_release_checkpoint
+delivery_phase_2:
+  authorized_by_phase_1: false
+  packet: phase-2/VPS-DEPLOYMENT-AND-PILOT-PACKET.md
+work_packets:
+  W1-01: wave-1/W1-01-CANONICAL-CONTRACTS-AND-TERMINOLOGY.md
+  W1-02: wave-1/W1-02-LEDGER-PHASE-HIERARCHY-AND-GATES.md
+  W1-03: wave-1/W1-03-CONTINUOUS-INTAKE-AND-ORCHESTRATOR-FOUNDATION.md
+  W1-04: wave-1/W1-04-VERSIONED-WORKING-CONTENT-PLANE.md
+  W1-05: wave-1/W1-05-LINKLIBRARIES-CONSUMER-AND-MASTER-TEMPLATE-CONTRACT.md
+  W1-06: wave-1/W1-06-WAVE-INTEGRATION-AND-LEGACY-BOUNDARY.md
+  W2-01: wave-2/W2-01-CONTENT-AND-MEDIA-PRODUCTION.md
+  W2-02: wave-2/W2-02-END-TO-END-PROGRAM-ORCHESTRATION.md
+  W2-03: wave-2/W2-03-PAYLOAD-PROMOTION-PUBLICATION-AND-CMS-PROOF.md
+  W2-04: wave-2/W2-04-MASTER-TEMPLATE-AND-PRIVATE-DEMO.md
+  W2-05: wave-2/W2-05-LINKAUTOWORK-AND-EXTERNAL-EVENT-BOUNDARY.md
+  W2-06: wave-2/W2-06-OUTCOMES-RECYCLING-AND-LINKSITES-ARCHITECT.md
+  W2-07: wave-2/W2-07-DEPLOYMENT-OPERATIONS-CI-AND-LEGACY-REMOVAL.md
+  W2-08: wave-2/W2-08-LOCAL-CERTIFICATION-AND-PHASE-1-RELEASE-GATE.md
+audit_packet: audit/WAVE-AUDIT-PACKET.md
+execution_protocol: EXECUTION-PROTOCOL.md
+
