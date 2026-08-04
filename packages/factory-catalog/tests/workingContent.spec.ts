@@ -17,6 +17,7 @@ const platformFoundation = resolve(__dirname, '../../program-ledger/tests/fixtur
 const siteCoreMigration = resolve(__dirname, '../../../supabase/migrations/20260715_000001_lsites_sites_core.sql')
 const siteRlsMigration = resolve(__dirname, '../../../supabase/migrations/20260715_000002_lsites_sites_rls_hardening.sql')
 const workingContentMigration = resolve(__dirname, '../../../supabase/migrations/20260804_000001_lsites_working_content_plane.sql')
+const workingContentPrivilegeMigration = resolve(__dirname, '../../../supabase/migrations/20260805_000001_lsites_working_content_runtime_privileges.sql')
 
 const ORG_A = '10000000-0000-0000-0000-000000000001'
 const ORG_B = '10000000-0000-0000-0000-000000000002'
@@ -103,6 +104,7 @@ beforeAll(async () => {
   await db.exec(upSql(siteCoreMigration))
   await db.exec(upSql(siteRlsMigration))
   await db.exec(fullSql(workingContentMigration))
+  await db.exec(fullSql(workingContentPrivilegeMigration))
   await db.query(
     `insert into platform.organizations (id, name, kind, status) values
       ($1, 'W1-04 Org A', 'client', 'active'), ($2, 'W1-04 Org B', 'client', 'active')`,
@@ -345,6 +347,7 @@ describe('forward-only migration boundary', () => {
   it('applies the exact migration file on a clean database and contains no rollback block', async () => {
     const migration = fullSql(workingContentMigration)
     expect(migration).not.toContain('-- migrate:down')
+    expect(fullSql(workingContentPrivilegeMigration)).not.toContain('-- migrate:down')
     await expect(db.query(
       `select table_name from information_schema.tables
         where table_schema = 'lsites_sites'
@@ -359,6 +362,91 @@ describe('forward-only migration boundary', () => {
 })
 
 describe('working-content RLS and credential boundary', () => {
+  it('removes inherited destructive privileges while preserving same-org working-content operations', async () => {
+    const privileges = await db.query(`
+      select
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_packages', 'select') as packages_select,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_packages', 'insert') as packages_insert,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_packages', 'update') as packages_update,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_packages', 'delete') as packages_delete,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_content_versions', 'select') as versions_select,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_content_versions', 'insert') as versions_insert,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_content_versions', 'update') as versions_update,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_content_versions', 'delete') as versions_delete,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_content_promotion_receipts', 'select') as receipts_select,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_content_promotion_receipts', 'insert') as receipts_insert,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_content_promotion_receipts', 'update') as receipts_update,
+        has_table_privilege('svc_linksites_runtime', 'lsites_sites.working_content_promotion_receipts', 'delete') as receipts_delete
+    `)
+    expect(privileges.rows[0]).toEqual({
+      packages_select: true,
+      packages_insert: true,
+      packages_update: true,
+      packages_delete: false,
+      versions_select: true,
+      versions_insert: true,
+      versions_update: true,
+      versions_delete: false,
+      receipts_select: true,
+      receipts_insert: true,
+      receipts_update: false,
+      receipts_delete: false,
+    })
+
+    const version = await createVersion('wp-runtime-privileges', null)
+    await acceptVersion('wp-runtime-privileges', version.versionNumber, version.contentChecksum)
+    await asRuntime(USER_A, async () => {
+      await expect(db.query(
+        `delete from lsites_sites.working_content_versions
+          where working_package_id = 'wp-runtime-privileges' and version_number = 1`,
+      )).rejects.toThrow(/permission denied/i)
+    })
+
+    await asRuntime(USER_A, () => repository.preparePromotion({
+      orgId: ORG_A,
+      workingPackageId: 'wp-runtime-privileges',
+      versionNumber: version.versionNumber,
+      contentChecksum: version.contentChecksum,
+      promotionIdempotencyKey: 'promote:wp-runtime-privileges:1',
+    }))
+    await asRuntime(USER_A, () => repository.recordPromotionReceipt({
+      orgId: ORG_A,
+      workingPackageId: 'wp-runtime-privileges',
+      versionNumber: version.versionNumber,
+      promotionIdempotencyKey: 'promote:wp-runtime-privileges:1',
+      contentChecksum: version.contentChecksum,
+      promotionReceiptId: 'receipt-runtime-privileges',
+      payloadTargetCollection: 'pages',
+      payloadDocumentId: 'pages::home',
+      payloadDraftRevision: 'draft-revision-runtime-privileges',
+      receipt: { status: 'succeeded' },
+    }))
+
+    await asRuntime(USER_A, async () => {
+      await expect(db.query(
+        `delete from lsites_sites.working_content_versions
+          where working_package_id = 'wp-runtime-privileges' and version_number = 1`,
+      )).rejects.toThrow(/permission denied/i)
+      await expect(db.query(
+        `delete from lsites_sites.working_content_promotion_receipts
+          where promotion_receipt_id = 'receipt-runtime-privileges'`,
+      )).rejects.toThrow(/permission denied/i)
+      await expect(db.query(
+        `update lsites_sites.working_content_promotion_receipts
+            set receipt = '{"status":"tampered"}'::jsonb
+          where promotion_receipt_id = 'receipt-runtime-privileges'`,
+      )).rejects.toThrow(/permission denied/i)
+      await expect(db.query(
+        `select lifecycle_state from lsites_sites.working_content_versions
+          where working_package_id = 'wp-runtime-privileges' and version_number = 1`,
+      )).resolves.toMatchObject({ rows: [{ lifecycle_state: 'promoted' }] })
+      await expect(db.query(
+        `select receipt from lsites_sites.working_content_promotion_receipts
+          where promotion_receipt_id = 'receipt-runtime-privileges'`,
+      )).resolves.toMatchObject({ rows: [{ receipt: { status: 'succeeded' } }] })
+    })
+  })
+
   it('allows same-org service access and denies cross-org repository reads/writes', async () => {
     const own = await createVersion('wp-org-a', null)
     await expect(asRuntime(USER_B, () => repository.readVersion('wp-org-a', own.versionNumber))).resolves.toBeNull()
