@@ -2,6 +2,7 @@ import type { WorkingContentPackage } from '../../src/workingContent.js'
 
 export const workingContentFixture: WorkingContentPackage = {
   schemaVersion: { major: 1, minor: 0 },
+  templateId: 'marketing-smb-v1',
   content: {
     pages: [
       {
@@ -10,8 +11,8 @@ export const workingContentFixture: WorkingContentPackage = {
         sections: [
           {
             sectionId: 'section-hero',
-            componentId: 'Hero',
-            content: { heading: 'A clear home page', body: 'Evidence-backed working copy.' },
+            componentId: 'SignupHero',
+            content: { lang: 'en', copy: 'A clear home page' },
           },
         ],
       },
@@ -24,7 +25,7 @@ export const workingContentFixture: WorkingContentPackage = {
       source: 'asset://lead-demo/logo',
     },
   ],
-  libraryRefs: [{ libraryId: 'component.hero', sha: 'library-sha-001' }],
+  libraryRefs: [{ libraryId: 'component.hero', sha: '0123456789abcdef0123456789abcdef01234567' }],
   provenance: [
     {
       claimId: 'claim-hero-001',
@@ -45,7 +46,7 @@ export function revisedWorkingContentFixture(): WorkingContentPackage {
           sections: [
             {
               ...workingContentFixture.content.pages[0].sections[0],
-              content: { heading: 'A clearer home page', body: 'Revised working copy with the same asset receipt.' },
+              content: { lang: 'en', revision: 'A clearer home page with the same asset receipt.' },
             },
           ],
         },

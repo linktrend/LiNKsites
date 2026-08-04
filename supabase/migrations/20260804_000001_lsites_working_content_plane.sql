@@ -7,6 +7,8 @@
 -- versioned source records until an explicit W2-03 promotion copies one
 -- accepted version into a Payload draft. The retired lsites_core mirror,
 -- sync_ingress, and sync_jobs path is historical and is not recreated here.
+-- This Supabase migration is forward-only. Do not add or execute a rollback
+-- section: `supabase db reset` reapplies this complete file from a clean DB.
 
 create schema if not exists lsites_sites;
 
@@ -24,6 +26,7 @@ end $$;
 
 create table if not exists lsites_sites.working_packages (
   working_package_id text primary key,
+  template_id text not null default 'marketing-smb-v1',
   schema_version_major smallint not null default 1,
   schema_version_minor smallint not null default 0,
   org_id uuid not null references platform.organizations(id),
@@ -33,6 +36,7 @@ create table if not exists lsites_sites.working_packages (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   check (schema_version_major = 1 and schema_version_minor = 0),
+  check (template_id = 'marketing-smb-v1'),
   unique (org_id, lead_id, site_id)
 );
 
@@ -44,6 +48,7 @@ create table if not exists lsites_sites.working_content_versions (
   version_number integer not null check (version_number > 0),
   schema_version_major smallint not null default 1,
   schema_version_minor smallint not null default 0,
+  template_id text not null default 'marketing-smb-v1',
   org_id uuid not null references platform.organizations(id),
   lead_id text not null,
   site_id uuid not null references lsites_sites.sites(id),
@@ -70,6 +75,7 @@ create table if not exists lsites_sites.working_content_versions (
   updated_at timestamptz not null default now(),
   primary key (working_package_id, version_number),
   check (schema_version_major = 1 and schema_version_minor = 0),
+  check (template_id = 'marketing-smb-v1'),
   check (parent_version_number is null or parent_version_number < version_number),
   check (jsonb_typeof(content_payload) = 'object'),
   check (jsonb_typeof(asset_refs) = 'array'),
@@ -116,6 +122,64 @@ create index if not exists idx_working_versions_package_state
 create index if not exists idx_working_receipts_package
   on lsites_sites.working_content_promotion_receipts(working_package_id, version_number);
 
+create or replace function lsites_sites.assert_working_content_contract()
+returns trigger
+language plpgsql
+security invoker
+set search_path = lsites_sites, public
+as $$
+begin
+  if coalesce(jsonb_typeof(new.content_payload), '') <> 'object'
+    or coalesce(jsonb_typeof(new.content_payload->'pages'), '') <> 'array'
+    or coalesce(jsonb_array_length(new.content_payload->'pages'), 0) = 0
+  then
+    raise exception 'working content payload must contain at least one page';
+  end if;
+
+  if exists (
+    select 1
+      from jsonb_array_elements(new.content_payload->'pages') as page(value)
+     where coalesce(jsonb_typeof(page.value), '') <> 'object'
+        or coalesce(page.value->>'pageId', '') = ''
+        or coalesce(page.value->>'route', '') = ''
+        or coalesce(jsonb_typeof(page.value->'sections'), '') <> 'array'
+  ) then
+    raise exception 'working content page does not satisfy the marketing-smb-v1 contract';
+  end if;
+
+  if exists (
+    select 1
+      from jsonb_array_elements(new.content_payload->'pages') as page(value)
+      cross join lateral jsonb_array_elements(page.value->'sections') as section(value)
+     where coalesce(jsonb_typeof(section.value), '') <> 'object'
+        or coalesce(section.value->>'sectionId', '') = ''
+        or coalesce(section.value->>'componentId', '') not in ('SignupHero', 'CTASection', 'OfferShowcase', 'ArticlesGrid')
+        or coalesce(jsonb_typeof(section.value->'content'), '') <> 'object'
+        or coalesce(section.value->'content'->>'lang', '') = ''
+        or (section.value->>'componentId' = 'OfferShowcase' and coalesce(jsonb_typeof(section.value->'content'->'offers'), '') <> 'array')
+        or (section.value->>'componentId' = 'ArticlesGrid' and coalesce(jsonb_typeof(section.value->'content'->'articles'), '') <> 'array')
+  ) then
+    raise exception 'working content section does not satisfy the accepted component contract';
+  end if;
+
+  if exists (
+    select 1
+      from jsonb_array_elements(new.library_refs) as library(value)
+     where coalesce(jsonb_typeof(library.value), '') <> 'object'
+        or coalesce(library.value->>'libraryId', '') = ''
+        or coalesce(library.value->>'sha', '') !~ '^[a-f0-9]{40}$'
+  ) then
+    raise exception 'working content LiNKlibraries references require canonical 40-character Git SHAs';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists working_versions_contract on lsites_sites.working_content_versions;
+create trigger working_versions_contract
+before insert on lsites_sites.working_content_versions
+for each row execute function lsites_sites.assert_working_content_contract();
+
 -- A package and every version must use the organization that owns its site.
 create or replace function lsites_sites.assert_working_content_org_consistency()
 returns trigger
@@ -141,6 +205,9 @@ begin
     if package_org_id is null or package_org_id <> new.org_id or package_lead_id <> new.lead_id or package_site_id <> new.site_id then
       raise exception 'working content version identity does not match package identity';
     end if;
+    if (select p.template_id from lsites_sites.working_packages p where p.working_package_id = new.working_package_id) <> new.template_id then
+      raise exception 'working content version template does not match package template';
+    end if;
     if new.parent_version_number is not null and new.parent_version_number >= new.version_number then
       raise exception 'working content version parent must be older than the new version';
     end if;
@@ -162,6 +229,7 @@ set search_path = lsites_sites, public
 as $$
 begin
   if old.working_package_id <> new.working_package_id
+    or old.template_id <> new.template_id
     or old.org_id <> new.org_id
     or old.lead_id <> new.lead_id
     or old.site_id <> new.site_id
@@ -199,6 +267,7 @@ begin
     or old.version_number <> new.version_number
     or old.schema_version_major <> new.schema_version_major
     or old.schema_version_minor <> new.schema_version_minor
+    or old.template_id <> new.template_id
     or old.org_id <> new.org_id
     or old.lead_id <> new.lead_id
     or old.site_id <> new.site_id
@@ -215,6 +284,29 @@ begin
     or new.created_at <> old.created_at
   then
     raise exception 'working content version is immutable; create a new version instead';
+  end if;
+
+  if old.promotion_idempotency_key is not null
+    and old.promotion_idempotency_key is distinct from new.promotion_idempotency_key
+  then
+    raise exception 'promotion idempotency key is immutable once bound';
+  end if;
+
+  if old.lifecycle_state = 'promoted'
+    and (
+      old.lifecycle_state is distinct from new.lifecycle_state
+      or old.gate_outcome is distinct from new.gate_outcome
+      or old.gate_reference is distinct from new.gate_reference
+      or old.gate_evidence_refs is distinct from new.gate_evidence_refs
+      or old.promotion_idempotency_key is distinct from new.promotion_idempotency_key
+      or old.payload_target_collection is distinct from new.payload_target_collection
+      or old.payload_document_id is distinct from new.payload_document_id
+      or old.payload_draft_revision is distinct from new.payload_draft_revision
+      or old.promotion_receipt_id is distinct from new.promotion_receipt_id
+      or old.updated_at is distinct from new.updated_at
+    )
+  then
+    raise exception 'promoted working content is immutable';
   end if;
 
   if not (
@@ -307,14 +399,3 @@ drop trigger if exists working_receipts_consistency on lsites_sites.working_cont
 create trigger working_receipts_consistency
 before insert on lsites_sites.working_content_promotion_receipts
 for each row execute function lsites_sites.assert_working_receipt_consistency();
-
--- migrate:down
-drop table if exists lsites_sites.working_content_promotion_receipts;
-drop table if exists lsites_sites.working_content_versions;
-drop table if exists lsites_sites.working_packages;
-drop function if exists lsites_sites.assert_working_receipt_consistency();
-drop function if exists lsites_sites.enforce_working_content_version_immutability();
-drop function if exists lsites_sites.enforce_working_package_cursor();
-drop function if exists lsites_sites.assert_working_content_org_consistency();
-drop type if exists lsites_sites.working_gate_outcome;
-drop type if exists lsites_sites.working_content_state;

@@ -29,6 +29,10 @@ function upSql(path: string): string {
   return readFileSync(path, 'utf8').split('-- migrate:down')[0].replace('-- migrate:up', '')
 }
 
+function fullSql(path: string): string {
+  return readFileSync(path, 'utf8')
+}
+
 let db: PGlite
 let repository: WorkingContentRepository
 
@@ -98,7 +102,7 @@ beforeAll(async () => {
   await db.exec(upSql(platformFoundation))
   await db.exec(upSql(siteCoreMigration))
   await db.exec(upSql(siteRlsMigration))
-  await db.exec(upSql(workingContentMigration))
+  await db.exec(fullSql(workingContentMigration))
   await db.query(
     `insert into platform.organizations (id, name, kind, status) values
       ($1, 'W1-04 Org A', 'client', 'active'), ($2, 'W1-04 Org B', 'client', 'active')`,
@@ -130,12 +134,23 @@ describe('working-content contract and checksum', () => {
     expect(validateWorkingContentPackage(workingContentFixture)).toBe(true)
     expect(validateWorkingContentPackage({ ...workingContentFixture, content: { pages: [] } })).toBe(false)
     expect(validateWorkingContentPackage({ ...workingContentFixture, libraryRefs: [{ libraryId: 'x', sha: '' }] })).toBe(false)
+    expect(validateWorkingContentPackage({ ...workingContentFixture, templateId: 'unknown-template' as never })).toBe(false)
+    expect(validateWorkingContentPackage({
+      ...workingContentFixture,
+      content: { pages: [{ ...workingContentFixture.content.pages[0], sections: [{ ...workingContentFixture.content.pages[0].sections[0], componentId: 'UnknownComponent' }] }] },
+    })).toBe(false)
+    expect(validateWorkingContentPackage({
+      ...workingContentFixture,
+      content: { pages: [{ ...workingContentFixture.content.pages[0], sections: [{ ...workingContentFixture.content.pages[0].sections[0], content: { lang: 7 } }] }] },
+    })).toBe(false)
+    expect(validateWorkingContentPackage({ ...workingContentFixture, libraryRefs: [{ libraryId: 'x', sha: '0123456789abcdef0123456789abcdef0123456' }] })).toBe(false)
+    expect(validateWorkingContentPackage({ ...workingContentFixture, libraryRefs: [{ libraryId: 'x', sha: '0123456789ABCDEF0123456789abcdef01234567' }] })).toBe(false)
     expect(computeWorkingContentChecksum(workingContentFixture)).toMatch(/^[a-f0-9]{64}$/)
   })
 
   it('produces the same checksum for equivalent object-key insertion order', () => {
     const reordered = JSON.parse(JSON.stringify(workingContentFixture)) as typeof workingContentFixture
-    reordered.content.pages[0].sections[0].content = { body: 'Evidence-backed working copy.', heading: 'A clear home page' }
+    reordered.content.pages[0].sections[0].content = { copy: 'A clear home page', lang: 'en' }
     expect(computeWorkingContentChecksum(reordered)).toBe(computeWorkingContentChecksum(workingContentFixture))
   })
 })
@@ -160,6 +175,27 @@ describe('working-content persistence and lineage', () => {
     await expect(createVersion('wp-cas', 0)).rejects.toMatchObject({ code: 'conflict' })
     await expect(createVersion('wp-cas', 1, revisedWorkingContentFixture())).resolves.toMatchObject({ versionNumber: 2 })
     expect(first.versionNumber).toBe(1)
+  })
+
+  it('allows only one winner when two first-version CAS writes race', async () => {
+    const attempts = [1, 2].map((index) => repository.createVersion({
+      workingPackageId: 'wp-concurrent-cas',
+      orgId: ORG_A,
+      leadId: 'lead-wp-concurrent-cas',
+      siteId: SITE_A,
+      programRef: 'links-program',
+      runId: 'run-001',
+      expectedCurrentVersion: null,
+      authorId: `author-${index}`,
+      executorId: 'codex-luna-high',
+      contentPackage: workingContentFixture,
+    }))
+    const results = await Promise.allSettled(attempts)
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1)
+    expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1)
+    const rejected = results.find((result) => result.status === 'rejected')
+    expect(rejected).toMatchObject({ reason: expect.objectContaining({ code: 'conflict' }) })
+    await expect(asRuntime(USER_A, () => repository.readVersion('wp-concurrent-cas', 1))).resolves.toMatchObject({ versionNumber: 1 })
   })
 
   it('does not allow accepted content to be overwritten in place', async () => {
@@ -191,6 +227,36 @@ describe('working-content persistence and lineage', () => {
     )
     await expect(asRuntime(USER_A, () => repository.readVersion('wp-corrupt', 1))).rejects.toMatchObject({ code: 'checksum_mismatch' })
   })
+
+  it('rejects unknown components and malformed library SHAs at the database boundary', async () => {
+    await db.query(
+      `insert into lsites_sites.working_packages (working_package_id, org_id, lead_id, site_id)
+       values ('wp-db-contract-component', $1, 'lead-db-contract-component', $2)`,
+      [ORG_A, SITE_A],
+    )
+    await expect(db.query(
+      `insert into lsites_sites.working_content_versions
+        (working_package_id, version_number, org_id, lead_id, site_id, program_ref,
+         author_id, executor_id, content_payload, asset_refs, library_refs, provenance,
+         content_checksum)
+       values ('wp-db-contract-component', 1, $1, 'lead-db-contract-component', $2, 'program', 'author', 'executor', $3, '[]'::jsonb, '[]'::jsonb, '[]'::jsonb, $4)`,
+      [ORG_A, SITE_A, { pages: [{ pageId: 'home', route: '/', sections: [{ sectionId: 'unknown', componentId: 'UnknownComponent', content: { lang: 'en' } }] }] }, '0000000000000000000000000000000000000000000000000000000000000000'],
+    )).rejects.toThrow(/accepted component contract|marketing-smb-v1/)
+
+    await db.query(
+      `insert into lsites_sites.working_packages (working_package_id, org_id, lead_id, site_id)
+       values ('wp-db-contract-sha', $1, 'lead-db-contract-sha', $2)`,
+      [ORG_A, SITE_A],
+    )
+    await expect(db.query(
+      `insert into lsites_sites.working_content_versions
+        (working_package_id, version_number, org_id, lead_id, site_id, program_ref,
+         author_id, executor_id, content_payload, asset_refs, library_refs, provenance,
+         content_checksum)
+       values ('wp-db-contract-sha', 1, $1, 'lead-db-contract-sha', $2, 'program', 'author', 'executor', $3, '[]'::jsonb, $4, '[]'::jsonb, $5)`,
+      [ORG_A, SITE_A, workingContentFixture.content, [{ libraryId: 'component.hero', sha: 'not-a-git-sha' }], '0000000000000000000000000000000000000000000000000000000000000000'],
+    )).rejects.toThrow(/canonical 40-character Git SHAs/)
+  })
 })
 
 describe('working-content gates and promotion boundary', () => {
@@ -210,6 +276,10 @@ describe('working-content gates and promotion boundary', () => {
       contentChecksum: first.contentChecksum, promotionIdempotencyKey: 'promote:wp-promotion:1',
     }))
     expect(retried).toEqual(prepared)
+    await expect(asRuntime(USER_A, () => repository.preparePromotion({
+      orgId: ORG_A, workingPackageId: 'wp-promotion', versionNumber: 1,
+      contentChecksum: first.contentChecksum, promotionIdempotencyKey: 'promote:wp-promotion:different-key',
+    }))).rejects.toMatchObject({ code: 'conflict' })
     const receiptInput = {
       orgId: ORG_A, workingPackageId: 'wp-promotion', versionNumber: 1,
       promotionIdempotencyKey: 'promote:wp-promotion:1', contentChecksum: first.contentChecksum,
@@ -220,10 +290,34 @@ describe('working-content gates and promotion boundary', () => {
     const receiptRetry = await asRuntime(USER_A, () => repository.recordPromotionReceipt({ ...receiptInput, promotionReceiptId: 'different-receipt-on-retry' }))
     expect(receiptRetry).toEqual(receipt)
     await expect(asRuntime(USER_A, () => repository.selectExactAcceptedVersion({ workingPackageId: 'wp-promotion', versionNumber: 1, contentChecksum: first.contentChecksum }))).resolves.toMatchObject({ lifecycleState: 'promoted' })
+    await asRuntime(USER_A, async () => {
+      await expect(db.query(
+        `update lsites_sites.working_content_versions
+            set payload_document_id = 'tampered'
+          where working_package_id = 'wp-promotion' and version_number = 1`,
+      )).rejects.toThrow(/promoted working content is immutable/)
+    })
     await expect(asRuntime(USER_A, () => repository.preparePromotion({
       orgId: ORG_A, workingPackageId: 'wp-promotion', versionNumber: 1,
       contentChecksum: computeWorkingContentChecksum(revisedWorkingContentFixture()), promotionIdempotencyKey: 'promote:wp-promotion:1',
     }))).rejects.toMatchObject({ code: 'conflict' })
+  })
+})
+
+describe('forward-only migration boundary', () => {
+  it('applies the exact migration file on a clean database and contains no rollback block', async () => {
+    const migration = fullSql(workingContentMigration)
+    expect(migration).not.toContain('-- migrate:down')
+    await expect(db.query(
+      `select table_name from information_schema.tables
+        where table_schema = 'lsites_sites'
+          and table_name in ('working_packages', 'working_content_versions', 'working_content_promotion_receipts')
+        order by table_name`,
+    )).resolves.toMatchObject({ rows: [
+      { table_name: 'working_content_promotion_receipts' },
+      { table_name: 'working_content_versions' },
+      { table_name: 'working_packages' },
+    ] })
   })
 })
 

@@ -2,6 +2,14 @@ import { createHash } from 'node:crypto'
 import type { SchemaVersion } from '@linksites/types'
 
 export const WORKING_CONTENT_SCHEMA_VERSION = { major: 1, minor: 0 } as const satisfies SchemaVersion
+export const WORKING_CONTENT_TEMPLATE_ID = 'marketing-smb-v1' as const
+
+const WORKING_CONTENT_COMPONENT_CONTRACT = {
+  SignupHero: { requiredContent: ['lang'] },
+  CTASection: { requiredContent: ['lang'] },
+  OfferShowcase: { requiredContent: ['lang', 'offers'] },
+  ArticlesGrid: { requiredContent: ['lang', 'articles'] },
+} as const
 
 export type WorkingContentState =
   | 'working'
@@ -47,6 +55,7 @@ export interface WorkingContentProvenance {
 
 export interface WorkingContentPackage {
   schemaVersion: SchemaVersion
+  templateId: typeof WORKING_CONTENT_TEMPLATE_ID
   content: {
     pages: WorkingContentPage[]
   }
@@ -137,16 +146,25 @@ const isNonEmptyString = (value: unknown): value is string =>
 const isSha256 = (value: unknown): value is string =>
   typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
 
+const isGitSha = (value: unknown): value is string =>
+  typeof value === 'string' && /^[a-f0-9]{40}$/.test(value)
+
+const isUniqueViolation = (value: unknown): boolean =>
+  isRecord(value) && value.code === '23505'
+
 const hasExactKeys = (value: unknown, required: readonly string[]): value is Record<string, unknown> =>
   isRecord(value) && required.every((key) => Object.prototype.hasOwnProperty.call(value, key)) && Object.keys(value).every((key) => required.includes(key))
 
 function assertContentPackage(value: unknown): asserts value is WorkingContentPackage {
-  if (!isRecord(value) || !hasExactKeys(value, ['schemaVersion', 'content', 'assetRefs', 'libraryRefs', 'provenance'])) {
+  if (!isRecord(value) || !hasExactKeys(value, ['schemaVersion', 'templateId', 'content', 'assetRefs', 'libraryRefs', 'provenance'])) {
     throw new WorkingContentError('working content package has an incompatible top-level shape', 'invalid_input')
   }
   const schema = value.schemaVersion
   if (!isRecord(schema) || schema.major !== WORKING_CONTENT_SCHEMA_VERSION.major || schema.minor !== WORKING_CONTENT_SCHEMA_VERSION.minor || Object.keys(schema).length !== 2) {
     throw new WorkingContentError('working content package schema version is unsupported', 'invalid_input')
+  }
+  if (value.templateId !== WORKING_CONTENT_TEMPLATE_ID) {
+    throw new WorkingContentError(`working content template ${String(value.templateId)} is not accepted`, 'invalid_input')
   }
 
   const content = value.content
@@ -161,13 +179,30 @@ function assertContentPackage(value: unknown): asserts value is WorkingContentPa
       if (!isRecord(section) || !hasExactKeys(section, ['sectionId', 'componentId', 'content']) || !isNonEmptyString(section.sectionId) || !isNonEmptyString(section.componentId) || !isRecord(section.content)) {
         throw new WorkingContentError('working content section is incompatible with the template contract', 'invalid_input')
       }
+      const componentContract = WORKING_CONTENT_COMPONENT_CONTRACT[section.componentId as keyof typeof WORKING_CONTENT_COMPONENT_CONTRACT]
+      if (!componentContract) {
+        throw new WorkingContentError(`working content component ${section.componentId} is not accepted by ${WORKING_CONTENT_TEMPLATE_ID}`, 'invalid_input')
+      }
+      if (!componentContract.requiredContent.every((key) => Object.prototype.hasOwnProperty.call(section.content, key))) {
+        throw new WorkingContentError(`working content component ${section.componentId} does not satisfy its accepted content contract`, 'invalid_input')
+      }
+      if (!isNonEmptyString(section.content.lang)) {
+        throw new WorkingContentError(`working content component ${section.componentId} requires a non-empty lang`, 'invalid_input')
+      }
+      const requiredContent = componentContract.requiredContent as readonly string[]
+      if (requiredContent.includes('offers') && !Array.isArray(section.content.offers)) {
+        throw new WorkingContentError(`working content component ${section.componentId} requires an offers array`, 'invalid_input')
+      }
+      if (requiredContent.includes('articles') && !Array.isArray(section.content.articles)) {
+        throw new WorkingContentError(`working content component ${section.componentId} requires an articles array`, 'invalid_input')
+      }
     }
   }
 
   if (!Array.isArray(value.assetRefs) || !value.assetRefs.every((asset) => isRecord(asset) && hasExactKeys(asset, ['assetId', 'sha256', 'source']) && isNonEmptyString(asset.assetId) && isSha256(asset.sha256) && isNonEmptyString(asset.source))) {
     throw new WorkingContentError('working content asset references are invalid', 'invalid_input')
   }
-  if (!Array.isArray(value.libraryRefs) || !value.libraryRefs.every((library) => isRecord(library) && hasExactKeys(library, ['libraryId', 'sha']) && isNonEmptyString(library.libraryId) && isNonEmptyString(library.sha))) {
+  if (!Array.isArray(value.libraryRefs) || !value.libraryRefs.every((library) => isRecord(library) && hasExactKeys(library, ['libraryId', 'sha']) && isNonEmptyString(library.libraryId) && isGitSha(library.sha))) {
     throw new WorkingContentError('working content LiNKlibraries references are invalid', 'invalid_input')
   }
   if (!Array.isArray(value.provenance) || !value.provenance.every((record) => isRecord(record) && hasExactKeys(record, ['claimId', 'kind', 'sourceReferences', 'statement']) && isNonEmptyString(record.claimId) && (record.kind === 'factual_claim' || record.kind === 'generated_copy' || record.kind === 'media') && Array.isArray(record.sourceReferences) && record.sourceReferences.every(isNonEmptyString) && isNonEmptyString(record.statement))) {
@@ -229,6 +264,7 @@ const iso = (value: unknown): string => new Date(String(value)).toISOString()
 function mapVersion(row: SqlRow): WorkingContentVersion {
   const contentPackage = {
     schemaVersion: { major: Number(row.schema_version_major), minor: Number(row.schema_version_minor) },
+    templateId: String(row.template_id),
     content: row.content_payload as WorkingContentPackage['content'],
     assetRefs: row.asset_refs as WorkingContentPackage['assetRefs'],
     libraryRefs: row.library_refs as WorkingContentPackage['libraryRefs'],
@@ -285,10 +321,16 @@ function mapReceipt(row: SqlRow): WorkingContentPromotionReceipt {
   }
 }
 
-async function inTransaction<T>(db: WorkingContentSqlExecutor, work: () => Promise<T>): Promise<T> {
+async function inTransaction<T>(db: WorkingContentSqlExecutor, work: (tx: WorkingContentSqlExecutor) => Promise<T>): Promise<T> {
+  const candidate = db as WorkingContentSqlExecutor & {
+    transaction?: <R>(callback: (tx: { query(sql: string, params?: unknown[]): Promise<{ rows: SqlRow[] }> }) => Promise<R>) => Promise<R>
+  }
+  if (typeof candidate.transaction === 'function') {
+    return candidate.transaction(async (tx) => work(tx))
+  }
   await db.query('begin')
   try {
-    const result = await work()
+    const result = await work(db)
     await db.query('commit')
     return result
   } catch (error) {
@@ -306,16 +348,16 @@ export class WorkingContentRepository {
       throw new WorkingContentError('working content version identity or compare-and-swap input is invalid', 'invalid_input')
     }
     const checksum = computeWorkingContentChecksum(input.contentPackage)
-    return inTransaction(this.db, async () => {
-      await this.db.query(
+    return inTransaction(this.db, async (tx) => {
+      await tx.query(
         `insert into lsites_sites.working_packages
-          (working_package_id, org_id, lead_id, site_id)
-         values ($1, $2, $3, $4)
+          (working_package_id, template_id, org_id, lead_id, site_id)
+         values ($1, $2, $3, $4, $5)
          on conflict (working_package_id) do nothing`,
-        [input.workingPackageId, input.orgId, input.leadId, input.siteId],
+        [input.workingPackageId, input.contentPackage.templateId, input.orgId, input.leadId, input.siteId],
       )
-      const packageResult = await this.db.query(
-        `select current_version, org_id, lead_id, site_id
+      const packageResult = await tx.query(
+        `select current_version, template_id, org_id, lead_id, site_id
            from lsites_sites.working_packages
           where working_package_id = $1
           for update`,
@@ -323,7 +365,7 @@ export class WorkingContentRepository {
       )
       const packageRow = packageResult.rows[0]
       if (!packageRow) throw new WorkingContentError(`working package ${input.workingPackageId} was not found`, 'not_found')
-      if (String(packageRow.org_id) !== input.orgId || String(packageRow.lead_id) !== input.leadId || String(packageRow.site_id) !== input.siteId) {
+      if (String(packageRow.template_id) !== input.contentPackage.templateId || String(packageRow.org_id) !== input.orgId || String(packageRow.lead_id) !== input.leadId || String(packageRow.site_id) !== input.siteId) {
         throw new WorkingContentError(`working package ${input.workingPackageId} identity conflicts with the requested lead/site/org`, 'conflict')
       }
       const currentVersion = Number(packageRow.current_version)
@@ -332,19 +374,20 @@ export class WorkingContentRepository {
         throw new WorkingContentError(`working package ${input.workingPackageId} changed from expected version ${String(input.expectedCurrentVersion)} to ${currentVersion}`, 'conflict')
       }
       const versionNumber = currentVersion + 1
-      const inserted = await this.db.query(
+      const inserted = await tx.query(
         `insert into lsites_sites.working_content_versions
-          (working_package_id, version_number, schema_version_major, schema_version_minor,
+          (working_package_id, version_number, schema_version_major, schema_version_minor, template_id,
            org_id, lead_id, site_id, program_ref, run_id, parent_version_number,
            author_id, executor_id, content_payload, asset_refs, library_refs,
            provenance, content_checksum)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
          returning *`,
         [
           input.workingPackageId,
           versionNumber,
           input.contentPackage.schemaVersion.major,
           input.contentPackage.schemaVersion.minor,
+          input.contentPackage.templateId,
           input.orgId,
           input.leadId,
           input.siteId,
@@ -360,7 +403,7 @@ export class WorkingContentRepository {
           checksum,
         ],
       )
-      await this.db.query(
+      await tx.query(
         `update lsites_sites.working_packages set current_version = $2, updated_at = now()
           where working_package_id = $1`,
         [input.workingPackageId, versionNumber],
@@ -405,8 +448,8 @@ export class WorkingContentRepository {
     gateReference: string | null,
     evidenceReferences: string[],
   ): Promise<WorkingContentVersion> {
-    return inTransaction(this.db, async () => {
-      const current = await this.db.query(
+    return inTransaction(this.db, async (tx) => {
+      const current = await tx.query(
         `select * from lsites_sites.working_content_versions
           where working_package_id = $1 and version_number = $2 for update`,
         [workingPackageId, versionNumber],
@@ -416,7 +459,7 @@ export class WorkingContentRepository {
       if (version.contentChecksum !== expectedChecksum) throw new WorkingContentError(`checksum mismatch for version ${workingPackageId}/${versionNumber}`, 'checksum_mismatch')
       if (lifecycleState === 'ready_for_gate' && version.lifecycleState !== 'working') throw new WorkingContentError(`version ${workingPackageId}/${versionNumber} is not working`, 'invalid_state')
       if (lifecycleState !== 'ready_for_gate' && version.lifecycleState !== 'ready_for_gate') throw new WorkingContentError(`version ${workingPackageId}/${versionNumber} is not ready for a gate outcome`, 'invalid_state')
-      const updated = await this.db.query(
+      const updated = await tx.query(
         `update lsites_sites.working_content_versions
             set lifecycle_state = $3, gate_outcome = $4, gate_reference = $5,
                 gate_evidence_refs = $6, updated_at = now()
@@ -425,7 +468,7 @@ export class WorkingContentRepository {
         [workingPackageId, versionNumber, lifecycleState, gateOutcome, gateReference, evidenceReferences],
       )
       if (lifecycleState === 'accepted') {
-        await this.db.query(
+        await tx.query(
           `update lsites_sites.working_content_versions
               set lifecycle_state = 'superseded', updated_at = now()
             where working_package_id = $1 and lifecycle_state = 'accepted' and version_number <> $2`,
@@ -449,35 +492,49 @@ export class WorkingContentRepository {
 
   async preparePromotion(input: { orgId: string; workingPackageId: string; versionNumber: number; contentChecksum: string; promotionIdempotencyKey: string }): Promise<WorkingContentPromotionInput> {
     if (!isNonEmptyString(input.promotionIdempotencyKey)) throw new WorkingContentError('promotion idempotency key is required', 'invalid_input')
-    return inTransaction(this.db, async () => {
-      const prior = await this.db.query(
+    return inTransaction(this.db, async (tx) => {
+      const selected = await tx.query(
         `select * from lsites_sites.working_content_versions
-          where org_id = $1 and promotion_idempotency_key = $2`,
+          where org_id = $1 and working_package_id = $2 and version_number = $3
+            and lifecycle_state in ('accepted', 'promoted')
+          for update`,
+        [input.orgId, input.workingPackageId, input.versionNumber],
+      )
+      if (!selected.rows[0]) throw new WorkingContentError(`exact accepted working content version ${input.workingPackageId}/${input.versionNumber} was not found`, 'not_found')
+      const version = mapVersion(selected.rows[0])
+      if (version.contentChecksum !== input.contentChecksum) throw new WorkingContentError('promotion input does not match the selected immutable version', 'conflict')
+      const prior = await tx.query(
+        `select working_package_id, version_number from lsites_sites.working_content_versions
+          where org_id = $1 and promotion_idempotency_key = $2
+          for update`,
         [input.orgId, input.promotionIdempotencyKey],
       )
       if (prior.rows[0] && (String(prior.rows[0].working_package_id) !== input.workingPackageId || Number(prior.rows[0].version_number) !== input.versionNumber)) {
         throw new WorkingContentError(`promotion idempotency key ${input.promotionIdempotencyKey} is already bound to another immutable version`, 'conflict')
       }
-      const version = prior.rows[0]
-        ? mapVersion(prior.rows[0])
-        : await this.selectExactAcceptedVersion(input)
-      if (version.orgId !== input.orgId || version.contentChecksum !== input.contentChecksum) throw new WorkingContentError('promotion input does not match the selected immutable version', 'conflict')
-      if (version.promotionIdempotencyKey === null) {
-        const updated = await this.db.query(
-          `update lsites_sites.working_content_versions
-              set promotion_idempotency_key = $4, updated_at = now()
-            where org_id = $1 and working_package_id = $2 and version_number = $3
-              and content_checksum = $5 and lifecycle_state in ('accepted', 'promoted')
-            returning *`,
-          [input.orgId, input.workingPackageId, input.versionNumber, input.promotionIdempotencyKey, input.contentChecksum],
-        )
-        if (!updated.rows[0]) throw new WorkingContentError('working content changed while preparing promotion', 'conflict')
+      if (version.promotionIdempotencyKey !== null) {
+        if (version.promotionIdempotencyKey !== input.promotionIdempotencyKey) {
+          throw new WorkingContentError(`version ${input.workingPackageId}/${input.versionNumber} is already bound to a different promotion idempotency key`, 'conflict')
+        }
+        return toWorkingContentPromotionInput(version, input.promotionIdempotencyKey)
       }
-      const selected = version.promotionIdempotencyKey === null
-        ? await this.readVersion(input.workingPackageId, input.versionNumber)
-        : version
-      if (!selected) throw new WorkingContentError('prepared working content version disappeared', 'not_found')
-      return toWorkingContentPromotionInput(selected, input.promotionIdempotencyKey)
+      let updated: { rows: SqlRow[] }
+      try {
+        updated = await tx.query(
+          `update lsites_sites.working_content_versions
+              set promotion_idempotency_key = $5, updated_at = now()
+            where org_id = $1 and working_package_id = $2 and version_number = $3
+              and content_checksum = $4 and promotion_idempotency_key is null
+              and lifecycle_state in ('accepted', 'promoted')
+            returning *`,
+          [input.orgId, input.workingPackageId, input.versionNumber, input.contentChecksum, input.promotionIdempotencyKey],
+        )
+      } catch (error) {
+        if (isUniqueViolation(error)) throw new WorkingContentError('promotion idempotency key was concurrently bound to another immutable version', 'conflict')
+        throw error
+      }
+      if (!updated.rows[0]) throw new WorkingContentError('working content changed while preparing promotion', 'conflict')
+      return toWorkingContentPromotionInput(mapVersion(updated.rows[0]), input.promotionIdempotencyKey)
     })
   }
 
@@ -494,8 +551,8 @@ export class WorkingContentRepository {
     receipt: Record<string, unknown>
   }): Promise<WorkingContentPromotionReceipt> {
     if (!isNonEmptyString(input.promotionReceiptId) || !isNonEmptyString(input.payloadTargetCollection) || !isRecord(input.receipt)) throw new WorkingContentError('promotion receipt fields are invalid', 'invalid_input')
-    return inTransaction(this.db, async () => {
-      const prior = await this.db.query(
+    return inTransaction(this.db, async (tx) => {
+      const prior = await tx.query(
         `select * from lsites_sites.working_content_promotion_receipts
           where org_id = $1 and promotion_idempotency_key = $2`,
         [input.orgId, input.promotionIdempotencyKey],
@@ -505,9 +562,17 @@ export class WorkingContentRepository {
         if (existing.workingPackageId !== input.workingPackageId || existing.versionNumber !== input.versionNumber || existing.contentChecksum !== input.contentChecksum) throw new WorkingContentError('promotion idempotency key conflicts with an existing receipt', 'conflict')
         return existing
       }
-      const version = await this.selectExactAcceptedVersion({ workingPackageId: input.workingPackageId, versionNumber: input.versionNumber, contentChecksum: input.contentChecksum })
+      const selectedVersion = await tx.query(
+        `select * from lsites_sites.working_content_versions
+          where working_package_id = $1 and version_number = $2
+            and content_checksum = $3 and lifecycle_state in ('accepted', 'promoted')
+          for update`,
+        [input.workingPackageId, input.versionNumber, input.contentChecksum],
+      )
+      if (!selectedVersion.rows[0]) throw new WorkingContentError(`exact accepted working content version ${input.workingPackageId}/${input.versionNumber} was not found`, 'not_found')
+      const version = mapVersion(selectedVersion.rows[0])
       if (version.orgId !== input.orgId || version.promotionIdempotencyKey !== input.promotionIdempotencyKey) throw new WorkingContentError('promotion receipt is not bound to the prepared version', 'conflict')
-      const inserted = await this.db.query(
+      const inserted = await tx.query(
         `insert into lsites_sites.working_content_promotion_receipts
           (promotion_receipt_id, org_id, working_package_id, version_number,
            promotion_idempotency_key, content_checksum, payload_target_collection,
@@ -516,7 +581,7 @@ export class WorkingContentRepository {
          returning *`,
         [input.promotionReceiptId, input.orgId, input.workingPackageId, input.versionNumber, input.promotionIdempotencyKey, input.contentChecksum, input.payloadTargetCollection, input.payloadDocumentId ?? null, input.payloadDraftRevision ?? null, input.receipt],
       )
-      await this.db.query(
+      await tx.query(
         `update lsites_sites.working_content_versions
             set lifecycle_state = 'promoted', payload_target_collection = $4,
                 payload_document_id = $5, payload_draft_revision = $6,

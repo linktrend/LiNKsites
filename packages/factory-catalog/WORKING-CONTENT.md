@@ -15,18 +15,20 @@ working package -> version 1 -> version 2 -> ...
 ```
 
 Each version contains the structured page/section payload, asset SHA
-references, LiNKlibraries SHA references, factual/generated-copy/media
-provenance, parent version, author/executor, deterministic SHA-256 checksum,
-gate evidence, and promotion binding. Version content and identity are guarded
-by a database trigger; later lifecycle and receipt fields advance only through
-the repository operations.
+references, the accepted `marketing-smb-v1` template/component contract,
+canonical 40-character lowercase Git SHAs for LiNKlibraries references,
+factual/generated-copy/media provenance, parent version, author/executor,
+deterministic SHA-256 checksum, gate evidence, and promotion binding. Version
+content and identity are guarded by a database trigger; promoted rows are
+immutable and later lifecycle and receipt fields advance only through the
+repository operations.
 
 `WorkingContentRepository` is storage-driver agnostic. Its write path locks the
 package cursor and requires an expected current version, so concurrent agents
 cannot silently replace one another. Reads and promotion preparation recompute
-the checksum. `preparePromotion()` binds an idempotency key to one exact
-accepted version; `recordPromotionReceipt()` is append-only and can safely
-return the same receipt on retry.
+the checksum. `preparePromotion()` locks the exact immutable version and binds
+one idempotency key to it; a different key is rejected. `recordPromotionReceipt()`
+is append-only and can safely return the same receipt on retry.
 
 The exported `WorkingContentPromotionInput` is the W2-03 boundary. It carries
 the exact organization, package/version, checksum, idempotency key, validated
