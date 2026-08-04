@@ -17,7 +17,7 @@ It does two related jobs:
 1. **Factory** — prepare reusable website foundations, adapt them into real previews for prospects, and convert paid orders into launched customer sites.
 2. **Managed service** — host, monitor, maintain, and update those sites so the customer does not have to run technical infrastructure themselves.
 
-The sales idea behind it is **build-first, sell-later**: a qualified prospect should see an actual website representing what LiNKsites can provide, not only a promise that one will be built after payment. If they do not buy, the reusable foundation can be cleaned and offered to someone else.
+The commercial idea behind it is **build-first, sell-later**: a qualified prospect should see an actual website representing what LiNKsites can provide, not only a promise that one will be built after payment. If they do not buy, the reusable foundation can be cleaned and offered to someone else.
 
 LiNKsites continuously pulls and claims ready work, but does **not** discover leads, make sales calls, or process payments. LiNKreach owns research, commercial decisions, and authorization. LiNKsites receives a `LeadResearchPackage`, `CommercialOutcomeEnvelope`, or `ActivationRequest` and performs the technical work. Historical Sales/Stripe/Odoo references are retained only to explain the former boundary.
 
@@ -39,7 +39,7 @@ LiNKsites continuously pulls and claims ready work, but does **not** discover le
 - Write code or approve every small coding task
 - Configure Cloudflare, Traefik, or databases day to day
 - Manually assemble each customer website
-- Run sales outreach or process payments yourself (LiNKreach owns that)
+- Run outreach or process payments yourself (LiNKreach owns that)
 
 Someone technical (or an AI agent under factory rules) handles mechanics. Your job is direction and the checkpoints above.
 
@@ -47,15 +47,15 @@ Someone technical (or an AI agent under factory rules) handles mechanics. Your j
 
 ## How a website is supposed to be born (plain walkthrough)
 
-### 1. Sales qualifies a prospect
+### 1. LiNKreach qualifies a prospect
 
-Sales researches the business and decides whether a LiNKsites preview investment is worth it. They request a **proof level** (how complete the preview should be) — this is *not* the same as the paid package the customer might buy later.
+LiNKreach researches the business and decides whether a LiNKsites preview investment is worth it. It requests a **proof level** (how complete the preview should be) — this is *not* the same as the paid package the customer might receive later.
 
 ### 2. LiNKsites builds a preview from inventory
 
 The factory picks the best **reusable foundation** it already has (or builds one when justified), applies the prospect’s name/contact/services, promotes content into the CMS as a **draft**, and prepares a private preview link with quality checks.
 
-### 3. Sales presents the preview
+### 3. LiNKreach presents the preview
 
 If the prospect engages, LiNKreach may request a richer preview. If they buy, LiNKreach sends an authorized `ActivationRequest`; LiNKsites does not receive or process payment credentials.
 
@@ -67,7 +67,7 @@ The preview is locked so it cannot be recycled by mistake. Content is finalized,
 
 Prospect-specific details are removed. The reusable foundation returns to inventory for another suitable prospect.
 
-**Honesty:** steps 1 and the live “Sales ↔ payment ↔ launch” wiring are only partly real in software today. The factory objects for foundations, specs, promotion-to-draft, and recycle locks exist and are tested. The live Sales/payment connection and full “push the live customer site live automatically” path are still ahead — see [Current status](#current-status-what-is-not-available-yet).
+**Honesty:** step 1 and the live “LiNKreach ↔ payment ↔ launch” wiring are only partly real in software today. The factory objects for foundations, specs, promotion-to-draft, and recycle locks exist and are tested. The live LiNKreach/payment connection and full “push the live customer site live automatically” path are still ahead — see [Current status](#current-status-what-is-not-available-yet).
 
 ---
 
@@ -124,13 +124,13 @@ No. The customer buys a managed outcome. At launch they do not get CMS login.
 So the sale is based on proof, not a promise — and so unsuccessful offers still leave a reusable foundation for the next prospect.
 
 **Who sells and who builds?**  
-Sales sells and takes payment. LiNKsites builds, launches, and hosts. They hand packages back and forth; they do not merge into one system.
+LiNKreach handles outreach, commercial decisions, and payment. LiNKsites builds, launches, and hosts. They hand authorized packages back and forth; they do not merge into one system.
 
 **Do I need to understand Payload, Next.js, or Traefik?**  
 No. Those are implementation details. You care about product direction, exceptions, and when to promote releases.
 
 **Is the factory “done”?**  
-The CMS, frontend, Ledger, and core factory objects are real and tested. Connecting live sales/payment, finishing autonomous hosting ops, and running the first real customer pilot are the remaining milestones — not “rewrite everything from scratch.”
+The CMS, frontend, Ledger, and core factory objects are real and tested. Connecting live LiNKreach/payment, finishing autonomous hosting ops, and running the first real customer pilot are the remaining milestones — not “rewrite everything from scratch.”
 
 **What should I watch as progress?**  
 Prefer `docs/OPEN-ISSUES.md` and the Intent / Technical PRD over older scattered docs. Ask for briefings when a phase needs a Principal decision (pricing, pilot go-live, security incident, promotion to production).
@@ -141,7 +141,7 @@ Prefer `docs/OPEN-ISSUES.md` and the Intent / Technical PRD over older scattered
 
 1. LiNKsites makes and hosts managed SMB websites from reusable foundations.  
 2. Prospects can see a real preview before buying; unsold work is recycled.  
-3. Sales owns leads and payment; LiNKsites owns the website technical lifecycle.  
+3. LiNKreach owns research, outreach, commercial decisions, and payment; LiNKsites owns the website technical lifecycle.
 4. Your day-to-day role is strategy and exceptions — not coding or server babysitting.  
 5. CMS, shared frontend, Ledger, and factory building blocks are already real.  
 6. Live sell→launch wiring, monitoring/backups, and the first real customer pilot are still ahead — and this handbook already says so honestly.

@@ -26,7 +26,7 @@ optional_fields:
     - "pnpm exec tsc -p tsconfig.json (packages/factory-catalog)"
     - "rm -rf apps/web-master/.next apps/web-company/.next && pnpm run typecheck --force (workspace root)"
   open_gaps:
-    - "No real Stripe or Odoo integration exists in this repository (GAP-33/34/35, a previously-identified blocker requiring cross-Program access this repository does not have). stripePaymentConfirmationRef and odooCommercialRecordRef are opaque, caller-supplied string references, with no live verification against a real Stripe API call or Odoo commercial record. conversionInstructionRef is likewise unverified against any real Sales-authority system."
+    - "No real LiNKreach-owned payment or CRM adapter exists in this repository (GAP-33/34/35, a previously-identified blocker requiring cross-Program access this repository does not have). stripePaymentConfirmationRef and odooCommercialRecordRef are opaque, caller-supplied historical compatibility references, with no live verification against an external payment API or CRM record. conversionInstructionRef is likewise unverified against any real LiNKreach-authorization system."
     - "This module implements only the Conversion Lock and its recycle-blocking gate (assertRecycleAllowed()), not the downstream customer-finalization workflow the manual explicitly separates out (verifying customer facts, replacing provisional assets, completing purchased scope, production integration/domain configuration, approval, and launch Gates). None of those objects/integrations exist in this repository yet."
     - "archiveAndRecycleFoundation() in prospectAdaptation.ts is NOT modified to call assertRecycleAllowed() automatically. Wiring that call in is left as explicit future work, to avoid an unreviewed edit to already-merged shared code within this Issue's scope. Until that wiring lands, assertRecycleAllowed() is a gate other code must remember to call -- it is not yet enforced end-to-end."
   notes:
@@ -37,7 +37,7 @@ optional_fields:
 
 ## Subject
 
-`phase4-conversion-lock-001` -- Conversion Lock: block recycling/reassignment of a Foundation once Sales converts a published preview.
+`phase4-conversion-lock-001` -- Conversion Lock: block recycling/reassignment of a Foundation once LiNKreach authorizes conversion of a published preview.
 
 ## Criteria To Evidence Map / Artifacts / Verification Summary
 
@@ -49,4 +49,4 @@ See front matter `open_gaps`. None of these are defects in this Issue's own scop
 
 ## Gate Guidance
 
-Non-vacuous: every criterion maps to specific, named, passing tests, including negative-path (draft/previewed/archived rejection, each naming its own status), idempotency, and cross-Foundation isolation tests, not just a single happy-path assertion. Doc comments in `conversionLock.ts` explicitly name what is and is not covered (no live Stripe/Odoo/Sales-authority verification, no downstream finalization workflow, no automatic wiring into `archiveAndRecycleFoundation()`) so a reviewer does not need to infer scope boundaries from the code alone.
+Non-vacuous: every criterion maps to specific, named, passing tests, including negative-path (draft/previewed/archived rejection, each naming its own status), idempotency, and cross-Foundation isolation tests, not just a single happy-path assertion. Doc comments in `conversionLock.ts` explicitly name what is and is not covered (no live payment/CRM or LiNKreach-authorization verification, no downstream finalization workflow, no automatic wiring into `archiveAndRecycleFoundation()`) so a reviewer does not need to infer scope boundaries from the code alone.

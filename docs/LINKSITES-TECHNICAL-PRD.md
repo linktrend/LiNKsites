@@ -40,7 +40,7 @@ Payload published
 web-master (hostname → site) behind Traefik + Cloudflare
 ```
 
-Today the Ledger ↔ catalog executor path is real and tested. Live Sales ingress, full publication automation, and autonomous hosting remediation are not yet end-to-end.
+Today the Ledger ↔ catalog executor path is real and tested. Live LiNKreach ingress, full publication automation, and autonomous hosting remediation are not yet end-to-end.
 
 ---
 
@@ -63,9 +63,9 @@ Terms match the Program Manual's vocabulary (ADR 0001: LiNKsites-internal engine
 | **Prospect Adaptation** | Prospect-specific overlay on a reserved Foundation |
 | **Site Specification** | Resolved per-site contract composing Kit/Tier/Foundation/components |
 | **Site Assembly Manifest** | Deterministic page/section plan from a Site Specification |
-| **Proof level** | Progressive Sales Proof Levels 0–4 (investment before sale) — **separate from paid tier** |
+| **Proof level** | Progressive Proof Levels 0–4 (investment before commercial decision) — **separate from paid tier** |
 | **Promotion Service** | Only trusted path from working package → Payload **draft** |
-| **Preview Inventory** | Portfolio of foundations/adaptations/deployments as measurable sales inventory |
+| **Preview Inventory** | Portfolio of foundations/adaptations/deployments as measurable preview inventory |
 | **Conversion Lock** | Blocks recycle once a preview is locked for paid finalization |
 | **Site Assignment** | Where/how a site is served (hostname, VPS, region, release) — doctrine; control-plane records partial |
 
@@ -98,7 +98,7 @@ Authoritative Module list from Program Manual §05 / `packages/program-ledger` h
 ### Paid fulfilment
 | ID | Name | Code status |
 |---|---|---|
-| M13 | Paid-Order Intake and Customer Finalization | Conversion Lock only; no Stripe/Odoo spine |
+| M13 | Paid-Order Intake and Customer Finalization | Conversion Lock only; no LiNKreach-owned commercial adapter |
 | M14 | Production Publication and Launch Certification | **Not built** as automated Module |
 | M15 | Domain, DNS, TLS, Hosting Provisioning | Docker/Traefik scaffolding; not Program-controlled |
 
@@ -115,7 +115,7 @@ Authoritative Module list from Program Manual §05 / `packages/program-ledger` h
 
 ```
 Capability:     M01→M02→M03→M04→M05→M06
-Preview:        Sales request → M07→M06→M08↔M09→M10→M11 → Sales package → M12
+Preview:        LiNKreach request → M07→M06→M08↔M09→M10→M11 → LiNKreach package → M12
 Paid customer:  Activation → M13→M10→M14↔M15 → active site
 Managed:        Active → M16 ↔ M17 ↔ M18 → M19 when instructed
 ```
@@ -124,7 +124,7 @@ Managed:        Active → M16 ↔ M17 ↔ M18 → M19 when instructed
 
 ## 4. Site-generation lifecycle (lead → recycle / launch)
 
-### 4.1 Progressive Sales Proof Levels (≠ paid tier)
+### 4.1 Progressive Proof Levels (≠ paid tier)
 
 | Level | Use | Website proof |
 |---|---|---|
@@ -141,9 +141,9 @@ Code: `packages/factory-catalog/src/proofLevel.ts` — versioned `ProofSpecifica
 4. **Site Assembly Manifest** — deterministic page/section plan (`siteAssemblyManifest.ts` + `SiteAssemblyExecutor`).
 5. **Promotion** — working package → Payload draft only; checksum idempotency + readback (`promotionService.ts` + `PromotionExecutor`).
 6. **Preview Deployment record** — isolated analytics identity; `noindex` by default (`previewDeployment.ts`).
-7. **Outcome / Conversion Lock** — Sales outcome → technical disposition; lock blocks recycle (`outcomeRecord.ts`, `conversionLock.ts`).
+7. **Outcome / Conversion Lock** — LiNKreach outcome → technical disposition; lock blocks recycle (`outcomeRecord.ts`, `conversionLock.ts`).
 
-Pipeline chaining helpers exist (`pipelineChaining.ts`, `pipelineAutoChaining.ts`) but full autonomous Sales→preview→hosting orchestration is not claimed complete.
+Pipeline chaining helpers exist (`pipelineChaining.ts`, `pipelineAutoChaining.ts`) but full autonomous LiNKreach→preview→hosting orchestration is not claimed complete.
 
 ### 4.3 Paid path (doctrine vs code)
 
@@ -240,7 +240,7 @@ Program-controlled Site Assignment registry, automated DNS/TLS issuance, monitor
 ### LiNKautowork
 
 - Separate automation factory. LiNKsites may **consume** approved automation products or hand off form events; it does **not** use LiNKautowork as universal executor.
-- Cross-Program handoffs should use versioned envelopes (`platform.handoff_envelopes` doctrine); full Sales/Autowork contract implementations are deferred.
+- Cross-Program handoffs should use versioned envelopes (`platform.handoff_envelopes` doctrine); full LiNKreach/LiNKautowork contract implementations are deferred.
 
 ### Historical commercial boundary
 

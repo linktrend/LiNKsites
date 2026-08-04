@@ -26,7 +26,7 @@ optional_fields:
     - "pnpm exec turbo run lint --filter=@linksites/cms --filter=@linksites/web-master"
     - "pnpm run typecheck (workspace-wide)"
   open_gaps:
-    - "Stage-level decomposition is not modeled (empty array per Module) -- any stageRef is currently rejected. This is intentional per the Issue's out-of-scope note, not an oversight."
+    - "Phase-level decomposition is not modeled (empty array per Module) -- the existing stageRef compatibility field is currently rejected. This is intentional per the Issue's out-of-scope note, not an oversight; it is not an active Phase API."
   notes:
     - "The Module list and one-line purposes were transcribed directly from manual §05's Module descriptions (via this session's earlier extraction pass), not invented."
 ---

@@ -80,7 +80,7 @@ Post-sales Program
 |---|---|---|
 | Lead discovery and research | LiNKreach | LiNKsites continuously pulls and claims eligible authorized records |
 | Outreach, sale/no-sale decision | LiNKreach | Consumes recorded outcome |
-| Stripe/payment and agreement | LiNKreach or its owned workflow | Acts only on LiNKreach's versioned activation authorization; no direct payment integration |
+| Payment and agreement | LiNKreach or its owned workflow | Acts only on LiNKreach's versioned activation authorization; no direct payment integration |
 | Website creation and private preview | LiNKsites | Owns and executes |
 | Payload content promotion/publication | LiNKsites | Owns controlled technical execution |
 | Domain/DNS/TLS/visibility changes | LiNKsites | Executes after LiNKreach authorization |
@@ -93,8 +93,8 @@ Post-sales Program
 ### 3.3 Explicitly outside the Phase 1 implementation
 
 - LiNKreach implementation.
-- Live Stripe or payment adapters.
-- Pricing, package economics, discounts, contracts, or sales-frontend implementation.
+- Live LiNKreach-owned payment adapters.
+- Pricing, package economics, discounts, contracts, or commercial-frontend implementation.
 - Production customer-domain activation during the first website test.
 - Post-sales workflows.
 - Customer self-service CMS.
@@ -193,7 +193,7 @@ This roadmap was prepared against `main` at `78f5d50ab8acbdc38de863895deb337220d
 ### 6.2 Confirmed gaps this roadmap closes
 
 - No production composition root currently instantiates the Ledger, repositories, executors, intake loop, and external adapters as one continuously operating Program.
-- Phase definitions and gates are incomplete, and active material still uses `Stage` terminology.
+- Phase definitions and gates are incomplete, and some completed execution artifacts still expose legacy `Stage` names at a documented code-compatibility boundary.
 - The CRM pull/claim/completion adapter and the canonical shared envelope are absent.
 - The active Supabase working-content layer is not yet wired through generation, validation, exact-version promotion, and receipts.
 - Promotion logic does not yet prove a complete real Payload draft/read-back/separate-publication path.
