@@ -131,8 +131,8 @@ function assertBound(record: Omit<PersistedLibraryBackedSite, 'integrityChecksum
   assertLibraryConsumptionEvidence(record.libraryConsumption)
   assertLibraryConsumptionReceipt(record.libraryReceipt)
   assertLibraryVerificationRecord(record.libraryVerification)
-  if (record.libraryConsumption.receipt.receiptId !== record.libraryReceipt.receiptId || record.libraryConsumption.receipt.entryChecksum !== record.libraryReceipt.entryChecksum || canonicalJsonStringify(record.libraryConsumption.verification) !== canonicalJsonStringify(record.libraryVerification)) {
-    throw new LibraryPersistenceError('Persisted library-backed site receipt is not the receipt from the materialized consumption evidence.')
+  if (canonicalJsonStringify(record.libraryConsumption.receipt) !== canonicalJsonStringify(record.libraryReceipt) || canonicalJsonStringify(record.libraryConsumption.verification) !== canonicalJsonStringify(record.libraryVerification)) {
+    throw new LibraryPersistenceError('Persisted library-backed site receipt is not canonically and completely bound to the materialized consumption evidence.')
   }
   if (record.siteSpec.libraryEntryId !== record.libraryReceipt.entryId || record.manifest.libraryEntryId !== record.libraryReceipt.entryId || !record.siteSpec.libraryConsumption || !record.manifest.libraryConsumption) {
     throw new LibraryPersistenceError('Library-backed site persistence is not bound to the selected entry ID.')

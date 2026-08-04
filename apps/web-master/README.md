@@ -17,7 +17,7 @@ A production-ready, AI-first, multi-language, CMS-driven corporate/marketing sit
 
 ### Prerequisites
 
-- Node.js 18+ (see `.nvmrc` for exact version)
+- Node.js 22 (see `.nvmrc` for exact version)
 - pnpm (recommended) or npm
 
 ### Installation

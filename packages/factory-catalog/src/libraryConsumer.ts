@@ -26,14 +26,16 @@ export type LibraryConsumer = typeof LINKSITES_LIBRARY_CONSUMER
 
 export interface LibraryCatalogEntry {
   entryId: string
-  kind: LibraryEntryKind
+  /** The authoritative catalog schema only constrains this to a string. */
+  kind: string
   name: string
   summary: string
   problemDomains: string[]
   tags: string[]
   languages: string[]
   frameworks: string[]
-  status: LibraryEntryStatus
+  /** The authoritative catalog schema only constrains this to a string. */
+  status: string
   path: string
 }
 
@@ -225,7 +227,11 @@ export const OFFLINE_LIBRARY_AUTHORITY: LibraryVerificationRecord = Object.freez
   }),
 })
 
-/** One local schema descriptor drives the runtime shape checks below. */
+/**
+ * The authoritative entry schema is copied from
+ * LiNKlibraries/schemas/library-entry.schema.json. Keep source-schema
+ * validation separate from LiNKsites policy validation below.
+ */
 export const AUTHORITATIVE_LIBRARY_ENTRY_SCHEMA = Object.freeze({
   topLevelKeys: [
     'schemaVersion', 'entryId', 'kind', 'name', 'summary', 'problemDomains', 'tags', 'languages', 'frameworks',
@@ -240,12 +246,18 @@ export const AUTHORITATIVE_LIBRARY_ENTRY_SCHEMA = Object.freeze({
   },
   nestedAdditionalPropertiesAllowed: ['compatibility', 'license', 'securityReview', 'usage', 'provenance'],
   vettedOssRequiredProvenance: ['sourceUrl', 'versionOrRange'],
+  entryId: { minLength: 2, maxLength: 128, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$' },
+  problemDomains: { minItems: 1, itemMinLength: 1 },
+  gotchas: { itemMinLength: 1 },
+  files: { minItems: 1, pathPattern: '^(?!/)(?!.*\\.\\./).+$', sha256Pattern: '^[a-f0-9]{64}$' },
 } as const)
 const LIBRARY_ENTRY_KEYS = AUTHORITATIVE_LIBRARY_ENTRY_SCHEMA.topLevelKeys
 const CATALOG_KEYS = ['schemaVersion', 'generatedAt', 'sourceCommitSha', 'entries']
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const hasOwn = (value: Record<string, unknown>, key: string): boolean => Object.prototype.hasOwnProperty.call(value, key)
 
 const isGitSha = (value: unknown): value is GitSha => typeof value === 'string' && GIT_SHA_PATTERN.test(value)
 
@@ -273,6 +285,20 @@ export const canonicalJsonChecksum = (value: unknown): string => sha256(canonica
 const assertExactKeys = (value: Record<string, unknown>, keys: readonly string[], label: string): void => {
   const expected = new Set(keys)
   if (Object.keys(value).some((key) => !expected.has(key))) throw new LibraryConsumerError(`${label} contains fields outside the authoritative schema.`)
+}
+
+const stringLength = (value: string): number => Array.from(value).length
+
+function assertSchemaString(value: unknown, label: string, minLength?: number): asserts value is string {
+  assertString(value, label)
+  if (minLength !== undefined && stringLength(value) < minLength) {
+    throw new LibraryConsumerError(`${label} must be at least ${minLength} character${minLength === 1 ? '' : 's'} long.`)
+  }
+}
+
+function assertSchemaStringPattern(value: unknown, pattern: RegExp, label: string): asserts value is string {
+  assertString(value, label)
+  if (!pattern.test(value)) throw new LibraryConsumerError(`${label} does not match the authoritative schema pattern.`)
 }
 
 const isOfflineLibraryAuthority = (value: unknown): value is LibraryVerificationRecord =>
@@ -344,12 +370,12 @@ const compareRange = (range: string, major: number): boolean => {
 
 function assertCatalogEntrySchema(row: unknown): asserts row is LibraryCatalogEntry {
   if (!isRecord(row)) throw new LibraryConsumerError('LiNKlibraries catalog contains a malformed entry row.')
-  assertString(row.entryId, 'Catalog entryId')
-  if (!LIBRARY_ENTRY_KINDS.has(row.kind as LibraryEntryKind)) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid kind.`)
-  for (const field of ['name', 'summary']) assertString(row[field], `Catalog ${field}`)
+  assertSchemaString(row.entryId, 'Catalog entryId')
+  assertSchemaString(row.kind, `Catalog entry "${row.entryId}" kind`)
+  for (const field of ['name', 'summary']) assertSchemaString(row[field], `Catalog ${field}`)
   for (const field of ['problemDomains', 'tags', 'languages', 'frameworks']) assertSchemaStringArray(row[field], `Catalog ${field}`)
-  if (row.status !== 'approved' && row.status !== 'deprecated') throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid status.`)
-  if (row.path !== `entries/${row.entryId}`) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid path.`)
+  assertSchemaString(row.status, `Catalog entry "${row.entryId}" status`)
+  assertSchemaString(row.path, `Catalog entry "${row.entryId}" path`)
   assertExactKeys(row, ['entryId', 'kind', 'name', 'summary', 'problemDomains', 'tags', 'languages', 'frameworks', 'status', 'path'], `Catalog entry "${row.entryId}"`)
 }
 
@@ -357,23 +383,28 @@ export function assertLibraryCatalogSchema(catalog: unknown): asserts catalog is
   if (!isRecord(catalog)) throw new LibraryConsumerError('LiNKlibraries catalog is not an object.')
   assertExactKeys(catalog, CATALOG_KEYS, 'LiNKlibraries catalog')
   if (catalog.schemaVersion !== LIBRARY_ENTRY_SCHEMA_VERSION) throw new LibraryConsumerError('LiNKlibraries catalog schemaVersion 1 is required.')
-  assertString(catalog.generatedAt, 'LiNKlibraries catalog generatedAt')
-  if (!isGitSha(catalog.sourceCommitSha)) throw new LibraryConsumerError('LiNKlibraries catalog sourceCommitSha must be a full commit SHA.')
+  assertSchemaString(catalog.generatedAt, 'LiNKlibraries catalog generatedAt', 1)
+  assertSchemaString(catalog.sourceCommitSha, 'LiNKlibraries catalog sourceCommitSha', 7)
   if (!Array.isArray(catalog.entries)) throw new LibraryConsumerError('LiNKlibraries catalog entries must be an array.')
-  const seen = new Set<string>()
-  for (const row of catalog.entries) {
-    assertCatalogEntrySchema(row)
-    if (seen.has(row.entryId)) throw new LibraryConsumerError(`LiNKlibraries catalog contains duplicate entryId "${row.entryId}".`)
-    seen.add(row.entryId)
-  }
+  for (const row of catalog.entries) assertCatalogEntrySchema(row)
 }
 
-function assertLiNKSitesCatalogPolicy(catalog: LibraryCatalog): void {
+export function assertLiNKSitesCatalogPolicy(catalog: LibraryCatalog): void {
+  assertLibraryCatalogSchema(catalog)
   assertNonEmptyString(catalog.generatedAt, 'LiNKlibraries catalog generatedAt')
+  if (!isGitSha(catalog.sourceCommitSha)) throw new LibraryConsumerError('LiNKlibraries catalog sourceCommitSha must be a full commit SHA for LiNKsites consumption.')
   for (const row of catalog.entries) {
     if (row.entryId.length < 2 || row.entryId.length > 128 || !ENTRY_ID_PATTERN.test(row.entryId)) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid LiNKsites identity.`)
+    if (!LIBRARY_ENTRY_KINDS.has(row.kind as LibraryEntryKind)) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid LiNKsites kind.`)
     for (const field of ['name', 'summary']) assertNonEmptyString(row[field as keyof LibraryCatalogEntry], `Catalog ${field}`)
     for (const field of ['problemDomains', 'tags', 'languages', 'frameworks']) assertStringArray(row[field as keyof LibraryCatalogEntry], `Catalog ${field}`)
+    if (row.status !== 'approved' && row.status !== 'deprecated') throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid LiNKsites status.`)
+    if (row.path !== `entries/${row.entryId}`) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid LiNKsites path.`)
+  }
+  const seen = new Set<string>()
+  for (const row of catalog.entries) {
+    if (seen.has(row.entryId)) throw new LibraryConsumerError(`LiNKlibraries catalog contains duplicate entryId "${row.entryId}".`)
+    seen.add(row.entryId)
   }
 }
 
@@ -445,35 +476,42 @@ export function assertLibraryEntryContract(entry: unknown): asserts entry is Lib
   if (!isRecord(entry)) throw new LibraryConsumerError('LiNKlibraries returned a malformed entry contract.')
   assertExactKeys(entry, LIBRARY_ENTRY_KEYS, `Entry ${String(entry.entryId)}`)
   if (entry.schemaVersion !== LIBRARY_ENTRY_SCHEMA_VERSION) throw new LibraryConsumerError(`Entry "${String(entry.entryId)}" has an unsupported schemaVersion.`)
-  assertString(entry.entryId, 'Entry entryId')
+  assertSchemaStringPattern(entry.entryId, ENTRY_ID_PATTERN, 'Entry entryId')
+  if (stringLength(entry.entryId) < 2 || stringLength(entry.entryId) > 128) throw new LibraryConsumerError('Entry entryId is outside the authoritative schema length range.')
   if (!LIBRARY_ENTRY_KINDS.has(entry.kind as LibraryEntryKind)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has an invalid kind.`)
-  for (const field of ['name', 'summary', 'integrationNotes']) assertString(entry[field], `Entry ${field}`)
+  for (const field of ['name', 'summary', 'integrationNotes']) assertSchemaString(entry[field], `Entry ${field}`, 1)
   assertSchemaStringArray(entry.problemDomains, 'Entry problemDomains')
-  for (const field of ['tags', 'languages', 'frameworks', 'gotchas']) assertSchemaStringArray(entry[field], `Entry ${field}`)
+  if (entry.problemDomains.length < 1 || entry.problemDomains.some((item) => stringLength(item) < 1)) throw new LibraryConsumerError('Entry problemDomains does not satisfy the authoritative schema.')
+  for (const field of ['tags', 'languages', 'frameworks']) assertSchemaStringArray(entry[field], `Entry ${field}`)
+  const gotchas = entry.gotchas
+  assertSchemaStringArray(gotchas, 'Entry gotchas')
+  if (gotchas.some((item) => stringLength(item) < 1)) throw new LibraryConsumerError('Entry gotchas does not satisfy the authoritative schema.')
   if (!isRecord(entry.compatibility)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed compatibility metadata.`)
-  assertString(entry.compatibility.node, `Entry "${entry.entryId}" compatibility.node`)
+  assertSchemaString(entry.compatibility.node, `Entry "${entry.entryId}" compatibility.node`)
   assertSchemaStringArray(entry.compatibility.runtimes, `Entry "${entry.entryId}" compatibility.runtimes`)
   if (!isRecord(entry.license)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed license metadata.`)
-  assertString(entry.license.spdx, `Entry "${entry.entryId}" license.spdx`)
+  assertSchemaString(entry.license.spdx, `Entry "${entry.entryId}" license.spdx`, 1)
   if (typeof entry.license.redistributionAllowed !== 'boolean') throw new LibraryConsumerError(`Entry "${entry.entryId}" license.redistributionAllowed must be boolean.`)
+  if (hasOwn(entry.license, 'notes')) assertSchemaString(entry.license.notes, `Entry "${entry.entryId}" license.notes`)
   if (!isRecord(entry.securityReview)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed security review metadata.`)
-  for (const field of ['reviewedAt', 'reviewedBy', 'notes']) assertString(entry.securityReview[field], `Entry ${field}`)
+  for (const field of ['reviewedAt', 'reviewedBy', 'notes']) assertSchemaString(entry.securityReview[field], `Entry ${field}`, 1)
   if (!isRecord(entry.usage)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed usage metadata.`)
-  assertString(entry.usage.howToUse, `Entry "${entry.entryId}" usage.howToUse`)
-  if (entry.usage.examples !== undefined) assertSchemaStringArray(entry.usage.examples, `Entry "${entry.entryId}" usage.examples`)
+  assertSchemaString(entry.usage.howToUse, `Entry "${entry.entryId}" usage.howToUse`, 1)
+  if (hasOwn(entry.usage, 'examples')) assertSchemaStringArray(entry.usage.examples, `Entry "${entry.entryId}" usage.examples`)
   if (!isRecord(entry.provenance)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed provenance metadata.`)
   if (!['ide-development', 'linkdeveloper', 'manual', 'migration'].includes(entry.provenance.sourceSystem as string)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has an invalid provenance sourceSystem.`)
-  assertString(entry.provenance.contributedAt, `Entry "${entry.entryId}" provenance.contributedAt`)
-  for (const field of ['sourceUrl', 'versionOrRange', 'productRunId']) if (entry.provenance[field] !== undefined) assertString(entry.provenance[field], `Entry ${field}`)
+  assertSchemaString(entry.provenance.contributedAt, `Entry "${entry.entryId}" provenance.contributedAt`, 1)
+  for (const field of ['sourceUrl', 'versionOrRange', 'productRunId']) if (hasOwn(entry.provenance, field)) assertString(entry.provenance[field], `Entry ${field}`)
+  if (entry.kind === 'vetted_oss' && (!Object.prototype.hasOwnProperty.call(entry.provenance, 'sourceUrl') || !Object.prototype.hasOwnProperty.call(entry.provenance, 'versionOrRange'))) {
+    throw new LibraryConsumerError(`Entry "${entry.entryId}" vetted_oss provenance is missing sourceUrl or versionOrRange.`)
+  }
   if (!Array.isArray(entry.files)) throw new LibraryConsumerError(`Entry "${entry.entryId}" files must be an array.`)
-  const paths = new Set<string>()
+  if (entry.files.length < 1) throw new LibraryConsumerError(`Entry "${entry.entryId}" files must contain at least one item.`)
   for (const asset of entry.files) {
     if (!isRecord(asset)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed file metadata.`)
     assertExactKeys(asset, ['path', 'sha256'], `Entry "${entry.entryId}" file`)
-    assertSafePath(asset.path, `Entry "${entry.entryId}" asset`)
+    assertSchemaStringPattern(asset.path, /^(?!\/)(?!.*\.\.\/).+$/, `Entry "${entry.entryId}" asset path`)
     assertSha(asset.sha256, `Entry "${entry.entryId}" asset ${asset.path}`)
-    if (paths.has(asset.path)) throw new LibraryConsumerError(`Entry "${entry.entryId}" lists asset "${asset.path}" more than once.`)
-    paths.add(asset.path)
   }
   if (entry.status !== 'approved' && entry.status !== 'deprecated') throw new LibraryConsumerError(`Entry "${entry.entryId}" has an invalid status.`)
 }
@@ -503,6 +541,12 @@ export function assertLiNKSitesLibraryConsumerPolicy(entry: LibraryEntryContract
     for (const field of AUTHORITATIVE_LIBRARY_ENTRY_SCHEMA.vettedOssRequiredProvenance) assertNonEmptyString(entry.provenance[field], `Entry "${entry.entryId}" vetted_oss provenance.${field}`)
     assertNonEmptyString(entry.provenance.sourceUrl, `Entry "${entry.entryId}" vetted_oss provenance.sourceUrl`)
     if (!/^https:\/\//.test(entry.provenance.sourceUrl)) throw new LibraryConsumerError(`Entry "${entry.entryId}" vetted_oss provenance.sourceUrl must be an HTTPS URL.`)
+  }
+  const paths = new Set<string>()
+  for (const asset of entry.files) {
+    assertSafePath(asset.path, `Entry "${entry.entryId}" asset`)
+    if (paths.has(asset.path)) throw new LibraryConsumerError(`Entry "${entry.entryId}" lists asset "${asset.path}" more than once.`)
+    paths.add(asset.path)
   }
   if (entry.files.length === 0) throw new LibraryConsumerError(`Entry "${entry.entryId}" has no files.`)
 }

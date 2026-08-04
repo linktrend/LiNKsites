@@ -7,7 +7,9 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   consumePinnedLibraryEntry,
+  assertLibraryCatalogSchema,
   assertLibraryEntryContract,
+  assertLiNKSitesCatalogPolicy,
   assertLiNKSitesLibraryConsumerPolicy,
   canonicalJsonChecksum,
   LINKSITES_LIBRARY_CONSUMER,
@@ -210,12 +212,12 @@ describe('W1-05 LiNKlibraries consumer', () => {
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
-      transport: buildTransport({ entry: { ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } } }),
+      transport: buildTransport({ entry: { ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'https://example.com/package', versionOrRange: '^1.2.3' } } }),
     })).rejects.toThrow(/source-owned immutable fixture/)
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
-      transport: buildTransport({ entry: { ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'https://example.com/package' } } }),
+      transport: buildTransport({ entry: { ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'https://example.com/package', versionOrRange: '^1.2.3' } } }),
     })).rejects.toThrow(/source-owned immutable fixture/)
 
     await expect(consumePinnedLibraryEntry({
@@ -226,9 +228,45 @@ describe('W1-05 LiNKlibraries consumer', () => {
       }),
     })).rejects.toThrow(/source-owned immutable fixture/)
 
-    expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } })).not.toThrow()
-    expect(() => assertLiNKSitesLibraryConsumerPolicy({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } })).toThrow(/vetted_oss provenance.sourceUrl/)
+    expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } })).toThrow(/vetted_oss provenance/)
+    expect(() => assertLiNKSitesLibraryConsumerPolicy({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'not-https', versionOrRange: '^1.2.3' } })).toThrow(/vetted_oss provenance.sourceUrl/)
     expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'https://example.com/package', versionOrRange: '^1.2.3' } })).not.toThrow()
+  })
+
+  it('conforms to the source JSON schemas before applying separate LiNKsites policy', () => {
+    const schemaValidEntry = {
+      ...fixtureEntry,
+      entryId: 'ab',
+      compatibility: { node: '', runtimes: [] },
+      tags: [''],
+      files: [{ path: '.', sha256: '0'.repeat(64) }],
+    }
+    expect(() => assertLibraryEntryContract(schemaValidEntry)).not.toThrow()
+    expect(() => assertLiNKSitesLibraryConsumerPolicy(schemaValidEntry)).toThrow(/non-empty|unsupported|runtime/)
+
+    const schemaValidCatalog = {
+      schemaVersion: 1 as const,
+      generatedAt: 'source-schema-generated-at',
+      sourceCommitSha: 'abcdefg',
+      entries: [{
+        entryId: '',
+        kind: 'source-schema-allows-this-kind',
+        name: '',
+        summary: '',
+        problemDomains: [],
+        tags: [''],
+        languages: [],
+        frameworks: [],
+        status: 'source-schema-allows-this-status',
+        path: 'arbitrary-source-path',
+      }],
+    }
+    expect(() => assertLibraryCatalogSchema(schemaValidCatalog)).not.toThrow()
+    expect(() => assertLiNKSitesCatalogPolicy(schemaValidCatalog)).toThrow(/LiNKsites/)
+
+    expect(() => assertLibraryCatalogSchema({ ...schemaValidCatalog, entries: [{ ...schemaValidCatalog.entries[0], extra: true }] })).toThrow(/authoritative schema/)
+    expect(() => assertLibraryEntryContract({ ...fixtureEntry, problemDomains: [] })).toThrow(/problemDomains/)
+    expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { sourceSystem: fixtureEntry.provenance.sourceSystem, contributedAt: fixtureEntry.provenance.contributedAt } })).toThrow(/vetted_oss provenance/)
   })
 
   it('rejects metadata-only, missing-asset, undeclared, and checksum-mismatch selections', async () => {
@@ -313,6 +351,21 @@ describe('W1-05 LiNKlibraries consumer', () => {
     const { integrityChecksum: _oldChecksum, ...tamperedPayload } = tamperedEvidence
     tamperedEvidence.integrityChecksum = canonicalJsonChecksum(tamperedPayload)
     expect(() => deserializePersistedLibraryBackedSite(JSON.stringify(tamperedEvidence))).toThrow(/failed SHA-256|file contents|integrity checksum/)
+
+    const receiptDivergences: Array<[string, Record<string, unknown>]> = [
+      ['recordedAt', { recordedAt: '2026-08-04T00:03:00.000Z' }],
+      ['entrypoint', { entrypoint: 'README.md' }],
+      ['testFiles', { testFiles: ['README.md'] }],
+      ['assetChecksums', { assetChecksums: { ...consumption.receipt.assetChecksums, 'README.md': '0'.repeat(64) } }],
+      ['compatibility', { compatibility: { ...consumption.receipt.compatibility, auditNote: 'independently altered' } }],
+    ]
+    for (const [field, change] of receiptDivergences) {
+      const diverged = JSON.parse(serializePersistedLibraryBackedSite(persisted)) as typeof persisted
+      diverged.libraryReceipt = { ...diverged.libraryReceipt, ...change }
+      const { integrityChecksum: _divergedChecksum, ...divergedPayload } = diverged
+      diverged.integrityChecksum = canonicalJsonChecksum(divergedPayload)
+      expect(() => deserializePersistedLibraryBackedSite(JSON.stringify(diverged)), field).toThrow(/canonically and completely bound|same receipt/)
+    }
 
     const fabricatedReadback = JSON.parse(serializePersistedLibraryBackedSite(persisted)) as typeof persisted
     fabricatedReadback.libraryConsumption.entry = { ...fabricatedReadback.libraryConsumption.entry, summary: 'fabricated entry' }
