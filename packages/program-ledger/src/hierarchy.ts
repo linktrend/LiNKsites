@@ -1,38 +1,36 @@
 /**
- * Program/Module/Stage hierarchy (Phase 2, Issue phase2-program-hierarchy-001).
+ * The durable Program -> Module -> Phase -> Issue -> Run vocabulary.
  *
- * The LiNKsites Program Manual (§01, §05) is explicit that LiNKsites itself
- * IS one Program, decomposed into 20 named Modules (M01-M20) grouped into
- * four functional bands: product/capability (M01-M05), preview-production
- * (M06-M12), paid-fulfilment (M13-M15), managed-service (M16-M19), and
- * control/improvement (M20). This file makes that hierarchy a real,
- * queryable object instead of the opaque `programRef`/`moduleRef`/
- * `stageRef` strings that `packages/program-ledger/src/types.ts` accepted
- * with a documented "not yet built" caveat.
- *
- * Scope: this models the LiNKsites Program's own Modules as static,
- * versioned data (per docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md).
- * Stage-level decomposition within each Module is deliberately left open
- * (`stages: []`) -- the manual's Section 05 defines Module *purpose* in
- * detail but Stage-level breakdown is Module-specific detail owned by
- * each Module's own future implementation work, not invented here.
+ * The catalog below is intentionally small at the Phase/Issue level: it
+ * contains the real first private-demo path that W2-02 will compose. The
+ * remaining Modules retain their canonical purpose and are populated by the
+ * packet that owns their execution detail rather than by invented placeholders.
  */
 
 import type { SchemaVersion } from './types.js'
 import { SCHEMA_VERSION } from './types.js'
 
-export interface StageDefinition {
-  stageId: string
+export interface IssueDefinition {
+  issueKey: string
   title: string
+  issueType: string
+  objective: string
+  dependsOnIssueKeys: string[]
+}
+
+export interface PhaseDefinition {
+  phaseId: string
+  title: string
+  objective: string
+  issues: IssueDefinition[]
 }
 
 export interface ModuleDefinition {
   moduleId: string
   title: string
-  /** One-line purpose, drawn from manual §05's Module descriptions. */
   purpose: string
   band: 'product-capability' | 'preview-production' | 'paid-fulfilment' | 'managed-service' | 'control-improvement'
-  stages: StageDefinition[]
+  phases: PhaseDefinition[]
 }
 
 export interface ProgramDefinition {
@@ -42,38 +40,97 @@ export interface ProgramDefinition {
   modules: ModuleDefinition[]
 }
 
-/**
- * The LiNKsites Program itself, per manual §05. This is the ONE Program
- * this repository's Program Ledger is currently scoped to govern -- the
- * manual's cross-Program contracts (Sales, Odoo, Stripe) are explicitly
- * separate Programs this repository does not own (manual §02, §21) and
- * are not modeled here.
- */
+const demo = (phaseId: string, title: string, objective: string, issues: IssueDefinition[]): PhaseDefinition => ({
+  phaseId,
+  title,
+  objective,
+  issues,
+})
+
+const issue = (issueKey: string, title: string, issueType: string, objective: string, dependsOnIssueKeys: string[] = []): IssueDefinition => ({
+  issueKey,
+  title,
+  issueType,
+  objective,
+  dependsOnIssueKeys,
+})
+
+const FIRST_PRIVATE_DEMO_PHASES: Record<string, PhaseDefinition[]> = {
+  M07: [
+    demo('intake', 'Lead intake and qualification', 'Accept and qualify one canonical lead package for the private demo.', [
+      issue('lead-research', 'Pull and validate lead research', 'lead.research.validate', 'Validate the canonical lead/research package before any website work.'),
+      issue('program-claim', 'Create the private-demo Program', 'program.claim', 'Idempotently create or recover the private-demo Program graph.', ['lead-research']),
+      issue('vertical-qualification', 'Qualify vertical compatibility', 'lead.vertical.qualify', 'Confirm the lead can use an approved vertical foundation.', ['program-claim']),
+    ]),
+  ],
+  M08: [
+    demo('planning', 'Foundation and site planning', 'Reserve the correct reusable foundation and create deterministic site plans.', [
+      issue('foundation-reservation', 'Reserve foundation inventory', 'foundation.reserve', 'Reserve a compatible foundation/template inventory item.', ['vertical-qualification']),
+      issue('library-verification', 'Verify exact library artifacts', 'library.verify', 'Verify the exact approved LiNKlibraries artifacts and SHA receipts.', ['foundation-reservation']),
+      issue('site-specification', 'Build site specification and assembly manifest', 'site.plan', 'Produce the site specification and assembly manifest for this lead.', ['library-verification']),
+    ]),
+  ],
+  M09: [
+    demo('content', 'Lead-specific content and media', 'Produce grounded copy and provenance-bearing media inputs.', [
+      issue('information-architecture', 'Create information architecture and copy', 'content.information_architecture', 'Create lead-specific information architecture and copy inputs.', ['site-specification']),
+      issue('media-provenance', 'Source and process media', 'content.media.provenance', 'Source/process media with a durable provenance manifest.', ['information-architecture']),
+    ]),
+  ],
+  M10: [
+    demo('working-content', 'Working-content assembly and gates', 'Assemble and accept a versioned working-content package.', [
+      issue('working-content-assembly', 'Assemble working-content version', 'content.working.assemble', 'Assemble and validate one immutable working-content version.', ['media-provenance']),
+      issue('content-gates', 'Run content and quality gates', 'content.gates', 'Record evidence-backed content, schema, quality, security, privacy, and asset gate results.', ['working-content-assembly']),
+    ]),
+  ],
+  M11: [
+    demo('private-preview', 'Private Payload preview', 'Promote the accepted version to a private, non-indexable preview and verify it.', [
+      issue('payload-draft', 'Promote exact version to Payload draft', 'payload.draft.promote', 'Promote only the accepted working version to a Payload draft.', ['content-gates']),
+      issue('payload-parity', 'Run CMS read-back parity gate', 'payload.readback.gate', 'Read the draft back and record field-level parity evidence.', ['payload-draft']),
+      issue('private-publication', 'Publish private preview', 'preview.private.publish', 'Publish only to the authorized private preview environment.', ['payload-parity']),
+      issue('site-render-validation', 'Render and validate the private site', 'preview.render.validate', 'Render and validate the complete private preview.', ['private-publication']),
+    ]),
+  ],
+  M12: [
+    demo('completion', 'Evidence and completion', 'Capture final evidence and emit one replay-safe completion record.', [
+      issue('final-evidence', 'Capture functional, visual, SEO, accessibility, and privacy evidence', 'preview.evidence.capture', 'Capture the required final evidence receipts for the private preview.', ['site-render-validation']),
+      issue('completion-record', 'Emit CRM-shaped completion record', 'completion.emit', 'Emit exactly one evidence-backed completion record for the accepted private demo.', ['final-evidence']),
+    ]),
+  ],
+}
+
+const moduleDefinition = (
+  moduleId: string,
+  title: string,
+  purpose: string,
+  band: ModuleDefinition['band'],
+): ModuleDefinition => ({ moduleId, title, purpose, band, phases: FIRST_PRIVATE_DEMO_PHASES[moduleId] ?? [] })
+
+/** Canonical LiNKsites Program catalog. */
 export const LINKSITES_PROGRAM: ProgramDefinition = {
   schemaVersion: SCHEMA_VERSION,
   programId: 'linksites',
   title: 'LiNKsites — autonomous website factory and managed-website business',
   modules: [
-    { moduleId: 'M01', title: 'Product & Tier Governance', purpose: 'Governs product outcomes, tier specifications, add-ons, and exclusions.', band: 'product-capability', stages: [] },
-    { moduleId: 'M02', title: 'Design Intelligence Operations', purpose: 'Governs the Design Intelligence Catalog, tokens, and site design profile resolution.', band: 'product-capability', stages: [] },
-    { moduleId: 'M03', title: 'Component & Frontend Platform Operations', purpose: 'Governs the Component Registry, Site Assembly Engine, and platform releases.', band: 'product-capability', stages: [] },
-    { moduleId: 'M04', title: 'Vertical Kit Operations', purpose: 'Governs Vertical Kit lifecycle, Kit Tier Variants, and vertical-specific production patterns.', band: 'product-capability', stages: [] },
-    { moduleId: 'M05', title: 'Reusable Foundation Production', purpose: 'Governs Reusable Site Foundation lifecycle, manifests, and adaptation contracts.', band: 'product-capability', stages: [] },
-    { moduleId: 'M06', title: 'Preview Inventory Management', purpose: 'Governs the Preview Inventory portfolio, foundation reservations, and cost ledger.', band: 'preview-production', stages: [] },
-    { moduleId: 'M07', title: 'Preview Intake & Planning', purpose: 'Validates Preview Production Requests and produces Site Specifications.', band: 'preview-production', stages: [] },
-    { moduleId: 'M08', title: 'Prospect Site Adaptation', purpose: 'Applies the Prospect Adaptation Contract atop a reserved foundation.', band: 'preview-production', stages: [] },
-    { moduleId: 'M09', title: 'Content & Media Production', purpose: 'Produces Copy Bundles, Media Plans, and Provenance Manifests from Lead Research Packages.', band: 'preview-production', stages: [] },
-    { moduleId: 'M10', title: 'Working-to-Payload Promotion', purpose: 'Operates the Promotion Service, the sole trusted path from Supabase working records to Payload drafts.', band: 'preview-production', stages: [] },
-    { moduleId: 'M11', title: 'Preview Deployment & Validation', purpose: 'Builds, tests, and deploys Preview Releases and records Quality Gate results.', band: 'preview-production', stages: [] },
-    { moduleId: 'M12', title: 'Preview Outcome, Upgrade & Recycling', purpose: 'Handles conversion locks, upgrades, and the cleansing/recycling pipeline for unsold previews.', band: 'preview-production', stages: [] },
-    { moduleId: 'M13', title: 'Paid Order Intake & Customer Finalization', purpose: 'Validates Paid Website Activation Packages and creates Customer Site Instances.', band: 'paid-fulfilment', stages: [] },
-    { moduleId: 'M14', title: 'Production Publication & Launch Certification', purpose: 'Operates the launch readiness Gate, Launch Manifest, and Launch Certificate.', band: 'paid-fulfilment', stages: [] },
-    { moduleId: 'M15', title: 'Domain, DNS, TLS & Hosting Provisioning', purpose: 'Provisions custom hostnames, certificates, and hosting assignments for launched sites.', band: 'paid-fulfilment', stages: [] },
-    { moduleId: 'M16', title: 'Site Operations, Monitoring & Recovery', purpose: 'Operates monitoring, incident response, and autonomous remediation for live sites.', band: 'managed-service', stages: [] },
-    { moduleId: 'M17', title: 'Customer Changes & Service Evolution', purpose: 'Handles Customer Change Requests and entitlement-bounded scope changes.', band: 'managed-service', stages: [] },
-    { moduleId: 'M18', title: 'Capacity, Regional Placement & Scaling', purpose: 'Operates the placement engine, capacity forecasting, and regional bundling decisions.', band: 'managed-service', stages: [] },
-    { moduleId: 'M19', title: 'Suspension, Export & Termination', purpose: 'Handles payment-driven suspension, customer data export, and decommissioning.', band: 'managed-service', stages: [] },
-    { moduleId: 'M20', title: 'Quality, Cost & Performance Improvement', purpose: 'Operates cross-cutting observability, cost accounting, and continuous-improvement loops.', band: 'control-improvement', stages: [] },
+    moduleDefinition('M01', 'Product & Tier Governance', 'Governs product outcomes, tier specifications, add-ons, and exclusions.', 'product-capability'),
+    moduleDefinition('M02', 'Design Intelligence Operations', 'Governs design tokens and site design profile resolution.', 'product-capability'),
+    moduleDefinition('M03', 'Component & Frontend Platform Operations', 'Governs the Component Registry, assembly engine, and platform releases.', 'product-capability'),
+    moduleDefinition('M04', 'Vertical Kit Operations', 'Governs vertical kit lifecycle and production patterns.', 'product-capability'),
+    moduleDefinition('M05', 'Reusable Foundation Production', 'Governs reusable foundation lifecycle and adaptation contracts.', 'product-capability'),
+    moduleDefinition('M06', 'Preview Inventory Management', 'Governs preview inventory reservations and cost records.', 'preview-production'),
+    moduleDefinition('M07', 'Preview Intake & Planning', 'Validates preview requests and produces site specifications.', 'preview-production'),
+    moduleDefinition('M08', 'Prospect Site Adaptation', 'Applies the prospect adaptation contract atop a reserved foundation.', 'preview-production'),
+    moduleDefinition('M09', 'Content & Media Production', 'Produces grounded copy, media plans, and provenance manifests.', 'preview-production'),
+    moduleDefinition('M10', 'Working-to-Payload Promotion', 'Operates the sole trusted path from working records to Payload drafts.', 'preview-production'),
+    moduleDefinition('M11', 'Preview Deployment & Validation', 'Builds, tests, and validates private preview releases.', 'preview-production'),
+    moduleDefinition('M12', 'Preview Outcome, Upgrade & Recycling', 'Handles preview completion, outcome, and recycling records.', 'preview-production'),
+    moduleDefinition('M13', 'Paid Order Intake & Customer Finalization', 'Validates paid activation packages and customer site instances.', 'paid-fulfilment'),
+    moduleDefinition('M14', 'Production Publication & Launch Certification', 'Operates launch readiness and launch certification.', 'paid-fulfilment'),
+    moduleDefinition('M15', 'Domain, DNS, TLS & Hosting Provisioning', 'Provisions approved custom hostnames and hosting assignments.', 'paid-fulfilment'),
+    moduleDefinition('M16', 'Site Operations, Monitoring & Recovery', 'Operates monitoring, incidents, and recovery.', 'managed-service'),
+    moduleDefinition('M17', 'Customer Changes & Service Evolution', 'Handles entitlement-bounded customer change requests.', 'managed-service'),
+    moduleDefinition('M18', 'Capacity, Regional Placement & Scaling', 'Operates capacity and placement decisions.', 'managed-service'),
+    moduleDefinition('M19', 'Suspension, Export & Termination', 'Handles suspension, export, and decommissioning.', 'managed-service'),
+    moduleDefinition('M20', 'Quality, Cost & Performance Improvement', 'Operates cross-cutting quality, cost, and performance improvement.', 'control-improvement'),
   ],
 }
 
@@ -84,49 +141,37 @@ export class HierarchyError extends Error {
   }
 }
 
-/**
- * Validates that a `programRef`/`moduleRef`/`stageRef` triple (as accepted
- * by `Issue` in types.ts) refers to a real, known Program/Module/Stage.
- * Stage validation is a no-op for now since no Module defines Stages yet
- * (see the module-level doc comment) -- an unset `stageRef` is always
- * valid, and any provided `stageRef` is currently rejected until a Module
- * actually defines Stages, so callers get an explicit error rather than a
- * silently-ignored value.
- */
 export class HierarchyRegistry {
   constructor(private readonly programs: ProgramDefinition[] = [LINKSITES_PROGRAM]) {}
 
   getProgram(programId: string): ProgramDefinition | null {
-    return this.programs.find((p) => p.programId === programId) ?? null
+    return this.programs.find((program) => program.programId === programId) ?? null
   }
 
   getModule(programId: string, moduleId: string): ModuleDefinition | null {
-    const program = this.getProgram(programId)
-    if (!program) return null
-    return program.modules.find((m) => m.moduleId === moduleId) ?? null
+    return this.getProgram(programId)?.modules.find((module) => module.moduleId === moduleId) ?? null
   }
 
-  /** Throws HierarchyError if the refs don't resolve; returns nothing on success. */
-  assertValidRefs(programRef: string, moduleRef?: string, stageRef?: string): void {
+  getPhase(programId: string, moduleId: string, phaseId: string): PhaseDefinition | null {
+    return this.getModule(programId, moduleId)?.phases.find((phase) => phase.phaseId === phaseId) ?? null
+  }
+
+  getIssue(programId: string, moduleId: string, phaseId: string, issueKey: string): IssueDefinition | null {
+    return this.getPhase(programId, moduleId, phaseId)?.issues.find((candidate) => candidate.issueKey === issueKey) ?? null
+  }
+
+  /** Throws when any supplied hierarchy reference is unknown. */
+  assertValidRefs(programRef: string, moduleRef?: string, phaseRef?: string): void {
     const program = this.getProgram(programRef)
-    if (!program) {
-      throw new HierarchyError(`Unknown programRef "${programRef}" -- not a registered Program.`)
+    if (!program) throw new HierarchyError(`Unknown programRef "${programRef}" -- not a registered Program.`)
+    if (moduleRef === undefined) {
+      if (phaseRef !== undefined) throw new HierarchyError(`phaseRef "${phaseRef}" was provided without a moduleRef.`)
+      return
     }
-    if (moduleRef !== undefined) {
-      const module_ = this.getModule(programRef, moduleRef)
-      if (!module_) {
-        throw new HierarchyError(`Unknown moduleRef "${moduleRef}" for Program "${programRef}".`)
-      }
-      if (stageRef !== undefined) {
-        const stage = module_.stages.find((s) => s.stageId === stageRef)
-        if (!stage) {
-          throw new HierarchyError(
-            `Unknown stageRef "${stageRef}" for Module "${moduleRef}" -- this Module has not defined any Stages yet.`,
-          )
-        }
-      }
-    } else if (stageRef !== undefined) {
-      throw new HierarchyError(`stageRef "${stageRef}" was provided without a moduleRef.`)
+    const module = this.getModule(programRef, moduleRef)
+    if (!module) throw new HierarchyError(`Unknown moduleRef "${moduleRef}" for Program "${programRef}".`)
+    if (phaseRef !== undefined && !module.phases.some((phase) => phase.phaseId === phaseRef)) {
+      throw new HierarchyError(`Unknown phaseRef "${phaseRef}" for Module "${moduleRef}".`)
     }
   }
 }

@@ -34,14 +34,14 @@ describe('HierarchyRegistry', () => {
     expect(() => registry.assertValidRefs('linksites', 'M99')).toThrow(HierarchyError)
   })
 
-  it('rejects a stageRef when no moduleRef is given', () => {
+  it('rejects a phaseRef when no moduleRef is given', () => {
     const registry = new HierarchyRegistry()
-    expect(() => registry.assertValidRefs('linksites', undefined, 'stage-1')).toThrow(HierarchyError)
+    expect(() => registry.assertValidRefs('linksites', undefined, 'intake')).toThrow(HierarchyError)
   })
 
-  it('rejects any stageRef today, since no Module has defined Stages yet', () => {
+  it('accepts a real phase in the first private-demo path', () => {
     const registry = new HierarchyRegistry()
-    expect(() => registry.assertValidRefs('linksites', 'M07', 'stage-1')).toThrow(HierarchyError)
+    expect(() => registry.assertValidRefs('linksites', 'M07', 'intake')).not.toThrow()
   })
 })
 

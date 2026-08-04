@@ -25,7 +25,7 @@ export function runDependencyTests(storeName: string, makeStore: () => Promise<L
     const run = await ledger.dispatch(issueId)
     const claimed = await ledger.claim(run.runId, 'executor-a')
     await ledger.complete(run.runId, claimed.lease!.fencingToken, { result: 'ok' })
-    await ledger.decideGate(issueId, run.runId, 'accepted', {}, 'reviewer-1')
+    await ledger.decideGate(issueId, run.runId, 'accepted', { verified: true }, 'reviewer-1')
   }
 
   // -----------------------------------------------------------------------
@@ -87,7 +87,7 @@ export function runDependencyTests(storeName: string, makeStore: () => Promise<L
       const run2 = await ledger.retryIssue(dep.issueId)
       const claimed2 = await ledger.claim(run2.runId, 'executor-b')
       await ledger.complete(run2.runId, claimed2.lease!.fencingToken, { draft: 'v2-fixed' })
-      await ledger.decideGate(dep.issueId, run2.runId, 'accepted', {}, 'reviewer-1')
+      await ledger.decideGate(dep.issueId, run2.runId, 'accepted', { verified: true }, 'reviewer-1')
 
       // Now downstream IS dispatchable.
       const downstreamRun = await ledger.dispatch(downstream.issueId)
@@ -336,7 +336,7 @@ export function runDependencyTests(storeName: string, makeStore: () => Promise<L
       const run = await ledger.dispatch(issue.issueId)
       const claimed = await ledger.claim(run.runId, 'executor-a')
       await ledger.complete(run.runId, claimed.lease!.fencingToken, { result: 'done' })
-      const gate = await ledger.decideGate(issue.issueId, run.runId, 'accepted', {}, 'reviewer-1')
+      const gate = await ledger.decideGate(issue.issueId, run.runId, 'accepted', { verified: true }, 'reviewer-1')
       expect(gate.decision).toBe('accepted')
       const final = await ledger.getIssue(issue.issueId)
       expect(final!.state).toBe('completed')

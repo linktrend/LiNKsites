@@ -10,16 +10,9 @@
  * MAJOR.MINOR pair. This is version 1.0 — the first version, not an
  * implicit/unversioned baseline.
  *
- * Scope note: this is a deliberately bounded first slice of the manual's
- * full Program Ledger doctrine. It implements the mechanics the manual's
- * Phase 2 exit gate requires (idempotent dispatch, lease/fencing-based
- * claim, heartbeat-based crash detection, cooperative cancellation, and
- * Gate-gated completion that a Run cannot self-declare). It deliberately
- * does NOT yet implement: Program/Module/Stage hierarchy objects (Issues
- * reference them only as opaque string IDs for now), the full dependency
- * DAG (requires_completion/requires_gate/etc.), the 8-level model-routing
- * ladder, compensation Sagas, or cross-Program outbox/inbox. Those are
- * separate, later work packets — see audit/14_implementation_roadmap.md.
+ * W1-02 makes the hierarchy and gate records durable while keeping the
+ * existing executor/lease contract intact. The model-routing ladder,
+ * compensation Sagas, and cross-Program outbox/inbox remain out of scope.
  */
 
 import type { SchemaVersion } from '@linksites/types'
@@ -28,9 +21,9 @@ export const SCHEMA_VERSION: SchemaVersion = { major: 1, minor: 0 }
 
 export type { SchemaVersion }
 
-/** Manual §20 §15: Issue lifecycle states (subset — draft/blocked/dependency-DAG
- * evaluation is deferred; Issues in this slice start at `ready`). */
+/** Manual §20 §15: Issue lifecycle states with dependency-aware readiness. */
 export type IssueState =
+  | 'blocked'
   | 'ready'
   | 'dispatched'
   | 'running'
@@ -84,14 +77,57 @@ export interface RetryPolicy {
   backoffMaxMs: number
 }
 
+export type WorkState = 'planned' | 'ready' | 'in_progress' | 'awaiting_gate' | 'completed' | 'failed' | 'blocked'
+
+export interface Program {
+  schemaVersion: SchemaVersion
+  programId: string
+  orgId: string | null
+  title: string
+  state: WorkState
+  revision: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Module {
+  schemaVersion: SchemaVersion
+  moduleId: string
+  programId: string
+  orgId: string | null
+  title: string
+  purpose: string
+  state: WorkState
+  revision: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Phase {
+  schemaVersion: SchemaVersion
+  phaseId: string
+  moduleId: string
+  programId: string
+  orgId: string | null
+  title: string
+  objective: string
+  state: WorkState
+  revision: number
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Issue {
   schemaVersion: SchemaVersion
   issueId: string
   issueType: string
-  /** Opaque references — Program/Module/Stage objects don't exist yet (see scope note above). */
+  /** Durable hierarchy references. */
   programRef: string
   moduleRef?: string
-  stageRef?: string
+  phaseRef?: string
+  /** Stable packet/application key, distinct from the UUID storage identity. */
+  issueKey?: string
+  correlationId?: string | null
   state: IssueState
   input: Record<string, unknown>
   inputDigest: string
@@ -114,6 +150,7 @@ export interface Issue {
   createdAt: string
   updatedAt: string
   cancelRequested: boolean
+  retryAt: string | null
 }
 
 export interface Lease {
@@ -132,21 +169,49 @@ export interface Run {
   /** Immutable input snapshot pinned at Run creation (manual §20 §21). */
   inputSnapshot: Record<string, unknown>
   lease: Lease | null
+  executorType: string | null
+  executorVersion: string | null
+  correlationId: string | null
+  idempotencyKey: string
   output: unknown | null
   failure: { failureClass: FailureClass; message: string } | null
   createdAt: string
   claimedAt: string | null
+  startedAt: string | null
   lastHeartbeatAt: string | null
   completedAt: string | null
+  terminalState: RunState | null
 }
 
 export type GateDecision = 'pending' | 'accepted' | 'rejected'
 
+export type GateSubjectType = 'issue' | 'phase' | 'module' | 'program'
+
+export interface EvidenceReceipt {
+  receiptId: string
+  producer: string
+  subjectId: string
+  checksum: string
+  revision: string
+  location: string
+  recordedAt: string
+}
+
 export interface GateResult {
   schemaVersion: SchemaVersion
   gateId: string
-  issueId: string
-  runId: string
+  subjectType: GateSubjectType
+  subjectId: string
+  subjectRevision: string
+  attempt: number
+  evaluator: string
+  evaluatorVersion: string
+  inputs: Record<string, unknown>
+  reasons: string[]
+  evidenceReceipts: EvidenceReceipt[]
+  /** Compatibility fields for the original Issue gate API. */
+  issueId: string | null
+  runId: string | null
   decision: GateDecision
   evidence: Record<string, unknown>
   decidedBy: string | null
@@ -199,13 +264,14 @@ export interface IdempotencyRecord {
  * Derives a stable idempotency key from business intent, not a random
  * retry ID (manual §20 §57-59). Full formula per the manual is
  * issue_type + target + tenant + input_digest + intended_effect +
- * contract_version; this slice has no explicit tenant/target/
- * intended-effect fields yet (Program/Module hierarchy is not built), so
- * those are folded into `programRef`/`issueType` for now — revisit when
- * the full Program/Module/Stage objects exist.
+ * contract_version; target and intended effect remain folded into the
+ * program/issue references until a later packet adds explicit fields. Tenant
+ * scope is included whenever an Issue has an orgId so identical work in two
+ * organizations cannot share a dispatch record.
  */
-export function deriveIdempotencyKey(issue: Pick<Issue, 'issueType' | 'programRef' | 'inputDigest'>): string {
-  return `${issue.issueType}:${issue.programRef}:${issue.inputDigest}:v${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor}`
+export function deriveIdempotencyKey(issue: Pick<Issue, 'issueType' | 'programRef' | 'inputDigest'> & { orgId?: string | null }): string {
+  const organizationScope = issue.orgId ? `org:${issue.orgId}:` : ''
+  return `${organizationScope}${issue.issueType}:${issue.programRef}:${issue.inputDigest}:v${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor}`
 }
 
 /**
@@ -225,4 +291,33 @@ export interface IssueDependency {
   /** The Issue that must reach `completed` state before `issueId` can be dispatched. */
   dependsOnIssueId: string
   createdAt: string
+}
+
+export interface UnresolvedDependency {
+  dependency: IssueDependency
+  state: IssueState | null
+  reason: 'missing' | 'not_completed' | 'rejected_gate' | 'wrong_org'
+}
+
+export interface ProgramCompletion {
+  programId: string
+  state: WorkState
+  totalModules: number
+  completedModules: number
+  totalIssues: number
+  completedIssues: number
+  terminalFailures: number
+}
+
+export interface LedgerSnapshot {
+  schemaVersion: SchemaVersion
+  programs: Program[]
+  modules: Module[]
+  phases: Phase[]
+  issues: Issue[]
+  runs: Run[]
+  idempotency: IdempotencyRecord[]
+  gates: GateResult[]
+  events: LedgerEvent[]
+  dependencies: IssueDependency[]
 }

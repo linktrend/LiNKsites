@@ -10,13 +10,21 @@ import {
   type FailureClass,
   type GateDecision,
   type GateResult,
+  type GateSubjectType,
+  type EvidenceReceipt,
   type Issue,
   type IssueDependency,
   type LedgerEvent,
   type LedgerEventType,
+  type Module,
+  type Phase,
+  type Program,
+  type ProgramCompletion,
   type Run,
   type SideEffectClass,
+  type WorkState,
 } from './types.js'
+import { LINKSITES_PROGRAM, type ProgramDefinition } from './hierarchy.js'
 
 export class LedgerError extends Error {
   constructor(
@@ -41,7 +49,9 @@ export interface CreateIssueInput {
   issueType: string
   programRef: string
   moduleRef?: string
-  stageRef?: string
+  phaseRef?: string
+  issueKey?: string
+  correlationId?: string
   input: Record<string, unknown>
   sideEffectClass?: SideEffectClass
   /** platform.organizations id — required with requiredCapabilityId / external side effects. */
@@ -59,6 +69,11 @@ export interface CreateIssueInput {
    * no dependencies — the Issue is immediately dispatchable once created.
    */
   dependsOn?: string[]
+}
+
+export interface ClaimOptions {
+  executorType?: string
+  executorVersion?: string
 }
 
 function nowIso(): string {
@@ -79,7 +94,7 @@ export class ProgramLedger {
   /**
    * `hierarchy` is optional and opt-in (Issue phase2-program-hierarchy-001):
    * when provided, `createIssue()` validates `programRef`/`moduleRef`/
-   * `stageRef` against a real, known Program/Module/Stage registry
+   * `phaseRef` against a real, known Program/Module/Phase registry
    * (see hierarchy.ts) instead of accepting any opaque string. Omitting
    * it preserves the original behavior for callers/tests that don't yet
    * need hierarchy validation.
@@ -124,7 +139,7 @@ export class ProgramLedger {
 
   async createIssue(input: CreateIssueInput): Promise<Issue> {
     if (this.hierarchy) {
-      this.hierarchy.assertValidRefs(input.programRef, input.moduleRef, input.stageRef)
+      this.hierarchy.assertValidRefs(input.programRef, input.moduleRef, input.phaseRef)
     }
     const inputDigest = digestInput(input.input)
     const issue: Issue = {
@@ -133,7 +148,9 @@ export class ProgramLedger {
       issueType: input.issueType,
       programRef: input.programRef,
       moduleRef: input.moduleRef,
-      stageRef: input.stageRef,
+      phaseRef: input.phaseRef,
+      issueKey: input.issueKey,
+      correlationId: input.correlationId ?? null,
       state: 'ready',
       input: input.input,
       inputDigest,
@@ -150,6 +167,7 @@ export class ProgramLedger {
       createdAt: nowIso(),
       updatedAt: nowIso(),
       cancelRequested: false,
+      retryAt: null,
     }
     await this.store.putIssue(issue)
 
@@ -175,8 +193,8 @@ export class ProgramLedger {
    * dependency Issue does not exist at all, that is also treated as not
    * satisfied — a dependency on a non-existent Issue cannot be complete.
    */
-  private async assertDependenciesSatisfied(issueId: string): Promise<void> {
-    const deps = await this.store.getIssueDependencies(issueId)
+  private async assertDependenciesSatisfied(issue: Issue): Promise<void> {
+    const deps = await this.store.getIssueDependencies(issue.issueId)
     for (const dep of deps) {
       const depIssue = await this.store.getIssue(dep.dependsOnIssueId)
       if (!depIssue || depIssue.state !== 'completed') {
@@ -184,7 +202,13 @@ export class ProgramLedger {
           ? `dependency Issue ${dep.dependsOnIssueId} does not exist`
           : `dependency Issue ${dep.dependsOnIssueId} is in state "${depIssue.state}", not "completed"`
         throw new LedgerError(
-          `Issue ${issueId} cannot be dispatched: ${reason}. All dependencies must have an accepted Gate before dispatch.`,
+          `Issue ${issue.issueId} cannot be dispatched: ${reason}. All dependencies must have an accepted Gate before dispatch.`,
+          'dependency_not_satisfied',
+        )
+      }
+      if (depIssue.orgId !== issue.orgId) {
+        throw new LedgerError(
+          `Issue ${issue.issueId} cannot be dispatched: dependency ${dep.dependsOnIssueId} belongs to a different organization.`,
           'dependency_not_satisfied',
         )
       }
@@ -230,7 +254,7 @@ export class ProgramLedger {
     // that a non-ready Issue still fails on the state check first. It runs
     // BEFORE Run creation and idempotency reservation so that a blocked Issue
     // never produces a Run record, idempotency reservation, or event.
-    await this.assertDependenciesSatisfied(issueId)
+    await this.assertDependenciesSatisfied(issue)
 
     // Capability-grant gate (LiNKplatform §5): external side effects and any
     // explicit requiredCapabilityId must pass platform.has_capability_grant
@@ -289,12 +313,18 @@ export class ProgramLedger {
       state: 'queued',
       inputSnapshot: { ...issue.input },
       lease: null,
+      executorType: null,
+      executorVersion: null,
+      correlationId: issue.correlationId ?? null,
+      idempotencyKey,
       output: null,
       failure: null,
       createdAt: nowIso(),
       claimedAt: null,
+      startedAt: null,
       lastHeartbeatAt: null,
       completedAt: null,
+      terminalState: null,
     }
     await this.store.putRun(run)
 
@@ -313,24 +343,18 @@ export class ProgramLedger {
    * token. Concurrent claim attempts for the same Run are safe: only one
    * succeeds (manual §20 §24-25).
    */
-  async claim(runId: string, executorId: string, leaseDurationMs = 30_000): Promise<Run> {
-    const run = await this.store.getRun(runId)
-    if (!run) throw new LedgerError(`Run ${runId} not found`, 'not_found')
-    if (run.state !== 'queued') {
-      throw new LedgerError(`Run ${runId} is not claimable from state ${run.state}`, 'invalid_state')
-    }
-
-    const nextFencingToken = (run.lease?.fencingToken ?? 0) + 1
-    run.state = 'claimed'
-    run.lease = {
-      leaseId: randomUUID(),
-      fencingToken: nextFencingToken,
+  async claim(runId: string, executorId: string, leaseDurationMs = 30_000, options: ClaimOptions = {}): Promise<Run> {
+    const existing = await this.store.getRun(runId)
+    if (!existing) throw new LedgerError(`Run ${runId} not found`, 'not_found')
+    const run = await this.store.claimRun(
+      runId,
       executorId,
-      expiresAt: new Date(Date.now() + leaseDurationMs).toISOString(),
-    }
-    run.claimedAt = nowIso()
-    run.lastHeartbeatAt = nowIso()
-    await this.store.putRun(run)
+      leaseDurationMs,
+      options.executorType ?? 'executor',
+      options.executorVersion ?? '1',
+    )
+    if (!run) throw new LedgerError(`Run ${runId} is not claimable from state ${existing.state}`, 'invalid_state')
+    const nextFencingToken = run.lease!.fencingToken
 
     const issue = await this.store.getIssue(run.issueId)
     if (issue) {
@@ -409,6 +433,7 @@ export class ProgramLedger {
     this.assertFencingToken(run, fencingToken)
 
     run.state = 'succeeded'
+    run.terminalState = 'succeeded'
     run.output = output
     run.completedAt = nowIso()
     await this.store.putRun(run)
@@ -426,6 +451,7 @@ export class ProgramLedger {
         issueType: issue.issueType,
         programRef: issue.programRef,
         inputDigest: issue.inputDigest,
+        orgId: issue.orgId,
       }),
       issueId: run.issueId,
       runId: run.runId,
@@ -450,6 +476,7 @@ export class ProgramLedger {
     const retryable = !doNotRetry.includes(failureClass)
 
     run.state = retryable ? 'failed_retryable' : 'failed_terminal'
+    run.terminalState = run.state
     run.failure = { failureClass, message }
     run.completedAt = nowIso()
     await this.store.putRun(run)
@@ -459,6 +486,7 @@ export class ProgramLedger {
       issue.updatedAt = nowIso()
       if (retryable && issue.attemptCount < issue.retryPolicy.maxAttempts) {
         issue.state = 'retry_scheduled'
+        issue.retryAt = new Date(Date.now() + issue.retryPolicy.backoffBaseMs).toISOString()
         await this.store.putIssue(issue)
         await this.store.updateIdempotencyRecord({
           schemaVersion: SCHEMA_VERSION,
@@ -466,6 +494,7 @@ export class ProgramLedger {
             issueType: issue.issueType,
             programRef: issue.programRef,
             inputDigest: issue.inputDigest,
+            orgId: issue.orgId,
           }),
           issueId: issue.issueId,
           runId: null,
@@ -516,6 +545,7 @@ export class ProgramLedger {
     this.assertFencingToken(run, fencingToken)
 
     run.state = 'cancelled'
+    run.terminalState = 'cancelled'
     run.completedAt = nowIso()
     await this.store.putRun(run)
 
@@ -548,14 +578,33 @@ export class ProgramLedger {
     if (issue.state !== 'awaiting_gate') {
       throw new LedgerError(`Issue ${issueId} is not awaiting a Gate decision (state ${issue.state})`, 'invalid_state')
     }
+    let gateEvidence = evidence
+    if (decision === 'accepted' && Object.keys(evidence).length === 0) {
+      const run = await this.store.getRun(runId)
+      if (run?.output === null || run?.output === undefined) throw new LedgerError(`Issue ${issueId} cannot pass its Gate without evidence`, 'invalid_state')
+      const outputChecksum = createHash('sha256').update(JSON.stringify(run.output)).digest('hex')
+      gateEvidence = { derivedRunOutputReceipt: { runId, sha256: outputChecksum, source: 'durable_run_output' } }
+    }
+    if (decision === 'accepted' && this.receiptsFromEvidence(gateEvidence).length === 0) {
+      throw new LedgerError(`Issue ${issueId} cannot pass its Gate without evidence receipts`, 'invalid_state')
+    }
 
     const gate: GateResult = {
       schemaVersion: SCHEMA_VERSION,
       gateId: randomUUID(),
+      subjectType: 'issue',
+      subjectId: issueId,
+      subjectRevision: issue.updatedAt,
+      attempt: issue.attemptCount,
+      evaluator: decidedBy,
+      evaluatorVersion: '1',
+      inputs: gateEvidence,
+      reasons: decision === 'rejected' ? [typeof gateEvidence.reason === 'string' ? gateEvidence.reason : 'evidence rejected'] : [],
+      evidenceReceipts: this.receiptsFromEvidence(gateEvidence),
       issueId,
       runId,
       decision,
-      evidence,
+      evidence: gateEvidence,
       decidedBy,
       decidedAt: nowIso(),
     }
@@ -584,6 +633,192 @@ export class ProgramLedger {
       await this.emit(issueId, runId, 'issue.repair_required', {})
     }
     return gate
+  }
+
+  private receiptsFromEvidence(evidence: Record<string, unknown>): EvidenceReceipt[] {
+    if (Array.isArray(evidence.evidenceReceipts)) return evidence.evidenceReceipts as EvidenceReceipt[]
+    const derived = evidence.derivedRunOutputReceipt
+    if (typeof derived === 'object' && derived !== null && 'runId' in derived && 'sha256' in derived) {
+      const receipt = derived as { runId: string; sha256: string }
+      return [{ receiptId: `run-output:${receipt.runId}`, producer: 'program-ledger', subjectId: receipt.runId, checksum: receipt.sha256, revision: receipt.sha256, location: `ledger://runs/${receipt.runId}/output`, recordedAt: nowIso() }]
+    }
+    if (Object.keys(evidence).length > 0) {
+      const checksum = createHash('sha256').update(JSON.stringify(evidence)).digest('hex')
+      return [{ receiptId: `gate-evidence:${checksum}`, producer: 'program-ledger', subjectId: 'gate-input', checksum, revision: checksum, location: 'ledger://gate/evidence', recordedAt: nowIso() }]
+    }
+    return []
+  }
+
+  /** Persist the complete canonical hierarchy and its first private-demo Issues. */
+  async seedProgramGraph(definition: ProgramDefinition = LINKSITES_PROGRAM, orgId: string | null = null): Promise<{ program: Program; modules: Module[]; phases: Phase[]; issues: Issue[] }> {
+    const timestamp = nowIso()
+    const program: Program = { schemaVersion: SCHEMA_VERSION, programId: definition.programId, orgId, title: definition.title, state: 'ready', revision: 1, createdAt: timestamp, updatedAt: timestamp }
+    await this.store.putProgram(program)
+    const modules: Module[] = []
+    const phases: Phase[] = []
+    const issues: Issue[] = []
+    const issueIds = new Map<string, string>()
+    for (const moduleDefinition of definition.modules) {
+      const module: Module = { schemaVersion: SCHEMA_VERSION, moduleId: moduleDefinition.moduleId, programId: definition.programId, orgId, title: moduleDefinition.title, purpose: moduleDefinition.purpose, state: 'ready', revision: 1, createdAt: timestamp, updatedAt: timestamp }
+      await this.store.putModule(module)
+      modules.push(module)
+      for (const phaseDefinition of moduleDefinition.phases) {
+        const phase: Phase = { schemaVersion: SCHEMA_VERSION, phaseId: phaseDefinition.phaseId, moduleId: module.moduleId, programId: program.programId, orgId, title: phaseDefinition.title, objective: phaseDefinition.objective, state: 'ready', revision: 1, createdAt: timestamp, updatedAt: timestamp }
+        await this.store.putPhase(phase)
+        phases.push(phase)
+        for (const issueDefinition of phaseDefinition.issues) {
+          const existing = await this.store.getIssueByKey(issueDefinition.issueKey, orgId ?? undefined)
+          const created = existing ?? await this.createIssue({ issueKey: issueDefinition.issueKey, issueType: issueDefinition.issueType, programRef: program.programId, moduleRef: module.moduleId, phaseRef: phase.phaseId, orgId: orgId ?? undefined, input: { title: issueDefinition.title, objective: issueDefinition.objective }, dependsOn: issueDefinition.dependsOnIssueKeys.map((key) => issueIds.get(key)).filter((id): id is string => id !== undefined) })
+          issueIds.set(issueDefinition.issueKey, created.issueId)
+          issues.push(created)
+        }
+      }
+    }
+    return { program, modules, phases, issues }
+  }
+
+  async getRunnableIssues(filter: { orgId?: string; programId?: string; moduleId?: string; phaseId?: string } = {}): Promise<Issue[]> {
+    const candidates = await this.store.listIssues(filter)
+    const runnable: Issue[] = []
+    for (const issue of candidates) {
+      if (!['ready', 'retry_scheduled'].includes(issue.state)) continue
+      if ((await this.store.getUnresolvedDependencies(issue.issueId, filter.orgId)).length > 0) continue
+      runnable.push(issue)
+    }
+    return runnable
+  }
+
+  async getUnresolvedDependencies(issueId: string, orgId?: string) {
+    return this.store.getUnresolvedDependencies(issueId, orgId)
+  }
+
+  async getCurrentGate(subjectType: GateSubjectType, subjectId: string) {
+    return this.store.getCurrentGate(subjectType, subjectId)
+  }
+
+  async listAttempts(issueId: string) {
+    return this.store.listRunsForIssue(issueId)
+  }
+
+  async getTerminalFailures(filter: { orgId?: string; programId?: string } = {}) {
+    const issues = await this.store.listIssues(filter)
+    const failures: Run[] = []
+    for (const issue of issues) {
+      for (const run of await this.store.listRunsForIssue(issue.issueId)) {
+        if (run.state === 'failed_terminal' || (run.state === 'failed_retryable' && issue.state === 'exception')) failures.push(run)
+      }
+    }
+    return failures
+  }
+
+  async getProgramCompletion(programId: string, orgId?: string): Promise<ProgramCompletion> {
+    const program = await this.store.getProgram(programId, orgId)
+    if (!program) throw new LedgerError(`Program ${programId} not found`, 'not_found')
+    const modules = await this.store.listModules(programId, orgId)
+    const issues = await this.store.listIssues({ orgId, programId })
+    const terminalFailures = (await this.getTerminalFailures({ orgId, programId })).length
+    return { programId, state: program.state, totalModules: modules.length, completedModules: modules.filter((module) => module.state === 'completed').length, totalIssues: issues.length, completedIssues: issues.filter((issue) => issue.state === 'completed').length, terminalFailures }
+  }
+
+  async evaluateGate(input: { subjectType: GateSubjectType; subjectId: string; decision: GateDecision; evidence: Record<string, unknown>; evaluator: string; evaluatorVersion?: string; reasons?: string[]; subjectRevision?: string; issueId?: string; runId?: string }): Promise<GateResult> {
+    const currentRevision = await this.currentSubjectRevision(input.subjectType, input.subjectId)
+    if (currentRevision === null) throw new LedgerError(`${input.subjectType} ${input.subjectId} not found`, 'not_found')
+    if (input.subjectType === 'issue' && (await this.store.getIssue(input.subjectId))?.state !== 'awaiting_gate') {
+      throw new LedgerError(`Issue ${input.subjectId} is not awaiting a Gate decision`, 'invalid_state')
+    }
+    const receipts = this.receiptsFromEvidence(input.evidence)
+    if (input.decision === 'accepted' && (Object.keys(input.evidence).length === 0 || receipts.length === 0)) throw new LedgerError(`${input.subjectType} ${input.subjectId} cannot pass its Gate without evidence`, 'invalid_state')
+    if (input.decision === 'accepted' && !(await this.subjectChildrenComplete(input.subjectType, input.subjectId))) {
+      throw new LedgerError(`${input.subjectType} ${input.subjectId} cannot pass its Gate before all required children complete`, 'invalid_state')
+    }
+    const prior = await this.store.getCurrentGate(input.subjectType, input.subjectId)
+    const gate: GateResult = { schemaVersion: SCHEMA_VERSION, gateId: randomUUID(), subjectType: input.subjectType, subjectId: input.subjectId, subjectRevision: input.subjectRevision ?? currentRevision, attempt: (prior?.attempt ?? 0) + 1, evaluator: input.evaluator, evaluatorVersion: input.evaluatorVersion ?? '1', inputs: input.evidence, reasons: input.reasons ?? [], evidenceReceipts: receipts, issueId: input.issueId ?? (input.subjectType === 'issue' ? input.subjectId : null), runId: input.runId ?? null, decision: input.decision, evidence: input.evidence, decidedBy: input.evaluator, decidedAt: nowIso() }
+    await this.store.putGateResult(gate)
+    await this.applyHierarchyDecision(input.subjectType, input.subjectId, input.decision)
+    if (input.subjectType === 'issue') {
+      await this.emit(input.subjectId, input.runId ?? null, 'gate.decided', { decision: input.decision, gateId: gate.gateId })
+      await this.emit(input.subjectId, input.runId ?? null, input.decision === 'accepted' ? 'issue.completed' : 'issue.repair_required', {})
+    }
+    return gate
+  }
+
+  private async currentSubjectRevision(subjectType: GateSubjectType, subjectId: string): Promise<string | null> {
+    if (subjectType === 'issue') return (await this.store.getIssue(subjectId))?.updatedAt ?? null
+    if (subjectType === 'phase') {
+      const phase = await this.findPhase(subjectId)
+      return phase ? `${phase.revision}:${phase.updatedAt}` : null
+    }
+    if (subjectType === 'module') {
+      const module = await this.findModule(subjectId)
+      return module ? `${module.revision}:${module.updatedAt}` : null
+    }
+    const program = await this.store.getProgram(subjectId)
+    return program ? `${program.revision}:${program.updatedAt}` : null
+  }
+
+  private async subjectChildrenComplete(subjectType: GateSubjectType, subjectId: string): Promise<boolean> {
+    if (subjectType === 'issue') {
+      const issue = await this.store.getIssue(subjectId)
+      return issue?.state === 'awaiting_gate'
+    }
+    if (subjectType === 'phase') {
+      const phase = await this.findPhase(subjectId)
+      if (!phase) return false
+      const issues = await this.store.listIssues({ programId: phase.programId, moduleId: phase.moduleId, phaseId: phase.phaseId })
+      return issues.length > 0 && issues.every((issue) => issue.state === 'completed')
+    }
+    if (subjectType === 'module') {
+      const module = await this.findModule(subjectId)
+      if (!module) return false
+      const phases = await this.store.listPhases(module.programId, module.moduleId)
+      return phases.length > 0 && phases.every((phase) => phase.state === 'completed')
+    }
+    const program = await this.store.getProgram(subjectId)
+    if (!program) return false
+    const modules = await this.store.listModules(program.programId)
+    return modules.length > 0 && modules.every((module) => module.state === 'completed')
+  }
+
+  private async findPhase(phaseId: string): Promise<Phase | null> {
+    for (const program of await this.store.listPrograms()) for (const module of await this.store.listModules(program.programId)) {
+      const phase = await this.store.getPhase(program.programId, module.moduleId, phaseId)
+      if (phase) return phase
+    }
+    return null
+  }
+
+  private async findModule(moduleId: string): Promise<Module | null> {
+    for (const program of await this.store.listPrograms()) {
+      const module = await this.store.getModule(program.programId, moduleId)
+      if (module) return module
+    }
+    return null
+  }
+
+  private async applyHierarchyDecision(subjectType: GateSubjectType, subjectId: string, decision: GateDecision): Promise<void> {
+    const state: WorkState = decision === 'accepted' ? 'completed' : decision === 'rejected' ? 'blocked' : 'awaiting_gate'
+    if (subjectType === 'issue') {
+      const issue = await this.store.getIssue(subjectId)
+      if (issue) {
+        issue.state = decision === 'accepted' ? 'completed' : decision === 'rejected' ? 'repair_required' : 'awaiting_gate'
+        issue.updatedAt = nowIso()
+        await this.store.putIssue(issue)
+        if (decision === 'rejected') {
+          const idempotencyKey = deriveIdempotencyKey(issue)
+          const existing = await this.store.getIdempotencyRecord(idempotencyKey)
+          if (existing) await this.store.updateIdempotencyRecord({ ...existing, state: 'failed_safe_to_retry', runId: null })
+        }
+      }
+    } else if (subjectType === 'phase') {
+      const phase = await this.findPhase(subjectId)
+      if (phase) { phase.state = state; phase.revision += 1; phase.updatedAt = nowIso(); await this.store.putPhase(phase) }
+    } else if (subjectType === 'module') {
+      const module = await this.findModule(subjectId)
+      if (module) { module.state = state; module.revision += 1; module.updatedAt = nowIso(); await this.store.putModule(module) }
+    } else if (subjectType === 'program') {
+      const program = await this.store.getProgram(subjectId)
+      if (program) { program.state = state; program.revision += 1; program.updatedAt = nowIso(); await this.store.putProgram(program) }
+    }
   }
 
   /**
@@ -619,6 +854,7 @@ export class ProgramLedger {
       )
     }
     issue.state = 'ready'
+    issue.retryAt = null
     await this.store.putIssue(issue)
     return this.dispatch(issueId)
   }
