@@ -67,6 +67,38 @@ test('the seven canonical envelopes accept their valid fixtures', () => {
   assert.equal(isEvidenceReceipt(validEvidenceReceipt), true)
 })
 
+test('demo preview URLs require strict HTTP(S) syntax and hostnames', () => {
+  const invalidPreviewUrls = [
+    'https://',
+    'https://example..com',
+    'https://-bad.example.com',
+    'https://user:password@example.com',
+    'https:// example.com',
+    'https://example.com\n',
+    'https://example.com/\u0000',
+    'https://example.com:99999/preview',
+    'https://example.com:invalid/preview',
+    'ftp://example.com/preview',
+    'https://example.com/#fragment',
+  ]
+
+  for (const private_preview_url of invalidPreviewUrls) {
+    assert.equal(
+      isDemoCompletionEnvelope({ ...validDemoCompletion, private_preview_url }),
+      false,
+      `accepted invalid preview URL ${JSON.stringify(private_preview_url)}`,
+    )
+  }
+
+  assert.equal(
+    isDemoCompletionEnvelope({
+      ...validDemoCompletion,
+      private_preview_url: `https://${'a'.repeat(63)}.example.com:65535/preview?mode=private`,
+    }),
+    true,
+  )
+})
+
 test('the manual and CRM-port lead boundaries are byte-compatible', () => {
   assert.equal(JSON.stringify(manualFirstTestLead), JSON.stringify(crmPortLead))
 })

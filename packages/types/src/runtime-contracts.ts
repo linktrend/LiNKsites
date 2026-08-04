@@ -257,6 +257,29 @@ const isHostname = (value: unknown): value is string => {
   return labels.length >= 2 && labels.every((label) => HOSTNAME_LABEL_PATTERN.test(label))
 }
 
+const isStrictHttpPreviewUrl = (value: unknown): value is string => {
+  if (
+    !isNonEmptyString(value) ||
+    /[\s\u0000-\u001f\u007f]/.test(value) ||
+    value.includes('#')
+  ) {
+    return false
+  }
+
+  try {
+    const parsed = new URL(value)
+
+    return (
+      (parsed.protocol === 'http:' || parsed.protocol === 'https:') &&
+      parsed.username === '' &&
+      parsed.password === '' &&
+      isHostname(parsed.hostname)
+    )
+  } catch {
+    return false
+  }
+}
+
 const isSchemaVersion = (value: unknown): value is ContractSchemaVersion =>
   isRecord(value) &&
   hasExactKeys(value, ['major', 'minor']) &&
@@ -376,8 +399,7 @@ export const isDemoCompletionEnvelope = (
     ) ||
     !isCanonicalReference(value.lead_id) ||
     !isCanonicalReference(value.site_id) ||
-    !isNonEmptyString(value.private_preview_url) ||
-    !/^https?:\/\//.test(value.private_preview_url) ||
+    !isStrictHttpPreviewUrl(value.private_preview_url) ||
     !isCompletionStatus(value.status) ||
     !isGitSha(value.artifact_revision) ||
     !isGitSha(value.library_revision) ||
