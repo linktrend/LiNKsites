@@ -78,6 +78,10 @@ test('demo preview URLs require strict HTTP(S) syntax and hostnames', () => {
     'https://example.com/\u0000',
     'https://example.com:99999/preview',
     'https://example.com:invalid/preview',
+    'https:preview.example.com/path',
+    'https:/preview.example.com/path',
+    'http:preview.example.com/path',
+    'http:/preview.example.com/path',
     'ftp://example.com/preview',
     'https://example.com/#fragment',
   ]
