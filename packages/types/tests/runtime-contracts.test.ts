@@ -32,7 +32,7 @@ const withTopLevelField = (
 const withPathValue = (
   value: unknown,
   path: readonly (string | number)[],
-  replacement: string,
+  replacement: unknown,
 ): unknown => {
   if (path.length === 0) return replacement
   if (Array.isArray(value)) {
@@ -288,6 +288,162 @@ test('ordinary descriptive strings remain valid', () => {
     }),
     true,
   )
+})
+
+test('stable identifiers and references use one bounded canonical syntax', () => {
+  const blockedDemo = {
+    ...validDemoCompletion,
+    status: 'blocked',
+    error: {
+      code: 'preview_blocked',
+      message: 'Preview is blocked pending correction.',
+      retryable: true,
+    },
+  }
+
+  const fields: Array<[
+    string,
+    ContractValidator,
+    object,
+    readonly (string | number)[],
+  ]> = [
+    ['lead org_id', isLeadResearchPackage, manualFirstTestLead, ['org_id']],
+    ['lead correlation_id', isLeadResearchPackage, manualFirstTestLead, ['correlation_id']],
+    ['lead idempotency_key', isLeadResearchPackage, manualFirstTestLead, ['idempotency_key']],
+    ['lead lead_id', isLeadResearchPackage, manualFirstTestLead, ['lead_id']],
+    ['demo site_id', isDemoCompletionEnvelope, validDemoCompletion, ['site_id']],
+    ['demo evidence reference', isDemoCompletionEnvelope, validDemoCompletion, ['evidence_references', 0]],
+    ['demo error code', isDemoCompletionEnvelope, blockedDemo, ['error', 'code']],
+    ['commercial authorization reference', isCommercialOutcomeEnvelope, validCommercialOutcome, ['reach_authorization_reference']],
+    ['commercial replay event_id', isCommercialOutcomeEnvelope, validCommercialOutcome, ['replay_protection', 'event_id']],
+    ['commercial replay nonce', isCommercialOutcomeEnvelope, validCommercialOutcome, ['replay_protection', 'nonce']],
+    ['activation authorization reference', isActivationRequest, validActivationRequest, ['reach_authorization_reference']],
+    ['recycling inventory reference', isRecyclingRequest, validRecyclingRequest, ['template_inventory_id']],
+    ['event event_id', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['event_id']],
+    ['event signature key_id', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['signature', 'key_id']],
+    ['evidence receipt_id', isEvidenceReceipt, validEvidenceReceipt, ['receipt_id']],
+    ['evidence producer', isEvidenceReceipt, validEvidenceReceipt, ['producer']],
+    ['evidence subject id', isEvidenceReceipt, validEvidenceReceipt, ['subject', 'id']],
+    ['evidence storage location', isEvidenceReceipt, validEvidenceReceipt, ['storage_location']],
+    ['evidence gate association', isEvidenceReceipt, validEvidenceReceipt, ['gate_association']],
+  ]
+
+  const invalidReferences = [
+    'lead\u0000forged',
+    'lead\nforged',
+    ' lead-forged',
+    'lead forged',
+    'lead@forged',
+    'lead--forged',
+    'a'.repeat(129),
+  ]
+
+  for (const [name, validator, fixture, path] of fields) {
+    assert.equal(
+      validator(withPathValue(fixture, path, 'a'.repeat(128))),
+      true,
+      `${name} rejects the 128-character boundary value`,
+    )
+
+    for (const invalidReference of invalidReferences) {
+      assert.equal(
+        validator(withPathValue(fixture, path, invalidReference)),
+        false,
+        `${name} accepts invalid reference ${JSON.stringify(invalidReference)}`,
+      )
+    }
+  }
+})
+
+test('timestamps require canonical valid UTC instants', () => {
+  const fields: Array<[
+    string,
+    ContractValidator,
+    object,
+    readonly (string | number)[],
+  ]> = [
+    ['demo started_at', isDemoCompletionEnvelope, validDemoCompletion, ['started_at']],
+    ['demo completed_at', isDemoCompletionEnvelope, validDemoCompletion, ['completed_at']],
+    ['commercial recorded_at', isCommercialOutcomeEnvelope, validCommercialOutcome, ['recorded_at']],
+    ['activation requested_at', isActivationRequest, validActivationRequest, ['publication', 'requested_at']],
+    ['recycling requested_at', isRecyclingRequest, validRecyclingRequest, ['requested_at']],
+    ['event acknowledged_at', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['acknowledgement', 'acknowledged_at']],
+    ['evidence timestamp', isEvidenceReceipt, validEvidenceReceipt, ['timestamp']],
+  ]
+
+  const invalidTimestamps = [
+    '2026-08-04 00:00:00.000Z',
+    '2026-08-04T00:00:00Z',
+    '2026-08-04T00:00:00.000+00:00',
+    '2026-02-30T00:00:00.000Z',
+    'not-a-timestamp',
+  ]
+
+  for (const [name, validator, fixture, path] of fields) {
+    assert.equal(
+      validator(withPathValue(fixture, path, '9999-12-31T23:59:59.999Z')),
+      true,
+      `${name} rejects the canonical UTC boundary value`,
+    )
+
+    for (const invalidTimestamp of invalidTimestamps) {
+      assert.equal(
+        validator(withPathValue(fixture, path, invalidTimestamp)),
+        false,
+        `${name} accepts non-canonical timestamp ${invalidTimestamp}`,
+      )
+    }
+  }
+})
+
+test('activation domains are hostnames, while undefined remains allowed', () => {
+  assert.equal(
+    isActivationRequest({
+      ...validActivationRequest,
+      publication: {
+        ...validActivationRequest.publication,
+        domain: `${'a'.repeat(63)}.example.com`,
+      },
+    }),
+    true,
+  )
+  assert.equal(
+    isActivationRequest({
+      ...validActivationRequest,
+      publication: { ...validActivationRequest.publication, domain: undefined },
+    }),
+    true,
+  )
+  assert.equal(
+    isActivationRequest({
+      ...validActivationRequest,
+      publication: (() => {
+        const { domain: _domain, ...publicationWithoutDomain } = validActivationRequest.publication
+        return publicationWithoutDomain
+      })(),
+    }),
+    true,
+  )
+
+  for (const domain of [
+    'not a hostname',
+    'https://customer.example.com',
+    'customer..example.com',
+    '-customer.example.com',
+    'customer-.example.com',
+    `${'a'.repeat(64)}.example.com`,
+    'pay-4111111111111111.example.com',
+    'customer.example.com\nforged',
+  ]) {
+    assert.equal(
+      isActivationRequest({
+        ...validActivationRequest,
+        publication: { ...validActivationRequest.publication, domain },
+      }),
+      false,
+      `activation accepts invalid hostname ${JSON.stringify(domain)}`,
+    )
+  }
 })
 
 test('every unknown enum value fails closed', () => {

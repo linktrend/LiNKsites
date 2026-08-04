@@ -67,7 +67,7 @@ export type ActivationRequest = ContractMetadata & {
   site_id: string
   reach_authorization_reference: string
   publication: {
-    domain: string
+    domain?: string
     environment: 'production'
     requested_at: string
   }
@@ -205,13 +205,57 @@ const isNonEmptyString = (value: unknown): value is string =>
   value.trim().length > 0 &&
   !isSensitiveString(value)
 
+const MAX_CANONICAL_REFERENCE_LENGTH = 128
+
+// Stable contract references are ASCII tokens separated by one of `-`, `_`, `.`, `:`, or `/`.
+// URI-like references may use one `scheme://` prefix, as in the existing evidence fixtures.
+const CANONICAL_REFERENCE_PATTERN =
+  /^(?:[A-Za-z0-9]+:\/\/[A-Za-z0-9]+|[A-Za-z0-9]+)(?:[._:/-][A-Za-z0-9]+)*$/
+
+const isCanonicalReference = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length <= MAX_CANONICAL_REFERENCE_LENGTH &&
+  CANONICAL_REFERENCE_PATTERN.test(value) &&
+  !isSensitiveString(value)
+
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) &&
   Object.keys(value).length === value.length &&
   value.every(isNonEmptyString)
 
-const isIsoTimestamp = (value: unknown): value is string =>
-  isNonEmptyString(value) && !Number.isNaN(Date.parse(value))
+const isReferenceArray = (value: unknown): value is string[] =>
+  Array.isArray(value) &&
+  Object.keys(value).length === value.length &&
+  value.every(isCanonicalReference)
+
+const CANONICAL_UTC_TIMESTAMP_PATTERN =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+
+const isIsoTimestamp = (value: unknown): value is string => {
+  if (typeof value !== 'string' || !CANONICAL_UTC_TIMESTAMP_PATTERN.test(value)) {
+    return false
+  }
+
+  const parsed = new Date(value)
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value
+}
+
+const HOSTNAME_LABEL_PATTERN =
+  /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/
+
+const isHostname = (value: unknown): value is string => {
+  if (
+    typeof value !== 'string' ||
+    value.length === 0 ||
+    value.length > 253 ||
+    isSensitiveString(value)
+  ) {
+    return false
+  }
+
+  const labels = value.split('.')
+  return labels.length >= 2 && labels.every((label) => HOSTNAME_LABEL_PATTERN.test(label))
+}
 
 const isSchemaVersion = (value: unknown): value is ContractSchemaVersion =>
   isRecord(value) &&
@@ -249,14 +293,14 @@ const isMetadata = (
   !containsSensitiveMaterial(value) &&
   hasRequiredKeys(value, METADATA_KEYS) &&
   isSchemaVersion(value.schema_version) &&
-  isNonEmptyString(value.org_id) &&
-  isNonEmptyString(value.correlation_id) &&
-  isNonEmptyString(value.idempotency_key)
+  isCanonicalReference(value.org_id) &&
+  isCanonicalReference(value.correlation_id) &&
+  isCanonicalReference(value.idempotency_key)
 
 const isSafeErrorState = (value: unknown): value is SafeErrorState =>
   isRecord(value) &&
   hasExactKeys(value, ['code', 'message', 'retryable']) &&
-  isNonEmptyString(value.code) &&
+  isCanonicalReference(value.code) &&
   isNonEmptyString(value.message) &&
   typeof value.retryable === 'boolean'
 
@@ -285,8 +329,8 @@ const isEventPayload = (
 ): value is LiNKautoworkEventPayload =>
   isRecord(value) &&
   hasExactKeys(value, ['lead_id', 'site_id']) &&
-  isNonEmptyString(value.lead_id) &&
-  isNonEmptyString(value.site_id)
+  isCanonicalReference(value.lead_id) &&
+  isCanonicalReference(value.site_id)
 
 const isEventName = (value: unknown): value is LiNKautoworkEventName =>
   value === 'lead.research.ready' ||
@@ -300,7 +344,7 @@ export const isLeadResearchPackage = (
 ): value is LeadResearchPackage =>
   isMetadata(value) &&
   hasExactKeys(value, [...METADATA_KEYS, 'lead_id', 'research', 'requested_vertical', 'source']) &&
-  isNonEmptyString(value.lead_id) &&
+  isCanonicalReference(value.lead_id) &&
   isRecord(value.research) &&
   hasExactKeys(value.research, ['summary', 'sources']) &&
   isNonEmptyString(value.research.summary) &&
@@ -330,15 +374,15 @@ export const isDemoCompletionEnvelope = (
       ],
       ['error'],
     ) ||
-    !isNonEmptyString(value.lead_id) ||
-    !isNonEmptyString(value.site_id) ||
+    !isCanonicalReference(value.lead_id) ||
+    !isCanonicalReference(value.site_id) ||
     !isNonEmptyString(value.private_preview_url) ||
     !/^https?:\/\//.test(value.private_preview_url) ||
     !isCompletionStatus(value.status) ||
     !isGitSha(value.artifact_revision) ||
     !isGitSha(value.library_revision) ||
     !isGitSha(value.content_revision) ||
-    !isStringArray(value.evidence_references) ||
+    !isReferenceArray(value.evidence_references) ||
     !isIsoTimestamp(value.started_at) ||
     !isIsoTimestamp(value.completed_at)
   ) {
@@ -362,14 +406,14 @@ export const isCommercialOutcomeEnvelope = (
     value,
     [...METADATA_KEYS, 'lead_id', 'site_id', 'outcome', 'reach_authorization_reference', 'replay_protection', 'recorded_at'],
   ) &&
-  isNonEmptyString(value.lead_id) &&
-  isNonEmptyString(value.site_id) &&
+  isCanonicalReference(value.lead_id) &&
+  isCanonicalReference(value.site_id) &&
   isCommercialOutcome(value.outcome) &&
-  isNonEmptyString(value.reach_authorization_reference) &&
+  isCanonicalReference(value.reach_authorization_reference) &&
   isRecord(value.replay_protection) &&
   hasExactKeys(value.replay_protection, ['event_id', 'nonce']) &&
-  isNonEmptyString(value.replay_protection.event_id) &&
-  isNonEmptyString(value.replay_protection.nonce) &&
+  isCanonicalReference(value.replay_protection.event_id) &&
+  isCanonicalReference(value.replay_protection.nonce) &&
   isIsoTimestamp(value.recorded_at)
 
 export const isActivationRequest = (value: unknown): value is ActivationRequest =>
@@ -378,21 +422,21 @@ export const isActivationRequest = (value: unknown): value is ActivationRequest 
     value,
     [...METADATA_KEYS, 'lead_id', 'site_id', 'reach_authorization_reference', 'publication'],
   ) &&
-  isNonEmptyString(value.lead_id) &&
-  isNonEmptyString(value.site_id) &&
-  isNonEmptyString(value.reach_authorization_reference) &&
+  isCanonicalReference(value.lead_id) &&
+  isCanonicalReference(value.site_id) &&
+  isCanonicalReference(value.reach_authorization_reference) &&
   isRecord(value.publication) &&
-  hasExactKeys(value.publication, ['domain', 'environment', 'requested_at']) &&
-  isNonEmptyString(value.publication.domain) &&
+  hasExactKeys(value.publication, ['environment', 'requested_at'], ['domain']) &&
+  (value.publication.domain === undefined || isHostname(value.publication.domain)) &&
   value.publication.environment === 'production' &&
   isIsoTimestamp(value.publication.requested_at)
 
 export const isRecyclingRequest = (value: unknown): value is RecyclingRequest =>
   isMetadata(value) &&
   hasExactKeys(value, [...METADATA_KEYS, 'lead_id', 'site_id', 'template_inventory_id', 'reason', 'requested_at']) &&
-  isNonEmptyString(value.lead_id) &&
-  isNonEmptyString(value.site_id) &&
-  isNonEmptyString(value.template_inventory_id) &&
+  isCanonicalReference(value.lead_id) &&
+  isCanonicalReference(value.site_id) &&
+  isCanonicalReference(value.template_inventory_id) &&
   value.reason === 'no_sale' &&
   isIsoTimestamp(value.requested_at)
 
@@ -404,13 +448,13 @@ export const isLiNKautoworkEventEnvelope = (
     value,
     [...METADATA_KEYS, 'event_id', 'event_name', 'payload', 'signature', 'delivery_attempt', 'acknowledgement'],
   ) &&
-  isNonEmptyString(value.event_id) &&
+  isCanonicalReference(value.event_id) &&
   isEventName(value.event_name) &&
   isEventPayload(value.payload) &&
   isRecord(value.signature) &&
   hasExactKeys(value.signature, ['algorithm', 'key_id', 'signature']) &&
   value.signature.algorithm === 'hmac-sha256' &&
-  isNonEmptyString(value.signature.key_id) &&
+  isCanonicalReference(value.signature.key_id) &&
   isNonEmptyString(value.signature.signature) &&
   typeof value.delivery_attempt === 'number' &&
   Number.isInteger(value.delivery_attempt) &&
@@ -423,21 +467,21 @@ export const isEvidenceReceipt = (value: unknown): value is EvidenceReceipt =>
     value,
     [...METADATA_KEYS, 'receipt_id', 'producer', 'subject', 'checksum', 'revision_sha', 'storage_location', 'gate_association', 'timestamp'],
   ) &&
-  isNonEmptyString(value.receipt_id) &&
-  isNonEmptyString(value.producer) &&
+  isCanonicalReference(value.receipt_id) &&
+  isCanonicalReference(value.producer) &&
   isRecord(value.subject) &&
   hasExactKeys(value.subject, ['type', 'id']) &&
   (value.subject.type === 'lead' ||
     value.subject.type === 'site' ||
     value.subject.type === 'run' ||
     value.subject.type === 'issue') &&
-  isNonEmptyString(value.subject.id) &&
+  isCanonicalReference(value.subject.id) &&
   isRecord(value.checksum) &&
   hasExactKeys(value.checksum, ['algorithm', 'value']) &&
   value.checksum.algorithm === 'sha256' &&
   isNonEmptyString(value.checksum.value) &&
   /^[a-f0-9]{64}$/.test(value.checksum.value) &&
   isGitSha(value.revision_sha) &&
-  isNonEmptyString(value.storage_location) &&
-  isNonEmptyString(value.gate_association) &&
+  isCanonicalReference(value.storage_location) &&
+  isCanonicalReference(value.gate_association) &&
   isIsoTimestamp(value.timestamp)
