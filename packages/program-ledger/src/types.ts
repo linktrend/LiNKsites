@@ -15,9 +15,12 @@
  * compensation Sagas, and cross-Program outbox/inbox remain out of scope.
  */
 
-import type { SchemaVersion } from '@linksites/types'
+import type { EvidenceReceipt, SchemaVersion } from '@linksites/types'
 
 export const SCHEMA_VERSION: SchemaVersion = { major: 1, minor: 0 }
+
+/** Reserved tenant used only to make pre-tenant legacy rows deterministic. */
+export const DEFAULT_ORG_ID = 'a0000000-a000-a000-a000-a00000000001'
 
 export type { SchemaVersion }
 
@@ -127,6 +130,8 @@ export interface Issue {
   phaseRef?: string
   /** Stable packet/application key, distinct from the UUID storage identity. */
   issueKey?: string
+  target?: string | null
+  intendedEffect: string
   correlationId?: string | null
   state: IssueState
   input: Record<string, unknown>
@@ -164,6 +169,7 @@ export interface Run {
   schemaVersion: SchemaVersion
   runId: string
   issueId: string
+  orgId: string
   attemptNumber: number
   state: RunState
   /** Immutable input snapshot pinned at Run creation (manual §20 §21). */
@@ -187,21 +193,14 @@ export type GateDecision = 'pending' | 'accepted' | 'rejected'
 
 export type GateSubjectType = 'issue' | 'phase' | 'module' | 'program'
 
-export interface EvidenceReceipt {
-  receiptId: string
-  producer: string
-  subjectId: string
-  checksum: string
-  revision: string
-  location: string
-  recordedAt: string
-}
+export type { EvidenceReceipt }
 
 export interface GateResult {
   schemaVersion: SchemaVersion
   gateId: string
   subjectType: GateSubjectType
   subjectId: string
+  orgId: string
   subjectRevision: string
   attempt: number
   evaluator: string
@@ -237,7 +236,8 @@ export type LedgerEventType =
 export interface LedgerEvent {
   schemaVersion: SchemaVersion
   eventId: string
-  issueId: string
+  issueId: string | null
+  orgId: string
   runId: string | null
   type: LedgerEventType
   payload: Record<string, unknown>
@@ -255,6 +255,7 @@ export interface IdempotencyRecord {
   schemaVersion: SchemaVersion
   idempotencyKey: string
   issueId: string
+  orgId: string
   runId: string | null
   state: IdempotencyState
   createdAt: string
@@ -269,9 +270,13 @@ export interface IdempotencyRecord {
  * scope is included whenever an Issue has an orgId so identical work in two
  * organizations cannot share a dispatch record.
  */
-export function deriveIdempotencyKey(issue: Pick<Issue, 'issueType' | 'programRef' | 'inputDigest'> & { orgId?: string | null }): string {
-  const organizationScope = issue.orgId ? `org:${issue.orgId}:` : ''
-  return `${organizationScope}${issue.issueType}:${issue.programRef}:${issue.inputDigest}:v${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor}`
+export function deriveIdempotencyKey(
+  issue: Pick<Issue, 'issueType' | 'programRef' | 'inputDigest' | 'issueKey' | 'intendedEffect' | 'target'> & { orgId?: string | null },
+): string {
+  const organizationScope = `org:${issue.orgId ?? DEFAULT_ORG_ID}:`
+  const stableIssueIdentity = issue.issueKey ?? `issue:${issue.issueType}:${issue.programRef}:${issue.inputDigest}`
+  const target = issue.target ?? 'target:unspecified'
+  return `${organizationScope}issue:${stableIssueIdentity}:effect:${issue.intendedEffect}:target:${target}:v${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor}`
 }
 
 /**
@@ -290,6 +295,7 @@ export interface IssueDependency {
   issueId: string
   /** The Issue that must reach `completed` state before `issueId` can be dispatched. */
   dependsOnIssueId: string
+  orgId: string
   createdAt: string
 }
 

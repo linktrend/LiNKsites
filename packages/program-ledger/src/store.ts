@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { SCHEMA_VERSION } from './types.js'
+import { DEFAULT_ORG_ID } from './types.js'
 import type {
   GateResult,
+  FailureClass,
   IdempotencyRecord,
   Issue,
   IssueDependency,
@@ -47,6 +49,9 @@ export interface LedgerStore {
   listRunsForIssue(issueId: string): Promise<Run[]>
   /** Atomically claims a queued Run and assigns its lease/fencing token. */
   claimRun(runId: string, executorId: string, leaseDurationMs: number, executorType: string, executorVersion: string): Promise<Run | null>
+  dispatchRun(issue: Issue, run: Run): Promise<{ run: Run; created: boolean }>
+  mutateLeasedRun(input: { runId: string; fencingToken: number; kind: 'heartbeat' | 'complete' | 'fail' | 'cancel'; leaseDurationMs?: number; output?: unknown; failureClass?: FailureClass; message?: string }): Promise<Run | null>
+  reclaimExpiredLeases(nowIso: string): Promise<Run[]>
 
   /**
    * Atomically reserves an idempotency key for a NEW dispatch attempt.
@@ -73,7 +78,6 @@ export interface LedgerStore {
   listEvents(issueId: string): Promise<LedgerEvent[]>
 
   /** Returns all Runs currently in `claimed`/`executing` state whose lease has expired. */
-  listExpiredLeaseRuns(nowIso: string): Promise<Run[]>
 
   /**
    * Records a dependency: `dep.issueId` cannot be dispatched until
@@ -104,9 +108,9 @@ export class InMemoryLedgerStore implements LedgerStore {
 
   static fromSnapshot(snapshot: LedgerSnapshot): InMemoryLedgerStore {
     const store = new InMemoryLedgerStore()
-    for (const program of snapshot.programs) store.programs.set(program.programId, { ...program })
-    for (const module of snapshot.modules) store.modules.set(`${module.programId}:${module.moduleId}`, { ...module })
-    for (const phase of snapshot.phases) store.phases.set(`${phase.programId}:${phase.moduleId}:${phase.phaseId}`, { ...phase })
+    for (const program of snapshot.programs) store.programs.set(`${program.programId}:${program.orgId}`, { ...program })
+    for (const module of snapshot.modules) store.modules.set(`${module.programId}:${module.moduleId}:${module.orgId}`, { ...module })
+    for (const phase of snapshot.phases) store.phases.set(`${phase.programId}:${phase.moduleId}:${phase.phaseId}:${phase.orgId}`, { ...phase })
     for (const issue of snapshot.issues) store.issues.set(issue.issueId, { ...issue })
     for (const run of snapshot.runs) store.runs.set(run.runId, { ...run })
     for (const record of snapshot.idempotency) store.idempotency.set(record.idempotencyKey, { ...record })
@@ -117,36 +121,36 @@ export class InMemoryLedgerStore implements LedgerStore {
   }
 
   async getProgram(programId: string, orgId?: string): Promise<Program | null> {
-    const program = this.programs.get(programId)
-    return program && (orgId === undefined || program.orgId === orgId) ? { ...program } : null
+    const program = [...this.programs.values()].find((candidate) => candidate.programId === programId && candidate.orgId === (orgId ?? DEFAULT_ORG_ID))
+    return program && program.orgId === (orgId ?? DEFAULT_ORG_ID) ? { ...program } : null
   }
 
-  async putProgram(program: Program): Promise<void> { this.programs.set(program.programId, { ...program }) }
+  async putProgram(program: Program): Promise<void> { this.programs.set(`${program.programId}:${program.orgId}`, { ...program }) }
 
   async listPrograms(orgId?: string): Promise<Program[]> {
-    return [...this.programs.values()].filter((program) => orgId === undefined || program.orgId === orgId).map((program) => ({ ...program }))
+    return [...this.programs.values()].filter((program) => program.orgId === (orgId ?? DEFAULT_ORG_ID)).map((program) => ({ ...program }))
   }
 
   async getModule(programId: string, moduleId: string, orgId?: string): Promise<Module | null> {
-    const module = this.modules.get(`${programId}:${moduleId}`)
-    return module && (orgId === undefined || module.orgId === orgId) ? { ...module } : null
+    const module = [...this.modules.values()].find((candidate) => candidate.programId === programId && candidate.moduleId === moduleId && candidate.orgId === (orgId ?? DEFAULT_ORG_ID))
+    return module && module.orgId === (orgId ?? DEFAULT_ORG_ID) ? { ...module } : null
   }
 
-  async putModule(module: Module): Promise<void> { this.modules.set(`${module.programId}:${module.moduleId}`, { ...module }) }
+  async putModule(module: Module): Promise<void> { this.modules.set(`${module.programId}:${module.moduleId}:${module.orgId}`, { ...module }) }
 
   async listModules(programId: string, orgId?: string): Promise<Module[]> {
-    return [...this.modules.values()].filter((module) => module.programId === programId && (orgId === undefined || module.orgId === orgId)).map((module) => ({ ...module }))
+    return [...this.modules.values()].filter((module) => module.programId === programId && module.orgId === (orgId ?? DEFAULT_ORG_ID)).map((module) => ({ ...module }))
   }
 
   async getPhase(programId: string, moduleId: string, phaseId: string, orgId?: string): Promise<Phase | null> {
-    const phase = this.phases.get(`${programId}:${moduleId}:${phaseId}`)
-    return phase && (orgId === undefined || phase.orgId === orgId) ? { ...phase } : null
+    const phase = [...this.phases.values()].find((candidate) => candidate.programId === programId && candidate.moduleId === moduleId && candidate.phaseId === phaseId && candidate.orgId === (orgId ?? DEFAULT_ORG_ID))
+    return phase && phase.orgId === (orgId ?? DEFAULT_ORG_ID) ? { ...phase } : null
   }
 
-  async putPhase(phase: Phase): Promise<void> { this.phases.set(`${phase.programId}:${phase.moduleId}:${phase.phaseId}`, { ...phase }) }
+  async putPhase(phase: Phase): Promise<void> { this.phases.set(`${phase.programId}:${phase.moduleId}:${phase.phaseId}:${phase.orgId}`, { ...phase }) }
 
   async listPhases(programId: string, moduleId: string, orgId?: string): Promise<Phase[]> {
-    return [...this.phases.values()].filter((phase) => phase.programId === programId && phase.moduleId === moduleId && (orgId === undefined || phase.orgId === orgId)).map((phase) => ({ ...phase }))
+    return [...this.phases.values()].filter((phase) => phase.programId === programId && phase.moduleId === moduleId && phase.orgId === (orgId ?? DEFAULT_ORG_ID)).map((phase) => ({ ...phase }))
   }
 
   async getIssue(issueId: string): Promise<Issue | null> {
@@ -154,7 +158,7 @@ export class InMemoryLedgerStore implements LedgerStore {
   }
 
   async getIssueByKey(issueKey: string, orgId?: string): Promise<Issue | null> {
-    for (const issue of this.issues.values()) if (issue.issueKey === issueKey && (orgId === undefined || issue.orgId === orgId)) return { ...issue }
+    for (const issue of this.issues.values()) if (issue.issueKey === issueKey && issue.orgId === (orgId ?? DEFAULT_ORG_ID)) return { ...issue }
     return null
   }
 
@@ -164,7 +168,7 @@ export class InMemoryLedgerStore implements LedgerStore {
 
   async listIssues(filter: { orgId?: string; programId?: string; moduleId?: string; phaseId?: string } = {}): Promise<Issue[]> {
     return [...this.issues.values()].filter((issue) =>
-      (filter.orgId === undefined || issue.orgId === filter.orgId) &&
+      issue.orgId === (filter.orgId ?? DEFAULT_ORG_ID) &&
       (filter.programId === undefined || issue.programRef === filter.programId) &&
       (filter.moduleId === undefined || issue.moduleRef === filter.moduleId) &&
       (filter.phaseId === undefined || issue.phaseRef === filter.phaseId),
@@ -201,6 +205,33 @@ export class InMemoryLedgerStore implements LedgerStore {
     return { ...claimed }
   }
 
+  async dispatchRun(issue: Issue, run: Run): Promise<{ run: Run; created: boolean }> {
+    const existing = this.idempotency.get(run.idempotencyKey)
+    if (existing && existing.state !== 'failed_safe_to_retry') {
+      const existingRun = existing.runId ? this.runs.get(existing.runId) : undefined
+      if (existingRun) return { run: { ...existingRun }, created: false }
+      throw new Error(`idempotency record ${run.idempotencyKey} has no resolvable Run`)
+    }
+    if (!['ready', 'retry_scheduled'].includes(issue.state)) throw new Error(`Issue ${issue.issueId} is no longer dispatchable`)
+    this.runs.set(run.runId, { ...run })
+    this.idempotency.set(run.idempotencyKey, { schemaVersion: SCHEMA_VERSION, idempotencyKey: run.idempotencyKey, issueId: issue.issueId, orgId: issue.orgId ?? DEFAULT_ORG_ID, runId: run.runId, state: 'executing', createdAt: run.createdAt })
+    this.issues.set(issue.issueId, { ...issue, state: 'dispatched', attemptCount: run.attemptNumber, updatedAt: run.createdAt })
+    return { run: { ...run }, created: true }
+  }
+
+  async mutateLeasedRun(input: { runId: string; fencingToken: number; kind: 'heartbeat' | 'complete' | 'fail' | 'cancel'; leaseDurationMs?: number; output?: unknown; failureClass?: FailureClass; message?: string }): Promise<Run | null> {
+    const run = this.runs.get(input.runId)
+    const allowedStates = input.kind === 'cancel' ? ['claimed', 'executing', 'cancel_requested'] : ['claimed', 'executing']
+    if (!run || !run.lease || run.lease.fencingToken !== input.fencingToken || !allowedStates.includes(run.state) || new Date(run.lease.expiresAt).getTime() <= Date.now()) return null
+    const next = { ...run }
+    if (input.kind === 'heartbeat') { next.lease = { ...run.lease, expiresAt: new Date(Date.now() + (input.leaseDurationMs ?? 30_000)).toISOString() }; next.lastHeartbeatAt = new Date().toISOString() }
+    if (input.kind === 'complete') { next.state = 'succeeded'; next.terminalState = 'succeeded'; next.output = input.output ?? null; next.completedAt = new Date().toISOString() }
+    if (input.kind === 'fail') { next.state = 'failed_retryable'; next.terminalState = 'failed_retryable'; next.failure = { failureClass: input.failureClass as NonNullable<Run['failure']>['failureClass'], message: input.message ?? '' }; next.completedAt = new Date().toISOString() }
+    if (input.kind === 'cancel') { next.state = 'cancelled'; next.terminalState = 'cancelled'; next.completedAt = new Date().toISOString() }
+    this.runs.set(input.runId, next)
+    return { ...next }
+  }
+
   async reserveIdempotencyKey(
     record: IdempotencyRecord,
   ): Promise<{ record: IdempotencyRecord; created: boolean }> {
@@ -221,6 +252,7 @@ export class InMemoryLedgerStore implements LedgerStore {
   }
 
   async putGateResult(gate: GateResult): Promise<void> {
+    if (this.gates.has(gate.gateId)) throw new Error(`Gate ${gate.gateId} is immutable`)
     this.gates.set(gate.gateId, { ...gate })
   }
 
@@ -245,14 +277,21 @@ export class InMemoryLedgerStore implements LedgerStore {
     return this.events.filter((e) => e.issueId === issueId)
   }
 
-  async listExpiredLeaseRuns(nowIso: string): Promise<Run[]> {
+  async reclaimExpiredLeases(nowIso: string): Promise<Run[]> {
     const now = new Date(nowIso).getTime()
-    return Array.from(this.runs.values()).filter(
+    const expired = Array.from(this.runs.values()).filter(
       (r) =>
         (r.state === 'claimed' || r.state === 'executing') &&
         r.lease !== null &&
         new Date(r.lease.expiresAt).getTime() < now,
     )
+    const reclaimed: Run[] = []
+    for (const run of expired) {
+      const next = { ...run, state: 'queued' as const, lease: { ...(run.lease as NonNullable<Run['lease']>), fencingToken: (run.lease?.fencingToken ?? 0) + 1, executorId: '', expiresAt: nowIso } }
+      this.runs.set(run.runId, next)
+      reclaimed.push({ ...next })
+    }
+    return reclaimed
   }
 
   async addIssueDependency(dep: IssueDependency): Promise<void> {

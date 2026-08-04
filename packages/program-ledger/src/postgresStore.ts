@@ -17,6 +17,7 @@ import type {
   SchemaVersion,
   UnresolvedDependency,
 } from './types.js'
+import { DEFAULT_ORG_ID } from './types.js'
 import type { LedgerStore } from './store.js'
 
 /**
@@ -85,13 +86,15 @@ function toIssue(row: Record<string, unknown>): Issue {
     moduleRef: (row.module_ref as string | null) ?? undefined,
     phaseRef: (row.phase_ref as string | null) ?? undefined,
     issueKey: (row.issue_key as string | null) ?? undefined,
+    target: (row.target as string | null) ?? null,
+    intendedEffect: String(row.intended_effect ?? row.issue_type),
     correlationId: (row.correlation_id as string | null) ?? null,
     state: row.state as IssueState,
     input: row.input as Record<string, unknown>,
     inputDigest: String(row.input_digest),
     sideEffectClass: row.side_effect_class as Issue['sideEffectClass'],
     requiredCapabilityId: (row.required_capability_id as string | null) ?? null,
-    orgId: (row.org_id as string | null) ?? null,
+    orgId: (row.org_id as string | null) ?? DEFAULT_ORG_ID,
     retryPolicy: {
       maxAttempts: Number(row.retry_max_attempts),
       backoffBaseMs: Number(row.retry_backoff_base_ms),
@@ -112,6 +115,7 @@ function toRun(row: Record<string, unknown>): Run {
     schemaVersion: schemaVersion(row),
     runId: String(row.run_id),
     issueId: String(row.issue_id),
+    orgId: String(row.org_id ?? DEFAULT_ORG_ID),
     attemptNumber: Number(row.attempt_number),
     state: row.state as RunState,
     inputSnapshot: row.input_snapshot as Record<string, unknown>,
@@ -147,6 +151,7 @@ function toGate(row: Record<string, unknown>): GateResult {
     gateId: String(row.gate_id),
     subjectType: (row.subject_type as GateSubjectType) ?? 'issue',
     subjectId: String(row.subject_id ?? row.issue_id),
+    orgId: String(row.org_id ?? DEFAULT_ORG_ID),
     subjectRevision: String(row.subject_revision ?? row.decided_at ?? ''),
     attempt: Number(row.attempt ?? 1),
     evaluator: String(row.evaluator ?? row.decided_by ?? 'legacy'),
@@ -167,7 +172,8 @@ function toEvent(row: Record<string, unknown>): LedgerEvent {
   return {
     schemaVersion: schemaVersion(row),
     eventId: String(row.event_id),
-    issueId: String(row.issue_id),
+    issueId: row.issue_id == null ? null : String(row.issue_id),
+    orgId: String(row.org_id ?? DEFAULT_ORG_ID),
     runId: (row.run_id as string | null) ?? null,
     type: row.event_type as LedgerEventType,
     payload: row.payload as Record<string, unknown>,
@@ -180,6 +186,7 @@ function toIdempotency(row: Record<string, unknown>): IdempotencyRecord {
     schemaVersion: schemaVersion(row),
     idempotencyKey: String(row.idempotency_key),
     issueId: String(row.issue_id),
+    orgId: String(row.org_id ?? DEFAULT_ORG_ID),
     runId: (row.run_id as string | null) ?? null,
     state: row.state as IdempotencyState,
     createdAt: new Date(row.created_at as string).toISOString(),
@@ -218,41 +225,41 @@ export class PostgresLedgerStore implements LedgerStore {
   constructor(private readonly db: SqlExecutor) {}
 
   async getProgram(programId: string, orgId?: string): Promise<Program | null> {
-    return queryOneOrNull(this.db, 'select * from lsites_ledger.programs where program_id = $1 and ($2::uuid is null or org_id = $2)', [programId, orgId ?? null], toProgram)
+    return queryOneOrNull(this.db, 'select * from lsites_ledger.programs where program_id = $1 and org_id = $2', [programId, orgId ?? DEFAULT_ORG_ID], toProgram)
   }
 
   async putProgram(program: Program): Promise<void> {
-    await this.db.query(`insert into lsites_ledger.programs (program_id, schema_version_major, schema_version_minor, org_id, title, state, revision, created_at, updated_at) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) on conflict (program_id) do update set org_id=excluded.org_id,title=excluded.title,state=excluded.state,revision=excluded.revision,updated_at=excluded.updated_at`, [program.programId, program.schemaVersion.major, program.schemaVersion.minor, program.orgId, program.title, program.state, program.revision, program.createdAt, program.updatedAt])
+    await this.db.query(`insert into lsites_ledger.programs (program_id, schema_version_major, schema_version_minor, org_id, title, state, revision, created_at, updated_at) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) on conflict (program_id, org_id) do update set title=excluded.title,state=excluded.state,revision=excluded.revision,updated_at=excluded.updated_at`, [program.programId, program.schemaVersion.major, program.schemaVersion.minor, program.orgId, program.title, program.state, program.revision, program.createdAt, program.updatedAt])
   }
 
   async listPrograms(orgId?: string): Promise<Program[]> {
-    const { rows } = await this.db.query('select * from lsites_ledger.programs where ($1::uuid is null or org_id = $1) order by program_id', [orgId ?? null])
+    const { rows } = await this.db.query('select * from lsites_ledger.programs where org_id = $1 order by program_id', [orgId ?? DEFAULT_ORG_ID])
     return rows.map(toProgram)
   }
 
   async getModule(programId: string, moduleId: string, orgId?: string): Promise<Module | null> {
-    return queryOneOrNull(this.db, 'select * from lsites_ledger.modules where program_id = $1 and module_id = $2 and ($3::uuid is null or org_id = $3)', [programId, moduleId, orgId ?? null], toModule)
+    return queryOneOrNull(this.db, 'select * from lsites_ledger.modules where program_id = $1 and module_id = $2 and org_id = $3', [programId, moduleId, orgId ?? DEFAULT_ORG_ID], toModule)
   }
 
   async putModule(module: Module): Promise<void> {
-    await this.db.query(`insert into lsites_ledger.modules (program_id,module_id,schema_version_major,schema_version_minor,org_id,title,purpose,state,revision,created_at,updated_at) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) on conflict (program_id,module_id) do update set org_id=excluded.org_id,title=excluded.title,purpose=excluded.purpose,state=excluded.state,revision=excluded.revision,updated_at=excluded.updated_at`, [module.programId, module.moduleId, module.schemaVersion.major, module.schemaVersion.minor, module.orgId, module.title, module.purpose, module.state, module.revision, module.createdAt, module.updatedAt])
+    await this.db.query(`insert into lsites_ledger.modules (program_id,module_id,schema_version_major,schema_version_minor,org_id,title,purpose,state,revision,created_at,updated_at) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) on conflict (program_id,module_id,org_id) do update set title=excluded.title,purpose=excluded.purpose,state=excluded.state,revision=excluded.revision,updated_at=excluded.updated_at`, [module.programId, module.moduleId, module.schemaVersion.major, module.schemaVersion.minor, module.orgId, module.title, module.purpose, module.state, module.revision, module.createdAt, module.updatedAt])
   }
 
   async listModules(programId: string, orgId?: string): Promise<Module[]> {
-    const { rows } = await this.db.query('select * from lsites_ledger.modules where program_id = $1 and ($2::uuid is null or org_id = $2) order by module_id', [programId, orgId ?? null])
+    const { rows } = await this.db.query('select * from lsites_ledger.modules where program_id = $1 and org_id = $2 order by module_id', [programId, orgId ?? DEFAULT_ORG_ID])
     return rows.map(toModule)
   }
 
   async getPhase(programId: string, moduleId: string, phaseId: string, orgId?: string): Promise<Phase | null> {
-    return queryOneOrNull(this.db, 'select * from lsites_ledger.phases where program_id = $1 and module_id = $2 and phase_id = $3 and ($4::uuid is null or org_id = $4)', [programId, moduleId, phaseId, orgId ?? null], toPhase)
+    return queryOneOrNull(this.db, 'select * from lsites_ledger.phases where program_id = $1 and module_id = $2 and phase_id = $3 and org_id = $4', [programId, moduleId, phaseId, orgId ?? DEFAULT_ORG_ID], toPhase)
   }
 
   async putPhase(phase: Phase): Promise<void> {
-    await this.db.query(`insert into lsites_ledger.phases (program_id,module_id,phase_id,schema_version_major,schema_version_minor,org_id,title,objective,state,revision,created_at,updated_at) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) on conflict (program_id,module_id,phase_id) do update set org_id=excluded.org_id,title=excluded.title,objective=excluded.objective,state=excluded.state,revision=excluded.revision,updated_at=excluded.updated_at`, [phase.programId, phase.moduleId, phase.phaseId, phase.schemaVersion.major, phase.schemaVersion.minor, phase.orgId, phase.title, phase.objective, phase.state, phase.revision, phase.createdAt, phase.updatedAt])
+    await this.db.query(`insert into lsites_ledger.phases (program_id,module_id,phase_id,schema_version_major,schema_version_minor,org_id,title,objective,state,revision,created_at,updated_at) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) on conflict (program_id,module_id,phase_id,org_id) do update set title=excluded.title,objective=excluded.objective,state=excluded.state,revision=excluded.revision,updated_at=excluded.updated_at`, [phase.programId, phase.moduleId, phase.phaseId, phase.schemaVersion.major, phase.schemaVersion.minor, phase.orgId, phase.title, phase.objective, phase.state, phase.revision, phase.createdAt, phase.updatedAt])
   }
 
   async listPhases(programId: string, moduleId: string, orgId?: string): Promise<Phase[]> {
-    const { rows } = await this.db.query('select * from lsites_ledger.phases where program_id = $1 and module_id = $2 and ($3::uuid is null or org_id = $3) order by phase_id', [programId, moduleId, orgId ?? null])
+    const { rows } = await this.db.query('select * from lsites_ledger.phases where program_id = $1 and module_id = $2 and org_id = $3 order by phase_id', [programId, moduleId, orgId ?? DEFAULT_ORG_ID])
     return rows.map(toPhase)
   }
 
@@ -261,22 +268,22 @@ export class PostgresLedgerStore implements LedgerStore {
   }
 
   async getIssueByKey(issueKey: string, orgId?: string): Promise<Issue | null> {
-    return queryOneOrNull(this.db, 'select * from lsites_ledger.issues where issue_key = $1 and ($2::uuid is null or org_id = $2)', [issueKey, orgId ?? null], toIssue)
+    return queryOneOrNull(this.db, 'select * from lsites_ledger.issues where issue_key = $1 and org_id = $2', [issueKey, orgId ?? DEFAULT_ORG_ID], toIssue)
   }
 
   async putIssue(issue: Issue): Promise<void> {
     await this.db.query(
       `insert into lsites_ledger.issues (
-         issue_id, schema_version_major, schema_version_minor, issue_type, program_ref, module_ref, phase_ref, issue_key, correlation_id,
+         issue_id, schema_version_major, schema_version_minor, issue_type, program_ref, module_ref, phase_ref, issue_key, target, intended_effect, correlation_id,
          state, input, input_digest, side_effect_class, org_id, required_capability_id,
          retry_max_attempts, retry_backoff_base_ms,
          retry_backoff_max_ms, timeout_ms, attempt_count, cancel_requested, retry_at, created_at, updated_at
-       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26)
        on conflict (issue_id) do update set
          state = excluded.state, input = excluded.input, input_digest = excluded.input_digest,
          side_effect_class = excluded.side_effect_class,
          org_id = excluded.org_id, required_capability_id = excluded.required_capability_id,
-         phase_ref = excluded.phase_ref, issue_key = excluded.issue_key, correlation_id = excluded.correlation_id,
+         phase_ref = excluded.phase_ref, issue_key = excluded.issue_key, target = excluded.target, intended_effect = excluded.intended_effect, correlation_id = excluded.correlation_id,
          attempt_count = excluded.attempt_count, retry_at = excluded.retry_at,
          cancel_requested = excluded.cancel_requested, updated_at = excluded.updated_at`,
       [
@@ -288,6 +295,8 @@ export class PostgresLedgerStore implements LedgerStore {
         issue.moduleRef ?? null,
         issue.phaseRef ?? null,
         issue.issueKey ?? null,
+        issue.target ?? null,
+        issue.intendedEffect,
         issue.correlationId ?? null,
         issue.state,
         JSON.stringify(issue.input),
@@ -316,7 +325,7 @@ export class PostgresLedgerStore implements LedgerStore {
          and ($3::text is null or module_ref = $3)
          and ($4::text is null or phase_ref = $4)
        order by created_at, issue_id`,
-      [filter.orgId ?? null, filter.programId ?? null, filter.moduleId ?? null, filter.phaseId ?? null],
+      [filter.orgId ?? DEFAULT_ORG_ID, filter.programId ?? null, filter.moduleId ?? null, filter.phaseId ?? null],
     )
     return rows.map(toIssue)
   }
@@ -328,10 +337,10 @@ export class PostgresLedgerStore implements LedgerStore {
   async putRun(run: Run): Promise<void> {
     await this.db.query(
       `insert into lsites_ledger.runs (
-         run_id, schema_version_major, schema_version_minor, issue_id, attempt_number, state, input_snapshot,
+         run_id, schema_version_major, schema_version_minor, issue_id, org_id, attempt_number, state, input_snapshot,
          lease_id, lease_fencing_token, lease_executor_id, lease_expires_at, output, failure_class,
          failure_message, executor_type, executor_version, correlation_id, idempotency_key, created_at, claimed_at, started_at, last_heartbeat_at, completed_at, terminal_state
-       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)
        on conflict (run_id) do update set
          state = excluded.state, lease_id = excluded.lease_id, lease_fencing_token = excluded.lease_fencing_token,
          lease_executor_id = excluded.lease_executor_id, lease_expires_at = excluded.lease_expires_at,
@@ -344,6 +353,7 @@ export class PostgresLedgerStore implements LedgerStore {
         run.schemaVersion.major,
         run.schemaVersion.minor,
         run.issueId,
+        run.orgId,
         run.attemptNumber,
         run.state,
         JSON.stringify(run.inputSnapshot),
@@ -389,6 +399,45 @@ export class PostgresLedgerStore implements LedgerStore {
     return rows[0] ? toRun(rows[0]) : null
   }
 
+  async dispatchRun(issue: Issue, run: Run): Promise<{ run: Run; created: boolean }> {
+    await this.db.query('begin')
+    try {
+      const existing = await this.db.query('select * from lsites_ledger.idempotency_records where idempotency_key = $1 for update', [run.idempotencyKey])
+      if (existing.rows[0] && existing.rows[0].state !== 'failed_safe_to_retry') {
+        const existingRunId = existing.rows[0].run_id
+        const existingRun = existingRunId ? await this.db.query('select * from lsites_ledger.runs where run_id = $1', [existingRunId]) : { rows: [] }
+        if (!existingRun.rows[0]) throw new Error(`idempotency record ${run.idempotencyKey} has no resolvable Run`)
+        await this.db.query('commit')
+        return { run: toRun(existingRun.rows[0]), created: false }
+      }
+      const issueUpdate = await this.db.query(`update lsites_ledger.issues set state = 'dispatched', attempt_count = $2, updated_at = $3 where issue_id = $1 and state in ('ready', 'retry_scheduled') returning *`, [issue.issueId, run.attemptNumber, run.createdAt])
+      if (!issueUpdate.rows[0]) throw new Error(`Issue ${issue.issueId} is no longer dispatchable`)
+      await this.db.query(`insert into lsites_ledger.runs (run_id, schema_version_major, schema_version_minor, issue_id, org_id, attempt_number, state, input_snapshot, correlation_id, idempotency_key, created_at) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, [run.runId, run.schemaVersion.major, run.schemaVersion.minor, run.issueId, run.orgId, run.attemptNumber, run.state, JSON.stringify(run.inputSnapshot), run.correlationId, run.idempotencyKey, run.createdAt])
+      await this.db.query(`insert into lsites_ledger.idempotency_records (idempotency_key, schema_version_major, schema_version_minor, issue_id, org_id, run_id, state, created_at) values ($1,$2,$3,$4,$5,$6,'executing',$7) on conflict (idempotency_key) do update set issue_id = excluded.issue_id, org_id = excluded.org_id, run_id = excluded.run_id, state = excluded.state, created_at = excluded.created_at`, [run.idempotencyKey, run.schemaVersion.major, run.schemaVersion.minor, run.issueId, run.orgId, run.runId, run.createdAt])
+      await this.db.query('commit')
+      return { run, created: true }
+    } catch (error) {
+      await this.db.query('rollback')
+      throw error
+    }
+  }
+
+  async mutateLeasedRun(input: { runId: string; fencingToken: number; kind: 'heartbeat' | 'complete' | 'fail' | 'cancel'; leaseDurationMs?: number; output?: unknown; failureClass?: string; message?: string }): Promise<Run | null> {
+    const params: unknown[] = [input.runId, input.fencingToken]
+    let sql: string
+    if (input.kind === 'heartbeat') { params.push(input.leaseDurationMs ?? 30_000); sql = `update lsites_ledger.runs set lease_expires_at = now() + ($3 * interval '1 millisecond'), last_heartbeat_at = now() where run_id = $1 and lease_fencing_token = $2 and state in ('claimed','executing') and lease_expires_at > now() returning *` }
+    else if (input.kind === 'complete') { params.push(JSON.stringify(input.output ?? null)); sql = `update lsites_ledger.runs set state = 'succeeded', terminal_state = 'succeeded', output = $3, completed_at = now() where run_id = $1 and lease_fencing_token = $2 and state in ('claimed','executing') and lease_expires_at > now() returning *` }
+    else if (input.kind === 'cancel') { sql = `update lsites_ledger.runs set state = 'cancelled', terminal_state = 'cancelled', completed_at = now() where run_id = $1 and lease_fencing_token = $2 and state in ('claimed','executing','cancel_requested') and lease_expires_at > now() returning *` }
+    else { params.push(input.failureClass ?? 'unknown', input.message ?? ''); sql = `update lsites_ledger.runs set state = 'failed_retryable', terminal_state = 'failed_retryable', failure_class = $3, failure_message = $4, completed_at = now() where run_id = $1 and lease_fencing_token = $2 and state in ('claimed','executing') and lease_expires_at > now() returning *` }
+    const { rows } = await this.db.query(sql, params)
+    return rows[0] ? toRun(rows[0]) : null
+  }
+
+  async reclaimExpiredLeases(nowIso: string): Promise<Run[]> {
+    const { rows } = await this.db.query(`update lsites_ledger.runs set state = 'queued', lease_fencing_token = coalesce(lease_fencing_token, 0) + 1, lease_executor_id = '', lease_expires_at = $1 where state in ('claimed','executing') and lease_expires_at < $1 returning *`, [nowIso])
+    return rows.map(toRun)
+  }
+
   async reserveIdempotencyKey(
     record: IdempotencyRecord,
   ): Promise<{ record: IdempotencyRecord; created: boolean }> {
@@ -409,8 +458,8 @@ export class PostgresLedgerStore implements LedgerStore {
       }
 
       await this.db.query(
-        `insert into lsites_ledger.idempotency_records (idempotency_key, schema_version_major, schema_version_minor, issue_id, run_id, state, created_at)
-         values ($1,$2,$3,$4,$5,$6,$7)
+        `insert into lsites_ledger.idempotency_records (idempotency_key, schema_version_major, schema_version_minor, issue_id, org_id, run_id, state, created_at)
+         values ($1,$2,$3,$4,$5,$6,$7,$8)
          on conflict (idempotency_key) do update set
            issue_id = excluded.issue_id, run_id = excluded.run_id, state = excluded.state, created_at = excluded.created_at`,
         [
@@ -418,6 +467,7 @@ export class PostgresLedgerStore implements LedgerStore {
           record.schemaVersion.major,
           record.schemaVersion.minor,
           record.issueId,
+          record.orgId,
           record.runId,
           record.state,
           record.createdAt,
@@ -440,8 +490,8 @@ export class PostgresLedgerStore implements LedgerStore {
 
   async updateIdempotencyRecord(record: IdempotencyRecord): Promise<void> {
     await this.db.query(
-      `insert into lsites_ledger.idempotency_records (idempotency_key, schema_version_major, schema_version_minor, issue_id, run_id, state, created_at)
-       values ($1,$2,$3,$4,$5,$6,$7)
+      `insert into lsites_ledger.idempotency_records (idempotency_key, schema_version_major, schema_version_minor, issue_id, org_id, run_id, state, created_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8)
        on conflict (idempotency_key) do update set
          issue_id = excluded.issue_id, run_id = excluded.run_id, state = excluded.state`,
       [
@@ -449,6 +499,7 @@ export class PostgresLedgerStore implements LedgerStore {
         record.schemaVersion.major,
         record.schemaVersion.minor,
         record.issueId,
+        record.orgId,
         record.runId,
         record.state,
         record.createdAt,
@@ -458,15 +509,15 @@ export class PostgresLedgerStore implements LedgerStore {
 
   async putGateResult(gate: GateResult): Promise<void> {
     await this.db.query(
-      `insert into lsites_ledger.gate_results (gate_id, schema_version_major, schema_version_minor, issue_id, run_id, subject_type, subject_id, subject_revision, attempt, evaluator, evaluator_version, inputs, reasons, evidence_receipts, decision, evidence, decided_by, decided_at)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
-       on conflict (gate_id) do update set decision = excluded.decision, evidence = excluded.evidence, inputs = excluded.inputs, reasons = excluded.reasons, evidence_receipts = excluded.evidence_receipts, decided_by = excluded.decided_by, decided_at = excluded.decided_at`,
+      `insert into lsites_ledger.gate_results (gate_id, schema_version_major, schema_version_minor, issue_id, run_id, org_id, subject_type, subject_id, subject_revision, attempt, evaluator, evaluator_version, inputs, reasons, evidence_receipts, decision, evidence, decided_by, decided_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
       [
         gate.gateId,
         gate.schemaVersion.major,
         gate.schemaVersion.minor,
         gate.issueId,
         gate.runId,
+        gate.orgId,
         gate.subjectType,
         gate.subjectId,
         gate.subjectRevision,
@@ -499,13 +550,14 @@ export class PostgresLedgerStore implements LedgerStore {
 
   async appendEvent(event: LedgerEvent): Promise<void> {
     await this.db.query(
-      `insert into lsites_ledger.ledger_events (event_id, schema_version_major, schema_version_minor, issue_id, run_id, event_type, payload, occurred_at)
-       values ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      `insert into lsites_ledger.ledger_events (event_id, schema_version_major, schema_version_minor, issue_id, org_id, run_id, event_type, payload, occurred_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
       [
         event.eventId,
         event.schemaVersion.major,
         event.schemaVersion.minor,
         event.issueId,
+        event.orgId,
         event.runId,
         event.type,
         JSON.stringify(event.payload),
@@ -522,33 +574,25 @@ export class PostgresLedgerStore implements LedgerStore {
     return rows.map(toEvent)
   }
 
-  async listExpiredLeaseRuns(nowIso: string): Promise<Run[]> {
-    const { rows } = await this.db.query(
-      `select * from lsites_ledger.runs
-       where state in ('claimed', 'executing') and lease_expires_at is not null and lease_expires_at < $1`,
-      [nowIso],
-    )
-    return rows.map(toRun)
-  }
-
   async addIssueDependency(dep: IssueDependency): Promise<void> {
     await this.db.query(
-      `insert into lsites_ledger.issue_dependencies (issue_id, depends_on_issue_id, created_at)
-       values ($1, $2, $3)
+        `insert into lsites_ledger.issue_dependencies (issue_id, depends_on_issue_id, org_id, created_at)
+       values ($1, $2, $3, $4)
        on conflict (issue_id, depends_on_issue_id) do nothing`,
-      [dep.issueId, dep.dependsOnIssueId, dep.createdAt],
+      [dep.issueId, dep.dependsOnIssueId, dep.orgId, dep.createdAt],
     )
   }
 
   async getIssueDependencies(issueId: string): Promise<IssueDependency[]> {
     try {
       const { rows } = await this.db.query(
-        'select issue_id, depends_on_issue_id, created_at from lsites_ledger.issue_dependencies where issue_id = $1',
+        'select issue_id, depends_on_issue_id, org_id, created_at from lsites_ledger.issue_dependencies where issue_id = $1',
         [issueId],
       )
       return rows.map((row) => ({
         issueId: String(row.issue_id),
         dependsOnIssueId: String(row.depends_on_issue_id),
+        orgId: String(row.org_id ?? DEFAULT_ORG_ID),
         createdAt: new Date(row.created_at as string).toISOString(),
       }))
     } catch (error) {
@@ -560,7 +604,7 @@ export class PostgresLedgerStore implements LedgerStore {
   async getUnresolvedDependencies(issueId: string, orgId?: string): Promise<UnresolvedDependency[]> {
     try {
       const { rows } = await this.db.query(
-        `select d.issue_id, d.depends_on_issue_id, d.created_at, i.state, i.org_id,
+        `select d.issue_id, d.depends_on_issue_id, d.org_id, d.created_at, i.state, i.org_id as target_org_id,
                 case when i.issue_id is null then 'missing'
                      when $2::uuid is not null and owner.org_id is distinct from $2 then 'wrong_org'
                      when i.org_id is distinct from owner.org_id then 'wrong_org'
@@ -570,9 +614,9 @@ export class PostgresLedgerStore implements LedgerStore {
            join lsites_ledger.issues owner on owner.issue_id = d.issue_id
            left join lsites_ledger.issues i on i.issue_id = d.depends_on_issue_id
           where d.issue_id = $1 and (i.issue_id is null or i.state <> 'completed' or i.org_id is distinct from owner.org_id or ($2::uuid is not null and owner.org_id is distinct from $2))`,
-        [issueId, orgId ?? null],
+        [issueId, orgId ?? DEFAULT_ORG_ID],
       )
-      return rows.map((row) => ({ dependency: { issueId: String(row.issue_id), dependsOnIssueId: String(row.depends_on_issue_id), createdAt: new Date(row.created_at as string).toISOString() }, state: (row.state as Issue['state'] | null) ?? null, reason: row.reason as 'missing' | 'not_completed' | 'rejected_gate' | 'wrong_org' }))
+      return rows.map((row) => ({ dependency: { issueId: String(row.issue_id), dependsOnIssueId: String(row.depends_on_issue_id), orgId: String(row.org_id ?? DEFAULT_ORG_ID), createdAt: new Date(row.created_at as string).toISOString() }, state: (row.state as Issue['state'] | null) ?? null, reason: row.reason as 'missing' | 'not_completed' | 'rejected_gate' | 'wrong_org' }))
     } catch (error) {
       if (isInvalidInputSyntaxError(error)) return []
       throw error

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryLedgerStore } from '../src/store.js'
 import { ProgramLedger } from '../src/ledger.js'
+import { canonicalEvidence } from './evidence.js'
 import { HierarchyRegistry } from '../src/hierarchy.js'
 import {
   ExecutorRegistry,
@@ -43,7 +44,7 @@ describe('end-to-end synthetic Issue lifecycle', () => {
 
     // Gate acceptance is a distinct authority the executor never claimed
     // for itself -- runIssueOnce() only got the Issue to awaiting_gate.
-    const gate = await ledger.decideGate(issue.issueId, run.runId, 'accepted', { checked: true }, 'reviewer-1')
+    const gate = await ledger.decideGate(issue.issueId, run.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issue.issueId, issue.orgId!), 'reviewer-1')
     expect(gate.decision).toBe('accepted')
 
     const finalIssue = await ledger.getIssue(issue.issueId)
