@@ -261,6 +261,7 @@ const isStrictHttpPreviewUrl = (value: unknown): value is string => {
   if (
     !isNonEmptyString(value) ||
     !(value.startsWith('http://') || value.startsWith('https://')) ||
+    value.includes('\\') ||
     /[\s\u0000-\u001f\u007f]/.test(value) ||
     value.includes('#')
   ) {
