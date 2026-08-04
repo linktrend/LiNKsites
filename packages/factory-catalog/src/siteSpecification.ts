@@ -28,7 +28,7 @@ import { assertKitIsProductionReady, resolveEffectiveMaxPages, type VerticalKit 
 import { checkEntitlement, type TierId, type TierSpecification } from './tierSpecification.js'
 import type { SiteDesignProfile } from './designCatalog.js'
 import type { ComponentRegistry } from './componentRegistry.js'
-import { assertLibraryConsumptionReceipt, type LibraryConsumptionReceipt } from './libraryConsumer.js'
+import { assertLibraryConsumptionEvidence, canonicalJsonStringify, isTrustedLibraryConsumption, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.js'
 
 export class SiteSpecificationError extends Error {
   constructor(message: string) {
@@ -50,10 +50,12 @@ export interface SiteSpecification {
   pageCount: number
   effectiveMaxPages: number
   resolvedAt: string
-  /** Explicit selection marker; when present, libraryReceipt is mandatory. */
+  /** Explicit selection marker; when present, trusted materialized consumption is mandatory. */
   libraryEntryId?: string
   /** Exact Library evidence for library-backed specifications. */
   libraryReceipt?: LibraryConsumptionReceipt
+  /** Materialized entry and file bodies from the trusted consumer boundary. */
+  libraryConsumption?: LibraryConsumption
 }
 
 export interface ResolveSiteSpecificationInput {
@@ -68,6 +70,7 @@ export interface ResolveSiteSpecificationInput {
   pageCount: number
   libraryEntryId?: string
   libraryReceipt?: LibraryConsumptionReceipt
+  libraryConsumption?: LibraryConsumption
 }
 
 /**
@@ -92,11 +95,13 @@ export interface ResolveSiteSpecificationInput {
 export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): SiteSpecification {
   const { siteSpecId, siteRef, kit, tier, foundation, designProfile, componentRegistry, selectedComponentIds, pageCount } = input
 
-  const libraryEntryId = input.libraryEntryId ?? input.libraryReceipt?.entryId
-  if (libraryEntryId && (!input.libraryReceipt || input.libraryReceipt.entryId !== libraryEntryId)) {
-    throw new SiteSpecificationError('A library-backed Site Specification must persist a receipt matching its selected library entry.')
+  const hasLibrarySelection = Boolean(input.libraryEntryId || input.libraryReceipt || input.libraryConsumption)
+  if (hasLibrarySelection) {
+    if (!input.libraryConsumption || !isTrustedLibraryConsumption(input.libraryConsumption)) throw new SiteSpecificationError('A library-backed Site Specification requires trusted materialized LiNKlibraries consumption evidence; a caller-supplied receipt is insufficient.')
+    assertLibraryConsumptionEvidence(input.libraryConsumption)
+    const libraryEntryId = input.libraryEntryId ?? input.libraryConsumption.receipt.entryId
+    if (libraryEntryId !== input.libraryConsumption.receipt.entryId || (input.libraryReceipt && canonicalJsonStringify(input.libraryReceipt) !== canonicalJsonStringify(input.libraryConsumption.receipt))) throw new SiteSpecificationError('A library-backed Site Specification must bind its selected entry and receipt to the trusted consumption evidence.')
   }
-  if (input.libraryReceipt) assertLibraryConsumptionReceipt(input.libraryReceipt)
 
   assertKitIsProductionReady(kit)
   assertFoundationIsProductionReady(foundation)
@@ -132,7 +137,6 @@ export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): 
     pageCount,
     effectiveMaxPages,
     resolvedAt: new Date().toISOString(),
-    ...(libraryEntryId ? { libraryEntryId } : {}),
-    ...(input.libraryReceipt ? { libraryReceipt: input.libraryReceipt } : {}),
+    ...(input.libraryConsumption ? { libraryEntryId: input.libraryConsumption.receipt.entryId, libraryReceipt: input.libraryConsumption.receipt, libraryConsumption: input.libraryConsumption } : {}),
   }
 }
