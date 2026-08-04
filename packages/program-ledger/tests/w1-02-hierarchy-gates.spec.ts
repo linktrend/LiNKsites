@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { HierarchyRegistry, LINKSITES_PROGRAM } from '../src/hierarchy.js'
 import { ProgramLedger } from '../src/ledger.js'
 import { InMemoryLedgerStore } from '../src/store.js'
+import { deriveIdempotencyKey } from '../src/types.js'
 import { canonicalEvidence } from './evidence.js'
 
 describe('W1-02 durable hierarchy and gates', () => {
@@ -64,9 +65,9 @@ describe('W1-02 durable hierarchy and gates', () => {
     await ledger.complete(run.runId, claim.lease!.fencingToken, null)
     await expect(ledger.decideGate(issue.issueId, run.runId, 'accepted', {}, 'reviewer')).rejects.toMatchObject({ code: 'invalid_state' })
     await ledger.decideGate(issue.issueId, run.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issue.issueId, issue.orgId!), 'reviewer')
-    await ledger.evaluateGate({ subjectType: 'phase', subjectId: 'phase-1', decision: 'accepted', evidence: await canonicalEvidence(ledger, 'phase', 'phase-1', issue.orgId!), evaluator: 'reviewer' })
-    await ledger.evaluateGate({ subjectType: 'module', subjectId: 'M01', decision: 'accepted', evidence: await canonicalEvidence(ledger, 'module', 'M01', issue.orgId!), evaluator: 'reviewer' })
-    await ledger.evaluateGate({ subjectType: 'program', subjectId: 'test-program', decision: 'accepted', evidence: await canonicalEvidence(ledger, 'program', 'test-program', issue.orgId!), evaluator: 'reviewer' })
+    await ledger.evaluateGate({ subjectType: 'phase', subjectId: 'phase-1', orgId: issue.orgId!, decision: 'accepted', evidence: await canonicalEvidence(ledger, 'phase', 'phase-1', issue.orgId!), evaluator: 'reviewer' })
+    await ledger.evaluateGate({ subjectType: 'module', subjectId: 'M01', orgId: issue.orgId!, decision: 'accepted', evidence: await canonicalEvidence(ledger, 'module', 'M01', issue.orgId!), evaluator: 'reviewer' })
+    await ledger.evaluateGate({ subjectType: 'program', subjectId: 'test-program', orgId: issue.orgId!, decision: 'accepted', evidence: await canonicalEvidence(ledger, 'program', 'test-program', issue.orgId!), evaluator: 'reviewer' })
     expect((await ledger.getCurrentGate('program', 'test-program'))?.decision).toBe('accepted')
   })
 
@@ -100,9 +101,7 @@ describe('W1-02 durable hierarchy and gates', () => {
     await ledger.complete(runB.runId, claimB.lease!.fencingToken, { result: 'org-b' })
     await ledger.decideGate(orgB.issueId, runB.runId, 'accepted', await canonicalEvidence(ledger, 'issue', orgB.issueId, orgB.orgId!), 'reviewer')
 
-    const dependent = await ledger.createIssue({ issueType: 'test.org-dependent', programRef: 'linksites', orgId: 'org-a', input: {}, dependsOn: [orgB.issueId] })
-    await expect(ledger.dispatch(dependent.issueId)).rejects.toMatchObject({ code: 'dependency_not_satisfied' })
-    expect((await ledger.getUnresolvedDependencies(dependent.issueId))[0]).toMatchObject({ reason: 'wrong_org' })
+    await expect(ledger.createIssue({ issueType: 'test.org-dependent', programRef: 'linksites', orgId: 'org-a', input: {}, dependsOn: [orgB.issueId] })).rejects.toMatchObject({ code: 'dependency_not_satisfied' })
   })
 
   it('applies the generic Issue gate API to the Issue state and audit trail', async () => {
@@ -133,5 +132,26 @@ describe('W1-02 durable hierarchy and gates', () => {
     await ledger.complete(gatedRun.runId, gatedClaim.lease!.fencingToken, { ok: true })
     await expect(ledger.decideGate(gated.issueId, gatedRun.runId, 'accepted', { evidenceReceipts: [{ nope: true }] }, 'reviewer')).rejects.toMatchObject({ code: 'invalid_state' })
     await expect(ledger.decideGate(gated.issueId, gatedRun.runId, 'accepted', { evidenceReceipts: [{ schema_version: { major: 1, minor: 0 }, org_id: gated.orgId, correlation_id: 'c', idempotency_key: 'i', receipt_id: 'r', producer: 'p', subject: { type: 'issue', id: gated.issueId }, checksum: { algorithm: 'sha256', value: 'a'.repeat(64) }, revision_sha: 'b'.repeat(40), storage_location: 'evidence://r', gate_association: 'g', timestamp: '2026-08-04T00:00:00.000Z' }] }, 'reviewer')).rejects.toMatchObject({ code: 'invalid_state' })
+
+    const copied = await canonicalEvidence(ledger, 'issue', gated.issueId, gated.orgId!)
+    copied.evidenceReceipts[0]!.subject.id = 'copied-from-another-issue'
+    await expect(ledger.decideGate(gated.issueId, gatedRun.runId, 'accepted', copied, 'reviewer')).rejects.toMatchObject({ code: 'invalid_state' })
+  })
+
+  it('binds an Issue Gate to its exact succeeded Run and uses collision-safe identity hashing', async () => {
+    const ledger = new ProgramLedger(new InMemoryLedgerStore())
+    const first = await ledger.createIssue({ issueType: 'test.exact-run', programRef: 'linksites', issueKey: 'exact-a', intendedEffect: 'write:a', target: 'target', input: {} })
+    const second = await ledger.createIssue({ issueType: 'test.exact-run', programRef: 'linksites', issueKey: 'exact-b', intendedEffect: 'write', target: 'a:target', input: {} })
+    const firstRun = await ledger.dispatch(first.issueId)
+    const firstClaim = await ledger.claim(firstRun.runId, 'worker-a')
+    await ledger.complete(firstRun.runId, firstClaim.lease!.fencingToken, { ok: true })
+    const secondRun = await ledger.dispatch(second.issueId)
+    const secondClaim = await ledger.claim(secondRun.runId, 'worker-b')
+    await ledger.complete(secondRun.runId, secondClaim.lease!.fencingToken, { ok: true })
+
+    await expect(ledger.decideGate(first.issueId, secondRun.runId, 'accepted', await canonicalEvidence(ledger, 'issue', first.issueId, first.orgId!), 'reviewer')).rejects.toMatchObject({ code: 'invalid_state' })
+    expect(deriveIdempotencyKey({ ...first, issueKey: 'same', intendedEffect: 'a:b', target: 'c' })).not.toBe(
+      deriveIdempotencyKey({ ...second, issueKey: 'same', intendedEffect: 'a', target: 'b:c' }),
+    )
   })
 })

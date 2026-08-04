@@ -183,14 +183,12 @@ export function runDependencyTests(storeName: string, makeStore: () => Promise<L
 
       const nonExistentIssueId = '00000000-dead-beef-0000-000000000000'
 
-      const downstream = await ledger.createIssue({
+      const err = await ledger.createIssue({
         issueType: 'test.downstream',
         programRef: 'program-1',
         input: { step: 'second' },
         dependsOn: [nonExistentIssueId],
-      })
-
-      const err = await ledger.dispatch(downstream.issueId).catch((e) => e)
+      }).catch((e) => e)
       expect(err).toBeInstanceOf(LedgerError)
       expect((err as LedgerError).code).toBe('dependency_not_satisfied')
       expect((err as LedgerError).message).toMatch(/does not exist/)

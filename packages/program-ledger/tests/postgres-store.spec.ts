@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { PostgresLedgerStore } from '../src/postgresStore.js'
 import { ProgramLedger } from '../src/ledger.js'
 import { runLedgerContractTests } from './ledgerContract.shared.js'
+import { canonicalEvidence } from './evidence.js'
 
 /**
  * Runs the SAME ledger contract test suite as tests/exit-gate.spec.ts,
@@ -28,6 +29,7 @@ const capabilityColumnsPath = resolve(
 )
 const hierarchyMigrationPath = resolve(__dirname, '../../../supabase/migrations/20260804113354_ledger_program_module_phase_gates.sql')
 const correctiveMigrationPath = resolve(__dirname, '../../../supabase/migrations/20260804120000_ledger_tenant_leases_backfill.sql')
+const integrityMigrationPath = resolve(__dirname, '../../../supabase/migrations/20260804200000_ledger_w1_02_integrity.sql')
 
 let db: PGlite
 
@@ -40,6 +42,7 @@ beforeAll(async () => {
   await db.exec(readFileSync(capabilityColumnsPath, 'utf8'))
   await db.exec(readFileSync(hierarchyMigrationPath, 'utf8'))
   await db.exec(readFileSync(correctiveMigrationPath, 'utf8'))
+  await db.exec(readFileSync(integrityMigrationPath, 'utf8'))
 })
 
 beforeEach(async () => {
@@ -83,6 +86,26 @@ describe('PostgresLedgerStore: malformed-ID robustness (hardening pass, 2026-07-
   })
 })
 
+describe('PostgresLedgerStore: fresh-instance replay and recovery proof', () => {
+  it('reclaims an interrupted Run and completes the same Issue through a fresh store instance', async () => {
+    const firstLedger = new ProgramLedger(new PostgresLedgerStore(db))
+    const issue = await firstLedger.createIssue({ issueType: 'recovery.fresh-instance', programRef: 'recovery-program', input: { step: 'durable' } })
+    const firstRun = await firstLedger.dispatch(issue.issueId)
+    const firstClaim = await firstLedger.claim(firstRun.runId, 'crashed-worker', 1)
+    await new Promise((resolve) => setTimeout(resolve, 5))
+
+    const recoveredLedger = new ProgramLedger(new PostgresLedgerStore(db))
+    await recoveredLedger.reclaimExpiredLeases()
+    const recoveredRun = await recoveredLedger.claim(firstRun.runId, 'recovery-worker')
+    const completed = await recoveredLedger.complete(firstRun.runId, recoveredRun.lease!.fencingToken, { recovered: true })
+    await recoveredLedger.decideGate(issue.issueId, completed.runId, 'accepted', await canonicalEvidence(recoveredLedger, 'issue', issue.issueId, issue.orgId!), 'recovery-reviewer')
+
+    expect((await recoveredLedger.listAttempts(issue.issueId)).map((run) => run.runId)).toEqual([firstRun.runId])
+    expect((await recoveredLedger.getIssue(issue.issueId))?.state).toBe('completed')
+    expect(firstClaim.lease!.fencingToken).toBeLessThan(recoveredRun.lease!.fencingToken)
+  })
+})
+
 describe('PostgresLedgerStore: ledger tenant RLS negative probe', () => {
   it('does not expose Org B hierarchy rows under an Org A runtime context', async () => {
     const orgA = '00000000-0000-0000-0000-0000000000aa'
@@ -100,5 +123,30 @@ describe('PostgresLedgerStore: ledger tenant RLS negative probe', () => {
       await db.query('reset role')
       await db.query('select set_config($1, $2, false)', ['app.org_id', ''])
     }
+  })
+})
+
+describe('PostgresLedgerStore: direct SQL composite-FK negative probes', () => {
+  it('rejects cross-tenant hierarchy, dependency, gate, event, and idempotency links', async () => {
+    const orgA = '00000000-0000-0000-0000-0000000000ca'
+    const orgB = '00000000-0000-0000-0000-0000000000cb'
+    await db.query(`insert into platform.organizations (id, name, kind, status) values ($1, 'FK A', 'client', 'active'), ($2, 'FK B', 'client', 'active') on conflict (id) do nothing`, [orgA, orgB])
+    await db.query(`insert into lsites_ledger.programs (program_id, org_id, title, state) values ('fk-program', $1, 'FK A', 'ready'), ('fk-program', $2, 'FK B', 'ready') on conflict do nothing`, [orgA, orgB])
+    await db.query(`insert into lsites_ledger.modules (program_id, module_id, org_id, title, purpose, state) values ('fk-program', 'M1', $1, 'M1', 'test', 'ready') on conflict do nothing`, [orgA])
+    await db.query(`insert into lsites_ledger.phases (program_id, module_id, phase_id, org_id, title, objective, state) values ('fk-program', 'M1', 'P1', $1, 'P1', 'test', 'ready') on conflict do nothing`, [orgA])
+
+    const invalidIssueSql = `insert into lsites_ledger.issues (issue_id, issue_type, program_ref, module_ref, phase_ref, issue_key, state, input, input_digest, intended_effect, org_id) values ($1, 'fk.test', 'fk-program', 'M1', $3, $2, 'ready', '{}'::jsonb, 'digest', 'test', $4)`
+    await expect(db.query(invalidIssueSql, ['51000000-0000-0000-0000-000000000001', 'wrong-org-hierarchy', 'P1', orgB])).rejects.toThrow()
+    await expect(db.query(invalidIssueSql, ['51000000-0000-0000-0000-000000000002', 'wrong-phase', 'P2', orgA])).rejects.toThrow()
+
+    const ledger = new ProgramLedger(new PostgresLedgerStore(db))
+    const issueA = await ledger.createIssue({ issueType: 'fk.owner', programRef: 'fk-program', orgId: orgA, issueKey: 'owner-a', input: {} })
+    const issueB = await ledger.createIssue({ issueType: 'fk.target', programRef: 'fk-program', orgId: orgB, issueKey: 'target-b', input: {} })
+    const runA = await ledger.dispatch(issueA.issueId)
+
+    await expect(db.query(`insert into lsites_ledger.issue_dependencies (issue_id, depends_on_issue_id, org_id) values ($1, $2, $3)`, [issueA.issueId, issueB.issueId, orgA])).rejects.toThrow()
+    await expect(db.query(`insert into lsites_ledger.gate_results (gate_id, issue_id, run_id, org_id, subject_type, subject_id, subject_revision, evaluator, evaluator_version, inputs, reasons, evidence_receipts, decision, evidence) values ($1, $2, $3, $4, 'issue', $2, 'revision', 'test', '1', '{}'::jsonb, '[]'::jsonb, '[]'::jsonb, 'accepted', '{}'::jsonb)`, ['52000000-0000-0000-0000-000000000001', issueA.issueId, runA.runId, orgB])).rejects.toThrow()
+    await expect(db.query(`insert into lsites_ledger.ledger_events (event_id, issue_id, org_id, event_type, payload) values ($1, $2, $3, 'probe', '{}'::jsonb)`, ['53000000-0000-0000-0000-000000000001', issueA.issueId, orgB])).rejects.toThrow()
+    await expect(db.query(`insert into lsites_ledger.idempotency_records (idempotency_key, issue_id, org_id, state) values ('fk-probe', $1, $2, 'reserved')`, [issueA.issueId, orgB])).rejects.toThrow()
   })
 })

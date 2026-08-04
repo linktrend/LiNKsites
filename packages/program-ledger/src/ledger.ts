@@ -7,12 +7,14 @@ import { assertDispatchCapabilityGrant, CapabilityGateError } from './capability
 import {
   SCHEMA_VERSION,
   DEFAULT_ORG_ID,
+  canonicalSerialize,
   deriveIdempotencyKey,
   type FailureClass,
   type GateDecision,
   type GateResult,
   type GateSubjectType,
-  type EvidenceReceipt,
+  type IdempotencyRecord,
+  type LedgerEvidenceReceipt,
   type Issue,
   type IssueDependency,
   type LedgerEvent,
@@ -25,7 +27,6 @@ import {
   type SideEffectClass,
   type WorkState,
 } from './types.js'
-import { isEvidenceReceipt, type EvidenceReceipt as CanonicalEvidenceReceipt } from '@linksites/types'
 import { LINKSITES_PROGRAM, type ProgramDefinition } from './hierarchy.js'
 
 export class LedgerError extends Error {
@@ -85,11 +86,37 @@ function nowIso(): string {
 }
 
 function digestInput(input: Record<string, unknown>): string {
-  return createHash('sha256').update(JSON.stringify(input)).digest('hex')
+  return createHash('sha256').update(canonicalSerialize(input)).digest('hex')
 }
 
 function subjectRevision(subjectType: GateSubjectType, subject: { id: string; state: string; revision?: number; updatedAt: string; inputDigest?: string; attemptCount?: number }): string {
-  return createHash('sha1').update(JSON.stringify({ subjectType, id: subject.id, state: subject.state, revision: subject.revision ?? null, updatedAt: subject.updatedAt, inputDigest: subject.inputDigest ?? null, attemptCount: subject.attemptCount ?? null })).digest('hex')
+  return createHash('sha1').update(canonicalSerialize({ subjectType, id: subject.id, state: subject.state, revision: subject.revision ?? null, updatedAt: subject.updatedAt, inputDigest: subject.inputDigest ?? null, attemptCount: subject.attemptCount ?? null })).digest('hex')
+}
+
+function intendedGateAssociation(subjectType: GateSubjectType, subjectId: string, runId?: string): string {
+  return runId ? `gate:${subjectType}:${subjectId}:run:${runId}` : `gate:${subjectType}:${subjectId}`
+}
+
+function isLedgerEvidenceReceipt(value: unknown): value is LedgerEvidenceReceipt {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
+  const receipt = value as Record<string, unknown>
+  const expectedKeys = ['schema_version', 'org_id', 'correlation_id', 'idempotency_key', 'receipt_id', 'producer', 'subject', 'checksum', 'revision_sha', 'storage_location', 'gate_association', 'timestamp']
+  if (Object.keys(receipt).sort().join('|') !== expectedKeys.sort().join('|')) return false
+  const schema = receipt.schema_version
+  const subject = receipt.subject
+  const checksum = receipt.checksum
+  if (typeof schema !== 'object' || schema === null || Array.isArray(schema) || typeof subject !== 'object' || subject === null || Array.isArray(subject) || typeof checksum !== 'object' || checksum === null || Array.isArray(checksum)) return false
+  const subjectRecord = subject as Record<string, unknown>
+  const checksumRecord = checksum as Record<string, unknown>
+  const reference = (candidate: unknown): candidate is string => typeof candidate === 'string' && candidate.length > 0 && !/[\u0000\n\r]/.test(candidate)
+  return (schema as Record<string, unknown>).major === 1 && (schema as Record<string, unknown>).minor === 0 &&
+    reference(receipt.org_id) && reference(receipt.correlation_id) && reference(receipt.idempotency_key) &&
+    reference(receipt.receipt_id) && reference(receipt.producer) &&
+    Object.keys(subjectRecord).sort().join('|') === 'id|type' &&
+    (subjectRecord.type === 'issue' || subjectRecord.type === 'phase' || subjectRecord.type === 'module' || subjectRecord.type === 'program' || subjectRecord.type === 'run') && reference(subjectRecord.id) &&
+    Object.keys(checksumRecord).sort().join('|') === 'algorithm|value' && checksumRecord.algorithm === 'sha256' && typeof checksumRecord.value === 'string' && /^[a-f0-9]{64}$/.test(checksumRecord.value) &&
+    typeof receipt.revision_sha === 'string' && /^[a-f0-9]{40}$/.test(receipt.revision_sha) &&
+    reference(receipt.storage_location) && reference(receipt.gate_association) && typeof receipt.timestamp === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(receipt.timestamp)
 }
 
 /**
@@ -187,9 +214,17 @@ export class ProgramLedger {
       cancelRequested: false,
       retryAt: null,
     }
+    if (issue.moduleRef !== undefined || issue.phaseRef !== undefined) await this.assertIssueHierarchyTenant(issue)
+
+    const dependencies = input.dependsOn ?? []
+    for (const dependsOnIssueId of dependencies) {
+      const dependencyTarget = await this.store.getIssue(dependsOnIssueId)
+      if (!dependencyTarget) throw new LedgerError(`Issue ${issue.issueId} dependency ${dependsOnIssueId} does not exist`, 'dependency_not_satisfied')
+      if ((dependencyTarget.orgId ?? DEFAULT_ORG_ID) !== orgId) throw new LedgerError(`Issue ${issue.issueId} dependency ${dependsOnIssueId} belongs to a different organization`, 'dependency_not_satisfied')
+    }
     await this.store.putIssue(issue)
 
-    for (const dependsOnIssueId of input.dependsOn ?? []) {
+    for (const dependsOnIssueId of dependencies) {
       const dep: IssueDependency = {
         issueId: issue.issueId,
         dependsOnIssueId,
@@ -398,27 +433,40 @@ export class ProgramLedger {
   async complete(runId: string, fencingToken: number, output: unknown): Promise<Run> {
     const run = await this.store.getRun(runId)
     if (!run) throw new LedgerError(`Run ${runId} not found`, 'not_found')
-    const updated = await this.store.mutateLeasedRun({ runId, fencingToken, kind: 'complete', output })
-    if (!updated) { if (run.lease && run.lease.fencingToken !== fencingToken) this.assertFencingToken(run, fencingToken); throw new LedgerError(`Run ${runId} lease is expired or not active`, 'lease_expired') }
-
-    const issue = await this.store.getIssue(updated.issueId)
-    if (!issue) throw new LedgerError(`Issue ${updated.issueId} not found for Run ${runId}`, 'not_found')
-
-    issue.state = 'awaiting_gate'
-    issue.updatedAt = nowIso()
-    await this.store.putIssue(issue)
-
-    await this.store.updateIdempotencyRecord({
+    const issue = await this.store.getIssue(run.issueId)
+    if (!issue) throw new LedgerError(`Issue ${run.issueId} not found for Run ${runId}`, 'not_found')
+    const transitionedAt = nowIso()
+    const idempotency: IdempotencyRecord = {
       schemaVersion: SCHEMA_VERSION,
       idempotencyKey: deriveIdempotencyKey(issue),
-          issueId: updated.issueId,
-          orgId: issue.orgId ?? DEFAULT_ORG_ID,
-          runId: updated.runId,
+      issueId: issue.issueId,
+      orgId: issue.orgId ?? DEFAULT_ORG_ID,
+      runId: run.runId,
       state: 'completed',
-      createdAt: nowIso(),
+      createdAt: transitionedAt,
+    }
+    const updated = await this.store.transitionTerminalRun({
+      runId,
+      fencingToken,
+      kind: 'complete',
+      runState: 'succeeded',
+      issueState: 'awaiting_gate',
+      issueUpdatedAt: transitionedAt,
+      retryAt: issue.retryAt,
+      output,
+      idempotency,
+      events: [{
+        schemaVersion: SCHEMA_VERSION,
+        eventId: randomUUID(),
+        issueId: issue.issueId,
+        orgId: issue.orgId ?? DEFAULT_ORG_ID,
+        runId,
+        type: 'run.succeeded',
+        payload: {},
+        occurredAt: transitionedAt,
+      }],
     })
-
-    await this.emit(updated.issueId, runId, 'run.succeeded', {})
+    if (!updated) { if (run.lease && run.lease.fencingToken !== fencingToken) this.assertFencingToken(run, fencingToken); throw new LedgerError(`Run ${runId} lease is expired or not active`, 'lease_expired') }
     return updated
   }
 
@@ -432,38 +480,56 @@ export class ProgramLedger {
 
     const doNotRetry: FailureClass[] = ['invalid_input', 'code_defect', 'cancelled']
     const retryable = !doNotRetry.includes(failureClass)
-    const updated = await this.store.mutateLeasedRun({ runId, fencingToken, kind: 'fail', failureClass, message })
-    if (!updated) { if (run.lease && run.lease.fencingToken !== fencingToken) this.assertFencingToken(run, fencingToken); throw new LedgerError(`Run ${runId} lease is expired or not active`, 'lease_expired') }
-    if (!retryable) {
-      updated.state = 'failed_terminal'
-      updated.terminalState = 'failed_terminal'
-      await this.store.putRun(updated)
+    const issue = await this.store.getIssue(run.issueId)
+    if (!issue) throw new LedgerError(`Issue ${run.issueId} not found for Run ${runId}`, 'not_found')
+    const transitionedAt = nowIso()
+    const canRetry = retryable && issue.attemptCount < issue.retryPolicy.maxAttempts
+    const issueState = canRetry ? 'retry_scheduled' : retryable ? 'exception' : 'failed'
+    const retryAt = canRetry ? new Date(Date.now() + issue.retryPolicy.backoffBaseMs).toISOString() : null
+    const idempotency: IdempotencyRecord = {
+      schemaVersion: SCHEMA_VERSION,
+      idempotencyKey: deriveIdempotencyKey(issue),
+      issueId: issue.issueId,
+      orgId: issue.orgId ?? DEFAULT_ORG_ID,
+      runId: null,
+      state: canRetry ? 'failed_safe_to_retry' : 'completed',
+      createdAt: transitionedAt,
     }
-
-    const issue = await this.store.getIssue(updated.issueId)
-    if (issue) {
-      issue.updatedAt = nowIso()
-      if (retryable && issue.attemptCount < issue.retryPolicy.maxAttempts) {
-        issue.state = 'retry_scheduled'
-        issue.retryAt = new Date(Date.now() + issue.retryPolicy.backoffBaseMs).toISOString()
-        await this.store.putIssue(issue)
-        await this.store.updateIdempotencyRecord({
+    const updated = await this.store.transitionTerminalRun({
+      runId,
+      fencingToken,
+      kind: 'fail',
+      runState: retryable ? 'failed_retryable' : 'failed_terminal',
+      issueState,
+      issueUpdatedAt: transitionedAt,
+      retryAt,
+      failureClass,
+      message,
+      idempotency,
+      events: [
+        ...(canRetry ? [{
           schemaVersion: SCHEMA_VERSION,
-          idempotencyKey: deriveIdempotencyKey(issue),
+          eventId: randomUUID(),
           issueId: issue.issueId,
           orgId: issue.orgId ?? DEFAULT_ORG_ID,
-          runId: null,
-          state: 'failed_safe_to_retry',
-          createdAt: nowIso(),
-        })
-        await this.emit(issue.issueId, runId, 'issue.retry_scheduled', { failureClass })
-      } else {
-        issue.state = retryable ? 'exception' : 'failed'
-        await this.store.putIssue(issue)
-      }
-    }
-
-    await this.emit(updated.issueId, runId, 'run.failed', { failureClass, message })
+          runId,
+          type: 'issue.retry_scheduled' as const,
+          payload: { failureClass },
+          occurredAt: transitionedAt,
+        }] : []),
+        {
+          schemaVersion: SCHEMA_VERSION,
+          eventId: randomUUID(),
+          issueId: issue.issueId,
+          orgId: issue.orgId ?? DEFAULT_ORG_ID,
+          runId,
+          type: 'run.failed',
+          payload: { failureClass, message },
+          occurredAt: transitionedAt,
+        },
+      ],
+    })
+    if (!updated) { if (run.lease && run.lease.fencingToken !== fencingToken) this.assertFencingToken(run, fencingToken); throw new LedgerError(`Run ${runId} lease is expired or not active`, 'lease_expired') }
     return updated
   }
 
@@ -497,17 +563,21 @@ export class ProgramLedger {
   async confirmCancelled(runId: string, fencingToken: number): Promise<Run> {
     const run = await this.store.getRun(runId)
     if (!run) throw new LedgerError(`Run ${runId} not found`, 'not_found')
-    const updated = await this.store.mutateLeasedRun({ runId, fencingToken, kind: 'cancel' })
-    if (!updated) { if (run.lease && run.lease.fencingToken !== fencingToken) this.assertFencingToken(run, fencingToken); throw new LedgerError(`Run ${runId} lease is expired or not active`, 'lease_expired') }
-
     const issue = await this.store.getIssue(run.issueId)
-    if (issue) {
-      issue.state = 'cancelled'
-      issue.updatedAt = nowIso()
-      await this.store.putIssue(issue)
-    }
-
-    await this.emit(updated.issueId, runId, 'run.cancelled', {})
+    if (!issue) throw new LedgerError(`Issue ${run.issueId} not found for Run ${runId}`, 'not_found')
+    const transitionedAt = nowIso()
+    const updated = await this.store.transitionTerminalRun({
+      runId,
+      fencingToken,
+      kind: 'cancel',
+      runState: 'cancelled',
+      issueState: 'cancelled',
+      issueUpdatedAt: transitionedAt,
+      retryAt: null,
+      idempotency: null,
+      events: [{ schemaVersion: SCHEMA_VERSION, eventId: randomUUID(), issueId: issue.issueId, orgId: issue.orgId ?? DEFAULT_ORG_ID, runId, type: 'run.cancelled', payload: {}, occurredAt: transitionedAt }],
+    })
+    if (!updated) { if (run.lease && run.lease.fencingToken !== fencingToken) this.assertFencingToken(run, fencingToken); throw new LedgerError(`Run ${runId} lease is expired or not active`, 'lease_expired') }
     return updated
   }
 
@@ -530,13 +600,15 @@ export class ProgramLedger {
       throw new LedgerError(`Issue ${issueId} is not awaiting a Gate decision (state ${issue.state})`, 'invalid_state')
     }
     const run = await this.store.getRun(runId)
-    if (!run || run.issueId !== issueId || run.state !== 'succeeded') throw new LedgerError(`Issue ${issueId} Gate must reference its succeeded Run`, 'invalid_state')
+    await this.assertIssueHierarchyTenant(issue)
+    if (!run || run.issueId !== issueId || run.orgId !== (issue.orgId ?? DEFAULT_ORG_ID) || run.attemptNumber !== issue.attemptCount || run.state !== 'succeeded') throw new LedgerError(`Issue ${issueId} Gate must reference its exact succeeded Run`, 'invalid_state')
     const currentRevision = subjectRevision('issue', { id: issue.issueId, state: issue.state, updatedAt: issue.updatedAt, inputDigest: issue.inputDigest, attemptCount: issue.attemptCount })
     const receipts = this.receiptsFromEvidence(evidence)
     if (decision === 'accepted' && receipts.length === 0) {
       throw new LedgerError(`Issue ${issueId} cannot pass its Gate without evidence receipts`, 'invalid_state')
     }
-    this.assertReceiptsForRevision(receipts, currentRevision, issue.orgId ?? DEFAULT_ORG_ID)
+    this.assertReceiptsForSubject(receipts, 'issue', issueId, currentRevision, issue.orgId ?? DEFAULT_ORG_ID, runId)
+    const decidedAt = nowIso()
 
     const gate: GateResult = {
       schemaVersion: SCHEMA_VERSION,
@@ -556,14 +628,9 @@ export class ProgramLedger {
       decision,
       evidence,
       decidedBy,
-      decidedAt: nowIso(),
+      decidedAt,
     }
-    await this.store.putGateResult(gate)
-
-    issue.state = decision === 'accepted' ? 'completed' : 'repair_required'
-    issue.updatedAt = nowIso()
-    await this.store.putIssue(issue)
-
+    let idempotency: IdempotencyRecord | null = null
     if (decision === 'rejected') {
       // A rejected Gate makes the underlying dispatch intent retry-eligible
       // again, even though the Run itself technically "succeeded" --
@@ -572,26 +639,33 @@ export class ProgramLedger {
       const idempotencyKey = deriveIdempotencyKey(issue)
       const existing = await this.store.getIdempotencyRecord(idempotencyKey)
       if (existing) {
-        await this.store.updateIdempotencyRecord({ ...existing, state: 'failed_safe_to_retry', runId: null })
+        idempotency = { ...existing, state: 'failed_safe_to_retry', runId: null }
       }
     }
-
-    await this.emit(issueId, runId, 'gate.decided', { decision, gateId: gate.gateId })
-    if (decision === 'accepted') {
-      await this.emit(issueId, runId, 'issue.completed', {})
-    } else {
-      await this.emit(issueId, runId, 'issue.repair_required', {})
-    }
+    await this.store.recordIssueGateDecision({
+      gate,
+      issueState: decision === 'accepted' ? 'completed' : 'repair_required',
+      issueUpdatedAt: decidedAt,
+      idempotency,
+      events: [
+        { schemaVersion: SCHEMA_VERSION, eventId: randomUUID(), issueId, orgId: issue.orgId ?? DEFAULT_ORG_ID, runId, type: 'gate.decided', payload: { decision, gateId: gate.gateId }, occurredAt: decidedAt },
+        { schemaVersion: SCHEMA_VERSION, eventId: randomUUID(), issueId, orgId: issue.orgId ?? DEFAULT_ORG_ID, runId, type: decision === 'accepted' ? 'issue.completed' : 'issue.repair_required', payload: {}, occurredAt: decidedAt },
+      ],
+    })
     return gate
   }
 
-  private receiptsFromEvidence(evidence: Record<string, unknown>): CanonicalEvidenceReceipt[] {
-    if (!Array.isArray(evidence.evidenceReceipts) || !evidence.evidenceReceipts.every(isEvidenceReceipt)) return []
-    return evidence.evidenceReceipts
+  private receiptsFromEvidence(evidence: Record<string, unknown>): LedgerEvidenceReceipt[] {
+    if (!Array.isArray(evidence.evidenceReceipts)) return []
+    if (!evidence.evidenceReceipts.every(isLedgerEvidenceReceipt)) throw new LedgerError('EvidenceReceipt has an invalid canonical envelope', 'invalid_state')
+    return evidence.evidenceReceipts as LedgerEvidenceReceipt[]
   }
 
-  private assertReceiptsForRevision(receipts: CanonicalEvidenceReceipt[], revision: string, orgId: string): void {
-    if (receipts.some((receipt) => receipt.org_id !== orgId || receipt.revision_sha !== revision)) throw new LedgerError('EvidenceReceipt org_id or revision does not match the current gate subject', 'invalid_state')
+  private assertReceiptsForSubject(receipts: LedgerEvidenceReceipt[], subjectType: GateSubjectType, subjectId: string, revision: string, orgId: string, runId?: string): void {
+    const expectedAssociation = intendedGateAssociation(subjectType, subjectId, runId)
+    if (receipts.some((receipt) => receipt.org_id !== orgId || receipt.revision_sha !== revision || receipt.subject.type !== subjectType || receipt.subject.id !== subjectId || receipt.gate_association !== expectedAssociation)) {
+      throw new LedgerError('EvidenceReceipt is not bound to the exact gate subject, tenant, revision, and intended gate association', 'invalid_state')
+    }
   }
 
   /** Persist the complete canonical hierarchy and its first private-demo Issues. */
@@ -666,103 +740,138 @@ export class ProgramLedger {
     return { programId, state: program.state, totalModules: modules.length, completedModules: modules.filter((module) => module.state === 'completed').length, totalIssues: issues.length, completedIssues: issues.filter((issue) => issue.state === 'completed').length, terminalFailures }
   }
 
-  async evaluateGate(input: { subjectType: GateSubjectType; subjectId: string; decision: GateDecision; evidence: Record<string, unknown>; evaluator: string; evaluatorVersion?: string; reasons?: string[]; subjectRevision?: string; issueId?: string; runId?: string }): Promise<GateResult> {
-    const currentRevision = await this.currentSubjectRevision(input.subjectType, input.subjectId)
+  async evaluateGate(input: { subjectType: GateSubjectType; subjectId: string; decision: GateDecision; evidence: Record<string, unknown>; evaluator: string; evaluatorVersion?: string; reasons?: string[]; subjectRevision?: string; issueId?: string; runId?: string; orgId?: string }): Promise<GateResult> {
+    const knownIssue = input.subjectType === 'issue' ? await this.store.getIssue(input.subjectId) : null
+    const orgId = input.orgId ?? knownIssue?.orgId ?? null
+    if (input.subjectType !== 'issue' && !orgId) throw new LedgerError(`${input.subjectType} ${input.subjectId} requires an explicit tenant-scoped hierarchy lookup`, 'org_required')
+    const currentRevision = await this.currentSubjectRevision(input.subjectType, input.subjectId, orgId ?? undefined)
     if (currentRevision === null) throw new LedgerError(`${input.subjectType} ${input.subjectId} not found`, 'not_found')
     if (input.subjectRevision !== undefined && input.subjectRevision !== currentRevision) throw new LedgerError(`${input.subjectType} ${input.subjectId} Gate carries a stale subject revision`, 'invalid_state')
-    if (input.subjectType === 'issue' && (await this.store.getIssue(input.subjectId))?.state !== 'awaiting_gate') {
+    if (input.subjectType === 'issue' && knownIssue?.state !== 'awaiting_gate') {
       throw new LedgerError(`Issue ${input.subjectId} is not awaiting a Gate decision`, 'invalid_state')
+    }
+    if (input.subjectType === 'issue') {
+      await this.assertIssueHierarchyTenant(knownIssue!)
+      if (!input.runId) throw new LedgerError(`Issue ${input.subjectId} Gate must reference its exact succeeded Run`, 'invalid_state')
+      const run = await this.store.getRun(input.runId)
+      if (!run || run.issueId !== input.subjectId || run.orgId !== (knownIssue!.orgId ?? DEFAULT_ORG_ID) || run.attemptNumber !== knownIssue!.attemptCount || run.state !== 'succeeded') throw new LedgerError(`Issue ${input.subjectId} Gate must reference its exact succeeded Run`, 'invalid_state')
     }
     const receipts = this.receiptsFromEvidence(input.evidence)
     if (input.decision === 'accepted' && (Object.keys(input.evidence).length === 0 || receipts.length === 0)) throw new LedgerError(`${input.subjectType} ${input.subjectId} cannot pass its Gate without evidence`, 'invalid_state')
-    const orgId = await this.subjectOrgId(input.subjectType, input.subjectId)
     if (!orgId) throw new LedgerError(`${input.subjectType} ${input.subjectId} has no tenant`, 'org_required')
-    this.assertReceiptsForRevision(receipts, currentRevision, orgId)
-    if (input.decision === 'accepted' && !(await this.subjectChildrenComplete(input.subjectType, input.subjectId))) {
+    this.assertReceiptsForSubject(receipts, input.subjectType, input.subjectId, currentRevision, orgId, input.subjectType === 'issue' ? input.runId : undefined)
+    if (input.decision === 'accepted' && !(await this.subjectChildrenComplete(input.subjectType, input.subjectId, orgId))) {
       throw new LedgerError(`${input.subjectType} ${input.subjectId} cannot pass its Gate before all required children complete`, 'invalid_state')
     }
     if (input.subjectType !== 'issue') {
-      const current = input.subjectType === 'program' ? await this.store.getProgram(input.subjectId) : input.subjectType === 'module' ? await this.findModule(input.subjectId) : await this.findPhase(input.subjectId)
+      const current = input.subjectType === 'program' ? await this.store.getProgram(input.subjectId, orgId) : input.subjectType === 'module' ? await this.findModule(input.subjectId, orgId) : await this.findPhase(input.subjectId, orgId)
       if (current) this.assertLegalHierarchyTransition(current.state, input.decision === 'accepted' ? 'completed' : 'blocked')
     }
     const prior = await this.store.getCurrentGate(input.subjectType, input.subjectId)
-    const gate: GateResult = { schemaVersion: SCHEMA_VERSION, gateId: randomUUID(), subjectType: input.subjectType, subjectId: input.subjectId, orgId, subjectRevision: currentRevision, attempt: (prior?.attempt ?? 0) + 1, evaluator: input.evaluator, evaluatorVersion: input.evaluatorVersion ?? '1', inputs: input.evidence, reasons: input.reasons ?? [], evidenceReceipts: receipts, issueId: input.issueId ?? (input.subjectType === 'issue' ? input.subjectId : null), runId: input.runId ?? null, decision: input.decision, evidence: input.evidence, decidedBy: input.evaluator, decidedAt: nowIso() }
-    await this.store.putGateResult(gate)
-    await this.applyHierarchyDecision(input.subjectType, input.subjectId, input.decision)
+    const decidedAt = nowIso()
+    const gate: GateResult = { schemaVersion: SCHEMA_VERSION, gateId: randomUUID(), subjectType: input.subjectType, subjectId: input.subjectId, orgId, subjectRevision: currentRevision, attempt: (prior?.attempt ?? 0) + 1, evaluator: input.evaluator, evaluatorVersion: input.evaluatorVersion ?? '1', inputs: input.evidence, reasons: input.reasons ?? [], evidenceReceipts: receipts, issueId: input.issueId ?? (input.subjectType === 'issue' ? input.subjectId : null), runId: input.runId ?? null, decision: input.decision, evidence: input.evidence, decidedBy: input.evaluator, decidedAt }
+    if (gate.issueId) {
+      const linkedIssue = await this.store.getIssue(gate.issueId)
+      if (!linkedIssue || linkedIssue.orgId !== orgId) throw new LedgerError('Gate issue association is outside the subject tenant', 'invalid_state')
+    }
     if (input.subjectType === 'issue') {
-      await this.emit(input.subjectId, input.runId ?? null, 'gate.decided', { decision: input.decision, gateId: gate.gateId })
-      await this.emit(input.subjectId, input.runId ?? null, input.decision === 'accepted' ? 'issue.completed' : 'issue.repair_required', {})
+      let idempotency: IdempotencyRecord | null = null
+      if (input.decision === 'rejected') {
+        const existing = await this.store.getIdempotencyRecord(deriveIdempotencyKey(knownIssue!))
+        if (existing) idempotency = { ...existing, state: 'failed_safe_to_retry', runId: null }
+      }
+      await this.store.recordIssueGateDecision({
+        gate,
+        issueState: input.decision === 'accepted' ? 'completed' : 'repair_required',
+        issueUpdatedAt: decidedAt,
+        idempotency,
+        events: [
+          { schemaVersion: SCHEMA_VERSION, eventId: randomUUID(), issueId: input.subjectId, orgId, runId: input.runId ?? null, type: 'gate.decided', payload: { decision: input.decision, gateId: gate.gateId }, occurredAt: decidedAt },
+          { schemaVersion: SCHEMA_VERSION, eventId: randomUUID(), issueId: input.subjectId, orgId, runId: input.runId ?? null, type: input.decision === 'accepted' ? 'issue.completed' : 'issue.repair_required', payload: {}, occurredAt: decidedAt },
+        ],
+      })
+    } else {
+      await this.store.putGateResult(gate)
+      await this.applyHierarchyDecision(input.subjectType, input.subjectId, input.decision, orgId)
     }
     return gate
   }
 
-  private async currentSubjectRevision(subjectType: GateSubjectType, subjectId: string): Promise<string | null> {
+  private async assertIssueHierarchyTenant(issue: Issue): Promise<void> {
+    const orgId = issue.orgId ?? DEFAULT_ORG_ID
+    const program = await this.store.getProgram(issue.programRef, orgId)
+    if (!program) throw new LedgerError(`Issue ${issue.issueId} hierarchy Program is outside tenant ${orgId}`, 'invalid_state')
+    if (issue.moduleRef === undefined && issue.phaseRef !== undefined) throw new LedgerError(`Issue ${issue.issueId} cannot reference a Phase without a Module`, 'invalid_state')
+    if (issue.moduleRef !== undefined) {
+      const module = await this.store.getModule(issue.programRef, issue.moduleRef, orgId)
+      if (!module) throw new LedgerError(`Issue ${issue.issueId} hierarchy Module is outside tenant ${orgId}`, 'invalid_state')
+      if (issue.phaseRef !== undefined) {
+        const phase = await this.store.getPhase(issue.programRef, issue.moduleRef, issue.phaseRef, orgId)
+        if (!phase) throw new LedgerError(`Issue ${issue.issueId} hierarchy Phase is outside tenant ${orgId}`, 'invalid_state')
+      }
+    }
+  }
+
+  private async currentSubjectRevision(subjectType: GateSubjectType, subjectId: string, orgId?: string): Promise<string | null> {
     if (subjectType === 'issue') { const issue = await this.store.getIssue(subjectId); return issue ? subjectRevision('issue', { id: issue.issueId, state: issue.state, updatedAt: issue.updatedAt, inputDigest: issue.inputDigest, attemptCount: issue.attemptCount }) : null }
     if (subjectType === 'phase') {
-      const phase = await this.findPhase(subjectId)
+      const phase = await this.findPhase(subjectId, orgId)
       return phase ? subjectRevision('phase', { id: phase.phaseId, state: phase.state, revision: phase.revision, updatedAt: phase.updatedAt }) : null
     }
     if (subjectType === 'module') {
-      const module = await this.findModule(subjectId)
+      const module = await this.findModule(subjectId, orgId)
       return module ? subjectRevision('module', { id: module.moduleId, state: module.state, revision: module.revision, updatedAt: module.updatedAt }) : null
     }
-    const program = await this.store.getProgram(subjectId)
+    const program = await this.store.getProgram(subjectId, orgId)
     return program ? subjectRevision('program', { id: program.programId, state: program.state, revision: program.revision, updatedAt: program.updatedAt }) : null
   }
 
-  async getSubjectRevision(subjectType: GateSubjectType, subjectId: string): Promise<string> {
-    const revision = await this.currentSubjectRevision(subjectType, subjectId)
+  async getSubjectRevision(subjectType: GateSubjectType, subjectId: string, orgId?: string): Promise<string> {
+    const revision = await this.currentSubjectRevision(subjectType, subjectId, orgId)
     if (!revision) throw new LedgerError(`${subjectType} ${subjectId} not found`, 'not_found')
     return revision
   }
 
-  private async subjectOrgId(subjectType: GateSubjectType, subjectId: string): Promise<string | null> {
-    if (subjectType === 'issue') return (await this.store.getIssue(subjectId))?.orgId ?? null
-    if (subjectType === 'program') return (await this.store.getProgram(subjectId))?.orgId ?? null
-    if (subjectType === 'module') return (await this.findModule(subjectId))?.orgId ?? null
-    return (await this.findPhase(subjectId))?.orgId ?? null
-  }
-
-  private async subjectChildrenComplete(subjectType: GateSubjectType, subjectId: string): Promise<boolean> {
+  private async subjectChildrenComplete(subjectType: GateSubjectType, subjectId: string, orgId?: string): Promise<boolean> {
     if (subjectType === 'issue') {
       const issue = await this.store.getIssue(subjectId)
       return issue?.state === 'awaiting_gate'
     }
     if (subjectType === 'phase') {
-      const phase = await this.findPhase(subjectId)
+      const phase = await this.findPhase(subjectId, orgId)
       if (!phase) return false
-      const issues = await this.store.listIssues({ programId: phase.programId, moduleId: phase.moduleId, phaseId: phase.phaseId })
+      const issues = await this.store.listIssues({ orgId, programId: phase.programId, moduleId: phase.moduleId, phaseId: phase.phaseId })
       return issues.length > 0 && issues.every((issue) => issue.state === 'completed')
     }
     if (subjectType === 'module') {
-      const module = await this.findModule(subjectId)
+      const module = await this.findModule(subjectId, orgId)
       if (!module) return false
-      const phases = await this.store.listPhases(module.programId, module.moduleId)
+      const phases = await this.store.listPhases(module.programId, module.moduleId, orgId)
       return phases.length > 0 && phases.every((phase) => phase.state === 'completed')
     }
-    const program = await this.store.getProgram(subjectId)
+    const program = await this.store.getProgram(subjectId, orgId)
     if (!program) return false
-    const modules = await this.store.listModules(program.programId)
+    const modules = await this.store.listModules(program.programId, orgId)
     return modules.length > 0 && modules.every((module) => module.state === 'completed')
   }
 
-  private async findPhase(phaseId: string): Promise<Phase | null> {
-    for (const program of await this.store.listPrograms()) for (const module of await this.store.listModules(program.programId)) {
-      const phase = await this.store.getPhase(program.programId, module.moduleId, phaseId)
+  private async findPhase(phaseId: string, orgId?: string): Promise<Phase | null> {
+    for (const program of await this.store.listPrograms(orgId)) for (const module of await this.store.listModules(program.programId, orgId)) {
+      const phase = await this.store.getPhase(program.programId, module.moduleId, phaseId, orgId)
       if (phase) return phase
     }
     return null
   }
 
-  private async findModule(moduleId: string): Promise<Module | null> {
-    for (const program of await this.store.listPrograms()) {
-      const module = await this.store.getModule(program.programId, moduleId)
+  private async findModule(moduleId: string, orgId?: string): Promise<Module | null> {
+    for (const program of await this.store.listPrograms(orgId)) {
+      const module = await this.store.getModule(program.programId, moduleId, orgId)
       if (module) return module
     }
     return null
   }
 
-  private async applyHierarchyDecision(subjectType: GateSubjectType, subjectId: string, decision: GateDecision): Promise<void> {
+  private async applyHierarchyDecision(subjectType: GateSubjectType, subjectId: string, decision: GateDecision, orgId?: string): Promise<void> {
     const state: WorkState = decision === 'accepted' ? 'completed' : decision === 'rejected' ? 'blocked' : 'awaiting_gate'
     if (subjectType === 'issue') {
       const issue = await this.store.getIssue(subjectId)
@@ -777,13 +886,13 @@ export class ProgramLedger {
         }
       }
     } else if (subjectType === 'phase') {
-      const phase = await this.findPhase(subjectId)
+      const phase = await this.findPhase(subjectId, orgId)
       if (phase) { this.assertLegalHierarchyTransition(phase.state, state); phase.state = state; phase.revision += 1; phase.updatedAt = nowIso(); await this.store.putPhase(phase); await this.emit(null, null, 'gate.decided', { subjectType, subjectId, decision }, phase.orgId ?? DEFAULT_ORG_ID) }
     } else if (subjectType === 'module') {
-      const module = await this.findModule(subjectId)
+      const module = await this.findModule(subjectId, orgId)
       if (module) { this.assertLegalHierarchyTransition(module.state, state); module.state = state; module.revision += 1; module.updatedAt = nowIso(); await this.store.putModule(module); await this.emit(null, null, 'gate.decided', { subjectType, subjectId, decision }, module.orgId ?? DEFAULT_ORG_ID) }
     } else if (subjectType === 'program') {
-      const program = await this.store.getProgram(subjectId)
+      const program = await this.store.getProgram(subjectId, orgId)
       if (program) { this.assertLegalHierarchyTransition(program.state, state); program.state = state; program.revision += 1; program.updatedAt = nowIso(); await this.store.putProgram(program); await this.emit(null, null, 'gate.decided', { subjectType, subjectId, decision }, program.orgId ?? DEFAULT_ORG_ID) }
     }
   }

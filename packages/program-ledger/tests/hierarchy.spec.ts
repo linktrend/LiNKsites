@@ -48,6 +48,7 @@ describe('HierarchyRegistry', () => {
 describe('ProgramLedger with hierarchy validation enabled', () => {
   it('creates an Issue against a real Module ref (M07, Preview Intake & Planning)', async () => {
     const ledger = new ProgramLedger(new InMemoryLedgerStore(), new HierarchyRegistry())
+    await ledger.seedProgramGraph()
     const issue = await ledger.createIssue({
       issueType: 'preview.intake.validate_request',
       programRef: 'linksites',

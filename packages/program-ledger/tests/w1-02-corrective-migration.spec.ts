@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 const here = dirname(fileURLToPath(import.meta.url))
 const sql = (name: string) => readFileSync(resolve(here, '../../../supabase/migrations', name), 'utf8')
 const fixtureSql = (name: string) => readFileSync(resolve(here, 'fixtures', name), 'utf8')
+const integritySql = sql('20260804200000_ledger_w1_02_integrity.sql')
 
 describe('W1-02 corrective migration forward data proof', () => {
   it('backfills Stage rows into Phase without deleting the legacy value', async () => {
@@ -22,10 +23,11 @@ describe('W1-02 corrective migration forward data proof', () => {
     await db.query(`insert into lsites_ledger.issues (issue_id, issue_type, program_ref, stage_ref, state, input, input_digest) values ($1, 'legacy.test', 'legacy-program', 'legacy-phase', 'ready', '{}'::jsonb, 'legacy')`, [issueId])
     await db.query(`insert into lsites_ledger.issues (issue_id, issue_type, program_ref, stage_ref, state, input, input_digest) values ('22222222-2222-2222-2222-222222222222', 'orphan.test', 'orphan-program', 'orphan-phase', 'ready', '{}'::jsonb, 'orphan')`)
     await db.exec(sql('20260804120000_ledger_tenant_leases_backfill.sql'))
+    await db.exec(integritySql)
     const result = await db.query('select stage_ref, phase_ref, org_id from lsites_ledger.issues where issue_id = $1', [issueId])
     expect(result.rows[0]).toMatchObject({ stage_ref: 'legacy-phase', phase_ref: 'legacy-phase', org_id: 'a0000000-a000-a000-a000-a00000000001' })
     const orphanProgram = await db.query(`select 1 from lsites_ledger.programs where program_id = 'orphan-program' and org_id = 'a0000000-a000-a000-a000-a00000000001'`)
     expect(orphanProgram.rows).toHaveLength(1)
     await db.close()
-  })
+  }, 15_000)
 })

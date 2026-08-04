@@ -433,6 +433,68 @@ export class PostgresLedgerStore implements LedgerStore {
     return rows[0] ? toRun(rows[0]) : null
   }
 
+  async transitionTerminalRun(input: {
+    runId: string
+    fencingToken: number
+    kind: 'complete' | 'fail' | 'cancel'
+    runState: Run['state']
+    issueState: Issue['state']
+    issueUpdatedAt: string
+    retryAt: string | null
+    output?: unknown
+    failureClass?: string
+    message?: string
+    idempotency: IdempotencyRecord | null
+    events: LedgerEvent[]
+  }): Promise<Run | null> {
+    await this.db.query('begin')
+    try {
+      const params: unknown[] = [input.runId, input.fencingToken]
+      let sql: string
+      if (input.kind === 'complete') {
+        params.push(JSON.stringify(input.output ?? null), input.runState)
+        sql = `update lsites_ledger.runs
+                set state = $4::lsites_ledger.run_state, terminal_state = $4::text, output = $3, completed_at = $5
+                where run_id = $1 and lease_fencing_token = $2
+                  and state in ('claimed','executing') and lease_expires_at > now()
+                returning *`
+        params.push(input.issueUpdatedAt)
+      } else if (input.kind === 'fail') {
+        params.push(input.failureClass ?? 'unknown', input.message ?? '', input.runState, input.issueUpdatedAt)
+        sql = `update lsites_ledger.runs
+                  set state = $5::lsites_ledger.run_state, terminal_state = $5::text, failure_class = $3, failure_message = $4, completed_at = $6
+                where run_id = $1 and lease_fencing_token = $2
+                  and state in ('claimed','executing') and lease_expires_at > now()
+                returning *`
+      } else {
+        params.push(input.runState, input.issueUpdatedAt)
+        sql = `update lsites_ledger.runs
+                  set state = $3::lsites_ledger.run_state, terminal_state = $3::text, completed_at = $4
+                where run_id = $1 and lease_fencing_token = $2
+                  and state in ('claimed','executing','cancel_requested') and lease_expires_at > now()
+                returning *`
+      }
+      const runResult = await this.db.query(sql, params)
+      if (!runResult.rows[0]) {
+        await this.db.query('rollback')
+        return null
+      }
+      const run = toRun(runResult.rows[0])
+      const issueResult = await this.db.query(
+        `update lsites_ledger.issues set state = $2, retry_at = $3, updated_at = $4 where issue_id = $1 returning issue_id`,
+        [run.issueId, input.issueState, input.retryAt, input.issueUpdatedAt],
+      )
+      if (!issueResult.rows[0]) throw new Error(`Issue ${run.issueId} not found for terminal Run ${run.runId}`)
+      if (input.idempotency) await this.writeIdempotency(input.idempotency)
+      for (const event of input.events) await this.writeEvent(event)
+      await this.db.query('commit')
+      return run
+    } catch (error) {
+      await this.db.query('rollback')
+      throw error
+    }
+  }
+
   async reclaimExpiredLeases(nowIso: string): Promise<Run[]> {
     const { rows } = await this.db.query(`update lsites_ledger.runs set state = 'queued', lease_fencing_token = coalesce(lease_fencing_token, 0) + 1, lease_executor_id = '', lease_expires_at = $1 where state in ('claimed','executing') and lease_expires_at < $1 returning *`, [nowIso])
     return rows.map(toRun)
@@ -532,6 +594,51 @@ export class PostgresLedgerStore implements LedgerStore {
         gate.decidedBy,
         gate.decidedAt,
       ],
+    )
+  }
+
+  async recordIssueGateDecision(input: {
+    gate: GateResult
+    issueState: Issue['state']
+    issueUpdatedAt: string
+    idempotency: IdempotencyRecord | null
+    events: LedgerEvent[]
+  }): Promise<void> {
+    await this.db.query('begin')
+    try {
+      await this.db.query(
+        `insert into lsites_ledger.gate_results (gate_id, schema_version_major, schema_version_minor, issue_id, run_id, org_id, subject_type, subject_id, subject_revision, attempt, evaluator, evaluator_version, inputs, reasons, evidence_receipts, decision, evidence, decided_by, decided_at)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
+        [input.gate.gateId, input.gate.schemaVersion.major, input.gate.schemaVersion.minor, input.gate.issueId, input.gate.runId, input.gate.orgId, input.gate.subjectType, input.gate.subjectId, input.gate.subjectRevision, input.gate.attempt, input.gate.evaluator, input.gate.evaluatorVersion, JSON.stringify(input.gate.inputs), JSON.stringify(input.gate.reasons), JSON.stringify(input.gate.evidenceReceipts), input.gate.decision, JSON.stringify(input.gate.evidence), input.gate.decidedBy, input.gate.decidedAt],
+      )
+      const issueResult = await this.db.query(
+        `update lsites_ledger.issues set state = $2, updated_at = $3 where issue_id = $1 and state = 'awaiting_gate' returning issue_id`,
+        [input.gate.subjectId, input.issueState, input.issueUpdatedAt],
+      )
+      if (!issueResult.rows[0]) throw new Error(`Issue ${input.gate.subjectId} is no longer awaiting a Gate decision`)
+      if (input.idempotency) await this.writeIdempotency(input.idempotency)
+      for (const event of input.events) await this.writeEvent(event)
+      await this.db.query('commit')
+    } catch (error) {
+      await this.db.query('rollback')
+      throw error
+    }
+  }
+
+  private async writeIdempotency(record: IdempotencyRecord): Promise<void> {
+    await this.db.query(
+      `insert into lsites_ledger.idempotency_records (idempotency_key, schema_version_major, schema_version_minor, issue_id, org_id, run_id, state, created_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8)
+       on conflict (idempotency_key) do update set issue_id = excluded.issue_id, org_id = excluded.org_id, run_id = excluded.run_id, state = excluded.state`,
+      [record.idempotencyKey, record.schemaVersion.major, record.schemaVersion.minor, record.issueId, record.orgId, record.runId, record.state, record.createdAt],
+    )
+  }
+
+  private async writeEvent(event: LedgerEvent): Promise<void> {
+    await this.db.query(
+      `insert into lsites_ledger.ledger_events (event_id, schema_version_major, schema_version_minor, issue_id, org_id, run_id, event_type, payload, occurred_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [event.eventId, event.schemaVersion.major, event.schemaVersion.minor, event.issueId, event.orgId, event.runId, event.type, JSON.stringify(event.payload), event.occurredAt],
     )
   }
 

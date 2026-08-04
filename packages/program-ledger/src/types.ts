@@ -15,6 +15,7 @@
  * compensation Sagas, and cross-Program outbox/inbox remain out of scope.
  */
 
+import { createHash } from 'node:crypto'
 import type { EvidenceReceipt, SchemaVersion } from '@linksites/types'
 
 export const SCHEMA_VERSION: SchemaVersion = { major: 1, minor: 0 }
@@ -195,6 +196,16 @@ export type GateSubjectType = 'issue' | 'phase' | 'module' | 'program'
 
 export type { EvidenceReceipt }
 
+/**
+ * Ledger gates accept the shared receipt envelope, while extending its
+ * subject vocabulary to the four durable hierarchy subjects. The shared
+ * contract intentionally only names cross-program subjects; the ledger must
+ * still bind a hierarchy gate to its exact local subject.
+ */
+export type LedgerEvidenceReceipt = Omit<EvidenceReceipt, 'subject'> & {
+  subject: { type: GateSubjectType | 'run'; id: string }
+}
+
 export interface GateResult {
   schemaVersion: SchemaVersion
   gateId: string
@@ -207,7 +218,7 @@ export interface GateResult {
   evaluatorVersion: string
   inputs: Record<string, unknown>
   reasons: string[]
-  evidenceReceipts: EvidenceReceipt[]
+  evidenceReceipts: LedgerEvidenceReceipt[]
   /** Compatibility fields for the original Issue gate API. */
   issueId: string | null
   runId: string | null
@@ -273,10 +284,52 @@ export interface IdempotencyRecord {
 export function deriveIdempotencyKey(
   issue: Pick<Issue, 'issueType' | 'programRef' | 'inputDigest' | 'issueKey' | 'intendedEffect' | 'target'> & { orgId?: string | null },
 ): string {
-  const organizationScope = `org:${issue.orgId ?? DEFAULT_ORG_ID}:`
-  const stableIssueIdentity = issue.issueKey ?? `issue:${issue.issueType}:${issue.programRef}:${issue.inputDigest}`
-  const target = issue.target ?? 'target:unspecified'
-  return `${organizationScope}issue:${stableIssueIdentity}:effect:${issue.intendedEffect}:target:${target}:v${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor}`
+  const canonical = canonicalSerialize({
+    contractVersion: SCHEMA_VERSION,
+    orgId: issue.orgId ?? DEFAULT_ORG_ID,
+    issueKey: issue.issueKey ?? null,
+    issueType: issue.issueType,
+    programRef: issue.programRef,
+    inputDigest: issue.inputDigest,
+    intendedEffect: issue.intendedEffect,
+    target: issue.target ?? null,
+  })
+  const digest = createHash('sha256').update(canonical).digest('hex')
+  return `ledger-idempotency:v${SCHEMA_VERSION.major}.${SCHEMA_VERSION.minor}:${digest}`
+}
+
+/**
+ * Deterministic, length-prefixed serialization for identity material.
+ * Object keys are sorted and every value carries a type tag and length, so
+ * values such as `a:b` and the pair `a`/`b` cannot collapse into the same
+ * delimiter-joined string.
+ */
+export function canonicalSerialize(value: unknown): string {
+  if (value === null) return 'null'
+  if (typeof value === 'string') return `string:${value.length}:${value}`
+  if (typeof value === 'boolean') return `boolean:${value ? 1 : 0}`
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) throw new TypeError('canonical serialization requires finite numbers')
+    return `number:${String(value)}`
+  }
+  if (typeof value === 'bigint') return `bigint:${String(value).length}:${String(value)}`
+  if (Array.isArray(value)) {
+    const items = value.map(canonicalSerialize)
+    return `array:${items.length}:${items.map((item) => `${item.length}:${item}`).join('')}`
+  }
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>).sort(([left], [right]) => left.localeCompare(right))
+    const serialized = entries
+      .map(([key, item]) => {
+        const encodedKey = canonicalSerialize(key)
+        const encodedValue = canonicalSerialize(item)
+        return `${encodedKey.length}:${encodedKey}${encodedValue.length}:${encodedValue}`
+      })
+      .join('')
+    return `object:${entries.length}:${serialized}`
+  }
+  if (typeof value === 'undefined') return 'undefined'
+  throw new TypeError(`unsupported canonical serialization type: ${typeof value}`)
 }
 
 /**

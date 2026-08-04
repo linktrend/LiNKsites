@@ -26,6 +26,7 @@ describe('end-to-end synthetic Issue lifecycle', () => {
     const ledger = new ProgramLedger(new InMemoryLedgerStore(), new HierarchyRegistry())
     const registry = new ExecutorRegistry()
     registry.register(new SyntheticEchoExecutor())
+    await ledger.seedProgramGraph()
 
     const issue = await ledger.createIssue({
       issueType: 'test.synthetic.echo',

@@ -51,6 +51,21 @@ export interface LedgerStore {
   claimRun(runId: string, executorId: string, leaseDurationMs: number, executorType: string, executorVersion: string): Promise<Run | null>
   dispatchRun(issue: Issue, run: Run): Promise<{ run: Run; created: boolean }>
   mutateLeasedRun(input: { runId: string; fencingToken: number; kind: 'heartbeat' | 'complete' | 'fail' | 'cancel'; leaseDurationMs?: number; output?: unknown; failureClass?: FailureClass; message?: string }): Promise<Run | null>
+  /** Atomically applies a terminal Run transition, its Issue state, idempotency state, and audit events. */
+  transitionTerminalRun(input: {
+    runId: string
+    fencingToken: number
+    kind: 'complete' | 'fail' | 'cancel'
+    runState: Run['state']
+    issueState: Issue['state']
+    issueUpdatedAt: string
+    retryAt: string | null
+    output?: unknown
+    failureClass?: FailureClass
+    message?: string
+    idempotency: IdempotencyRecord | null
+    events: LedgerEvent[]
+  }): Promise<Run | null>
   reclaimExpiredLeases(nowIso: string): Promise<Run[]>
 
   /**
@@ -70,6 +85,14 @@ export interface LedgerStore {
   updateIdempotencyRecord(record: IdempotencyRecord): Promise<void>
 
   putGateResult(gate: GateResult): Promise<void>
+  /** Atomically records an Issue Gate and applies its authoritative Issue state. */
+  recordIssueGateDecision(input: {
+    gate: GateResult
+    issueState: Issue['state']
+    issueUpdatedAt: string
+    idempotency: IdempotencyRecord | null
+    events: LedgerEvent[]
+  }): Promise<void>
   getGateResult(gateId: string): Promise<GateResult | null>
   getCurrentGate(subjectType: GateResult['subjectType'], subjectId: string): Promise<GateResult | null>
   listGateResults(subjectType: GateResult['subjectType'], subjectId: string): Promise<GateResult[]>
@@ -232,6 +255,40 @@ export class InMemoryLedgerStore implements LedgerStore {
     return { ...next }
   }
 
+  async transitionTerminalRun(input: {
+    runId: string
+    fencingToken: number
+    kind: 'complete' | 'fail' | 'cancel'
+    runState: Run['state']
+    issueState: Issue['state']
+    issueUpdatedAt: string
+    retryAt: string | null
+    output?: unknown
+    failureClass?: FailureClass
+    message?: string
+    idempotency: IdempotencyRecord | null
+    events: LedgerEvent[]
+  }): Promise<Run | null> {
+    const run = this.runs.get(input.runId)
+    const allowedStates = input.kind === 'cancel' ? ['claimed', 'executing', 'cancel_requested'] : ['claimed', 'executing']
+    if (!run || !run.lease || run.lease.fencingToken !== input.fencingToken || !allowedStates.includes(run.state) || new Date(run.lease.expiresAt).getTime() <= Date.now()) return null
+    const next: Run = {
+      ...run,
+      state: input.runState,
+      terminalState: input.runState,
+      output: input.kind === 'complete' ? input.output ?? null : run.output,
+      failure: input.kind === 'fail' ? { failureClass: input.failureClass ?? 'unknown', message: input.message ?? '' } : run.failure,
+      completedAt: input.issueUpdatedAt,
+    }
+    const issue = this.issues.get(run.issueId)
+    if (!issue) throw new Error(`Issue ${run.issueId} not found for terminal Run ${run.runId}`)
+    this.runs.set(run.runId, next)
+    this.issues.set(issue.issueId, { ...issue, state: input.issueState, retryAt: input.retryAt, updatedAt: input.issueUpdatedAt })
+    if (input.idempotency) this.idempotency.set(input.idempotency.idempotencyKey, { ...input.idempotency })
+    this.events.push(...input.events.map((event) => ({ ...event })))
+    return { ...next }
+  }
+
   async reserveIdempotencyKey(
     record: IdempotencyRecord,
   ): Promise<{ record: IdempotencyRecord; created: boolean }> {
@@ -254,6 +311,22 @@ export class InMemoryLedgerStore implements LedgerStore {
   async putGateResult(gate: GateResult): Promise<void> {
     if (this.gates.has(gate.gateId)) throw new Error(`Gate ${gate.gateId} is immutable`)
     this.gates.set(gate.gateId, { ...gate })
+  }
+
+  async recordIssueGateDecision(input: {
+    gate: GateResult
+    issueState: Issue['state']
+    issueUpdatedAt: string
+    idempotency: IdempotencyRecord | null
+    events: LedgerEvent[]
+  }): Promise<void> {
+    if (this.gates.has(input.gate.gateId)) throw new Error(`Gate ${input.gate.gateId} is immutable`)
+    const issue = this.issues.get(input.gate.subjectId)
+    if (!issue) throw new Error(`Issue ${input.gate.subjectId} not found for Gate`)
+    this.gates.set(input.gate.gateId, { ...input.gate })
+    this.issues.set(issue.issueId, { ...issue, state: input.issueState, updatedAt: input.issueUpdatedAt })
+    if (input.idempotency) this.idempotency.set(input.idempotency.idempotencyKey, { ...input.idempotency })
+    this.events.push(...input.events.map((event) => ({ ...event })))
   }
 
   async getGateResult(gateId: string): Promise<GateResult | null> {

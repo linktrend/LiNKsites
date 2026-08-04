@@ -34,6 +34,7 @@ const capabilityColumnsPath = resolve(
 )
 const hierarchyMigrationPath = resolve(__dirname, '../../../supabase/migrations/20260804113354_ledger_program_module_phase_gates.sql')
 const correctiveMigrationPath = resolve(__dirname, '../../../supabase/migrations/20260804120000_ledger_tenant_leases_backfill.sql')
+const integrityMigrationPath = resolve(__dirname, '../../../supabase/migrations/20260804200000_ledger_w1_02_integrity.sql')
 
 let db: PGlite
 
@@ -46,6 +47,7 @@ beforeAll(async () => {
   await db.exec(readFileSync(capabilityColumnsPath, 'utf8'))
   await db.exec(readFileSync(hierarchyMigrationPath, 'utf8'))
   await db.exec(readFileSync(correctiveMigrationPath, 'utf8'))
+  await db.exec(readFileSync(integrityMigrationPath, 'utf8'))
 })
 
 beforeEach(async () => {
