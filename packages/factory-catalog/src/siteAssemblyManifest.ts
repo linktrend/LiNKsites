@@ -84,6 +84,8 @@ export interface SiteAssemblyManifest {
   pages: SiteAssemblyPage[]
   lineage: SiteAssemblyLineage
   resolvedAt: string
+  /** Explicit selection marker; when present, libraryReceipt is mandatory. */
+  libraryEntryId?: string
   /** Carried forward from the Site Specification as durable Library evidence. */
   libraryReceipt?: LibraryConsumptionReceipt
 }
@@ -160,6 +162,11 @@ export function assembleSiteManifest(input: AssembleSiteManifestInput): SiteAsse
     )
   }
 
+  const libraryEntryId = siteSpec.libraryEntryId ?? siteSpec.libraryReceipt?.entryId
+  if (libraryEntryId && (!siteSpec.libraryReceipt || siteSpec.libraryReceipt.entryId !== libraryEntryId)) {
+    throw new SiteAssemblyError('A library-backed Assembly Manifest requires the Site Specification receipt for its selected entry.')
+  }
+
   const tier = TIER_SPECIFICATIONS[siteSpec.tierId]
 
   const pages: SiteAssemblyPage[] = pagePlan.map((pageEntry) => {
@@ -197,6 +204,7 @@ export function assembleSiteManifest(input: AssembleSiteManifestInput): SiteAsse
     pages,
     lineage: lineage ?? {},
     resolvedAt: new Date().toISOString(),
+    ...(libraryEntryId ? { libraryEntryId } : {}),
     ...(siteSpec.libraryReceipt ? { libraryReceipt: siteSpec.libraryReceipt } : {}),
   }
 }

@@ -6,9 +6,10 @@ the LiNKsites consumer contract, immutable consumption receipt, and offline
 executable fixture; it does not claim that the current external LiNKlibraries
 catalog already contains this entry.
 
-The consumer contract points to the real template source path as provenance
-and is exercised against an explicitly offline executable fixture under
-`packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1/`.
+The LiNKsites migration boundary remains documented at the real template
+source path, while the offline fixture uses only the authoritative
+LiNKlibraries entry schema and LiNKsites-owned executable selection. It is
+exercised under `packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1/`.
 That fixture proves the consumer protocol only; it is not evidence that the
 external catalog already contains an approved production entry.
 W2-04 must admit the substantive `marketing-smb-v1` artifact to the governed

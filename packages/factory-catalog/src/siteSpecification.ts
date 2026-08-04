@@ -50,11 +50,9 @@ export interface SiteSpecification {
   pageCount: number
   effectiveMaxPages: number
   resolvedAt: string
-  /**
-   * Exact Library evidence for library-backed specifications. Optional only
-   * for pre-W1 migration records that still reference the physical template
-   * in apps/web-master; new Library consumption must provide this receipt.
-   */
+  /** Explicit selection marker; when present, libraryReceipt is mandatory. */
+  libraryEntryId?: string
+  /** Exact Library evidence for library-backed specifications. */
   libraryReceipt?: LibraryConsumptionReceipt
 }
 
@@ -68,6 +66,7 @@ export interface ResolveSiteSpecificationInput {
   componentRegistry: ComponentRegistry
   selectedComponentIds: string[]
   pageCount: number
+  libraryEntryId?: string
   libraryReceipt?: LibraryConsumptionReceipt
 }
 
@@ -93,6 +92,10 @@ export interface ResolveSiteSpecificationInput {
 export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): SiteSpecification {
   const { siteSpecId, siteRef, kit, tier, foundation, designProfile, componentRegistry, selectedComponentIds, pageCount } = input
 
+  const libraryEntryId = input.libraryEntryId ?? input.libraryReceipt?.entryId
+  if (libraryEntryId && (!input.libraryReceipt || input.libraryReceipt.entryId !== libraryEntryId)) {
+    throw new SiteSpecificationError('A library-backed Site Specification must persist a receipt matching its selected library entry.')
+  }
   if (input.libraryReceipt) assertLibraryConsumptionReceipt(input.libraryReceipt)
 
   assertKitIsProductionReady(kit)
@@ -129,6 +132,7 @@ export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): 
     pageCount,
     effectiveMaxPages,
     resolvedAt: new Date().toISOString(),
+    ...(libraryEntryId ? { libraryEntryId } : {}),
     ...(input.libraryReceipt ? { libraryReceipt: input.libraryReceipt } : {}),
   }
 }
