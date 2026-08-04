@@ -47,7 +47,8 @@
  * content this repository does not have.
  */
 
-import { DEFAULT_ORG_ID, type CreateIssueInput, type GateResult, type HierarchySubjectRef, type Issue, type ProgramLedger, type SideEffectClass } from '@linksites/program-ledger'
+import { createHash } from 'node:crypto'
+import { canonicalSerialize, DEFAULT_ORG_ID, type CreateIssueInput, type GateResult, type HierarchySubjectRef, type Issue, type ProgramLedger, type SideEffectClass } from '@linksites/program-ledger'
 import { SITE_ASSEMBLY_ISSUE_TYPE } from './executors/siteAssemblyExecutor.js'
 import { SITE_SPECIFICATION_ISSUE_TYPE } from './executors/siteSpecificationExecutor.js'
 import { PROMOTE_WORKING_PACKAGE_ISSUE_TYPE } from './executors/promotionExecutor.js'
@@ -132,6 +133,10 @@ function placementToCreateInput(
     backoffMaxMs: placement.backoffMaxMs,
     timeoutMs: placement.timeoutMs,
   }
+}
+
+function checksumForRunOutput(output: unknown): string {
+  return createHash('sha256').update(canonicalSerialize(output)).digest('hex')
 }
 
 /**
@@ -246,6 +251,11 @@ async function resolveAcceptedGateOutput(
   }
   if (run.state !== 'succeeded' || run.output == null) {
     return { ok: false, reason: `Run ${authoritativeGate.runId} for Issue ${issue.issueId} did not produce a successful output (state: "${run.state}") -- not chaining.` }
+  }
+
+  const expectedOutputChecksum = checksumForRunOutput(run.output)
+  if (!authoritativeGate.evidenceReceipts.some((receipt) => receipt.checksum.algorithm === 'sha256' && receipt.checksum.value === expectedOutputChecksum)) {
+    throw new PipelineAutoChainingError(`Authoritative Gate ${authoritativeGate.gateId} for Issue ${issue.issueId} does not carry a checksum verified against the exact immutable output of Run ${run.runId} -- not chaining.`)
   }
 
   return { ok: true, output: run.output }

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { InMemoryLedgerStore, ProgramLedger, ExecutorRegistry, runIssueOnce, type Run } from '@linksites/program-ledger'
+import { createHash } from 'node:crypto'
+import { canonicalSerialize, InMemoryLedgerStore, ProgramLedger, ExecutorRegistry, runIssueOnce, type Run } from '@linksites/program-ledger'
 import {
   SITE_SPECIFICATION_ISSUE_TYPE,
   SiteSpecificationExecutor,
@@ -170,9 +171,11 @@ async function runToAwaitingGate(issueId: string): Promise<Run> {
   return run
 }
 
-async function canonicalIssueEvidence(issueId: string, runId: string): Promise<Record<string, unknown>> {
+async function canonicalIssueEvidence(issueId: string, runId: string, checksumOverride?: string): Promise<Record<string, unknown>> {
   const issue = await ledger.getIssue(issueId)
   if (!issue) throw new Error(`missing Issue ${issueId}`)
+  const run = await ledger.getRun(runId)
+  if (!run || run.output == null) throw new Error(`missing completed Run ${runId}`)
   return {
     evidenceReceipts: [{
       schema_version: { major: 1, minor: 0 },
@@ -182,7 +185,7 @@ async function canonicalIssueEvidence(issueId: string, runId: string): Promise<R
       receipt_id: `receipt-${issueId}`,
       producer: 'factory-catalog.test',
       subject: { type: 'issue', id: issueId },
-      checksum: { algorithm: 'sha256', value: 'a'.repeat(64) },
+      checksum: { algorithm: 'sha256', value: checksumOverride ?? createHash('sha256').update(canonicalSerialize(run.output)).digest('hex') },
       revision_sha: await ledger.getSubjectRevision({ subjectType: 'issue', subjectId: issueId, orgId: issue.orgId!, programId: issue.programRef, moduleId: issue.moduleRef, phaseId: issue.phaseRef }),
       storage_location: `evidence://issue/${issueId}`,
       gate_association: `gate:issue:${issueId}:run:${runId}`,
@@ -330,6 +333,52 @@ describe('Pipeline auto-chaining: gate-discipline guards and full-chain proof', 
     await expect(
       chainSiteAssemblyToPromotion(ledger, gate, { promotionInput: PROMOTION_EXTRAS, placement: PLACEMENT }),
     ).rejects.toBeInstanceOf(PipelineAutoChainingError)
+  })
+
+  it('rejects a Gate receipt with a wrong checksum or a checksum for a different output', async () => {
+    const specIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: SITE_SPEC_INPUT,
+    })
+    const specRun = await runToAwaitingGate(specIssue.issueId)
+    const createSpy = vi.spyOn(ledger, 'createIssue')
+
+    const wrongChecksumGate = await ledger.decideGate(
+      specIssue.issueId,
+      specRun.runId,
+      'accepted',
+      await canonicalIssueEvidence(specIssue.issueId, specRun.runId, 'b'.repeat(64)),
+      'test-gate',
+    )
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, wrongChecksumGate, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/checksum verified against the exact immutable output/)
+    expect(createSpy).not.toHaveBeenCalled()
+
+    createSpy.mockRestore()
+
+    const secondIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: { ...SITE_SPEC_INPUT, siteSpecId: 'sitespec-wrong-output' },
+    })
+    const secondRun = await runToAwaitingGate(secondIssue.issueId)
+    const wrongOutput = { ...(secondRun.output as Record<string, unknown>), siteRef: 'site-wrong-output' }
+    const wrongOutputChecksum = createHash('sha256').update(canonicalSerialize(wrongOutput)).digest('hex')
+    const wrongOutputGate = await ledger.decideGate(
+      secondIssue.issueId,
+      secondRun.runId,
+      'accepted',
+      await canonicalIssueEvidence(secondIssue.issueId, secondRun.runId, wrongOutputChecksum),
+      'test-gate',
+    )
+    const secondCreateSpy = vi.spyOn(ledger, 'createIssue')
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, wrongOutputGate, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/checksum verified against the exact immutable output/)
+    expect(secondCreateSpy).not.toHaveBeenCalled()
+    secondCreateSpy.mockRestore()
   })
 
   it('rejects a fabricated or cross-tenant Gate result instead of chaining', async () => {
