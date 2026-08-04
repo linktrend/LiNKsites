@@ -3,8 +3,9 @@
  *
  * The entry and catalog types below mirror LiNKlibraries schema version 1.
  * LiNKsites-owned selection and receipt fields deliberately live outside that
- * metadata schema. The transport is also a trust boundary: it must verify
- * the requested Git commit before returning either catalog or entry content.
+ * metadata schema. The W1-05 transport is an offline fixture adapter: it
+ * independently verifies the fixed manifest before returning content and does
+ * not claim live LiNKlibraries authority.
  */
 
 import { createHash } from 'node:crypto'
@@ -14,7 +15,7 @@ export const LINKSITES_LIBRARY_CONSUMER = 'linksites' as const
 export const LINKLIBRARIES_REPOSITORY = 'https://github.com/linktrend/LiNKlibraries.git'
 export const LIBRARY_ENTRY_SCHEMA_VERSION = 1 as const
 export const LINKSITES_RUNTIME_REQUIREMENTS = {
-  nodeMajor: 20,
+  nodeMajor: 22,
   runtimes: ['node', 'browser'],
 } as const
 
@@ -126,19 +127,16 @@ export interface LibraryVerificationRecord {
   readonly assetChecksums: Readonly<Record<string, string>>
 }
 
-/** No callback-only or self-echo verifier is admissible. */
+/**
+ * LiNKsites-owned adapter surface. It carries no authority record or runtime
+ * brand. Every returned byte is checked against the fixed offline manifest.
+ */
 export interface VerifiedLibraryCommit {
-  readonly repositoryUrl: string
-  readonly commitSha: GitSha
-  readonly verification: LibraryVerificationRecord
   readonly readCatalog: () => LibraryCatalog | Promise<LibraryCatalog>
   readonly readEntryAtCommit: (input: { entryId: string; path: string }) => LibraryEntryFetch | Promise<LibraryEntryFetch>
 }
 
-/**
- * Trusted Git/artifact boundary. The transport must supply a materialized
- * capability whose catalog and entry reads are bound to one exact commit.
- */
+/** W1-05 exact-commit adapter boundary; the implementation is offline-only. */
 export interface LibraryExactCommitTransport {
   readonly verifiedCommit: VerifiedLibraryCommit
 }
@@ -185,9 +183,6 @@ export interface LibraryConsumption {
   verification: LibraryVerificationRecord
 }
 
-const VERIFIED_COMMIT_BRAND = Symbol('linksites.verified-library-commit')
-const TRUSTED_CONSUMPTION_BRAND = Symbol('linksites.trusted-library-consumption')
-
 export type LibraryConsumptionEvidence = LibraryConsumption
 
 export class LibraryConsumerError extends Error {
@@ -207,6 +202,7 @@ const LIBRARY_ENTRY_KINDS: ReadonlySet<LibraryEntryKind> = new Set([
   'starter_kit',
   'vetted_oss',
 ])
+const OFFLINE_ADAPTER_INSTANCES = new WeakSet<object>()
 
 /**
  * Source-owned authority for the offline W1-05 migration fixture. This is a
@@ -221,7 +217,7 @@ export const OFFLINE_LIBRARY_AUTHORITY: LibraryVerificationRecord = Object.freez
   catalogChecksum: '68633477924c29a60f0c77befa2b9e85157c5208b434acb3bcb084e3294aaecf',
   entryId: 'marketing-smb-v1',
   entryPath: 'entries/marketing-smb-v1',
-  entryChecksum: '0ca6f1e68016148cb80eb6f55fd2b9ba2756af8daa062caa25939f918edc9bed',
+  entryChecksum: 'c54d737aa55ddcc5fbd5575b846aeee526468d14931deec14b58694d2a991b5b',
   assetChecksums: Object.freeze({
     'README.md': '5ecdd28fd51c5a3e7922daa8b693542943654d242c8257121773aa8ca70fe398',
     'assets/marketingSmbV1.ts': 'bc2a1813815d3334364cc936765483ab3135a7c9c457f2fee9b0b325f68386c9',
@@ -292,14 +288,23 @@ export function assertLibraryVerificationRecord(value: unknown): asserts value i
   }
 }
 
+function assertString(value: unknown, label: string): asserts value is string {
+  if (typeof value !== 'string') throw new LibraryConsumerError(`${label} must be a string.`)
+}
+
 function assertNonEmptyString(value: unknown, label: string): asserts value is string {
   if (typeof value !== 'string' || value.trim() === '') throw new LibraryConsumerError(`${label} must be a non-empty string.`)
 }
 
-function assertStringArray(value: unknown, label: string, minItems = 0): asserts value is string[] {
-  if (!Array.isArray(value) || value.length < minItems || !value.every((item) => typeof item === 'string' && item.trim() !== '')) {
-    throw new LibraryConsumerError(`${label} must be an array of non-empty strings.`)
+function assertSchemaStringArray(value: unknown, label: string): asserts value is string[] {
+  if (!Array.isArray(value) || !value.every((item) => typeof item === 'string')) {
+    throw new LibraryConsumerError(`${label} must be an array of strings.`)
   }
+}
+
+function assertStringArray(value: unknown, label: string, minItems = 0): asserts value is string[] {
+  assertSchemaStringArray(value, label)
+  if (value.length < minItems || !value.every((item) => item.trim() !== '')) throw new LibraryConsumerError(`${label} must be an array of non-empty strings.`)
 }
 
 function assertSha(value: unknown, label: string): asserts value is string {
@@ -337,29 +342,38 @@ const compareRange = (range: string, major: number): boolean => {
   })
 }
 
-function assertCatalogEntryShape(row: unknown): asserts row is LibraryCatalogEntry {
+function assertCatalogEntrySchema(row: unknown): asserts row is LibraryCatalogEntry {
   if (!isRecord(row)) throw new LibraryConsumerError('LiNKlibraries catalog contains a malformed entry row.')
-  assertNonEmptyString(row.entryId, 'Catalog entryId')
-  if (row.entryId.length < 2 || row.entryId.length > 128 || !ENTRY_ID_PATTERN.test(row.entryId) || !LIBRARY_ENTRY_KINDS.has(row.kind as LibraryEntryKind)) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid identity or kind.`)
-  for (const field of ['name', 'summary']) assertNonEmptyString(row[field], `Catalog ${field}`)
-  for (const field of ['problemDomains', 'tags', 'languages', 'frameworks']) assertStringArray(row[field], `Catalog ${field}`)
+  assertString(row.entryId, 'Catalog entryId')
+  if (!LIBRARY_ENTRY_KINDS.has(row.kind as LibraryEntryKind)) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid kind.`)
+  for (const field of ['name', 'summary']) assertString(row[field], `Catalog ${field}`)
+  for (const field of ['problemDomains', 'tags', 'languages', 'frameworks']) assertSchemaStringArray(row[field], `Catalog ${field}`)
   if (row.status !== 'approved' && row.status !== 'deprecated') throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid status.`)
   if (row.path !== `entries/${row.entryId}`) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid path.`)
   assertExactKeys(row, ['entryId', 'kind', 'name', 'summary', 'problemDomains', 'tags', 'languages', 'frameworks', 'status', 'path'], `Catalog entry "${row.entryId}"`)
 }
 
-function assertCatalogShape(catalog: unknown): asserts catalog is LibraryCatalog {
+export function assertLibraryCatalogSchema(catalog: unknown): asserts catalog is LibraryCatalog {
   if (!isRecord(catalog)) throw new LibraryConsumerError('LiNKlibraries catalog is not an object.')
   assertExactKeys(catalog, CATALOG_KEYS, 'LiNKlibraries catalog')
   if (catalog.schemaVersion !== LIBRARY_ENTRY_SCHEMA_VERSION) throw new LibraryConsumerError('LiNKlibraries catalog schemaVersion 1 is required.')
-  assertNonEmptyString(catalog.generatedAt, 'LiNKlibraries catalog generatedAt')
+  assertString(catalog.generatedAt, 'LiNKlibraries catalog generatedAt')
   if (!isGitSha(catalog.sourceCommitSha)) throw new LibraryConsumerError('LiNKlibraries catalog sourceCommitSha must be a full commit SHA.')
   if (!Array.isArray(catalog.entries)) throw new LibraryConsumerError('LiNKlibraries catalog entries must be an array.')
   const seen = new Set<string>()
   for (const row of catalog.entries) {
-    assertCatalogEntryShape(row)
+    assertCatalogEntrySchema(row)
     if (seen.has(row.entryId)) throw new LibraryConsumerError(`LiNKlibraries catalog contains duplicate entryId "${row.entryId}".`)
     seen.add(row.entryId)
+  }
+}
+
+function assertLiNKSitesCatalogPolicy(catalog: LibraryCatalog): void {
+  assertNonEmptyString(catalog.generatedAt, 'LiNKlibraries catalog generatedAt')
+  for (const row of catalog.entries) {
+    if (row.entryId.length < 2 || row.entryId.length > 128 || !ENTRY_ID_PATTERN.test(row.entryId)) throw new LibraryConsumerError(`Catalog entry "${row.entryId}" has an invalid LiNKsites identity.`)
+    for (const field of ['name', 'summary']) assertNonEmptyString(row[field as keyof LibraryCatalogEntry], `Catalog ${field}`)
+    for (const field of ['problemDomains', 'tags', 'languages', 'frameworks']) assertStringArray(row[field as keyof LibraryCatalogEntry], `Catalog ${field}`)
   }
 }
 
@@ -369,7 +383,7 @@ export interface OfflineLibraryFixtureSource {
 }
 
 function assertOfflineCatalog(catalog: unknown): asserts catalog is LibraryCatalog {
-  assertCatalogShape(catalog)
+  assertLibraryCatalogSchema(catalog)
   if (canonicalJsonChecksum(catalog) !== OFFLINE_LIBRARY_AUTHORITY.catalogChecksum) {
     throw new LibraryConsumerError('Offline LiNKlibraries adapter rejected catalog content that is not the source-owned immutable fixture object.')
   }
@@ -400,7 +414,8 @@ function assertOfflineEntryFetch(fetched: unknown): asserts fetched is LibraryEn
  * LiNKsites-owned offline adapter. It admits only the one source-owned
  * candidate fixture described by OFFLINE_LIBRARY_AUTHORITY. Caller callbacks
  * provide bytes to verify; they do not provide authority, commit identity, or
- * verification evidence. This is deliberately not a live Git integration.
+ * verification evidence. The returned adapter contains no transferable trust
+ * credential. This is deliberately not a live Git integration.
  */
 export function createOfflineLibraryFixtureTransport(source: OfflineLibraryFixtureSource): LibraryExactCommitTransport {
   if (!source || typeof source.readCatalog !== 'function' || typeof source.readEntryAtCommit !== 'function') {
@@ -410,10 +425,7 @@ export function createOfflineLibraryFixtureTransport(source: OfflineLibraryFixtu
     assertOfflineCatalog(catalog)
     return deepFreeze(structuredClone(catalog))
   })
-  const capability = {
-    repositoryUrl: OFFLINE_LIBRARY_AUTHORITY.repositoryUrl,
-    commitSha: OFFLINE_LIBRARY_AUTHORITY.commitSha,
-    verification: OFFLINE_LIBRARY_AUTHORITY,
+  const adapter: VerifiedLibraryCommit = {
     readCatalog: () => catalogPromise,
     readEntryAtCommit: async (request: { entryId: string; path: string }) => {
       if (request.entryId !== OFFLINE_LIBRARY_AUTHORITY.entryId || request.path !== OFFLINE_LIBRARY_AUTHORITY.entryPath) {
@@ -424,47 +436,36 @@ export function createOfflineLibraryFixtureTransport(source: OfflineLibraryFixtu
       return deepFreeze({ entry: structuredClone(fetched.entry), files: { ...fetched.files } })
     },
   }
-  Object.defineProperty(capability, VERIFIED_COMMIT_BRAND, { value: true, enumerable: false })
-  return Object.freeze({ verifiedCommit: Object.freeze(capability) as VerifiedLibraryCommit })
-}
-
-function isVerifiedLibraryCommit(value: unknown): value is VerifiedLibraryCommit {
-  return isRecord(value) && Object.getOwnPropertyDescriptor(value, VERIFIED_COMMIT_BRAND)?.value === true && Object.isFrozen(value) &&
-    typeof value.repositoryUrl === 'string' && isGitSha(value.commitSha) &&
-    isOfflineLibraryAuthority(value.verification) &&
-    typeof value.readCatalog === 'function' && typeof value.readEntryAtCommit === 'function'
+  const frozenAdapter = Object.freeze(adapter)
+  OFFLINE_ADAPTER_INSTANCES.add(frozenAdapter)
+  return Object.freeze({ verifiedCommit: frozenAdapter })
 }
 
 export function assertLibraryEntryContract(entry: unknown): asserts entry is LibraryEntryContract {
   if (!isRecord(entry)) throw new LibraryConsumerError('LiNKlibraries returned a malformed entry contract.')
   assertExactKeys(entry, LIBRARY_ENTRY_KEYS, `Entry ${String(entry.entryId)}`)
   if (entry.schemaVersion !== LIBRARY_ENTRY_SCHEMA_VERSION) throw new LibraryConsumerError(`Entry "${String(entry.entryId)}" has an unsupported schemaVersion.`)
-  assertNonEmptyString(entry.entryId, 'Entry entryId')
-  if (entry.entryId.length < 2 || entry.entryId.length > 128 || !ENTRY_ID_PATTERN.test(entry.entryId) || !LIBRARY_ENTRY_KINDS.has(entry.kind as LibraryEntryKind)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has an invalid identity or kind.`)
-  for (const field of ['name', 'summary', 'integrationNotes']) assertNonEmptyString(entry[field], `Entry ${field}`)
-  assertStringArray(entry.problemDomains, 'Entry problemDomains', 1)
-  for (const field of ['tags', 'languages', 'frameworks', 'gotchas']) assertStringArray(entry[field], `Entry ${field}`)
+  assertString(entry.entryId, 'Entry entryId')
+  if (!LIBRARY_ENTRY_KINDS.has(entry.kind as LibraryEntryKind)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has an invalid kind.`)
+  for (const field of ['name', 'summary', 'integrationNotes']) assertString(entry[field], `Entry ${field}`)
+  assertSchemaStringArray(entry.problemDomains, 'Entry problemDomains')
+  for (const field of ['tags', 'languages', 'frameworks', 'gotchas']) assertSchemaStringArray(entry[field], `Entry ${field}`)
   if (!isRecord(entry.compatibility)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed compatibility metadata.`)
-  assertNodeRange(entry.compatibility.node, `Entry "${entry.entryId}" compatibility.node`)
-  assertStringArray(entry.compatibility.runtimes, `Entry "${entry.entryId}" compatibility.runtimes`, 1)
+  assertString(entry.compatibility.node, `Entry "${entry.entryId}" compatibility.node`)
+  assertSchemaStringArray(entry.compatibility.runtimes, `Entry "${entry.entryId}" compatibility.runtimes`)
   if (!isRecord(entry.license)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed license metadata.`)
-  assertNonEmptyString(entry.license.spdx, `Entry "${entry.entryId}" license.spdx`)
+  assertString(entry.license.spdx, `Entry "${entry.entryId}" license.spdx`)
   if (typeof entry.license.redistributionAllowed !== 'boolean') throw new LibraryConsumerError(`Entry "${entry.entryId}" license.redistributionAllowed must be boolean.`)
   if (!isRecord(entry.securityReview)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed security review metadata.`)
-  for (const field of ['reviewedAt', 'reviewedBy', 'notes']) assertNonEmptyString(entry.securityReview[field], `Entry ${field}`)
+  for (const field of ['reviewedAt', 'reviewedBy', 'notes']) assertString(entry.securityReview[field], `Entry ${field}`)
   if (!isRecord(entry.usage)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed usage metadata.`)
-  assertNonEmptyString(entry.usage.howToUse, `Entry "${entry.entryId}" usage.howToUse`)
-  if (entry.usage.examples !== undefined) assertStringArray(entry.usage.examples, `Entry "${entry.entryId}" usage.examples`)
+  assertString(entry.usage.howToUse, `Entry "${entry.entryId}" usage.howToUse`)
+  if (entry.usage.examples !== undefined) assertSchemaStringArray(entry.usage.examples, `Entry "${entry.entryId}" usage.examples`)
   if (!isRecord(entry.provenance)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed provenance metadata.`)
   if (!['ide-development', 'linkdeveloper', 'manual', 'migration'].includes(entry.provenance.sourceSystem as string)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has an invalid provenance sourceSystem.`)
-  assertNonEmptyString(entry.provenance.contributedAt, `Entry "${entry.entryId}" provenance.contributedAt`)
-  for (const field of ['sourceUrl', 'versionOrRange', 'productRunId']) if (entry.provenance[field] !== undefined) assertNonEmptyString(entry.provenance[field], `Entry ${field}`)
-  if (entry.kind === 'vetted_oss') {
-    for (const field of AUTHORITATIVE_LIBRARY_ENTRY_SCHEMA.vettedOssRequiredProvenance) assertNonEmptyString(entry.provenance[field], `Entry "${entry.entryId}" vetted_oss provenance.${field}`)
-    assertNonEmptyString(entry.provenance.sourceUrl, `Entry "${entry.entryId}" vetted_oss provenance.sourceUrl`)
-    if (!/^https:\/\//.test(entry.provenance.sourceUrl)) throw new LibraryConsumerError(`Entry "${entry.entryId}" vetted_oss provenance.sourceUrl must be an HTTPS URL.`)
-  }
-  if (!Array.isArray(entry.files) || entry.files.length === 0) throw new LibraryConsumerError(`Entry "${entry.entryId}" has no files.`)
+  assertString(entry.provenance.contributedAt, `Entry "${entry.entryId}" provenance.contributedAt`)
+  for (const field of ['sourceUrl', 'versionOrRange', 'productRunId']) if (entry.provenance[field] !== undefined) assertString(entry.provenance[field], `Entry ${field}`)
+  if (!Array.isArray(entry.files)) throw new LibraryConsumerError(`Entry "${entry.entryId}" files must be an array.`)
   const paths = new Set<string>()
   for (const asset of entry.files) {
     if (!isRecord(asset)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has malformed file metadata.`)
@@ -475,6 +476,35 @@ export function assertLibraryEntryContract(entry: unknown): asserts entry is Lib
     paths.add(asset.path)
   }
   if (entry.status !== 'approved' && entry.status !== 'deprecated') throw new LibraryConsumerError(`Entry "${entry.entryId}" has an invalid status.`)
+}
+
+/** LiNKsites policy is intentionally separate from the authoritative schema. */
+export function assertLiNKSitesLibraryConsumerPolicy(entry: LibraryEntryContract): void {
+  assertLibraryEntryContract(entry)
+  assertNonEmptyString(entry.entryId, 'Entry entryId')
+  if (entry.entryId.length < 2 || entry.entryId.length > 128 || !ENTRY_ID_PATTERN.test(entry.entryId)) throw new LibraryConsumerError(`Entry "${entry.entryId}" has an invalid LiNKsites identity.`)
+  assertNonEmptyString(entry.name, 'Entry name')
+  assertNonEmptyString(entry.summary, 'Entry summary')
+  assertNonEmptyString(entry.integrationNotes, 'Entry integrationNotes')
+  assertStringArray(entry.problemDomains, 'Entry problemDomains', 1)
+  assertStringArray(entry.tags, 'Entry tags')
+  assertStringArray(entry.languages, 'Entry languages')
+  assertStringArray(entry.frameworks, 'Entry frameworks')
+  assertStringArray(entry.gotchas, 'Entry gotchas')
+  assertNodeRange(entry.compatibility.node, `Entry "${entry.entryId}" compatibility.node`)
+  assertStringArray(entry.compatibility.runtimes, `Entry "${entry.entryId}" compatibility.runtimes`, 1)
+  assertNonEmptyString(entry.license.spdx, `Entry "${entry.entryId}" license.spdx`)
+  for (const field of ['reviewedAt', 'reviewedBy', 'notes']) assertNonEmptyString(entry.securityReview[field], `Entry ${field}`)
+  assertNonEmptyString(entry.usage.howToUse, `Entry "${entry.entryId}" usage.howToUse`)
+  if (entry.usage.examples !== undefined) assertStringArray(entry.usage.examples, `Entry "${entry.entryId}" usage.examples`)
+  assertNonEmptyString(entry.provenance.contributedAt, `Entry "${entry.entryId}" provenance.contributedAt`)
+  for (const field of ['sourceUrl', 'versionOrRange', 'productRunId']) if (entry.provenance[field] !== undefined) assertNonEmptyString(entry.provenance[field], `Entry ${field}`)
+  if (entry.kind === 'vetted_oss') {
+    for (const field of AUTHORITATIVE_LIBRARY_ENTRY_SCHEMA.vettedOssRequiredProvenance) assertNonEmptyString(entry.provenance[field], `Entry "${entry.entryId}" vetted_oss provenance.${field}`)
+    assertNonEmptyString(entry.provenance.sourceUrl, `Entry "${entry.entryId}" vetted_oss provenance.sourceUrl`)
+    if (!/^https:\/\//.test(entry.provenance.sourceUrl)) throw new LibraryConsumerError(`Entry "${entry.entryId}" vetted_oss provenance.sourceUrl must be an HTTPS URL.`)
+  }
+  if (entry.files.length === 0) throw new LibraryConsumerError(`Entry "${entry.entryId}" has no files.`)
 }
 
 export function validatePinnedCatalogReference(reference: PinnedLibraryCatalogReference): void {
@@ -488,7 +518,7 @@ function assertCompatible(entry: LibraryEntryContract, request: LibraryCompatibi
       request.nodeMajor !== LINKSITES_RUNTIME_REQUIREMENTS.nodeMajor ||
       request.runtimes.length !== LINKSITES_RUNTIME_REQUIREMENTS.runtimes.length ||
       request.runtimes.some((runtime, index) => runtime !== LINKSITES_RUNTIME_REQUIREMENTS.runtimes[index])) {
-    throw new LibraryConsumerError('LiNKsites runtime requirements are owned and fixed at Node >=20 with node+browser; callers cannot weaken or replace the baseline.')
+    throw new LibraryConsumerError('LiNKsites runtime requirements are owned and fixed at Node 22 with node+browser; callers cannot weaken or replace the baseline.')
   }
   if (!compareRange(entry.compatibility.node, LINKSITES_RUNTIME_REQUIREMENTS.nodeMajor)) throw new LibraryConsumerError(`Entry "${entry.entryId}" is incompatible with LiNKsites Node ${LINKSITES_RUNTIME_REQUIREMENTS.nodeMajor}; declared range is ${entry.compatibility.node}.`)
   for (const runtime of LINKSITES_RUNTIME_REQUIREMENTS.runtimes) if (!entry.compatibility.runtimes.includes(runtime)) throw new LibraryConsumerError(`Entry "${entry.entryId}" does not declare required LiNKsites runtime "${runtime}".`)
@@ -525,18 +555,19 @@ export async function consumePinnedLibraryEntry(input: {
   recordedAt?: string
 }): Promise<LibraryConsumption> {
   validatePinnedCatalogReference(input.catalogReference)
-  if (!input.transport || !isVerifiedLibraryCommit(input.transport.verifiedCommit)) throw new LibraryConsumerError('LiNKlibraries consumption requires a materialized trusted exact-commit capability; callback-only or self-attested SHA transport is rejected.')
-  const verifiedCommit = input.transport.verifiedCommit
-  if (verifiedCommit.repositoryUrl !== input.catalogReference.repositoryUrl || verifiedCommit.commitSha !== input.catalogReference.commitSha) throw new LibraryConsumerError('Materialized LiNKlibraries capability does not bind to the requested exact repository commit.')
-  assertLibraryVerificationRecord(verifiedCommit.verification)
-  const catalog = await verifiedCommit.readCatalog()
-  assertCatalogShape(catalog)
+  if (!input.transport || !isRecord(input.transport.verifiedCommit) || !OFFLINE_ADAPTER_INSTANCES.has(input.transport.verifiedCommit) || typeof input.transport.verifiedCommit.readCatalog !== 'function' || typeof input.transport.verifiedCommit.readEntryAtCommit !== 'function') throw new LibraryConsumerError('LiNKlibraries consumption requires the LiNKsites-owned offline fixture adapter; copied, callback-only, or self-attested transport is rejected.')
+  if (input.catalogReference.repositoryUrl !== OFFLINE_LIBRARY_AUTHORITY.repositoryUrl || input.catalogReference.commitSha !== OFFLINE_LIBRARY_AUTHORITY.commitSha) throw new LibraryConsumerError('This W1-05 offline fixture adapter accepts only its fixed candidate manifest; it is not live LiNKlibraries integration.')
+  const adapter = input.transport.verifiedCommit
+  const catalog = await adapter.readCatalog()
+  assertLibraryCatalogSchema(catalog)
+  assertLiNKSitesCatalogPolicy(catalog)
   if (catalog.sourceCommitSha !== input.catalogReference.commitSha) throw new LibraryConsumerError('LiNKlibraries catalog sourceCommitSha does not bind to the requested exact commit.')
   const row = catalog.entries.find((candidate) => candidate.entryId === input.entryId)
   if (!row || row.status !== 'approved') throw new LibraryConsumerError(`No approved LiNKlibraries catalog entry exists for "${input.entryId}".`)
-  const fetched = await verifiedCommit.readEntryAtCommit({ entryId: row.entryId, path: row.path })
+  const fetched = await adapter.readEntryAtCommit({ entryId: row.entryId, path: row.path })
   if (!isRecord(fetched) || !isRecord(fetched.entry) || !isRecord(fetched.files)) throw new LibraryConsumerError('Materialized exact-commit capability returned no entry/file read evidence; no-op transport is rejected.')
   assertLibraryEntryContract(fetched.entry)
+  assertLiNKSitesLibraryConsumerPolicy(fetched.entry)
   if (fetched.entry.entryId !== row.entryId) throw new LibraryConsumerError(`Fetched entry identity does not match catalog entry "${row.entryId}".`)
   const metadata = ['entryId', 'kind', 'name', 'summary', 'problemDomains', 'tags', 'languages', 'frameworks', 'status']
   if (canonicalJsonStringify(Object.fromEntries(metadata.map((key) => [key, fetched.entry[key as keyof LibraryEntryContract]]))) !== canonicalJsonStringify(Object.fromEntries(metadata.map((key) => [key, row[key as keyof LibraryCatalogEntry]])))) throw new LibraryConsumerError(`Fetched entry "${input.entryId}" metadata does not match the pinned catalog.`)
@@ -550,7 +581,7 @@ export async function consumePinnedLibraryEntry(input: {
     entryId: fetched.entry.entryId,
     catalogCommitSha: input.catalogReference.commitSha,
     libraryCommitSha: input.catalogReference.commitSha,
-    verificationId: verifiedCommit.verification.verificationId,
+    verificationId: OFFLINE_LIBRARY_AUTHORITY.verificationId,
     entryChecksum: canonicalJsonChecksum(fetched.entry),
     assetChecksums,
     entrypoint: input.executable.entrypoint,
@@ -563,9 +594,8 @@ export async function consumePinnedLibraryEntry(input: {
     entry: deepFreeze(fetched.entry),
     files: deepFreeze({ ...fetched.files }),
     receipt: deepFreeze(receipt),
-    verification: verifiedCommit.verification,
+    verification: OFFLINE_LIBRARY_AUTHORITY,
   }
-  Object.defineProperty(consumption, TRUSTED_CONSUMPTION_BRAND, { value: true, enumerable: false })
   return Object.freeze(consumption)
 }
 
@@ -603,12 +633,17 @@ export function assertLibraryConsumptionEvidence(value: unknown): asserts value 
 }
 
 export function isTrustedLibraryConsumption(value: unknown): value is LibraryConsumptionEvidence {
-  return isRecord(value) && (Object.getOwnPropertyDescriptor(value, TRUSTED_CONSUMPTION_BRAND)?.value === true || isOfflineLibraryAuthority(value.verification))
+  try {
+    assertLibraryConsumptionEvidence(value)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export function assertLibraryReceiptMatchesEntry(receipt: LibraryConsumptionReceipt, entry: LibraryEntryContract): void {
   assertLibraryConsumptionReceipt(receipt)
-  assertLibraryEntryContract(entry)
+  assertLiNKSitesLibraryConsumerPolicy(entry)
   if (receipt.entryId !== entry.entryId || receipt.entryChecksum !== canonicalJsonChecksum(entry)) throw new LibraryConsumerError('Library receipt entry identity/checksum does not match the persisted entry metadata.')
   const declared = Object.fromEntries(entry.files.map(({ path, sha256: checksum }) => [path, checksum]))
   if (canonicalJsonStringify(receipt.assetChecksums) !== canonicalJsonStringify(declared)) throw new LibraryConsumerError('Library receipt asset checksums do not match the persisted entry metadata.')
@@ -635,7 +670,8 @@ export function submitArchitectCandidate(input: {
   validatePinnedCatalogReference(input.catalogReference)
   if (input.catalogReference.ref && input.catalogReference.ref !== input.catalogReference.commitSha) throw new LibraryConsumerError('Architect proposals require an exact catalog commit.')
   if (!input.catalogReference.catalog) throw new LibraryConsumerError('Architect proposals require a catalog snapshot bound to the exact commit.')
-  assertCatalogShape(input.catalogReference.catalog)
+  assertLibraryCatalogSchema(input.catalogReference.catalog)
+  assertLiNKSitesCatalogPolicy(input.catalogReference.catalog)
   if (input.catalogReference.catalog.sourceCommitSha !== input.catalogReference.commitSha) throw new LibraryConsumerError('Architect proposal catalog does not bind to the exact commit.')
   if (input.candidate.status !== 'candidate') throw new LibraryConsumerError('Architect submissions must remain candidate status.')
   const approved = input.catalogReference.catalog?.entries.find((entry) => entry.entryId === input.candidate.entryId && entry.status === 'approved')

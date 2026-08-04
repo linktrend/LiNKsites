@@ -9,7 +9,7 @@
   "languages": ["typescript"],
   "frameworks": ["next", "react"],
   "compatibility": {
-    "node": ">=20",
+    "node": ">=22",
     "runtimes": ["node", "browser"]
   },
   "license": {

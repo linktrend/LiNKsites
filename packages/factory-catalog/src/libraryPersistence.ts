@@ -5,6 +5,8 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import type { SiteAssemblyManifest } from './siteAssemblyManifest.js'
 import type { SiteSpecification } from './siteSpecification.js'
 import {
@@ -33,6 +35,92 @@ export class LibraryPersistenceError extends Error {
     super(message)
     this.name = 'LibraryPersistenceError'
   }
+}
+
+/** LiNKsites-owned persistence boundary; implementations do not require an external service. */
+export interface FactoryCatalogPersistence {
+  writeLibraryBackedSite(record: PersistedLibraryBackedSite): Promise<void>
+  readLibraryBackedSite(siteRef: string): Promise<PersistedLibraryBackedSite | null>
+}
+
+interface DurableFactoryCatalogRecord {
+  storageSchemaVersion: 1
+  siteRef: string
+  record: PersistedLibraryBackedSite
+}
+
+const durableStorageSchemaVersion = 1 as const
+
+function storageKey(siteRef: string): string {
+  if (typeof siteRef !== 'string' || siteRef.trim() === '') throw new LibraryPersistenceError('Factory Catalog persistence requires a non-empty siteRef.')
+  return canonicalJsonChecksum(siteRef)
+}
+
+/**
+ * A real local durable representation for the Factory Catalog. Each record is
+ * stored as canonical JSON under a content-derived filename and atomically
+ * replaced, then fully revalidated on read. This is fixture/local persistence,
+ * not a live database, hosted catalog, or LiNKlibraries integration.
+ */
+export function createFileFactoryCatalogPersistence(directory: string): FactoryCatalogPersistence {
+  if (typeof directory !== 'string' || directory.trim() === '') throw new LibraryPersistenceError('Factory Catalog persistence requires a storage directory.')
+  const recordPath = (siteRef: string): string => join(directory, `${storageKey(siteRef)}.json`)
+
+  return {
+    async writeLibraryBackedSite(record) {
+      assertPersistedLibraryBackedSite(record)
+      const path = recordPath(record.siteSpec.siteRef)
+      const durable: DurableFactoryCatalogRecord = {
+        storageSchemaVersion: durableStorageSchemaVersion,
+        siteRef: record.siteSpec.siteRef,
+        record,
+      }
+      await mkdir(directory, { recursive: true })
+      const temporaryPath = `${path}.tmp-${process.pid}`
+      await writeFile(temporaryPath, canonicalJsonStringify(durable), 'utf8')
+      await rename(temporaryPath, path)
+    },
+
+    async readLibraryBackedSite(siteRef) {
+      const path = recordPath(siteRef)
+      let serialized: string
+      try {
+        serialized = await readFile(path, 'utf8')
+      } catch (error) {
+        if (isNodeError(error) && error.code === 'ENOENT') return null
+        throw new LibraryPersistenceError(`Factory Catalog durable read failed for siteRef "${siteRef}".`)
+      }
+      let durable: unknown
+      try {
+        durable = JSON.parse(serialized)
+      } catch {
+        throw new LibraryPersistenceError(`Factory Catalog durable record for siteRef "${siteRef}" is not valid JSON.`)
+      }
+      if (!durable || typeof durable !== 'object') throw new LibraryPersistenceError('Factory Catalog durable record must be an object.')
+      const parsed = durable as Partial<DurableFactoryCatalogRecord>
+      if (parsed.storageSchemaVersion !== durableStorageSchemaVersion || parsed.siteRef !== siteRef || !parsed.record) throw new LibraryPersistenceError('Factory Catalog durable record has an invalid storage envelope.')
+      assertPersistedLibraryBackedSite(parsed.record)
+      if (parsed.record.siteSpec.siteRef !== siteRef) throw new LibraryPersistenceError('Factory Catalog durable record siteRef does not match its persisted Site Specification.')
+      return parsed.record
+    },
+  }
+}
+
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && 'code' in error
+}
+
+/** Rehydrates only through the owned durable persistence interface. */
+export async function rehydratePersistedLibraryBackedSite(
+  persistence: FactoryCatalogPersistence,
+  siteRef: string,
+): Promise<PersistedLibraryBackedSite> {
+  if (!persistence || typeof persistence.readLibraryBackedSite !== 'function') throw new LibraryPersistenceError('Factory Catalog rehydration requires its owned persistence interface.')
+  const record = await persistence.readLibraryBackedSite(siteRef)
+  if (!record) throw new LibraryPersistenceError(`No durable Factory Catalog record exists for siteRef "${siteRef}".`)
+  assertPersistedLibraryBackedSite(record)
+  if (record.siteSpec.siteRef !== siteRef) throw new LibraryPersistenceError('Rehydrated Factory Catalog record is bound to a different siteRef.')
+  return record
 }
 
 function payloadOf(record: Omit<PersistedLibraryBackedSite, 'integrityChecksum'>): Omit<PersistedLibraryBackedSite, 'integrityChecksum'> {

@@ -1,15 +1,19 @@
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
+import { dirname, join, resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   consumePinnedLibraryEntry,
   assertLibraryEntryContract,
+  assertLiNKSitesLibraryConsumerPolicy,
   canonicalJsonChecksum,
   LINKSITES_LIBRARY_CONSUMER,
   LINKLIBRARIES_REPOSITORY,
   createOfflineLibraryFixtureTransport,
+  isTrustedLibraryConsumption,
   submitArchitectCandidate,
   type LibraryCatalog,
   type LibraryCompatibilityRequest,
@@ -19,7 +23,9 @@ import {
 } from '../src/libraryConsumer.js'
 import {
   createPersistedLibraryBackedSite,
+  createFileFactoryCatalogPersistence,
   deserializePersistedLibraryBackedSite,
+  rehydratePersistedLibraryBackedSite,
   serializePersistedLibraryBackedSite,
 } from '../src/libraryPersistence.js'
 import { assembleSiteManifest } from '../src/siteAssemblyManifest.js'
@@ -65,7 +71,7 @@ const catalogReference: PinnedLibraryCatalogReference = {
   ref: COMMIT_SHA,
   catalog: fixtureCatalog,
 }
-const compatibility: LibraryCompatibilityRequest = { nodeMajor: 20, runtimes: ['node', 'browser'] }
+const compatibility: LibraryCompatibilityRequest = { nodeMajor: 22, runtimes: ['node', 'browser'] }
 const executable = { entrypoint: 'assets/marketingSmbV1.ts', testFiles: ['tests/marketingSmbV1.fixture.ts'] }
 
 function buildTransport(overrides: Partial<{
@@ -114,9 +120,13 @@ describe('W1-05 LiNKlibraries consumer', () => {
       'assets/marketingSmbV1.ts': sha256(fixtureFiles['assets/marketingSmbV1.ts']),
       'tests/marketingSmbV1.fixture.ts': sha256(fixtureFiles['tests/marketingSmbV1.fixture.ts']),
     })
+    expect(isTrustedLibraryConsumption(consumption)).toBe(true)
+    const forgedConsumption = structuredClone(consumption)
+    forgedConsumption.entry = { ...forgedConsumption.entry, summary: 'caller-forged summary' }
+    expect(isTrustedLibraryConsumption(forgedConsumption)).toBe(false)
   })
 
-  it('requires the trusted exact-commit verifier and rejects moving refs', async () => {
+  it('requires the LiNKsites-owned adapter and rejects moving refs', async () => {
     await expect(consumePinnedLibraryEntry({
       catalogReference: { ...catalogReference, ref: 'development' },
       entryId: 'marketing-smb-v1', compatibility, executable, transport: buildTransport(),
@@ -126,22 +136,19 @@ describe('W1-05 LiNKlibraries consumer', () => {
       catalogReference,
       entryId: 'marketing-smb-v1', compatibility, executable,
       transport: { verifiedCommit: undefined } as unknown as LibraryExactCommitTransport,
-    })).rejects.toThrow(/materialized trusted exact-commit capability/)
+    })).rejects.toThrow(/LiNKsites-owned offline fixture adapter/)
   })
 
-  it('rejects self-attested SHA objects and binds materialized reads to the exact capability', async () => {
+  it('rejects copied adapter objects and exposes no transferable symbol credential', async () => {
+    const adapter = buildTransport().verifiedCommit
+    expect(Object.getOwnPropertySymbols(adapter)).toHaveLength(0)
     await expect(consumePinnedLibraryEntry({
       catalogReference,
       entryId: 'marketing-smb-v1', compatibility, executable,
       transport: {
-        verifiedCommit: {
-          repositoryUrl: LINKLIBRARIES_REPOSITORY,
-          commitSha: COMMIT_SHA,
-          readCatalog: () => fixtureCatalog,
-          readEntryAtCommit: () => ({ entry: fixtureEntry, files: fixtureFiles }),
-        },
+        verifiedCommit: { ...adapter },
       } as unknown as LibraryExactCommitTransport,
-    })).rejects.toThrow(/materialized trusted exact-commit capability/)
+    })).rejects.toThrow(/copied.*self-attested transport/)
 
     let selectedPath: string | undefined
     await consumePinnedLibraryEntry({
@@ -162,24 +169,22 @@ describe('W1-05 LiNKlibraries consumer', () => {
     })).rejects.toThrow(/source-owned immutable fixture/)
 
     await expect(consumePinnedLibraryEntry({
-      catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 19, runtimes: compatibility.runtimes }, executable, transport: buildTransport(),
+      catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 21, runtimes: compatibility.runtimes }, executable, transport: buildTransport(),
     })).rejects.toThrow(/owned and fixed/)
 
     await expect(consumePinnedLibraryEntry({
-      catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 20, runtimes: ['node', 'browser', 'edge'] }, executable, transport: buildTransport(),
+      catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 22, runtimes: ['node', 'browser', 'edge'] }, executable, transport: buildTransport(),
     })).rejects.toThrow(/owned and fixed/)
 
     await expect(consumePinnedLibraryEntry({
-      catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 19, runtimes: ['node', 'browser'] }, executable, transport: buildTransport(),
+      catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 21, runtimes: ['node', 'browser'] }, executable, transport: buildTransport(),
     })).rejects.toThrow(/owned and fixed/)
 
     await expect(consumePinnedLibraryEntry({
-      catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 20, runtimes: [] }, executable, transport: buildTransport(),
-    })).rejects.toThrow(/runtime requirements/)
+      catalogReference, entryId: 'marketing-smb-v1', compatibility: { nodeMajor: 22, runtimes: [] }, executable, transport: buildTransport(),
+    })).rejects.toThrow(/owned and fixed/)
 
-    await expect(consumePinnedLibraryEntry({
-      catalogReference, entryId: 'marketing-smb-v1', compatibility, executable, transport: buildTransport({ entry: { ...fixtureEntry, compatibility: { ...fixtureEntry.compatibility, node: '>=20 || <18' } } }),
-    })).rejects.toThrow(/unsupported or ambiguous/)
+    expect(() => assertLiNKSitesLibraryConsumerPolicy({ ...fixtureEntry, compatibility: { ...fixtureEntry.compatibility, node: '>=20 || <18' } })).toThrow(/unsupported or ambiguous/)
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
@@ -195,15 +200,23 @@ describe('W1-05 LiNKlibraries consumer', () => {
       provenance: { ...fixtureEntry.provenance, sourceBranch: 'development' },
     })).not.toThrow()
 
+    const schemaValidEmptyOptionals = {
+      ...fixtureEntry,
+      usage: { ...fixtureEntry.usage, examples: [''] },
+      provenance: { ...fixtureEntry.provenance, sourceUrl: '', versionOrRange: '', productRunId: '' },
+    }
+    expect(() => assertLibraryEntryContract(schemaValidEmptyOptionals)).not.toThrow()
+    expect(() => assertLiNKSitesLibraryConsumerPolicy(schemaValidEmptyOptionals)).toThrow(/non-empty/)
+
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
       transport: buildTransport({ entry: { ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } } }),
-    })).rejects.toThrow(/vetted_oss provenance.sourceUrl/)
+    })).rejects.toThrow(/source-owned immutable fixture/)
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
       transport: buildTransport({ entry: { ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'https://example.com/package' } } }),
-    })).rejects.toThrow(/vetted_oss provenance.versionOrRange/)
+    })).rejects.toThrow(/source-owned immutable fixture/)
 
     await expect(consumePinnedLibraryEntry({
       catalogReference, entryId: 'marketing-smb-v1', compatibility, executable,
@@ -213,7 +226,8 @@ describe('W1-05 LiNKlibraries consumer', () => {
       }),
     })).rejects.toThrow(/source-owned immutable fixture/)
 
-    expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } })).toThrow(/vetted_oss provenance.sourceUrl/)
+    expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } })).not.toThrow()
+    expect(() => assertLiNKSitesLibraryConsumerPolicy({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance } })).toThrow(/vetted_oss provenance.sourceUrl/)
     expect(() => assertLibraryEntryContract({ ...fixtureEntry, kind: 'vetted_oss', provenance: { ...fixtureEntry.provenance, sourceUrl: 'https://example.com/package', versionOrRange: '^1.2.3' } })).not.toThrow()
   })
 
@@ -274,6 +288,22 @@ describe('W1-05 LiNKlibraries consumer', () => {
     const restored = deserializePersistedLibraryBackedSite(serializePersistedLibraryBackedSite(persisted))
     expect(restored.siteSpec.libraryReceipt).toEqual(consumption.receipt)
     expect(restored.manifest.libraryReceipt).toEqual(consumption.receipt)
+
+    const storageDirectory = await mkdtemp(join(tmpdir(), 'linksites-factory-catalog-'))
+    try {
+      const persistence = createFileFactoryCatalogPersistence(storageDirectory)
+      await persistence.writeLibraryBackedSite(persisted)
+      const rehydrated = await rehydratePersistedLibraryBackedSite(createFileFactoryCatalogPersistence(storageDirectory), siteSpec.siteRef)
+      expect(rehydrated.siteSpec.libraryReceipt).toEqual(consumption.receipt)
+      expect(await readdir(storageDirectory)).toHaveLength(1)
+      const durablePath = join(storageDirectory, (await readdir(storageDirectory))[0])
+      const durable = JSON.parse(await readFile(durablePath, 'utf8')) as { record: typeof persisted }
+      durable.record.libraryConsumption.files['assets/marketingSmbV1.ts'] = 'durable-store-tamper'
+      await writeFile(durablePath, JSON.stringify(durable), 'utf8')
+      await expect(rehydratePersistedLibraryBackedSite(createFileFactoryCatalogPersistence(storageDirectory), siteSpec.siteRef)).rejects.toThrow(/failed SHA-256|file contents|integrity checksum/)
+    } finally {
+      await rm(storageDirectory, { recursive: true, force: true })
+    }
     const tampered = JSON.parse(serializePersistedLibraryBackedSite(persisted)) as typeof persisted
     tampered.manifest.libraryReceipt = { ...tampered.manifest.libraryReceipt!, entryId: 'other-entry' }
     expect(() => deserializePersistedLibraryBackedSite(JSON.stringify(tampered))).toThrow(/same receipt|selected entry ID|checksum mismatch/)
