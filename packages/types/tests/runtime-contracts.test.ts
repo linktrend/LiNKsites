@@ -29,6 +29,34 @@ const withTopLevelField = (
   fieldValue: unknown,
 ): Record<string, unknown> => ({ ...value, [key]: fieldValue })
 
+const withPathValue = (
+  value: unknown,
+  path: readonly (string | number)[],
+  replacement: string,
+): unknown => {
+  if (path.length === 0) return replacement
+  if (Array.isArray(value)) {
+    const [head, ...tail] = path
+    const next = [...value]
+    next[Number(head)] = withPathValue(next[Number(head)], tail, replacement)
+    return next
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    const [head, ...tail] = path
+    return {
+      ...(value as Record<string, unknown>),
+      [String(head)]: withPathValue(
+        (value as Record<string, unknown>)[String(head)],
+        tail,
+        replacement,
+      ),
+    }
+  }
+
+  throw new Error(`Cannot set path ${path.join('.')}`)
+}
+
 test('the seven canonical envelopes accept their valid fixtures', () => {
   assert.equal(isLeadResearchPackage(manualFirstTestLead), true)
   assert.equal(isDemoCompletionEnvelope(validDemoCompletion), true)
@@ -190,6 +218,75 @@ test('all nested objects use closed schemas and reject credential or payment mat
       checksum: { ...validEvidenceReceipt.checksum, processor: 'stripe' },
     }),
     false,
+  )
+})
+
+test('all recursively reachable allowed strings reject embedded sensitive material', () => {
+  const blockedDemo = {
+    ...validDemoCompletion,
+    status: 'blocked',
+    error: {
+      code: 'preview_blocked',
+      message: 'Preview is blocked pending correction.',
+      retryable: true,
+    },
+  }
+
+  const cases: Array<[
+    string,
+    ContractValidator,
+    object,
+    readonly (string | number)[],
+    string,
+  ]> = [
+    ['lead summary bearer', isLeadResearchPackage, manualFirstTestLead, ['research', 'summary'], 'Bearer raw-secret'],
+    ['lead source query credential', isLeadResearchPackage, manualFirstTestLead, ['research', 'sources', 0], 'https://example.test/?api_key=raw-secret'],
+    ['lead id account material', isLeadResearchPackage, manualFirstTestLead, ['lead_id'], 'customer-account-123456789'],
+    ['demo preview auth query', isDemoCompletionEnvelope, validDemoCompletion, ['private_preview_url'], 'https://preview.example.test/?authorization=raw-secret'],
+    ['demo error code private key', isDemoCompletionEnvelope, blockedDemo, ['error', 'code'], 'private_key=raw-secret'],
+    ['demo error message PEM', isDemoCompletionEnvelope, blockedDemo, ['error', 'message'], '-----BEGIN PRIVATE KEY----- raw-secret'],
+    ['commercial authorization reference', isCommercialOutcomeEnvelope, validCommercialOutcome, ['reach_authorization_reference'], 'auth_token=raw-secret'],
+    ['commercial nonce token', isCommercialOutcomeEnvelope, validCommercialOutcome, ['replay_protection', 'nonce'], 'token: raw-secret'],
+    ['activation domain card', isActivationRequest, validActivationRequest, ['publication', 'domain'], 'pay-4111111111111111.example.com'],
+    ['activation site id URL credentials', isActivationRequest, validActivationRequest, ['site_id'], 'https://user:password@example.com'],
+    ['recycling inventory account', isRecyclingRequest, validRecyclingRequest, ['template_inventory_id'], 'account_number=123456789'],
+    ['event payload JWT', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['payload', 'lead_id'], 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.signature'],
+    ['event acknowledgement password', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['acknowledgement', 'reason'], 'password=hunter2'],
+    ['event signature known token', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['signature', 'signature'], 'ghp_1234567890abcdefghij'],
+    ['evidence storage query credential', isEvidenceReceipt, validEvidenceReceipt, ['storage_location'], 'evidence://run/receipt?access_token=raw-secret'],
+    ['evidence producer bearer', isEvidenceReceipt, validEvidenceReceipt, ['producer'], 'Bearer raw-secret'],
+    ['evidence gate payment reference', isEvidenceReceipt, validEvidenceReceipt, ['gate_association'], 'payment_intent=pi_secret'],
+    ['evidence subject card', isEvidenceReceipt, validEvidenceReceipt, ['subject', 'id'], 'card-4111-1111-1111-1111'],
+  ]
+
+  for (const [name, validator, fixture, path, sensitiveValue] of cases) {
+    assert.equal(
+      validator(withPathValue(fixture, path, sensitiveValue)),
+      false,
+      `${name} was accepted at ${path.join('.')}`,
+    )
+  }
+})
+
+test('ordinary descriptive strings remain valid', () => {
+  assert.equal(
+    isLeadResearchPackage({
+      ...manualFirstTestLead,
+      research: {
+        ...manualFirstTestLead.research,
+        summary: 'The account team reviewed the private preview and payment workflow.',
+        sources: ['https://example.test/research?topic=payments'],
+      },
+      source: 'manual-first-test',
+    }),
+    true,
+  )
+  assert.equal(
+    isDemoCompletionEnvelope({
+      ...validDemoCompletion,
+      evidence_references: ['evidence://run/demo-complete'],
+    }),
+    true,
   )
 })
 

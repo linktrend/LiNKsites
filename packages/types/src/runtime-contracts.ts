@@ -132,10 +132,78 @@ export type EvidenceReceipt = ContractMetadata & {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
+const SENSITIVE_ASSIGNMENT_PATTERN =
+  /(?:^|[^a-z0-9])(?:auth(?:entication|orization)?(?:[_-](?:token|key|secret|credential))?|api[_-]?key|access[_-]?(?:key|token)|refresh[_-]?token|id[_-]?token|session[_-]?token|token|secret|credential|password|passwd|pwd|private[_ -]?key|client[_-]?secret|account(?:[_ -]?(?:number|no|id))?|card(?:[_ -]?(?:number|no|id|cvc|cvv|expiry))?|payment(?:[_ -]?(?:intent|token|method|id|number|account))?|routing[_ -]?number|iban|bic|sort[_ -]?code|ssn|tax[_ -]?id)\s*(?:=|:|%3d|%3a)\s*[^\s&#;,]+/i
+
+const AUTHORIZATION_HEADER_PATTERN = /\b(?:bearer|basic)\s+[^\s]+/i
+
+const PRIVATE_KEY_PATTERN = /-----BEGIN(?: [A-Z0-9]+)? PRIVATE KEY-----/i
+
+const URL_CREDENTIAL_PATTERN = /\bhttps?:\/\/[^/\s:@]+:[^/\s@]+@/i
+
+const KNOWN_TOKEN_PATTERN =
+  /(?:^|[^a-z0-9])(?:sk-(?:proj|ant|live|test)-[a-z0-9_-]+|sk_(?:live|test)_[a-z0-9]+|rk_(?:live|test)_[a-z0-9]+|gh[pousr]_[a-z0-9]+|github_pat_[a-z0-9_]+|glpat-[a-z0-9_-]+|xox[baprs]-[a-z0-9-]+|npm_[a-z0-9]+|akia[0-9a-z]{16}|asia[0-9a-z]{16}|AIza[0-9a-z_-]{20,})(?:$|[^a-z0-9])/i
+
+const JWT_PATTERN =
+  /(?:^|[^a-z0-9])eyJ[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]+(?:$|[^a-z0-9])/i
+
+const TOKEN_PREFIX_PATTERN = /(?:^|[^a-z0-9])(?:token|secret|password)[_-][a-z0-9]{8,}(?:$|[^a-z0-9])/i
+
+const PAYMENT_LABEL_PATTERN =
+  /\b(?:account(?:[_-]?(?:number|no|id))?|card(?:[_-]?(?:number|no|id|cvc|cvv|expiry))?|payment(?:[_-]?(?:intent|token|method|id|number|account))?|routing[_-]?number|iban|bic|sort[_-]?code|ssn|tax[_-]?id)\b[^a-z0-9]{0,4}\d{4,}/i
+
+const hasValidLuhnChecksum = (digits: string): boolean => {
+  let sum = 0
+  let shouldDouble = false
+
+  for (let index = digits.length - 1; index >= 0; index -= 1) {
+    let digit = Number(digits[index])
+    if (shouldDouble) {
+      digit *= 2
+      if (digit > 9) digit -= 9
+    }
+    sum += digit
+    shouldDouble = !shouldDouble
+  }
+
+  return sum % 10 === 0
+}
+
+const hasCardNumber = (value: string): boolean => {
+  const candidates = value.match(/(?:^|[^0-9])((?:\d[ -]?){13,19})(?=$|[^0-9])/g) ?? []
+  return candidates.some((candidate) => {
+    const digits = candidate.replace(/[^0-9]/g, '')
+    return digits.length >= 13 && digits.length <= 19 && hasValidLuhnChecksum(digits)
+  })
+}
+
+const isSensitiveString = (value: string): boolean =>
+  SENSITIVE_ASSIGNMENT_PATTERN.test(value) ||
+  AUTHORIZATION_HEADER_PATTERN.test(value) ||
+  PRIVATE_KEY_PATTERN.test(value) ||
+  URL_CREDENTIAL_PATTERN.test(value) ||
+  KNOWN_TOKEN_PATTERN.test(value) ||
+  JWT_PATTERN.test(value) ||
+  TOKEN_PREFIX_PATTERN.test(value) ||
+  PAYMENT_LABEL_PATTERN.test(value) ||
+  hasCardNumber(value)
+
+const containsSensitiveMaterial = (value: unknown, ancestors = new Set<object>()): boolean => {
+  if (typeof value === 'string') return isSensitiveString(value)
+  if (!Array.isArray(value) && !isRecord(value)) return false
+  if (ancestors.has(value)) return true
+
+  ancestors.add(value)
+  const nestedValues = Array.isArray(value) ? value : Object.values(value)
+  const found = nestedValues.some((nestedValue) => containsSensitiveMaterial(nestedValue, ancestors))
+  ancestors.delete(value)
+  return found
+}
+
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' &&
   value.trim().length > 0 &&
-  !/^Bearer\s+\S+/i.test(value)
+  !isSensitiveString(value)
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) &&
@@ -178,6 +246,7 @@ const isMetadata = (
   value: unknown,
 ): value is ContractMetadata & Record<string, unknown> =>
   isRecord(value) &&
+  !containsSensitiveMaterial(value) &&
   hasRequiredKeys(value, METADATA_KEYS) &&
   isSchemaVersion(value.schema_version) &&
   isNonEmptyString(value.org_id) &&
