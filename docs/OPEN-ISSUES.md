@@ -79,3 +79,7 @@ Every in-repo cross-reference to these old **top-level `docs/`** paths (README, 
 **Verification performed for real after structural moves:** workspace `pnpm typecheck` / `pnpm test` (and build as applicable) — this was a pure documentation/file-organization pass; no product `apps/**/src` or `packages/**/src` logic was intentionally changed beyond comment path updates.
 
 **What this deliberately does NOT do:** delete any archived document (moved only); touch `apps/*/docs/**`; invent a fake “factory complete” claim; resolve GAP-33/23/50 by documentation alone.
+
+## 2. W1-01 terminology boundary clarification — 2026-08-04
+
+The seeded GAP-33/34/35 label above is retained as historical build-log terminology because this file is append-only. The current commercial owner is **LiNKreach**; LiNKsites has no direct Sales, Stripe, or Odoo runtime dependency. Existing payment/CRM-shaped names remain only as explicitly documented compatibility or historical references, and the live LiNKreach commercial adapter remains open.

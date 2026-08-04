@@ -26,9 +26,9 @@ optional_fields:
     - "pnpm exec tsc -p tsconfig.json (packages/factory-catalog)"
     - "rm -rf apps/web-master/.next apps/web-company/.next && pnpm run typecheck --force (workspace root)"
   open_gaps:
-    - "The LiNKreach-outcome-to-technical-disposition mapping table in the compatibility function mapSalesOutcomeToTechnicalDisposition() is this repository's own reasonable, defensible interpretation of the manual's two named vocabularies (§10.31) -- the manual names both lists but does not print one literal lookup table connecting every pair. This specific mapping should be reviewed against real LiNKreach/CRM practice before being treated as final policy."
+    - "The Sales-outcome-to-technical-disposition mapping table in mapSalesOutcomeToTechnicalDisposition() is this repository's own reasonable, defensible interpretation of the manual's two named vocabularies (§10.31) -- the manual names both lists but does not print one literal lookup table connecting every pair. This specific mapping should be reviewed against real Sales/CRM practice before being treated as final policy."
     - "requiresConversionLock() and requiresRecycling() are pure predicates only. No wiring exists yet connecting an OutcomeRecord to ConversionLockRegistry.createLock() (conversionLock.ts) or archiveAndRecycleFoundation() (prospectAdaptation.ts) -- that orchestration is separate, still-open future work."
-    - "salesAuthorityRef is an opaque, unvalidated reference, the same honest-scope boundary as other authority_ref fields in this package (e.g. conversionInstructionRef in conversionLock.ts). No real LiNKreach-authorization validation system exists to check it against."
+    - "salesAuthorityRef is an opaque, unvalidated reference, the same honest-scope boundary as other authority_ref fields in this package (e.g. conversionInstructionRef in conversionLock.ts). No real Sales-authority validation system exists to check it against."
   notes:
     - "This module deliberately mirrors tierSpecification.ts's checkEntitlement() pattern of returning a structured decision rather than a bare value, adapted here as a type-level guarantee (OutcomeRecord.technicalDisposition can only ever be set via the mapping function, since createOutcomeRecord() is the sole exported constructor) rather than a returned {disposition, reason} object, since the 'decision' in this case is a derived field on a persisted-shape record rather than a one-off check result."
 ---
@@ -37,7 +37,7 @@ optional_fields:
 
 ## Subject
 
-`phase4-outcome-record-001` -- Outcome Record: deterministic mapping from LiNKreach-owned commercial outcome to LiNKsites-owned technical disposition.
+`phase4-outcome-record-001` -- Outcome Record: deterministic mapping from Sales-owned commercial outcome to LiNKsites-owned technical disposition.
 
 ## Criteria To Evidence Map / Artifacts / Verification Summary
 
@@ -49,4 +49,4 @@ See front matter `open_gaps`. None of these are defects in this Issue's own scop
 
 ## Gate Guidance
 
-Non-vacuous: every criterion maps to specific, named, passing tests, including all 11 individual mapping cases (not a single loop-based test), a real delegation proof for `createOutcomeRecord()` (comparing its output against the mapping function directly rather than re-asserting a hardcoded expectation), and both true- and false-case coverage for both predicates. Doc comments in `outcomeRecord.ts` explicitly name what is and is not covered (no real CRM verification, no LiNKreach-authorization validation, no downstream ConversionLock/recycling wiring) so a reviewer does not need to infer scope boundaries from the code alone.
+Non-vacuous: every criterion maps to specific, named, passing tests, including all 11 individual mapping cases (not a single loop-based test), a real delegation proof for `createOutcomeRecord()` (comparing its output against the mapping function directly rather than re-asserting a hardcoded expectation), and both true- and false-case coverage for both predicates. Doc comments in `outcomeRecord.ts` explicitly name what is and is not covered (no real CRM verification, no Sales-authority validation, no downstream ConversionLock/recycling wiring) so a reviewer does not need to infer scope boundaries from the code alone.

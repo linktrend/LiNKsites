@@ -29,8 +29,11 @@ The repository mixes `Stage` and `Phase`, contains historical obligations that b
 ## Owned paths
 
 - `packages/types/**`
-- active top-level product documents listed above
+- `README.md`, `docs/LINKSITES-INTENT.md`, `docs/LINKSITES-TECHNICAL-PRD.md`, `docs/LINKSITES-OPERATIONS-MANUAL.md`, and the append-only current-state clarification in `docs/OPEN-ISSUES.md`
 - `execution/PROGRAM.md`
+- These active execution descriptors only: `execution/modules/phase2-program-ledger/MODULE.md`, `execution/modules/phase2-program-ledger/issues/phase2-ledger-review-bugfix-001/ISSUE.md`, `execution/modules/phase2-program-ledger/issues/phase2-program-hierarchy-001/ISSUE.md`, `execution/modules/phase3-reusable-asset-factory/issues/phase3-pipeline-chaining-001/ISSUE.md`, `execution/modules/phase4-build-first-preview-path/MODULE.md`, `execution/modules/phase4-build-first-preview-path/issues/phase4-conversion-lock-001/ISSUE.md`, `execution/modules/phase4-build-first-preview-path/issues/phase4-outcome-record-001/ISSUE.md`, `execution/modules/phase4-build-first-preview-path/issues/phase4-preview-inventory-001/ISSUE.md`, `execution/modules/phase4-build-first-preview-path/issues/phase4-proof-level-engine-001/ISSUE.md`, and `execution/modules/repo-hardening/MODULE.md`.
+- Reversion-only restoration of these historical proof records to the W1-01 base content: `execution/modules/phase2-program-ledger/issues/phase2-program-hierarchy-001/PROOF.md`, `execution/modules/phase4-build-first-preview-path/issues/phase4-conversion-lock-001/PROOF.md`, `execution/modules/phase4-build-first-preview-path/issues/phase4-outcome-record-001/PROOF.md`, `execution/modules/phase4-build-first-preview-path/issues/phase4-preview-inventory-001/PROOF.md`, and `execution/modules/phase4-build-first-preview-path/issues/phase4-proof-level-engine-001/PROOF.md`.
+- The execution-descriptor correction is narrow: active prose uses `Phase` and LiNKreach ownership, while legacy code symbols and field names are explicitly identified where they remain. The proof reversions add no new evidence and are not claimed as evidence produced under the corrected terminology.
 - contract fixtures placed under the shared types package
 - root lockfile only if a small runtime-validation dependency is demonstrably required
 
