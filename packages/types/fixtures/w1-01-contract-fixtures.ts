@@ -1,6 +1,7 @@
 import type {
   ActivationRequest,
   CommercialOutcomeEnvelope,
+  ContractMetadata,
   DemoCompletionEnvelope,
   EvidenceReceipt,
   LeadResearchPackage,
@@ -22,6 +23,13 @@ export const manualFirstTestLead: LeadResearchPackage = {
   source: 'manual-first-test',
 }
 
+const canonicalMetadata: ContractMetadata = {
+  schema_version: { major: 1, minor: 0 },
+  org_id: 'org_demo',
+  correlation_id: 'corr_lead_001',
+  idempotency_key: 'lead:demo-example:research:v1',
+}
+
 export const crmPortLead: LeadResearchPackage = {
   schema_version: { major: 1, minor: 0 },
   org_id: 'org_demo',
@@ -37,20 +45,22 @@ export const crmPortLead: LeadResearchPackage = {
 }
 
 export const validDemoCompletion: DemoCompletionEnvelope = {
-  ...manualFirstTestLead,
+  ...canonicalMetadata,
+  lead_id: 'lead_demo_example',
   site_id: 'site_demo_example',
   private_preview_url: 'https://preview.example.test/site_demo_example',
   status: 'completed',
-  artifact_revision: 'artifact-sha-001',
-  library_revision: 'library-sha-001',
-  content_revision: 'content-sha-001',
+  artifact_revision: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  library_revision: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+  content_revision: 'cccccccccccccccccccccccccccccccccccccccc',
   evidence_references: ['evidence://run/demo-complete'],
   started_at: '2026-08-04T00:00:00.000Z',
   completed_at: '2026-08-04T00:05:00.000Z',
 }
 
 export const validCommercialOutcome: CommercialOutcomeEnvelope = {
-  ...manualFirstTestLead,
+  ...canonicalMetadata,
+  lead_id: 'lead_demo_example',
   site_id: 'site_demo_example',
   outcome: 'sold',
   reach_authorization_reference: 'reach-auth-001',
@@ -59,7 +69,8 @@ export const validCommercialOutcome: CommercialOutcomeEnvelope = {
 }
 
 export const validActivationRequest: ActivationRequest = {
-  ...manualFirstTestLead,
+  ...canonicalMetadata,
+  lead_id: 'lead_demo_example',
   site_id: 'site_demo_example',
   reach_authorization_reference: 'reach-auth-001',
   publication: {
@@ -70,7 +81,8 @@ export const validActivationRequest: ActivationRequest = {
 }
 
 export const validRecyclingRequest: RecyclingRequest = {
-  ...manualFirstTestLead,
+  ...canonicalMetadata,
+  lead_id: 'lead_demo_example',
   site_id: 'site_demo_example',
   template_inventory_id: 'template-inventory-001',
   reason: 'no_sale',
@@ -78,7 +90,7 @@ export const validRecyclingRequest: RecyclingRequest = {
 }
 
 export const validLiNKautoworkEvent: LiNKautoworkEventEnvelope = {
-  ...manualFirstTestLead,
+  ...canonicalMetadata,
   event_id: 'event-001',
   event_name: 'demo.completed',
   payload: { lead_id: 'lead_demo_example', site_id: 'site_demo_example' },
@@ -92,7 +104,7 @@ export const validLiNKautoworkEvent: LiNKautoworkEventEnvelope = {
 }
 
 export const validEvidenceReceipt: EvidenceReceipt = {
-  ...manualFirstTestLead,
+  ...canonicalMetadata,
   receipt_id: 'receipt-001',
   producer: 'linksites.executor',
   subject: { type: 'site', id: 'site_demo_example' },
@@ -100,7 +112,7 @@ export const validEvidenceReceipt: EvidenceReceipt = {
     algorithm: 'sha256',
     value: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
   },
-  revision_sha: 'commit-sha-001',
+  revision_sha: 'dddddddddddddddddddddddddddddddddddddddd',
   storage_location: 'evidence://run/demo-complete/receipt.json',
   gate_association: 'W1-01-001',
   timestamp: '2026-08-04T00:22:00.000Z',
