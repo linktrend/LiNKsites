@@ -217,6 +217,19 @@ importers:
         specifier: 3.2.6
         version: 3.2.6(@types/debug@4.1.13)(@types/node@22.19.15)(happy-dom@20.10.6)(jiti@1.21.7)(jsdom@26.1.0)(lightningcss@1.32.0)(sass@1.77.4)(tsx@4.21.0)
 
+  apps/intake-orchestrator:
+    dependencies:
+      '@linksites/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+    devDependencies:
+      '@types/node':
+        specifier: 22.19.15
+        version: 22.19.15
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+
   apps/web-company:
     dependencies:
       '@linksites/types':
