@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict'
+import { mkdtemp, writeFile } from 'node:fs/promises'
 import test from 'node:test'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import {
   manualFirstTestLead,
   validDemoCompletion,
@@ -30,6 +33,7 @@ import {
   IntakeOrchestrator,
   type OrchestratorDependencies,
 } from '../src/index.ts'
+import { FileWorkIntakePort } from '../src/file-adapters.ts'
 import type { DemoCompletionEnvelope, EvidenceReceipt, LeadResearchPackage } from '@linksites/types'
 
 class TestClock {
@@ -544,6 +548,31 @@ test('duplicate pull/restart creates one idempotent Program', async () => {
   await orchestrator.runCycle()
   await orchestrator.runCycle()
   assert.deepEqual(setup.ledger.createdLeadIds, [manualFirstTestLead.lead_id])
+})
+
+test('restart after a durable file claim before Program creation reoffers safely and creates one Program', async () => {
+  const setup = makeDependencies()
+  const directory = await mkdtemp(join(tmpdir(), 'linksites-w1-03-'))
+  const inputPath = join(directory, 'intake.ndjson')
+  const statePath = join(directory, 'claims.state.json')
+  await writeFile(inputPath, `${JSON.stringify(manualFirstTestLead)}\n`, 'utf8')
+
+  const options = { clock: setup.clock, claimLeaseMs: 7 }
+  const firstAdapter = new FileWorkIntakePort(inputPath, statePath, options)
+  const [item] = await firstAdapter.pullReady(10, setup.clock.now())
+  assert.ok(await firstAdapter.claim(item!.itemId, manualFirstTestLead.lead_id, manualFirstTestLead.idempotency_key, setup.clock.now()))
+  // Simulated process crash boundary: claim is durable, createOrResumeProgram was not called.
+
+  setup.clock.advance(8)
+  const restartedAdapter = new FileWorkIntakePort(inputPath, statePath, options)
+  setup.ledger.setNow(() => setup.clock.now())
+  setup.dependencies = { ...setup.dependencies, intake: restartedAdapter }
+  setup.executors.register(successExecutor())
+  await new IntakeOrchestrator(setup.dependencies).runCycle()
+  await new IntakeOrchestrator(setup.dependencies).runCycle()
+
+  assert.deepEqual(setup.ledger.createdLeadIds, [manualFirstTestLead.lead_id])
+  assert.deepEqual(await restartedAdapter.pullReady(10, setup.clock.now()), [])
 })
 
 test('transient Program creation failure schedules durable intake retry and then succeeds', async () => {

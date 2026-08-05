@@ -3,6 +3,7 @@ import { randomUUID, createHash } from 'node:crypto'
 import { dirname } from 'node:path'
 import type { DemoCompletionEnvelope } from '@linksites/types'
 import type {
+  Clock,
   CompletionSink,
   IntakeAcknowledgement,
   IntakeClaim,
@@ -10,14 +11,29 @@ import type {
   WorkIntakePort,
 } from './contracts.ts'
 import type { LeadResearchPackage } from '@linksites/types'
+import { SystemClock } from './orchestrator.ts'
 
 type IntakeState = Record<string, {
   state: 'claimed' | 'rejected' | 'program_started' | 'program_retry_scheduled' | 'program_manual_attention'
   claimId?: string
+  claimExpiresAt?: string
   reasonCode?: string
   nextAttemptAt?: string
   attemptNumber?: number
 }>
+
+type ClaimMarker = {
+  itemId: string
+  claimId: string
+  claimExpiresAt: string
+}
+
+export interface FileWorkIntakeOptions {
+  readonly clock?: Clock
+  readonly claimLeaseMs?: number
+  readonly stateLockStaleMs?: number
+  readonly stateLockRetryMs?: number
+}
 
 const EMPTY_STATE: IntakeState = {}
 
@@ -30,14 +46,26 @@ export class FileWorkIntakePort implements WorkIntakePort {
   private readonly inputPath: string
   private readonly statePath: string
   private readonly claimsPath: string
+  private readonly clock: Clock
+  private readonly claimLeaseMs: number
+  private readonly stateLockStaleMs: number
+  private readonly stateLockRetryMs: number
 
   constructor(
     inputPath: string,
     statePath = `${inputPath}.state.json`,
+    options: FileWorkIntakeOptions = {},
   ) {
     this.inputPath = inputPath
     this.statePath = statePath
     this.claimsPath = `${statePath}.claims`
+    this.clock = options.clock ?? new SystemClock()
+    this.claimLeaseMs = options.claimLeaseMs ?? 30_000
+    this.stateLockStaleMs = options.stateLockStaleMs ?? 30_000
+    this.stateLockRetryMs = options.stateLockRetryMs ?? 1
+    if (this.claimLeaseMs <= 0 || this.stateLockStaleMs <= 0 || this.stateLockRetryMs <= 0) {
+      throw new Error('file intake lease, lock stale, and lock retry durations must be positive')
+    }
   }
 
   async pullReady(limit: number, nowIso: string): Promise<readonly PulledWorkItem[]> {
@@ -56,8 +84,9 @@ export class FileWorkIntakePort implements WorkIntakePort {
       const itemState = state[itemId]
       const retryDue = itemState?.state === 'program_retry_scheduled' &&
         (!itemState.nextAttemptAt || itemState.nextAttemptAt <= nowIso)
-      if (itemState && !retryDue) continue
-      if (!retryDue && await this.claimExists(itemId)) continue
+      if (itemState?.state === 'claimed' && this.claimIsActive(itemState.claimExpiresAt, nowIso)) continue
+      if (itemState && itemState.state !== 'claimed' && !retryDue) continue
+      if (!itemState && await this.claimExists(itemId, nowIso)) continue
       let envelope: unknown
       try {
         envelope = JSON.parse(trimmed) as unknown
@@ -70,56 +99,45 @@ export class FileWorkIntakePort implements WorkIntakePort {
   }
 
   async claim(itemId: string, leadId: LeadResearchPackage['lead_id'], idempotencyKey: LeadResearchPackage['idempotency_key'], nowIso: string): Promise<IntakeClaim | null> {
-    const state = await this.readState()
-    const existing = state[itemId]
-    if (existing?.state === 'program_retry_scheduled') {
-      if (existing.nextAttemptAt && existing.nextAttemptAt > nowIso) return null
+    return this.withStateLock(async () => {
+      const state = await this.readState()
+      const existing = state[itemId]
       const marker = await this.readClaimMarker(itemId)
-      const claimId = marker?.claimId ?? `claim:${leadId}:${idempotencyKey}`
-      return this.withStateLock(async () => {
-        const current = await this.readState()
-        if (
-          current[itemId]?.state !== 'program_retry_scheduled' ||
-          (current[itemId]?.nextAttemptAt && current[itemId]!.nextAttemptAt! > nowIso)
-        ) return null
-        await this.writeState(itemId, {
-          state: 'claimed',
-          claimId,
-          attemptNumber: current[itemId]?.attemptNumber,
-        })
-        return { itemId, claimId }
-      })
-    }
-    if (existing) return null
-    const claimId = `claim:${leadId}:${idempotencyKey}`
-    const claimPath = this.claimPath(itemId)
-    await mkdir(dirname(claimPath), { recursive: true })
-    let marker: Awaited<ReturnType<typeof open>> | undefined
-    try {
-      marker = await open(claimPath, 'wx')
-    } catch (error: unknown) {
-      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined
-      if (code === 'EEXIST') return null
-      throw error
-    }
-    if (!marker) return null
-    try {
-      await marker.writeFile(JSON.stringify({ itemId, claimId }) + '\n', 'utf8')
-    } finally {
-      await marker.close()
-    }
-    await this.updateState(itemId, { state: 'claimed', claimId, attemptNumber: 1 })
-    return { itemId, claimId }
+      if (existing?.state === 'program_retry_scheduled') {
+        if (existing.nextAttemptAt && existing.nextAttemptAt > nowIso) return null
+      } else if (existing?.state === 'claimed') {
+        if (this.claimIsActive(existing.claimExpiresAt, nowIso)) return null
+      } else if (existing) {
+        return null
+      } else if (marker && this.claimIsActive(marker.claimExpiresAt, nowIso)) {
+        return null
+      }
+
+      const claimId = existing?.claimId ?? marker?.claimId ?? `claim:${leadId}:${idempotencyKey}`
+      const claimExpiresAt = this.addMilliseconds(nowIso, this.claimLeaseMs)
+      const nextState: IntakeState[string] = {
+        state: 'claimed',
+        claimId,
+        claimExpiresAt,
+        attemptNumber: existing?.attemptNumber ?? 1,
+      }
+      await this.writeState(itemId, nextState)
+      await this.writeClaimMarker({ itemId, claimId, claimExpiresAt })
+      return { itemId, claimId }
+    })
   }
 
   async acknowledge(itemId: string, acknowledgement: IntakeAcknowledgement): Promise<void> {
-    const marker = await this.readClaimMarker(itemId)
-    await this.updateState(itemId, {
-      state: acknowledgement.state,
-      claimId: marker?.claimId,
-      reasonCode: acknowledgement.reasonCode,
-      nextAttemptAt: acknowledgement.nextAttemptAt,
-      attemptNumber: acknowledgement.attemptNumber,
+    await this.withStateLock(async () => {
+      const state = await this.readState()
+      const marker = await this.readClaimMarker(itemId)
+      await this.writeState(itemId, {
+        state: acknowledgement.state,
+        claimId: state[itemId]?.claimId ?? marker?.claimId,
+        reasonCode: acknowledgement.reasonCode,
+        nextAttemptAt: acknowledgement.nextAttemptAt,
+        attemptNumber: acknowledgement.attemptNumber,
+      })
     })
   }
 
@@ -140,15 +158,12 @@ export class FileWorkIntakePort implements WorkIntakePort {
     return `${this.claimsPath}/${digest}.json`
   }
 
-  private async claimExists(itemId: string): Promise<boolean> {
-    return stat(this.claimPath(itemId)).then(() => true).catch((error: unknown) => {
-      const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined
-      if (code === 'ENOENT') return false
-      throw error
-    })
+  private async claimExists(itemId: string, nowIso: string): Promise<boolean> {
+    const marker = await this.readClaimMarker(itemId)
+    return marker !== null && this.claimIsActive(marker.claimExpiresAt, nowIso)
   }
 
-  private async readClaimMarker(itemId: string): Promise<{ claimId?: string } | null> {
+  private async readClaimMarker(itemId: string): Promise<ClaimMarker | null> {
     const contents = await readFile(this.claimPath(itemId), 'utf8').catch((error: unknown) => {
       const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined
       if (code === 'ENOENT') return null
@@ -157,16 +172,35 @@ export class FileWorkIntakePort implements WorkIntakePort {
     if (!contents) return null
     try {
       const parsed: unknown = JSON.parse(contents)
-      return parsed && typeof parsed === 'object' ? parsed as { claimId?: string } : null
+      if (!parsed || typeof parsed !== 'object') return null
+      const candidate = parsed as Partial<ClaimMarker>
+      return typeof candidate.claimId === 'string' && typeof candidate.claimExpiresAt === 'string'
+        ? candidate as ClaimMarker
+        : null
     } catch {
       return null
     }
   }
 
-  private async updateState(itemId: string, entry: IntakeState[string]): Promise<void> {
-    await this.withStateLock(async () => {
-      await this.writeState(itemId, entry)
-    })
+  private claimIsActive(expiresAt: string | undefined, nowIso: string): boolean {
+    if (!expiresAt) return false
+    const expiry = Date.parse(expiresAt)
+    const now = Date.parse(nowIso)
+    return Number.isFinite(expiry) && Number.isFinite(now) && expiry > now
+  }
+
+  private addMilliseconds(nowIso: string, milliseconds: number): string {
+    const now = Date.parse(nowIso)
+    if (!Number.isFinite(now)) throw new Error('intake claim time must be an ISO timestamp')
+    return new Date(now + milliseconds).toISOString()
+  }
+
+  private async writeClaimMarker(marker: ClaimMarker): Promise<void> {
+    const claimPath = this.claimPath(marker.itemId)
+    await mkdir(dirname(claimPath), { recursive: true })
+    const temporaryPath = `${claimPath}.${process.pid}.${randomUUID()}.tmp`
+    await writeFile(temporaryPath, `${JSON.stringify(marker)}\n`, 'utf8')
+    await rename(temporaryPath, claimPath)
   }
 
   private async withStateLock<T>(operation: () => Promise<T>): Promise<T> {
@@ -180,18 +214,37 @@ export class FileWorkIntakePort implements WorkIntakePort {
       } catch (error: unknown) {
         const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined
         if (code !== 'EEXIST') throw error
-        const ageMs = Date.now() - (await stat(lockPath)).mtimeMs
-        if (ageMs > 30_000) await unlink(lockPath).catch(() => undefined)
-        else await new Promise((resolve) => setTimeout(resolve, 1))
+        const lockAgeMs = await this.readLockAge(lockPath)
+        if (lockAgeMs !== null && lockAgeMs > this.stateLockStaleMs) await unlink(lockPath).catch(() => undefined)
+        else await this.clock.sleep(this.stateLockRetryMs)
       }
     }
     if (!lock) throw new Error('intake state lock was not acquired')
     try {
+      await lock.writeFile(`${JSON.stringify({ createdAt: this.clock.now() })}\n`, 'utf8')
       return await operation()
     } finally {
       await lock.close()
       await unlink(lockPath).catch(() => undefined)
     }
+  }
+
+  private async readLockAge(lockPath: string): Promise<number | null> {
+    const contents = await readFile(lockPath, 'utf8').catch(() => '')
+    try {
+      const parsed: unknown = JSON.parse(contents)
+      const createdAt = parsed && typeof parsed === 'object' && 'createdAt' in parsed
+        ? parsed.createdAt
+        : undefined
+      const created = typeof createdAt === 'string' ? Date.parse(createdAt) : Number.NaN
+      const now = Date.parse(this.clock.now())
+      if (Number.isFinite(created) && Number.isFinite(now)) return now - created
+    } catch {
+      // Fall through to the filesystem timestamp for legacy empty lock files.
+    }
+    const lockStat = await stat(lockPath).catch(() => null)
+    const now = Date.parse(this.clock.now())
+    return lockStat && Number.isFinite(now) ? now - lockStat.mtimeMs : null
   }
 
   private async writeState(itemId: string, entry: IntakeState[string]): Promise<void> {
