@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, PayloadRequest } from 'payload'
 import { cacheInvalidatePattern } from '@/payload/utils/cache'
-import { triggerN8N } from '@/payload/utils/n8n'
+import { triggerLiNKautowork } from '@/payload/utils/autowork'
 import type { WorkflowRequest } from '@/types/PayloadRequestExtended'
 import { triggerSiteRebuild } from '@/utils/webhook'
 
@@ -56,7 +56,7 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
         console.error('Failed to trigger rebuild:', error)
       })
       if (collection?.slug && doc?.id) {
-        void triggerN8N({
+        void triggerLiNKautowork({
           id: doc.id as string | number,
           collection: collection.slug,
           eventType: 'content_published',
@@ -64,7 +64,7 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
           locale: workflowReq.locale ?? undefined,
           meta: { source: 'payload' },
           req: workflowReq,
-        }).catch((error) => console.error('n8n publish trigger failed', error))
+        }).catch((error) => console.error('LiNKautowork publish trigger failed', error))
       }
     }
   }

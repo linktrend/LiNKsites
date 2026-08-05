@@ -46,6 +46,17 @@ export interface WorkIntakePort {
   acknowledge(itemId: string, acknowledgement: IntakeAcknowledgement): Promise<void>
 }
 
+/** Vendor-neutral CRM boundary. A concrete CRM must implement these same ports. */
+export interface CrmPullPort {
+  pullReady(limit: number, nowIso: string): Promise<readonly PulledWorkItem[]>
+}
+export interface CrmClaimPort {
+  claim(itemId: string, leadId: LeadResearchPackage['lead_id'], idempotencyKey: LeadResearchPackage['idempotency_key'], nowIso: string): Promise<IntakeClaim | null>
+}
+export interface CrmCompletionPort {
+  write(envelope: DemoCompletionEnvelope): Promise<void>
+}
+
 export interface ProgramRun {
   readonly programRunId: string
   readonly leadId: LeadResearchPackage['lead_id']

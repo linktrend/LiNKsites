@@ -54,6 +54,7 @@
     "tailwindcss": "^3.4.13",
     "tailwindcss-animate": "^1.0.7",
     "@linksites/types": "workspace:*"
+    ,"@linksites/autowork-boundary": "workspace:*"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",

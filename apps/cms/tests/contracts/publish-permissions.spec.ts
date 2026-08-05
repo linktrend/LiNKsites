@@ -5,7 +5,7 @@ import { triggerRebuild } from '@/hooks/triggerRebuild'
 const mocks = vi.hoisted(() => ({
   cacheInvalidatePattern: vi.fn(async () => 1),
   triggerSiteRebuild: vi.fn(async () => {}),
-  triggerN8N: vi.fn(async () => {}),
+  triggerLiNKautowork: vi.fn(async () => {}),
 }))
 
 vi.mock('@/payload/utils/cache', () => ({
@@ -16,8 +16,8 @@ vi.mock('@/utils/webhook', () => ({
   triggerSiteRebuild: mocks.triggerSiteRebuild,
 }))
 
-vi.mock('@/payload/utils/n8n', () => ({
-  triggerN8N: mocks.triggerN8N,
+vi.mock('@/payload/utils/autowork', () => ({
+  triggerLiNKautowork: mocks.triggerLiNKautowork,
 }))
 
 const publisherUser = {
@@ -37,6 +37,7 @@ const buildReq = (user: unknown, data: Record<string, unknown>) =>
     user,
     data,
     context: {},
+    meta: { lead_id: 'lead-1', org_id: 'org-1' },
     payload: {
       config: {
         localization: { defaultLocale: 'en' },
@@ -102,6 +103,6 @@ describe('Publish permissions workflow', () => {
 
     expect(mocks.cacheInvalidatePattern).toHaveBeenCalledWith('site:site-1')
     expect(mocks.triggerSiteRebuild).toHaveBeenCalled()
-    expect(mocks.triggerN8N).toHaveBeenCalled()
+    expect(mocks.triggerLiNKautowork).toHaveBeenCalled()
   })
 })
