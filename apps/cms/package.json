@@ -15,6 +15,7 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
+    "test:local": "bash scripts/test-local.sh",
     "test:e2e": "cross-env NODE_OPTIONS=--no-deprecation pnpm exec playwright test",
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-webstorage\" vitest run --config ./vitest.config.mts",
     "factory:create-demo-site": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/factory/create-demo-site.ts",
