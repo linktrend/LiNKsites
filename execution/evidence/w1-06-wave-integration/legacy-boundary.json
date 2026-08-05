@@ -1,36 +1,12 @@
 {
-  "evidence_schema": "linksites.wave.legacy-boundary.v1",
-  "subject_sha": "0b7c1831f2364a138d606b519a4d1fbec6916cb2",
+  "evidence_schema": "linksites.wave.legacy-boundary.v2",
+  "subject_sha": "c8f61b8e78b807bec94f79ddfb38c2ea420a30d2",
+  "classification_result": "reviewed_not_cleaned",
   "classifications": [
-    {
-      "surface": "lsites_core mirror/schema",
-      "classification": "historical_or_archived",
-      "observed": "supabase/schemas/lsites_core.schema.json and archive references remain; active Wave 1 working content uses lsites_working_content and the migration path is documented",
-      "action": "none; destructive removal reserved for W2-07"
-    },
-    {
-      "surface": "raw n8n and N8N_WEBHOOK_URL",
-      "classification": "not an active Wave 1 orchestrator dependency",
-      "observed": "no raw n8n import or N8N_WEBHOOK_URL in the orchestrator or canonical active contract packages; generic executor comments and historical docs remain labelled",
-      "action": "none; W2-05 owns broader external-event boundary work"
-    },
-    {
-      "surface": "apps/web-company",
-      "classification": "paused duplicate",
-      "observed": "existing app and CI documentation identify it as paused/excluded from the active Wave 1 path",
-      "action": "preserved; removal is reserved for W2-07"
-    },
-    {
-      "surface": "mock template/content fallbacks",
-      "classification": "fixture_or_explicit_non-production fallback",
-      "observed": "W1-03 uses manual/file fixtures and W1-05 uses an offline library fixture explicitly marked non-production; web-master mock provider remains outside Wave 1 runtime integration",
-      "action": "preserved and not presented as live proof"
-    },
-    {
-      "surface": "Stage hierarchy terminology",
-      "classification": "compatibility or historical boundary",
-      "observed": "active ledger APIs and W1 fixtures use Phase; legacy stage_ref persistence is retained only by documented additive migration compatibility tests",
-      "action": "preserved read-only for migration safety"
-    }
+    {"surface": "lsites_core mirror/schema", "classification": "historical_or_archived", "evidence": "archive and schema references remain; active W1 migrations use lsites_sites/lsites_ledger/working content", "action": "none; W2-07 owns destructive removal"},
+    {"surface": "raw n8n/N8N_WEBHOOK_URL", "classification": "documented boundary", "evidence": "environment matrix and historical references remain; no active W1 orchestrator dependency", "action": "none; broader external-event boundary is later work"},
+    {"surface": "apps/web-company", "classification": "paused duplicate", "evidence": "accepted root scripts explicitly filter @linksites/web-company", "action": "preserved; removal reserved for W2-07"},
+    {"surface": "mock/fixture content", "classification": "explicit local fixture", "evidence": "tests and offline LiNKlibraries adapter identify fixture/non-live behavior", "action": "preserved and excluded from live-proof claims"},
+    {"surface": "Stage terminology", "classification": "compatibility boundary", "evidence": "stage_ref is retained read-only and backfilled into quarantined Phase structures; active APIs use Phase", "action": "preserved for migration safety"}
   ]
 }

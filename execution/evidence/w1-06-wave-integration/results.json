@@ -1,94 +1,62 @@
 {
-  "evidence_schema": "linksites.wave.integration.v1",
+  "evidence_schema": "linksites.wave.integration.v2",
   "work_packet": "W1-06",
   "repository": "LiNKsites",
-  "branch": "issue/w1-06-wave-integration",
+  "branch": "issue/w1-06-final-integration",
   "status": "HOLD",
-  "validation_sha": "0b7c1831f2364a138d606b519a4d1fbec6916cb2",
-  "remote_sha_at_validation": "0b7c1831f2364a138d606b519a4d1fbec6916cb2",
-  "evidence_scope": "All command results below were run against validation_sha. This evidence-only correction is not presented as product validation at a different SHA.",
-  "wave_base_sha": "b750ab0c218513a527e1a2d8e04255430a1d240e",
-  "accepted_lane_tips": {
-    "W1-01": "04a021026a43c367f9399535456edeb3d497a915",
-    "W1-02": "dd5e4ec65bb501a6f29b5a5ec06662d7eabf6838",
-    "W1-03": "75012ee4fa575bc8d02f3ecdab953339f888b928",
-    "W1-04": "f67ef5f5f642afd19d17f1142a9ff5559276252a",
-    "W1-05": "880eda5d6a574bcaff9a5d0da069a33aa45de0da"
-  },
-  "integration_order": ["W1-01", "W1-02-ledger", "W1-04-working-content", "W1-05-library-consumer", "W1-03-orchestrator"],
-  "fixtures": {
-    "manual_lead": "packages/types/fixtures/w1-01-contract-fixtures.ts:manualFirstTestLead",
-    "contract_schema_version": "1.0",
-    "working_content": "packages/factory-catalog/tests/fixtures/working-content-fixtures.ts",
-    "library_entry": "marketing-smb-v1",
-    "orchestrator_input": "manualFirstTestLead",
-    "evidence_classification": "local_fixture_and_structural_only"
-  },
-  "lockfile": {
-    "path": "pnpm-lock.yaml",
-    "sha256": "30f6f58bcd4762df6f72a2ff4c36f49613c41bb8d8c5a33df99b8b3d2e5e61b1",
-    "install_command": "pnpm install --frozen-lockfile",
-    "exit_code": 1,
-    "result": "blocked",
-    "error": "ERR_PNPM_OUTDATED_LOCKFILE",
-    "diagnosis": "The lockfile importer for apps/web-master does not match apps/web-master/package.json: package.json includes dependency specifiers for @linksites/types, @hookform/resolvers, @radix-ui/react-checkbox, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-label, @radix-ui/react-slot, @radix-ui/react-switch, class-variance-authority, lucide-react, next, next-intl, react, react-dom, react-hook-form, web-vitals, and zod that are absent from the lockfile importer.",
-    "disposition": "HOLD; lockfile regeneration or dependency changes are out of scope. No lockfile or product source was modified."
-  },
-  "commands": [
+  "base_sha": "03f03fbe70dde07247250f89b7b2dc0ca7e0f711",
+  "validation_source_sha": "c8f61b8e78b807bec94f79ddfb38c2ea420a30d2",
+  "candidate_binding": "The final pushed integration commit SHA is the external immutable binding for this stable evidence path; all product validation below ran at validation_source_sha and the evidence-only replacement is limited to this directory.",
+  "accepted_corrections": [
     {
-      "command": "node --experimental-strip-types --test apps/intake-orchestrator/tests/*.test.ts",
-      "exit_code": 0,
-      "result": "pass",
-      "counts": {"tests": 25, "pass": 25, "fail": 0, "skipped": 0},
-      "proof": "manual/file fixture lifecycle, duplicate replay, restart/recovery, lease expiry, dependency gate, completion-once, and secret-redaction cases"
+      "requested": "1edb09d355577a302a26c2a2e0a3ba277d6160b2",
+      "cherry_picked_as": "f9575c43c81e31d7506c665dd56364a1b5eaee76",
+      "scope": ["package.json"],
+      "purpose": "exclude paused @linksites/web-company from root build/lint/typecheck/test"
     },
     {
-      "command": "node --experimental-strip-types --test packages/types/tests/runtime-contracts.test.ts",
-      "exit_code": 0,
-      "result": "pass",
-      "counts": {"tests": 17, "pass": 17, "fail": 0, "skipped": 0},
-      "proof": "canonical envelopes, byte-compatible manual/CRM boundary, closed schemas, sensitive-value rejection, and invalid-enum/revision cases"
-    },
-    {
-      "command": "bash scripts/test-supabase-local.sh",
-      "exit_code": 0,
-      "result": "pass",
-      "counts": {"assertions": 19, "pass": 19, "fail": 0, "skipped": 0},
-      "proof": "disposable local Supabase migration application and W1-02 pgTAP tenant-isolation/RLS suite; local services stopped by harness cleanup; no hosted service contacted"
-    },
-    {"command": "pnpm --filter @linksites/program-ledger test", "exit_code": 1, "result": "blocked", "reason": "vitest: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm --filter @linksites/factory-catalog test", "exit_code": 1, "result": "blocked", "reason": "vitest: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm --filter @linksites/types typecheck", "exit_code": 1, "result": "blocked", "reason": "tsc: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm --filter @linksites/program-ledger typecheck", "exit_code": 1, "result": "blocked", "reason": "tsc: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm --filter @linksites/factory-catalog typecheck", "exit_code": 1, "result": "blocked", "reason": "tsc: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm --filter @linksites/intake-orchestrator typecheck", "exit_code": 1, "result": "blocked", "reason": "tsc: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm --filter @linksites/intake-orchestrator build", "exit_code": 1, "result": "blocked", "reason": "tsc: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm typecheck", "exit_code": 1, "result": "blocked", "reason": "turbo: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm test", "exit_code": 1, "result": "blocked", "reason": "turbo: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm build", "exit_code": 1, "result": "blocked", "reason": "turbo: command not found because frozen install did not materialize node_modules"},
-    {"command": "pnpm lint", "exit_code": 1, "result": "blocked", "reason": "turbo: command not found because frozen install did not materialize node_modules"},
-    {"command": "git diff --check", "exit_code": 0, "result": "pass"},
-    {
-      "command": "rg -n -i --glob '!execution/evidence/w1-06-wave-integration/**' --glob '!**/tests/**' --glob '!**/fixtures/**' '(BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|SUPABASE_SERVICE_ROLE_KEY\\s*=\\s*[^$\\s]+|DATABASE_URL\\s*=\\s*[^$\\s]+)' .",
-      "exit_code": 0,
-      "result": "pass",
-      "proof": "no credential-pattern matches outside tests/fixtures/evidence; the excluded runtime-contract fixture contains an intentional negative-test token"
-    },
-    {
-      "command": "rg -n 'lsites_core|N8N_WEBHOOK_URL|apps/web-company|mock|Stage' apps packages scripts supabase docs --glob '!**/*.lock'",
-      "exit_code": 0,
-      "result": "pass",
-      "proof": "legacy references remain classified in legacy-boundary.json and archived/documented boundaries; no deletion or active Wave 1 reactivation was performed"
+      "requested": "a5cfbfed3f7349ee5a67a204873ad834a87857fd",
+      "cherry_picked_as": "c8f61b8e78b807bec94f79ddfb38c2ea420a30d2",
+      "scope": ["apps/cms/docs/LOCAL_VALIDATION.md", "apps/cms/package.json", "apps/cms/scripts/test-local.sh"],
+      "purpose": "disposable local CMS/Supabase validation"
     }
   ],
+  "scope_check": {
+    "result": "PASS",
+    "post_cherry_pick_delta": [
+      "A apps/cms/docs/LOCAL_VALIDATION.md",
+      "M apps/cms/package.json",
+      "A apps/cms/scripts/test-local.sh",
+      "M package.json"
+    ],
+    "conflicts": 0,
+    "product_source_broadened": false
+  },
+  "commands": [
+    {"command": "pnpm install --frozen-lockfile", "exit_code": 0, "result": "pass", "proof": "pnpm 10.0.0; lockfile resolution skipped; 945 packages installed"},
+    {"command": "DATABASE_URI=postgresql://postgres:postgres@127.0.0.1:54322/postgres PAYLOAD_SECRET=<disposable> PAYLOAD_PUBLIC_SERVER_URL=http://127.0.0.1:3000 pnpm lint", "exit_code": 0, "result": "pass", "proof": "6 active packages; web-company excluded"},
+    {"command": "DATABASE_URI=postgresql://postgres:postgres@127.0.0.1:54322/postgres PAYLOAD_SECRET=<disposable> PAYLOAD_PUBLIC_SERVER_URL=http://127.0.0.1:3000 pnpm typecheck", "exit_code": 0, "result": "pass", "proof": "6 active packages; web-company excluded"},
+    {"command": "DATABASE_URI=postgresql://postgres:postgres@127.0.0.1:54322/postgres PAYLOAD_SECRET=<disposable> PAYLOAD_PUBLIC_SERVER_URL=http://127.0.0.1:3000 pnpm build", "exit_code": 0, "result": "pass", "proof": "CMS, web-master, and intake-orchestrator builds completed"},
+    {"command": "DATABASE_URI=postgresql://postgres:postgres@127.0.0.1:54322/postgres PAYLOAD_SECRET=<disposable> PAYLOAD_PUBLIC_SERVER_URL=http://127.0.0.1:3000 pnpm test", "exit_code": 0, "result": "pass", "proof": "rerun in isolated disposable local database; 5 active test tasks succeeded; CMS integration 18 passed/1 skipped and Playwright 1 passed"},
+    {"command": "pnpm --filter @linksites/types test", "exit_code": 0, "result": "pass", "counts": {"passed": 17}},
+    {"command": "pnpm --filter @linksites/program-ledger test", "exit_code": 0, "result": "pass", "counts": {"passed": 126, "skipped": 1}},
+    {"command": "pnpm --filter @linksites/factory-catalog test", "exit_code": 0, "result": "pass", "counts": {"passed": 265, "skipped": 4}, "known_skip": "live Payload integration requires externally supplied URL/JWT/site ID"},
+    {"command": "pnpm --filter @linksites/intake-orchestrator test", "exit_code": 0, "result": "pass", "counts": {"passed": 25}, "proof": "duplicate, restart, gate rejection, gate success, bounded retry, and completion-once fixtures"},
+    {"command": "pnpm --filter @linksites/cms run test:local", "exit_code": 0, "result": "pass", "proof": "disposable local Supabase start/stop; CMS build; integration 18 passed/1 skipped; Playwright 1 passed"},
+    {"command": "bash scripts/test-supabase-local.sh", "exit_code": 0, "result": "pass", "counts": {"assertions": 19, "passed": 19, "failed": 0}, "proof": "exact pinned LiNKplatform migration commit 63635ecec576887e5e25080745c4ad169b335508 plus LiNKsites migrations; no hosted project"},
+    {"command": "LiNKlibraries archived validation at b4819032cb9ab13b1886189968f690f6288cb065", "exit_code": 0, "result": "pass_with_platform_skip", "proof": "schema 16/16; library validate; entries 9/9; catalog; Librarian 11/11; security 16/16; promotion 9/9; workflows 7/7", "known_skip": "1 Linux candidate-sandbox test skipped on macOS because sandbox_linux_required"},
+    {"command": "git diff --check", "exit_code": 0, "result": "pass"},
+    {"command": "sanitized secret scan with tests/fixtures/evidence excluded", "exit_code": 1, "result": "pass", "proof": "rg exit 1 means no matches; no credential-pattern output"},
+    {"command": "active legacy-drift search", "exit_code": 0, "result": "reviewed", "proof": "matches are archived lsites_core, paused web-company, documented N8N variable, and Stage compatibility references; no unclassified active Wave 1 runtime reactivation found"}
+  ],
+  "generated_artifacts": {"result": "PASS", "restored": ["apps/cms/next-env.d.ts"], "final_worktree_before_evidence": "clean"},
   "external_actions": [],
   "live_proof": false,
   "known_limits": [
-    "Required clean pinned-lockfile installation did not pass because the committed lockfile is stale relative to apps/web-master/package.json.",
-    "All package and root Turbo validation requiring installed dependencies remains unverified and blocks PASS/independent Sol audit readiness.",
-    "Passing tests are local fixture and disposable local database proof, not hosted GitHub, live Supabase, Payload, CRM, LiNKautowork, deployment, observability, or production proof.",
-    "LiNKlibraries paired-SHA validation and the full fixture lifecycle cannot be newly certified by this correction because the required dependency installation failed."
+    "This is local/disposable proof only; it does not prove hosted Supabase, live Payload credentials, GitHub hosted execution, deployment, DNS, backups, observability, or production readiness.",
+    "The LiNKlibraries candidate-sandbox test is unproven on this macOS host and is not claimed as PASS.",
+    "The evidence path records fixture and local database proof; independent Sol audit remains required.",
+    "Wave 2 is not started."
   ],
-  "owner": "W1-06 validation correction executor",
-  "independent_audit_disposition": "HOLD; not ready for independent Sol audit until the lockfile is corrected by an authorized owner and a fresh exact-SHA clean-install validation is executed."
+  "independent_audit_disposition": "HOLD; do not claim W1-06 readiness or start Wave 2 until Sol reviews the exact pushed candidate and the platform-unavailable LiNKlibraries adversarial check is independently resolved or accepted by the governing gate."
 }
