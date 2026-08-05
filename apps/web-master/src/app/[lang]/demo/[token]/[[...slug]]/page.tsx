@@ -36,7 +36,7 @@ export default async function PrivateDemoPage({ params }: Props) {
   const locale = normalizeLocale(lang);
   const siteId = await getSiteIdFromRequest();
   const [page, primaryNav, footerNav, templateId] = await Promise.all([
-    getPageBySlug({ siteId, locale, slugSegments: slug }),
+    getPageBySlug({ siteId, locale, slugSegments: slug, audience: "private-preview" }),
     getNavigation({ siteId, locale, key: "primary" }),
     getNavigation({ siteId, locale, key: "footer" }),
     getTemplateIdForSite({ siteId, locale }),

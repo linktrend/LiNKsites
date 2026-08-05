@@ -21,15 +21,22 @@ const renderer = await read("apps/web-master/src/components/page-renderer.tsx");
 const pricing = await read("apps/web-master/src/components/marketing/PricingHomepage.tsx");
 const background = await read("apps/web-master/src/components/marketing/DynamicBgSection.tsx");
 const markdownRoute = await read("apps/web-master/src/app/ai/markdown/route.ts");
+const publicSurface = await read("apps/web-master/src/lib/public-surface.ts");
+const runtime = await read("apps/web-master/src/config/runtime.ts");
+const readyz = await read("apps/web-master/src/app/api/readyz/route.ts");
 
 assert.equal(fixture.fixtureName, "w2-04-published-content-contract");
+assert.deepEqual(fixture.sites, [{ id: "demo-site", status: "published" }]);
+assert.deepEqual(fixture.siteDomains, [
+  { id: "demo-site-localhost", hostname: "localhost", site: "demo-site", primary: true },
+]);
 assert.deepEqual(
   ["home", "about", "services", "contact", "legal/privacy-policy", "legal/terms-of-use"],
   fixture.pages.map((page) => page.slug),
 );
 for (const page of fixture.pages) {
   assert.equal(page.status, "published", `${page.slug} must be published`);
-  assert.equal(page.site, fixture.site.id, `${page.slug} must be tenant scoped`);
+  assert.equal(page.site, fixture.sites[0].id, `${page.slug} must be tenant scoped`);
   assert.ok(page.content.length > 0, `${page.slug} must contain blocks`);
   assert.ok(page.revision, `${page.slug} must carry a revision`);
 }
@@ -41,14 +48,22 @@ assert.doesNotMatch(client, /mock\.site\?\.id \|\| "company-site"/);
 assert.doesNotMatch(client, /hostname: hostnameFilter, site: siteId/);
 assert.match(client, /site: siteId/);
 assert.match(siteContext, /throw new SiteResolutionError\(host\)/);
-assert.doesNotMatch(siteContext, /return runtimeConfig\.defaultSiteId;\s*\n};/);
+assert.match(siteContext, /collection: "sites"/);
+assert.match(siteContext, /status: \{ equals: "published" \}/);
+assert.doesNotMatch(siteContext, /defaultSiteId|DEFAULT_SITE_ID/);
+assert.doesNotMatch(runtime, /defaultSiteId|DEFAULT_SITE_ID/);
+assert.doesNotMatch(readyz, /DEFAULT_SITE_ID/);
+assert.match(publicSurface, /site\?\.status === "published"/);
+assert.match(publicSurface, /previewEnvironment === "private-preview"/);
 assert.match(pagesSource, /page\.status !== "published"/);
 assert.match(pagesSource, /Array\.isArray\(page\.content\) \? page\.content : page\.layout/);
+assert.match(pagesSource, /audience = "public"/);
 assert.match(pageRoute, /if \(!page\) return notFound\(\)/);
 assert.match(pageRoute, /params: Promise</);
 assert.match(pageRoute, /const \{ lang, slug = \[\] \} = await params/);
 assert.doesNotMatch(pageRoute, /fallbackPage|Default demo content|Welcome to the Master Template/);
 assert.match(preview, /PREVIEW_ACCESS_TOKEN/);
+assert.match(preview, /audience: "private-preview"/);
 assert.match(preview, /index: false, follow: false/);
 assert.match(preview, /data-private-preview/);
 for (const legalRoute of legalRoutes) {
@@ -67,4 +82,4 @@ console.log("routes: home, about, services, contact, privacy, terms, not-found/e
 console.log("privacy: token wall + noindex/nofollow + no-store headers");
 console.log("content: explicit published-only fixture; no production fallback");
 console.log("adversarial: unknown tenant, unpublished/layout contract, legal bypass, demo fallbacks");
-console.log("fixture adapter: no synthetic tenant/locale or hostname mapping");
+console.log("fixture adapter: explicit published site + hostname mapping only; no DEFAULT_SITE_ID synthesis");

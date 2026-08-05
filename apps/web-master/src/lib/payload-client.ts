@@ -6,7 +6,7 @@ const isFixtureProvider = cmsProvider === "fixture";
 const isPayloadProvider = cmsProvider === "payload";
 
 type MockPayloadData = {
-  site?: { id?: string };
+  sites?: Array<{ id?: string; status?: string }>;
   siteDomains?: Array<{
     id?: string;
     hostname?: string;
@@ -113,8 +113,20 @@ const mockPayloadFind = async <T>({
   if (collection === "site-domains") {
     const hostnameFilter = (where as any)?.hostname?.equals as string | undefined;
     const docs = (mock.siteDomains ?? []).filter((doc) =>
-      hostnameFilter ? doc.hostname === hostnameFilter : true,
+      hostnameFilter ? doc.hostname?.trim().toLowerCase() === hostnameFilter : true,
     );
+    return {
+      docs: docs as T[],
+      page: 1,
+      totalDocs: docs.length,
+      totalPages: 1,
+      limit: safeLimit,
+    };
+  }
+
+  if (collection === "sites") {
+    const idFilter = (where as any)?.id?.equals as string | undefined;
+    const docs = (mock.sites ?? []).filter((doc) => (idFilter ? doc.id === idFilter : true));
     return {
       docs: docs as T[],
       page: 1,
@@ -256,6 +268,7 @@ type FindArgs = {
    * The CMS access layer scopes public reads by this query param.
    */
   site?: string;
+  select?: string[];
 };
 
 export const payloadFind = async <T>({
@@ -267,6 +280,7 @@ export const payloadFind = async <T>({
   locale,
   draft,
   site,
+  select,
 }: FindArgs): Promise<{
   docs: T[];
   page: number;
@@ -288,6 +302,7 @@ export const payloadFind = async <T>({
   if (locale) url.searchParams.set("locale", locale);
   if (typeof draft === "boolean") url.searchParams.set("draft", String(draft));
   if (site) url.searchParams.set("site", site);
+  for (const field of select ?? []) url.searchParams.set(`select[${field}]`, "true");
   if (where) {
     appendWhereParams(url.searchParams, where);
   }

@@ -136,6 +136,15 @@ export const Pages: CollectionConfig<'pages'> = {
         },
       ],
     },
+    {
+      name: 'previewEnvironment',
+      type: 'select',
+      options: [{ label: 'Private preview', value: 'private-preview' }],
+      admin: {
+        readOnly: true,
+        description: 'Marks content published only for the token-gated private preview route.',
+      },
+    },
     ...workflowFields,
   ],
 }

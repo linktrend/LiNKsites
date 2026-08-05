@@ -2,6 +2,8 @@ import type { CollectionConfig, Field } from 'payload'
 import { manageSitesAccess } from '@/access'
 import { isBootstrapMode } from '@/utils/bootstrap'
 
+const privateSiteFieldRead = ({ req }: { req: { user?: unknown } }) => Boolean(req.user)
+
 export const Sites: CollectionConfig<'sites'> = {
   slug: 'sites',
   admin: {
@@ -11,7 +13,11 @@ export const Sites: CollectionConfig<'sites'> = {
   access: {
     read: async ({ req }) => {
       if (await isBootstrapMode(req)) return true
-      return manageSitesAccess({ req })
+      if (req.user) return manageSitesAccess({ req })
+
+      const url = req.url ? new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`) : null
+      const requestedId = url?.searchParams.get('where[id][equals]')?.trim()
+      return requestedId ? { id: { equals: requestedId } } : false
     },
     create: manageSitesAccess,
     update: manageSitesAccess,
@@ -33,6 +39,21 @@ export const Sites: CollectionConfig<'sites'> = {
       unique: true,
       admin: {
         description: 'Primary domain (e.g., linktrend.com)',
+      },
+    },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'draft',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Active', value: 'active' },
+        { label: 'Published', value: 'published' },
+        { label: 'Archived', value: 'archived' },
+      ],
+      admin: {
+        description: 'A site must be published before hostname resolution can serve it publicly.',
       },
     },
     {
@@ -65,6 +86,7 @@ export const Sites: CollectionConfig<'sites'> = {
     {
       name: 'youtubeApiKey',
       type: 'text',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'YouTube Data API v3 key for video ingestion',
       },
@@ -72,6 +94,7 @@ export const Sites: CollectionConfig<'sites'> = {
     {
       name: 'youtubeChannelId',
       type: 'text',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'YouTube channel ID for automatic sync',
       },
@@ -79,6 +102,7 @@ export const Sites: CollectionConfig<'sites'> = {
     {
       name: 'youtubePlaylistIds',
       type: 'array',
+      access: { read: privateSiteFieldRead },
       label: 'YouTube Playlists',
       admin: {
         description: 'Playlist IDs to sync videos from',
@@ -95,6 +119,7 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'defaultVideoCategory',
       type: 'relationship',
       relationTo: 'video-categories',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'Default category for auto-ingested videos',
       },
@@ -137,6 +162,7 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'rebuildWebhookUrl',
       type: 'text',
       label: 'Rebuild Webhook URL',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'Webhook URL to trigger site rebuild on content publish',
       },
@@ -145,6 +171,7 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'rebuildWebhookSecret',
       type: 'text',
       label: 'Rebuild Webhook Secret',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'Secret key for webhook authentication',
       },
@@ -153,6 +180,7 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'permissionOverrides',
       type: 'array',
       label: 'Permission Overrides',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'Override default role permissions for this site',
       },

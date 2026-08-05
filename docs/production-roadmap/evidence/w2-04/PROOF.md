@@ -10,9 +10,9 @@ contract fixture, not evidence of a live Payload instance or W2-03 promotion.
 ## Scope
 
 - `marketing-smb-v1` remains the reusable web-master entry point.
-- Public pages read published, site-scoped Payload content and controlled-fail on missing, malformed, unpublished, or unknown-tenant content.
+- Public pages read published, site-scoped Payload content and controlled-fail on missing, malformed, unpublished, or unknown-tenant content. Hostname resolution additionally requires an explicit CMS site with `status: published` and at least one published page; a configured `SITE_ID` is subject to the same proof.
 - Canonical legal routes and the AI markdown surface read the same published `pages` contract; they do not bypass it through legacy legal collections or an external legal API.
-- `/[lang]/demo/[token]/[[...slug]]` is a private preview wall. It requires `PREVIEW_ACCESS_TOKEN`, emits `noindex,nofollow`, and uses private no-store caching.
+- `/[lang]/demo/[token]/[[...slug]]` is a private preview wall. It requires `PREVIEW_ACCESS_TOKEN`, selects only `previewEnvironment: private-preview` pages, emits `noindex,nofollow`, and uses private no-store caching.
 - `/api/healthz` is a liveness endpoint; `/api/readyz` fails when CMS configuration is invalid.
 - No CMS promotion, publication, deployment, DNS, or external live mutation was performed.
 
@@ -24,7 +24,7 @@ contract fixture, not evidence of a live Payload instance or W2-03 promotion.
 | contact | `pages` published content | fixture-covered; submission remains non-submitting |
 | privacy / terms | `pages` published content | fixture-covered through the canonical page contract |
 | not-found / error | Next.js boundaries | source-covered |
-| private demo | same published page query behind token wall | source-covered |
+| private demo | private-preview page query behind token wall | source-covered |
 
 ## W2-03 integration handoff
 
@@ -35,16 +35,19 @@ and rerun the frontend/browser gates before claiming live W2-03 proof.
 
 ## Local adversarial coverage
 
-The focused contract test also checks that shared Payload tenant resolution has no
-`DEFAULT_SITE_ID` fallback, unpublished pages are rejected, Payload `layout` content
-is normalized only when the document is explicitly published, legal routes cannot use
-the legacy legal API, the fixture adapter cannot synthesize tenant/locale or hostname
-mapping data, and reusable template components contain no hard-coded demo
-signup/pricing/background fallbacks.
+The focused contract and behavioral tests also check that tenant resolution has no
+default-site fallback, unmapped/draft/archived/unpublished sites fail closed, published
+content is required before serving a tenant, unpublished pages are rejected, Payload
+`layout` content is normalized only when the document is explicitly published, legal
+routes cannot use the legacy legal API, fixture mode requires explicit published site
+and hostname mapping records, and reusable template components contain no hard-coded
+demo signup/pricing/background fallbacks. Public audience selection rejects private
+preview and unknown environment markers; the token-gated route selects only private
+preview content.
 
 ## Validation recorded for this candidate
 
-- `pnpm test:w2-04` — focused contract checks passed.
+- `pnpm test:w2-04` — focused contract and behavioral adversarial checks passed.
 - `pnpm --filter @linksites/web-master typecheck` — passed.
 - `pnpm --filter @linksites/web-master lint` — passed.
 - `pnpm --filter @linksites/web-master build` — production build completed; Next reported

@@ -1,5 +1,7 @@
 import { payloadFind } from "@/lib/payload-client";
 import { siteLocaleFilter } from "@/lib/repository/shared-filters";
+import { selectPageForAudience } from "@/lib/public-surface";
+import type { PageAudience } from "@/lib/public-surface";
 
 export type PageBlockCommon = {
   id?: string;
@@ -254,6 +256,7 @@ export interface CmsPage {
   seo?: CmsPageSeo;
   reviewedAt?: string | null;
   reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
+  previewEnvironment?: "public" | "private-preview";
 }
 
 export class PublishedContentError extends Error {
@@ -267,6 +270,7 @@ type PayloadPage = Omit<CmsPage, "content" | "status"> & {
   content?: CmsPageBlock[];
   layout?: CmsPageBlock[];
   status?: string;
+  previewEnvironment?: string | null;
 };
 
 export const assertPublishedPage = (page: PayloadPage): CmsPage => {
@@ -284,12 +288,14 @@ type GetPageArgs = {
   siteId: string;
   locale: string;
   slugSegments: string[];
+  audience?: PageAudience;
 };
 
 export const getPageBySlug = async ({
   siteId,
   locale,
   slugSegments,
+  audience = "public",
 }: GetPageArgs): Promise<CmsPage | null> => {
   const slug = slugSegments.length > 0 ? slugSegments.join("/") : "home";
 
@@ -300,13 +306,14 @@ export const getPageBySlug = async ({
   const result = await payloadFind<CmsPage>({
     collection: "pages",
     where,
-    limit: 1,
+    limit: 20,
     depth: 2,
     locale,
     site: siteId,
   });
 
-  return result.docs[0] ? assertPublishedPage(result.docs[0] as PayloadPage) : null;
+  const page = selectPageForAudience(result.docs as PayloadPage[], audience);
+  return page ? assertPublishedPage(page) : null;
 };
 
 export const getHomepage = async ({

@@ -7,7 +7,7 @@ export function GET() {
   const provider = process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "payload";
   const validProvider = provider === "payload" || provider === "fixture";
   const cmsConfigured = provider === "fixture"
-    ? Boolean(process.env.CMS_FIXTURE_PATH && process.env.DEFAULT_SITE_ID)
+    ? Boolean(process.env.CMS_FIXTURE_PATH)
     : Boolean(runtimeConfig.payloadBaseUrl && /^https?:\/\//.test(runtimeConfig.payloadBaseUrl));
   const ready = validProvider && cmsConfigured && (provider === "fixture" || Boolean(runtimeConfig.payloadApiKey || process.env.NODE_ENV !== "production"));
   return NextResponse.json(

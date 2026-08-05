@@ -2,12 +2,18 @@ import { headers } from "next/headers";
 
 import { runtimeConfig } from "@/config/runtime";
 import { payloadFind } from "@/lib/payload-client";
+import { isPublicSiteEligible } from "@/lib/public-surface";
 
 type SiteDomainDoc = {
   id: string;
   hostname: string;
-  site: string | { id?: string };
+  site: string | number | { id?: string | number };
   primary?: boolean;
+};
+
+type PublicSiteDoc = {
+  id: string | number;
+  status?: string;
 };
 
 const normalizeHost = (host: string): string => {
@@ -17,79 +23,91 @@ const normalizeHost = (host: string): string => {
   return trimmed.replace(/:\d+$/, "");
 };
 
-const TENANT_CACHE_TTL_MS = 5 * 60 * 1000;
-const tenantCache = new Map<string, { siteId: string; expiresAt: number }>();
-const cmsProvider = process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "payload";
-const isFixtureProvider = cmsProvider === "fixture";
-
-const cacheGet = (host: string): string | null => {
-  const entry = tenantCache.get(host);
-  if (!entry) return null;
-  if (Date.now() >= entry.expiresAt) {
-    tenantCache.delete(host);
-    return null;
-  }
-  return entry.siteId;
-};
-
-const cacheSet = (host: string, siteId: string) => {
-  tenantCache.set(host, { siteId, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
-};
-
 export const getHostnameFromRequest = async (): Promise<string> => {
   const headerList = await headers();
   return normalizeHost(headerList.get("host") ?? "");
+};
+
+const extractSiteId = (site: SiteDomainDoc["site"]): string | null => {
+  if (typeof site === "string" || typeof site === "number") return String(site) || null;
+  return site?.id !== undefined && site.id !== null && String(site.id) ? String(site.id) : null;
+};
+
+const hasPublishedPage = async (siteId: string): Promise<boolean> => {
+  const result = await payloadFind<unknown>({
+    collection: "pages",
+    where: {
+      and: [
+        { site: { equals: siteId } },
+        { status: { equals: "published" } },
+      ],
+    },
+    limit: 1,
+    depth: 0,
+    site: siteId,
+  });
+
+  return result.docs.length > 0;
+};
+
+const resolvePublicSite = async (siteId: string): Promise<string | null> => {
+  if (!siteId) return null;
+
+  try {
+    const [siteResult, publishedPage] = await Promise.all([
+      payloadFind<PublicSiteDoc>({
+        collection: "sites",
+        where: { id: { equals: siteId } },
+        limit: 1,
+        depth: 0,
+        select: ["id", "status"],
+      }),
+      hasPublishedPage(siteId),
+    ]);
+    const site = siteResult.docs[0];
+    return isPublicSiteEligible(site, publishedPage ? 1 : 0) ? siteId : null;
+  } catch {
+    // Tenant resolution is a security boundary. CMS errors cannot fall back
+    // to a configured or fixture-derived tenant.
+    return null;
+  }
 };
 
 export const resolveSiteIdByHostname = async (hostname: string): Promise<string | null> => {
   const normalized = normalizeHost(hostname);
   if (!normalized) return null;
 
-  const cached = cacheGet(normalized);
-  if (cached) return cached;
-
   const result = await payloadFind<SiteDomainDoc>({
     collection: "site-domains",
     where: { hostname: { equals: normalized } },
     limit: 1,
-    depth: 1,
+    depth: 0,
   }).catch(() => null);
 
-  const doc = result?.docs?.[0];
-  const siteId =
-    typeof doc?.site === "string"
-      ? doc.site
-      : typeof doc?.site === "object" && doc.site && typeof (doc.site as any).id === "string"
-        ? String((doc.site as any).id)
-        : null;
-
-  if (siteId) cacheSet(normalized, siteId);
-  return siteId;
+  const siteId = result?.docs?.[0] ? extractSiteId(result.docs[0].site) : null;
+  return siteId ? resolvePublicSite(siteId) : null;
 };
 
 export class SiteResolutionError extends Error {
   constructor(hostname: string) {
-    super(`No published site mapping exists for host "${hostname || "unknown"}".`);
+    super(`No published and lifecycle-eligible site mapping exists for host "${hostname || "unknown"}".`);
     this.name = "SiteResolutionError";
   }
 }
 
 /**
- * Resolves the current tenant siteId for this request.
+ * Resolves the current public tenant for this request.
  *
- * Resolution priority:
- * 1) Dedicated deployments: `SITE_ID` env var locks the frontend to one site.
- * 2) Hostname mapping (site-domains collection).
- *
- * Shared Payload deployments deliberately have no DEFAULT_SITE_ID fallback:
- * an unknown host must not receive another tenant's content. Local fixture
- * mode uses DEFAULT_SITE_ID explicitly, and dedicated deployments use SITE_ID.
+ * Every path requires an explicit CMS site record with `status: published`
+ * and at least one published page. Fixture mode follows the same hostname
+ * mapping path; it never turns an ambient default or fixture data into a tenant.
+ * Dedicated SITE_ID deployments still require the same eligibility proof.
  */
 export const getSiteIdFromRequest = async (): Promise<string> => {
-  if (runtimeConfig.dedicatedSiteId) return runtimeConfig.dedicatedSiteId;
-  if (isFixtureProvider) {
-    if (!runtimeConfig.defaultSiteId) throw new Error("DEFAULT_SITE_ID is required in fixture mode.");
-    return runtimeConfig.defaultSiteId;
+  if (runtimeConfig.dedicatedSiteId) {
+    const resolved = await resolvePublicSite(runtimeConfig.dedicatedSiteId);
+    if (resolved) return resolved;
+    throw new SiteResolutionError("SITE_ID");
   }
 
   const host = await getHostnameFromRequest();

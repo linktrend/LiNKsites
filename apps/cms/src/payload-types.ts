@@ -273,6 +273,10 @@ export interface Site {
    */
   domain: string;
   /**
+   * A site must be published before hostname resolution can serve it publicly.
+   */
+  status: 'draft' | 'active' | 'published' | 'archived';
+  /**
    * Which frontend template module should render this site
    */
   templateId: string;
@@ -2137,6 +2141,10 @@ export interface Page {
     image?: (number | null) | Media;
   };
   /**
+   * Marks content published only for the token-gated private preview route.
+   */
+  previewEnvironment?: 'private-preview' | null;
+  /**
    * Content workflow state
    */
   status: 'draft' | 'pending' | 'approved' | 'published';
@@ -2932,6 +2940,7 @@ export interface RolesSelect<T extends boolean = true> {
 export interface SitesSelect<T extends boolean = true> {
   name?: T;
   domain?: T;
+  status?: T;
   templateId?: T;
   defaultLanguage?: T;
   languages?: T;
@@ -3802,6 +3811,7 @@ export interface PagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  previewEnvironment?: T;
   status?: T;
   submittedBy?: T;
   reviewedBy?: T;

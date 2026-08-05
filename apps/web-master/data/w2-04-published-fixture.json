@@ -1,6 +1,11 @@
 {
   "fixtureName": "w2-04-published-content-contract",
-  "site": { "id": "demo-site" },
+  "sites": [
+    { "id": "demo-site", "status": "published" }
+  ],
+  "siteDomains": [
+    { "id": "demo-site-localhost", "hostname": "localhost", "site": "demo-site", "primary": true }
+  ],
   "navigation": {
     "primary": [
       { "label": "About", "slug": "/about" },
