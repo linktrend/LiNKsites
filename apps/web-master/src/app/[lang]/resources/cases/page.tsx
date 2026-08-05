@@ -10,15 +10,6 @@ export async function generateMetadata({ params }: Props) {
   const locale = normalizeLocale(params.lang);
   return buildMetadata(locale, "/resources/cases", {
     title: "Case Studies",
-    description: "Discover how leading companies transform their operations with our AI-powered automation platform. Real results from real customers.",
-    keywords: [
-      "case studies",
-      "success stories",
-      "customer testimonials",
-      "business results",
-      "ROI",
-      "implementation",
-    ],
   });
 }
 
@@ -26,5 +17,6 @@ export default async function CasesPage({ params }: Props) {
   const siteId = await getSiteIdFromRequest();
   const locale = normalizeLocale(params.lang);
   const page = await getCasesPage(locale, siteId);
+  if (page.data.cases.length === 0) return <CaseStudiesPageContent lang={locale} cases={[]} />;
   return <CaseStudiesPageContent lang={locale} cases={page.data.cases} />;
 }

@@ -5,13 +5,16 @@ import { execFileSync } from "node:child_process";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const publicSurface = resolve(root, "apps/web-master/src/lib/public-surface.ts");
+const templateAdmission = resolve(root, "apps/web-master/src/lib/template-admission.ts");
 const testSource = `
   import assert from "node:assert/strict";
   import {
     isPageVisibleToAudience,
     isPublicSiteEligible,
-    selectPageForAudience,
-  } from ${JSON.stringify(publicSurface)};
+  selectPageForAudience,
+  countPublicPages,
+} from ${JSON.stringify(publicSurface)};
+  import { getAdmittedTemplateReceipt } from ${JSON.stringify(templateAdmission)};
 
   const publicPage = { previewEnvironment: "public", id: "public" };
   const privatePage = { previewEnvironment: "private-preview", id: "private" };
@@ -25,6 +28,16 @@ const testSource = `
   assert.equal(selectPageForAudience([publicPage, privatePage], "private-preview"), privatePage);
   assert.equal(selectPageForAudience([privatePage], "public"), null);
   assert.equal(selectPageForAudience([publicPage], "private-preview"), null);
+  assert.equal(countPublicPages([privatePage]), 0);
+  assert.equal(countPublicPages([privatePage, publicPage]), 1);
+
+  const receiptJson = process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON;
+  const templateSha = process.env.LINKSITES_ADMITTED_TEMPLATE_SHA;
+  delete process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON;
+  delete process.env.LINKSITES_ADMITTED_TEMPLATE_SHA;
+  assert.throws(() => getAdmittedTemplateReceipt(), /no admitted receipt/);
+  if (receiptJson !== undefined) process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON = receiptJson;
+  if (templateSha !== undefined) process.env.LINKSITES_ADMITTED_TEMPLATE_SHA = templateSha;
 
   assert.equal(isPublicSiteEligible({ id: "site-1", status: "published" }, 1), true);
   assert.equal(isPublicSiteEligible({ id: "site-1", status: "draft" }, 1), false);

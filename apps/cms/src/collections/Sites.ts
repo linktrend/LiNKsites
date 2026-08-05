@@ -60,7 +60,6 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'templateId',
       type: 'text',
       required: true,
-      defaultValue: 'marketing-smb-v1',
       admin: {
         description: 'Which frontend template module should render this site',
       },

@@ -1,8 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getOfferPage } from "@/lib/pageService";
 import { OfferPageLayout } from "@/layouts/OfferPageLayout";
-import { buildMetadata, buildProductJsonLd } from "@/lib/seo";
-import { SEO_CONFIG, SITE_CONFIG, getSiteUrl } from "@/config";
+import { buildMetadata } from "@/lib/seo";
 import { getSiteIdFromRequest } from "@/lib/site-context";
 import { normalizeLocale } from "@/lib/locale-context";
 import { listOffers } from "@/lib/repository/offers";
@@ -25,17 +24,7 @@ export async function generateMetadata({ params }: Props) {
     return buildMetadata(locale, `/offers/${params.offerSlug}`, {
       title: seo.title ?? offer.title,
       description: seo.description ?? offer.short_description ?? offer.description,
-      keywords:
-        seo.keywords && Array.isArray(seo.keywords)
-          ? seo.keywords
-          : [
-              offer.title,
-              offer.type ?? "offer",
-              "business solution",
-              "enterprise software",
-              ...SEO_CONFIG.defaultKeywords,
-            ].filter(Boolean) as string[],
-      ogImage: (seo.ogImage as any)?.url ?? SEO_CONFIG.openGraph.images.default,
+      keywords: seo.keywords,
       canonicalUrl: seo.canonicalUrl,
     });
   } catch (error) {
@@ -59,30 +48,5 @@ export default async function OfferPage({ params }: Props) {
   if (!page.data.offer) return notFound();
   
   const offer = page.data.offer;
-  const reviewedBy =
-    typeof (offer as any).reviewedBy === "string"
-      ? (offer as any).reviewedBy
-      : (offer as any).reviewedBy?.name;
-  
-  // Structured data for offer page
-  const productJsonLd = buildProductJsonLd({
-    name: offer.title,
-    description: offer.short_description || offer.description || '',
-    image: `${getSiteUrl()}${SEO_CONFIG.openGraph.images.default}`,
-    url: `${getSiteUrl()}/${locale}/offers/${params.offerSlug}`,
-    brand: SITE_CONFIG.siteName,
-    reviewedBy,
-    verificationDate: (offer as any).reviewedAt ?? undefined,
-  });
-
-  return (
-    <>
-      {/* Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
-      />
-      <OfferPageLayout lang={locale} page={page as any} />
-    </>
-  );
+  return <OfferPageLayout lang={locale} page={page as any} />;
 }

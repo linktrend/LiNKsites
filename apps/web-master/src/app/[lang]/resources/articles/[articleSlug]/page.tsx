@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getResourceArticle } from "@/lib/pageService";
 import { buildMetadata } from "@/lib/seo";
-import { SEO_CONFIG } from "@/config";
 import { getSiteIdFromRequest } from "@/lib/site-context";
 import { normalizeLocale } from "@/lib/locale-context";
 import { ArticleLayout } from "@/layouts/ArticleLayout";
@@ -29,16 +28,7 @@ export async function generateMetadata({ params }: Props) {
     return buildMetadata(locale, `/resources/articles/${params.articleSlug}`, {
       title: seo.title ?? article.title ?? "Article",
       description: seo.description ?? article.excerpt ?? "",
-      keywords:
-        seo.keywords && Array.isArray(seo.keywords)
-          ? seo.keywords
-          : [
-              article.category || "article",
-              article.title || "",
-              "article",
-              "guide",
-              ...SEO_CONFIG.defaultKeywords,
-            ].filter(Boolean),
+      keywords: seo.keywords,
       ogType: "article",
       ogImage,
       canonicalUrl: seo.canonicalUrl,

@@ -43,3 +43,6 @@ export const selectPageForAudience = <T extends AudiencePage>(
   pages: T[],
   audience: PageAudience,
 ): T | null => pages.find((page) => isPageVisibleToAudience(page, audience)) ?? null;
+
+export const countPublicPages = (pages: AudiencePage[]): number =>
+  pages.filter((page) => isPageVisibleToAudience(page, "public")).length;

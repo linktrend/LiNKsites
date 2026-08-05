@@ -4,7 +4,7 @@ import { timingSafeEqual } from "node:crypto";
 
 import { getNavigation } from "@/lib/repository/navigation";
 import { getPageBySlug } from "@/lib/repository/pages";
-import { getSiteIdFromRequest } from "@/lib/site-context";
+import { getPreviewSiteIdFromRequest } from "@/lib/site-context";
 import { normalizeLocale } from "@/lib/locale-context";
 import { getTemplateIdForSite } from "@/lib/template-context";
 import { getTemplateModule } from "@/templates/registry";
@@ -34,7 +34,7 @@ export default async function PrivateDemoPage({ params }: Props) {
   if (!hasPreviewAccess(token)) notFound();
 
   const locale = normalizeLocale(lang);
-  const siteId = await getSiteIdFromRequest();
+  const siteId = await getPreviewSiteIdFromRequest();
   const [page, primaryNav, footerNav, templateId] = await Promise.all([
     getPageBySlug({ siteId, locale, slugSegments: slug, audience: "private-preview" }),
     getNavigation({ siteId, locale, key: "primary" }),

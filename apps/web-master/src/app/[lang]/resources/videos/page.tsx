@@ -9,15 +9,7 @@ type Props = { params: { lang: string } };
 export async function generateMetadata({ params }: Props) {
   const locale = normalizeLocale(params.lang);
   return buildMetadata(locale, "/resources/videos", {
-    title: "Video Tutorials",
-    description: "Watch our video tutorials to learn how to use our platform effectively. Step-by-step guides and best practices.",
-    keywords: [
-      "video tutorials",
-      "training videos",
-      "how-to guides",
-      "platform tutorials",
-      "video library",
-    ],
+    title: "Videos",
   });
 }
 

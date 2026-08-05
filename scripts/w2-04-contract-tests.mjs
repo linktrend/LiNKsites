@@ -22,6 +22,21 @@ const pricing = await read("apps/web-master/src/components/marketing/PricingHome
 const background = await read("apps/web-master/src/components/marketing/DynamicBgSection.tsx");
 const markdownRoute = await read("apps/web-master/src/app/ai/markdown/route.ts");
 const publicSurface = await read("apps/web-master/src/lib/public-surface.ts");
+const siteContextSource = await read("apps/web-master/src/lib/site-context.ts");
+const robots = await read("apps/web-master/src/app/robots.ts");
+const sitemap = await read("apps/web-master/src/app/sitemap.ts");
+const offerLayout = await read("apps/web-master/src/layouts/OfferPageLayout.tsx");
+const offerIndexLayout = await read("apps/web-master/src/layouts/OfferIndexLayout.tsx");
+const faqRoutes = await Promise.all([
+  read("apps/web-master/src/app/[lang]/resources/faq/page.tsx"),
+  read("apps/web-master/src/app/[lang]/resources/faq/[categorySlug]/page.tsx"),
+  read("apps/web-master/src/app/[lang]/resources/faq/[categorySlug]/[articleSlug]/page.tsx"),
+]);
+const templateRegistry = await read("apps/web-master/src/templates/registry.ts");
+const templateContext = await read("apps/web-master/src/lib/template-context.ts");
+const templateAdmission = await read("apps/web-master/src/lib/template-admission.ts");
+const cmsSites = await read("apps/cms/src/collections/Sites.ts");
+const cmsSiteSettings = await read("apps/cms/src/collections/SiteSettings.ts");
 const runtime = await read("apps/web-master/src/config/runtime.ts");
 const readyz = await read("apps/web-master/src/app/api/readyz/route.ts");
 
@@ -55,6 +70,24 @@ assert.doesNotMatch(runtime, /defaultSiteId|DEFAULT_SITE_ID/);
 assert.doesNotMatch(readyz, /DEFAULT_SITE_ID/);
 assert.match(publicSurface, /site\?\.status === "published"/);
 assert.match(publicSurface, /previewEnvironment === "private-preview"/);
+assert.match(publicSurface, /countPublicPages/);
+assert.match(siteContextSource, /hasPublicPage/);
+assert.match(siteContextSource, /countPublicPages\(result\.docs\)/);
+assert.match(robots, /getSiteIdFromRequest/);
+assert.match(sitemap, /isPageVisibleToAudience\(page, "public"\)/);
+assert.doesNotMatch(sitemap, /listOffers|listArticles|listCaseStudies|listVideos/);
+assert.doesNotMatch(offerLayout, /mockCaseStudies|mockResources|mockFaqs|SOC 2|GDPR|CCPA|1,000\+/);
+assert.doesNotMatch(offerIndexLayout, /Solutions Built for Scale|Enterprise-grade|Ready to Get Started/);
+for (const faqRoute of faqRoutes) {
+  assert.doesNotMatch(faqRoute, /helpMockData|HelpCentrePageContent/);
+}
+assert.doesNotMatch(templateRegistry, /marketingSmbV1|marketing-smb-v1/);
+assert.doesNotMatch(templateContext, /DEFAULT_TEMPLATE_ID|\|\|/);
+assert.match(templateContext, /assertTemplateAdmission/);
+assert.match(templateAdmission, /LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON/);
+assert.match(templateAdmission, /LINKSITES_ADMITTED_TEMPLATE_SHA/);
+assert.doesNotMatch(cmsSites, /defaultValue:\s*['"]marketing-smb-v1/);
+assert.doesNotMatch(cmsSiteSettings, /defaultValue:\s*['"]marketing-smb-v1/);
 assert.match(pagesSource, /page\.status !== "published"/);
 assert.match(pagesSource, /Array\.isArray\(page\.content\) \? page\.content : page\.layout/);
 assert.match(pagesSource, /audience = "public"/);
@@ -63,6 +96,8 @@ assert.match(pageRoute, /params: Promise</);
 assert.match(pageRoute, /const \{ lang, slug = \[\] \} = await params/);
 assert.doesNotMatch(pageRoute, /fallbackPage|Default demo content|Welcome to the Master Template/);
 assert.match(preview, /PREVIEW_ACCESS_TOKEN/);
+assert.match(preview, /getPreviewSiteIdFromRequest/);
+assert.doesNotMatch(preview, /getSiteIdFromRequest/);
 assert.match(preview, /audience: "private-preview"/);
 assert.match(preview, /index: false, follow: false/);
 assert.match(preview, /data-private-preview/);
