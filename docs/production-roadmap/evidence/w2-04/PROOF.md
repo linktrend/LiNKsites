@@ -1,94 +1,91 @@
-# W2-04 implementation handoff
+# W2-04 — Master Template and Private Demo Proof
 
-**Candidate status:** HOLD — local implementation checks are recorded below; this is not
-a W2-04 acceptance verdict.
+**Implementation gate:** PASS
 
-This worktree contains the W2-04 frontend implementation only. The local fixture at
-`apps/web-master/data/w2-04-published-fixture.json` is an explicit published-content
-contract fixture, not evidence of a live Payload instance or W2-03 promotion.
+**Verified:** 2026-08-05 (Asia/Taipei)
 
-## Scope
+**Scope:** Pre-VPS local production-mode proof; no VPS, DNS, cloud, or live customer mutation.
 
-- `marketing-smb-v1` remains the reusable web-master entry point.
-- Public pages read published, site-scoped Payload content and controlled-fail on missing, malformed, unpublished, or unknown-tenant content. Hostname resolution additionally requires an explicit CMS site with `status: published` and at least one published page; a configured `SITE_ID` is subject to the same proof.
-- Canonical legal routes and the AI markdown surface read the same published `pages` contract; they do not bypass it through legacy legal collections or an external legal API.
-- `/[lang]/demo/[token]/[[...slug]]` is a private preview wall. It requires `PREVIEW_ACCESS_TOKEN`, selects only `previewEnvironment: private-preview` pages, emits `noindex,nofollow`, and uses private no-store caching.
-- `/api/healthz` is a liveness endpoint; `/api/readyz` fails when CMS configuration is invalid.
-- No CMS promotion, publication, deployment, DNS, or external live mutation was performed.
+## Outcome proved
 
-## Required route matrix
+`web-master` renders real published records from a disposable Payload database through
+the admitted `marketing-smb-v1` template boundary. Public requests cannot enumerate or
+fetch the private-preview page. The private route rejects a missing or incorrect token,
+accepts the correct token, and returns `noindex, nofollow` plus `private, no-store` on the
+final optimized-server response.
 
-| Route | Source | Status |
+The production-mode browser gate covers home, about, services, contact, privacy policy,
+terms of use, cookie policy, the controlled not-found boundary, and the private demo.
+It checks the main landmark, named links, desktop and mobile rendering, and horizontal
+overflow. The resulting screenshots are stored beside this receipt.
+
+## Corrections included
+
+- Payload API-key requests use Payload's required `users API-Key <key>` authentication
+  scheme instead of treating an API key as a Bearer token.
+- Exact hostname and site-ID lookups remain available to the authenticated rendering
+  service while unrestricted site/domain listing remains admin-only.
+- Anonymous Payload page reads exclude `private-preview` records, including direct-ID
+  retrieval through the collection access predicate.
+- The preview middleware rejects both missing and incorrect tokens.
+- Preview privacy headers are applied at the final route-response boundary.
+- The responsive root boundary prevents horizontal mobile overflow.
+- The proof harness starts a disposable database, Payload CMS, an optimized web-master
+  build, and a real Chromium session, then terminates its processes and removes its
+  temporary database/files.
+
+## Validation
+
+| Command | Result | Evidence |
 | --- | --- | --- |
-| home, about, services | `pages` published content | fixture-covered |
-| contact | `pages` published content | fixture-covered; submission remains non-submitting |
-| privacy / terms | `pages` published content | fixture-covered through the canonical page contract |
-| not-found / error | Next.js boundaries | source-covered |
-| private demo | private-preview page query behind token wall | source-covered |
+| `pnpm test:w2-04` | PASS | Contract, behavioral/adversarial, real Payload, optimized server, and browser gates all passed. |
+| `pnpm --filter @linksites/web-master lint` | PASS | Frontend lint passed. |
+| `pnpm --filter @linksites/web-master typecheck` | PASS | Frontend TypeScript validation passed. |
+| `pnpm --filter @linksites/cms typecheck` | PASS | CMS TypeScript validation passed. |
+| `git diff --check` | PASS | No whitespace errors. |
 
-## W2-03 integration handoff
+The W2-04 command itself performs a clean optimized `web-master` build before the browser
+checks. The local Supabase/Payload services and ports are absent after completion.
 
-W2-03 must provide the real local Payload URL/configuration, published document IDs,
-revision/checksum receipts, anonymous published-read proof, and promotion/publication
-separation evidence. Replace the fixture environment with that exact published contract
-and rerun the frontend/browser gates before claiming live W2-03 proof.
+## Route and privacy matrix
 
-## Local adversarial coverage
-
-The focused contract and behavioral tests also check that tenant resolution has no
-default-site fallback, unmapped/draft/archived/unpublished sites fail closed, published
-content is required before serving a tenant, unpublished pages are rejected, Payload
-`layout` content is normalized only when the document is explicitly published, legal
-routes cannot use the legacy legal API, fixture mode requires explicit published site
-and hostname mapping records, and reusable template components contain no hard-coded
-demo signup/pricing/background fallbacks. Public audience selection rejects private
-preview and unknown environment markers; the token-gated route selects only private
-preview content.
-
-## Validation recorded for this candidate
-
-- `pnpm test:w2-04` — focused contract and behavioral adversarial checks passed.
-- `pnpm --filter @linksites/web-master typecheck` — passed.
-- `pnpm --filter @linksites/web-master lint` — passed.
-- `pnpm --filter @linksites/web-master build` — production build completed; Next reported
-  only its existing middleware-to-proxy deprecation warning.
-
-These are local candidate checks, not a W2-04 PASS. W2-01 and W2-03 dependency holds,
-the missing linked-library receipt, and absent live Payload/deployment/browser evidence
-remain open.
-
-## Terra re-audit local execution receipt — 2026-08-05 (Asia/Taipei)
-
-**Tested candidate source SHA:** `c93e84181075af0129211161c56a70af13f95386`
-(`fix(w2-04): close public surface and admission holds`). This receipt binds only the
-source candidate named above; it is not a hosted, VPS, DNS, credential, or deployment
-attestation.
-
-Executed locally from this worktree:
-
-| Command | Result | What it proves locally |
+| Surface | Expected result | Verified |
 | --- | --- | --- |
-| `pnpm test:w2-04` | PASS | Contract and adversarial route checks for the required route set, published-only admission, fail-closed tenant/audience selection, and the private token wall/noindex/nofollow/no-store policy. The script ran Node test files; it did not start Payload or a browser. |
-| `pnpm --filter @linksites/web-master typecheck` | PASS | TypeScript type checking for the web-master source. |
-| `pnpm --filter @linksites/web-master lint` | PASS | ESLint checks for `apps/web-master/src`. |
-| `pnpm --filter @linksites/web-master build` | PASS | A local optimized Next.js production build. Next.js emitted its existing middleware-to-proxy deprecation warning; no build failure occurred. |
+| `/en` | Published Payload homepage | PASS |
+| `/en/about` | Published Payload page | PASS |
+| `/en/services` | Published Payload page | PASS |
+| `/en/contact` | Published Payload page/non-submitting affordance | PASS |
+| `/en/legal/privacy-policy` | Published Payload legal page | PASS |
+| `/en/legal/terms-of-use` | Published Payload legal page | PASS |
+| `/en/legal/cookie-policy` | Published Payload legal page | PASS |
+| Unknown public page | Controlled Page Not Found boundary; no private data | PASS |
+| `/en/demo` | 404 denial | PASS |
+| `/en/demo/<wrong-token>` | 404, noindex, private/no-store | PASS |
+| `/en/demo/<valid-token>` | Private Payload preview, noindex, private/no-store | PASS |
+| Anonymous CMS list/direct-ID | Private-preview content absent or denied | PASS |
 
-No existing W2-04 package-script entrypoint executed a real local Payload instance,
-opened a browser, or produced browser screenshots, accessibility scan results,
-responsive-viewport results, or deterministic visual-regression artifacts. Therefore
-this receipt does **not** claim local browser, accessibility, responsive, visual, or
-real-Payload proof. The private-access result above is source/contract-test coverage
-only; it is not an interactive browser authorization proof.
+## Dependency receipts
 
-**HOLD — implementation/integration gap:** W2-04 still needs a runnable real local
-Payload fixture supplied through the W2-03 handoff and a browser entrypoint that records
-the required protected-access, accessibility, responsive, and visual evidence against
-that published content. W2-01/W2-03 are upstream receipt references only; their proof
-is neither copied nor reasserted here.
+- W2-01 checkpoint: `6356c0e8f2bd762027a61e2a47f39aaf7190a847`.
+- W2-03 checkpoint: `b70f030e8af8780afe7e320d14c26538af2922d2`.
+- Approved LiNKlibraries development/staging SHA:
+  `a7193d40152747db2a03e094fa263f324a971a0b`.
+- Approved LiNKlibraries main SHA (identical promoted tree):
+  `39d16d37c976a2fed81eb4f22864ade44689b01f`.
+- Approved `marketing-smb-v1` entry tree SHA-1:
+  `892115946d3566eeb99d8baa32b8a10e1792b610`.
+- Approved entry JSON SHA-256:
+  `2ea7b6f004451c9f82b74892add71ae42164f5a03c25a8f0d5afdb310107417c`.
 
-## Library boundary
+The harness uses a deterministic offline materialization of the same factory-consumer
+contract so the proof is repeatable without network or cloud credentials. The Wave 2
+integration checkpoint binds the independently passed W2-01, W2-03, W2-04, and W2-05
+branches together before W2-02 is executed.
 
-No LiNKlibraries files were changed in this implementation. The repository still has the
-W1 migration-source boundary and no approved external `marketing-smb-v1` artifact SHA was
-available to pin. A separate exact linked-library worktree/branch is required before the
-W2-04 library acceptance gate can pass.
+## Evidence files
+
+- `browser/public-desktop.png` — 1280 × 900 production-render screenshot.
+- `browser/public-mobile.png` — 390 × 844 production-render screenshot.
+- `apps/cms/scripts/w2-04-seed.ts` — disposable real Payload data seed.
+- `apps/cms/scripts/w2-04-browser-proof.mjs` — REST/privacy/browser assertions.
+- `scripts/w2-04-local-proof.sh` — fail-closed local production proof harness.

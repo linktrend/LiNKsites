@@ -191,7 +191,7 @@ const withAuthHeader = (headers: HeadersInit = {}): HeadersInit => {
   if (!runtimeConfig.payloadApiKey) return headers;
   return {
     ...headers,
-    Authorization: `Bearer ${runtimeConfig.payloadApiKey}`,
+    Authorization: `users API-Key ${runtimeConfig.payloadApiKey}`,
   };
 };
 

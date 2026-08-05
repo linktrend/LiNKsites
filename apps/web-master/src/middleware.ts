@@ -62,10 +62,11 @@ const intlMiddleware = createMiddleware({
 export default function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  const demoMatch = pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo\/([^/]+)/);
+  const demoMatch = pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/([^/]+))?(?:\/|$)/);
   if (demoMatch) {
     const configuredToken = process.env.PREVIEW_ACCESS_TOKEN;
-    if (!configuredToken || demoMatch[1] !== configuredToken) {
+    const candidateToken = demoMatch[1];
+    if (!configuredToken || !candidateToken || candidateToken !== configuredToken) {
       return new NextResponse("Not Found", {
         status: 404,
         headers: {

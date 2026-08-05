@@ -37,7 +37,7 @@ export const Pages: CollectionConfig<'pages'> = {
     description: 'Unified pages collection - aggregates all page types',
   },
   access: {
-    read: createSiteFilteredAccess(),
+    read: createSiteFilteredAccess({ excludePrivatePreviewForAnonymousReads: true }),
     create: createAccess,
     update: updateAccess,
     delete: deleteAccess,

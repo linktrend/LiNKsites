@@ -13,7 +13,10 @@ export const Sites: CollectionConfig<'sites'> = {
   access: {
     read: async ({ req }) => {
       if (await isBootstrapMode(req)) return true
-      if (req.user) return manageSitesAccess({ req })
+      if (req.user) {
+        const adminAccess = await manageSitesAccess({ req })
+        if (adminAccess) return adminAccess
+      }
 
       const url = req.url ? new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`) : null
       const requestedId = url?.searchParams.get('where[id][equals]')?.trim()

@@ -36,7 +36,10 @@ const templateRegistry = await read("apps/web-master/src/templates/registry.ts")
 const templateContext = await read("apps/web-master/src/lib/template-context.ts");
 const templateAdmission = await read("apps/web-master/src/lib/template-admission.ts");
 const publicRouteGuard = await read("apps/web-master/src/lib/public-route-guard.ts");
+const middleware = await read("apps/web-master/src/middleware.ts");
+const nextConfig = await read("apps/web-master/next.config.mjs");
 const cmsSites = await read("apps/cms/src/collections/Sites.ts");
+const cmsSiteDomains = await read("apps/cms/src/collections/SiteDomains.ts");
 const cmsSiteSettings = await read("apps/cms/src/collections/SiteSettings.ts");
 const runtime = await read("apps/web-master/src/config/runtime.ts");
 const readyz = await read("apps/web-master/src/app/api/readyz/route.ts");
@@ -65,6 +68,8 @@ for (const page of fixture.pages) {
 }
 
 assert.match(client, /cmsProvider === "fixture"/);
+assert.match(client, /Authorization: `users API-Key \$\{runtimeConfig\.payloadApiKey\}`/);
+assert.doesNotMatch(client, /Authorization: `Bearer \$\{runtimeConfig\.payloadApiKey\}`/);
 assert.match(client, /doc\.status !== undefined && doc\.status !== "published"/);
 assert.match(client, /collection === "pages" && doc\.status !== "published"/);
 assert.doesNotMatch(client, /mock\.site\?\.id \|\| "company-site"/);
@@ -100,12 +105,20 @@ assert.match(templateAdmission, /materializedAssetBytes/);
 assert.match(templateAdmission, /evidence\.files/);
 assert.match(publicRouteGuard, /getSiteIdFromRequest/);
 assert.match(publicRouteGuard, /status: 404/);
+assert.match(middleware, /const candidateToken = demoMatch\[1\]/);
+assert.match(middleware, /!candidateToken \|\| candidateToken !== configuredToken/);
+assert.match(nextConfig, /source: '\/:lang\(en\|es\|zh-tw\|zh-cn\)\/demo\/:path\*'/);
+assert.match(nextConfig, /'Cache-Control', value: 'private, no-store, max-age=0'/);
 for (const publicRoute of publicRoutes) {
   assert.match(publicRoute, /getPublicSiteIdOrNull|getSiteIdFromRequest/);
   assert.match(publicRoute, /publicRouteNotFound|catch\(\(\) => null\)/);
 }
 assert.match(templateAdmission, /LINKSITES_ADMITTED_TEMPLATE_SHA/);
 assert.doesNotMatch(cmsSites, /defaultValue:\s*['"]marketing-smb-v1/);
+assert.match(cmsSites, /if \(adminAccess\) return adminAccess/);
+assert.match(cmsSites, /requestedId \? \{ id: \{ equals: requestedId \} \} : false/);
+assert.match(cmsSiteDomains, /if \(adminAccess\) return adminAccess/);
+assert.match(cmsSiteDomains, /hostname: \{ equals: requestedHostname\.trim\(\)\.toLowerCase\(\) \}/);
 assert.doesNotMatch(cmsSiteSettings, /defaultValue:\s*['"]marketing-smb-v1/);
 assert.match(pagesSource, /page\.status !== "published"/);
 assert.match(pagesSource, /Array\.isArray\(page\.content\) \? page\.content : page\.layout/);
@@ -130,6 +143,7 @@ assert.doesNotMatch(pricing, /defaultPricingPlans|Perfect for pilots|Unlimited a
 assert.doesNotMatch(background, /fallbackBackgroundImages|getFallbackImage/);
 assert.doesNotMatch(markdownRoute, /getLegalBySlug|markdownForLegal/);
 assert.match(css, /@media/);
+assert.match(css, /html,\s*body \{\s*max-width: 100%;\s*overflow-x: hidden;/);
 
 console.log("W2-04 contract tests: PASS");
 console.log("routes: home, about, services, contact, privacy, terms, not-found/error");

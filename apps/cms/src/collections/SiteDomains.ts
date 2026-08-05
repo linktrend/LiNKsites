@@ -22,9 +22,11 @@ export const SiteDomains: CollectionConfig<'site-domains'> = {
     read: (async ({ req }) => {
       if (await isBootstrapMode(req as WorkflowRequest)) return true
 
-      // Authenticated admin access only.
+      // Administrators may list mappings. Authenticated service users still
+      // need the same exact-host lookup that anonymous public rendering uses.
       if ((req as WorkflowRequest).user) {
-        return manageSitesAccess({ req })
+        const adminAccess = await manageSitesAccess({ req })
+        if (adminAccess) return adminAccess
       }
 
       const url = req.url ? new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`) : null

@@ -30,7 +30,18 @@ import type { WorkflowRequest } from '@/types/PayloadRequestExtended'
  * - ?site=__all__ - Show all sites (admin only)
  * - No parameter - Show sites based on user's assigned sites
  */
-export const createSiteFilteredAccess = (): Access => {
+type SiteFilteredAccessOptions = {
+  /**
+   * Private-preview Pages are rendered only by the token-gated web-master
+   * route, which supplies a server-side Payload API key. Anonymous REST
+   * callers must not be able to enumerate or fetch them.
+   */
+  excludePrivatePreviewForAnonymousReads?: boolean
+}
+
+export const createSiteFilteredAccess = (
+  options: SiteFilteredAccessOptions = {},
+): Access => {
   return async ({ req }) => {
     // During bootstrap (no users), allow full read access
     if (await isBootstrapMode(req as WorkflowRequest)) {
@@ -118,6 +129,9 @@ export const createSiteFilteredAccess = (): Access => {
       const and: Where[] = [{ site: { equals: selectedSite } }]
       if (requestedLocale) and.push({ locale: { equals: requestedLocale } })
       if (REQUIRE_PUBLISHED_STATUS.has(collectionSlug)) and.push({ status: { equals: 'published' } })
+      if (options.excludePrivatePreviewForAnonymousReads && collectionSlug === 'pages') {
+        and.push({ previewEnvironment: { not_equals: 'private-preview' } })
+      }
 
       return { and }
     }
