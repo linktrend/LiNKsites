@@ -1,0 +1,36 @@
+{
+  "evidence_schema": "linksites.wave.legacy-boundary.v1",
+  "subject_sha": "56931983312b65c34ef241c32057437db5171862",
+  "classifications": [
+    {
+      "surface": "lsites_core mirror/schema",
+      "classification": "historical_or_archived",
+      "observed": "supabase/schemas/lsites_core.schema.json and archive references remain; active Wave 1 working content uses lsites_working_content and the migration path is documented",
+      "action": "none; destructive removal reserved for W2-07"
+    },
+    {
+      "surface": "raw n8n and N8N_WEBHOOK_URL",
+      "classification": "not an active Wave 1 orchestrator dependency",
+      "observed": "no raw n8n import or N8N_WEBHOOK_URL in the orchestrator or canonical active contract packages; generic executor comments and historical docs remain labelled",
+      "action": "none; W2-05 owns broader external-event boundary work"
+    },
+    {
+      "surface": "apps/web-company",
+      "classification": "paused duplicate",
+      "observed": "existing app and CI documentation identify it as paused/excluded from the active Wave 1 path",
+      "action": "preserved; removal is reserved for W2-07"
+    },
+    {
+      "surface": "mock template/content fallbacks",
+      "classification": "fixture_or_explicit_non-production fallback",
+      "observed": "W1-03 uses manual/file fixtures and W1-05 uses an offline library fixture explicitly marked non-production; web-master mock provider remains outside Wave 1 runtime integration",
+      "action": "preserved and not presented as live proof"
+    },
+    {
+      "surface": "Stage hierarchy terminology",
+      "classification": "compatibility or historical boundary",
+      "observed": "active ledger APIs and W1 fixtures use Phase; legacy stage_ref persistence is retained only by documented additive migration compatibility tests",
+      "action": "preserved read-only for migration safety"
+    }
+  ]
+}

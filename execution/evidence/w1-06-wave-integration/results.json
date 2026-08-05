@@ -1,0 +1,84 @@
+{
+  "evidence_schema": "linksites.wave.integration.v1",
+  "work_packet": "W1-06",
+  "repository": "LiNKsites",
+  "branch": "issue/w1-06-wave-integration",
+  "integration_checkpoint_sha": "56931983312b65c34ef241c32057437db5171862",
+  "wave_base_sha": "b750ab0c218513a527e1a2d8e04255430a1d240e",
+  "accepted_lane_tips": {
+    "W1-01": "04a021026a43c367f9399535456edeb3d497a915",
+    "W1-02": "dd5e4ec65bb501a6f29b5a5ec06662d7eabf6838",
+    "W1-03": "75012ee4fa575bc8d02f3ecdab953339f888b928",
+    "W1-04": "f67ef5f5f642afd19d17f1142a9ff5559276252a",
+    "W1-05": "880eda5d6a574bcaff9a5d0da069a33aa45de0da"
+  },
+  "integration_order": ["W1-01", "W1-02-ledger", "W1-04-working-content", "W1-05-library-consumer", "W1-03-orchestrator"],
+  "fixtures": {
+    "manual_lead": "packages/types/fixtures/w1-01-contract-fixtures.ts:manualFirstTestLead",
+    "contract_schema_version": "1.0",
+    "working_content": "packages/factory-catalog/tests/fixtures/working-content-fixtures.ts",
+    "library_entry": "marketing-smb-v1",
+    "orchestrator_input": "manualFirstTestLead",
+    "evidence_classification": "local_fixture_and_structural_only"
+  },
+  "commands": [
+    {
+      "command": "node --experimental-strip-types --test apps/intake-orchestrator/tests/*.test.ts",
+      "exit_code": 0,
+      "result": "pass",
+      "counts": {"tests": 25, "pass": 25, "fail": 0, "skipped": 0},
+      "proof": "W1-03 manual/file fixture lifecycle, duplicate replay, restart/recovery, lease expiry, dependency gate, completion-once, and secret-redaction cases"
+    },
+    {
+      "command": "node --experimental-strip-types --test packages/types/tests/runtime-contracts.test.ts",
+      "exit_code": 0,
+      "result": "pass",
+      "counts": {"tests": 17, "pass": 17, "fail": 0, "skipped": 0},
+      "proof": "seven canonical envelopes, byte-compatible manual/CRM boundary, closed schemas, sensitive-value rejection, and invalid-enum/revision cases"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "pass"
+    },
+    {
+      "command": "pnpm --filter @linksites/program-ledger test",
+      "exit_code": 1,
+      "result": "blocked",
+      "reason": "vitest not found because node_modules is absent; dependency installation was explicitly prohibited",
+      "owner": "W1-06 integration executor",
+      "disposition": "independent Sol audit must rerun after clean pinned install"
+    },
+    {
+      "command": "pnpm --filter @linksites/factory-catalog test",
+      "exit_code": 1,
+      "result": "blocked",
+      "reason": "vitest not found because node_modules is absent; dependency installation was explicitly prohibited",
+      "owner": "W1-06 integration executor",
+      "disposition": "independent Sol audit must rerun after clean pinned install"
+    },
+    {
+      "command": "pnpm typecheck && pnpm test && pnpm build && pnpm lint",
+      "exit_code": 1,
+      "result": "blocked",
+      "reason": "turbo not found because node_modules is absent; dependency installation was explicitly prohibited",
+      "owner": "W1-06 integration executor",
+      "disposition": "independent Sol audit must rerun after clean pinned install"
+    },
+    {
+      "command": "supabase db lint --local",
+      "exit_code": 1,
+      "result": "blocked",
+      "reason": "local database is not running at 127.0.0.1:54322; no local service was started",
+      "owner": "W1-06 integration executor",
+      "disposition": "independent audit/local certification prerequisite; no live or hosted proof claimed"
+    }
+  ],
+  "external_actions": [],
+  "live_proof": false,
+  "known_limits": [
+    "No dependency installation, external service mutation, deployment, or Wave 2 execution was performed.",
+    "Passing tests are dependency-free local fixture proof, not hosted GitHub, live Supabase, Payload, CRM, LiNKautowork, deployment, observability, or production proof.",
+    "The final candidate SHA is the pushed commit containing this evidence record; the tests above were run at the exact integration checkpoint SHA recorded above."
+  ]
+}
