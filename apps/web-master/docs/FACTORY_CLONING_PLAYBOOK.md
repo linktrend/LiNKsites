@@ -318,8 +318,10 @@ NEXT_PUBLIC_ENABLE_I18N="true"
 # ============================================================================
 # CONTACT FORM
 # ============================================================================
-CONTACT_WEBHOOK_URL="https://n8n.clientdomain.com/webhook/contact"
-CONTACT_WEBHOOK_SECRET="<webhook-secret>"
+LINKAUTOWORK_GATEWAY_URL="https://gateway.clientdomain.example/events"
+LINKAUTOWORK_SIGNING_SECRET="<secret-manager reference>"
+LINKAUTOWORK_SIGNING_KEY_ID="web-master"
+LINKAUTOWORK_EVENT_GRANTS="[{\"eventName\":\"contact.submitted\",\"environments\":[\"production\"],\"orgIds\":[\"<org-id>\"]}]"
 CONTACT_FALLBACK_EMAIL="support@clientdomain.com"
 ```
 

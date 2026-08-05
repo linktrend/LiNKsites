@@ -26,7 +26,8 @@
     "react-hook-form": "^7.67.0",
     "web-vitals": "^5.1.0",
     "zod": "^4.1.13",
-    "@linksites/types": "workspace:*"
+    "@linksites/types": "workspace:*",
+    "@linksites/autowork-boundary": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

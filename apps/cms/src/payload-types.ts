@@ -277,6 +277,18 @@ export interface Site {
    */
   templateId: string;
   /**
+   * Canonical platform organization owning the linked Program and site
+   */
+  orgId: string;
+  /**
+   * Canonical Program Ledger identity for this site
+   */
+  programId: string;
+  /**
+   * Canonical lead identity claimed by the linked Program
+   */
+  leadId: string;
+  /**
    * Default language for this site
    */
   defaultLanguage: number | Language;
@@ -2933,6 +2945,9 @@ export interface SitesSelect<T extends boolean = true> {
   name?: T;
   domain?: T;
   templateId?: T;
+  orgId?: T;
+  programId?: T;
+  leadId?: T;
   defaultLanguage?: T;
   languages?: T;
   youtubeApiKey?: T;

@@ -85,8 +85,10 @@ NEXT_PUBLIC_FB_PIXEL_ID=123456789
 ### Contact Form Webhook
 
 ```bash
-CONTACT_WEBHOOK_URL=https://n8n.acme.com/webhook/contact
-CONTACT_WEBHOOK_SECRET=your-secret-key
+LINKAUTOWORK_GATEWAY_URL=https://gateway.example.com/events
+LINKAUTOWORK_SIGNING_SECRET=<secret-manager reference>
+LINKAUTOWORK_SIGNING_KEY_ID=web-master
+LINKAUTOWORK_EVENT_GRANTS=[]
 ```
 
 ### AI Actions + Markdown
@@ -160,7 +162,7 @@ NEXT_PUBLIC_ENABLE_LIVE_CHAT=false
 
 ⚠️ Keep secret:
 - API keys (`PAYLOAD_API_KEY`)
-- Webhook secrets (`CONTACT_WEBHOOK_SECRET`)
+- LiNKautowork signing secrets are loaded only by the server-side durable boundary
 - Database URLs (`REDIS_URL`)
 - Fallback emails (`CONTACT_FALLBACK_EMAIL`)
 

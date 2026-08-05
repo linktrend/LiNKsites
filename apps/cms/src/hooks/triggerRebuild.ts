@@ -1,7 +1,6 @@
 import type { CollectionAfterChangeHook, PayloadRequest } from 'payload'
 import { cacheInvalidatePattern } from '@/payload/utils/cache'
 import { triggerLiNKautowork } from '@/payload/utils/autowork'
-import type { WorkflowRequest } from '@/types/PayloadRequestExtended'
 import { triggerSiteRebuild } from '@/utils/webhook'
 
 export const triggerRebuild: CollectionAfterChangeHook = async ({
@@ -17,7 +16,6 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
   collection?: { slug?: string }
   previousDoc: Record<string, unknown> | null
 }): Promise<Record<string, unknown>> => {
-  const workflowReq = req as WorkflowRequest
   // Only trigger on update or create
   if (operation !== 'create' && operation !== 'update') {
     return doc
@@ -48,7 +46,7 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
         console.error('Cache invalidation failed during rebuild trigger', error),
       )
       // Trigger rebuild asynchronously (don't wait)
-      triggerSiteRebuild(siteId, workflowReq, 'content_published').catch((error) => {
+      triggerSiteRebuild(siteId, req, 'content_published').catch((error) => {
         console.error('Failed to trigger rebuild:', error)
       })
       if (collection?.slug && doc?.id) {
@@ -57,9 +55,8 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
           collection: collection.slug,
           eventType: 'content_published',
           site: siteId,
-          locale: workflowReq.locale ?? undefined,
-          meta: { lead_id: (workflowReq as WorkflowRequest & { meta?: Record<string, unknown> }).meta?.lead_id, org_id: (workflowReq as WorkflowRequest & { meta?: Record<string, unknown> }).meta?.org_id },
-          req: workflowReq,
+          locale: req.locale ?? undefined,
+          req,
         })
       }
     }

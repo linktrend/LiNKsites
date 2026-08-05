@@ -271,8 +271,7 @@ Use this checklist when creating a production site for a specific client.
 
 ### 📋 Contact Form Configuration
 
-- [ ] Set `CONTACT_WEBHOOK_URL`
-- [ ] Set `CONTACT_WEBHOOK_SECRET`
+- [ ] Set the LiNKautowork gateway, signing key reference, explicit grant, and outbox path
 - [ ] Set `CONTACT_FALLBACK_EMAIL`
 - [ ] Test webhook endpoint
 - [ ] Test form submission
@@ -538,7 +537,7 @@ Use this section to identify potential coupling risks before cloning.
 |------|----------|------------|
 | Hardcoded API endpoints | 🔴 High | Use env vars for all endpoints |
 | Hardcoded CMS URLs | 🔴 High | Use `NEXT_PUBLIC_PAYLOAD_API_URL` |
-| Hardcoded webhook URLs | 🟡 Medium | Use `CONTACT_WEBHOOK_URL` |
+| Arbitrary contact delivery URL | 🔴 High | Use the signed LiNKautowork durable boundary |
 | Hardcoded analytics IDs | 🟡 Medium | Use `NEXT_PUBLIC_GA_MEASUREMENT_ID` etc. |
 | Hardcoded external service URLs | 🟡 Medium | Use env vars for all external URLs |
 

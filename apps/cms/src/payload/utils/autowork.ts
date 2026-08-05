@@ -1,7 +1,11 @@
 import type { PayloadRequest } from 'payload'
 import { FileOutbox, LiNKautoworkGateway, type GatewayEnvironment, type GatewayEventPolicy, type GatewayRequest } from '@linksites/autowork-boundary'
 
-export type AutoworkEvent = { id: string | number; collection: string; eventType: string; site?: string; locale?: string; meta?: Record<string, unknown>; req?: PayloadRequest | null }
+export type ProgramPass = { programId: string; orgId: string; leadId: string; siteId: string; state: 'PASS'; completionId: string }
+export type ProgramPassReader = (input: { req: PayloadRequest; programId: string; orgId: string; leadId: string; siteId: string }) => Promise<ProgramPass | null>
+export type AutoworkEvent = { id: string | number; collection: string; eventType: string; site?: string; locale?: string; req?: PayloadRequest | null }
+
+type PayloadWithProgramReader = PayloadRequest & { linksitesProgramPass?: ProgramPassReader }
 
 const environmentNames = new Set(['development', 'staging', 'production'])
 const configuredPolicies = (): readonly GatewayEventPolicy[] => {
@@ -28,16 +32,22 @@ const gatewayAndQueue = (): { gateway: LiNKautoworkGateway; outbox: FileOutbox }
   if (!gatewayUrl || !secret || !keyId || !environmentNames.has(environment) || !queuePath) throw new Error('LiNKautowork durable delivery configuration is incomplete')
   const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: configuredPolicies(), transport: async (request) => {
     const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 3_000)
-    try { const response = await fetch(gatewayUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request), signal: controller.signal }); return { status: response.status, receiptId: response.headers.get('x-linkautowork-receipt') ?? 'missing', acknowledgedAt: new Date().toISOString() } } finally { clearTimeout(timer) }
+    try { const response = await fetch(gatewayUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request), signal: controller.signal }); const acknowledgedAt = response.headers.get('x-linkautowork-acknowledged-at') ?? new Date().toISOString(); return { status: response.status, receiptId: response.headers.get('x-linkautowork-receipt') ?? 'missing', receiptSignature: response.headers.get('x-linkautowork-receipt-signature') ?? 'missing', acknowledgedAt } } finally { clearTimeout(timer) }
   } })
-  return { gateway, outbox: new FileOutbox(queuePath, 5, gateway.metrics, (request, attempt) => gateway.resignRequest(request, attempt)) }
+  return { gateway, outbox: new FileOutbox(queuePath, 5, gateway.metrics, (request, attempt) => gateway.resignRequest(request, attempt), (request) => gateway.verifyStored(request)) }
 }
 
 export const triggerLiNKautowork = async (event: AutoworkEvent): Promise<void> => {
-  const leadId = typeof event.meta?.lead_id === 'string' ? event.meta.lead_id : undefined
   const siteId = typeof event.site === 'string' ? event.site : undefined
-  const orgId = typeof event.meta?.org_id === 'string' ? event.meta.org_id : undefined
-  if (!leadId || !siteId || !orgId) throw new Error('lead, site, and org are required for LiNKautowork enqueue')
+  const req = event.req as PayloadWithProgramReader | null | undefined
+  if (!req || !siteId || !req.payload?.findByID || !req.linksitesProgramPass) throw new Error('Payload request, site relationship, and Program PASS reader are required')
+  const site = await req.payload.findByID({ collection: 'sites', id: siteId, depth: 0, overrideAccess: false }) as unknown as { id: string | number; orgId?: unknown; programId?: unknown; leadId?: unknown }
+  const orgId = typeof site.orgId === 'string' ? site.orgId : undefined
+  const programId = typeof site.programId === 'string' ? site.programId : undefined
+  const leadId = typeof site.leadId === 'string' ? site.leadId : undefined
+  if (!orgId || !programId || !leadId || String(site.id) !== siteId) throw new Error('site must carry canonical org, Program, and lead relationships')
+  const pass = await req.linksitesProgramPass({ req, programId, orgId, leadId, siteId })
+  if (!pass || pass.state !== 'PASS' || pass.programId !== programId || pass.orgId !== orgId || pass.leadId !== leadId || pass.siteId !== siteId) throw new Error('linked Program has no canonical PASS completion')
   const { gateway, outbox } = gatewayAndQueue()
   const request = gateway.buildRequest('demo.completed', orgId, `cms:${event.id}`, `cms:${event.collection}:${event.id}:${event.eventType}`, { lead_id: leadId, site_id: siteId })
   await outbox.enqueue(request)

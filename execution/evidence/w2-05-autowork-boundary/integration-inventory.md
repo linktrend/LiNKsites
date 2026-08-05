@@ -1,43 +1,36 @@
-# W2-05 correction evidence
+# W2-05 Sol correction-2 evidence
 
-## Exact inventory
+## Scope and lineage
 
-Before (base `28cf47236fa81e87c606e9633a24af7cf1db16b3`):
+- Immutable implementation base: `749ef8d9e831d8cde1dfa45513a1d0240dc61c45`
+- Branch: `issue/w2-05-sol-correction-2`
+- Scope: CMS/Payload-to-LiNKautowork composition, durable signed delivery, governed contact-form boundary, and vendor-neutral CRM reference adapter only.
+- No hosted, live-deployment, live CRM, VPS, production network, or credential action was performed.
 
-| Active path | Finding |
+## Findings corrected
+
+| Finding | Truthful source proof |
 | --- | --- |
-| `apps/cms/src/hooks/triggerRebuild.ts` | Fire-and-forget adapter; hook returned before delivery was durably recorded. |
-| `apps/cms/src/payload/utils/autowork.ts` | Missing lead/org/site fail-closed handling; active n8n provenance/skip coupling. |
-| `packages/autowork-boundary/src/index.ts` | Wildcard org grants; no canonical pre-transport validation; incomplete retry and process-local replay state; no durable lease/receipt state. |
-| `apps/intake-orchestrator/src/contracts.ts` | Ports existed, but no reference vendor-field mapping harness. |
-| `apps/cms/.env.example`, `apps/cms/deploy/prod/.env.example` | No durable queue/grant configuration. |
+| R1 | `Sites` carries canonical `orgId`, `programId`, and `leadId`; the normal Payload composition fetches the Site, requires an injected Program Ledger PASS reader, rejects invented request metadata, and only builds `demo.completed` after matching PASS identity. |
+| R2 | `FileOutbox` persists pending/leased/sent/dead-letter records; `apps/cms/cron/drainLiNKautowork.ts` is a recoverable startup/cron worker; gateway 2xx responses require a non-empty valid receipt; missing/invalid receipts retry and eventually dead-letter. |
+| R3 | Queue records have integrity framing, stored HMAC signature verification, current explicit event/org/environment authorization, canonical envelope validation, and pre-transport validation. Cross-org/tampered records fail closed before transport. |
+| R4 | Lease id, expiry, attempt, retry error, receipt, and dead-letter state are persisted before transport; expired leases are reclaimable; metrics are reconstructed from durable state after restart; ambiguous sends remain recoverable by idempotency key. |
+| R5 | Active web-master contact code no longer reads `CONTACT_WEBHOOK_URL` or a raw n8n/arbitrary webhook. It enqueues signed `contact.submitted` through LiNKautowork with explicit org/site identity and durable outbox configuration. Active form docs/config were updated; archived historical material is excluded from the runtime boundary. |
+| R6 | `ReferenceCrmAdapter` proves pull, idempotent claim, canonical completion write, duplicate idempotency, and byte-preserving parity with the manual canonical mapping fixture. |
 
-After (candidate correction SHA `c04f8cb6662bf6c47acdfe5cb55a3c666fa837a2`):
+## Local proof boundary
 
-| Active path | Correction |
-| --- | --- |
-| `apps/cms/src/hooks/triggerRebuild.ts` | Awaits canonical enqueue before hook return. |
-| `apps/cms/src/payload/utils/autowork.ts` | Requires explicit lead/org/site, configured event grants, gateway URL, signing key, environment, and durable outbox path; exports recoverable drain worker. |
-| `packages/autowork-boundary/src/index.ts` | Validates canonical envelope before transport and enqueue; explicit org/environment/event grants; bounded 5xx/timeout retry; locked durable state; corruption fail-closed; durable sent/dead-letter receipt; retry attempt increment with re-sign hook; restart-safe metrics. |
-| `packages/autowork-boundary/src/crm-reference.ts` | Vendor-neutral reference mapping harness; vendor fields do not cross canonical boundary. |
-| `apps/cms/tests/contracts/autowork-composition.spec.ts` | Actual CMS adapter composition proves enqueue-before-return, restart drain, receipt persistence, and invalid identity/missing grant transport suppression. |
-| `apps/cms/.env.example`, `apps/cms/deploy/prod/.env.example` | Explicit grant and outbox configuration names; production grant intentionally blank. |
+Focused tests use disposable local filesystem queues and mocked local gateway responses. They prove composition, persistence, receipt failure, Program PASS gating, restart recovery, and CRM adapter behavior; they do not prove hosted credentials, production deployment, live CRM behavior, or production observability.
 
-## Contract and redacted example
+Validation commands and exact results are reported only after execution from the final pushed commit. Any failure or skipped disposable dependency remains a HOLD, not a PASS.
 
-Canonical contract version: `{ "major": 1, "minor": 0 }`.
+## Executed local validation
 
-Redacted signed request shape (signature and nonce are never logged):
-
-```json
-{"envelope":{"schema_version":{"major":1,"minor":0},"org_id":"org_demo","correlation_id":"cms:page-1","idempotency_key":"cms:pages:page-1:content_published","event_id":"event:cms:pages:page-1:content_published","event_name":"demo.completed","payload":{"lead_id":"lead-1","site_id":"site-1"},"signature":{"algorithm":"hmac-sha256","key_id":"cms-test","signature":"[redacted]"},"delivery_attempt":1,"acknowledgement":{"status":"pending"}},"timestamp":1700000000,"nonce":"[redacted]"}
-```
-
-Configured names/counts: `LINKAUTOWORK_GATEWAY_URL` 1, `LINKAUTOWORK_SIGNING_SECRET` 1, `LINKAUTOWORK_SIGNING_KEY_ID` 1, `LINKAUTOWORK_ENVIRONMENT` 1, `LINKAUTOWORK_OUTBOX_PATH` 1, `LINKAUTOWORK_EVENT_GRANTS` 1. No wildcard grant is permitted.
-
-## Proof and limitations
-
-- Focused adversarial boundary tests and actual CMS composition tests are local-real; tests use a disposable filesystem queue and mocked local transport.
-- The root build/typecheck/test and CMS prebuild are required validation; their exact result is recorded in the handoff, not implied by this document.
-- No live CRM, LiNKautowork credential, hosted CRM, deployment, VPS, or production network receipt was used. This correction proves the boundary and local recovery behavior only.
-- A filesystem queue is suitable for the local/manual proof, not production multi-process operation without a database/object-store implementation and operational backup/alerting policy.
+- `pnpm typecheck`: pass, 7/7 packages.
+- `pnpm lint`: pass, CMS and web-master lint targets pass.
+- `pnpm build` with disposable local `DATABASE_URI`: pass for CMS, web-master, and intake-orchestrator; Turborepo reported only its existing intake build-output warning.
+- `bash apps/cms/scripts/test-local.sh`: pass; disposable local Supabase CMS build, 22 passing / 1 intentionally skipped integration test, and 1/1 Chromium E2E pass.
+- `bash scripts/test-supabase-local.sh`: pass; exact Platform/LiNKsites migrations and W1-02 RLS probe completed `1..19`, all assertions `ok`.
+- Focused W2-05 tests: pass; autowork boundary 6/6, CRM reference pull/claim/completion parity included, and CMS composition/adversarial 4/4.
+- Active runtime/docs scan: pass; no `CONTACT_WEBHOOK_URL`, `CONTACT_WEBHOOK_SECRET`, n8n, or N8N references remain under active web-master source/config/docs paths (archived history excluded).
+- Diff whitespace and changed-content secret scan: pass; only test fixtures and secret-manager placeholders were present.
