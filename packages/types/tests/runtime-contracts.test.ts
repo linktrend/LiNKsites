@@ -359,6 +359,56 @@ test('all recursively reachable allowed strings reject embedded sensitive materi
   }
 })
 
+test('Stripe webhook secrets and payment processor IDs fail closed at recursive fields', () => {
+  const webhookSecrets = [
+    `whsec_${'a'.repeat(32)}`,
+    `prefix WHSEC_${'B'.repeat(32)} suffix`,
+  ]
+
+  for (const signature of webhookSecrets) {
+    assert.equal(
+      isLiNKautoworkEventEnvelope({
+        ...validLiNKautoworkEvent,
+        signature: { ...validLiNKautoworkEvent.signature, signature },
+      }),
+      false,
+      'event signature accepts a Stripe webhook secret',
+    )
+  }
+
+  const paymentProcessorIds = [
+    `pi_${'c'.repeat(24)}`,
+    `case/PI_${'D'.repeat(24)}`,
+    `pi_${'e'.repeat(24)}_secret_${'f'.repeat(24)}`,
+  ]
+
+  for (const reach_authorization_reference of paymentProcessorIds) {
+    assert.equal(
+      isCommercialOutcomeEnvelope({
+        ...validCommercialOutcome,
+        reach_authorization_reference,
+      }),
+      false,
+      'commercial authorization accepts a Stripe payment processor ID',
+    )
+  }
+
+  assert.equal(
+    isLiNKautoworkEventEnvelope({
+      ...validLiNKautoworkEvent,
+      signature: { ...validLiNKautoworkEvent.signature, signature: 'signature-opaque-001' },
+    }),
+    true,
+  )
+  assert.equal(
+    isCommercialOutcomeEnvelope({
+      ...validCommercialOutcome,
+      reach_authorization_reference: 'reach-payment-approved-001',
+    }),
+    true,
+  )
+})
+
 test('ordinary descriptive strings remain valid', () => {
   assert.equal(
     isLeadResearchPackage({
