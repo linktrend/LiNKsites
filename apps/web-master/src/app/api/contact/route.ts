@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { ENVIRONMENT, ENV } from "@/config";
+import { getPublicSiteIdOrNull, publicRouteNotFound } from "@/lib/public-route-guard";
 
 // Environment variables for webhook configuration
 const WEBHOOK_URL = ENV.CONTACT.WEBHOOK_URL;
@@ -84,6 +85,8 @@ type ContactApiPayload = z.infer<typeof contactApiSchema>;
  * @returns JSON response with success status and message
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  if (!(await getPublicSiteIdOrNull())) return publicRouteNotFound();
+
   try {
     // Check request size (prevent DoS attacks)
     const contentLength = request.headers.get("content-length");
@@ -228,6 +231,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  * Handles CORS preflight requests
  */
 export async function OPTIONS(): Promise<NextResponse> {
+  if (!(await getPublicSiteIdOrNull())) return publicRouteNotFound();
+
   return new NextResponse(null, {
     status: 204,
     headers: {

@@ -25,7 +25,7 @@ const normalizeHost = (host: string): string => {
 
 export const getHostnameFromRequest = async (): Promise<string> => {
   const headerList = await headers();
-  return normalizeHost(headerList.get("host") ?? "");
+  return normalizeHost(headerList.get("host") ?? headerList.get("x-forwarded-host") ?? "");
 };
 
 const extractSiteId = (site: SiteDomainDoc["site"]): string | null => {

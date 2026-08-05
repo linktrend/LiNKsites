@@ -11,7 +11,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./library-consumer": "./src/libraryConsumer.ts"
   },
   "dependencies": {
     "@linksites/program-ledger": "workspace:*",

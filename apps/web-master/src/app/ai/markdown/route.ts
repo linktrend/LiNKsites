@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_FEATURES, DEFAULT_LANGUAGE, isLanguageSupported } from "@/config";
 import { normalizeLocale } from "@/lib/locale-context";
-import { getSiteIdFromRequest } from "@/lib/site-context";
+import { getPublicSiteIdOrNull, publicRouteNotFound } from "@/lib/public-route-guard";
 import { getPageBySlug } from "@/lib/repository/pages";
 import {
   getOfferIndex,
@@ -50,7 +50,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     slugSegments = segments.slice(1);
   }
   const locale = normalizeLocale(lang);
-  const siteId = await getSiteIdFromRequest();
+  const siteId = await getPublicSiteIdOrNull();
+  if (!siteId) return publicRouteNotFound();
 
   let markdown = "";
 

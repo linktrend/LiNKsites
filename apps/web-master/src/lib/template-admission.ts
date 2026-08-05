@@ -1,18 +1,14 @@
-const GIT_SHA_PATTERN = /^[a-f0-9]{40}$/;
-const SHA256_PATTERN = /^[a-f0-9]{64}$/;
+import {
+  assertLibraryConsumptionEvidence,
+  assertLibraryConsumptionReceipt,
+  canonicalJsonStringify,
+  type LibraryConsumptionEvidence,
+  type LibraryConsumptionReceipt,
+} from "@linksites/factory-catalog/library-consumer";
 
-export type AdmittedTemplateReceipt = {
-  schemaVersion: { major: number; minor: number };
-  receiptId: string;
-  consumer: "linksites";
-  entryId: string;
-  catalogCommitSha: string;
-  libraryCommitSha: string;
-  verificationId: string;
-  entryChecksum: string;
-  assetChecksums: Record<string, string>;
-  entrypoint: string;
-};
+const GIT_SHA_PATTERN = /^[a-f0-9]{40}$/;
+
+export type AdmittedTemplateReceipt = LibraryConsumptionReceipt;
 
 export class TemplateAdmissionError extends Error {
   constructor(message: string) {
@@ -21,87 +17,90 @@ export class TemplateAdmissionError extends Error {
   }
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const requiredString = (value: unknown, field: string): string => {
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new TemplateAdmissionError(`receipt field "${field}" is required`);
-  }
-  return value;
-};
-
-const parseReceipt = (raw: string): AdmittedTemplateReceipt => {
-  let value: unknown;
+const parseJson = (raw: string, label: string): unknown => {
   try {
-    value = JSON.parse(raw);
+    return JSON.parse(raw) as unknown;
   } catch {
-    throw new TemplateAdmissionError("receipt JSON is invalid");
+    throw new TemplateAdmissionError(`${label} JSON is invalid`);
   }
-  if (!isRecord(value)) throw new TemplateAdmissionError("receipt must be an object");
-
-  const schemaVersion = value.schemaVersion;
-  if (!isRecord(schemaVersion) || schemaVersion.major !== 1 || schemaVersion.minor !== 0) {
-    throw new TemplateAdmissionError("receipt schemaVersion must be 1.0");
-  }
-  if (value.consumer !== "linksites") throw new TemplateAdmissionError("receipt consumer is not linksites");
-
-  const receipt = {
-    schemaVersion: { major: 1, minor: 0 },
-    receiptId: requiredString(value.receiptId, "receiptId"),
-    consumer: "linksites" as const,
-    entryId: requiredString(value.entryId, "entryId"),
-    catalogCommitSha: requiredString(value.catalogCommitSha, "catalogCommitSha"),
-    libraryCommitSha: requiredString(value.libraryCommitSha, "libraryCommitSha"),
-    verificationId: requiredString(value.verificationId, "verificationId"),
-    entryChecksum: requiredString(value.entryChecksum, "entryChecksum"),
-    assetChecksums: value.assetChecksums,
-    entrypoint: requiredString(value.entrypoint, "entrypoint"),
-  };
-
-  if (!GIT_SHA_PATTERN.test(receipt.catalogCommitSha) || !GIT_SHA_PATTERN.test(receipt.libraryCommitSha)) {
-    throw new TemplateAdmissionError("receipt commit SHAs must be full 40-character lowercase Git SHAs");
-  }
-  if (!SHA256_PATTERN.test(receipt.entryChecksum)) {
-    throw new TemplateAdmissionError("receipt entryChecksum must be a 64-character SHA-256 value");
-  }
-  if (!isRecord(receipt.assetChecksums) || Object.keys(receipt.assetChecksums).length === 0) {
-    throw new TemplateAdmissionError("receipt assetChecksums must be non-empty");
-  }
-  for (const [path, checksum] of Object.entries(receipt.assetChecksums)) {
-    if (!path || !SHA256_PATTERN.test(String(checksum))) {
-      throw new TemplateAdmissionError(`receipt asset checksum is invalid for "${path}"`);
-    }
-  }
-
-  return receipt as AdmittedTemplateReceipt;
 };
 
-export const getAdmittedTemplateReceipt = (): AdmittedTemplateReceipt => {
-  const raw = process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON;
+const loadAdmittedEvidence = (): LibraryConsumptionEvidence => {
+  const receiptRaw = process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON;
+  const evidenceRaw = process.env.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON;
   const expectedSha = process.env.LINKSITES_ADMITTED_TEMPLATE_SHA;
-  if (!raw || !expectedSha) {
+
+  if (!receiptRaw || !evidenceRaw || !expectedSha) {
     throw new TemplateAdmissionError(
-      "no admitted receipt and exact LiNKlibraries SHA are configured; local template sources are not admissible",
+      "no authoritative receipt, materialized evidence, and exact LiNKlibraries SHA are configured; local template sources are not admissible",
     );
   }
   if (!GIT_SHA_PATTERN.test(expectedSha)) {
     throw new TemplateAdmissionError("LINKSITES_ADMITTED_TEMPLATE_SHA must be a full 40-character lowercase Git SHA");
   }
 
-  const receipt = parseReceipt(raw);
-  if (receipt.libraryCommitSha !== expectedSha) {
-    throw new TemplateAdmissionError("configured SHA does not match receipt.libraryCommitSha");
-  }
-  return receipt;
-};
+  const receiptValue = parseJson(receiptRaw, "receipt") as LibraryConsumptionReceipt;
+  const evidenceValue = parseJson(evidenceRaw, "materialized evidence") as LibraryConsumptionEvidence;
 
-export const assertTemplateAdmission = (templateId: string): AdmittedTemplateReceipt => {
-  const receipt = getAdmittedTemplateReceipt();
-  if (receipt.entryId !== templateId) {
+  try {
+    // Both checks are intentional: the receipt verifier validates the
+    // admission contract, while the evidence verifier binds the receipt to
+    // the source-owned authority and every materialized asset byte.
+    assertLibraryConsumptionReceipt(receiptValue);
+    assertLibraryConsumptionEvidence(evidenceValue);
+  } catch (error) {
     throw new TemplateAdmissionError(
-      `site selected "${templateId}" but the admitted receipt is for "${receipt.entryId}"`,
+      `factory-catalog authoritative verification rejected the admission evidence: ${error instanceof Error ? error.message : "unknown verifier error"}`,
     );
   }
+
+  if (canonicalJsonStringify(receiptValue) !== canonicalJsonStringify(evidenceValue.receipt)) {
+    throw new TemplateAdmissionError("receipt JSON is not exactly bound to the independently verified materialized evidence");
+  }
+  if (receiptValue.libraryCommitSha !== expectedSha || receiptValue.catalogCommitSha !== expectedSha) {
+    throw new TemplateAdmissionError("configured SHA does not match the independently verified receipt commit SHA");
+  }
+  if (evidenceValue.entry.status !== "approved") {
+    throw new TemplateAdmissionError("the admitted template is not registered as an approved catalog entry");
+  }
+
+  return evidenceValue;
+};
+
+export const getAdmittedTemplateEvidence = (): LibraryConsumptionEvidence => loadAdmittedEvidence();
+
+export const getAdmittedTemplateReceipt = (): AdmittedTemplateReceipt => loadAdmittedEvidence().receipt;
+
+/**
+ * Proves that the selected template is the approved catalog entry and, when
+ * supplied by the materializer, that the bytes actually loaded by the app are
+ * exactly the bytes covered by the factory-catalog evidence.
+ */
+export const assertTemplateAdmission = (
+  templateId: string,
+  materializedAssetBytes?: Record<string, string>,
+): AdmittedTemplateReceipt => {
+  const evidence = loadAdmittedEvidence();
+  const receipt = evidence.receipt;
+
+  if (receipt.entryId !== templateId || evidence.entry.entryId !== templateId) {
+    throw new TemplateAdmissionError(
+      `site selected "${templateId}" but the independently verified receipt is for "${receipt.entryId}"`,
+    );
+  }
+
+  if (materializedAssetBytes !== undefined) {
+    const expectedPaths = Object.keys(evidence.files).sort();
+    const actualPaths = Object.keys(materializedAssetBytes).sort();
+    if (canonicalJsonStringify(actualPaths) !== canonicalJsonStringify(expectedPaths)) {
+      throw new TemplateAdmissionError("materialized template assets do not match the evidence asset set");
+    }
+    for (const path of expectedPaths) {
+      if (materializedAssetBytes[path] !== evidence.files[path]) {
+        throw new TemplateAdmissionError(`materialized template asset bytes differ for "${path}"`);
+      }
+    }
+  }
+
   return receipt;
 };

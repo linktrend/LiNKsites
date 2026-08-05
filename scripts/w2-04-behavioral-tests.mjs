@@ -32,12 +32,44 @@ const testSource = `
   assert.equal(countPublicPages([privatePage, publicPage]), 1);
 
   const receiptJson = process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON;
+  const evidenceJson = process.env.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON;
   const templateSha = process.env.LINKSITES_ADMITTED_TEMPLATE_SHA;
   delete process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON;
+  delete process.env.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON;
   delete process.env.LINKSITES_ADMITTED_TEMPLATE_SHA;
-  assert.throws(() => getAdmittedTemplateReceipt(), /no admitted receipt/);
+  assert.throws(() => getAdmittedTemplateReceipt(), /no (authoritative )?receipt/);
   if (receiptJson !== undefined) process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON = receiptJson;
+  if (evidenceJson !== undefined) process.env.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON = evidenceJson;
   if (templateSha !== undefined) process.env.LINKSITES_ADMITTED_TEMPLATE_SHA = templateSha;
+
+  const fabricatedReceipt = {
+    schemaVersion: { major: 1, minor: 0 },
+    receiptId: "library-consumption:marketing-smb-v1:" + "a".repeat(40),
+    consumer: "linksites",
+    entryId: "marketing-smb-v1",
+    catalogCommitSha: "a".repeat(40),
+    libraryCommitSha: "a".repeat(40),
+    verificationId: "self-asserted",
+    entryChecksum: "0".repeat(64),
+    assetChecksums: { "assets/marketingSmbV1.ts": "0".repeat(64) },
+    entrypoint: "assets/marketingSmbV1.ts",
+    testFiles: ["assets/marketingSmbV1.ts"],
+    compatibility: { compatible: true, consumer: "linksites", nodeMajor: 22, runtimes: ["node", "browser"] },
+    recordedAt: "2026-08-05T00:00:00.000Z",
+  };
+  process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON = JSON.stringify(fabricatedReceipt);
+  process.env.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON = JSON.stringify({
+    entry: { entryId: "marketing-smb-v1", status: "approved" },
+    files: { "assets/marketingSmbV1.ts": "fabricated materialized bytes" },
+    receipt: fabricatedReceipt,
+    verification: { verificationId: "self-asserted" },
+  });
+  process.env.LINKSITES_ADMITTED_TEMPLATE_SHA = "a".repeat(40);
+  assert.throws(
+    () => getAdmittedTemplateReceipt(),
+    /factory-catalog authoritative verification|source-owned W1-05 offline authority|Invalid LiNKsites Library consumption receipt/,
+    "a fabricated environment receipt must not be admitted",
+  );
 
   assert.equal(isPublicSiteEligible({ id: "site-1", status: "published" }, 1), true);
   assert.equal(isPublicSiteEligible({ id: "site-1", status: "draft" }, 1), false);

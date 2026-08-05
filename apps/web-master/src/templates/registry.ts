@@ -14,7 +14,10 @@ export const getTemplateModule = (templateId: TemplateId): TemplateModule => {
   return template;
 };
 
-export const registerAdmittedTemplateModule = (template: TemplateModule): void => {
-  assertTemplateAdmission(template.id);
+export const registerAdmittedTemplateModule = (
+  template: TemplateModule,
+  materializedAssetBytes: Record<string, string>,
+): void => {
+  assertTemplateAdmission(template.id, materializedAssetBytes);
   TEMPLATES.set(template.id, template);
 };

@@ -35,10 +35,18 @@ const faqRoutes = await Promise.all([
 const templateRegistry = await read("apps/web-master/src/templates/registry.ts");
 const templateContext = await read("apps/web-master/src/lib/template-context.ts");
 const templateAdmission = await read("apps/web-master/src/lib/template-admission.ts");
+const publicRouteGuard = await read("apps/web-master/src/lib/public-route-guard.ts");
 const cmsSites = await read("apps/cms/src/collections/Sites.ts");
 const cmsSiteSettings = await read("apps/cms/src/collections/SiteSettings.ts");
 const runtime = await read("apps/web-master/src/config/runtime.ts");
 const readyz = await read("apps/web-master/src/app/api/readyz/route.ts");
+const publicRoutes = await Promise.all([
+  read("apps/web-master/src/app/llms.txt/route.ts"),
+  read("apps/web-master/src/app/.well-known/ai-actions.json/route.ts"),
+  read("apps/web-master/src/app/api/contact/route.ts"),
+  read("apps/web-master/src/app/api/ai-actions/contact/route.ts"),
+  read("apps/web-master/src/app/ai/markdown/route.ts"),
+]);
 
 assert.equal(fixture.fixtureName, "w2-04-published-content-contract");
 assert.deepEqual(fixture.sites, [{ id: "demo-site", status: "published" }]);
@@ -85,6 +93,17 @@ assert.doesNotMatch(templateRegistry, /marketingSmbV1|marketing-smb-v1/);
 assert.doesNotMatch(templateContext, /DEFAULT_TEMPLATE_ID|\|\|/);
 assert.match(templateContext, /assertTemplateAdmission/);
 assert.match(templateAdmission, /LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON/);
+assert.match(templateAdmission, /LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON/);
+assert.match(templateAdmission, /assertLibraryConsumptionReceipt/);
+assert.match(templateAdmission, /assertLibraryConsumptionEvidence/);
+assert.match(templateAdmission, /materializedAssetBytes/);
+assert.match(templateAdmission, /evidence\.files/);
+assert.match(publicRouteGuard, /getSiteIdFromRequest/);
+assert.match(publicRouteGuard, /status: 404/);
+for (const publicRoute of publicRoutes) {
+  assert.match(publicRoute, /getPublicSiteIdOrNull|getSiteIdFromRequest/);
+  assert.match(publicRoute, /publicRouteNotFound|catch\(\(\) => null\)/);
+}
 assert.match(templateAdmission, /LINKSITES_ADMITTED_TEMPLATE_SHA/);
 assert.doesNotMatch(cmsSites, /defaultValue:\s*['"]marketing-smb-v1/);
 assert.doesNotMatch(cmsSiteSettings, /defaultValue:\s*['"]marketing-smb-v1/);
