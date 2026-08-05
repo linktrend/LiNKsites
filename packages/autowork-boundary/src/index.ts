@@ -99,6 +99,7 @@ export class LiNKautoworkGateway {
     throw lastError instanceof Error ? lastError : new Error('gateway_retry_exhausted')
   }
   private async sendRequest(request: GatewayRequest): Promise<GatewayResponse> {
+    if (!isLiNKautoworkEventEnvelope(request.envelope)) throw new ReplayError('invalid_envelope')
     this.metrics.increment('attempts')
     const started = Date.now(); const response = await Promise.race([
       this.options.transport(request),
