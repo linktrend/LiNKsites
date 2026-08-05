@@ -57,6 +57,35 @@ These are local candidate checks, not a W2-04 PASS. W2-01 and W2-03 dependency h
 the missing linked-library receipt, and absent live Payload/deployment/browser evidence
 remain open.
 
+## Terra re-audit local execution receipt — 2026-08-05 (Asia/Taipei)
+
+**Tested candidate source SHA:** `c93e84181075af0129211161c56a70af13f95386`
+(`fix(w2-04): close public surface and admission holds`). This receipt binds only the
+source candidate named above; it is not a hosted, VPS, DNS, credential, or deployment
+attestation.
+
+Executed locally from this worktree:
+
+| Command | Result | What it proves locally |
+| --- | --- | --- |
+| `pnpm test:w2-04` | PASS | Contract and adversarial route checks for the required route set, published-only admission, fail-closed tenant/audience selection, and the private token wall/noindex/nofollow/no-store policy. The script ran Node test files; it did not start Payload or a browser. |
+| `pnpm --filter @linksites/web-master typecheck` | PASS | TypeScript type checking for the web-master source. |
+| `pnpm --filter @linksites/web-master lint` | PASS | ESLint checks for `apps/web-master/src`. |
+| `pnpm --filter @linksites/web-master build` | PASS | A local optimized Next.js production build. Next.js emitted its existing middleware-to-proxy deprecation warning; no build failure occurred. |
+
+No existing W2-04 package-script entrypoint executed a real local Payload instance,
+opened a browser, or produced browser screenshots, accessibility scan results,
+responsive-viewport results, or deterministic visual-regression artifacts. Therefore
+this receipt does **not** claim local browser, accessibility, responsive, visual, or
+real-Payload proof. The private-access result above is source/contract-test coverage
+only; it is not an interactive browser authorization proof.
+
+**HOLD — implementation/integration gap:** W2-04 still needs a runnable real local
+Payload fixture supplied through the W2-03 handoff and a browser entrypoint that records
+the required protected-access, accessibility, responsive, and visual evidence against
+that published content. W2-01/W2-03 are upstream receipt references only; their proof
+is neither copied nor reasserted here.
+
 ## Library boundary
 
 No LiNKlibraries files were changed in this implementation. The repository still has the
