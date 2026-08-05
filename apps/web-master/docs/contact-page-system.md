@@ -104,6 +104,7 @@ LINKAUTOWORK_SIGNING_KEY_ID=web-master
 LINKAUTOWORK_ENVIRONMENT=production
 LINKAUTOWORK_EVENT_GRANTS=[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]
 LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
 LINKSITES_ORG_ID=<org-id>
 LINKSITES_SITE_ID=<site-id>
 ```

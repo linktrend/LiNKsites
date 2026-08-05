@@ -1,4 +1,4 @@
-import { drainLiNKautowork } from '@/payload/utils/autowork'
+import { drainLiNKautowork } from '../src/payload/utils/autowork.ts'
 
 /** Safe to run from a scheduler or container startup; it only drains durable state. */
 export const runLiNKautoworkDrain = async (): Promise<void> => {

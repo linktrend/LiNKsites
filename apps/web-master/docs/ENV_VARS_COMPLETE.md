@@ -280,6 +280,7 @@ NEXT_PUBLIC_ENABLE_BLOG=true
 | `LINKAUTOWORK_SIGNING_SECRET` | Server | ⚠️ Production | `""` | Secret-manager signing secret |
 | `LINKAUTOWORK_EVENT_GRANTS` | Server | ⚠️ Production | `[]` | Explicit event/org/environment grants |
 | `LINKAUTOWORK_OUTBOX_PATH` | Server | ⚠️ Production | `""` | Durable recoverable outbox |
+| `LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET` | Server | ⚠️ Production | `""` | Separate secret for queue integrity framing |
 | `CONTACT_FORM_ENDPOINT` | Server | ❌ | `/api/contact` | Contact form API endpoint |
 
 **Access via**: `ENV.CONTACT.*`
@@ -296,6 +297,7 @@ LINKAUTOWORK_GATEWAY_URL=https://gateway.acme.example/events
 LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
 LINKAUTOWORK_EVENT_GRANTS='[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]'
 LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
 ```
 
 **Example (Development)**:
@@ -432,7 +434,7 @@ NEXT_PUBLIC_ENABLE_CASE_STUDIES=false
 - ✅ `NEXT_PUBLIC_SITE_NAME` - Client's brand name
 - ✅ `NEXT_PUBLIC_SITE_URL` - Client's domain
 - ✅ CMS configuration (if using Payload)
-- ⚠️ Contact webhook (recommended)
+- ⚠️ Governed contact delivery gateway and durable outbox
 
 **Recommended Variables**:
 - Analytics configuration
@@ -791,7 +793,7 @@ npm run dev
 curl https://cms.acme.com/api/health
 ```
 
-### Contact Form Webhook Fails
+### Governed Contact Delivery Fails
 
 **Error**: `governed LiNKautowork contact configuration is incomplete`
 
@@ -799,7 +801,7 @@ curl https://cms.acme.com/api/health
 1. ✅ `LINKAUTOWORK_GATEWAY_URL` correct?
 2. ✅ Explicit event/org/environment grant is present?
 3. ✅ Signing secret and key id are loaded from the secret manager?
-4. ✅ Durable outbox path is writable and recoverable?
+4. ✅ Durable outbox path and separate integrity secret are writable/configured?
 5. ✅ Gateway returns a valid acknowledgement receipt?
 
 **Debug**:

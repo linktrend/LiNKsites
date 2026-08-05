@@ -322,7 +322,7 @@ LINKAUTOWORK_GATEWAY_URL="https://gateway.clientdomain.example/events"
 LINKAUTOWORK_SIGNING_SECRET="<secret-manager reference>"
 LINKAUTOWORK_SIGNING_KEY_ID="web-master"
 LINKAUTOWORK_EVENT_GRANTS="[{\"eventName\":\"contact.submitted\",\"environments\":[\"production\"],\"orgIds\":[\"<org-id>\"]}]"
-CONTACT_FALLBACK_EMAIL="support@clientdomain.com"
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET="<separate-secret-manager-reference>"
 ```
 
 ### Step 3: Replace Branding Assets

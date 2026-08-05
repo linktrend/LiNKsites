@@ -10,6 +10,7 @@ RUN apk add --no-cache libc6-compat \
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY packages/types/package.json packages/types/package.json
+COPY packages/autowork-boundary/package.json packages/autowork-boundary/package.json
 COPY apps/web-master/package.json apps/web-master/package.json
 RUN pnpm install --frozen-lockfile
 
@@ -31,6 +32,7 @@ RUN addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 nextjs
 COPY --from=builder /app/apps/web-master/public ./apps/web-master/public
 RUN mkdir -p apps/web-master/.next && chown nextjs:nodejs apps/web-master/.next
+RUN mkdir -p /var/lib/linksites && chown nextjs:nodejs /var/lib/linksites
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web-master/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web-master/.next/static ./apps/web-master/.next/static
 USER nextjs

@@ -58,7 +58,7 @@ This document provides comprehensive documentation for the **Forms and Validatio
 - **Purpose**: General contact form for user inquiries
 - **Fields**: name, email, message, captcha (optional)
 - **Validation**: Min/max length, email format, captcha verification
-- **Submission**: Posts to `/api/contact` with webhook integration
+- **Submission**: Posts to `/api/contact` into the governed durable outbox
 - **Success/Error**: Full UI feedback with translated messages
 
 #### 2. DynamicContactForm
@@ -621,7 +621,7 @@ interface FormSubmissionResponse {
 
 - ✅ **Zod Validation**: Server-side validation with Zod schemas
 - ✅ **Governed delivery**: Enqueues signed `contact.submitted` events through LiNKautowork
-- ✅ **Retry Logic**: Exponential backoff for webhook failures
+- ✅ **Retry Logic**: Exponential backoff for governed gateway failures
 - ✅ **Security**: Request size limits, input sanitization, no data leaks
 - ✅ **Metadata Collection**: Timestamp, user agent, referrer, language, IP
 - ✅ **Error Handling**: Comprehensive error handling with user-friendly messages
@@ -630,10 +630,14 @@ interface FormSubmissionResponse {
 #### Environment Variables
 
 ```bash
-# Webhook Configuration
+# Governed Delivery Configuration
 LINKAUTOWORK_GATEWAY_URL=https://gateway.example.com/events
 LINKAUTOWORK_SIGNING_SECRET=<secret-manager reference>
-CONTACT_FALLBACK_EMAIL=contact@yoursite.com
+LINKAUTOWORK_SIGNING_KEY_ID=web-master
+LINKAUTOWORK_ENVIRONMENT=production
+LINKAUTOWORK_EVENT_GRANTS='[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]'
+LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
 ```
 
 ---

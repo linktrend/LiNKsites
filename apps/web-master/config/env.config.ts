@@ -266,7 +266,7 @@ export const ENV = {
   /** Feature flags */
   FEATURES: FEATURE_FLAGS_ENV,
   
-  /** Contact & webhooks */
+  /** Contact & governed delivery */
   CONTACT: CONTACT_ENV,
 
   /** Legal & compliance */

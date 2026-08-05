@@ -82,7 +82,7 @@ NEXT_PUBLIC_GTM_ID=GTM-ABC123
 NEXT_PUBLIC_FB_PIXEL_ID=123456789
 ```
 
-### Contact Form Webhook
+### Governed Contact Delivery
 
 ```bash
 LINKAUTOWORK_GATEWAY_URL=https://gateway.example.com/events
@@ -121,7 +121,7 @@ Access via `ENV.*`:
 | `SOCIAL` | Social media URLs | `ENV.SOCIAL.TWITTER_HANDLE` |
 | `APP_URLS` | External app URLs | `ENV.APP_URLS.APP_LOGIN_URL` |
 | `FEATURES` | Feature flags | `ENV.FEATURES.ENABLE_BLOG` |
-| `CONTACT` | Contact form config | `ENV.CONTACT.WEBHOOK_URL` |
+| `CONTACT` | Contact form config | `ENV.CONTACT` |
 | `DATABASE` | Database config | `ENV.DATABASE.REDIS_URL` |
 | `AI` | AI/MX config | `ENV.AI.ENABLE_MARKDOWN` |
 | `LEGAL` | Legal content | `ENV.LEGAL.LEGAL_CONTENT_API_URL` |
@@ -164,7 +164,7 @@ NEXT_PUBLIC_ENABLE_LIVE_CHAT=false
 - API keys (`PAYLOAD_API_KEY`)
 - LiNKautowork signing secrets are loaded only by the server-side durable boundary
 - Database URLs (`REDIS_URL`)
-- Fallback emails (`CONTACT_FALLBACK_EMAIL`)
+- Durable outbox integrity secrets
 
 ---
 

@@ -1,4 +1,5 @@
 import { isLeadResearchPackage, isDemoCompletionEnvelope, type DemoCompletionEnvelope, type LeadResearchPackage } from '../../types/src/runtime-contracts.ts'
+import type { CrmClaimPort, CrmCompletionPort, CrmPullPort } from './index.ts'
 
 /** Reference-only mapping harness. Vendor-specific field names stop at this adapter. */
 export type ReferenceCrmRecord = {
@@ -32,22 +33,24 @@ export type ReferenceCompletion = DemoCompletionEnvelope
  * The in-memory store is only a deterministic local fixture; no vendor SDK or
  * vendor field crosses the canonical boundary.
  */
-export class ReferenceCrmAdapter {
+export class ReferenceCrmAdapter implements CrmPullPort, CrmClaimPort, CrmCompletionPort {
   private readonly ready: ReferenceCrmRecord[]
   private readonly claims = new Map<string, string>()
   private readonly completions = new Map<string, string>()
   constructor(records: readonly ReferenceCrmRecord[]) { this.ready = records.map((record) => ({ ...record, customFields: { ...record.customFields } })) }
-  async pullReady(limit: number): Promise<readonly { itemId: string; envelope: LeadResearchPackage }[]> {
-    return this.ready.slice(0, limit).map((record) => ({ itemId: record.id, envelope: mapReferenceCrmLead(record) }))
+  async pullReady(limit: number, _nowIso: string): Promise<readonly { itemId: string; envelope: LeadResearchPackage }[]> {
+    return this.ready.filter((record) => !this.claims.has(record.id)).slice(0, limit).map((record) => ({ itemId: record.id, envelope: mapReferenceCrmLead(record) }))
   }
-  async claim(itemId: string, idempotencyKey: string): Promise<{ claimId: string } | null> {
+  async claim(itemId: string, leadId: string, idempotencyKey: string, _nowIso: string): Promise<{ itemId: string; claimId: string } | null> {
+    const record = this.ready.find((candidate) => candidate.id === itemId)
+    const envelope = record ? mapReferenceCrmLead(record) : null
+    if (!envelope || envelope.lead_id !== leadId || envelope.idempotency_key !== idempotencyKey) return null
     const current = this.claims.get(itemId)
-    if (current) return current === idempotencyKey ? { claimId: `claim:${itemId}` } : null
-    if (!this.ready.some((record) => record.id === itemId)) return null
+    if (current) return current === idempotencyKey ? { itemId, claimId: `claim:${itemId}` } : null
     this.claims.set(itemId, idempotencyKey)
-    return { claimId: `claim:${itemId}` }
+    return { itemId, claimId: `claim:${itemId}` }
   }
-  async writeCompletion(envelope: ReferenceCompletion): Promise<void> {
+  async write(envelope: ReferenceCompletion): Promise<void> {
     if (!isDemoCompletionEnvelope(envelope)) throw new Error('completion is not canonical')
     const prior = this.completions.get(envelope.idempotency_key)
     const serialized = JSON.stringify(envelope)

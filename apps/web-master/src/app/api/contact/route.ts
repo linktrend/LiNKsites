@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { ENVIRONMENT } from "@/config";
-import { FileOutbox, LiNKautoworkGateway, type GatewayEnvironment } from "@linksites/autowork-boundary";
+import { FileOutbox, LiNKautoworkGateway, parseGatewayEventPolicies, type GatewayEnvironment } from "@linksites/autowork-boundary";
 
 // Request size limit (1MB)
 const MAX_REQUEST_SIZE = 1024 * 1024;
@@ -14,14 +14,15 @@ const enqueueContact = async (payload: { intent: string; submission: Record<stri
   const orgId = process.env.LINKSITES_ORG_ID;
   const siteId = process.env.LINKSITES_SITE_ID;
   const outboxPath = process.env.LINKAUTOWORK_OUTBOX_PATH;
+  const integritySecret = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET;
   const grants = process.env.LINKAUTOWORK_EVENT_GRANTS;
-  if (!url || !secret || !keyId || !environment || !orgId || !siteId || !outboxPath || !grants) throw new Error('governed LiNKautowork contact configuration is incomplete');
-  const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: JSON.parse(grants), transport: async (request) => {
+  if (!url || !secret || !keyId || !environment || !orgId || !siteId || !outboxPath || !integritySecret || !grants) throw new Error('governed LiNKautowork contact configuration is incomplete');
+  const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: parseGatewayEventPolicies(grants), transport: async (request) => {
     const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) });
     const acknowledgedAt = response.headers.get('x-linkautowork-acknowledged-at') ?? new Date().toISOString();
     return { status: response.status, receiptId: response.headers.get('x-linkautowork-receipt') ?? 'missing', receiptSignature: response.headers.get('x-linkautowork-receipt-signature') ?? 'missing', acknowledgedAt };
   }});
-  const outbox = new FileOutbox(outboxPath, 5, gateway.metrics, (request, attempt) => gateway.resignRequest(request, attempt), (request) => gateway.verifyStored(request));
+  const outbox = new FileOutbox(outboxPath, { maxAttempts: 5, metrics: gateway.metrics, integritySecret, resigner: (request, attempt) => gateway.resignRequest(request, attempt), validator: (request) => gateway.verifyStored(request) });
   await outbox.enqueue(gateway.buildRequest('contact.submitted', orgId, `web:${siteId}`, `contact:${siteId}:${payload.metadata.timestamp}:${payload.intent}`, { lead_id: `contact:${siteId}`, site_id: siteId, submission: payload.submission }));
 };
 
@@ -52,7 +53,7 @@ type ContactApiPayload = z.infer<typeof contactApiSchema>;
 
 /**
  * POST /api/contact
- * Handles contact form submissions and forwards to the configured automation endpoint.
+ * Handles contact form submissions and appends them to the shared governed outbox.
  * 
  * @param request - Next.js request object
  * @returns JSON response with success status and message
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       {} as Record<string, string | number | boolean>
     );
 
-    // Prepare the vendor-neutral webhook payload.
+    // Prepare the vendor-neutral governed event payload.
     const payload = {
       intent: validated.intentTag,
       submission: sanitizedFormData,

@@ -55,7 +55,7 @@ Use this checklist to verify the Master Template is ready for cloning.
 
 - [ ] Site works without analytics configured
 - [ ] Site works without CMS connected (uses mock data)
-- [ ] Site works without contact webhook configured
+- [ ] Site fails closed without governed contact delivery configured
 - [ ] Forms have fallback error handling
 - [ ] Images have fallback placeholders
 - [ ] Analytics scripts have try-catch error handling
@@ -272,8 +272,8 @@ Use this checklist when creating a production site for a specific client.
 ### 📋 Contact Form Configuration
 
 - [ ] Set the LiNKautowork gateway, signing key reference, explicit grant, and outbox path
-- [ ] Set `CONTACT_FALLBACK_EMAIL`
-- [ ] Test webhook endpoint
+- [ ] Set the separate outbox integrity secret
+- [ ] Test governed worker delivery and acknowledgement receipt
 - [ ] Test form submission
 
 ### 📋 Branding Assets
