@@ -1,0 +1,108 @@
+{
+  "fixtureName": "w2-04-published-content-contract",
+  "site": { "id": "demo-site" },
+  "navigation": {
+    "primary": [
+      { "label": "About", "slug": "/about" },
+      { "label": "Services", "slug": "/services" },
+      { "label": "Contact", "slug": "/contact" }
+    ],
+    "footer": [
+      { "label": "Privacy", "slug": "/legal/privacy-policy" },
+      { "label": "Terms", "slug": "/legal/terms-of-use" }
+    ]
+  },
+  "pages": [
+    {
+      "id": "w2-04-home-en",
+      "site": "demo-site",
+      "locale": "en",
+      "slug": "home",
+      "title": "A clearer way to grow your local business",
+      "status": "published",
+      "revision": "w2-04-fixture-r1",
+      "seo": { "title": "Northstar Studio", "description": "Practical support for small businesses ready to grow." },
+      "content": [
+        { "blockType": "hero", "badge": "Northstar Studio", "title": "A clearer way to grow your local business", "subtitle": "Strategy, design, and delivery that turns good intentions into steady progress.", "cta": { "text": "Start a conversation", "url": "/contact" } },
+        { "blockType": "features", "title": "Built around your next useful step", "subtitle": "Focused support without the agency fog.", "items": [
+          { "id": "clarity", "title": "Find the focus", "description": "Turn a crowded list of ideas into a practical priority." },
+          { "id": "momentum", "title": "Build momentum", "description": "Ship the next improvement with a partner who stays close." },
+          { "id": "confidence", "title": "Measure what matters", "description": "Keep decisions grounded in outcomes your team can see." }
+        ] },
+        { "blockType": "cta", "title": "Ready to make the next step easier?", "text": "Tell us what is getting in the way and we will help you map a sensible next move.", "button": { "text": "Contact Northstar", "url": "/contact" } }
+      ]
+    },
+    {
+      "id": "w2-04-about-en",
+      "site": "demo-site",
+      "locale": "en",
+      "slug": "about",
+      "title": "About Northstar Studio",
+      "status": "published",
+      "revision": "w2-04-fixture-r1",
+      "seo": { "title": "About Northstar Studio", "description": "Meet the team behind Northstar Studio." },
+      "content": [
+        { "blockType": "hero", "title": "Small team. Useful work.", "subtitle": "We help local businesses make progress they can feel in the day-to-day." },
+        { "blockType": "richText", "content": "Northstar Studio works alongside owners and small teams to make the important work easier to start, finish, and improve." }
+      ]
+    },
+    {
+      "id": "w2-04-services-en",
+      "site": "demo-site",
+      "locale": "en",
+      "slug": "services",
+      "title": "Services for small businesses",
+      "status": "published",
+      "revision": "w2-04-fixture-r1",
+      "seo": { "title": "Services | Northstar Studio", "description": "Practical services for small business growth." },
+      "content": [
+        { "blockType": "hero", "title": "Practical help for the work ahead", "subtitle": "Choose the support that matches your current stage." },
+        { "blockType": "features", "title": "What we can help with", "items": [
+          { "id": "strategy", "title": "Growth planning", "description": "A simple plan your team can actually use." },
+          { "id": "web", "title": "Web presence", "description": "A clear, accessible site that earns trust." },
+          { "id": "systems", "title": "Better systems", "description": "Remove friction from recurring work." }
+        ] }
+      ]
+    },
+    {
+      "id": "w2-04-contact-en",
+      "site": "demo-site",
+      "locale": "en",
+      "slug": "contact",
+      "title": "Start a conversation",
+      "status": "published",
+      "revision": "w2-04-fixture-r1",
+      "seo": { "title": "Contact Northstar Studio", "description": "Talk with Northstar Studio about your next step." },
+      "content": [
+        { "blockType": "hero", "title": "Let us talk about what is next", "subtitle": "Share a little context and we will come back with a useful response." },
+        { "blockType": "cta", "title": "Contact form handoff", "text": "The local contract fixture renders this non-submitting contact affordance. W2-03/W2-05 own live submission wiring.", "button": { "text": "Email Northstar", "url": "mailto:hello@example.invalid" } }
+      ]
+    },
+    {
+      "id": "w2-04-privacy-en",
+      "site": "demo-site",
+      "locale": "en",
+      "slug": "legal/privacy-policy",
+      "title": "Privacy policy",
+      "status": "published",
+      "revision": "w2-04-fixture-r1",
+      "seo": { "title": "Privacy policy | Northstar Studio", "description": "How Northstar Studio handles personal information." },
+      "content": [
+        { "blockType": "hero", "title": "Privacy policy", "subtitle": "This local fixture contains the route contract only; production legal text must be supplied by the CMS." }
+      ]
+    },
+    {
+      "id": "w2-04-terms-en",
+      "site": "demo-site",
+      "locale": "en",
+      "slug": "legal/terms-of-use",
+      "title": "Terms of use",
+      "status": "published",
+      "revision": "w2-04-fixture-r1",
+      "seo": { "title": "Terms of use | Northstar Studio", "description": "Terms for using the Northstar Studio site." },
+      "content": [
+        { "blockType": "hero", "title": "Terms of use", "subtitle": "This local fixture contains the route contract only; production legal text must be supplied by the CMS." }
+      ]
+    }
+  ]
+}

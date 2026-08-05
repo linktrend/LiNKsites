@@ -19,8 +19,8 @@ const normalizeHost = (host: string): string => {
 
 const TENANT_CACHE_TTL_MS = 5 * 60 * 1000;
 const tenantCache = new Map<string, { siteId: string; expiresAt: number }>();
-const isMockProvider = (process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "payload") !== "payload";
-const DEFAULT_MOCK_SITE_ID = "company-site";
+const cmsProvider = process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "payload";
+const isFixtureProvider = cmsProvider === "fixture";
 
 const cacheGet = (host: string): string | null => {
   const entry = tenantCache.get(host);
@@ -77,7 +77,10 @@ export const resolveSiteIdByHostname = async (hostname: string): Promise<string 
  */
 export const getSiteIdFromRequest = async (): Promise<string> => {
   if (runtimeConfig.dedicatedSiteId) return runtimeConfig.dedicatedSiteId;
-  if (isMockProvider) return runtimeConfig.defaultSiteId || DEFAULT_MOCK_SITE_ID;
+  if (isFixtureProvider) {
+    if (!runtimeConfig.defaultSiteId) throw new Error("DEFAULT_SITE_ID is required in fixture mode.");
+    return runtimeConfig.defaultSiteId;
+  }
 
   const host = await getHostnameFromRequest();
   const resolved = await resolveSiteIdByHostname(host);

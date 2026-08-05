@@ -1,4 +1,5 @@
 import { buildMetadata } from "@/lib/seo";
+import { notFound } from "next/navigation";
 import { getSiteIdFromRequest } from "@/lib/site-context";
 import { normalizeLocale } from "@/lib/locale-context";
 import { getPageBySlug } from "@/lib/repository/pages";
@@ -53,16 +54,7 @@ export default async function ContactPage({ params }: Props) {
       <template.PageRenderer page={page} siteKey={siteId} locale={locale} />
     );
   } catch (error) {
-    console.error("Error loading contact page:", error);
-    
-    // Fallback: render with minimal data
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Unable to load contact page</h1>
-          <p className="text-muted-foreground">Please try again later.</p>
-        </div>
-      </div>
-    );
+    console.error("Published contact content unavailable:", error);
+    return notFound();
   }
 }

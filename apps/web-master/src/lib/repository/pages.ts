@@ -249,10 +249,29 @@ export interface CmsPage {
   title: string;
   pageType?: string;
   content: CmsPageBlock[];
+  status?: "published";
+  revision?: string | number;
   seo?: CmsPageSeo;
   reviewedAt?: string | null;
   reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
 }
+
+export class PublishedContentError extends Error {
+  constructor(message: string) {
+    super(`Published CMS content contract failed: ${message}`);
+    this.name = "PublishedContentError";
+  }
+}
+
+const assertPublishedPage = (page: CmsPage): CmsPage => {
+  if (page.status !== undefined && page.status !== "published") {
+    throw new PublishedContentError(`page "${page.slug}" is not published`);
+  }
+  if (!page.id || !page.site || !page.locale || !page.slug || !page.title || !Array.isArray(page.content) || page.content.length === 0) {
+    throw new PublishedContentError(`page "${page.slug || "unknown"}" is missing required fields`);
+  }
+  return page;
+};
 
 type GetPageArgs = {
   siteId: string;
@@ -280,7 +299,7 @@ export const getPageBySlug = async ({
     site: siteId,
   });
 
-  return result.docs[0] ?? null;
+  return result.docs[0] ? assertPublishedPage(result.docs[0]) : null;
 };
 
 export const getHomepage = async ({
