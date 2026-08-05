@@ -2,11 +2,12 @@
   "evidence_schema": "linksites.wave.integration.v2",
   "work_packet": "W1-06",
   "repository": "LiNKsites",
-  "branch": "issue/w1-06-final-integration",
-  "status": "HOLD",
+  "branch": "issue/w1-06-linux-proof-evidence",
+  "status": "READY_FOR_INDEPENDENT_SOL_AUDIT",
   "base_sha": "03f03fbe70dde07247250f89b7b2dc0ca7e0f711",
+  "integration_source_sha": "a8242b9f615bd8b6a86e72743fa7b2817b5ea4da",
   "validation_source_sha": "c8f61b8e78b807bec94f79ddfb38c2ea420a30d2",
-  "candidate_binding": "The final pushed integration commit SHA is the external immutable binding for this stable evidence path; all product validation below ran at validation_source_sha and the evidence-only replacement is limited to this directory.",
+  "candidate_binding": "The final pushed evidence-correction commit SHA is the external immutable binding for this stable evidence path; product validation ran at validation_source_sha, the integration source is integration_source_sha, and the correction is limited to this directory.",
   "accepted_corrections": [
     {
       "requested": "1edb09d355577a302a26c2a2e0a3ba277d6160b2",
@@ -44,7 +45,7 @@
     {"command": "pnpm --filter @linksites/intake-orchestrator test", "exit_code": 0, "result": "pass", "counts": {"passed": 25}, "proof": "duplicate, restart, gate rejection, gate success, bounded retry, and completion-once fixtures"},
     {"command": "pnpm --filter @linksites/cms run test:local", "exit_code": 0, "result": "pass", "proof": "disposable local Supabase start/stop; CMS build; integration 18 passed/1 skipped; Playwright 1 passed"},
     {"command": "bash scripts/test-supabase-local.sh", "exit_code": 0, "result": "pass", "counts": {"assertions": 19, "passed": 19, "failed": 0}, "proof": "exact pinned LiNKplatform migration commit 63635ecec576887e5e25080745c4ad169b335508 plus LiNKsites migrations; no hosted project"},
-    {"command": "LiNKlibraries archived validation at b4819032cb9ab13b1886189968f690f6288cb065", "exit_code": 0, "result": "pass_with_platform_skip", "proof": "schema 16/16; library validate; entries 9/9; catalog; Librarian 11/11; security 16/16; promotion 9/9; workflows 7/7", "known_skip": "1 Linux candidate-sandbox test skipped on macOS because sandbox_linux_required"},
+    {"command": "LiNKlibraries Linux proof at b4819032cb9ab13b1886189968f690f6288cb065", "exit_code": 0, "result": "pass", "proof": "execution/evidence/w1-06-wave-integration/linklibraries-linux-proof.json; schema 16/16; schema fixtures pass; entries 9/9; catalog check pass; Librarian 11/11; security 16/16; promotion workflows 9/9; workflow validation 7/7; npm run test:librarian-diff 19 passed, 0 failed, 0 skipped"},
     {"command": "git diff --check", "exit_code": 0, "result": "pass"},
     {"command": "sanitized secret scan with tests/fixtures/evidence excluded", "exit_code": 1, "result": "pass", "proof": "rg exit 1 means no matches; no credential-pattern output"},
     {"command": "active legacy-drift search", "exit_code": 0, "result": "reviewed", "proof": "matches are archived lsites_core, paused web-company, documented N8N variable, and Stage compatibility references; no unclassified active Wave 1 runtime reactivation found"}
@@ -54,9 +55,9 @@
   "live_proof": false,
   "known_limits": [
     "This is local/disposable proof only; it does not prove hosted Supabase, live Payload credentials, GitHub hosted execution, deployment, DNS, backups, observability, or production readiness.",
-    "The LiNKlibraries candidate-sandbox test is unproven on this macOS host and is not claimed as PASS.",
+    "The LiNKlibraries Linux proof ran only in local Docker node:20-bookworm at digest sha256:8f693eaa7e0a8e71560c9a82b55fd54c2ae920a2ba5d2cde28bac7d1c01c9ba5; it does not prove hosted CI, deployment, or production behavior.",
     "The evidence path records fixture and local database proof; independent Sol audit remains required.",
     "Wave 2 is not started."
   ],
-  "independent_audit_disposition": "HOLD; do not claim W1-06 readiness or start Wave 2 until Sol reviews the exact pushed candidate and the platform-unavailable LiNKlibraries adversarial check is independently resolved or accepted by the governing gate."
+  "independent_audit_disposition": "READY_FOR_INDEPENDENT_SOL_AUDIT; this is not a Wave 1 formal PASS and Wave 2 must not start before the independent verdict."
 }
