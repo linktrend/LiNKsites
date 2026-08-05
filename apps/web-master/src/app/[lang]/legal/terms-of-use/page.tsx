@@ -2,39 +2,40 @@ import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
 import { getSiteIdFromRequest } from "@/lib/site-context";
 import { normalizeLocale } from "@/lib/locale-context";
-import { getLegalBySlug } from "@/lib/repository/legal";
-import { LegalLayout } from "@/layouts/LegalLayout";
+import { getPageBySlug } from "@/lib/repository/pages";
+import { getTemplateIdForSite } from "@/lib/template-context";
+import { getTemplateModule } from "@/templates/registry";
 
-export type Props = { params: { lang: string } };
+export type Props = { params: Promise<{ lang: string }> };
 
 export async function generateMetadata({ params }: Props) {
+  const { lang } = await params;
   const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const locale = normalizeLocale(lang);
   try {
-    const legal = await getLegalBySlug({ siteId, locale, slug: "terms-of-use" });
-    if (legal) {
-      const seo = (legal as any).seo ?? {};
+    const page = await getPageBySlug({ siteId, locale, slugSegments: ["legal", "terms-of-use"] });
+    if (page) {
       return buildMetadata(locale, "/legal/terms-of-use", {
-        title: seo.title ?? legal.title ?? "Terms of Use",
-        description: seo.description ?? legal.summary ?? legal.body ?? "Terms of use",
-        ogImage: (seo.ogImage as any)?.url ?? undefined,
-        canonicalUrl: seo.canonicalUrl,
+        title: page.seo?.title ?? page.title,
+        description: page.seo?.description,
+        ogImage: (page.seo?.ogImage as any)?.url ?? undefined,
+        canonicalUrl: page.seo?.canonicalUrl,
       });
     }
   } catch (error) {
     console.error("Error generating terms of use metadata:", error);
   }
 
-  return buildMetadata(locale, "/legal/terms-of-use", {
-    title: "Terms of Use",
-    description: "Review the terms that govern your use of our services.",
-  });
+  return { title: "Page unavailable", robots: { index: false, follow: false } };
 }
 
 export default async function TermsOfUsePage({ params }: Props) {
+  const { lang } = await params;
   const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
-  const legal = await getLegalBySlug({ siteId, locale, slug: "terms-of-use" });
-  if (!legal) return notFound();
-  return <LegalLayout lang={locale} page={{ data: { legal } }} />;
+  const locale = normalizeLocale(lang);
+  const page = await getPageBySlug({ siteId, locale, slugSegments: ["legal", "terms-of-use"] });
+  if (!page) return notFound();
+  const templateId = await getTemplateIdForSite({ siteId, locale });
+  const template = getTemplateModule(templateId);
+  return <template.PageRenderer page={page} siteKey={siteId} locale={locale} />;
 }

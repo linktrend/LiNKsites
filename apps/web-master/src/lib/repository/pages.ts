@@ -249,7 +249,7 @@ export interface CmsPage {
   title: string;
   pageType?: string;
   content: CmsPageBlock[];
-  status?: "published";
+  status: "published";
   revision?: string | number;
   seo?: CmsPageSeo;
   reviewedAt?: string | null;
@@ -263,14 +263,21 @@ export class PublishedContentError extends Error {
   }
 }
 
-const assertPublishedPage = (page: CmsPage): CmsPage => {
-  if (page.status !== undefined && page.status !== "published") {
-    throw new PublishedContentError(`page "${page.slug}" is not published`);
+type PayloadPage = Omit<CmsPage, "content" | "status"> & {
+  content?: CmsPageBlock[];
+  layout?: CmsPageBlock[];
+  status?: string;
+};
+
+export const assertPublishedPage = (page: PayloadPage): CmsPage => {
+  if (page.status !== "published") {
+    throw new PublishedContentError(`page "${page.slug || "unknown"}" is not published`);
   }
-  if (!page.id || !page.site || !page.locale || !page.slug || !page.title || !Array.isArray(page.content) || page.content.length === 0) {
+  const content = Array.isArray(page.content) ? page.content : page.layout;
+  if (!page.id || !page.site || !page.locale || !page.slug || !page.title || !Array.isArray(content) || content.length === 0) {
     throw new PublishedContentError(`page "${page.slug || "unknown"}" is missing required fields`);
   }
-  return page;
+  return { ...page, content, status: "published" };
 };
 
 type GetPageArgs = {
@@ -299,7 +306,7 @@ export const getPageBySlug = async ({
     site: siteId,
   });
 
-  return result.docs[0] ? assertPublishedPage(result.docs[0]) : null;
+  return result.docs[0] ? assertPublishedPage(result.docs[0] as PayloadPage) : null;
 };
 
 export const getHomepage = async ({

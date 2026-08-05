@@ -7,6 +7,12 @@ const isPayloadProvider = cmsProvider === "payload";
 
 type MockPayloadData = {
   site?: { id?: string };
+  siteDomains?: Array<{
+    id?: string;
+    hostname?: string;
+    site?: string | { id?: string };
+    primary?: boolean;
+  }>;
   navigation?: Record<string, Array<{ label?: string; slug?: string }>>;
   offers?: unknown[];
   resources?: unknown[];
@@ -77,11 +83,12 @@ const mockPayloadFind = async <T>({
 
   if (!mock) throw new Error("CMS fixture is empty.");
 
-  const siteId = site || mock.site?.id || "company-site";
+  const siteId = site;
   const andFilters = Array.isArray((where as any)?.and) ? (where as any).and : [];
   const navKeyFilter = andFilters.find((f: any) => f?.navKey?.equals)?.navKey?.equals;
 
   if (collection === "navigation") {
+    if (!siteId) throw new Error("Fixture navigation queries require an explicit site.");
     const nav = mock.navigation ?? {};
     const items = Array.isArray(nav[navKeyFilter]) ? (nav[navKeyFilter] as any[]) : [];
     const docs = items.map((item, index) => ({
@@ -105,13 +112,13 @@ const mockPayloadFind = async <T>({
 
   if (collection === "site-domains") {
     const hostnameFilter = (where as any)?.hostname?.equals as string | undefined;
-    const doc = hostnameFilter
-      ? { id: "localhost-domain", hostname: hostnameFilter, site: siteId, primary: true }
-      : { id: "localhost-domain", hostname: "localhost", site: siteId, primary: true };
+    const docs = (mock.siteDomains ?? []).filter((doc) =>
+      hostnameFilter ? doc.hostname === hostnameFilter : true,
+    );
     return {
-      docs: [doc as any] as T[],
+      docs: docs as T[],
       page: 1,
-      totalDocs: 1,
+      totalDocs: docs.length,
       totalPages: 1,
       limit: safeLimit,
     };
@@ -138,13 +145,14 @@ const mockPayloadFind = async <T>({
     const filtered = (items as any[]).filter((doc) => {
       if (slugFilter && !matchesEquals(doc, "slug", slugFilter)) return false;
       if (statusFilter && !matchesEquals(doc, "status", statusFilter)) return false;
+      if (collection === "pages" && doc.status !== "published") return false;
       if (doc.status !== undefined && doc.status !== "published") return false;
       if (doc.site !== undefined && doc.site !== siteId) return false;
       if (doc.locale !== undefined && locale && doc.locale !== locale) return false;
       return true;
     });
     return {
-      docs: withSiteLocale(filtered as any, siteId, locale) as T[],
+      docs: filtered as T[],
       page: 1,
       totalDocs: filtered.length,
       totalPages: 1,

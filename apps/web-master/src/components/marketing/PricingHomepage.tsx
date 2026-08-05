@@ -29,79 +29,18 @@ type PricingPlan = {
   popular?: boolean;
 };
 
-const defaultPricingPlans: PricingPlan[] = [
-  {
-    name: "Free",
-    description: "Perfect for pilots and proof of value",
-    monthlyPrice: "$0",
-    yearlyPrice: "$0",
-    ctaText: "Start Free",
-    featuresLabel: "What's included:",
-    features: [
-      "2 automations",
-      "Community support",
-      "Basic analytics",
-      "Email notifications",
-      "Standard templates"
-    ],
-    popular: false
-  },
-  {
-    name: "Pro",
-    description: "Best for teams operationalizing AI-driven workflows",
-    monthlyPrice: "$29",
-    yearlyPrice: "$290",
-    ctaText: "Start Now",
-    featuresLabel: "What's included in Free, plus:",
-    features: [
-      "Unlimited automations",
-      "Priority support",
-      "100GB secure storage",
-      "Advanced insights",
-      "Custom integrations",
-      "Team collaboration",
-      "Advanced analytics",
-      "API access"
-    ],
-    popular: true
-  },
-  {
-    name: "Enterprise",
-    description: "For regulated industries and global deployments",
-    monthlyPrice: "Custom",
-    yearlyPrice: "Custom",
-    ctaText: "Contact Sales",
-    featuresLabel: "What's included in Pro, plus:",
-    features: [
-      "Dedicated advisor",
-      "Private cloud options",
-      "Unlimited storage",
-      "Custom SLA",
-      "Advanced security",
-      "SSO integration",
-      "Custom contracts",
-      "24/7 phone support"
-    ],
-    popular: false
-  }
-];
-
 export function PricingHomepage({ lang, plans, heading, subheading, monthlyLabel, yearlyLabel }: PricingHomepageProps) {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("year");
-  const pricingPlans = plans?.length ? plans : defaultPricingPlans;
-  const title = heading ?? "Simple Pricing";
-  const description = subheading ?? "Choose the plan that fits your automation journey.";
+  const pricingPlans = plans ?? [];
   const monthlyText = monthlyLabel ?? "Monthly";
-  const yearlyText = yearlyLabel ?? "Yearly – Save 20%";
+  const yearlyText = yearlyLabel ?? "Yearly";
 
   return (
     <div className="container px-4 sm:px-6" data-cms-component="pricing-homepage">
       {/* Header */}
       <div className="text-center mb-8 sm:mb-12">
-        <h2 className="text-3xl sm:text-4xl font-bold mb-3" data-cms-field="pricing.title">{title}</h2>
-        <p className="text-lg text-muted-foreground mb-6" data-cms-field="pricing.subtitle">
-          {description}
-        </p>
+        {heading ? <h2 className="text-3xl sm:text-4xl font-bold mb-3" data-cms-field="pricing.title">{heading}</h2> : null}
+        {subheading ? <p className="text-lg text-muted-foreground mb-6" data-cms-field="pricing.subtitle">{subheading}</p> : null}
 
         {/* Billing Toggle */}
         <div className="inline-flex items-center rounded-full border bg-background p-1" data-cms-field="pricing.billingToggle">
@@ -132,8 +71,14 @@ export function PricingHomepage({ lang, plans, heading, subheading, monthlyLabel
         </div>
       </div>
 
+      {pricingPlans.length === 0 ? (
+        <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+          Pricing content is unavailable for this published page.
+        </div>
+      ) : null}
+
       {/* Pricing Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-8" data-cms-field="pricing.plans">
+      {pricingPlans.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-8" data-cms-field="pricing.plans">
         {pricingPlans.map((plan, planIndex) => (
           <div key={plan.name} className="relative" data-cms-field={`pricing.plan.${planIndex}`}>
             {plan.popular && (
@@ -214,7 +159,7 @@ export function PricingHomepage({ lang, plans, heading, subheading, monthlyLabel
             </Card>
           </div>
         ))}
-      </div>
+      </div> : null}
 
       {/* View detailed pricing link */}
       <div className="text-center mt-12 sm:mt-16">

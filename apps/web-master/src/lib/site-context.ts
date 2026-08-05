@@ -67,13 +67,23 @@ export const resolveSiteIdByHostname = async (hostname: string): Promise<string 
   return siteId;
 };
 
+export class SiteResolutionError extends Error {
+  constructor(hostname: string) {
+    super(`No published site mapping exists for host "${hostname || "unknown"}".`);
+    this.name = "SiteResolutionError";
+  }
+}
+
 /**
  * Resolves the current tenant siteId for this request.
  *
  * Resolution priority:
  * 1) Dedicated deployments: `SITE_ID` env var locks the frontend to one site.
  * 2) Hostname mapping (site-domains collection).
- * 3) DEFAULT_SITE_ID env var fallback (useful for local dev).
+ *
+ * Shared Payload deployments deliberately have no DEFAULT_SITE_ID fallback:
+ * an unknown host must not receive another tenant's content. Local fixture
+ * mode uses DEFAULT_SITE_ID explicitly, and dedicated deployments use SITE_ID.
  */
 export const getSiteIdFromRequest = async (): Promise<string> => {
   if (runtimeConfig.dedicatedSiteId) return runtimeConfig.dedicatedSiteId;
@@ -86,5 +96,5 @@ export const getSiteIdFromRequest = async (): Promise<string> => {
   const resolved = await resolveSiteIdByHostname(host);
   if (resolved) return resolved;
 
-  return runtimeConfig.defaultSiteId;
+  throw new SiteResolutionError(host);
 };

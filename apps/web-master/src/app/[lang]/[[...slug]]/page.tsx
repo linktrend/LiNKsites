@@ -13,16 +13,17 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 type PageProps = {
-  params: {
+  params: Promise<{
     lang: string;
     slug?: string[];
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: PageProps) {
+  const { lang, slug = [] } = await params;
   const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
-  const slugSegments = params.slug ?? [];
+  const locale = normalizeLocale(lang);
+  const slugSegments = slug;
   const slugPath = slugSegments.length > 0 ? `/${slugSegments.join("/")}` : "/";
 
   try {
@@ -42,9 +43,10 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function CmsPage({ params }: PageProps) {
+  const { lang, slug = [] } = await params;
   const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
-  const slugSegments = params.slug ?? [];
+  const locale = normalizeLocale(lang);
+  const slugSegments = slug;
 
   const [page, primaryNav, footerNav, templateId] = await Promise.all([
     getPageBySlug({ siteId, locale, slugSegments }),

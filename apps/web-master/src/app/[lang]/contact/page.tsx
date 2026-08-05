@@ -6,11 +6,12 @@ import { getPageBySlug } from "@/lib/repository/pages";
 import { getTemplateIdForSite } from "@/lib/template-context";
 import { getTemplateModule } from "@/templates/registry";
 
-type Props = { params: { lang: string } };
+type Props = { params: Promise<{ lang: string }> };
 
 export async function generateMetadata({ params }: Props) {
+  const { lang } = await params;
   const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const locale = normalizeLocale(lang);
   try {
     const page = await getPageBySlug({ siteId, locale, slugSegments: ["contact"] });
     if (!page) throw new Error("Contact page missing");
@@ -29,16 +30,12 @@ export async function generateMetadata({ params }: Props) {
     });
   } catch (error) {
     console.error("Error generating contact metadata:", error);
-    // Fallback metadata
-    return buildMetadata(locale, "/contact", {
-      title: "Contact Us",
-      description: "Get in touch with our team. We're here to help you succeed.",
-    });
+    return { title: "Page unavailable", robots: { index: false, follow: false } };
   }
 }
 
 export default async function ContactPage({ params }: Props) {
-  const { lang } = params;
+  const { lang } = await params;
   const siteId = await getSiteIdFromRequest();
   const locale = normalizeLocale(lang);
 
