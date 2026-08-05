@@ -190,7 +190,7 @@ export const FEATURE_FLAGS_ENV = {
 // ============================================================================
 
 export const CONTACT_ENV = {
-  /** Contact form webhook URL (N8N or other automation) */
+  /** Contact form webhook URL */
   WEBHOOK_URL: process.env.CONTACT_WEBHOOK_URL || '',
   
   /** Contact form webhook secret for authentication */

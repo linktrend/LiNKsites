@@ -2,7 +2,7 @@
  * Hook up to:
  * - Vercel Cron: add this file as an edge function entry.
  * - DigitalOcean App Platform: schedule `node cron/rebuildStaleContent.ts`.
- * - n8n: call this file via a scheduled workflow HTTP node.
+ * - scheduler: call this file via a scheduled job.
  */
 import { getPayload } from 'payload'
 import config from '@payload-config'

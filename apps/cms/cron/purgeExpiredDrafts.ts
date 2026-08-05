@@ -2,7 +2,7 @@
  * Connect via:
  * - Vercel Cron job hitting `node cron/purgeExpiredDrafts.ts`
  * - DigitalOcean App Platform scheduled task
- * - n8n scheduled workflow calling this script
+ * - a scheduled job calling this script
  */
 import { getPayload } from 'payload'
 import config from '@payload-config'

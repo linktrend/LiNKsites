@@ -2,7 +2,7 @@ import type { PayloadRequest } from 'payload'
 import { verifySignature } from '@/payload/utils/verifySignature'
 
 /**
- * Shared middleware for inbound webhooks (n8n, cron, etc.).
+ * Shared middleware for independently authenticated inbound webhooks.
  * Attach to any route under /payload/endpoints/webhooks to enforce signature checks.
  */
 export const verifyWebhookMiddleware = async (

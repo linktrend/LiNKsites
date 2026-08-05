@@ -78,7 +78,7 @@ type ContactApiPayload = z.infer<typeof contactApiSchema>;
 
 /**
  * POST /api/contact
- * Handles contact form submissions and forwards to N8N webhook or other destinations
+ * Handles contact form submissions and forwards to the configured automation endpoint.
  * 
  * @param request - Next.js request object
  * @returns JSON response with success status and message
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       {} as Record<string, string | number | boolean>
     );
 
-    // Prepare payload for webhook (N8N or other automation)
+    // Prepare the vendor-neutral webhook payload.
     const payload = {
       intent: validated.intentTag,
       submission: sanitizedFormData,

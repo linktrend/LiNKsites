@@ -18,10 +18,6 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
   previousDoc: Record<string, unknown> | null
 }): Promise<Record<string, unknown>> => {
   const workflowReq = req as WorkflowRequest
-  const metaSource = (workflowReq as WorkflowRequest & { meta?: Record<string, unknown> }).meta?.source
-  if (metaSource === 'n8n') {
-    return doc
-  }
   // Only trigger on update or create
   if (operation !== 'create' && operation !== 'update') {
     return doc
@@ -56,15 +52,15 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
         console.error('Failed to trigger rebuild:', error)
       })
       if (collection?.slug && doc?.id) {
-        void triggerLiNKautowork({
+        await triggerLiNKautowork({
           id: doc.id as string | number,
           collection: collection.slug,
           eventType: 'content_published',
           site: siteId,
           locale: workflowReq.locale ?? undefined,
-          meta: { source: 'payload' },
+          meta: { lead_id: (workflowReq as WorkflowRequest & { meta?: Record<string, unknown> }).meta?.lead_id, org_id: (workflowReq as WorkflowRequest & { meta?: Record<string, unknown> }).meta?.org_id },
           req: workflowReq,
-        }).catch((error) => console.error('LiNKautowork publish trigger failed', error))
+        })
       }
     }
   }

@@ -79,7 +79,7 @@ describe('Publish permissions workflow', () => {
     ).rejects.toThrow(/Only publishers can revert/)
   })
 
-  it('triggers rebuild, cache invalidation, and optional n8n hooks on publish', async () => {
+  it('triggers rebuild, cache invalidation, and the optional automation hook on publish', async () => {
     const data = { status: 'published', site: 'site-1', id: 'doc-1', locale: 'en' }
     const req = buildReq(publisherUser, data)
     await validatePublishPermissions({

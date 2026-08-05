@@ -2,7 +2,7 @@
  * Connect via:
  * - Vercel Cron: schedule `node cron/syncSearchIndex.ts`.
  * - DigitalOcean App Platform: scheduled job.
- * - n8n: scheduled workflow HTTP node hitting this script.
+ * - scheduler: scheduled job invoking this script.
  */
 import { getPayload } from 'payload'
 import config from '@payload-config'
