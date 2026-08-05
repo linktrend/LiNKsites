@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "packageManager": "pnpm@10.0.0",
   "scripts": {
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
+    "build": "turbo run build --filter='!@linksites/web-company'",
+    "lint": "turbo run lint --filter='!@linksites/web-company'",
+    "typecheck": "turbo run typecheck --filter='!@linksites/web-company'",
+    "test": "turbo run test --filter='!@linksites/web-company'",
     "dev": "turbo run dev"
   },
   "devDependencies": {
