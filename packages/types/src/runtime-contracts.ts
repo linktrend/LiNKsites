@@ -141,8 +141,11 @@ const PRIVATE_KEY_PATTERN = /-----BEGIN(?: [A-Z0-9]+)? PRIVATE KEY-----/i
 
 const URL_CREDENTIAL_PATTERN = /\bhttps?:\/\/[^/\s:@]+:[^/\s@]+@/i
 
+const STRIPE_PAYMENT_IDENTIFIER_PATTERN =
+  /(?:whsec_[a-z0-9]{8,}|pi_[a-z0-9]{8,}(?:_secret_[a-z0-9]+)?)/i
+
 const KNOWN_TOKEN_PATTERN =
-  /(?:^|[^a-z0-9])(?:sk-(?:proj|ant|live|test)-[a-z0-9_-]+|sk_(?:live|test)_[a-z0-9]+|rk_(?:live|test)_[a-z0-9]+|whsec_[a-z0-9]{8,}|pi_[a-z0-9]{8,}(?:_secret_[a-z0-9]+)?|gh[pousr]_[a-z0-9]+|github_pat_[a-z0-9_]+|glpat-[a-z0-9_-]+|xox[baprs]-[a-z0-9-]+|npm_[a-z0-9]+|akia[0-9a-z]{16}|asia[0-9a-z]{16}|AIza[0-9a-z_-]{20,})(?:$|[^a-z0-9])/i
+  /(?:^|[^a-z0-9])(?:sk-(?:proj|ant|live|test)-[a-z0-9_-]+|sk_(?:live|test)_[a-z0-9]+|rk_(?:live|test)_[a-z0-9]+|gh[pousr]_[a-z0-9]+|github_pat_[a-z0-9_]+|glpat-[a-z0-9_-]+|xox[baprs]-[a-z0-9-]+|npm_[a-z0-9]+|akia[0-9a-z]{16}|asia[0-9a-z]{16}|AIza[0-9a-z_-]{20,})(?:$|[^a-z0-9])/i
 
 const JWT_PATTERN =
   /(?:^|[^a-z0-9])eyJ[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]+(?:$|[^a-z0-9])/i
@@ -182,6 +185,7 @@ const isSensitiveString = (value: string): boolean =>
   AUTHORIZATION_HEADER_PATTERN.test(value) ||
   PRIVATE_KEY_PATTERN.test(value) ||
   URL_CREDENTIAL_PATTERN.test(value) ||
+  STRIPE_PAYMENT_IDENTIFIER_PATTERN.test(value) ||
   KNOWN_TOKEN_PATTERN.test(value) ||
   JWT_PATTERN.test(value) ||
   TOKEN_PREFIX_PATTERN.test(value) ||

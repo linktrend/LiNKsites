@@ -359,54 +359,101 @@ test('all recursively reachable allowed strings reject embedded sensitive materi
   }
 })
 
-test('Stripe webhook secrets and payment processor IDs fail closed at recursive fields', () => {
-  const webhookSecrets = [
+test('Stripe webhook secrets and payment processor IDs fail closed across canonical string paths', () => {
+  const blockedDemo = {
+    ...validDemoCompletion,
+    status: 'blocked',
+    error: {
+      code: 'preview_blocked',
+      message: 'Preview is blocked pending correction.',
+      retryable: true,
+    },
+  }
+  const rejectedEvent = {
+    ...validLiNKautoworkEvent,
+    acknowledgement: {
+      status: 'rejected',
+      acknowledged_at: '2026-08-04T00:21:00.000Z',
+      reason: 'Delivery was rejected safely.',
+    },
+  }
+
+  const contracts: Array<[
+    string,
+    ContractValidator,
+    object,
+    readonly (readonly (string | number)[])[],
+  ]> = [
+    ['lead', isLeadResearchPackage, manualFirstTestLead, [
+      ['org_id'], ['correlation_id'], ['idempotency_key'], ['lead_id'],
+      ['research', 'summary'], ['research', 'sources', 0], ['requested_vertical'], ['source'],
+    ]],
+    ['demo', isDemoCompletionEnvelope, blockedDemo, [
+      ['org_id'], ['correlation_id'], ['idempotency_key'], ['lead_id'], ['site_id'],
+      ['evidence_references', 0], ['error', 'code'], ['error', 'message'],
+    ]],
+    ['commercial', isCommercialOutcomeEnvelope, validCommercialOutcome, [
+      ['org_id'], ['correlation_id'], ['idempotency_key'], ['lead_id'], ['site_id'],
+      ['reach_authorization_reference'], ['replay_protection', 'event_id'],
+      ['replay_protection', 'nonce'],
+    ]],
+    ['activation', isActivationRequest, validActivationRequest, [
+      ['org_id'], ['correlation_id'], ['idempotency_key'], ['lead_id'], ['site_id'],
+      ['reach_authorization_reference'],
+    ]],
+    ['recycling', isRecyclingRequest, validRecyclingRequest, [
+      ['org_id'], ['correlation_id'], ['idempotency_key'], ['lead_id'], ['site_id'],
+      ['template_inventory_id'],
+    ]],
+    ['event', isLiNKautoworkEventEnvelope, rejectedEvent, [
+      ['org_id'], ['correlation_id'], ['idempotency_key'], ['event_id'],
+      ['payload', 'lead_id'], ['payload', 'site_id'], ['signature', 'key_id'],
+      ['signature', 'signature'], ['acknowledgement', 'reason'],
+    ]],
+    ['evidence', isEvidenceReceipt, validEvidenceReceipt, [
+      ['org_id'], ['correlation_id'], ['idempotency_key'], ['receipt_id'], ['producer'],
+      ['subject', 'id'], ['storage_location'], ['gate_association'],
+    ]],
+  ]
+
+  const sensitiveMutations = [
     `whsec_${'a'.repeat(32)}`,
-    `prefix WHSEC_${'B'.repeat(32)} suffix`,
+    `pi_${'b'.repeat(24)}`,
+    `WHSeC_${'C'.repeat(32)}`,
+    `PI_${'D'.repeat(24)}`,
+    `before whsec_${'e'.repeat(32)} after`,
+    `before/pi_${'f'.repeat(24)}/after`,
+    `pi_${'g'.repeat(24)}_secret_${'h'.repeat(24)}`,
+    `prefixwhsec_${'i'.repeat(32)}suffix`,
+    `prefixpi_${'j'.repeat(24)}suffix`,
+    `prefixpi_${'k'.repeat(24)}_secret_${'l'.repeat(24)}suffix`,
+  ]
+  const safeOpaqueControls = [
+    'opaque-reference-001',
+    'opaque-whsec-reference-001',
+    'opaque-pi-reference-001',
+    'opaque-client-secret-ref',
   ]
 
-  for (const signature of webhookSecrets) {
-    assert.equal(
-      isLiNKautoworkEventEnvelope({
-        ...validLiNKautoworkEvent,
-        signature: { ...validLiNKautoworkEvent.signature, signature },
-      }),
-      false,
-      'event signature accepts a Stripe webhook secret',
-    )
+  for (const [contractName, validator, fixture, paths] of contracts) {
+    for (const path of paths) {
+      for (const sensitiveValue of sensitiveMutations) {
+        assert.equal(
+          validator(withPathValue(fixture, path, sensitiveValue)),
+          false,
+          `${contractName} accepts ${JSON.stringify(sensitiveValue)} at ${path.join('.')}`,
+        )
+      }
+
+      for (const safeValue of safeOpaqueControls) {
+        assert.equal(
+          validator(withPathValue(fixture, path, safeValue)),
+          true,
+          `${contractName} rejects safe control ${JSON.stringify(safeValue)} at ${path.join('.')}`,
+        )
+      }
+    }
   }
-
-  const paymentProcessorIds = [
-    `pi_${'c'.repeat(24)}`,
-    `case/PI_${'D'.repeat(24)}`,
-    `pi_${'e'.repeat(24)}_secret_${'f'.repeat(24)}`,
-  ]
-
-  for (const reach_authorization_reference of paymentProcessorIds) {
-    assert.equal(
-      isCommercialOutcomeEnvelope({
-        ...validCommercialOutcome,
-        reach_authorization_reference,
-      }),
-      false,
-      'commercial authorization accepts a Stripe payment processor ID',
-    )
-  }
-
-  assert.equal(
-    isLiNKautoworkEventEnvelope({
-      ...validLiNKautoworkEvent,
-      signature: { ...validLiNKautoworkEvent.signature, signature: 'signature-opaque-001' },
-    }),
-    true,
-  )
-  assert.equal(
-    isCommercialOutcomeEnvelope({
-      ...validCommercialOutcome,
-      reach_authorization_reference: 'reach-payment-approved-001',
-    }),
-    true,
-  )
 })
 
 test('ordinary descriptive strings remain valid', () => {
