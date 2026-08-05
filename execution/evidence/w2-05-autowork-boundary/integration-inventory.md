@@ -12,7 +12,7 @@ Before (base `28cf47236fa81e87c606e9633a24af7cf1db16b3`):
 | `apps/intake-orchestrator/src/contracts.ts` | Ports existed, but no reference vendor-field mapping harness. |
 | `apps/cms/.env.example`, `apps/cms/deploy/prod/.env.example` | No durable queue/grant configuration. |
 
-After (candidate SHA `5ca33b8e6bc80466350b7b2b3194210dbb87d55a`):
+After (candidate correction SHA `c04f8cb6662bf6c47acdfe5cb55a3c666fa837a2`):
 
 | Active path | Correction |
 | --- | --- |
