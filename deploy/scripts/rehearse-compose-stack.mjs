@@ -158,6 +158,7 @@ try {
     'LINKSITES_CMS_IMAGE=linksites-cms:w2-07-local', 'LINKSITES_WEB_MASTER_IMAGE=linksites-web-master:w2-07-local',
     'LINKSITES_WORKER_IMAGE=linksites-autowork-worker:w2-07-local', 'LINKSITES_ORCHESTRATOR_IMAGE=linksites-program-orchestrator:w2-07-local',
     'LINKSITES_MIGRATIONS_IMAGE=linksites-migrations:w2-07-local', `LINKSITES_RELEASE_SHA=${sourceRevision}`,
+    `LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA=${platformRevision}`,
     `LINKLIBRARIES_ARTIFACT_PATH=${libraryPath}`, `TRAEFIK_NETWORK=${project}-edge`, 'TRAEFIK_CMS_HOST=cms.localtest',
     'TRAEFIK_PREVIEW_HOST=preview.localtest', 'TRAEFIK_ENTRYPOINT=websecure', 'TRAEFIK_CMS_PRIVATE_MIDDLEWARE=local-proof-private',
     'TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE=local-proof-private', `LINKSITES_LOCAL_PROOF_PLATFORM_BOOTSTRAP=${platformBootstrap}`,
