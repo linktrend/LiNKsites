@@ -78,7 +78,9 @@ export class ProgramRuntime {
     this.active += 1
     try {
       if (!this.executors.resolve(issue.executorKind, issue.executorVersion)) throw new Error(`executor:unapproved:${issue.executorKind}@${issue.executorVersion}`)
+      await this.ledger.assertLeaseActive(runId, fencingToken)
       const output = await this.executeIssue(issue)
+      await this.ledger.assertLeaseActive(runId, fencingToken)
       const evidence = [this.evidence(issue, output)]
       if (issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, output)
       await this.ledger.succeed(runId, fencingToken, output, evidence)

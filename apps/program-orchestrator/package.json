@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts",
+    "export:graph": "tsx scripts/export-graph.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.4",

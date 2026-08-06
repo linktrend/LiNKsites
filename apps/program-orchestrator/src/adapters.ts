@@ -52,7 +52,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     this.config = config
     this.db = db
     this.workingContentRepository = new WorkingContentRepository(db)
-    this.payloadTarget = new PayloadRestDraftTarget({ baseUrl: config.payloadBaseUrl })
+    this.payloadTarget = new PayloadRestDraftTarget({ baseUrl: config.payloadBaseUrl, credential: { collectionSlug: 'users', apiKey: config.payloadApiKey } })
   }
 
   async injectFault(fault: AdapterFault): Promise<void> { this.faults.push({ ...fault }) }
@@ -221,12 +221,31 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   }
 
   async createPrivatePreview(siteId: string, promotion: Record<string, unknown>): Promise<Record<string, unknown>> {
-    return this.boundary('frontend.private-preview', async () => { const manifest = { schemaVersion: { major: 1, minor: 0 }, manifestId: `manifest:${siteId}`, manifestVersion: 1, siteId, siteClass: 'preview' as const, kitId: 'home_services', tierId: 'standard', platformReleaseRef: this.config.executingRevision, designProfileRef: 'design:local', contentReleaseRef: String(promotion.checksum), pages: [], lineage: {}, resolvedAt: new Date().toISOString() }; const deployment = createPreviewDeployment({ previewId: `preview:${siteId}`, prospectId: siteId, manifest, payloadDraftContentRef: `payload:${siteId}`, analyticsIdentityRef: `analytics:${siteId}`, accessPolicy: 'token_required', expiresAt: new Date(Date.now() + 86_400_000).toISOString(), qualityReceiptRef: null }); const result = { ...deployment, payloadDocumentIds: promotion.payloadDocumentIds, publicActivation: false, protectedRenderUrl: `${this.config.webMasterBaseUrl}/en/demo/${encodeURIComponent(siteId)}`, previewToken: 'w2-02-private-preview' }; const artifact = await this.writeArtifact('frontend-private-preview', siteId, result); return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum } })
+    return this.boundary('frontend.private-preview', async () => {
+      const ids = Array.isArray(promotion.payloadDocumentIds) ? promotion.payloadDocumentIds.map(String) : []
+      // Draft promotion belongs to W2-03. This is the separate authenticated
+      // W2-02 publication step and it never enables public activation.
+      for (const compoundId of ids) {
+        const [collection, id] = compoundId.split('::')
+        if (!collection || !id) throw new Error('payload:invalid-document-reference')
+        const response = await fetch(`${this.config.payloadBaseUrl}/api/${encodeURIComponent(collection)}/${encodeURIComponent(id)}`, {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json', Authorization: `users API-Key ${this.config.payloadApiKey}` },
+          body: JSON.stringify({ status: 'published', previewEnvironment: 'private-preview', site: this.config.payloadSiteId }),
+        })
+        if (!response.ok) throw new Error(`payload:private-preview-publication-failed:${response.status}`)
+      }
+      const manifest = { schemaVersion: { major: 1, minor: 0 }, manifestId: `manifest:${siteId}`, manifestVersion: 1, siteId, siteClass: 'preview' as const, kitId: 'home_services', tierId: 'standard', platformReleaseRef: this.config.executingRevision, designProfileRef: 'design:local', contentReleaseRef: String(promotion.checksum), pages: [], lineage: {}, resolvedAt: new Date().toISOString() }
+      const deployment = createPreviewDeployment({ previewId: `preview:${siteId}`, prospectId: siteId, manifest, payloadDraftContentRef: `payload:${siteId}`, analyticsIdentityRef: `analytics:${siteId}`, accessPolicy: 'token_required', expiresAt: new Date(Date.now() + 86_400_000).toISOString(), qualityReceiptRef: null })
+      const result = { ...deployment, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, publicActivation: false }, publicActivation: false, protectedRenderUrl: `${this.config.webMasterBaseUrl}/en/demo/${encodeURIComponent(this.config.previewAccessToken)}`, previewToken: this.config.previewAccessToken }
+      const artifact = await this.writeArtifact('frontend-private-preview', siteId, result)
+      return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum }
+    })
   }
 
   async renderPrivatePreview(siteId: string, preview: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.boundary('frontend.render', async () => {
-      const response = await fetch(String(preview.protectedRenderUrl), { headers: { 'x-preview-token': String(preview.previewToken) } })
+      const response = await fetch(String(preview.protectedRenderUrl))
       const html = await response.text()
       const robots = response.headers.get('x-robots-tag') ?? ''
       const cache = response.headers.get('cache-control') ?? ''

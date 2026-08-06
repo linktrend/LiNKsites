@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { mkdir, open, readFile, rename, unlink, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { createHash, randomUUID } from 'node:crypto'
 import type { DemoCompletionEnvelope, EvidenceReceipt } from '@linksites/types'
@@ -39,8 +39,8 @@ export class DurableLedger {
     }
   }
 
-  private async read(): Promise<LedgerState | null> {
-    if (this.cached) return clone(this.cached)
+  private async read(fresh = false): Promise<LedgerState | null> {
+    if (this.cached && !fresh) return clone(this.cached)
     const raw = await readFile(this.config.statePath, 'utf8').catch((error: unknown) => {
       if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') return null
       throw error
@@ -60,14 +60,43 @@ export class DurableLedger {
     this.cached = clone(state)
   }
 
+  /** Serializes independent worker processes, not merely promises in one VM.
+   * The owner record makes a SIGKILL orphan recoverable without trusting an
+   * indefinitely stale lock file. */
+  private async withProcessLock<T>(operation: () => Promise<T>): Promise<T> {
+    const path = `${this.config.statePath}.lock`
+    await mkdir(dirname(path), { recursive: true })
+    for (let attempt = 0; attempt < 400; attempt += 1) {
+      try {
+        const handle = await open(path, 'wx')
+        try {
+          await handle.writeFile(JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }))
+          return await operation()
+        } finally {
+          await handle.close().catch(() => undefined)
+          await unlink(path).catch(() => undefined)
+        }
+      } catch (error: unknown) {
+        if (!(error && typeof error === 'object' && 'code' in error && error.code === 'EEXIST')) throw error
+        const owner: { pid?: number; createdAt?: string } = await readFile(path, 'utf8').then((raw) => JSON.parse(raw) as { pid?: number; createdAt?: string }).catch(() => ({} as { pid?: number; createdAt?: string }))
+        const age = owner.createdAt ? Date.now() - Date.parse(owner.createdAt) : Number.POSITIVE_INFINITY
+        let alive = false
+        if (typeof owner.pid === 'number') { try { process.kill(owner.pid, 0); alive = true } catch { alive = false } }
+        if (!alive || age > Math.max(this.config.leaseDurationMs * 2, 5_000)) { await unlink(path).catch(() => undefined); continue }
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      }
+    }
+    throw new Error('ledger:cross-process-lock-timeout')
+  }
+
   private async mutate<T>(operation: (state: LedgerState | null) => Promise<{ state: LedgerState | null; result: T }> | { state: LedgerState | null; result: T }): Promise<T> {
     let result!: T
-    const currentOperation = this.operation.catch(() => undefined).then(async () => {
-      const current = await this.read()
+    const currentOperation = this.operation.catch(() => undefined).then(() => this.withProcessLock(async () => {
+      const current = await this.read(true)
       const next = await operation(current)
       if (next.state) await this.write(next.state)
       result = next.result
-    })
+    }))
     this.operation = currentOperation.then(() => undefined, () => undefined)
     await currentOperation
     return result
@@ -85,7 +114,7 @@ export class DurableLedger {
   }
 
   async snapshot(): Promise<LedgerState> {
-    const state = await this.read()
+    const state = await this.read(true)
     if (!state) throw new Error('program has not been created')
     return state
   }
@@ -134,6 +163,14 @@ export class DurableLedger {
       current.events.push({ type: 'run.claimed', at: run.startedAt, issueId, runId: run.runId, data: { attempt: issue.attempt } })
       return { state: current, result: { issue: clone(issue), run: clone(run) } }
     })
+  }
+
+  /** Must be checked immediately before and after an external mutation.
+   * A reclaimed worker cannot attach a receipt or completion to a newer lease. */
+  async assertLeaseActive(runId: string, fencingToken: number): Promise<void> {
+    const state = await this.snapshot()
+    const run = state.runs.find((candidate) => candidate.runId === runId)
+    if (!run || run.state !== 'running' || !run.lease || run.lease.fencingToken !== fencingToken || run.lease.expiresAt <= new Date().toISOString()) throw new Error('run external mutation rejected by stale lease fencing token')
   }
 
   async receipt(issueId: string, operation: string): Promise<Receipt | null> {

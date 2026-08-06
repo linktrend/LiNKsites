@@ -132,7 +132,10 @@ export type RuntimeConfig = {
   executableCheckpoint: string
   workerId: string
   payloadBaseUrl: string
+  payloadApiKey: string
+  payloadSiteId: string
   webMasterBaseUrl: string
+  previewAccessToken: string
   /** Read-only local clone/cache used to read the immutable LiNKlibraries pin. */
   libraryRepositoryPath: string
   approvedExecutors: Record<string, string>

@@ -45,14 +45,14 @@ export function validateRuntimeConfig(config: RuntimeConfig): RuntimeConfig {
 
 export function createLocalConfig(baseDir: string, orgId = 'local-org'): RuntimeConfig {
   const statePath = resolve(baseDir, 'program-ledger.json')
-  return { mode: 'local', orgId, statePath, intakePath: resolve(baseDir, 'leads.ndjson'), completionPath: resolve(baseDir, 'completions.ndjson'), approvedFactsPath: resolve(baseDir, 'approved-facts.json'), maxAttempts: 3, concurrency: 2, leaseDurationMs: 30_000, executingRevision: actualRevision(), executableCheckpoint: executableCheckpoint(), workerId: `w2-02:${process.pid}:${randomUUID()}`, payloadBaseUrl: '', webMasterBaseUrl: '', libraryRepositoryPath: process.env.W2_02_LIBRARY_REPOSITORY_PATH ?? '/Users/linktrend/Projects/LiNKlibraries', approvedExecutors: Object.fromEntries(W2_02_GRAPH.map((issue) => [issue.executorKind, issue.executorVersion])), approvedCapabilities: Object.fromEntries(Object.entries(EXECUTOR_BINDINGS).map(([kind, binding]) => [kind, [...binding.capabilities]])) }
+  return { mode: 'local', orgId, statePath, intakePath: resolve(baseDir, 'leads.ndjson'), completionPath: resolve(baseDir, 'completions.ndjson'), approvedFactsPath: resolve(baseDir, 'approved-facts.json'), maxAttempts: 3, concurrency: 2, leaseDurationMs: 30_000, executingRevision: actualRevision(), executableCheckpoint: executableCheckpoint(), workerId: `w2-02:${process.pid}:${randomUUID()}`, payloadBaseUrl: '', payloadApiKey: '', payloadSiteId: '', webMasterBaseUrl: '', previewAccessToken: '', libraryRepositoryPath: process.env.W2_02_LIBRARY_REPOSITORY_PATH ?? '/Users/linktrend/Projects/LiNKlibraries', approvedExecutors: Object.fromEntries(W2_02_GRAPH.map((issue) => [issue.executorKind, issue.executorVersion])), approvedCapabilities: Object.fromEntries(Object.entries(EXECUTOR_BINDINGS).map(([kind, binding]) => [kind, [...binding.capabilities]])) }
 }
 
 export function configFromEnvironment(env: NodeJS.ProcessEnv, baseDir: string): RuntimeConfig {
   if (env.W2_02_MODE !== 'local' || !env.W2_02_ORG_ID) throw new Error('W2-02 configuration is incomplete; set W2_02_MODE=local and W2_02_ORG_ID explicitly')
   const config = createLocalConfig(env.W2_02_STATE_DIR ? resolve(baseDir, env.W2_02_STATE_DIR) : baseDir, env.W2_02_ORG_ID)
   if (env.W2_02_EXECUTION_REVISION && env.W2_02_EXECUTION_REVISION !== config.executingRevision) throw new Error('W2-02 refuses an execution revision that is not the checked-out commit')
-  return validateRuntimeConfig({ ...config, approvedFactsPath: env.W2_02_APPROVED_FACTS_PATH ? resolve(baseDir, env.W2_02_APPROVED_FACTS_PATH) : config.approvedFactsPath, maxAttempts: env.W2_02_MAX_ATTEMPTS ? Number(env.W2_02_MAX_ATTEMPTS) : config.maxAttempts, concurrency: env.W2_02_CONCURRENCY ? Number(env.W2_02_CONCURRENCY) : config.concurrency, leaseDurationMs: env.W2_02_LEASE_MS ? Number(env.W2_02_LEASE_MS) : config.leaseDurationMs, payloadBaseUrl: env.W2_02_PAYLOAD_BASE_URL ?? config.payloadBaseUrl, webMasterBaseUrl: env.W2_02_WEB_MASTER_BASE_URL ?? config.webMasterBaseUrl, libraryRepositoryPath: env.W2_02_LIBRARY_REPOSITORY_PATH ?? config.libraryRepositoryPath })
+  return validateRuntimeConfig({ ...config, approvedFactsPath: env.W2_02_APPROVED_FACTS_PATH ? resolve(baseDir, env.W2_02_APPROVED_FACTS_PATH) : config.approvedFactsPath, maxAttempts: env.W2_02_MAX_ATTEMPTS ? Number(env.W2_02_MAX_ATTEMPTS) : config.maxAttempts, concurrency: env.W2_02_CONCURRENCY ? Number(env.W2_02_CONCURRENCY) : config.concurrency, leaseDurationMs: env.W2_02_LEASE_MS ? Number(env.W2_02_LEASE_MS) : config.leaseDurationMs, payloadBaseUrl: env.W2_02_PAYLOAD_BASE_URL ?? config.payloadBaseUrl, payloadApiKey: env.W2_02_PAYLOAD_API_KEY ?? config.payloadApiKey, payloadSiteId: env.W2_02_PAYLOAD_SITE_ID ?? config.payloadSiteId, webMasterBaseUrl: env.W2_02_WEB_MASTER_BASE_URL ?? config.webMasterBaseUrl, previewAccessToken: env.W2_02_PREVIEW_ACCESS_TOKEN ?? config.previewAccessToken, libraryRepositoryPath: env.W2_02_LIBRARY_REPOSITORY_PATH ?? config.libraryRepositoryPath })
 }
 
 export async function createProductionComposition(config: RuntimeConfig): Promise<Composition> {
@@ -64,7 +64,7 @@ export async function createProductionComposition(config: RuntimeConfig): Promis
   // W2-02 is a composition root, not an HTTP emulator.  The caller must bind
   // it to the separately started local Payload schema and real web-master
   // process (the W2-04 proof harness supplies these URLs).
-  if (!validated.payloadBaseUrl || !validated.webMasterBaseUrl) throw new Error('W2-02 requires explicit real local Payload and protected web-master service URLs')
+  if (!validated.payloadBaseUrl || !validated.payloadApiKey || !validated.payloadSiteId || !validated.webMasterBaseUrl || !validated.previewAccessToken) throw new Error('W2-02 requires explicit authenticated local Payload, scoped site, and protected web-master service configuration')
   const runtimeConfig = validated
   const ledger = new DurableLedger(validated)
   const adapters = new LocalBoundaryAdaptersImpl(runtimeConfig, db)

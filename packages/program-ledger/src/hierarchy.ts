@@ -67,10 +67,13 @@ const FIRST_PRIVATE_DEMO_PHASES: Record<string, PhaseDefinition[]> = {
       issue('program-claim', 'Create the private-demo Program', 'program.claim', 'Idempotently create or recover the private-demo Program graph.', ['lead-research']),
       issue('vertical-qualification', 'Qualify vertical compatibility', 'lead.vertical.qualify', 'Confirm the lead can use an approved vertical foundation.', ['program-claim']),
       issue('library-verification', 'Verify exact library artifacts', 'library.verify', 'Verify the exact approved LiNKlibraries artifacts and SHA receipts.', ['foundation-reservation']),
-      issue('site-specification', 'Build site specification and assembly manifest', 'site.plan', 'Produce the site specification and assembly manifest for this lead.', ['library-verification']),
     ]),
   ],
-  M08: [],
+  M08: [
+    demo('prospect-adaptation', 'Prospect site adaptation', 'Bind the approved foundation and exact library inputs to this prospect before content production.', [
+      issue('site-specification', 'Build site specification and assembly manifest', 'site.plan', 'Produce the lead-specific site specification and assembly manifest from the reserved foundation and verified library.', ['library-verification']),
+    ]),
+  ],
   M09: [
     demo('content', 'Lead-specific content and media', 'Produce grounded copy and provenance-bearing media inputs.', [
       issue('information-architecture', 'Create information architecture and copy', 'content.information_architecture', 'Create lead-specific information architecture and copy inputs.', ['site-specification']),

@@ -32,6 +32,7 @@ async function composition(id = 'lead-local-001') {
     const chunks: Buffer[] = []
     for await (const chunk of request) chunks.push(Buffer.from(chunk))
     const send = (status: number, value: unknown) => { response.writeHead(status, { 'content-type': 'application/json' }); response.end(JSON.stringify(value)) }
+    if (['POST', 'PATCH'].includes(request.method ?? '') && request.headers.authorization !== 'users API-Key test-api-key') return send(401, { error: 'authenticated Payload mutation required' })
     if (request.method === 'GET' && !id) {
       const slug = url.searchParams.get('where[slug][equals]')
       const values = slug ? [...docs.values()].filter((doc) => doc.slug === slug) : [...docs.values()]
@@ -48,7 +49,7 @@ async function composition(id = 'lead-local-001') {
   const web = createServer((_request, response) => { response.writeHead(200, { 'content-type': 'text/html', 'x-robots-tag': 'noindex, nofollow', 'cache-control': 'private, no-store' }); response.end('<main data-private-preview="true" data-route="/"><h1>Private preview</h1></main>') })
   await new Promise<void>((resolve) => web.listen(0, '127.0.0.1', resolve))
   const webPort = (web.address() as import('node:net').AddressInfo).port
-  const config = { ...createLocalConfig(directory), payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, webMasterBaseUrl: `http://127.0.0.1:${webPort}` }
+  const config = { ...createLocalConfig(directory), payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'test-preview-token' }
   await writeFile(config.approvedFactsPath, JSON.stringify(approvedFacts(id)))
   const value = await createProductionComposition(config)
   const close = value.close
@@ -183,9 +184,9 @@ test('post-promotion protected render failure creates durable manual attention',
 
 test('process termination after claim and irreversible receipt is reclaimed by a new worker', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-crash-'))
-  const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', webMasterBaseUrl: 'http://127.0.0.1:9' }
+  const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token' }
   const signalPath = join(directory, 'worker-ready')
-  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import('./src/composition.ts'); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,payloadBaseUrl:'http://127.0.0.1:9',webMasterBaseUrl:'http://127.0.0.1:9',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'}); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
+  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import('./src/composition.ts'); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,payloadBaseUrl:'http://127.0.0.1:9',payloadApiKey:'test-api-key',payloadSiteId:'test-site',webMasterBaseUrl:'http://127.0.0.1:9',previewAccessToken:'test-preview-token',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'}); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
   const worker = spawn(process.execPath, ['--import', 'tsx/esm', '-e', workerCode], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
   let restarted: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
@@ -210,6 +211,26 @@ test('process termination after claim and irreversible receipt is reclaimed by a
     await restarted?.close?.()
     await rm(directory, { recursive: true, force: true })
   }
+})
+
+test('two independent workers fence the same ready issue to one claim', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-race-'))
+  const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', workerId: 'setup-worker' }
+  const setup = await createProductionComposition(config)
+  try {
+    await setup.ledger.createOrResume(lead('lead-cross-process-race'))
+    const worker = (workerId: string) => new Promise<string>((resolve, reject) => {
+      const code = `(async()=>{const {createLocalConfig}=await import('./src/composition.ts');const {DurableLedger}=await import('./src/durable-store.ts');const c=createLocalConfig(${JSON.stringify(directory)},'local-org');const x=new DurableLedger({...c,workerId:${JSON.stringify(workerId)}});const claim=await x.claim('lead-research');process.stdout.write(claim?claim.run.runId:'none')})().catch(e=>{console.error(e);process.exit(1)})`
+      const child = spawn(process.execPath, ['--import', 'tsx/esm', '-e', code], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
+      let stdout = ''; let stderr = ''
+      child.stdout.on('data', (chunk) => { stdout += chunk })
+      child.stderr.on('data', (chunk) => { stderr += chunk })
+      child.on('exit', (status) => status === 0 ? resolve(stdout) : reject(new Error(stderr)))
+    })
+    const claims = await Promise.all([worker('race-a'), worker('race-b')])
+    assert.equal(claims.filter((value) => value !== 'none').length, 1)
+    assert.equal((await setup.ledger.snapshot()).runs.length, 1)
+  } finally { await setup.close(); await rm(directory, { recursive: true, force: true }) }
 })
 
 test('configuration and executor registry fail closed', () => {
