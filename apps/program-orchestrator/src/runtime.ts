@@ -4,8 +4,7 @@ import { W2_02_GRAPH } from './graph.ts'
 import { DurableLedger } from './durable-store.ts'
 import type { FailureClass, IssueRecord, LocalBoundaryAdapters, RuntimeConfig } from './contracts.ts'
 import type { ExecutorRegistry } from './executors.ts'
-
-const revision = '909e3188304b20bd7a19a8e0127eea863426267f'
+import type { LocalDependencyPorts } from './adapters.ts'
 
 export type RuntimeHealth = {
   liveness: boolean
@@ -26,7 +25,9 @@ export class ProgramRuntime {
   readonly adapters: LocalBoundaryAdapters
   readonly executors: ExecutorRegistry
 
-  constructor(config: RuntimeConfig, ledger: DurableLedger, adapters: LocalBoundaryAdapters, executors: ExecutorRegistry) { this.config = config; this.ledger = ledger; this.adapters = adapters; this.executors = executors }
+  readonly dependencies: LocalDependencyPorts
+
+  constructor(config: RuntimeConfig, ledger: DurableLedger, adapters: LocalBoundaryAdapters, executors: ExecutorRegistry, dependencies: LocalDependencyPorts) { this.config = config; this.ledger = ledger; this.adapters = adapters; this.executors = executors; this.dependencies = dependencies }
 
   async runLead(lead: LeadResearchPackage): Promise<void> {
     this.lead = lead
@@ -69,7 +70,7 @@ export class ProgramRuntime {
     return state.completion.envelope
   }
 
-  async exportState(): Promise<unknown> { return this.ledger.snapshot() }
+  async exportState(): Promise<unknown> { const state = await this.ledger.snapshot(); return { ...state, executionRevision: this.config.executingRevision, executorRegistry: this.executors.list() } }
 
   private async execute(issue: IssueRecord, runId: string): Promise<void> {
     this.active += 1
@@ -79,7 +80,7 @@ export class ProgramRuntime {
       const evidence = [this.evidence(issue, output)]
       if (issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, output)
       await this.ledger.succeed(runId, output, evidence)
-      if (issue.issueId === 'crm-completion-emit') {
+      if (issue.issueId === 'completion-record') {
         await this.deliverCompletion().catch(() => undefined)
       }
     } catch (error) {
@@ -88,10 +89,12 @@ export class ProgramRuntime {
       if (crashAfterReceipt && issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, { recovered: true, safeCode: 'boundary:recovered-after-receipt' })
       const issueBoundary = Boolean(issue.externalBoundary)
       const permanentBoundary = message.includes(':permanent-failure')
+      const priorIrreversibleEffect = (await this.ledger.snapshot()).issues.some((candidate) => candidate.irreversible && candidate.state === 'completed')
       const failure: { class: FailureClass; safeCode: string } = {
         class: message.startsWith('gate:') ? 'gate_rejected' : message.startsWith('qualification:') ? 'invalid_input' : permanentBoundary && issue.irreversible ? 'partial_mutation' : crashAfterReceipt ? 'transient_boundary' : issueBoundary ? 'transient_boundary' : 'unknown',
         safeCode: message.startsWith('gate:') ? 'gate:rejected' : message.startsWith('qualification:') ? 'qualification:unsupported-vertical' : permanentBoundary ? `boundary:${issue.externalBoundary ?? issue.issueId}:permanent-failure` : crashAfterReceipt ? 'boundary:recovered-after-receipt' : issueBoundary ? `boundary:${issue.externalBoundary}:failed` : `issue:${issue.issueId}:failed`,
       }
+      if (permanentBoundary && priorIrreversibleEffect && failure.class !== 'gate_rejected') failure.class = 'partial_mutation'
       const retryable = failure.class === 'transient_boundary'
       const result = await this.ledger.fail(runId, failure, retryable)
       if (result === 'manual_attention' || result === 'dead_letter') await this.adapters.compensate(issue.issueId, failure.safeCode)
@@ -104,43 +107,44 @@ export class ProgramRuntime {
     const output = (await this.ledger.snapshot()).issues.reduce<Record<string, unknown>>((all, candidate) => { if (candidate.output !== null) all[candidate.issueId] = candidate.output; return all }, {})
     const lead = this.lead ?? this.leadFromSnapshot(await this.ledger.snapshot())
     switch (issue.issueId) {
-      case 'lead-pull-validate': return { leadId: lead.lead_id, validated: true, researchSources: lead.research.sources.length }
-      case 'program-claim-create': return { programId: (await this.ledger.snapshot()).program.programId, claimed: true, idempotent: true }
-      case 'package-qualify': return this.adapters.qualify(lead)
-      case 'foundation-reserve': return this.adapters.reserveFoundation(`site:${lead.lead_id}`, String((output['package-qualify'] as { vertical: string }).vertical))
-      case 'library-resolve': return this.adapters.resolveLibrary(`site:${lead.lead_id}`)
-      case 'site-spec-manifest': return this.adapters.buildSiteSpecification(`site:${lead.lead_id}`, { foundation: output['foundation-reserve'], library: output['library-resolve'] })
-      case 'information-architecture-copy': return this.adapters.produceInformationArchitecture(`site:${lead.lead_id}`, lead)
-      case 'media-provenance': return this.adapters.processMedia(`site:${lead.lead_id}`, lead)
-      case 'working-content-assemble': return this.adapters.assembleWorkingContent(`site:${lead.lead_id}`, { copy: output['information-architecture-copy'], media: output['media-provenance'], manifest: output['site-spec-manifest'] })
-      case 'content-quality-gates': {
-        const gates = await this.adapters.runGates(`site:${lead.lead_id}`, output['working-content-assemble'] as Record<string, unknown>)
+      case 'lead-research': return { leadId: lead.lead_id, validated: true, researchSources: lead.research.sources.length }
+      case 'program-claim': return { programId: (await this.ledger.snapshot()).program.programId, claimed: true, idempotent: true, graphPersisted: true }
+      case 'vertical-qualification': return this.adapters.qualify(lead)
+      case 'foundation-reservation': return this.dependencies.factoryCatalog.reserveFoundation(`site:${lead.lead_id}`, String((output['vertical-qualification'] as { vertical: string }).vertical))
+      case 'library-verification': return this.dependencies.libraryClient.resolveLibrary(`site:${lead.lead_id}`)
+      case 'site-specification': return this.adapters.buildSiteSpecification(`site:${lead.lead_id}`, { foundation: output['foundation-reservation'], library: output['library-verification'] })
+      case 'information-architecture': return this.dependencies.workingContent.produceInformationArchitecture(`site:${lead.lead_id}`, lead)
+      case 'media-provenance': return this.dependencies.workingContent.processMedia(`site:${lead.lead_id}`, lead)
+      case 'working-content-assembly': return this.dependencies.workingContent.assembleWorkingContent(`site:${lead.lead_id}`, { copy: output['information-architecture'], media: output['media-provenance'], manifest: output['site-specification'] })
+      case 'content-gates': {
+        const gates = await this.dependencies.workingContent.runGates(`site:${lead.lead_id}`, output['working-content-assembly'] as Record<string, unknown>)
         if (!gates.accepted) throw new Error(gates.reason ?? 'gate:working-content-rejected')
         return gates
       }
-      case 'payload-draft-promote': return this.adapters.promoteDraft(`site:${lead.lead_id}`, output['working-content-assemble'] as Record<string, unknown>)
-      case 'payload-readback-parity': {
-        const result = await this.adapters.readbackDraft(`site:${lead.lead_id}`, output['payload-draft-promote'] as Record<string, unknown>)
+      case 'payload-draft': return this.dependencies.cmsAdapter.promoteDraft(`site:${lead.lead_id}`, output['working-content-assembly'] as Record<string, unknown>)
+      case 'payload-parity': {
+        const result = await this.dependencies.cmsAdapter.readbackDraft(`site:${lead.lead_id}`, output['payload-draft'] as Record<string, unknown>)
         if (result.parity !== true) throw new Error('gate:payload-readback-parity')
         return result
       }
-      case 'private-preview-create': return this.adapters.createPrivatePreview(`site:${lead.lead_id}`, output['payload-readback-parity'] as Record<string, unknown>)
-      case 'private-preview-render': return this.adapters.renderPrivatePreview(`site:${lead.lead_id}`, output['private-preview-create'] as Record<string, unknown>)
-      case 'preview-evidence-capture': return this.adapters.captureEvidence(`site:${lead.lead_id}`, output['private-preview-render'] as Record<string, unknown>)
-      case 'crm-completion-emit': return { completionBoundary: 'crm-shaped', exactlyOnce: true, evidence: output['preview-evidence-capture'] }
+      case 'private-publication': return this.dependencies.frontendDeploymentAdapter.createPrivatePreview(`site:${lead.lead_id}`, output['payload-parity'] as Record<string, unknown>)
+      case 'site-render-validation': return this.dependencies.frontendDeploymentAdapter.renderPrivatePreview(`site:${lead.lead_id}`, output['private-publication'] as Record<string, unknown>)
+      case 'final-evidence': return this.dependencies.frontendDeploymentAdapter.captureEvidence(`site:${lead.lead_id}`, output['site-render-validation'] as Record<string, unknown>)
+      case 'completion-record': return { completionBoundary: 'crm-shaped', exactlyOnce: true, evidence: output['final-evidence'], executionRevision: this.config.executingRevision }
       default: throw new Error(`executor:unknown:${issue.executorKind}`)
     }
   }
 
   private evidence(issue: IssueRecord, output: unknown): EvidenceReceipt {
     const checksum = createHash('sha256').update(JSON.stringify(output)).digest('hex')
-    return { schema_version: { major: 1, minor: 0 }, org_id: this.config.orgId, correlation_id: `program:${this.config.orgId}`, idempotency_key: `evidence:${issue.issueId}`, receipt_id: `evidence:${issue.issueId}:${checksum.slice(0, 12)}`, producer: `@linksites/program-orchestrator/${issue.executorKind}@${issue.executorVersion}`, subject: { type: 'issue', id: issue.issueId }, checksum: { algorithm: 'sha256', value: checksum }, revision_sha: revision, storage_location: `local://w2-02/${issue.issueId}/${checksum}.json`, gate_association: issue.issueId, timestamp: new Date().toISOString() }
+    const artifactPath = output && typeof output === 'object' && 'artifactPath' in output && typeof output.artifactPath === 'string' ? output.artifactPath : output && typeof output === 'object' && 'evidence' in output && Array.isArray(output.evidence) && typeof output.evidence[0] === 'string' ? output.evidence[0] : `local://w2-02/${issue.issueId}/${checksum}.json`
+    return { schema_version: { major: 1, minor: 0 }, org_id: this.config.orgId, correlation_id: `program:${this.config.orgId}`, idempotency_key: `evidence:${issue.issueId}`, receipt_id: `evidence:${issue.issueId}:${checksum.slice(0, 12)}`, producer: `@linksites/program-orchestrator/${issue.executorKind}@${issue.executorVersion}`, subject: { type: 'issue', id: issue.issueId }, checksum: { algorithm: 'sha256', value: checksum }, revision_sha: this.config.executingRevision, storage_location: artifactPath, gate_association: issue.issueId, timestamp: new Date().toISOString() }
   }
 
   private async deliverCompletion(): Promise<void> {
     const envelope = await this.ledger.reserveCompletion()
     if (!envelope) return
-    await this.adapters.emitCompletion(envelope)
+    await this.dependencies.eventAdapter.write(envelope)
     await this.ledger.markCompletionEmitted()
   }
 

@@ -1,32 +1,72 @@
+import { LINKSITES_PROGRAM, type IssueDefinition as CanonicalIssue, type ModuleDefinition } from '@linksites/program-ledger'
 import type { IssueDefinition } from './contracts.ts'
 
-export const PROGRAM_ID = 'linksites-first-site-private-demo'
-export const MODULE_ID = 'module-first-site-factory'
+export { LINKSITES_PROGRAM }
 
-export const W2_02_GRAPH: readonly IssueDefinition[] = [
-  { issueId: 'lead-pull-validate', moduleId: MODULE_ID, phaseId: 'phase-intake', title: 'Pull and validate lead/research', executorKind: 'lead.validate', executorVersion: '1.0.0', dependsOn: [] },
-  { issueId: 'program-claim-create', moduleId: MODULE_ID, phaseId: 'phase-intake', title: 'Atomically claim and idempotently create Program', executorKind: 'program.claim', executorVersion: '1.0.0', dependsOn: ['lead-pull-validate'] },
-  { issueId: 'package-qualify', moduleId: MODULE_ID, phaseId: 'phase-intake', title: 'Qualify package and vertical compatibility', executorKind: 'package.qualify', executorVersion: '1.0.0', dependsOn: ['program-claim-create'] },
-  { issueId: 'foundation-reserve', moduleId: MODULE_ID, phaseId: 'phase-foundation', title: 'Reserve foundation/template inventory', executorKind: 'foundation.reserve', executorVersion: '1.0.0', dependsOn: ['package-qualify'], externalBoundary: 'factory-catalog' },
-  { issueId: 'library-resolve', moduleId: MODULE_ID, phaseId: 'phase-foundation', title: 'Resolve exact approved LiNKlibraries artifact', executorKind: 'library.resolve', executorVersion: '1.0.0', dependsOn: ['package-qualify'], externalBoundary: 'library-client', irreversible: true },
-  { issueId: 'site-spec-manifest', moduleId: MODULE_ID, phaseId: 'phase-foundation', title: 'Build site specification and assembly manifest', executorKind: 'site.compose', executorVersion: '1.0.0', dependsOn: ['foundation-reserve', 'library-resolve'] },
-  { issueId: 'information-architecture-copy', moduleId: MODULE_ID, phaseId: 'phase-content', title: 'Create lead-specific information architecture and copy', executorKind: 'content.copy', executorVersion: '1.0.0', dependsOn: ['site-spec-manifest'], externalBoundary: 'working-content' },
-  { issueId: 'media-provenance', moduleId: MODULE_ID, phaseId: 'phase-content', title: 'Source and process media with provenance', executorKind: 'content.media', executorVersion: '1.0.0', dependsOn: ['site-spec-manifest'], externalBoundary: 'working-content' },
-  { issueId: 'working-content-assemble', moduleId: MODULE_ID, phaseId: 'phase-content', title: 'Assemble and validate working-content version', executorKind: 'content.assemble', executorVersion: '1.0.0', dependsOn: ['information-architecture-copy', 'media-provenance'], externalBoundary: 'working-content', irreversible: true },
-  { issueId: 'content-quality-gates', moduleId: MODULE_ID, phaseId: 'phase-content', title: 'Run content, schema, quality, security/privacy, and asset gates', executorKind: 'content.gates', executorVersion: '1.0.0', dependsOn: ['working-content-assemble'] },
-  { issueId: 'payload-draft-promote', moduleId: MODULE_ID, phaseId: 'phase-cms', title: 'Promote exact accepted version to Payload draft', executorKind: 'cms.promote-draft', executorVersion: '1.0.0', dependsOn: ['content-quality-gates'], externalBoundary: 'payload-cms', irreversible: true },
-  { issueId: 'payload-readback-parity', moduleId: MODULE_ID, phaseId: 'phase-cms', title: 'Run CMS read-back parity gate', executorKind: 'cms.readback-gate', executorVersion: '1.0.0', dependsOn: ['payload-draft-promote'], externalBoundary: 'payload-cms' },
-  { issueId: 'private-preview-create', moduleId: MODULE_ID, phaseId: 'phase-preview', title: 'Publish only to private preview environment', executorKind: 'preview.private-create', executorVersion: '1.0.0', dependsOn: ['payload-readback-parity'], externalBoundary: 'frontend-deployment', irreversible: true },
-  { issueId: 'private-preview-render', moduleId: MODULE_ID, phaseId: 'phase-preview', title: 'Render and validate the complete private site', executorKind: 'preview.render-validate', executorVersion: '1.0.0', dependsOn: ['private-preview-create'], externalBoundary: 'frontend-deployment' },
-  { issueId: 'preview-evidence-capture', moduleId: MODULE_ID, phaseId: 'phase-preview', title: 'Capture functional, visual, SEO, accessibility, and privacy evidence', executorKind: 'preview.evidence', executorVersion: '1.0.0', dependsOn: ['private-preview-render'] },
-  { issueId: 'crm-completion-emit', moduleId: MODULE_ID, phaseId: 'phase-completion', title: 'Emit one CRM-shaped completion record', executorKind: 'completion.emit', executorVersion: '1.0.0', dependsOn: ['preview-evidence-capture'], externalBoundary: 'completion-event', irreversible: true },
-]
+export const PROGRAM_ID = LINKSITES_PROGRAM.programId
+export const PROGRAM_MODULE_IDS = ['M07', 'M08', 'M09', 'M10', 'M11', 'M12'] as const
+
+type ExecutorBinding = {
+  version: string
+  capabilities: string[]
+  externalBoundary?: string
+  irreversible?: boolean
+}
+
+export const EXECUTOR_BINDINGS: Readonly<Record<string, ExecutorBinding>> = {
+  'lead.research.validate': { version: 'w1-01-contract.v1', capabilities: ['deterministic', 'evidence-producing'] },
+  'program.claim': { version: 'w1-02-ledger.v1', capabilities: ['durable-ledger', 'idempotent', 'evidence-producing'] },
+  'lead.vertical.qualify': { version: 'w1-02-ledger.v1', capabilities: ['deterministic', 'evidence-producing'] },
+  'foundation.reserve': { version: 'w1-04-factory-catalog.v1', capabilities: ['factory-catalog', 'idempotent', 'receipt-producing'], externalBoundary: 'factory-catalog' },
+  'library.verify': { version: 'w1-05-library-consumer.v1', capabilities: ['library-consumer', 'sha-bound', 'receipt-producing'], externalBoundary: 'library-consumer' },
+  'site.plan': { version: 'w1-04-factory-catalog.v1', capabilities: ['factory-catalog', 'deterministic', 'evidence-producing'] },
+  'content.information_architecture': { version: 'w2-01-deterministic-adapter.v1', capabilities: ['w2-01-content-production', 'provenance', 'deterministic'], externalBoundary: 'working-content' },
+  'content.media.provenance': { version: 'w2-01-deterministic-adapter.v1', capabilities: ['w2-01-content-production', 'media-provenance', 'deterministic'], externalBoundary: 'working-content' },
+  'content.working.assemble': { version: 'w2-01-deterministic-adapter.v1', capabilities: ['w2-01-content-production', 'immutable-working-content', 'receipt-producing'], externalBoundary: 'working-content', irreversible: true },
+  'content.gates': { version: 'w2-01-deterministic-adapter.v1', capabilities: ['w2-01-content-production', 'evidence-producing', 'fail-closed'] },
+  'payload.draft.promote': { version: 'w2-03-promotion-service.v1', capabilities: ['w2-03-payload-promotion', 'readback-parity', 'idempotent', 'receipt-producing'], externalBoundary: 'payload-cms', irreversible: true },
+  'payload.readback.gate': { version: 'w2-03-promotion-service.v1', capabilities: ['w2-03-payload-promotion', 'readback-parity', 'evidence-producing'], externalBoundary: 'payload-cms' },
+  'preview.private.publish': { version: 'w2-04-private-preview.v1', capabilities: ['private-preview', 'noindex', 'idempotent'], externalBoundary: 'frontend', irreversible: true },
+  'preview.render.validate': { version: 'w2-04-private-preview.v1', capabilities: ['frontend-render', 'route-validation', 'fail-closed'], externalBoundary: 'frontend' },
+  'preview.evidence.capture': { version: 'w2-04-private-preview.v1', capabilities: ['evidence-producing', 'persisted-artifact', 'tamper-detecting'] },
+  'completion.emit': { version: 'w2-05-completion-sink.v1', capabilities: ['shared-completion-sink', 'durable-delivery', 'idempotent'], externalBoundary: 'completion-sink', irreversible: true },
+}
+
+const activeModules = (): ModuleDefinition[] => PROGRAM_MODULE_IDS.map((id) => {
+  const module = LINKSITES_PROGRAM.modules.find((candidate) => candidate.moduleId === id)
+  if (!module) throw new Error(`canonical LiNKsites Program is missing module ${id}`)
+  return module
+})
+
+const toIssue = (module: ModuleDefinition, phaseId: string, canonical: CanonicalIssue): IssueDefinition => {
+  const binding = EXECUTOR_BINDINGS[canonical.issueType]
+  if (!binding) throw new Error(`no W2-02 executor binding for canonical issue type ${canonical.issueType}`)
+  return {
+    issueId: canonical.issueKey,
+    moduleId: module.moduleId,
+    phaseId,
+    title: canonical.title,
+    objective: canonical.objective,
+    issueType: canonical.issueType,
+    executorKind: canonical.issueType,
+    executorVersion: binding.version,
+    capabilities: [...binding.capabilities],
+    dependsOn: [...canonical.dependsOnIssueKeys],
+    externalBoundary: binding.externalBoundary,
+    irreversible: binding.irreversible,
+  }
+}
+
+export const W2_02_MODULES = activeModules()
+export const W2_02_GRAPH: readonly IssueDefinition[] = W2_02_MODULES.flatMap((module) => module.phases.flatMap((phase) => phase.issues.map((issue) => toIssue(module, phase.phaseId, issue))))
+
+/** The persisted Program identity is the canonical catalog object. W2-02 only
+ * schedules the populated private-preview subset of its Issues. */
+export const PERSISTED_PROGRAM_GRAPH = LINKSITES_PROGRAM
 
 export const GRAPH_EXPORT = {
-  program: PROGRAM_ID,
+  program: PERSISTED_PROGRAM_GRAPH,
   hierarchy: 'Module > Phase > Issue > Run',
-  module: { id: MODULE_ID, title: 'First-site private demo factory' },
-  phases: ['phase-intake', 'phase-foundation', 'phase-content', 'phase-cms', 'phase-preview', 'phase-completion'],
   issues: W2_02_GRAPH,
-  excluded: ['sold-site-public-activation', 'commercial-payment', 'commercial-erp', 'workflow-marketplace', 'hosted-infrastructure', 'live-credentials'],
+  excluded: ['M01-M06 empty canonical modules', 'M13-M20 paid fulfilment and managed-service modules', 'sold-site-public-activation', 'commercial-payment', 'commercial-erp', 'raw-n8n', 'VPS', 'cloud', 'live-credentials'],
 }

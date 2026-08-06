@@ -2,25 +2,18 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { createHash, randomUUID } from 'node:crypto'
 import type { DemoCompletionEnvelope, EvidenceReceipt } from '@linksites/types'
-import { MODULE_ID, PROGRAM_ID, W2_02_GRAPH } from './graph.ts'
+import { LINKSITES_PROGRAM, PERSISTED_PROGRAM_GRAPH, W2_02_GRAPH } from './graph.ts'
 import type { IssueRecord, LedgerState, Receipt, RunRecord, RuntimeConfig } from './contracts.ts'
 
 const blankState = (orgId: string, lead: { lead_id: string; idempotency_key: string }, now: string): LedgerState => ({
   schemaVersion: 1,
-  program: { programId: PROGRAM_ID, orgId, leadId: lead.lead_id, idempotencyKey: lead.idempotency_key, state: 'running', createdAt: now, updatedAt: now },
-  modules: [{ moduleId: MODULE_ID, title: 'First-site private demo factory', state: 'running' }],
-  phases: [
-    { phaseId: 'phase-intake', moduleId: MODULE_ID, title: 'Intake and qualification', state: 'running' },
-    { phaseId: 'phase-foundation', moduleId: MODULE_ID, title: 'Foundation and library resolution', state: 'running' },
-    { phaseId: 'phase-content', moduleId: MODULE_ID, title: 'Lead-specific content and media', state: 'running' },
-    { phaseId: 'phase-cms', moduleId: MODULE_ID, title: 'Draft promotion and parity', state: 'running' },
-    { phaseId: 'phase-preview', moduleId: MODULE_ID, title: 'Private preview validation', state: 'running' },
-    { phaseId: 'phase-completion', moduleId: MODULE_ID, title: 'Evidence and CRM-shaped completion', state: 'running' },
-  ],
+  program: { programId: PERSISTED_PROGRAM_GRAPH.programId, orgId, leadId: lead.lead_id, idempotencyKey: lead.idempotency_key, state: 'running', createdAt: now, updatedAt: now, graph: structuredClone(PERSISTED_PROGRAM_GRAPH) },
+  modules: LINKSITES_PROGRAM.modules.map((module) => ({ moduleId: module.moduleId, title: module.title, state: 'running' as const })),
+  phases: LINKSITES_PROGRAM.modules.flatMap((module) => module.phases.map((phase) => ({ phaseId: phase.phaseId, moduleId: module.moduleId, title: phase.title, state: 'running' as const }))),
   issues: W2_02_GRAPH.map((issue): IssueRecord => ({ ...issue, state: issue.dependsOn.length === 0 ? 'ready' : 'ready', attempt: 0, nextAttemptAt: null, output: null, gate: 'pending', runIds: [] })),
   runs: [],
   receipts: [],
-  events: [{ type: 'program.created', at: now, data: { programId: PROGRAM_ID, moduleId: MODULE_ID } }],
+  events: [{ type: 'program.created', at: now, data: { programId: PERSISTED_PROGRAM_GRAPH.programId, moduleIds: LINKSITES_PROGRAM.modules.map((module) => module.moduleId) } }],
   completion: { state: 'pending', envelope: null },
   outbox: [],
   deadLetters: [],
@@ -115,7 +108,7 @@ export class DurableLedger {
       issue.state = 'running'
       issue.attempt += 1
       issue.nextAttemptAt = null
-      const run: RunRecord = { runId: `run:${issue.issueId}:${issue.attempt}:${randomUUID()}`, issueId, attempt: issue.attempt, state: 'running', startedAt: new Date().toISOString(), completedAt: null, output: null, failure: null, evidence: [] }
+      const run: RunRecord = { runId: `run:${issue.issueId}:${issue.attempt}:${randomUUID()}`, issueId, attempt: issue.attempt, state: 'running', startedAt: new Date().toISOString(), completedAt: null, output: null, failure: null, evidence: [], lease: null }
       issue.runIds.push(run.runId)
       current.runs.push(run)
       current.metrics.attempts += 1
@@ -135,7 +128,10 @@ export class DurableLedger {
       if (!current) throw new Error('program has not been created')
       const prior = current.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation)
       if (prior) return { state: current, result: clone(prior) }
-      const receipt: Receipt = { receiptId: `receipt:${issueId}:${randomUUID()}`, issueId, operation, idempotencyKey: `${current.program.programId}:${issueId}`, revision: createHash('sha256').update(JSON.stringify(value)).digest('hex'), createdAt: new Date().toISOString(), value: clone(value) }
+      const issue = current.issues.find((candidate) => candidate.issueId === issueId)
+      if (!issue) throw new Error(`issue ${issueId} not found`)
+      const valueChecksum = createHash('sha256').update(JSON.stringify(value)).digest('hex')
+      const receipt: Receipt = { receiptId: `receipt:${issueId}:${randomUUID()}`, issueId, operation, idempotencyKey: `${current.program.programId}:${issueId}`, revision: this.config.executingRevision, valueChecksum, executorKind: issue.executorKind, executorVersion: issue.executorVersion, createdAt: new Date().toISOString(), value: clone(value) }
       current.receipts.push(receipt)
       current.events.push({ type: 'irreversible.receipt', at: receipt.createdAt, issueId, data: { operation, revision: receipt.revision } })
       return { state: current, result: clone(receipt) }
@@ -159,7 +155,11 @@ export class DurableLedger {
         if (phaseIssues.every((candidate) => candidate.state === 'completed')) phase.state = 'completed'
       }
       current.events.push({ type: 'gate.accepted', at: run.completedAt, issueId: issue.issueId, runId, data: { evidence: evidence.map((item) => item.receipt_id) } })
-      if (current.issues.every((candidate) => candidate.state === 'completed')) { current.program.state = 'completed'; current.modules[0].state = 'completed'; current.events.push({ type: 'program.completed', at: run.completedAt }) }
+      for (const module of current.modules) {
+        const moduleIssues = current.issues.filter((candidate) => candidate.moduleId === module.moduleId)
+        if (moduleIssues.every((candidate) => candidate.state === 'completed')) module.state = 'completed'
+      }
+      if (current.issues.every((candidate) => candidate.state === 'completed')) { current.program.state = 'completed'; current.events.push({ type: 'program.completed', at: run.completedAt }) }
       current.program.updatedAt = run.completedAt
       return { state: current, result: undefined }
     })
@@ -186,7 +186,7 @@ export class DurableLedger {
       else current.deadLetters.push({ issueId: issue.issueId, runId, safeCode: failure.safeCode, at: run.completedAt })
       current.program.state = manual ? 'manual_attention' : 'failed'
       for (const phase of current.phases.filter((candidate) => current.issues.some((item) => item.phaseId === candidate.phaseId && (item.state === 'failed' || item.state === 'manual_attention')))) phase.state = manual ? 'manual_attention' : 'failed'
-      current.modules[0].state = manual ? 'manual_attention' : 'failed'
+      for (const module of current.modules.filter((candidate) => current.issues.some((item) => item.moduleId === candidate.moduleId && (item.state === 'failed' || item.state === 'manual_attention')))) module.state = manual ? 'manual_attention' : 'failed'
       current.events.push({ type: manual ? 'manual_attention.created' : 'run.dead_lettered', at: run.completedAt, issueId: issue.issueId, runId, data: { safeCode: failure.safeCode } })
       return { state: current, result: manual ? 'manual_attention' as const : 'dead_letter' as const }
     })
@@ -198,7 +198,7 @@ export class DurableLedger {
       if (current.completion.envelope) return { state: current, result: clone(current.completion.envelope) }
       const now = new Date().toISOString()
       const envelope: DemoCompletionEnvelope = {
-        schema_version: { major: 1, minor: 0 }, org_id: current.program.orgId, correlation_id: `program:${current.program.programId}`, idempotency_key: `completion:${current.program.idempotencyKey}`, lead_id: current.program.leadId, site_id: `site:${current.program.leadId}`, private_preview_url: `http://127.0.0.1/private/${current.program.leadId}`, status: 'completed', artifact_revision: '909e3188304b20bd7a19a8e0127eea863426267f', library_revision: '39d16d37c976a2fed81eb4f22864ade44689b01f', content_revision: createHash('sha256').update(JSON.stringify(current.receipts)).digest('hex'), evidence_references: current.runs.flatMap((run) => run.evidence.map((item) => item.receipt_id)), started_at: current.program.createdAt, completed_at: now,
+        schema_version: { major: 1, minor: 0 }, org_id: current.program.orgId, correlation_id: `program:${current.program.programId}`, idempotency_key: `completion:${current.program.idempotencyKey}`, lead_id: current.program.leadId, site_id: `site:${current.program.leadId}`, private_preview_url: `http://127.0.0.1/private/${current.program.leadId}`, status: 'completed', artifact_revision: this.config.executingRevision, library_revision: this.libraryRevision(current), content_revision: this.contentRevision(current), evidence_references: current.runs.flatMap((run) => run.evidence.map((item) => item.receipt_id)), started_at: current.program.createdAt, completed_at: now,
       }
       current.completion = { state: 'reserved', envelope }
       current.metrics.completionEmits += 1
@@ -214,5 +214,17 @@ export class DurableLedger {
       current.events.push({ type: 'completion.emitted', at: new Date().toISOString() })
       return { state: current, result: undefined }
     })
+  }
+
+  private libraryRevision(state: LedgerState): string {
+    const output = state.issues.find((issue) => issue.issueId === 'library-verification')?.output
+    const revision = output && typeof output === 'object' && 'revision' in output ? (output as { revision?: unknown }).revision : null
+    return typeof revision === 'string' && /^[a-f0-9]{40}$/.test(revision) ? revision : this.config.executingRevision
+  }
+
+  private contentRevision(state: LedgerState): string {
+    const output = state.issues.find((issue) => issue.issueId === 'working-content-assembly')?.output
+    const checksum = output && typeof output === 'object' && 'checksum' in output ? (output as { checksum?: unknown }).checksum : null
+    return typeof checksum === 'string' && /^[a-f0-9]{64}$/.test(checksum) ? checksum : createHash('sha256').update(JSON.stringify(state.receipts)).digest('hex')
   }
 }

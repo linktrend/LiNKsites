@@ -120,6 +120,7 @@ export interface PayloadDraftTarget {
     data: Record<string, unknown>,
   ): Promise<{ payloadDocumentId: string; resultChecksum: string }>
   readback(payloadDocumentId: string): Promise<Record<string, unknown> | null>
+  verifyParity?(expected: Record<string, unknown>, actual: Record<string, unknown>): boolean
 }
 
 interface StoredReceipt {
@@ -220,6 +221,16 @@ export class PromotionService {
         resultChecksum: null,
         status: 'failed',
         failureReason: 'readback verification failed: document not retrievable after write',
+      }
+    }
+
+    if (this.target.verifyParity && !this.target.verifyParity(item.data, readback)) {
+      return {
+        sourceItemId: item.sourceItemId,
+        payloadDocumentId: write.payloadDocumentId,
+        resultChecksum: null,
+        status: 'failed',
+        failureReason: 'readback verification failed: promoted fields do not match the source package',
       }
     }
 

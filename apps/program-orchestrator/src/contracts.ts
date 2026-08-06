@@ -1,4 +1,6 @@
 import type { DemoCompletionEnvelope, EvidenceReceipt, LeadResearchPackage } from '@linksites/types'
+import type { CompletionSink, WorkIntakePort } from '@linksites/intake-orchestrator'
+import type { ProgramDefinition } from '@linksites/program-ledger'
 
 export type IssueState = 'ready' | 'running' | 'retry_scheduled' | 'completed' | 'failed' | 'manual_attention'
 export type RunState = 'running' | 'succeeded' | 'retry_scheduled' | 'dead_lettered' | 'manual_attention'
@@ -9,8 +11,11 @@ export type IssueDefinition = {
   moduleId: string
   phaseId: string
   title: string
+  objective: string
+  issueType: string
   executorKind: string
   executorVersion: string
+  capabilities: string[]
   dependsOn: string[]
   externalBoundary?: string
   irreversible?: boolean
@@ -35,6 +40,7 @@ export type RunRecord = {
   output: unknown | null
   failure: { class: FailureClass; safeCode: string } | null
   evidence: EvidenceReceipt[]
+  lease: { owner: string; expiresAt: string; fencingToken: number } | null
 }
 
 export type Receipt = {
@@ -43,6 +49,9 @@ export type Receipt = {
   operation: string
   idempotencyKey: string
   revision: string
+  valueChecksum: string
+  executorKind: string
+  executorVersion: string
   createdAt: string
   value: unknown
 }
@@ -57,6 +66,7 @@ export type LedgerState = {
     state: 'running' | 'completed' | 'failed' | 'manual_attention'
     createdAt: string
     updatedAt: string
+    graph: ProgramDefinition
   }
   modules: Array<{ moduleId: string; title: string; state: 'running' | 'completed' | 'failed' | 'manual_attention' }>
   phases: Array<{ phaseId: string; moduleId: string; title: string; state: 'running' | 'completed' | 'failed' | 'manual_attention' }>
@@ -84,7 +94,7 @@ export interface LocalBoundaryAdapters {
   produceInformationArchitecture(siteId: string, lead: LeadInput): Promise<Record<string, unknown>>
   processMedia(siteId: string, lead: LeadInput): Promise<Record<string, unknown>>
   assembleWorkingContent(siteId: string, dependencies: Record<string, unknown>): Promise<Record<string, unknown>>
-  runGates(siteId: string, workingContent: Record<string, unknown>): Promise<{ accepted: boolean; evidence: string[]; reason?: string }>
+  runGates(siteId: string, workingContent: Record<string, unknown>): Promise<{ accepted: boolean; evidence: string[]; reason?: string; artifactPath?: string; artifactChecksum?: string }>
   promoteDraft(siteId: string, workingContent: Record<string, unknown>): Promise<Record<string, unknown>>
   readbackDraft(siteId: string, promotion: Record<string, unknown>): Promise<Record<string, unknown>>
   createPrivatePreview(siteId: string, promotion: Record<string, unknown>): Promise<Record<string, unknown>>
@@ -101,7 +111,16 @@ export type RuntimeConfig = {
   statePath: string
   intakePath: string
   completionPath: string
+  approvedFactsPath: string
   maxAttempts: number
   concurrency: number
+  leaseDurationMs: number
+  executingRevision: string
   approvedExecutors: Record<string, string>
+  approvedCapabilities: Record<string, string[]>
+}
+
+export type SharedPorts = {
+  intake: WorkIntakePort
+  completionSink: CompletionSink
 }

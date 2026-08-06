@@ -1,18 +1,36 @@
 {
-  "program": "linksites-first-site-private-demo",
+  "schemaVersion": { "major": 1, "minor": 0 },
+  "program": "linksites",
+  "title": "LiNKsites — autonomous website factory and managed-website business",
+  "canonicalModuleCount": 20,
+  "executionSubset": "M07-M12",
   "hierarchy": "Module > Phase > Issue > Run",
-  "module": { "id": "module-first-site-factory", "title": "First-site private demo factory" },
-  "phases": [
-    "phase-intake",
-    "phase-foundation",
-    "phase-content",
-    "phase-cms",
-    "phase-preview",
-    "phase-completion"
+  "canonicalModules": [
+    { "moduleId": "M07", "phaseIds": ["intake"], "issueIds": ["lead-research", "program-claim", "vertical-qualification"] },
+    { "moduleId": "M08", "phaseIds": ["planning"], "issueIds": ["foundation-reservation", "library-verification", "site-specification"] },
+    { "moduleId": "M09", "phaseIds": ["content"], "issueIds": ["information-architecture", "media-provenance"] },
+    { "moduleId": "M10", "phaseIds": ["working-content"], "issueIds": ["working-content-assembly", "content-gates"] },
+    { "moduleId": "M11", "phaseIds": ["private-preview"], "issueIds": ["payload-draft", "payload-parity", "private-publication", "site-render-validation"] },
+    { "moduleId": "M12", "phaseIds": ["completion"], "issueIds": ["final-evidence", "completion-record"] }
   ],
-  "parallel_ready_branches": [
-    ["foundation-reserve", "library-resolve"],
-    ["information-architecture-copy", "media-provenance"]
+  "executorRegistry": [
+    "lead.research.validate@w1-01-contract.v1",
+    "program.claim@w1-02-ledger.v1",
+    "lead.vertical.qualify@w1-02-ledger.v1",
+    "foundation.reserve@w1-04-factory-catalog.v1",
+    "library.verify@w1-05-library-consumer.v1",
+    "site.plan@w1-04-factory-catalog.v1",
+    "content.information_architecture@w2-01-deterministic-adapter.v1",
+    "content.media.provenance@w2-01-deterministic-adapter.v1",
+    "content.working.assemble@w2-01-deterministic-adapter.v1",
+    "content.gates@w2-01-deterministic-adapter.v1",
+    "payload.draft.promote@w2-03-promotion-service.v1",
+    "payload.readback.gate@w2-03-promotion-service.v1",
+    "preview.private.publish@w2-04-private-preview.v1",
+    "preview.render.validate@w2-04-private-preview.v1",
+    "preview.evidence.capture@w2-04-private-preview.v1",
+    "completion.emit@w2-05-completion-sink.v1"
   ],
-  "excluded": ["sold-site-public-activation", "Stripe", "Odoo", "raw n8n", "VPS", "cloud", "DNS", "live credentials"]
+  "issueCount": 16,
+  "excluded": ["M01-M06 empty canonical modules", "M13-M20 paid fulfilment and managed-service modules", "sold-site-public-activation", "commercial-payment", "commercial-erp", "raw-n8n", "VPS", "cloud", "live-credentials"]
 }

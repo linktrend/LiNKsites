@@ -9,13 +9,17 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
+    "@linksites/factory-catalog": "workspace:*",
+    "@linksites/intake-orchestrator": "workspace:*",
+    "@linksites/program-ledger": "workspace:*",
     "@linksites/types": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.19.15",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "tsx": "4.23.9"
   }
 }
