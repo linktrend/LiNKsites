@@ -82,6 +82,7 @@ export type RecyclingRequest = ContractMetadata & {
 }
 
 export type LiNKautoworkEventName =
+  | 'contact.submitted'
   | 'lead.research.ready'
   | 'demo.completed'
   | 'commercial.outcome.recorded'
@@ -91,6 +92,7 @@ export type LiNKautoworkEventName =
 export type LiNKautoworkEventPayload = {
   lead_id: string
   site_id: string
+  submission?: Record<string, string | number | boolean>
 }
 
 export type EventAcknowledgement = {
@@ -371,11 +373,13 @@ const isEventPayload = (
   value: unknown,
 ): value is LiNKautoworkEventPayload =>
   isRecord(value) &&
-  hasExactKeys(value, ['lead_id', 'site_id']) &&
+  hasExactKeys(value, ['lead_id', 'site_id'], ['submission']) &&
   isCanonicalReference(value.lead_id) &&
-  isCanonicalReference(value.site_id)
+  isCanonicalReference(value.site_id) &&
+  (value.submission === undefined || (isRecord(value.submission) && Object.values(value.submission).every((entry) => (typeof entry === 'string' && !isSensitiveString(entry)) || typeof entry === 'number' || typeof entry === 'boolean')))
 
 const isEventName = (value: unknown): value is LiNKautoworkEventName =>
+  value === 'contact.submitted' ||
   value === 'lead.research.ready' ||
   value === 'demo.completed' ||
   value === 'commercial.outcome.recorded' ||

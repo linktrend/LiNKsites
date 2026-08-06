@@ -30,7 +30,7 @@ Components render with CMS data
   ↓
 User clicks intent → Opens modal with dynamic form
   ↓
-Form submission → API route → N8N webhook
+Form submission → API route → signed LiNKautowork durable outbox → governed gateway
 ```
 
 ## CMS Schema
@@ -93,19 +93,25 @@ Uses Zod for runtime validation:
 }
 ```
 
-### Webhook Integration (N8N)
+### Governed LiNKautowork delivery
 
 Set environment variables:
 
 ```env
-CONTACT_WEBHOOK_URL=https://your-n8n-instance.com/webhook/contact
-CONTACT_WEBHOOK_SECRET=your-secret-key
-CONTACT_FALLBACK_EMAIL=support@example.com
+LINKAUTOWORK_GATEWAY_URL=https://gateway.example.com/events
+LINKAUTOWORK_SIGNING_SECRET=<secret-manager reference>
+LINKAUTOWORK_SIGNING_KEY_ID=web-master
+LINKAUTOWORK_ENVIRONMENT=production
+LINKAUTOWORK_EVENT_GRANTS=[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]
+LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
+LINKSITES_ORG_ID=<org-id>
+LINKSITES_SITE_ID=<site-id>
 ```
 
 The API route will:
 1. Validate the payload with Zod
-2. Forward to N8N webhook with retry logic (3 attempts, exponential backoff)
+2. Enqueue a signed `contact.submitted` event; the recoverable worker owns retries and receipts
 3. Log failures for manual recovery
 4. Return success to user even if webhook fails (graceful degradation)
 
@@ -175,10 +181,9 @@ All content is in `data/cmsPayload.json`:
 
 ## Deployment Checklist
 
-- [ ] Set `CONTACT_WEBHOOK_URL` in production
-- [ ] Set `CONTACT_WEBHOOK_SECRET` for security
-- [ ] Test N8N webhook receives data correctly
-- [ ] Configure N8N workflow for routing by intent
+- [ ] Configure the signed LiNKautowork gateway, explicit org grant, and durable outbox
+- [ ] Test gateway acknowledgement receipts and restart recovery locally
+- [ ] Configure an explicit LiNKautowork event grant for the owning organization
 - [ ] Set up email notifications as fallback
 - [ ] Monitor API logs for errors
 - [ ] Test all forms in production

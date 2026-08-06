@@ -31,7 +31,7 @@ export interface InMemoryLedgerStoreOptions {
  * docs/archive/policies/CONTRACT_AND_SCHEMA_VERSIONING_POLICY.md's "generated
  * types / single source of truth" preference and manual §20's requirement
  * that the Program Ledger be the authoritative state store regardless of
- * which runtime (n8n, CrewAI, Agent Zero, Cursor, ...) executes a Run.
+ * which governed worker runtime executes a Run.
  *
  * `InMemoryLedgerStore` (this file) backs deterministic unit tests.
  * A Postgres-backed implementation lives in ./postgresStore.ts for real

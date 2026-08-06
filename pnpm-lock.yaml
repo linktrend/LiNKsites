@@ -74,6 +74,9 @@ importers:
 
   apps/cms:
     dependencies:
+      '@linksites/autowork-boundary':
+        specifier: workspace:*
+        version: link:../../packages/autowork-boundary
       '@linksites/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -125,6 +128,9 @@ importers:
       payload:
         specifier: 3.81.0
         version: 3.81.0(graphql@16.13.2)(typescript@5.7.3)
+      pg:
+        specifier: ^8.16.3
+        version: 8.20.0
       postcss:
         specifier: '>=8.5.10 <9.0.0'
         version: 8.5.19
@@ -162,6 +168,9 @@ importers:
       '@types/node':
         specifier: ^22.5.4
         version: 22.19.15
+      '@types/pg':
+        specifier: ^8.10.2
+        version: 8.10.2
       '@types/react':
         specifier: 19.1.8
         version: 19.1.8
@@ -186,9 +195,6 @@ importers:
       jsdom:
         specifier: 26.1.0
         version: 26.1.0
-      pg:
-        specifier: ^8.16.3
-        version: 8.20.0
       playwright:
         specifier: 1.56.1
         version: 1.56.1
@@ -294,6 +300,9 @@ importers:
       '@linksites/factory-catalog':
         specifier: workspace:*
         version: link:../../packages/factory-catalog
+      '@linksites/autowork-boundary':
+        specifier: workspace:*
+        version: link:../../packages/autowork-boundary
       '@linksites/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -369,6 +378,19 @@ importers:
         version: 3.4.19(tsx@4.23.9)
       typescript:
         specifier: ^5.7.2
+        version: 5.7.3
+
+  packages/autowork-boundary:
+    dependencies:
+      '@linksites/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      '@types/node':
+        specifier: ^22.5.4
+        version: 22.19.15
+      typescript:
+        specifier: 5.7.3
         version: 5.7.3
 
   packages/factory-catalog:

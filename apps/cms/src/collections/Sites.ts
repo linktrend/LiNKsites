@@ -68,6 +68,27 @@ export const Sites: CollectionConfig<'sites'> = {
       },
     },
     {
+      name: 'orgId',
+      type: 'text',
+      required: true,
+      index: true,
+      admin: { description: 'Canonical platform organization owning the linked Program and site' },
+    },
+    {
+      name: 'programId',
+      type: 'text',
+      required: true,
+      index: true,
+      admin: { description: 'Canonical Program Ledger identity for this site' },
+    },
+    {
+      name: 'leadId',
+      type: 'text',
+      required: true,
+      index: true,
+      admin: { description: 'Canonical lead identity claimed by the linked Program' },
+    },
+    {
       name: 'defaultLanguage',
       type: 'relationship',
       relationTo: 'languages',

@@ -11,6 +11,7 @@ RUN apk add --no-cache libc6-compat \
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY packages/types/package.json packages/types/package.json
+COPY packages/autowork-boundary/package.json packages/autowork-boundary/package.json
 COPY apps/cms/package.json apps/cms/package.json
 RUN pnpm install --frozen-lockfile
 
@@ -27,8 +28,11 @@ RUN addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 nextjs
 COPY --from=builder /app/apps/cms/public ./apps/cms/public
 RUN mkdir -p apps/cms/.next && chown nextjs:nodejs apps/cms/.next
+RUN mkdir -p /var/lib/linksites && chown nextjs:nodejs /var/lib/linksites
 COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/.next/static ./apps/cms/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/cron ./apps/cms/cron
+COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/src/payload/utils ./apps/cms/src/payload/utils
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000

@@ -1,6 +1,7 @@
 {
   "extends": "../../tooling/configs/tsconfig.base.json",
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "lib": [
       "DOM",

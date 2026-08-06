@@ -55,7 +55,7 @@ Use this checklist to verify the Master Template is ready for cloning.
 
 - [ ] Site works without analytics configured
 - [ ] Site works without CMS connected (uses mock data)
-- [ ] Site works without contact webhook configured
+- [ ] Site fails closed without governed contact delivery configured
 - [ ] Forms have fallback error handling
 - [ ] Images have fallback placeholders
 - [ ] Analytics scripts have try-catch error handling
@@ -271,10 +271,9 @@ Use this checklist when creating a production site for a specific client.
 
 ### 📋 Contact Form Configuration
 
-- [ ] Set `CONTACT_WEBHOOK_URL`
-- [ ] Set `CONTACT_WEBHOOK_SECRET`
-- [ ] Set `CONTACT_FALLBACK_EMAIL`
-- [ ] Test webhook endpoint
+- [ ] Set the LiNKautowork gateway, signing key reference, explicit grant, and outbox path
+- [ ] Set the separate outbox integrity secret
+- [ ] Test governed worker delivery and acknowledgement receipt
 - [ ] Test form submission
 
 ### 📋 Branding Assets
@@ -538,7 +537,7 @@ Use this section to identify potential coupling risks before cloning.
 |------|----------|------------|
 | Hardcoded API endpoints | 🔴 High | Use env vars for all endpoints |
 | Hardcoded CMS URLs | 🔴 High | Use `NEXT_PUBLIC_PAYLOAD_API_URL` |
-| Hardcoded webhook URLs | 🟡 Medium | Use `CONTACT_WEBHOOK_URL` |
+| Arbitrary contact delivery URL | 🔴 High | Use the signed LiNKautowork durable boundary |
 | Hardcoded analytics IDs | 🟡 Medium | Use `NEXT_PUBLIC_GA_MEASUREMENT_ID` etc. |
 | Hardcoded external service URLs | 🟡 Medium | Use env vars for all external URLs |
 

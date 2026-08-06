@@ -21,6 +21,7 @@
     "factory:create-demo-site": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/factory/create-demo-site.ts",
     "mvo:live-publish": "bash ../../scripts/mvo-live-publish.sh",
     "factory:attach-domain": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/factory/attach-domain.ts",
+    "autowork:drain": "cross-env NODE_OPTIONS=--no-deprecation tsx cron/drainLiNKautowork.ts",
     "factory:bootstrap": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/bootstrap-seed.ts",
     "validate:contracts": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/validate-contract.ts",
     "validate:supabase": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/validate-supabase.ts",
@@ -54,6 +55,8 @@
     "tailwindcss": "^3.4.13",
     "tailwindcss-animate": "^1.0.7",
     "@linksites/types": "workspace:*"
+    ,"@linksites/autowork-boundary": "workspace:*"
+    ,"pg": "^8.16.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
@@ -61,6 +64,7 @@
     "@testing-library/react": "16.3.0",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^22.5.4",
+    "@types/pg": "^8.10.2",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
     "@types/supertest": "^6.0.3",
@@ -69,7 +73,6 @@
     "eslint": "8.57.1",
     "eslint-config-next": "15.4.7",
     "jsdom": "26.1.0",
-    "pg": "^8.16.3",
     "playwright": "1.56.1",
     "playwright-core": "1.56.1",
     "prettier": "^3.4.2",
