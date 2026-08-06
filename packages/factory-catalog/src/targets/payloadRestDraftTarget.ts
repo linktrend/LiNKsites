@@ -154,6 +154,11 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
     }
   }
 
+  /** Field-level parity for the promotion service; Payload may add id/timestamps, so expected fields are authoritative. */
+  verifyParity(expected: Record<string, unknown>, actual: Record<string, unknown>): boolean {
+    return parityFields(expected, actual)
+  }
+
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
@@ -243,6 +248,12 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
     }
     return { Authorization: `${cred.collectionSlug} API-Key ${cred.apiKey}` }
   }
+}
+
+function parityFields(expected: unknown, actual: unknown): boolean {
+  if (Array.isArray(expected)) return Array.isArray(actual) && expected.length === actual.length && expected.every((value, index) => parityFields(value, actual[index]))
+  if (expected && typeof expected === 'object') return Boolean(actual && typeof actual === 'object' && !Array.isArray(actual) && Object.entries(expected as Record<string, unknown>).every(([key, value]) => parityFields(value, (actual as Record<string, unknown>)[key])))
+  return expected === actual
 }
 
 // ---------------------------------------------------------------------------

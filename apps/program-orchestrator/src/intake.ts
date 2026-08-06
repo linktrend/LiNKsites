@@ -15,7 +15,14 @@ export async function runFirstReadyFileLead(composition: Composition): Promise<L
   if (!item || !isLeadResearchPackage(item.envelope)) throw new Error('W2-02 manual intake is empty or invalid')
   const claim = await composition.intake.claim(item.itemId, item.envelope.lead_id, item.envelope.idempotency_key, new Date().toISOString())
   if (!claim) throw new Error('W2-02 manual intake claim was not acquired')
-  await composition.runtime.runLead(item.envelope)
-  await composition.intake.acknowledge(item.itemId, { state: 'program_started' })
+  try {
+    await composition.runtime.runLead(item.envelope)
+    await composition.intake.acknowledge(item.itemId, { state: 'program_started' })
+  } catch (error) {
+    const health = await composition.runtime.health()
+    const reasonCode = error instanceof Error ? error.message.split(':').slice(0, 2).join(':') : 'program:retry-required'
+    await composition.intake.acknowledge(item.itemId, { state: health.programState === 'manual_attention' ? 'program_manual_attention' : 'program_retry_scheduled', reasonCode, nextAttemptAt: new Date(Date.now() + 1).toISOString() })
+    throw error
+  }
   return item.envelope
 }

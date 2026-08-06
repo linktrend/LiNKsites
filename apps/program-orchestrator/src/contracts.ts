@@ -4,6 +4,7 @@ import type { ProgramDefinition } from '@linksites/program-ledger'
 
 export type IssueState = 'ready' | 'running' | 'retry_scheduled' | 'completed' | 'failed' | 'manual_attention'
 export type RunState = 'running' | 'succeeded' | 'retry_scheduled' | 'dead_lettered' | 'manual_attention'
+export type ModuleState = 'excluded' | 'running' | 'completed' | 'failed' | 'manual_attention'
 export type FailureClass = 'invalid_input' | 'transient_boundary' | 'gate_rejected' | 'partial_mutation' | 'configuration' | 'unknown'
 
 export type IssueDefinition = {
@@ -68,17 +69,29 @@ export type LedgerState = {
     updatedAt: string
     graph: ProgramDefinition
   }
-  modules: Array<{ moduleId: string; title: string; state: 'running' | 'completed' | 'failed' | 'manual_attention' }>
-  phases: Array<{ phaseId: string; moduleId: string; title: string; state: 'running' | 'completed' | 'failed' | 'manual_attention' }>
+  modules: Array<{ moduleId: string; title: string; state: ModuleState; scheduled: boolean }>
+  phases: Array<{ phaseId: string; moduleId: string; title: string; state: ModuleState; scheduled: boolean }>
   issues: IssueRecord[]
   runs: RunRecord[]
   receipts: Receipt[]
   events: Array<{ type: string; at: string; issueId?: string; runId?: string; data?: Record<string, unknown> }>
   completion: { state: 'pending' | 'reserved' | 'emitted'; envelope: DemoCompletionEnvelope | null }
-  outbox: Array<{ eventId: string; idempotencyKey: string; eventName: string; payload: Record<string, unknown>; delivered: boolean }>
+  outbox: Array<{
+    eventId: string
+    idempotencyKey: string
+    eventName: string
+    payload: Record<string, unknown>
+    status: 'pending' | 'delivered' | 'dead_lettered'
+    attempts: number
+    nextAttemptAt: string | null
+    lastAttemptAt: string | null
+    lastError: string | null
+    deadLetteredAt: string | null
+    ackAt: string | null
+  }>
   deadLetters: Array<{ issueId: string; runId: string; safeCode: string; at: string }>
   manualAttention: Array<{ issueId: string; reason: string; at: string }>
-  metrics: { attempts: number; retries: number; completedIssues: number; failedIssues: number; completionEmits: number }
+  metrics: { attempts: number; retries: number; completedIssues: number; failedIssues: number; completionEmits: number; outboxAttempts: number; outboxBacklog: number; outboxFailures: number; outboxDeadLetters: number; outboxAcks: number }
 }
 
 export type LeadInput = LeadResearchPackage
@@ -116,6 +129,10 @@ export type RuntimeConfig = {
   concurrency: number
   leaseDurationMs: number
   executingRevision: string
+  executableCheckpoint: string
+  workerId: string
+  payloadBaseUrl: string
+  webMasterBaseUrl: string
   approvedExecutors: Record<string, string>
   approvedCapabilities: Record<string, string[]>
 }

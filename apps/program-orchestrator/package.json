@@ -12,6 +12,7 @@
     "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
+    "@electric-sql/pglite": "0.5.4",
     "@linksites/factory-catalog": "workspace:*",
     "@linksites/intake-orchestrator": "workspace:*",
     "@linksites/program-ledger": "workspace:*",

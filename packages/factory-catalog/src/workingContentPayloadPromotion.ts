@@ -16,6 +16,7 @@ export function buildPromotionRequestFromPreparedWorkingContent(input: WorkingCo
       site: targetSiteId,
       locale: String(page.sections[0]?.content.lang ?? 'en'),
       content: page.sections.map((section) => ({ blockType: section.componentId, ...section.content })),
+      status: 'draft',
       promotionIdempotencyKey: input.promotionIdempotencyKey,
       workingPackageId: input.workingPackageId,
       workingPackageVersion: input.workingPackageVersion,

@@ -56,6 +56,11 @@ const issue = (issueKey: string, title: string, issueType: string, objective: st
 })
 
 const FIRST_PRIVATE_DEMO_PHASES: Record<string, PhaseDefinition[]> = {
+  M06: [
+    demo('inventory', 'Preview inventory management', 'Match and reserve one compatible reusable foundation without conflicting reservations.', [
+      issue('foundation-reservation', 'Reserve foundation inventory', 'foundation.reserve', 'Reserve a compatible foundation/template inventory item for the accepted preview request.', ['vertical-qualification']),
+    ]),
+  ],
   M07: [
     demo('intake', 'Lead intake and qualification', 'Accept and qualify one canonical lead package for the private demo.', [
       issue('lead-research', 'Pull and validate lead research', 'lead.research.validate', 'Validate the canonical lead/research package before any website work.'),
@@ -64,8 +69,7 @@ const FIRST_PRIVATE_DEMO_PHASES: Record<string, PhaseDefinition[]> = {
     ]),
   ],
   M08: [
-    demo('planning', 'Foundation and site planning', 'Reserve the correct reusable foundation and create deterministic site plans.', [
-      issue('foundation-reservation', 'Reserve foundation inventory', 'foundation.reserve', 'Reserve a compatible foundation/template inventory item.', ['vertical-qualification']),
+    demo('planning', 'Foundation and site planning', 'Resolve approved library artifacts and create a deterministic site plan for the reserved foundation.', [
       issue('library-verification', 'Verify exact library artifacts', 'library.verify', 'Verify the exact approved LiNKlibraries artifacts and SHA receipts.', ['foundation-reservation']),
       issue('site-specification', 'Build site specification and assembly manifest', 'site.plan', 'Produce the site specification and assembly manifest for this lead.', ['library-verification']),
     ]),
@@ -111,26 +115,26 @@ export const LINKSITES_PROGRAM: ProgramDefinition = {
   programId: 'linksites',
   title: 'LiNKsites — autonomous website factory and managed-website business',
   modules: [
-    moduleDefinition('M01', 'Product & Tier Governance', 'Governs product outcomes, tier specifications, add-ons, and exclusions.', 'product-capability'),
+    moduleDefinition('M01', 'Product and Tier Governance', 'Governs product outcomes, tier specifications, add-ons, and exclusions.', 'product-capability'),
     moduleDefinition('M02', 'Design Intelligence Operations', 'Governs design tokens and site design profile resolution.', 'product-capability'),
-    moduleDefinition('M03', 'Component & Frontend Platform Operations', 'Governs the Component Registry, assembly engine, and platform releases.', 'product-capability'),
+    moduleDefinition('M03', 'Component and Frontend Platform Operations', 'Governs the Component Registry, assembly engine, and platform releases.', 'product-capability'),
     moduleDefinition('M04', 'Vertical Kit Operations', 'Governs vertical kit lifecycle and production patterns.', 'product-capability'),
-    moduleDefinition('M05', 'Reusable Foundation Production', 'Governs reusable foundation lifecycle and adaptation contracts.', 'product-capability'),
+    moduleDefinition('M05', 'Reusable Site Foundation Production', 'Governs reusable foundation lifecycle and adaptation contracts.', 'product-capability'),
     moduleDefinition('M06', 'Preview Inventory Management', 'Governs preview inventory reservations and cost records.', 'preview-production'),
-    moduleDefinition('M07', 'Preview Intake & Planning', 'Validates preview requests and produces site specifications.', 'preview-production'),
+    moduleDefinition('M07', 'Preview Request Intake and Planning', 'Validates preview requests and produces site specifications.', 'preview-production'),
     moduleDefinition('M08', 'Prospect Site Adaptation', 'Applies the prospect adaptation contract atop a reserved foundation.', 'preview-production'),
-    moduleDefinition('M09', 'Content & Media Production', 'Produces grounded copy, media plans, and provenance manifests.', 'preview-production'),
+    moduleDefinition('M09', 'Content and Media Production', 'Produces grounded copy, media plans, and provenance manifests.', 'preview-production'),
     moduleDefinition('M10', 'Working-to-Payload Promotion', 'Operates the sole trusted path from working records to Payload drafts.', 'preview-production'),
-    moduleDefinition('M11', 'Preview Deployment & Validation', 'Builds, tests, and validates private preview releases.', 'preview-production'),
-    moduleDefinition('M12', 'Preview Outcome, Upgrade & Recycling', 'Handles preview completion, outcome, and recycling records.', 'preview-production'),
-    moduleDefinition('M13', 'Paid Order Intake & Customer Finalization', 'Validates paid activation packages and customer site instances.', 'paid-fulfilment'),
-    moduleDefinition('M14', 'Production Publication & Launch Certification', 'Operates launch readiness and launch certification.', 'paid-fulfilment'),
-    moduleDefinition('M15', 'Domain, DNS, TLS & Hosting Provisioning', 'Provisions approved custom hostnames and hosting assignments.', 'paid-fulfilment'),
-    moduleDefinition('M16', 'Site Operations, Monitoring & Recovery', 'Operates monitoring, incidents, and recovery.', 'managed-service'),
-    moduleDefinition('M17', 'Customer Changes & Service Evolution', 'Handles entitlement-bounded customer change requests.', 'managed-service'),
-    moduleDefinition('M18', 'Capacity, Regional Placement & Scaling', 'Operates capacity and placement decisions.', 'managed-service'),
-    moduleDefinition('M19', 'Suspension, Export & Termination', 'Handles suspension, export, and decommissioning.', 'managed-service'),
-    moduleDefinition('M20', 'Quality, Cost & Performance Improvement', 'Operates cross-cutting quality, cost, and performance improvement.', 'control-improvement'),
+    moduleDefinition('M11', 'Preview Deployment and Validation', 'Builds, tests, and validates private preview releases.', 'preview-production'),
+    moduleDefinition('M12', 'Preview Outcome, Upgrade, and Recycling', 'Handles preview completion, outcome, and recycling records.', 'preview-production'),
+    moduleDefinition('M13', 'Paid-Order Intake and Customer Finalization', 'Validates paid activation packages and customer site instances.', 'paid-fulfilment'),
+    moduleDefinition('M14', 'Production Publication and Launch Certification', 'Operates launch readiness and launch certification.', 'paid-fulfilment'),
+    moduleDefinition('M15', 'Domain, DNS, TLS, and Hosting Provisioning', 'Provisions approved custom hostnames and hosting assignments.', 'paid-fulfilment'),
+    moduleDefinition('M16', 'Site Operations, Monitoring, and Recovery', 'Operates monitoring, incidents, and recovery.', 'managed-service'),
+    moduleDefinition('M17', 'Customer Changes and Service Evolution', 'Handles entitlement-bounded customer change requests.', 'managed-service'),
+    moduleDefinition('M18', 'Capacity, Regional Placement, and Infrastructure Scaling', 'Operates capacity and placement decisions.', 'managed-service'),
+    moduleDefinition('M19', 'Suspension, Export, Termination, and Decommissioning', 'Handles suspension, export, and decommissioning.', 'managed-service'),
+    moduleDefinition('M20', 'Quality, Cost, Performance, and Program Improvement', 'Operates cross-cutting quality, cost, and performance improvement.', 'control-improvement'),
   ],
 }
 

@@ -34,8 +34,9 @@ export class ProgramRuntime {
     const validation = await this.adapters.validateLead(lead)
     if (!validation.valid) throw new Error(validation.reason ?? 'lead:invalid')
     await this.ledger.createOrResume(lead)
+    await this.ledger.reclaimExpiredLeases()
     await this.runUntilSettled()
-    await this.deliverCompletion().catch(() => undefined)
+    await this.deliverCompletion()
   }
 
   async runUntilSettled(maxCycles = 200): Promise<void> {
@@ -46,7 +47,7 @@ export class ProgramRuntime {
       if (ready.length === 0) return
       const batch = ready.slice(0, this.config.concurrency)
       const claims = await Promise.all(batch.map((issue) => this.ledger.claim(issue.issueId)))
-      await Promise.all(claims.filter((claim): claim is NonNullable<typeof claim> => claim !== null).map((claim) => this.execute(claim.issue, claim.run.runId)))
+      await Promise.all(claims.filter((claim): claim is NonNullable<typeof claim> => claim !== null).map((claim) => this.execute(claim.issue, claim.run.runId, claim.run.lease?.fencingToken ?? 0)))
     }
     throw new Error('runtime:max-cycles-exceeded')
   }
@@ -70,19 +71,16 @@ export class ProgramRuntime {
     return state.completion.envelope
   }
 
-  async exportState(): Promise<unknown> { const state = await this.ledger.snapshot(); return { ...state, executionRevision: this.config.executingRevision, executorRegistry: this.executors.list() } }
+  async exportState(): Promise<unknown> { const state = await this.ledger.snapshot(); return { ...(sanitize(state) as Record<string, unknown>), executionRevision: this.config.executingRevision, executableCheckpoint: this.config.executableCheckpoint, canonicalGraph: sanitize(state.program.graph), executorRegistry: this.executors.list(), persistedEvidence: state.runs.flatMap((run) => run.evidence).map((evidence) => ({ receiptId: evidence.receipt_id, storageLocation: evidence.storage_location, revisionSha: evidence.revision_sha, checksum: evidence.checksum })) } }
 
-  private async execute(issue: IssueRecord, runId: string): Promise<void> {
+  private async execute(issue: IssueRecord, runId: string, fencingToken: number): Promise<void> {
     this.active += 1
     try {
       if (!this.executors.resolve(issue.executorKind, issue.executorVersion)) throw new Error(`executor:unapproved:${issue.executorKind}@${issue.executorVersion}`)
       const output = await this.executeIssue(issue)
       const evidence = [this.evidence(issue, output)]
       if (issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, output)
-      await this.ledger.succeed(runId, output, evidence)
-      if (issue.issueId === 'completion-record') {
-        await this.deliverCompletion().catch(() => undefined)
-      }
+      await this.ledger.succeed(runId, fencingToken, output, evidence)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown'
       const crashAfterReceipt = message.startsWith('crash-after-receipt:')
@@ -96,7 +94,7 @@ export class ProgramRuntime {
       }
       if (permanentBoundary && priorIrreversibleEffect && failure.class !== 'gate_rejected') failure.class = 'partial_mutation'
       const retryable = failure.class === 'transient_boundary'
-      const result = await this.ledger.fail(runId, failure, retryable)
+      const result = await this.ledger.fail(runId, fencingToken, failure, retryable)
       if (result === 'manual_attention' || result === 'dead_letter') await this.adapters.compensate(issue.issueId, failure.safeCode)
     } finally {
       this.active -= 1
@@ -130,7 +128,7 @@ export class ProgramRuntime {
       case 'private-publication': return this.dependencies.frontendDeploymentAdapter.createPrivatePreview(`site:${lead.lead_id}`, output['payload-parity'] as Record<string, unknown>)
       case 'site-render-validation': return this.dependencies.frontendDeploymentAdapter.renderPrivatePreview(`site:${lead.lead_id}`, output['private-publication'] as Record<string, unknown>)
       case 'final-evidence': return this.dependencies.frontendDeploymentAdapter.captureEvidence(`site:${lead.lead_id}`, output['site-render-validation'] as Record<string, unknown>)
-      case 'completion-record': return { completionBoundary: 'crm-shaped', exactlyOnce: true, evidence: output['final-evidence'], executionRevision: this.config.executingRevision }
+      case 'completion-record': return { completionBoundary: 'shared-completion-sink', exactlyOnce: true, evidence: output['final-evidence'], executionRevision: this.config.executingRevision, executableCheckpoint: this.config.executableCheckpoint }
       default: throw new Error(`executor:unknown:${issue.executorKind}`)
     }
   }
@@ -144,11 +142,27 @@ export class ProgramRuntime {
   private async deliverCompletion(): Promise<void> {
     const envelope = await this.ledger.reserveCompletion()
     if (!envelope) return
-    await this.dependencies.eventAdapter.write(envelope)
-    await this.ledger.markCompletionEmitted()
+    const key = envelope.idempotency_key
+    await this.ledger.outboxAttempt(key)
+    try {
+      await this.dependencies.eventAdapter.write(envelope)
+      await this.ledger.markCompletionEmitted()
+    } catch (error) {
+      await this.ledger.outboxFailure(key, error instanceof Error ? error.message : String(error))
+      throw error
+    }
   }
 
   private leadFromSnapshot(state: Awaited<ReturnType<DurableLedger['snapshot']>>): LeadResearchPackage {
     return { schema_version: { major: 1, minor: 0 }, org_id: state.program.orgId, correlation_id: `program:${state.program.programId}`, idempotency_key: state.program.idempotencyKey, lead_id: state.program.leadId, requested_vertical: 'home_services', source: 'manual-file', research: { summary: 'recovered local lead', sources: ['local://recovered'] } }
   }
+}
+
+function sanitize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sanitize)
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, child]) => {
+    if (/token|secret|password|credential|authorization|api.?key/i.test(key)) return [key, '[REDACTED]']
+    return [key, sanitize(child)]
+  }))
 }

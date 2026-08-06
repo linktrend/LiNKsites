@@ -8,8 +8,8 @@ import type { IssueRecord, LedgerState, Receipt, RunRecord, RuntimeConfig } from
 const blankState = (orgId: string, lead: { lead_id: string; idempotency_key: string }, now: string): LedgerState => ({
   schemaVersion: 1,
   program: { programId: PERSISTED_PROGRAM_GRAPH.programId, orgId, leadId: lead.lead_id, idempotencyKey: lead.idempotency_key, state: 'running', createdAt: now, updatedAt: now, graph: structuredClone(PERSISTED_PROGRAM_GRAPH) },
-  modules: LINKSITES_PROGRAM.modules.map((module) => ({ moduleId: module.moduleId, title: module.title, state: 'running' as const })),
-  phases: LINKSITES_PROGRAM.modules.flatMap((module) => module.phases.map((phase) => ({ phaseId: phase.phaseId, moduleId: module.moduleId, title: phase.title, state: 'running' as const }))),
+  modules: LINKSITES_PROGRAM.modules.map((module) => { const scheduled = W2_02_GRAPH.some((issue) => issue.moduleId === module.moduleId); return { moduleId: module.moduleId, title: module.title, state: scheduled ? 'running' as const : 'excluded' as const, scheduled } }),
+  phases: LINKSITES_PROGRAM.modules.flatMap((module) => module.phases.map((phase) => { const scheduled = W2_02_GRAPH.some((issue) => issue.moduleId === module.moduleId && issue.phaseId === phase.phaseId); return { phaseId: phase.phaseId, moduleId: module.moduleId, title: phase.title, state: scheduled ? 'running' as const : 'excluded' as const, scheduled } })),
   issues: W2_02_GRAPH.map((issue): IssueRecord => ({ ...issue, state: issue.dependsOn.length === 0 ? 'ready' : 'ready', attempt: 0, nextAttemptAt: null, output: null, gate: 'pending', runIds: [] })),
   runs: [],
   receipts: [],
@@ -18,7 +18,7 @@ const blankState = (orgId: string, lead: { lead_id: string; idempotency_key: str
   outbox: [],
   deadLetters: [],
   manualAttention: [],
-  metrics: { attempts: 0, retries: 0, completedIssues: 0, failedIssues: 0, completionEmits: 0 },
+  metrics: { attempts: 0, retries: 0, completedIssues: 0, failedIssues: 0, completionEmits: 0, outboxAttempts: 0, outboxBacklog: 0, outboxFailures: 0, outboxDeadLetters: 0, outboxAcks: 0 },
 })
 
 const clone = <T>(value: T): T => structuredClone(value)
@@ -99,6 +99,22 @@ export class DurableLedger {
     }).map(clone)
   }
 
+  async reclaimExpiredLeases(now = new Date().toISOString()): Promise<number> {
+    return this.mutate(async (current) => {
+      if (!current) return { state: current, result: 0 }
+      let reclaimed = 0
+      for (const run of current.runs) {
+        if (run.state !== 'running' || !run.lease || run.lease.expiresAt > now) continue
+        const issue = current.issues.find((candidate) => candidate.issueId === run.issueId)
+        if (!issue || issue.state !== 'running') continue
+        run.state = 'retry_scheduled'; run.completedAt = now; run.failure = { class: 'transient_boundary', safeCode: 'lease:expired-reclaimed' }; issue.state = 'retry_scheduled'; issue.nextAttemptAt = now
+        current.metrics.retries += 1; reclaimed += 1
+        current.events.push({ type: 'run.lease_reclaimed', at: now, issueId: issue.issueId, runId: run.runId, data: { fencingToken: run.lease.fencingToken } })
+      }
+      return { state: current, result: reclaimed }
+    })
+  }
+
   async claim(issueId: string): Promise<{ issue: IssueRecord; run: RunRecord } | null> {
     return this.mutate(async (current) => {
       if (!current) return { state: null, result: null }
@@ -108,7 +124,9 @@ export class DurableLedger {
       issue.state = 'running'
       issue.attempt += 1
       issue.nextAttemptAt = null
-      const run: RunRecord = { runId: `run:${issue.issueId}:${issue.attempt}:${randomUUID()}`, issueId, attempt: issue.attempt, state: 'running', startedAt: new Date().toISOString(), completedAt: null, output: null, failure: null, evidence: [], lease: null }
+      const startedAt = new Date().toISOString()
+      const fencingToken = current.runs.reduce((max, candidate) => Math.max(max, candidate.lease?.fencingToken ?? 0), 0) + 1
+      const run: RunRecord = { runId: `run:${issue.issueId}:${issue.attempt}:${randomUUID()}`, issueId, attempt: issue.attempt, state: 'running', startedAt, completedAt: null, output: null, failure: null, evidence: [], lease: { owner: this.config.workerId, expiresAt: new Date(Date.now() + this.config.leaseDurationMs).toISOString(), fencingToken } }
       issue.runIds.push(run.runId)
       current.runs.push(run)
       current.metrics.attempts += 1
@@ -138,24 +156,25 @@ export class DurableLedger {
     })
   }
 
-  async succeed(runId: string, output: unknown, evidence: EvidenceReceipt[]): Promise<void> {
+  async succeed(runId: string, fencingToken: number, output: unknown, evidence: EvidenceReceipt[]): Promise<void> {
     await this.mutate(async (current) => {
       if (!current) throw new Error('program has not been created')
       const run = current.runs.find((candidate) => candidate.runId === runId)
       if (!run) throw new Error(`run ${runId} not found`)
       if (run.state === 'succeeded') return { state: current, result: undefined }
+      if (run.state !== 'running' || run.lease?.fencingToken !== fencingToken) throw new Error('run completion rejected by stale lease fencing token')
       const issue = current.issues.find((candidate) => candidate.issueId === run.issueId)
       if (!issue) throw new Error(`issue ${run.issueId} not found`)
       run.state = 'succeeded'; run.completedAt = new Date().toISOString(); run.output = clone(output); run.evidence = clone(evidence)
       if (evidence.length === 0) throw new Error('successful run requires evidence')
       issue.output = clone(output); issue.gate = 'accepted'; issue.state = 'completed'
       current.metrics.completedIssues += 1
-      for (const phase of current.phases) {
+      for (const phase of current.phases.filter((candidate) => candidate.scheduled)) {
         const phaseIssues = current.issues.filter((candidate) => candidate.phaseId === phase.phaseId)
         if (phaseIssues.every((candidate) => candidate.state === 'completed')) phase.state = 'completed'
       }
       current.events.push({ type: 'gate.accepted', at: run.completedAt, issueId: issue.issueId, runId, data: { evidence: evidence.map((item) => item.receipt_id) } })
-      for (const module of current.modules) {
+      for (const module of current.modules.filter((candidate) => candidate.scheduled)) {
         const moduleIssues = current.issues.filter((candidate) => candidate.moduleId === module.moduleId)
         if (moduleIssues.every((candidate) => candidate.state === 'completed')) module.state = 'completed'
       }
@@ -165,13 +184,14 @@ export class DurableLedger {
     })
   }
 
-  async fail(runId: string, failure: { class: import('./contracts.ts').FailureClass; safeCode: string }, retryable: boolean): Promise<'retry' | 'dead_letter' | 'manual_attention'> {
+  async fail(runId: string, fencingToken: number, failure: { class: import('./contracts.ts').FailureClass; safeCode: string }, retryable: boolean): Promise<'retry' | 'dead_letter' | 'manual_attention'> {
     return this.mutate(async (current) => {
       if (!current) throw new Error('program has not been created')
       const run = current.runs.find((candidate) => candidate.runId === runId)
       if (!run) throw new Error(`run ${runId} not found`)
       const issue = current.issues.find((candidate) => candidate.issueId === run.issueId)
       if (!issue) throw new Error(`issue ${run.issueId} not found`)
+      if (run.state !== 'running' || run.lease?.fencingToken !== fencingToken) throw new Error('run failure rejected by stale lease fencing token')
       run.failure = failure
       run.completedAt = new Date().toISOString()
       if (retryable && issue.attempt < this.config.maxAttempts) {
@@ -202,6 +222,8 @@ export class DurableLedger {
       }
       current.completion = { state: 'reserved', envelope }
       current.metrics.completionEmits += 1
+      current.outbox.push({ eventId: `outbox:${envelope.idempotency_key}`, idempotencyKey: envelope.idempotency_key, eventName: 'program.completed', payload: envelope as unknown as Record<string, unknown>, status: 'pending', attempts: 0, nextAttemptAt: now, lastAttemptAt: null, lastError: null, deadLetteredAt: null, ackAt: null })
+      current.metrics.outboxBacklog = current.outbox.filter((entry) => entry.status === 'pending').length
       current.events.push({ type: 'completion.reserved', at: now })
       return { state: current, result: clone(envelope) }
     })
@@ -210,8 +232,34 @@ export class DurableLedger {
   async markCompletionEmitted(): Promise<void> {
     await this.mutate(async (current) => {
       if (!current) throw new Error('program has not been created')
+      if (current.completion.state === 'emitted') return { state: current, result: undefined }
       current.completion.state = 'emitted'
+      const outbox = current.outbox.find((entry) => entry.idempotencyKey === current.completion.envelope?.idempotency_key)
+      if (outbox) { outbox.status = 'delivered'; outbox.ackAt = new Date().toISOString(); outbox.nextAttemptAt = null; current.metrics.outboxAcks += 1; current.metrics.outboxBacklog = current.outbox.filter((entry) => entry.status === 'pending').length }
       current.events.push({ type: 'completion.emitted', at: new Date().toISOString() })
+      return { state: current, result: undefined }
+    })
+  }
+
+  async outboxAttempt(idempotencyKey: string): Promise<void> {
+    await this.mutate(async (current) => {
+      if (!current) throw new Error('program has not been created')
+      const entry = current.outbox.find((candidate) => candidate.idempotencyKey === idempotencyKey)
+      if (!entry || entry.status !== 'pending') return { state: current, result: undefined }
+      entry.attempts += 1; entry.lastAttemptAt = new Date().toISOString(); current.metrics.outboxAttempts += 1
+      return { state: current, result: undefined }
+    })
+  }
+
+  async outboxFailure(idempotencyKey: string, error: string): Promise<void> {
+    await this.mutate(async (current) => {
+      if (!current) throw new Error('program has not been created')
+      const entry = current.outbox.find((candidate) => candidate.idempotencyKey === idempotencyKey)
+      if (!entry || entry.status !== 'pending') return { state: current, result: undefined }
+      entry.lastError = error; current.metrics.outboxFailures += 1
+      if (entry.attempts >= this.config.maxAttempts) { entry.status = 'dead_lettered'; entry.deadLetteredAt = new Date().toISOString(); entry.nextAttemptAt = null; current.metrics.outboxDeadLetters += 1 }
+      else entry.nextAttemptAt = new Date(Date.now() + 1).toISOString()
+      current.metrics.outboxBacklog = current.outbox.filter((candidate) => candidate.status === 'pending').length
       return { state: current, result: undefined }
     })
   }

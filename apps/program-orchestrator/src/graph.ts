@@ -4,7 +4,7 @@ import type { IssueDefinition } from './contracts.ts'
 export { LINKSITES_PROGRAM }
 
 export const PROGRAM_ID = LINKSITES_PROGRAM.programId
-export const PROGRAM_MODULE_IDS = ['M07', 'M08', 'M09', 'M10', 'M11', 'M12'] as const
+export const PROGRAM_MODULE_IDS = ['M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12'] as const
 
 type ExecutorBinding = {
   version: string
@@ -68,5 +68,7 @@ export const GRAPH_EXPORT = {
   program: PERSISTED_PROGRAM_GRAPH,
   hierarchy: 'Module > Phase > Issue > Run',
   issues: W2_02_GRAPH,
-  excluded: ['M01-M06 empty canonical modules', 'M13-M20 paid fulfilment and managed-service modules', 'sold-site-public-activation', 'commercial-payment', 'commercial-erp', 'raw-n8n', 'VPS', 'cloud', 'live-credentials'],
+  capabilities: EXECUTOR_BINDINGS,
+  scheduledModules: [...PROGRAM_MODULE_IDS],
+  excluded: ['M01-M05 canonical modules not scheduled by W2-02', 'M08 prospect adaptation issues not scheduled by this bounded private-demo slice', 'M13-M20 paid fulfilment and managed-service modules', 'sold-site-public-activation', 'commercial-payment', 'commercial-erp', 'raw-n8n', 'VPS', 'cloud', 'live-credentials'],
 }

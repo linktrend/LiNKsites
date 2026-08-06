@@ -23,7 +23,7 @@ describe('W1-02 durable hierarchy and gates', () => {
     expect(seeded.phases.length).toBeGreaterThan(0)
     expect(seeded.issues.length).toBe(16)
     expect((await store.listPhases('linksites', 'M07')).map((phase) => phase.phaseId)).toEqual(['intake'])
-    expect((await ledger.getRunnableIssues({ programId: 'linksites' })).map((issue) => issue.issueKey)).toEqual(['lead-research'])
+    expect((await ledger.getRunnableIssues({ programId: 'linksites' })).map((issue) => issue.issueKey)).toEqual(['foundation-reservation', 'lead-research'])
   })
 
   it('allows safe parallel readiness and blocks a dependent after gate rejection', async () => {

@@ -232,6 +232,9 @@ importers:
 
   apps/program-orchestrator:
     dependencies:
+      '@electric-sql/pglite':
+        specifier: 0.5.4
+        version: 0.5.4
       '@linksites/factory-catalog':
         specifier: workspace:*
         version: link:../../packages/factory-catalog

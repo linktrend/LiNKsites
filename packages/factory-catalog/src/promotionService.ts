@@ -36,13 +36,11 @@
  *    every item failed, `'partial'` otherwise; an empty item list is
  *    `'succeeded'` with an empty ledger).
  *
- * This module only consumes the injected `PayloadDraftTarget`
- * interface (manual §12.18: no raw SQL into Payload-owned tables for
- * routine promotion) -- it never talks to a real database or a real
- * Payload instance itself. A real Payload-backed `PayloadDraftTarget`
- * implementation is future work once live infrastructure is available
- * (GAP-50); an in-memory test double is expected to be supplied by
- * callers/tests, not by this file.
+ * This module only consumes the injected `PayloadDraftTarget` interface
+ * (manual §12.18: no raw SQL into Payload-owned tables for routine
+ * promotion). The W2-03 production composition supplies
+ * `PayloadRestDraftTarget`, which calls the Payload REST service; tests may
+ * still inject a narrow target without changing that production path.
  */
 
 import type { SchemaVersion } from '@linksites/types'
@@ -105,13 +103,9 @@ export interface PromotionReceipt {
 export class PromotionServiceError extends Error {}
 
 /**
- * The trusted write+readback interface a real implementation would call
- * through Payload's Local API/REST (manual §12.18: no raw SQL into
- * Payload-owned tables for routine promotion). This module only
- * consumes this interface -- it never talks to a real database itself.
- * An in-memory implementation for tests is expected to be supplied by
- * callers/tests, not by this file. A real Payload-backed implementation
- * is future work once live infrastructure is available (GAP-50).
+ * The trusted write+readback interface calls Payload's Local API/REST
+ * (manual §12.18: no raw SQL into Payload-owned tables for routine
+ * promotion). `PayloadRestDraftTarget` is the real REST implementation.
  */
 export interface PayloadDraftTarget {
   upsertDraft(
