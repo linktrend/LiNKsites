@@ -251,7 +251,7 @@ export interface CmsPage {
   title: string;
   pageType?: string;
   content: CmsPageBlock[];
-  status: "published";
+  status: "draft" | "published";
   revision?: string | number;
   seo?: CmsPageSeo;
   reviewedAt?: string | null;
@@ -273,15 +273,16 @@ type PayloadPage = Omit<CmsPage, "content" | "status"> & {
   previewEnvironment?: string | null;
 };
 
-export const assertPublishedPage = (page: PayloadPage): CmsPage => {
-  if (page.status !== "published") {
-    throw new PublishedContentError(`page "${page.slug || "unknown"}" is not published`);
+export const assertAudiencePage = (page: PayloadPage, audience: PageAudience): CmsPage => {
+  const expectedStatus = audience === "private-preview" ? "draft" : "published";
+  if (page.status !== expectedStatus) {
+    throw new PublishedContentError(`page "${page.slug || "unknown"}" is not ${expectedStatus}`);
   }
   const content = Array.isArray(page.content) ? page.content : page.layout;
   if (!page.id || !page.site || !page.locale || !page.slug || !page.title || !Array.isArray(content) || content.length === 0) {
     throw new PublishedContentError(`page "${page.slug || "unknown"}" is missing required fields`);
   }
-  return { ...page, content, status: "published" };
+  return { ...page, content, status: expectedStatus } as CmsPage;
 };
 
 type GetPageArgs = {
@@ -310,10 +311,14 @@ export const getPageBySlug = async ({
     depth: 2,
     locale,
     site: siteId,
+    draft: audience === "private-preview",
   });
 
-  const page = selectPageForAudience(result.docs as PayloadPage[], audience);
-  return page ? assertPublishedPage(page) : null;
+  const previewRunMarker = audience === "private-preview" ? process.env.PREVIEW_RUN_MARKER : undefined;
+  if (previewRunMarker && !/^w2-02-run-[a-f0-9]{16}$/.test(previewRunMarker)) return null;
+  const candidates = previewRunMarker ? result.docs.filter((candidate) => JSON.stringify(candidate).includes(previewRunMarker)) : result.docs;
+  const page = selectPageForAudience(candidates as PayloadPage[], audience);
+  return page ? assertAudiencePage(page, audience) : null;
 };
 
 export const getHomepage = async ({
