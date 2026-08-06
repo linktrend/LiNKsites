@@ -163,6 +163,34 @@ describe('W2-06 commercial outcome lifecycle', () => {
     expect((await (service as unknown as { store: InMemoryLifecycleStore }).store.getBySiteId(noSale.org_id, noSale.site_id))?.status).toBe('manual_attention')
   })
 
+  it('durably preserves a successful quarantine and failed inventory readback as the only allowed incomplete recycle state', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-06-release-readback-'))
+    try {
+      const reservations = new FoundationReservationManager()
+      const reservation = reservations.reserve('foundation-release-readback', 'program-release-readback')
+      const adaptation = { schemaVersion: { major: 1, minor: 0 }, adaptationId: 'adaptation-release-readback', siteSpecId: 'spec-release-readback', foundationId: 'foundation-release-readback', reservationId: reservation.reservationId, status: 'published' as const, prospectContent: { businessName: 'Private Co' }, createdAt: '2026-08-01T00:00:00.000Z' }
+      // Simulate an adversarial provider that reports release success by
+      // returning normally but leaves the active reservation in place.  The
+      // exact helper must reject its readback and persist both proofs.
+      reservations.release = () => undefined
+      const service = new SiteLifecycleService(createFileLifecycleStore(directory), authorization, undefined, verifiedEvidence)
+      await service.recordOutcome(noSale)
+      const quarantine = { receiptId: 'quarantine-release-readback', kind: 'recycling' as const, idempotencyKey: validRecyclingRequest.idempotency_key, subjectId: validRecyclingRequest.site_id, mode: 'dry_run' as const, action: 'content.quarantine', status: 'completed' as const, createdAt: new Date().toISOString(), details: { publicMutation: false, leadContentRetained: false, leadContentRemoved: true, adaptationId: adaptation.adaptationId, foundationId: adaptation.foundationId, reservationId: adaptation.reservationId, templateInventoryId: validRecyclingRequest.template_inventory_id } }
+      await expect(service.recycleNoSale({ request: validRecyclingRequest, adaptation, reservations, conversionLocks: new ConversionLockRegistry(), inventoryBinding: recycleBinding(adaptation), completedEvidence, quarantineLeadContent: async () => quarantine })).rejects.toThrow(/release did not complete/i)
+
+      const restarted = createFileLifecycleStore(directory)
+      const stored = await restarted.getBySiteId(noSale.org_id, noSale.site_id)
+      expect(stored?.status).toBe('manual_attention')
+      expect(stored?.recyclingRequest).toEqual(validRecyclingRequest)
+      expect(stored?.recycleEvidence).toBeNull()
+      expect(stored?.receipts.filter((entry) => entry.action === 'content.quarantine' && entry.status === 'completed')).toEqual([quarantine])
+      expect(stored?.receipts.filter((entry) => entry.action === 'inventory.release' && entry.status === 'failed').every((entry) => entry.details.publicMutation === false && entry.details.errorRecorded === true)).toBe(true)
+      expect(reservations.getActiveReservation(adaptation.foundationId)?.reservationId).toBe(reservation.reservationId)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
   it('has bounded deferred retention with no automatic retry loop', async () => {
     const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization)
     const record = await service.recordOutcome(deferred)

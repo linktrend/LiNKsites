@@ -251,6 +251,13 @@ function hasConsistentLifecycleInvariants(record: LifecycleRecord): boolean {
     const evidence = record.recycleEvidence
     const release = record.receipts.find((entry) => entry.receiptId === evidence.recycleReceipt.receiptId)
     if (!release || !sameCanonicalValue(release, evidence.recycleReceipt) || release.kind !== 'recycling' || release.action !== 'inventory.release' || release.status !== 'completed' || release.mode !== 'dry_run' || release.subjectId !== record.siteId || release.idempotencyKey !== record.recyclingRequest.idempotency_key || release.details.adaptationId !== evidence.adaptationId || release.details.foundationId !== evidence.foundationId || release.details.reservationId !== evidence.reservationId || release.details.inventoryId !== evidence.templateInventoryId || release.details.publicMutation !== false) return false
+  } else if (record.status === 'manual_attention' && record.recyclingRequest) {
+    // A no-sale quarantine can succeed while the exact inventory release (or
+    // its required post-release readback) fails.  This is the one incomplete
+    // recycle state that may be retained: it preserves the successful
+    // quarantine proof and the failed release proof for a human to resolve,
+    // but never represents a completed recycle or permits Architect use.
+    if (record.outcome !== 'no_sale' || record.recycleEvidence || !isManualRecycleReleaseFailure(record)) return false
   } else if (record.recyclingRequest || record.recycleEvidence) return false
   for (const refactor of record.refactoringRequests) {
     if (refactor.lifecycleId !== record.lifecycleId || refactor.siteId !== record.siteId || record.status !== 'recycled' || !record.recycleEvidence || refactor.foundationId !== record.recycleEvidence.foundationId || refactor.templateInventoryId !== record.recycleEvidence.templateInventoryId) return false
@@ -277,6 +284,40 @@ function hasConsistentLifecycleInvariants(record: LifecycleRecord): boolean {
     if (nested.kind === 'architect_candidate' && !record.candidateSubmissions.some((candidate) => candidate.submissionReceipt.receiptId === nested.receiptId)) return false
   }
   return true
+}
+
+/** The only incomplete recycle state that may survive a restart. */
+function isManualRecycleReleaseFailure(record: LifecycleRecord): boolean {
+  const request = record.recyclingRequest
+  if (!request || record.status !== 'manual_attention') return false
+  const quarantines = record.receipts.filter((entry) =>
+    entry.kind === 'recycling' &&
+    entry.action === 'content.quarantine' &&
+    entry.status === 'completed' &&
+    entry.mode === 'dry_run' &&
+    entry.subjectId === record.siteId &&
+    entry.idempotencyKey === request.idempotency_key &&
+    entry.details.publicMutation === false &&
+    entry.details.leadContentRetained === false &&
+    entry.details.leadContentRemoved === true &&
+    entry.details.templateInventoryId === request.template_inventory_id &&
+    isNonEmpty(entry.details.adaptationId) &&
+    isNonEmpty(entry.details.foundationId) &&
+    isNonEmpty(entry.details.reservationId),
+  )
+  const releaseFailures = record.receipts.filter((entry) =>
+    entry.kind === 'recycling' &&
+    entry.action === 'inventory.release' &&
+    entry.status === 'failed' &&
+    entry.mode === 'dry_run' &&
+    entry.subjectId === record.siteId &&
+    entry.idempotencyKey === request.idempotency_key &&
+    Object.keys(entry.details).length === 2 &&
+    entry.details.publicMutation === false &&
+    entry.details.errorRecorded === true,
+  )
+  return quarantines.length === 1 && releaseFailures.length === 1 &&
+    record.receipts.filter((entry) => entry.kind === 'recycling').length === 2
 }
 
 /** The only synthetic activation failure receipt written by this service. */
@@ -491,11 +532,11 @@ export class SiteLifecycleService {
     try {
       released = archiveAndReleaseExactFoundation(context.adaptation, context.reservations, context.conversionLocks)
     } catch (error) {
-      await recordManualAttention(this.store, lifecycle, context.request.idempotency_key, 'inventory.release')
+      await recordRecycleReleaseFailure(this.store, lifecycle, context.request, quarantine)
       throw error
     }
     if (released.release.status !== 'released' || released.release.reservationId !== context.adaptation.reservationId || released.release.foundationId !== context.adaptation.foundationId) {
-      await recordManualAttention(this.store, lifecycle, context.request.idempotency_key, 'inventory.release')
+      await recordRecycleReleaseFailure(this.store, lifecycle, context.request, quarantine)
       throw new LifecycleError('No-sale recycling requires a successful exact inventory release result.')
     }
     const recycleReceipt = receipt('recycling', context.request.idempotency_key, lifecycle.siteId, 'dry_run', 'inventory.release', 'completed', { inventoryId: context.request.template_inventory_id, foundationId: context.adaptation.foundationId, reservationId: released.release.reservationId, adaptationId: context.adaptation.adaptationId, leadContentRetained: false, publicMutation: false })
@@ -577,6 +618,20 @@ function assertRecyclingBinding(lifecycle: LifecycleRecord, context: RecyclingCo
 async function recordManualAttention(store: LifecycleStore, lifecycle: LifecycleRecord, idempotencyKey: string, action: string): Promise<void> {
   lifecycle.status = 'manual_attention'
   lifecycle.receipts.push(receipt('recycling', idempotencyKey, lifecycle.siteId, 'dry_run', action, 'failed', { publicMutation: false, errorRecorded: true }))
+  lifecycle.updatedAt = new Date().toISOString()
+  await store.save(lifecycle)
+}
+
+/**
+ * Records a quarantine that really completed before the inventory operation
+ * failed.  `recycleEvidence` intentionally remains null: there is no release
+ * receipt and therefore no completed recycle to reuse or submit as a library
+ * candidate.
+ */
+async function recordRecycleReleaseFailure(store: LifecycleStore, lifecycle: LifecycleRecord, request: RecyclingRequest, quarantine: LifecycleReceipt): Promise<void> {
+  lifecycle.status = 'manual_attention'
+  lifecycle.recyclingRequest = structuredClone(request)
+  lifecycle.receipts.push(quarantine, receipt('recycling', request.idempotency_key, lifecycle.siteId, 'dry_run', 'inventory.release', 'failed', { publicMutation: false, errorRecorded: true }))
   lifecycle.updatedAt = new Date().toISOString()
   await store.save(lifecycle)
 }
