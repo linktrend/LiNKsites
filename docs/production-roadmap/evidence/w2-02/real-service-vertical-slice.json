@@ -1,10 +1,10 @@
 {
   "scope": "disposable local actual Payload plus optimized web-master plus Chromium",
-  "executedRevision": "72caae160f710ef654499127cd981cc96e6fbbb9",
+  "executedRevision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
   "executableCheckpoint": "8f1f6865a68bfc826cb94741362d0611b43ecfeddb0d104deb24be60ee992ad9",
   "proofBinding": {
     "protocol": "w2-02-proof-binding-v1",
-    "testedSourceRevision": "72caae160f710ef654499127cd981cc96e6fbbb9",
+    "testedSourceRevision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
     "executableCheckpoint": "8f1f6865a68bfc826cb94741362d0611b43ecfeddb0d104deb24be60ee992ad9",
     "evidenceCommit": "the Git commit that first adds this receipt; it is intentionally distinct from testedSourceRevision"
   },
@@ -14,7 +14,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:foundation-reservation:4ba03c64946e"
+        "evidence:foundation-reservation:3cebebe72691"
       ]
     },
     {
@@ -22,7 +22,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:lead-research:f9874d6bfeb5"
+        "evidence:lead-research:30acf3ac25d2"
       ]
     },
     {
@@ -46,7 +46,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:library-verification:eedf64c74627"
+        "evidence:library-verification:0b15a4bcbc7a"
       ]
     },
     {
@@ -54,7 +54,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:site-specification:db4b9bb7f51f"
+        "evidence:site-specification:3217f6e46c71"
       ]
     },
     {
@@ -62,7 +62,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:information-architecture:6b2b41093903"
+        "evidence:information-architecture:1c674b30464b"
       ]
     },
     {
@@ -70,7 +70,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:media-provenance:b12947825e8f"
+        "evidence:media-provenance:132129eb77e9"
       ]
     },
     {
@@ -78,7 +78,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:working-content-assembly:85e42e64fe9b"
+        "evidence:working-content-assembly:415d334cc6d1"
       ]
     },
     {
@@ -86,7 +86,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:content-gates:e8264270c757"
+        "evidence:content-gates:6e9f14e714ad"
       ]
     },
     {
@@ -94,7 +94,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:payload-draft:d8d07ce628eb"
+        "evidence:payload-draft:fec383888a69"
       ]
     },
     {
@@ -102,7 +102,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:payload-parity:aa25223f07ab"
+        "evidence:payload-parity:f5dffb91d7f6"
       ]
     },
     {
@@ -110,7 +110,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:private-publication:993fc9f0cb34"
+        "evidence:private-publication:23293f9e2df0"
       ]
     },
     {
@@ -118,7 +118,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:site-render-validation:d0a347d5580c"
+        "evidence:site-render-validation:e85b61554b60"
       ]
     },
     {
@@ -126,7 +126,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:final-evidence:25d098211bc6"
+        "evidence:final-evidence:c84fc8e022aa"
       ]
     },
     {
@@ -134,7 +134,7 @@
       "state": "completed",
       "gateDecision": "accepted",
       "evidenceIds": [
-        "evidence:completion-record:bb2a77b79067"
+        "evidence:completion-record:9d0451a5e217"
       ]
     }
   ],
@@ -142,68 +142,68 @@
     {
       "issueId": "foundation-reservation",
       "operation": "factory-catalog",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "4ba03c64946e311a37e19bedc29928c2d90ed615df07388fb671ec052ec029a4"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "3cebebe72691678d7a7cd1dc53a842ae0f2f5cbfc5ea06ccd9f7150ee5f98ec9"
     },
     {
       "issueId": "library-verification",
       "operation": "library-consumer",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "eedf64c7462757d1a89175479876e140b0f3aee3ef6cd2adab53fdd0779c01dc"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "0b15a4bcbc7a4d7e9af78f26fc886601e669c6065efe8a55efb298aec9d6de3c"
     },
     {
       "issueId": "information-architecture",
       "operation": "working-content",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "6b2b410939031ce894f9209e2b43df7654c1dc8cae55e2cd5d26b3423aa47022"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "1c674b30464bd5c798eb0fb135e6b21790e8741bfd46bfa2675e15057bf4ed10"
     },
     {
       "issueId": "media-provenance",
       "operation": "working-content",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "b12947825e8f47223870f33a6f3a7ce1aaf300da0e8d7557b5eaaff028ee65cf"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "132129eb77e955bf86d71fad3cd5ace9b8892befbe53d36ca6f8ab6518352f0d"
     },
     {
       "issueId": "working-content-assembly",
       "operation": "working-content",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "85e42e64fe9b3bbe9fd0af005fb2055b460e02d0f26d005e75556138296e040d"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "415d334cc6d1b0efbc987c3f7a872a2c385bc1d2968ba4d17c619cabac9c9218"
     },
     {
       "issueId": "payload-draft",
       "operation": "payload-cms",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "d8d07ce628ebe48570a5028881eca2687e9fdd0435d9e2cd61838ea4d8be8b77"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "fec383888a6919bb492c4474b72988a232011d01e0c58e2ee33fa2e5b8a8a4ce"
     },
     {
       "issueId": "payload-parity",
       "operation": "payload-cms",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "aa25223f07ab907c393390d00cb4d97dc32e5175a87f6a8def1c132ecc9f0e97"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "f5dffb91d7f67b63c3ea9426e8410813e6f39439cc57e5f4657ed3e6276e994a"
     },
     {
       "issueId": "private-publication",
       "operation": "frontend",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "993fc9f0cb34064bcb873a6a3400496c5d6cbbe1e4c53bc8c3b3681cb3b155dc"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "23293f9e2df0ae04725b98afd1137954a80d90875a90acec400e3e0aec5ea713"
     },
     {
       "issueId": "site-render-validation",
       "operation": "frontend",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "d0a347d5580c9025fe3f1c6758262315a53911b09e3cf6a49c0ae6db7825d703"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "e85b61554b608b99c369c5d27efa2cda9df7137415fc94a1f09eab009d79b37d"
     },
     {
       "issueId": "completion-record",
       "operation": "completion-sink",
-      "revision": "72caae160f710ef654499127cd981cc96e6fbbb9",
-      "valueChecksum": "bb2a77b79067e8663f54d3b0073d807ed1b7f946a8420d322d0db7cf86782b59"
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "9d0451a5e2176a4879d60b0bc31bbd370264cfc8166fdc552c42333298a8c453"
     }
   ],
   "persistedEvidenceReceipts": 16,
   "payloadReadback": {
     "siteId": "1",
-    "runMarker": "w2-02-run-450657f69476aafc",
+    "runMarker": "w2-02-run-66e948c35ede345c",
     "promotedDraftDocumentIds": [
       "13",
       "12",
@@ -251,7 +251,7 @@
   "completion": {
     "emitted": true,
     "outboxStatus": "delivered",
-    "outboxAckAt": "2026-08-06T13:44:13.881Z",
+    "outboxAckAt": "2026-08-06T13:46:41.226Z",
     "backlog": 0,
     "deadLetters": 0
   },
