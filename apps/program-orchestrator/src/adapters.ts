@@ -1,14 +1,12 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
 import { createHash } from 'node:crypto'
 import type { DemoCompletionEnvelope, LeadResearchPackage } from '@linksites/types'
 import { FileCompletionSink, type CompletionSink } from '@linksites/intake-orchestrator'
 import {
-  consumePinnedLibraryEntry,
-  createOfflineLibraryFixtureTransport,
-  OFFLINE_LIBRARY_AUTHORITY,
+  MARKETING_SMB_V1_CATALOG_AUTHORITY,
   createPreviewDeployment,
-  type LibraryCatalog,
   type LibraryConsumptionEvidence,
   type PayloadDraftTarget,
   type WorkingContentPackage,
@@ -100,16 +98,23 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
 
   async reserveFoundation(siteId: string, vertical: string): Promise<Record<string, unknown>> { return this.boundary('foundation.reserve', async () => ({ foundationId: 'foundation:marketing-smb-v1:standard', vertical, status: 'reserved', reservationId: `reservation:${siteId}`, owner: 'M06-preview-inventory-management', dependencies: ['vertical-qualification'] })) }
 
-  async resolveLibrary(siteId: string): Promise<Record<string, unknown>> { return this.boundary('library.verify', async () => ({ entryId: OFFLINE_LIBRARY_AUTHORITY.entryId, revision: OFFLINE_LIBRARY_AUTHORITY.commitSha, entryChecksum: OFFLINE_LIBRARY_AUTHORITY.entryChecksum, status: 'approved', materialized: true, verificationId: OFFLINE_LIBRARY_AUTHORITY.verificationId, consumption: await this.libraryEvidence(), siteId })) }
+  async resolveLibrary(siteId: string): Promise<Record<string, unknown>> { return this.boundary('library.verify', async () => { const consumption = await this.libraryEvidence(); return { entryId: consumption.entry.entryId, revision: MARKETING_SMB_V1_CATALOG_AUTHORITY.commitSha, catalogTree: 'd35f81d84971df3b58da23443393f71ec1332462', catalogChecksum: MARKETING_SMB_V1_CATALOG_AUTHORITY.catalogChecksum, authorityRefs: { development: MARKETING_SMB_V1_CATALOG_AUTHORITY.commitSha, main: '39d16d37c976a2fed81eb4f22864ade44689b01' }, entryChecksum: consumption.receipt.entryChecksum, status: 'approved', materialized: true, verificationId: consumption.receipt.verificationId, consumption, siteId } }) }
 
   private async libraryEvidence(): Promise<LibraryConsumptionEvidence> {
-    const repositoryRoot = process.cwd().endsWith('/apps/program-orchestrator') ? join(process.cwd(), '../..') : process.cwd()
-    const fixture = (path: string) => readFile(join(repositoryRoot, 'packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1', path), 'utf8')
-    const sourceEntry = JSON.parse(await fixture('entry.json')) as Record<string, unknown>
-    const entry = { entryId: sourceEntry.entryId, kind: sourceEntry.kind, name: sourceEntry.name, summary: sourceEntry.summary, problemDomains: sourceEntry.problemDomains, tags: sourceEntry.tags, languages: sourceEntry.languages, frameworks: sourceEntry.frameworks, status: sourceEntry.status, path: `entries/${String(sourceEntry.entryId)}` } as LibraryCatalog['entries'][number]
-    const files = { 'README.md': await fixture('README.md'), 'assets/marketingSmbV1.ts': await fixture('assets/marketingSmbV1.ts'), 'tests/marketingSmbV1.fixture.ts': await fixture('tests/marketingSmbV1.fixture.ts') }
-    const catalog: LibraryCatalog = { schemaVersion: 1, generatedAt: '2026-08-04T00:00:00.000Z', sourceCommitSha: OFFLINE_LIBRARY_AUTHORITY.commitSha, entries: [entry] }
-    return consumePinnedLibraryEntry({ catalogReference: { repositoryUrl: OFFLINE_LIBRARY_AUTHORITY.repositoryUrl, commitSha: OFFLINE_LIBRARY_AUTHORITY.commitSha, ref: OFFLINE_LIBRARY_AUTHORITY.commitSha, catalog }, entryId: OFFLINE_LIBRARY_AUTHORITY.entryId, compatibility: { nodeMajor: 22, runtimes: ['node', 'browser'] }, executable: { entrypoint: 'assets/marketingSmbV1.ts', testFiles: ['tests/marketingSmbV1.fixture.ts'] }, transport: createOfflineLibraryFixtureTransport({ readCatalog: () => catalog, readEntryAtCommit: () => ({ entry: clone(sourceEntry), files }) }) })
+    const authority = MARKETING_SMB_V1_CATALOG_AUTHORITY
+    const git = (...args: string[]) => execFileSync('git', ['-C', this.config.libraryRepositoryPath, ...args], { encoding: 'utf8' })
+    git('cat-file', '-e', `${authority.commitSha}^{commit}`)
+    const catalogRaw = git('show', `${authority.commitSha}:indexes/catalog.json`)
+    if (createHash('sha256').update(catalogRaw, 'utf8').digest('hex') !== authority.catalogChecksum) throw new Error('library:catalog-checksum-mismatch')
+    const catalog = JSON.parse(catalogRaw) as { entries?: Array<{ entryId?: string; status?: string }> }
+    if (!catalog.entries?.some((row) => row.entryId === authority.entryId && row.status === 'approved')) throw new Error('library:approved-entry-missing')
+    const entry = JSON.parse(git('show', `${authority.commitSha}:${authority.entryPath}/entry.json`)) as LibraryConsumptionEvidence['entry']
+    const files = Object.fromEntries(entry.files.map((asset) => [asset.path, git('show', `${authority.commitSha}:${authority.entryPath}/${asset.path}`)]))
+    for (const asset of entry.files) if (createHash('sha256').update(files[asset.path] ?? '', 'utf8').digest('hex') !== asset.sha256) throw new Error(`library:asset-checksum-mismatch:${asset.path}`)
+    const entryChecksum = createHash('sha256').update(stable(entry), 'utf8').digest('hex')
+    if (entryChecksum !== authority.entryChecksum) throw new Error('library:entry-checksum-mismatch')
+    const assetChecksums = Object.fromEntries(entry.files.map((asset) => [asset.path, asset.sha256]))
+    return { entry, files, receipt: { schemaVersion: { major: 1, minor: 0 }, receiptId: `library-consumption:${authority.entryId}:${authority.commitSha}`, consumer: 'linksites', entryId: authority.entryId, catalogCommitSha: authority.commitSha, libraryCommitSha: authority.commitSha, entryChecksum, assetChecksums, entrypoint: 'src/index.mjs', testFiles: ['tests/marketing-smb-v1.test.mjs'], verificationId: authority.verificationId, compatibility: { compatible: true, consumer: 'linksites', nodeMajor: 22, runtimes: ['node', 'browser'] }, recordedAt: new Date().toISOString() }, verification: { ...authority, assetChecksums } } as LibraryConsumptionEvidence
   }
 
   async buildSiteSpecification(siteId: string, dependencies: Record<string, unknown>): Promise<Record<string, unknown>> { return { siteSpecId: `site-spec:${siteId}`, siteId, kitId: 'home_services', tierId: 'standard', foundation: dependencies.foundation, library: dependencies.library, pages: 5, reservationOwner: 'M06' } }
@@ -117,7 +122,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   private async production(lead: LeadInput): Promise<ReturnType<typeof produceWorkingContent>> {
     const facts = JSON.parse(await readFile(this.config.approvedFactsPath, 'utf8')) as unknown
     const library = await this.libraryEvidence()
-    const template = { templateId: 'marketing-smb-v1' as const, libraryAssetPath: 'assets/marketingSmbV1.ts', libraryAssetSha256: OFFLINE_LIBRARY_AUTHORITY.assetChecksums['assets/marketingSmbV1.ts'], baselinePages: [
+    const template = { templateId: 'marketing-smb-v1' as const, libraryAssetPath: 'src/index.mjs', libraryAssetSha256: library.receipt.assetChecksums['src/index.mjs'], baselinePages: [
       { pageId: 'home', route: '/', sections: [{ sectionId: 'hero', componentId: 'SignupHero', copy: { lang: 'en', headline: '{{businessName}} serving {{geography}}', body: 'Approved local service information.' } }] },
       { pageId: 'about', route: '/about', sections: [{ sectionId: 'credentials', componentId: 'CTASection', copy: { lang: 'en', headline: 'About {{businessName}}', body: '{{credentials}}' } }] },
       { pageId: 'services', route: '/services', sections: [{ sectionId: 'offers', componentId: 'OfferShowcase', copy: { lang: 'en', headline: 'Services', offers: ['{{services}}'] } }] },

@@ -207,6 +207,25 @@ const LIBRARY_ENTRY_KINDS: ReadonlySet<LibraryEntryKind> = new Set([
 const OFFLINE_ADAPTER_INSTANCES = new WeakSet<object>()
 
 /**
+ * W2-02's real authority pin.  `sourceCommitSha` in the catalog is generation
+ * provenance; it is deliberately not used as the Git authority.  Authority is
+ * the immutable Git commit/tree which contains indexes/catalog.json, plus the
+ * byte checksum below.  Both development and main pointed here when this pin
+ * was accepted.
+ */
+export const MARKETING_SMB_V1_CATALOG_AUTHORITY: LibraryVerificationRecord = Object.freeze({
+  authorityId: 'linklibraries.git-catalog.v1',
+  verificationId: 'linklibraries.git-catalog.v1:marketing-smb-v1:a7193d40152747db2a03e094fa263f324a971a0b',
+  repositoryUrl: LINKLIBRARIES_REPOSITORY,
+  commitSha: 'a7193d40152747db2a03e094fa263f324a971a0b' as GitSha,
+  catalogChecksum: '02d6d962d9b1e82fb898442d3de0833ded60be7f4eb177c84c176f0233ad6c0c',
+  entryId: 'marketing-smb-v1',
+  entryPath: 'entries/marketing-smb-v1',
+  entryChecksum: '4a36c1d9dc1c72be048e94e1d38593bd8134b2a43393f78e3ccd43d593bed112',
+  assetChecksums: Object.freeze({}),
+})
+
+/**
  * Source-owned authority for the offline W1-05 migration fixture. This is a
  * deterministic candidate fixture boundary, not proof of a live Git
  * integration or external LiNKlibraries admission.
@@ -301,11 +320,21 @@ function assertSchemaStringPattern(value: unknown, pattern: RegExp, label: strin
   if (!pattern.test(value)) throw new LibraryConsumerError(`${label} does not match the authoritative schema pattern.`)
 }
 
-const isOfflineLibraryAuthority = (value: unknown): value is LibraryVerificationRecord =>
-  isRecord(value) && canonicalJsonStringify(value) === canonicalJsonStringify(OFFLINE_LIBRARY_AUTHORITY)
+const isKnownLibraryAuthority = (value: unknown): value is LibraryVerificationRecord =>
+  isRecord(value) && (
+    canonicalJsonStringify(value) === canonicalJsonStringify(OFFLINE_LIBRARY_AUTHORITY) ||
+    (value.authorityId === MARKETING_SMB_V1_CATALOG_AUTHORITY.authorityId &&
+      value.verificationId === MARKETING_SMB_V1_CATALOG_AUTHORITY.verificationId &&
+      value.repositoryUrl === MARKETING_SMB_V1_CATALOG_AUTHORITY.repositoryUrl &&
+      value.commitSha === MARKETING_SMB_V1_CATALOG_AUTHORITY.commitSha &&
+      value.catalogChecksum === MARKETING_SMB_V1_CATALOG_AUTHORITY.catalogChecksum &&
+      value.entryId === MARKETING_SMB_V1_CATALOG_AUTHORITY.entryId &&
+      value.entryPath === MARKETING_SMB_V1_CATALOG_AUTHORITY.entryPath &&
+      value.entryChecksum === MARKETING_SMB_V1_CATALOG_AUTHORITY.entryChecksum)
+  )
 
 export function assertLibraryVerificationRecord(value: unknown): asserts value is LibraryVerificationRecord {
-  if (!isOfflineLibraryAuthority(value)) throw new LibraryConsumerError('Library verification evidence is not the source-owned W1-05 offline authority record.')
+  if (!isKnownLibraryAuthority(value)) throw new LibraryConsumerError('Library verification evidence is not a source-owned immutable authority record.')
   assertSha(value.catalogChecksum, 'Library verification catalog checksum')
   assertSha(value.entryChecksum, 'Library verification entry checksum')
   for (const [path, checksum] of Object.entries(value.assetChecksums)) {
@@ -644,7 +673,8 @@ export async function consumePinnedLibraryEntry(input: {
 }
 
 export function assertLibraryConsumptionReceipt(receipt: LibraryConsumptionReceipt): void {
-  if (!isRecord(receipt) || !isRecord(receipt.schemaVersion) || receipt.schemaVersion.major !== 1 || receipt.schemaVersion.minor !== 0 || receipt.consumer !== LINKSITES_LIBRARY_CONSUMER || !isGitSha(receipt.catalogCommitSha) || !isGitSha(receipt.libraryCommitSha) || receipt.catalogCommitSha !== receipt.libraryCommitSha || typeof receipt.entryId !== 'string' || !ENTRY_ID_PATTERN.test(receipt.entryId) || !SHA256_PATTERN.test(receipt.entryChecksum) || typeof receipt.verificationId !== 'string' || receipt.verificationId !== OFFLINE_LIBRARY_AUTHORITY.verificationId || typeof receipt.recordedAt !== 'string' || !isRecord(receipt.compatibility) || receipt.compatibility.compatible !== true || receipt.compatibility.consumer !== LINKSITES_LIBRARY_CONSUMER || receipt.compatibility.nodeMajor !== LINKSITES_RUNTIME_REQUIREMENTS.nodeMajor || !Array.isArray(receipt.compatibility.runtimes) || receipt.compatibility.runtimes.length !== LINKSITES_RUNTIME_REQUIREMENTS.runtimes.length || receipt.compatibility.runtimes.some((runtime, index) => runtime !== LINKSITES_RUNTIME_REQUIREMENTS.runtimes[index])) throw new LibraryConsumerError('Invalid LiNKsites Library consumption receipt; refusing to persist an unpinned or weakened receipt.')
+  const knownVerificationIds = new Set([OFFLINE_LIBRARY_AUTHORITY.verificationId, MARKETING_SMB_V1_CATALOG_AUTHORITY.verificationId])
+  if (!isRecord(receipt) || !isRecord(receipt.schemaVersion) || receipt.schemaVersion.major !== 1 || receipt.schemaVersion.minor !== 0 || receipt.consumer !== LINKSITES_LIBRARY_CONSUMER || !isGitSha(receipt.catalogCommitSha) || !isGitSha(receipt.libraryCommitSha) || receipt.catalogCommitSha !== receipt.libraryCommitSha || typeof receipt.entryId !== 'string' || !ENTRY_ID_PATTERN.test(receipt.entryId) || !SHA256_PATTERN.test(receipt.entryChecksum) || typeof receipt.verificationId !== 'string' || !knownVerificationIds.has(receipt.verificationId) || typeof receipt.recordedAt !== 'string' || !isRecord(receipt.compatibility) || receipt.compatibility.compatible !== true || receipt.compatibility.consumer !== LINKSITES_LIBRARY_CONSUMER || receipt.compatibility.nodeMajor !== LINKSITES_RUNTIME_REQUIREMENTS.nodeMajor || !Array.isArray(receipt.compatibility.runtimes) || receipt.compatibility.runtimes.length !== LINKSITES_RUNTIME_REQUIREMENTS.runtimes.length || receipt.compatibility.runtimes.some((runtime, index) => runtime !== LINKSITES_RUNTIME_REQUIREMENTS.runtimes[index])) throw new LibraryConsumerError('Invalid LiNKsites Library consumption receipt; refusing to persist an unpinned or weakened receipt.')
   if (receipt.receiptId !== `library-consumption:${receipt.entryId}:${receipt.libraryCommitSha}`) throw new LibraryConsumerError('Invalid LiNKsites Library consumption receipt; receipt identity is not deterministic.')
   assertSafePath(receipt.entrypoint, 'Library receipt entrypoint')
   assertStringArray(receipt.testFiles, 'Library receipt test files', 1)

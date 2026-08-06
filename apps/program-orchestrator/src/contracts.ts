@@ -133,6 +133,8 @@ export type RuntimeConfig = {
   workerId: string
   payloadBaseUrl: string
   webMasterBaseUrl: string
+  /** Read-only local clone/cache used to read the immutable LiNKlibraries pin. */
+  libraryRepositoryPath: string
   approvedExecutors: Record<string, string>
   approvedCapabilities: Record<string, string[]>
 }

@@ -18,14 +18,21 @@ This document is correction evidence, not a W2-02 PASS declaration.
 - W2-01 path: `WorkingContentRepository` over a durable PostgreSQL-compatible
   local database, immutable version creation, `ready_for_gate` → `accepted`
   lifecycle, checksum validation, and persisted gate evidence.
+- LiNKlibraries path: `indexes/catalog.json` is read at immutable commit
+  `a7193d40152747db2a03e094fa263f324a971a0b`/tree
+  `d35f81d84971df3b58da23443393f71ec1332462`, checked against SHA-256
+  `02d6d962d9b1e82fb898442d3de0833ded60be7f4eb177c84c176f0233ad6c0c`,
+  and requires `marketing-smb-v1` to be approved. `sourceCommitSha` is
+  catalog-generation provenance, not the authority ref; development and main
+  authority are recorded separately.
 - W2-03 path: `promotePreparedWorkingContent` with the accepted repository
   version, `PayloadRestDraftTarget`, service read-back, field parity, and a
   persisted promotion receipt. The configured `W2_02_PAYLOAD_BASE_URL` path is
-  the real Payload REST boundary; the default local proof starts an embedded
-  database-backed HTTP service harness and is not live Payload proof.
+  the real Payload REST boundary; local production proof uses the separately
+  started disposable authenticated Payload app, not an inline emulator.
 - W2-04 path: protected token-required web-master HTTP render with noindex and
-  no-store checks. The default local proof uses the embedded protected render
-  harness; a hosted web-master render remains unverified.
+  no-store checks. Local production proof uses the optimized `apps/web-master`
+  server; a hosted web-master render remains unverified.
 
 ## Redacted trace
 
