@@ -2145,6 +2145,10 @@ export interface Page {
    */
   previewEnvironment?: 'private-preview' | null;
   /**
+   * Stable orchestration run marker for authenticated draft-promotion readback.
+   */
+  promotionRunMarker?: string | null;
+  /**
    * Content workflow state
    */
   status: 'draft' | 'pending' | 'approved' | 'published';
@@ -3812,6 +3816,7 @@ export interface PagesSelect<T extends boolean = true> {
         image?: T;
       };
   previewEnvironment?: T;
+  promotionRunMarker?: T;
   status?: T;
   submittedBy?: T;
   reviewedBy?: T;

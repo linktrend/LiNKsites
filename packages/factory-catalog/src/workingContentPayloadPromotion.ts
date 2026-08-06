@@ -3,7 +3,7 @@ import { PromotionService, type PayloadDraftTarget, type PromotionReceipt, type 
 import type { WorkingContentPromotionInput, WorkingContentRepository } from './workingContent.js'
 
 /** Accepted W2-03 adapter: only prepared immutable working content may reach PromotionService. */
-export function buildPromotionRequestFromPreparedWorkingContent(input: WorkingContentPromotionInput, targetSiteId: string, promotionRequestId: string, assemblyManifestId: string): PromotionRequest {
+export function buildPromotionRequestFromPreparedWorkingContent(input: WorkingContentPromotionInput, targetSiteId: string, promotionRequestId: string, assemblyManifestId: string, promotionRunMarker?: string): PromotionRequest {
   const items = input.contentPackage.content.pages.map((page) => ({
     sourceItemId: page.pageId,
     payloadCollection: 'pages',
@@ -26,6 +26,7 @@ export function buildPromotionRequestFromPreparedWorkingContent(input: WorkingCo
       })),
       status: 'draft',
       previewEnvironment: 'private-preview',
+      ...(promotionRunMarker ? { promotionRunMarker } : {}),
     },
   }))
   return { schemaVersion: input.schemaVersion, promotionRequestId, idempotencyKey: input.promotionIdempotencyKey, targetSiteId, targetState: 'draft', workingPackage: { workingPackageId: input.workingPackageId, workingPackageVersion: input.workingPackageVersion, packageChecksum: input.contentChecksum, items }, assemblyManifestId, requiredGateReceiptIds: [...input.gateEvidenceReferences] }
@@ -39,8 +40,8 @@ function contentText(content: Record<string, unknown>): string {
 export function computeWorkingContentRevision(snapshot: unknown): string { return createHash('sha256').update(stableStringify(snapshot)).digest('hex') }
 function stableStringify(value: unknown): string { if (value === null || typeof value !== 'object') return JSON.stringify(value); if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`; return `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${stableStringify((value as Record<string, unknown>)[key])}`).join(',')}}` }
 
-export async function promotePreparedWorkingContent(input: { repository: Pick<WorkingContentRepository, 'recordPromotionReceipt'>; prepared: WorkingContentPromotionInput; target: PayloadDraftTarget; targetSiteId: string; promotionRequestId: string; assemblyManifestId: string }): Promise<{ receipt: PromotionReceipt; payloadReceiptId: string }> {
-  const receipt = await new PromotionService(input.target).promote(buildPromotionRequestFromPreparedWorkingContent(input.prepared, input.targetSiteId, input.promotionRequestId, input.assemblyManifestId))
+export async function promotePreparedWorkingContent(input: { repository: Pick<WorkingContentRepository, 'recordPromotionReceipt'>; prepared: WorkingContentPromotionInput; target: PayloadDraftTarget; targetSiteId: string; promotionRequestId: string; assemblyManifestId: string; promotionRunMarker?: string }): Promise<{ receipt: PromotionReceipt; payloadReceiptId: string }> {
+  const receipt = await new PromotionService(input.target).promote(buildPromotionRequestFromPreparedWorkingContent(input.prepared, input.targetSiteId, input.promotionRequestId, input.assemblyManifestId, input.promotionRunMarker))
   if (receipt.status !== 'succeeded') {
     const failures = receipt.itemResults
       .filter((item) => item.status === 'failed')

@@ -53,7 +53,7 @@ async function composition(id = 'lead-local-001') {
   await writeFile(config.approvedFactsPath, JSON.stringify(approvedFacts(id)))
   const value = await createProductionComposition(config)
   const close = value.close
-  return { ...value, directory, close: async () => { await close(); await new Promise<void>((resolve) => payload.close(() => resolve())); await new Promise<void>((resolve) => web.close(() => resolve())) } }
+  return { ...value, directory, docs, close: async () => { await close(); await new Promise<void>((resolve) => payload.close(() => resolve())); await new Promise<void>((resolve) => web.close(() => resolve())) } }
 }
 
 test('production composition boots with complete approved local configuration', async () => {
@@ -62,6 +62,21 @@ test('production composition boots with complete approved local configuration', 
     assert.equal((await value.runtime.health()).readiness, false)
     await value.runtime.runLead(lead())
     assert.equal((await value.runtime.health()).programState, 'completed')
+  } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
+})
+
+test('promotion maps the stable run marker onto all five schema-backed Payload drafts', async () => {
+  const id = 'w2-02-run-0123456789abcdef'
+  const value = await composition(id)
+  try {
+    await value.runtime.runLead(lead(id))
+    const state = await value.runtime.exportState() as { program: { state: string } }
+    assert.equal(state.program.state, 'completed')
+    // The mock holds the real request bodies, so this verifies the mapping
+    // independently of marker-bearing rendered copy.
+    assert.equal(value.docs.size, 5)
+    assert.ok([...value.docs.values()].every((doc) => doc.promotionRunMarker === id))
+    assert.ok([...value.docs.values()].every((doc) => doc.status === 'draft' && doc.previewEnvironment === 'private-preview'))
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
 

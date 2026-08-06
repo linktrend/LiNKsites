@@ -213,7 +213,8 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
         const prepared: WorkingContentPromotionInput = await this.workingContentRepository.preparePromotion({ orgId: version.orgId, workingPackageId: packageId, versionNumber: version.versionNumber, contentChecksum: version.contentChecksum, promotionIdempotencyKey: `promotion:${siteId}` })
         // The durable working-package key remains lead-specific, while the REST
         // mutation is constrained to the authenticated, seeded Payload site.
-        const promotion = await promotePreparedWorkingContent({ repository: this.workingContentRepository, prepared, target: this.payloadTarget, targetSiteId: this.config.payloadSiteId, promotionRequestId: `promotion-request:${siteId}`, assemblyManifestId: `manifest:${siteId}` })
+        const promotionRunMarker = siteId.replace(/^site:/, '')
+        const promotion = await promotePreparedWorkingContent({ repository: this.workingContentRepository, prepared, target: this.payloadTarget, targetSiteId: this.config.payloadSiteId, promotionRequestId: `promotion-request:${siteId}`, assemblyManifestId: `manifest:${siteId}`, promotionRunMarker })
         this.payloadDiagnostic = 'succeeded'
         return { receipt: promotion.receipt, payloadReceiptId: promotion.payloadReceiptId, payloadDocumentIds: promotion.receipt.itemResults.map((item) => item.payloadDocumentId).filter((id): id is string => Boolean(id)), checksum: prepared.contentChecksum, status: 'draft', published: false, serviceProof: { adapter: 'PayloadRestDraftTarget', baseUrl: this.config.payloadBaseUrl, readbackVerified: true, repositoryReceiptId: promotion.receipt.promotionReceiptId } }
       } catch (error) {
@@ -231,7 +232,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const version = await this.workingContentRepository.readVersion(workingPackageId, 1)
       if (!version || !['accepted', 'promoted'].includes(version.lifecycleState) || version.contentChecksum !== String(promotion.checksum)) throw new Error('gate:payload-readback-source-version-missing')
       const prepared = await this.workingContentRepository.preparePromotion({ orgId: version.orgId, workingPackageId, versionNumber: version.versionNumber, contentChecksum: version.contentChecksum, promotionIdempotencyKey: `promotion:${siteId}` })
-      const expectedItems = buildPromotionRequestFromPreparedWorkingContent(prepared, this.config.payloadSiteId, `promotion-request:${siteId}`, `manifest:${siteId}`).workingPackage.items
+      const expectedItems = buildPromotionRequestFromPreparedWorkingContent(prepared, this.config.payloadSiteId, `promotion-request:${siteId}`, `manifest:${siteId}`, siteId.replace(/^site:/, '')).workingPackage.items
       const parity = docs.length === ids.length && docs.every((doc, index) => Boolean(doc && expectedItems[index] && sameFields(expectedItems[index].data, doc)))
       const result = { parity, documentCount: docs.filter(Boolean).length, expectedCount: ids.length, checksum: promotion.checksum, payloadDocumentIds: ids, serviceReadback: true, siteId }
       const artifact = await this.writeArtifact('payload-readback-parity', siteId, result)

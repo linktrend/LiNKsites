@@ -145,6 +145,15 @@ export const Pages: CollectionConfig<'pages'> = {
         description: 'Marks content published only for the token-gated private preview route.',
       },
     },
+    {
+      name: 'promotionRunMarker',
+      type: 'text',
+      index: true,
+      admin: {
+        readOnly: true,
+        description: 'Stable orchestration run marker for authenticated draft-promotion readback.',
+      },
+    },
     ...workflowFields,
   ],
 }

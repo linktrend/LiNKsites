@@ -271,6 +271,7 @@ type PayloadPage = Omit<CmsPage, "content" | "status"> & {
   layout?: CmsPageBlock[];
   status?: string;
   previewEnvironment?: string | null;
+  promotionRunMarker?: string | null;
 };
 
 export const assertAudiencePage = (page: PayloadPage, audience: PageAudience): CmsPage => {
@@ -300,8 +301,9 @@ export const getPageBySlug = async ({
 }: GetPageArgs): Promise<CmsPage | null> => {
   const slug = slugSegments.length > 0 ? slugSegments.join("/") : "home";
 
+  const status = audience === "private-preview" ? "draft" : "published";
   const where = {
-    and: [...siteLocaleFilter(siteId, locale).and, { slug: { equals: slug } }],
+    and: [...siteLocaleFilter(siteId, locale, status).and, { slug: { equals: slug } }],
   };
 
   const result = await payloadFind<CmsPage>({
@@ -316,7 +318,7 @@ export const getPageBySlug = async ({
 
   const previewRunMarker = audience === "private-preview" ? process.env.PREVIEW_RUN_MARKER : undefined;
   if (previewRunMarker && !/^w2-02-run-[a-f0-9]{16}$/.test(previewRunMarker)) return null;
-  const candidates = previewRunMarker ? result.docs.filter((candidate) => JSON.stringify(candidate).includes(previewRunMarker)) : result.docs;
+  const candidates = previewRunMarker ? result.docs.filter((candidate) => (candidate as PayloadPage).promotionRunMarker === previewRunMarker) : result.docs;
   const page = selectPageForAudience(candidates as PayloadPage[], audience);
   return page ? assertAudiencePage(page, audience) : null;
 };
