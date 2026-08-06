@@ -13,7 +13,7 @@ completion record. Sold-site public activation is excluded.
 - Passed dependency W2-03: `b70f030e8af8780afe7e320d14c26538af2922d2`.
 - Passed dependency W2-04: `909e3188304b20bd7a19a8e0127eea863426267f`.
 - Passed dependency W2-05: `580aef87a79bbab54abdd4835a231e79b92c356e`.
-- W2-02 implementation commit: recorded in the final commit handoff.
+- W2-02 implementation commit: `b8c480bc263e638057f39fe8c1466420b9e2df19`.
 
 ## Composition and graph
 
@@ -52,9 +52,14 @@ contract fields.
 | --- | --- |
 | `pnpm install` | PASS; workspace dependencies installed for validation |
 | `pnpm --filter @linksites/program-orchestrator typecheck` | PASS |
+| `pnpm --filter @linksites/program-orchestrator build` | PASS |
 | `pnpm --filter @linksites/program-orchestrator test` | PASS; 10 tests |
-| `git diff --check` | Run again at final handoff |
-| Root typecheck/test/lint/build | Run again at final handoff; unrelated baseline failures, if any, are reported honestly |
+| `pnpm typecheck` | PASS; 7 workspace packages |
+| `pnpm lint` | PASS; CMS and web-master lint lanes |
+| `pnpm --filter @linksites/cms test:int` | PASS; 18 passed, 1 skipped |
+| `git diff --check` | PASS before commit |
+| `pnpm test` | HOLD; existing CMS E2E web server requires `DATABASE_URI` and was not allowed to claim a live database |
+| `pnpm build` | HOLD; existing CMS prebuild requires `DATABASE_URI`; W2-02 package build passed separately |
 
 ## Remaining environment requirements
 
