@@ -1,0 +1,115 @@
+{
+  "scope": "disposable local actual Payload plus optimized web-master plus Chromium",
+  "executedRevision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+  "executableCheckpoint": "9e9efcf4f5bc8ed92d4d28268868e9d04cb55ad4cda9a32b3522c3040ad23c00",
+  "issues": {
+    "expected": 16,
+    "completed": 16,
+    "issueIds": [
+      "foundation-reservation",
+      "lead-research",
+      "program-claim",
+      "vertical-qualification",
+      "library-verification",
+      "site-specification",
+      "information-architecture",
+      "media-provenance",
+      "working-content-assembly",
+      "content-gates",
+      "payload-draft",
+      "payload-parity",
+      "private-publication",
+      "site-render-validation",
+      "final-evidence",
+      "completion-record"
+    ]
+  },
+  "serviceReceipts": [
+    {
+      "issueId": "foundation-reservation",
+      "operation": "factory-catalog",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "cbb713a587d1fa37fdca6031682c508a4db22e3857e56e45e037eaa2ebef88ae"
+    },
+    {
+      "issueId": "library-verification",
+      "operation": "library-consumer",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "71e078f13ea6f0b1c50154c125936d113d96949aa1f48241fcf8e3efd5412791"
+    },
+    {
+      "issueId": "information-architecture",
+      "operation": "working-content",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "32dd4712dd170bdee871dee17ae3c1b0cc031b47b354fc0e3eed31537cc41e2e"
+    },
+    {
+      "issueId": "media-provenance",
+      "operation": "working-content",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "f88ce40cbf75b84ae6eefbc24ed72878cd0ff86a97194ce9fe00c43418702771"
+    },
+    {
+      "issueId": "working-content-assembly",
+      "operation": "working-content",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "71374857e53cf3b10095dc5851ce79783cefc56ab35c546968d5978220c0bd68"
+    },
+    {
+      "issueId": "payload-draft",
+      "operation": "payload-cms",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "052a701fe82e5189c9417eb432fe1259c671d1a1c861a2269e03c5de5a5e3a0a"
+    },
+    {
+      "issueId": "payload-parity",
+      "operation": "payload-cms",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "92dcd806142eeacf5a151ff1d52e0b82ecd5b18e0a59dc222c96c46861c56d1c"
+    },
+    {
+      "issueId": "private-publication",
+      "operation": "frontend",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "98314060b44880a25c75956702dbd37a8dba16b01709dd455e920d2cdc52297e"
+    },
+    {
+      "issueId": "site-render-validation",
+      "operation": "frontend",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "12ae74ecd9754938e24a402eb8ae1c302c855e756d3259ce3210efa3e7b44d60"
+    },
+    {
+      "issueId": "completion-record",
+      "operation": "completion-sink",
+      "revision": "d42815cc184cf93e846ec68807fa8bf03cb2c991",
+      "valueChecksum": "b4586373b342ffe39df53add29dc092193cdca05307a2d1d507d50e72298c6a2"
+    }
+  ],
+  "persistedEvidenceReceipts": 16,
+  "payloadReadback": {
+    "privateRecords": 6,
+    "authenticated": true
+  },
+  "privateOnly": true,
+  "browserGates": true,
+  "completion": {
+    "emitted": true,
+    "outboxStatus": "delivered",
+    "outboxAckAt": "2026-08-06T13:02:56.881Z",
+    "backlog": 0,
+    "deadLetters": 0
+  },
+  "health": {
+    "liveness": true,
+    "readiness": true,
+    "programState": "completed",
+    "activeIssues": 0,
+    "retries": 0,
+    "deadLetters": 0,
+    "manualAttention": 0,
+    "completionEmits": 1
+  },
+  "publicActivation": false,
+  "tokenBearingUrlsPersisted": false
+}

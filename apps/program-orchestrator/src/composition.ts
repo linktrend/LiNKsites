@@ -68,6 +68,7 @@ export async function createProductionComposition(config: RuntimeConfig): Promis
   const runtimeConfig = validated
   const ledger = new DurableLedger(validated)
   const adapters = new LocalBoundaryAdaptersImpl(runtimeConfig, db)
+  adapters.bindLeaseVerifier(({ runId, fencingToken }) => ledger.assertLeaseActive(runId, fencingToken))
   const executors = new ExecutorRegistry(runtimeConfig)
   const completionSink = new DurableCompletionSink(runtimeConfig, adapters)
   const intake = new FileWorkIntakePort(runtimeConfig.intakePath, `${runtimeConfig.statePath}.intake.json`, { claimLeaseMs: runtimeConfig.leaseDurationMs })

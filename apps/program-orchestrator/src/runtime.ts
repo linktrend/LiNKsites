@@ -79,21 +79,26 @@ export class ProgramRuntime {
     try {
       if (!this.executors.resolve(issue.executorKind, issue.executorVersion)) throw new Error(`executor:unapproved:${issue.executorKind}@${issue.executorVersion}`)
       await this.ledger.assertLeaseActive(runId, fencingToken)
-      const output = await this.executeIssue(issue)
+      const fence = { runId, fencingToken }
+      const output = await this.executeIssue(issue, fence)
       await this.ledger.assertLeaseActive(runId, fencingToken)
       const evidence = [this.evidence(issue, output)]
-      if (issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, output)
+      if (issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, output, runId, fencingToken)
       await this.ledger.succeed(runId, fencingToken, output, evidence)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown'
       const crashAfterReceipt = message.startsWith('crash-after-receipt:')
-      if (crashAfterReceipt && issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, { recovered: true, safeCode: 'boundary:recovered-after-receipt' })
+      // The REST adapter emits only its method, collection, and HTTP status.
+      // Retain that exact safe diagnostic in the terminal ledger without
+      // persisting Payload's response body (which can echo submitted content).
+      const payloadHttpStatus = message.match(/payload-rest:(?:POST|PATCH):[^:]+:http-(\d{3}):/u)?.[1]
+      if (crashAfterReceipt && issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, { recovered: true, safeCode: 'boundary:recovered-after-receipt' }, runId, fencingToken)
       const issueBoundary = Boolean(issue.externalBoundary)
       const permanentBoundary = message.includes(':permanent-failure')
       const priorIrreversibleEffect = (await this.ledger.snapshot()).issues.some((candidate) => candidate.irreversible && candidate.state === 'completed')
       const failure: { class: FailureClass; safeCode: string } = {
         class: message.startsWith('gate:') ? 'gate_rejected' : message.startsWith('qualification:') ? 'invalid_input' : permanentBoundary && issue.irreversible ? 'partial_mutation' : crashAfterReceipt ? 'transient_boundary' : issueBoundary ? 'transient_boundary' : 'unknown',
-        safeCode: message.startsWith('gate:') ? 'gate:rejected' : message.startsWith('qualification:') ? 'qualification:unsupported-vertical' : permanentBoundary ? `boundary:${issue.externalBoundary ?? issue.issueId}:permanent-failure` : crashAfterReceipt ? 'boundary:recovered-after-receipt' : issueBoundary ? `boundary:${issue.externalBoundary}:failed` : `issue:${issue.issueId}:failed`,
+        safeCode: message.startsWith('gate:') ? 'gate:rejected' : message.startsWith('qualification:') ? 'qualification:unsupported-vertical' : permanentBoundary ? `boundary:${issue.externalBoundary ?? issue.issueId}:permanent-failure` : crashAfterReceipt ? 'boundary:recovered-after-receipt' : payloadHttpStatus && issue.externalBoundary === 'payload-cms' ? `boundary:payload-cms:http-${payloadHttpStatus}` : issueBoundary ? `boundary:${issue.externalBoundary}:failed` : `issue:${issue.issueId}:failed`,
       }
       if (permanentBoundary && priorIrreversibleEffect && failure.class !== 'gate_rejected') failure.class = 'partial_mutation'
       const retryable = failure.class === 'transient_boundary'
@@ -104,7 +109,7 @@ export class ProgramRuntime {
     }
   }
 
-  private async executeIssue(issue: IssueRecord): Promise<unknown> {
+  private async executeIssue(issue: IssueRecord, fence: { runId: string; fencingToken: number }): Promise<unknown> {
     const output = (await this.ledger.snapshot()).issues.reduce<Record<string, unknown>>((all, candidate) => { if (candidate.output !== null) all[candidate.issueId] = candidate.output; return all }, {})
     const lead = this.lead ?? this.leadFromSnapshot(await this.ledger.snapshot())
     switch (issue.issueId) {
@@ -122,13 +127,13 @@ export class ProgramRuntime {
         if (!gates.accepted) throw new Error(gates.reason ?? 'gate:working-content-rejected')
         return gates
       }
-      case 'payload-draft': return this.dependencies.cmsAdapter.promoteDraft(`site:${lead.lead_id}`, output['working-content-assembly'] as Record<string, unknown>)
+      case 'payload-draft': return this.dependencies.cmsAdapter.promoteDraft(`site:${lead.lead_id}`, output['working-content-assembly'] as Record<string, unknown>, fence)
       case 'payload-parity': {
         const result = await this.dependencies.cmsAdapter.readbackDraft(`site:${lead.lead_id}`, output['payload-draft'] as Record<string, unknown>)
         if (result.parity !== true) throw new Error('gate:payload-readback-parity')
         return result
       }
-      case 'private-publication': return this.dependencies.frontendDeploymentAdapter.createPrivatePreview(`site:${lead.lead_id}`, output['payload-parity'] as Record<string, unknown>)
+      case 'private-publication': return this.dependencies.frontendDeploymentAdapter.createPrivatePreview(`site:${lead.lead_id}`, output['payload-parity'] as Record<string, unknown>, fence)
       case 'site-render-validation': return this.dependencies.frontendDeploymentAdapter.renderPrivatePreview(`site:${lead.lead_id}`, output['private-publication'] as Record<string, unknown>)
       case 'final-evidence': return this.dependencies.frontendDeploymentAdapter.captureEvidence(`site:${lead.lead_id}`, output['site-render-validation'] as Record<string, unknown>)
       case 'completion-record': return { completionBoundary: 'shared-completion-sink', exactlyOnce: true, evidence: output['final-evidence'], executionRevision: this.config.executingRevision, executableCheckpoint: this.config.executableCheckpoint }

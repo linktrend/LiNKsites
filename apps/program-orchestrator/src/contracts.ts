@@ -98,6 +98,9 @@ export type LeadInput = LeadResearchPackage
 
 export type AdapterFault = { operation: string; remaining: number; kind: 'transient' | 'permanent' | 'crash_after_receipt' }
 
+/** A durable lease identity which must accompany an irreversible boundary call. */
+export type ExternalFence = { runId: string; fencingToken: number }
+
 export interface LocalBoundaryAdapters {
   validateLead(lead: LeadInput): Promise<{ valid: boolean; reason?: string }>
   qualify(lead: LeadInput): Promise<{ vertical: string; tier: 'standard' }>
@@ -108,9 +111,9 @@ export interface LocalBoundaryAdapters {
   processMedia(siteId: string, lead: LeadInput): Promise<Record<string, unknown>>
   assembleWorkingContent(siteId: string, dependencies: Record<string, unknown>): Promise<Record<string, unknown>>
   runGates(siteId: string, workingContent: Record<string, unknown>): Promise<{ accepted: boolean; evidence: string[]; reason?: string; artifactPath?: string; artifactChecksum?: string }>
-  promoteDraft(siteId: string, workingContent: Record<string, unknown>): Promise<Record<string, unknown>>
+  promoteDraft(siteId: string, workingContent: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>>
   readbackDraft(siteId: string, promotion: Record<string, unknown>): Promise<Record<string, unknown>>
-  createPrivatePreview(siteId: string, promotion: Record<string, unknown>): Promise<Record<string, unknown>>
+  createPrivatePreview(siteId: string, promotion: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>>
   renderPrivatePreview(siteId: string, preview: Record<string, unknown>): Promise<Record<string, unknown>>
   captureEvidence(siteId: string, render: Record<string, unknown>): Promise<Record<string, unknown>>
   emitCompletion(envelope: DemoCompletionEnvelope): Promise<void>

@@ -142,7 +142,10 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
     if (parsed === null) return null
     const { collection, id } = parsed
 
-    const url = `${this.baseUrl}/api/${collection}/${encodeURIComponent(id)}?draft=true`
+    // Match the write contract's scalar relationship representation. Payload's
+    // default depth expands `site` into an object, which would create a false
+    // parity failure despite the authenticated draft mutation succeeding.
+    const url = `${this.baseUrl}/api/${collection}/${encodeURIComponent(id)}?draft=true&depth=0`
     try {
       const response = await fetch(url, { headers: this.buildHeaders() })
       if (response.status === 404) return null
@@ -156,7 +159,9 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
 
   /** Field-level parity for the promotion service; Payload may add id/timestamps, so expected fields are authoritative. */
   verifyParity(expected: Record<string, unknown>, actual: Record<string, unknown>): boolean {
-    return parityFields(expected, actual)
+    const mismatchPaths = parityMismatchPaths(expected, actual)
+    if (mismatchPaths.length > 0) throw new Error(`payload-parity-mismatch:${mismatchPaths.join(',')}`)
+    return true
   }
 
   // ---------------------------------------------------------------------------
@@ -195,12 +200,7 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
       headers: { 'Content-Type': 'application/json', ...this.buildHeaders() },
       body: JSON.stringify(data),
     })
-    if (!response.ok) {
-      const body = await response.text().catch(() => '')
-      throw new Error(
-        `Payload POST /${collection} failed (${response.status} ${response.statusText})${body ? `: ${body}` : ''}`,
-      )
-    }
+    if (!response.ok) throw payloadRequestError('POST', collection, response)
     return response.json() as Promise<PayloadDocResponse>
   }
 
@@ -216,12 +216,7 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
       headers: { 'Content-Type': 'application/json', ...this.buildHeaders() },
       body: JSON.stringify(data),
     })
-    if (!response.ok) {
-      const body = await response.text().catch(() => '')
-      throw new Error(
-        `Payload PATCH /${collection}/${id} failed (${response.status} ${response.statusText})${body ? `: ${body}` : ''}`,
-      )
-    }
+    if (!response.ok) throw payloadRequestError('PATCH', `${collection}/${id}`, response)
     return response.json() as Promise<PayloadDocResponse>
   }
 
@@ -250,10 +245,28 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
   }
 }
 
+// Payload bodies can echo submitted content.  Surface the exact HTTP boundary
+// result for operational diagnosis without allowing submitted content or
+// credentials into a durable receipt, outbox, or error log.
+function payloadRequestError(method: 'POST' | 'PATCH', target: string, response: Response): Error {
+  const statusText = response.statusText.replace(/[^A-Za-z0-9 ._-]/g, '').slice(0, 80)
+  return new Error(`payload-rest:${method}:${target}:http-${response.status}:${statusText || 'unknown'}`)
+}
+
 function parityFields(expected: unknown, actual: unknown): boolean {
+  if (typeof expected === 'string' && (typeof actual === 'number' || typeof actual === 'string')) return expected === String(actual)
+  if (typeof expected === 'string' && actual && typeof actual === 'object' && !Array.isArray(actual) && ['number', 'string'].includes(typeof (actual as Record<string, unknown>).id)) return expected === String((actual as Record<string, unknown>).id)
   if (Array.isArray(expected)) return Array.isArray(actual) && expected.length === actual.length && expected.every((value, index) => parityFields(value, actual[index]))
   if (expected && typeof expected === 'object') return Boolean(actual && typeof actual === 'object' && !Array.isArray(actual) && Object.entries(expected as Record<string, unknown>).every(([key, value]) => parityFields(value, (actual as Record<string, unknown>)[key])))
   return expected === actual
+}
+
+function parityMismatchPaths(expected: unknown, actual: unknown, path = ''): string[] {
+  if (typeof expected === 'string' && (typeof actual === 'number' || typeof actual === 'string')) return expected === String(actual) ? [] : [path || 'root']
+  if (typeof expected === 'string' && actual && typeof actual === 'object' && !Array.isArray(actual) && ['number', 'string'].includes(typeof (actual as Record<string, unknown>).id)) return expected === String((actual as Record<string, unknown>).id) ? [] : [path || 'root']
+  if (Array.isArray(expected)) return Array.isArray(actual) && expected.length === actual.length ? expected.flatMap((value, index) => parityMismatchPaths(value, actual[index], `${path}[${index}]`)) : [path || 'root']
+  if (expected && typeof expected === 'object') return actual && typeof actual === 'object' && !Array.isArray(actual) ? Object.entries(expected as Record<string, unknown>).flatMap(([key, value]) => parityMismatchPaths(value, (actual as Record<string, unknown>)[key], path ? `${path}.${key}` : key)) : [path || 'root']
+  return expected === actual ? [] : [path || 'root']
 }
 
 // ---------------------------------------------------------------------------

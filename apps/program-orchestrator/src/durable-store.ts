@@ -182,13 +182,15 @@ export class DurableLedger {
     return clone(state.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation) ?? null)
   }
 
-  async saveReceipt(issueId: string, operation: string, value: unknown): Promise<Receipt> {
+  async saveReceipt(issueId: string, operation: string, value: unknown, runId: string, fencingToken: number): Promise<Receipt> {
     return this.mutate(async (current) => {
       if (!current) throw new Error('program has not been created')
       const prior = current.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation)
       if (prior) return { state: current, result: clone(prior) }
       const issue = current.issues.find((candidate) => candidate.issueId === issueId)
       if (!issue) throw new Error(`issue ${issueId} not found`)
+      const run = current.runs.find((candidate) => candidate.runId === runId)
+      if (!run || run.issueId !== issueId || run.state !== 'running' || run.lease?.fencingToken !== fencingToken || run.lease.expiresAt <= new Date().toISOString()) throw new Error('receipt rejected by stale lease fencing token')
       const valueChecksum = createHash('sha256').update(JSON.stringify(value)).digest('hex')
       const receipt: Receipt = { receiptId: `receipt:${issueId}:${randomUUID()}`, issueId, operation, idempotencyKey: `${current.program.programId}:${issueId}`, revision: this.config.executingRevision, valueChecksum, executorKind: issue.executorKind, executorVersion: issue.executorVersion, createdAt: new Date().toISOString(), value: clone(value) }
       current.receipts.push(receipt)

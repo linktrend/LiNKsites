@@ -112,6 +112,8 @@ test('the canonical 16-issue graph completes without public activation', async (
       assert.ok(JSON.parse(await readFile(location, 'utf8')))
     }
     assert.equal(JSON.stringify(state).includes('sold-site-public-activation'), false)
+    const generated = [value.config.statePath, value.config.completionPath, ...(await readdir(`${value.directory}/evidence`)).map((file) => join(value.directory, 'evidence', file))]
+    for (const file of generated) assert.equal((await readFile(file, 'utf8')).includes('test-preview-token'), false, `preview token leaked into generated ${file}`)
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
 
@@ -186,7 +188,7 @@ test('process termination after claim and irreversible receipt is reclaimed by a
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-crash-'))
   const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token' }
   const signalPath = join(directory, 'worker-ready')
-  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import('./src/composition.ts'); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,payloadBaseUrl:'http://127.0.0.1:9',payloadApiKey:'test-api-key',payloadSiteId:'test-site',webMasterBaseUrl:'http://127.0.0.1:9',previewAccessToken:'test-preview-token',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'}); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
+  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import('./src/composition.ts'); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,payloadBaseUrl:'http://127.0.0.1:9',payloadApiKey:'test-api-key',payloadSiteId:'test-site',webMasterBaseUrl:'http://127.0.0.1:9',previewAccessToken:'test-preview-token',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'},claim.run.runId,claim.run.lease.fencingToken); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
   const worker = spawn(process.execPath, ['--import', 'tsx/esm', '-e', workerCode], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
   let restarted: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
@@ -211,6 +213,26 @@ test('process termination after claim and irreversible receipt is reclaimed by a
     await restarted?.close?.()
     await rm(directory, { recursive: true, force: true })
   }
+})
+
+test('a paused stale worker cannot acknowledge an irreversible receipt after lease expiry and reclaim', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-stale-receipt-'))
+  const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', leaseDurationMs: 25, workerId: 'worker-a' }
+  const first = await createProductionComposition(config)
+  let second: Awaited<ReturnType<typeof createProductionComposition>> | undefined
+  try {
+    await first.ledger.createOrResume(lead('lead-stale-receipt'))
+    const stale = await first.ledger.claim('lead-research')
+    assert.ok(stale)
+    await new Promise((resolve) => setTimeout(resolve, 60)) // worker A is paused across its lease expiry
+    second = await createProductionComposition({ ...config, workerId: 'worker-b' })
+    assert.equal(await second.ledger.reclaimExpiredLeases(), 1)
+    const current = await second.ledger.claim('lead-research')
+    assert.ok(current)
+    await assert.rejects(first.ledger.saveReceipt('lead-research', 'stale-external-effect', { acknowledged: true }, stale.run.runId, stale.run.lease!.fencingToken), /stale lease fencing token/)
+    await assert.rejects(first.ledger.succeed(stale.run.runId, stale.run.lease!.fencingToken, { stale: true }, []), /stale lease|not found/)
+    assert.equal((await second.ledger.snapshot()).receipts.length, 0)
+  } finally { await second?.close?.(); await first.close(); await rm(directory, { recursive: true, force: true }) }
 })
 
 test('two independent workers fence the same ready issue to one claim', async () => {
@@ -293,4 +315,21 @@ test('completion crash after receipt is delivered once after restart', async () 
     assert.equal(outbox.status, 'delivered')
     assert.ok(outbox.ackAt)
   } finally { await restarted?.close?.(); await value.close(); await rm(value.directory, { recursive: true, force: true }) }
+})
+
+test('completion outbox exhausts into a terminal dead letter', async () => {
+  const value = await composition('lead-completion-dead-letter')
+  try {
+    await value.adapters.injectFault({ operation: 'completion.emit', remaining: 3, kind: 'transient' })
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await assert.rejects(value.runtime.runLead(lead('lead-completion-dead-letter')), /boundary:completion-sink:transient-failure/)
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 1_050))
+    }
+    const state = await value.runtime.exportState() as { outbox: Array<{ status: string; attempts: number; deadLetteredAt: string | null }>; metrics: { outboxBacklog: number; outboxDeadLetters: number } }
+    assert.deepEqual(state.outbox.map((entry) => entry.status), ['dead_lettered'])
+    assert.equal(state.outbox[0]?.attempts, 3)
+    assert.ok(state.outbox[0]?.deadLetteredAt)
+    assert.equal(state.metrics.outboxBacklog, 0)
+    assert.equal(state.metrics.outboxDeadLetters, 1)
+  } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })

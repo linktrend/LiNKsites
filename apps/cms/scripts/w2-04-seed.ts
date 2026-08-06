@@ -92,7 +92,13 @@ const common = { site: site.id, locale: 'en', status: 'published' as const }
 const previewApiKey = 'w2-04-disposable-preview-api-key'
 const previewRole = await within('creating preview role', payload.create({
   collection: 'roles',
-  data: { name: `w2-04-preview-${randomUUID()}`, permissions: { read: true } },
+  // The same disposable, site-scoped API user is used by the W2-02 local
+  // promotion proof. It needs draft create/update authority; this fixture
+  // remains local-only and never grants public publication authority.
+  // Access resolution deliberately grants only recognised role profiles. The
+  // editor profile has read/create/update but cannot publish, approve, or
+  // manage sites, so it is the least-privileged role that can create drafts.
+  data: { name: 'editor', permissions: { read: true, create: true, update: true } },
   ...options,
 }))
 await within('creating preview API user', payload.create({

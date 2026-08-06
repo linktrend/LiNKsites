@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
 import { dirname, join } from 'node:path'
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import type { DemoCompletionEnvelope, LeadResearchPackage } from '@linksites/types'
 import { FileCompletionSink, type CompletionSink } from '@linksites/intake-orchestrator'
 import {
@@ -19,7 +19,7 @@ import {
   computeWorkingContentChecksum,
 } from '@linksites/factory-catalog'
 import { PayloadRestDraftTarget } from '@linksites/factory-catalog'
-import type { AdapterFault, LeadInput, LocalBoundaryAdapters, RuntimeConfig } from './contracts.ts'
+import type { AdapterFault, ExternalFence, LeadInput, LocalBoundaryAdapters, RuntimeConfig } from './contracts.ts'
 import { ensureTenantRows, type SqlDatabase } from './local-database.ts'
 
 const stable = (value: unknown): string => value === null || typeof value !== 'object' ? JSON.stringify(value) : Array.isArray(value) ? `[${value.map(stable).join(',')}]` : `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${stable((value as Record<string, unknown>)[key])}`).join(',')}}`
@@ -35,6 +35,8 @@ function stableUuid(value: string): string {
 }
 
 function sameFields(expected: unknown, actual: unknown): boolean {
+  if (typeof expected === 'string' && (typeof actual === 'number' || typeof actual === 'string')) return expected === String(actual)
+  if (typeof expected === 'string' && actual && typeof actual === 'object' && !Array.isArray(actual) && ['number', 'string'].includes(typeof (actual as Record<string, unknown>).id)) return expected === String((actual as Record<string, unknown>).id)
   if (Array.isArray(expected)) return Array.isArray(actual) && expected.length === actual.length && expected.every((item, index) => sameFields(item, actual[index]))
   if (expected && typeof expected === 'object') return Boolean(actual && typeof actual === 'object' && !Array.isArray(actual) && Object.entries(expected as Record<string, unknown>).every(([key, value]) => sameFields(value, (actual as Record<string, unknown>)[key])))
   return String(expected) === String(actual)
@@ -47,6 +49,8 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   private readonly db: SqlDatabase
   private readonly workingContentRepository: WorkingContentRepository
   private readonly payloadTarget: PayloadDraftTarget
+  private leaseVerifier: ((fence: ExternalFence) => Promise<void>) | null = null
+  private payloadDiagnostic = 'not-attempted'
 
   constructor(config: RuntimeConfig, db: SqlDatabase) {
     this.config = config
@@ -56,6 +60,8 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   }
 
   async injectFault(fault: AdapterFault): Promise<void> { this.faults.push({ ...fault }) }
+  bindLeaseVerifier(verifier: (fence: ExternalFence) => Promise<void>): void { this.leaseVerifier = verifier }
+  lastPayloadDiagnostic(): string { return this.payloadDiagnostic }
   async rejectNextGate(): Promise<void> { this.faults.push({ operation: 'content.gates', remaining: 1, kind: 'permanent' }) }
   async tamperPayload(): Promise<void> { await this.db.query("update lsites_sites.payload_drafts set data = jsonb_set(data, '{title}', to_jsonb('tampered'::text), true) where id = (select id from lsites_sites.payload_drafts order by id limit 1)") }
   async tamperEvidence(): Promise<void> { const first = this.artifacts.values().next().value as { path: string } | undefined; if (!first) throw new Error('no persisted evidence exists to tamper'); await writeFile(first.path, '{"tampered":true}\n', 'utf8') }
@@ -78,10 +84,15 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     return candidate
   }
 
-  private async boundary<T>(operation: string, effect: () => Promise<T>): Promise<T> {
+  private async boundary<T>(operation: string, effect: () => Promise<T>, fence?: ExternalFence): Promise<T> {
+    if (fence) {
+      if (!this.leaseVerifier) throw new Error('boundary:lease-verifier-unbound')
+      await this.leaseVerifier(fence)
+    }
     const fault = this.fault(operation)
     if (fault && fault.kind !== 'crash_after_receipt') throw new Error(`boundary:${operation}:${fault.kind}-failure`)
     const value = await effect()
+    if (fence) await this.leaseVerifier!(fence)
     if (fault?.kind === 'crash_after_receipt') throw new Error(`crash-after-receipt:${operation}`)
     return clone(value)
   }
@@ -194,16 +205,22 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     return { accepted: true, evidence: [artifact.path], artifactPath: artifact.path, artifactChecksum: artifact.checksum }
   }
 
-  async promoteDraft(siteId: string, _workingContent: Record<string, unknown>): Promise<Record<string, unknown>> {
+  async promoteDraft(siteId: string, _workingContent: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>> {
     return this.boundary('payload.promote-draft', async () => {
-      const packageId = `working:${siteId}`
-      const version = await this.workingContentRepository.selectExactAcceptedVersion({ workingPackageId: packageId, versionNumber: 1, contentChecksum: String((await this.workingContentRepository.readVersion(packageId, 1))?.contentChecksum) })
-      const prepared: WorkingContentPromotionInput = await this.workingContentRepository.preparePromotion({ orgId: version.orgId, workingPackageId: packageId, versionNumber: version.versionNumber, contentChecksum: version.contentChecksum, promotionIdempotencyKey: `promotion:${siteId}` })
-      // The durable working-package key remains lead-specific, while the REST
-      // mutation is constrained to the authenticated, seeded Payload site.
-      const promotion = await promotePreparedWorkingContent({ repository: this.workingContentRepository, prepared, target: this.payloadTarget, targetSiteId: this.config.payloadSiteId, promotionRequestId: `promotion-request:${siteId}`, assemblyManifestId: `manifest:${siteId}` })
-      return { receipt: promotion.receipt, payloadReceiptId: promotion.payloadReceiptId, payloadDocumentIds: promotion.receipt.itemResults.map((item) => item.payloadDocumentId).filter((id): id is string => Boolean(id)), checksum: prepared.contentChecksum, status: 'draft', published: false, serviceProof: { adapter: 'PayloadRestDraftTarget', baseUrl: this.config.payloadBaseUrl, readbackVerified: true, repositoryReceiptId: promotion.receipt.promotionReceiptId } }
-    })
+      try {
+        const packageId = `working:${siteId}`
+        const version = await this.workingContentRepository.selectExactAcceptedVersion({ workingPackageId: packageId, versionNumber: 1, contentChecksum: String((await this.workingContentRepository.readVersion(packageId, 1))?.contentChecksum) })
+        const prepared: WorkingContentPromotionInput = await this.workingContentRepository.preparePromotion({ orgId: version.orgId, workingPackageId: packageId, versionNumber: version.versionNumber, contentChecksum: version.contentChecksum, promotionIdempotencyKey: `promotion:${siteId}` })
+        // The durable working-package key remains lead-specific, while the REST
+        // mutation is constrained to the authenticated, seeded Payload site.
+        const promotion = await promotePreparedWorkingContent({ repository: this.workingContentRepository, prepared, target: this.payloadTarget, targetSiteId: this.config.payloadSiteId, promotionRequestId: `promotion-request:${siteId}`, assemblyManifestId: `manifest:${siteId}` })
+        this.payloadDiagnostic = 'succeeded'
+        return { receipt: promotion.receipt, payloadReceiptId: promotion.payloadReceiptId, payloadDocumentIds: promotion.receipt.itemResults.map((item) => item.payloadDocumentId).filter((id): id is string => Boolean(id)), checksum: prepared.contentChecksum, status: 'draft', published: false, serviceProof: { adapter: 'PayloadRestDraftTarget', baseUrl: this.config.payloadBaseUrl, readbackVerified: true, repositoryReceiptId: promotion.receipt.promotionReceiptId } }
+      } catch (error) {
+        this.payloadDiagnostic = safePayloadDiagnostic(error)
+        throw error
+      }
+    }, fence)
   }
 
   async readbackDraft(siteId: string, promotion: Record<string, unknown>): Promise<Record<string, unknown>> {
@@ -222,37 +239,34 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     })
   }
 
-  async createPrivatePreview(siteId: string, promotion: Record<string, unknown>): Promise<Record<string, unknown>> {
+  async createPrivatePreview(siteId: string, promotion: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>> {
     return this.boundary('frontend.private-preview', async () => {
       const ids = Array.isArray(promotion.payloadDocumentIds) ? promotion.payloadDocumentIds.map(String) : []
-      // Draft promotion belongs to W2-03. This is the separate authenticated
-      // W2-02 publication step and it never enables public activation.
-      for (const compoundId of ids) {
-        const [collection, id] = compoundId.split('::')
-        if (!collection || !id) throw new Error('payload:invalid-document-reference')
-        const response = await fetch(`${this.config.payloadBaseUrl}/api/${encodeURIComponent(collection)}/${encodeURIComponent(id)}`, {
-          method: 'PATCH',
-          headers: { 'content-type': 'application/json', Authorization: `users API-Key ${this.config.payloadApiKey}` },
-          body: JSON.stringify({ status: 'published', previewEnvironment: 'private-preview', site: this.config.payloadSiteId }),
-        })
-        if (!response.ok) throw new Error(`payload:private-preview-publication-failed:${response.status}`)
-      }
+      // The authenticated Payload promotion has already created and read back
+      // these records as private drafts. A token-gated preview deploys those
+      // drafts; it must not change their workflow status to published.
+      if (ids.length === 0 || promotion.parity !== true) throw new Error('payload:private-preview-requires-verified-draft-receipt')
       const manifest = { schemaVersion: { major: 1, minor: 0 }, manifestId: `manifest:${siteId}`, manifestVersion: 1, siteId, siteClass: 'preview' as const, kitId: 'home_services', tierId: 'standard', platformReleaseRef: this.config.executingRevision, designProfileRef: 'design:local', contentReleaseRef: String(promotion.checksum), pages: [], lineage: {}, resolvedAt: new Date().toISOString() }
       const deployment = createPreviewDeployment({ previewId: `preview:${siteId}`, prospectId: siteId, manifest, payloadDraftContentRef: `payload:${siteId}`, analyticsIdentityRef: `analytics:${siteId}`, accessPolicy: 'token_required', expiresAt: new Date(Date.now() + 86_400_000).toISOString(), qualityReceiptRef: null })
-      const result = { ...deployment, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, publicActivation: false }, publicActivation: false, protectedRenderUrl: `${this.config.webMasterBaseUrl}/en/demo/${encodeURIComponent(this.config.previewAccessToken)}`, previewToken: this.config.previewAccessToken }
+      // Tokens and token-bearing URLs are transport credentials. They must
+      // never enter the ledger, evidence, receipt, or completion envelope.
+      const result = { ...deployment, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, status: 'draft', publicActivation: false }, publicActivation: false, protectedRoute: '/en/demo/[private-token]' }
       const artifact = await this.writeArtifact('frontend-private-preview', siteId, result)
       return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum }
-    })
+    }, fence)
   }
 
   async renderPrivatePreview(siteId: string, preview: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.boundary('frontend.render', async () => {
-      const response = await fetch(String(preview.protectedRenderUrl))
+      const response = await fetch(`${this.config.webMasterBaseUrl}/en/demo/${encodeURIComponent(this.config.previewAccessToken)}`)
       const html = await response.text()
       const robots = response.headers.get('x-robots-tag') ?? ''
       const cache = response.headers.get('cache-control') ?? ''
       if (!response.ok || !html.includes('data-private-preview="true"') || !robots.includes('noindex') || !cache.includes('no-store')) throw new Error('frontend:protected-web-master-render-failed')
-      const result = { html, routes: (Array.from(html.matchAll(/data-route="([^"]+)"/g)).map((match) => match[1])), pages: String(preview.payloadDocumentIds).split(','), accessibility: html.includes('<h1>'), seo: robots.includes('noindex'), privacy: cache, protectedServiceProof: { status: response.status, tokenRequired: true, noPublicActivation: true }, siteId }
+      // The response body can legitimately contain a token-bearing navigation
+      // link. It is evaluated in-memory, then represented by a checksum and
+      // boolean gates only; durable evidence must never retain that credential.
+      const result = { htmlChecksum: checksum(html), routes: (Array.from(html.matchAll(/data-route="([^"]+)"/g)).map((match) => match[1])), pages: String(preview.payloadDocumentIds).split(','), accessibility: html.includes('<h1>'), seo: robots.includes('noindex'), privacy: cache, protectedServiceProof: { status: response.status, tokenRequired: true, noPublicActivation: true }, siteId }
       const artifact = await this.writeArtifact('frontend-render-gate', siteId, result)
       return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum }
     })
@@ -276,10 +290,32 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   async health(): Promise<{ cms: boolean; frontend: boolean; eventBoundary: boolean }> {
     const cms = await fetch(`${this.config.payloadBaseUrl}/api/pages?site=${encodeURIComponent(this.config.payloadSiteId)}&limit=1`, { headers: { Authorization: `users API-Key ${this.config.payloadApiKey}` } }).then((response) => response.ok).catch(() => false)
     const frontend = await fetch(`${this.config.webMasterBaseUrl}/api/healthz`).then(async (response) => response.ok && (await response.json() as { service?: unknown }).service === 'web-master').catch(() => false)
-    // The local durable sink is reachable only if its parent is writable.
-    const eventBoundary = await mkdir(dirname(this.config.completionPath), { recursive: true }).then(() => true).catch(() => false)
+    // Exercise the actual durable boundary with a reversible write/read/delete,
+    // not merely a directory creation check.
+    const probePath = `${this.config.completionPath}.health-${process.pid}-${randomUUID()}`
+    const eventBoundary = await mkdir(dirname(probePath), { recursive: true }).then(async () => {
+      const marker = `health:${randomUUID()}`
+      await writeFile(probePath, marker, { flag: 'wx' })
+      const readback = await readFile(probePath, 'utf8')
+      await import('node:fs/promises').then(({ unlink }) => unlink(probePath))
+      return readback === marker
+    }).catch(async () => {
+      await import('node:fs/promises').then(({ unlink }) => unlink(probePath)).catch(() => undefined)
+      return false
+    })
     return { cms, frontend, eventBoundary }
   }
+}
+
+function safePayloadDiagnostic(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error)
+  const exactBoundary = message.match(/payload-rest:(?:POST|PATCH):[^:]+:http-\d{3}:[A-Za-z0-9 ._-]+/u)?.[0]
+  if (exactBoundary) return exactBoundary
+  const parityPaths = message.match(/payload-parity-mismatch:([A-Za-z0-9_.\[\],-]+)/u)?.[1]
+  if (parityPaths) return `payload-readback:field-parity-mismatch:${parityPaths}`
+  if (message.includes('readback verification failed: promoted fields do not match the source package')) return 'payload-readback:field-parity-mismatch'
+  if (message.includes('readback verification failed: document not retrievable after write')) return 'payload-readback:not-retrievable'
+  return `non-http-error-sha256:${createHash('sha256').update(message).digest('hex')}`
 }
 
 export class DurableCompletionSink implements CompletionSink {
