@@ -11,6 +11,7 @@ import {
   InMemoryLifecycleStore,
   LifecycleError,
   SiteLifecycleService,
+  type ArchitectCandidateSubmitter,
   type LifecycleEvidenceVerifier,
   type LiNKreachAuthorizationVerifier,
 } from '../src/siteLifecycle.js'
@@ -94,6 +95,28 @@ describe('W2-06 commercial outcome lifecycle', () => {
     expect(stored?.status).toBe('manual_attention')
     expect(stored?.receipts.some((entry) => entry.action === 'activation.execution' && entry.status === 'failed')).toBe(true)
     expect(stored?.receipts.some((entry) => entry.action === 'payload.rollback' && entry.status === 'failed')).toBe(true)
+  })
+
+  it('persists schema-valid activation failure evidence that a fresh durable store can read', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-06-activation-failure-'))
+    try {
+      const failing = new DryRunActivationProvider('dns')
+      failing.execute = async () => { throw new Error('sandbox DNS failure') }
+      const providers = [
+        new DryRunActivationProvider('payload'), new DryRunActivationProvider('private_wall'), new DryRunActivationProvider('domain'), failing,
+        new DryRunActivationProvider('route'), new DryRunActivationProvider('tls'), new DryRunActivationProvider('health'),
+      ]
+      const service = new SiteLifecycleService(createFileLifecycleStore(directory), authorization, providers, verifiedEvidence)
+      await service.recordOutcome(validCommercialOutcome)
+      await expect(service.dryRunActivation(validActivationRequest)).rejects.toThrow(/execution and rollback evidence were recorded/i)
+
+      const restarted = createFileLifecycleStore(directory)
+      const stored = await restarted.getBySiteId(validActivationRequest.org_id, validActivationRequest.site_id)
+      expect(stored?.status).toBe('manual_attention')
+      expect(stored?.receipts.some((entry) => entry.action === 'activation.execution' && entry.status === 'failed' && entry.details.publicMutation === false && entry.details.errorRecorded === true)).toBe(true)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
   })
 
   it('quarantines no-sale content, releases inventory, and refuses to recycle a conversion-locked foundation', async () => {
@@ -230,5 +253,21 @@ describe('W2-06 LiNKsites Architect', () => {
     await expect(service.proposeArchitectCandidate({ orgId: 'org_demo', siteId: 'site_demo_example', assetPreview: {}, candidateFileContents, catalogReference, candidate: architectCandidate })).rejects.toBeInstanceOf(LifecycleError)
     await service.recordOutcome(noSale)
     await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, assetPreview: {}, candidateFileContents, catalogReference, candidate: architectCandidate })).rejects.toThrow(/completed no_sale/i)
+  })
+
+  it('rejects a candidate whose claimed source run is foreign before W1-05 submission is called', async () => {
+    let submissionCalls = 0
+    const submitter: ArchitectCandidateSubmitter = () => {
+      submissionCalls += 1
+      throw new Error('submission must not be reached')
+    }
+    const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization, undefined, verifiedEvidence, submitter)
+    await service.recordOutcome(noSale)
+    const reservations = new FoundationReservationManager(); const reservation = reservations.reserve('foundation-foreign-run', 'program-foreign-run')
+    const adaptation = { schemaVersion: { major: 1, minor: 0 }, adaptationId: 'adaptation-foreign-run', siteSpecId: 'spec-foreign-run', foundationId: 'foundation-foreign-run', reservationId: reservation.reservationId, status: 'published' as const, prospectContent: { businessName: 'Private Co' }, createdAt: '2026-08-01T00:00:00.000Z' }
+    await service.recycleNoSale({ request: validRecyclingRequest, adaptation, reservations, conversionLocks: new ConversionLockRegistry(), inventoryBinding: recycleBinding(adaptation), completedEvidence, quarantineLeadContent: async () => ({ receiptId: 'quarantine-foreign-run', kind: 'recycling', idempotencyKey: validRecyclingRequest.idempotency_key, subjectId: validRecyclingRequest.site_id, mode: 'dry_run', action: 'content.quarantine', status: 'completed', createdAt: new Date().toISOString(), details: { publicMutation: false, leadContentRetained: false, leadContentRemoved: true, adaptationId: adaptation.adaptationId, foundationId: adaptation.foundationId, reservationId: adaptation.reservationId, templateInventoryId: validRecyclingRequest.template_inventory_id } }) })
+
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, assetPreview: {}, candidateFileContents, catalogReference, candidate: { ...architectCandidate, provenance: { ...architectCandidate.provenance, productRunId: 'run-foreign' } } })).rejects.toThrow(/productRunId.*durable recycled source run/i)
+    expect(submissionCalls).toBe(0)
   })
 })

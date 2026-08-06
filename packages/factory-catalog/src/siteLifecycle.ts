@@ -266,6 +266,7 @@ function hasConsistentLifecycleInvariants(record: LifecycleRecord): boolean {
   for (const nested of record.receipts) {
     if (nested.subjectId !== record.siteId) return false
     if (nested.kind === 'activation_step' || nested.kind === 'activation_rollback') {
+      if (isActivationExecutionFailureReceipt(nested, record)) continue
       if (!record.activationRequest || nested.idempotencyKey !== record.activationRequest.idempotency_key || nested.mode !== 'dry_run' || !/^(payload|private_wall|domain|dns|route|tls|health)\.(execute|rollback)$/.test(nested.action)) return false
     }
     if (nested.kind === 'recycling') {
@@ -276,6 +277,21 @@ function hasConsistentLifecycleInvariants(record: LifecycleRecord): boolean {
     if (nested.kind === 'architect_candidate' && !record.candidateSubmissions.some((candidate) => candidate.submissionReceipt.receiptId === nested.receiptId)) return false
   }
   return true
+}
+
+/** The only synthetic activation failure receipt written by this service. */
+function isActivationExecutionFailureReceipt(receipt: LifecycleReceipt, record: LifecycleRecord): boolean {
+  return receipt.kind === 'activation_step' &&
+    receipt.action === 'activation.execution' &&
+    receipt.status === 'failed' &&
+    receipt.mode === 'dry_run' &&
+    record.status === 'manual_attention' &&
+    Boolean(record.activationRequest) &&
+    receipt.idempotencyKey === record.activationRequest?.idempotency_key &&
+    receipt.subjectId === record.siteId &&
+    Object.keys(receipt.details).length === 2 &&
+    receipt.details.publicMutation === false &&
+    receipt.details.errorRecorded === true
 }
 
 export interface LiNKreachAuthorizationVerifier {
@@ -355,6 +371,9 @@ export interface ArchitectInput {
   candidate: LibraryCandidateEntry
 }
 
+/** Injectable only to make the fail-closed Architect boundary independently testable. */
+export type ArchitectCandidateSubmitter = typeof submitArchitectCandidate
+
 export class LifecycleError extends Error {}
 
 export class SiteLifecycleService {
@@ -363,6 +382,7 @@ export class SiteLifecycleService {
     private readonly authorization: LiNKreachAuthorizationVerifier,
     private readonly activationProviders: ActivationProvider[] = createPhaseOneActivationProviders(),
     private readonly evidenceVerifier?: LifecycleEvidenceVerifier,
+    private readonly architectCandidateSubmitter: ArchitectCandidateSubmitter = submitArchitectCandidate,
   ) {
     const providerNames = new Set(activationProviders.map((provider) => provider.providerName))
     if (activationProviders.length !== ACTIVATION_PROVIDER_NAMES.length || providerNames.size !== ACTIVATION_PROVIDER_NAMES.length || ACTIVATION_PROVIDER_NAMES.some((name) => !providerNames.has(name))) {
@@ -513,7 +533,7 @@ export class SiteLifecycleService {
     if (containsProspectData(input.assetPreview, privacyValues) || containsLeadValues(candidateHumanText(input.candidate), privacyValues)) throw new LifecycleError('Reusable candidate contains lead/customer data and cannot be submitted.')
     try { assertLiNKSitesLibraryConsumerPolicy({ ...input.candidate, status: 'approved' }) } catch (error) { throw new LifecycleError(`LiNKsites Architect candidate failed LiNKlibraries contract validation: ${error instanceof Error ? error.message : 'invalid candidate'}`) }
     let submission: LibraryCandidateSubmission
-    try { submission = submitArchitectCandidate({ catalogReference: input.catalogReference, candidate: structuredClone(input.candidate) }) } catch (error) { throw new LifecycleError(`LiNKsites Architect governed submission was rejected: ${error instanceof Error ? error.message : 'unknown rejection'}`) }
+    try { submission = this.architectCandidateSubmitter({ catalogReference: input.catalogReference, candidate: structuredClone(input.candidate) }) } catch (error) { throw new LifecycleError(`LiNKsites Architect governed submission was rejected: ${error instanceof Error ? error.message : 'unknown rejection'}`) }
     const lifecycleCandidateId = `architect:${submission.proposalId}`
     const submissionReceipt = receipt('architect_candidate', `candidate:${submission.proposalId}`, lifecycle.siteId, 'dry_run', 'linklibraries.submitArchitectCandidate', 'accepted', { submissionReference: submission.proposalId, canonicalAssetChanged: false, publicMutation: false })
     lifecycle.receipts.push(submissionReceipt)
@@ -565,6 +585,9 @@ function assertArchitectEvidenceBoundToLifecycle(input: ArchitectInput, lifecycl
   const evidence = lifecycle.recycleEvidence
   if (!evidence || !isNonEmpty(evidence.sourceEvidenceReference) || evidence.privacyScanValues.length === 0) {
     throw new LifecycleError('LiNKsites Architect evidence must be bound to this persisted completed recycle, its source run, quality proof, passing test proof, and commercial outcome.')
+  }
+  if (input.candidate.provenance.productRunId !== evidence.sourceRunId) {
+    throw new LifecycleError('LiNKsites Architect candidate provenance productRunId must exactly match the durable recycled source run.')
   }
 }
 
