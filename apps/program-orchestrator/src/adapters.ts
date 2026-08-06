@@ -199,7 +199,9 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const packageId = `working:${siteId}`
       const version = await this.workingContentRepository.selectExactAcceptedVersion({ workingPackageId: packageId, versionNumber: 1, contentChecksum: String((await this.workingContentRepository.readVersion(packageId, 1))?.contentChecksum) })
       const prepared: WorkingContentPromotionInput = await this.workingContentRepository.preparePromotion({ orgId: version.orgId, workingPackageId: packageId, versionNumber: version.versionNumber, contentChecksum: version.contentChecksum, promotionIdempotencyKey: `promotion:${siteId}` })
-      const promotion = await promotePreparedWorkingContent({ repository: this.workingContentRepository, prepared, target: this.payloadTarget, targetSiteId: siteId, promotionRequestId: `promotion-request:${siteId}`, assemblyManifestId: `manifest:${siteId}` })
+      // The durable working-package key remains lead-specific, while the REST
+      // mutation is constrained to the authenticated, seeded Payload site.
+      const promotion = await promotePreparedWorkingContent({ repository: this.workingContentRepository, prepared, target: this.payloadTarget, targetSiteId: this.config.payloadSiteId, promotionRequestId: `promotion-request:${siteId}`, assemblyManifestId: `manifest:${siteId}` })
       return { receipt: promotion.receipt, payloadReceiptId: promotion.payloadReceiptId, payloadDocumentIds: promotion.receipt.itemResults.map((item) => item.payloadDocumentId).filter((id): id is string => Boolean(id)), checksum: prepared.contentChecksum, status: 'draft', published: false, serviceProof: { adapter: 'PayloadRestDraftTarget', baseUrl: this.config.payloadBaseUrl, readbackVerified: true, repositoryReceiptId: promotion.receipt.promotionReceiptId } }
     })
   }
@@ -212,7 +214,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const version = await this.workingContentRepository.readVersion(workingPackageId, 1)
       if (!version || !['accepted', 'promoted'].includes(version.lifecycleState) || version.contentChecksum !== String(promotion.checksum)) throw new Error('gate:payload-readback-source-version-missing')
       const prepared = await this.workingContentRepository.preparePromotion({ orgId: version.orgId, workingPackageId, versionNumber: version.versionNumber, contentChecksum: version.contentChecksum, promotionIdempotencyKey: `promotion:${siteId}` })
-      const expectedItems = buildPromotionRequestFromPreparedWorkingContent(prepared, siteId, `promotion-request:${siteId}`, `manifest:${siteId}`).workingPackage.items
+      const expectedItems = buildPromotionRequestFromPreparedWorkingContent(prepared, this.config.payloadSiteId, `promotion-request:${siteId}`, `manifest:${siteId}`).workingPackage.items
       const parity = docs.length === ids.length && docs.every((doc, index) => Boolean(doc && expectedItems[index] && sameFields(expectedItems[index].data, doc)))
       const result = { parity, documentCount: docs.filter(Boolean).length, expectedCount: ids.length, checksum: promotion.checksum, payloadDocumentIds: ids, serviceReadback: true, siteId }
       const artifact = await this.writeArtifact('payload-readback-parity', siteId, result)
@@ -271,7 +273,13 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   async emitCompletion(_envelope: DemoCompletionEnvelope): Promise<void> { throw new Error('completion delivery must use the durable outbox sink') }
 
   async compensate(issueId: string, reason: string): Promise<'compensated' | 'manual_attention'> { const artifact = await this.writeArtifact('manual-attention-compensation', issueId, { issueId, reason, postMutation: issueId === 'site-render-validation', action: 'retain-payload-draft-and-create-manual-review', publicActivation: false }); return artifact.path ? 'manual_attention' : 'manual_attention' }
-  health(): { cms: boolean; frontend: boolean; eventBoundary: boolean } { return { cms: Boolean(this.config.payloadBaseUrl), frontend: Boolean(this.config.webMasterBaseUrl), eventBoundary: true } }
+  async health(): Promise<{ cms: boolean; frontend: boolean; eventBoundary: boolean }> {
+    const cms = await fetch(`${this.config.payloadBaseUrl}/api/pages?site=${encodeURIComponent(this.config.payloadSiteId)}&limit=1`, { headers: { Authorization: `users API-Key ${this.config.payloadApiKey}` } }).then((response) => response.ok).catch(() => false)
+    const frontend = await fetch(`${this.config.webMasterBaseUrl}/api/healthz`).then(async (response) => response.ok && (await response.json() as { service?: unknown }).service === 'web-master').catch(() => false)
+    // The local durable sink is reachable only if its parent is writable.
+    const eventBoundary = await mkdir(dirname(this.config.completionPath), { recursive: true }).then(() => true).catch(() => false)
+    return { cms, frontend, eventBoundary }
+  }
 }
 
 export class DurableCompletionSink implements CompletionSink {

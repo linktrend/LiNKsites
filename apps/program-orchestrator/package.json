@@ -10,7 +10,9 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "export:graph": "tsx scripts/export-graph.ts"
+    "export:graph": "tsx scripts/export-graph.ts",
+    "validate:graph": "tsx scripts/validate-graph.ts",
+    "proof:real-services": "bash ../../scripts/w2-02-local-proof.sh"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.4",

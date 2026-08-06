@@ -57,7 +57,7 @@ export class ProgramRuntime {
     const state = await this.ledger.snapshot().catch(() => null)
     return {
       liveness: true,
-      readiness: Boolean(state) && Object.values(this.adapters.health()).every(Boolean),
+      readiness: Boolean(state) && Object.values(await this.adapters.health()).every(Boolean),
       programState: state?.program.state ?? null,
       activeIssues: this.active,
       retries: state?.metrics.retries ?? 0,

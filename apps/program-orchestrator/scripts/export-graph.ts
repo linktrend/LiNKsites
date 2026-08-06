@@ -1,8 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { GRAPH_EXPORT } from '../src/graph.ts'
 
-const target = process.argv[2] ? resolve(process.argv[2]) : null
+const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
+const target = process.argv[2] ? resolve(repositoryRoot, process.argv[2]) : null
 const json = `${JSON.stringify(GRAPH_EXPORT, null, 2)}\n`
 
 if (target) {

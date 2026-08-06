@@ -79,6 +79,10 @@ export class DurableLedger {
       } catch (error: unknown) {
         if (!(error && typeof error === 'object' && 'code' in error && error.code === 'EEXIST')) throw error
         const owner: { pid?: number; createdAt?: string } = await readFile(path, 'utf8').then((raw) => JSON.parse(raw) as { pid?: number; createdAt?: string }).catch(() => ({} as { pid?: number; createdAt?: string }))
+        // `open(..., 'wx')` makes the lock visible before the owner has
+        // written its identity.  That tiny window must be treated as locked:
+        // deleting it here would let a second worker mutate the same issue.
+        if (!owner.createdAt) { await new Promise((resolve) => setTimeout(resolve, 10)); continue }
         const age = owner.createdAt ? Date.now() - Date.parse(owner.createdAt) : Number.POSITIVE_INFINITY
         let alive = false
         if (typeof owner.pid === 'number') { try { process.kill(owner.pid, 0); alive = true } catch { alive = false } }

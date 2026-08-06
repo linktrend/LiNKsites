@@ -115,7 +115,8 @@ export interface LocalBoundaryAdapters {
   captureEvidence(siteId: string, render: Record<string, unknown>): Promise<Record<string, unknown>>
   emitCompletion(envelope: DemoCompletionEnvelope): Promise<void>
   compensate(issueId: string, reason: string): Promise<'compensated' | 'manual_attention'>
-  health(): { cms: boolean; frontend: boolean; eventBoundary: boolean }
+  /** Reachability is a real request, never configuration-presence shorthand. */
+  health(): Promise<{ cms: boolean; frontend: boolean; eventBoundary: boolean }>
 }
 
 export type RuntimeConfig = {

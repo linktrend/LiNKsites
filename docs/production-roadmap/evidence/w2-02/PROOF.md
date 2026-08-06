@@ -72,6 +72,21 @@ claim boundary: the real Payload integration suite still requires a running
 Payload process, database, and authorized test credential. No cloud or live
 credential path was used here.
 
+## Current correction harness
+
+`pnpm --filter @linksites/program-orchestrator proof:real-services` is the
+required disposable local vertical slice. It creates a temporary local
+database, starts the actual Payload app with its authenticated REST API, builds
+and starts the optimized `apps/web-master`, then runs all 16 Issues and a real
+Chromium token-gate check. It writes only the sanitized
+`real-service-vertical-slice.json` receipt; temporary credentials, URLs, state,
+database, and processes are removed in the shell trap. This receipt is not a
+PASS declaration.
+
+`pnpm --filter @linksites/program-orchestrator validate:graph` fails if the
+committed `program-graph.json` is not the canonical exporter output. The stale
+hand-maintained `GRAPH.json` has been removed.
+
 ## Recovery coverage
 
 The focused suite covers boundary retry, restart after a Payload receipt,
