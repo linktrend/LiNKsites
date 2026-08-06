@@ -16,7 +16,7 @@ LiNKsites is a monorepo website factory + managed hosting Program:
 |---|---|---|
 | **Control / working** | Program Ledger, factory objects, working packages, provenance | `packages/program-ledger`, `packages/factory-catalog`, schemas `lsites_ledger` + `lsites_sites` on shared Supabase/Postgres (`linkplatform-*`) |
 | **CMS** | Draft + published website content authority | `apps/cms` — Payload CMS 3.x on Next.js, Postgres `public` schema |
-| **Serving** | Multi-tenant frontend by hostname | `apps/web-master` — shared Next.js platform; optional `apps/web-company` (smaller template; legacy/paused per audit DR-02) |
+| **Serving** | Multi-tenant frontend by hostname | `apps/web-master` — the sole active shared Next.js platform; the paused corporate-site source is preserved under `archive/paused-applications/web-company/` and is not deployable |
 | **Edge / origin** | Public edge + VPS reverse proxy | Cloudflare (edge) + Traefik labels in `deploy/docker-compose.deploy.yml` |
 | **Commercial boundary** | Lead research, outcomes, authorization | **LiNKreach-owned** — LiNKsites continuously pulls and atomically claims eligible CRM work through a versioned adapter; payment and CRM systems remain LiNKreach-owned and are not LiNKsites dependencies |
 | **Shared substrate** | Org/RBAC/capability grants | LiNKplatform `platform.*` schemas; Ledger checks `platform.capability_grants` at dispatch |
@@ -270,12 +270,12 @@ Program-controlled Site Assignment registry, automated DNS/TLS issuance, monitor
 |---|---|---|
 | `apps/cms` | Payload CMS | Central draft/published content app (~25 collections) |
 | `apps/web-master` | Next.js frontend | Primary multi-tenant shared platform (hostname → site) |
-| `apps/web-company` | Next.js frontend | Smaller starter template; investment paused (DR-02) |
+| `archive/paused-applications/web-company` | Archived source | Preserved paused corporate-site source; outside workspace, CI and deployment |
 | `packages/types` | `@linksites/types` | Shared types / `SchemaVersion` / data-contract exports |
 | `packages/program-ledger` | `@linksites/program-ledger` | Issue/Run/Gate/Event, hierarchy, Postgres store, capability gate |
 | `packages/factory-catalog` | `@linksites/factory-catalog` | Vertical Kit, Tier, Foundation, Design, Components, Spec, Adaptation, Assembly, Promotion, preview path objects, executors |
 | `supabase/migrations` | — | `lsites_ledger`, `lsites_sites`, capability columns; archive of retired `lsites_core` |
-| `deploy/` | — | Docker + Traefik compose for CMS + shared frontend |
+| `deploy/` | — | Fail-closed Docker/Traefik bundle, immutable manifest generator, migrations, recovery rehearsal and operations runbooks |
 | `audit/` | — | Phase 0 audit set + living roadmap notes |
 | `execution/` | — | Program/Module/Issue execution artifacts |
 
@@ -307,7 +307,7 @@ Program-controlled Site Assignment registry, automated DNS/TLS issuance, monitor
 | GAP-16 "no foundation matching" | **First slice closed** (`foundationMatching.ts`) |
 | Fake-always-green CI | **Fixed** — real lint/typecheck/test gate in `.github/workflows/ci.yml` |
 | "No Program Ledger" (early audit prose) | **Built** — packages + migrations; still maturing toward full Module automation |
-| web-company as equal primary template | **Paused/ambiguous** per DR-02; web-master is primary |
+| web-company as equal primary template | **Retired from active LiNKsites surfaces**; web-master is the only factory renderer and source remains archived for history |
 
 ---
 

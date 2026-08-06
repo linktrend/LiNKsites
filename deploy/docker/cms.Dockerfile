@@ -16,6 +16,7 @@ COPY apps/cms/package.json apps/cms/package.json
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
+ENV LINKSITES_BUILD_NO_DATABASE=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm install --frozen-lockfile \
@@ -33,8 +34,14 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/.next/static ./apps/cms/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/cron ./apps/cms/cron
 COPY --from=builder --chown=nextjs:nodejs /app/apps/cms/src/payload/utils ./apps/cms/src/payload/utils
+COPY --from=builder --chown=nextjs:nodejs /app/deploy ./deploy
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-CMD ["node", "apps/cms/server.js"]
+ARG LINKSITES_RELEASE_SHA
+LABEL org.opencontainers.image.title="LiNKsites Payload CMS" \
+      org.opencontainers.image.vendor="LiNKtrend" \
+      org.opencontainers.image.revision="${LINKSITES_RELEASE_SHA}"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD node -e "fetch('http://127.0.0.1:3000/api/readyz').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+CMD ["node", "deploy/scripts/entrypoint.mjs", "cms", "node", "apps/cms/server.js"]

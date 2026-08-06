@@ -14,7 +14,7 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/.." && pwd)"
-platform_repo="/Users/linktrend/Projects/LiNKplatform-worktrees/linksites-platform-rls-grants"
+platform_repo="${LINKSITES_PLATFORM_REPOSITORY:-/Users/linktrend/Projects/LiNKplatform-worktrees/linksites-platform-rls-grants}"
 foundation_relative_path="supabase/migrations/20260714_000001_platform_foundation.sql"
 grant_relative_path="supabase/migrations/20260804233546_linksites_platform_rls_grants.sql"
 expected_platform_commit="63635ecec576887e5e25080745c4ad169b335508"

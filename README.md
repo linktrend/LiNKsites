@@ -21,13 +21,14 @@ LiNKsites/
 ├── apps/
 │   ├── cms/           # Payload CMS (draft/published content authority)
 │   ├── web-master/    # Primary multi-tenant Next.js frontend
-│   └── web-company/   # Smaller starter template (investment paused; see OPEN-ISSUES)
+│   └── program-orchestrator/ # Continuous Program/Phase/Issue execution service
 ├── packages/
 │   ├── program-ledger/   # Issue/Run/Gate/Event + Postgres store
 │   ├── factory-catalog/  # Vertical kits, foundations, promotion, preview path
 │   └── types/            # Shared types
 ├── supabase/          # Migrations for lsites_ledger + lsites_sites (+ archive)
-├── deploy/            # Docker + Traefik compose for CMS + shared frontend
+├── deploy/            # Fail-closed pre-VPS deployment, recovery and operations bundle
+├── archive/paused-applications/web-company/ # Preserved, inactive corporate-site source
 ├── audit/             # Phase 0 audit deliverables + living roadmap notes
 ├── execution/         # Program/Module/Issue execution artifacts
 └── docs/              # Intent, Technical PRD, Operations Manual, OPEN-ISSUES; archive/

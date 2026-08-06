@@ -272,34 +272,6 @@ importers:
         specifier: 5.7.3
         version: 5.7.3
 
-  apps/web-company:
-    dependencies:
-      '@linksites/types':
-        specifier: workspace:*
-        version: link:../../packages/types
-      next:
-        specifier: '>=16.2.11 <17.0.0'
-        version: 16.3.0(@babel/core@7.29.7)(@playwright/test@1.56.1)(@types/node@22.19.15)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.77.4)
-      react:
-        specifier: 19.1.0
-        version: 19.1.0
-      react-dom:
-        specifier: 19.1.0
-        version: 19.1.0(react@19.1.0)
-    devDependencies:
-      '@types/react':
-        specifier: 19.1.8
-        version: 19.1.8
-      '@types/react-dom':
-        specifier: 19.1.6
-        version: 19.1.6(@types/react@19.1.8)
-      tailwindcss:
-        specifier: ^3.3.5
-        version: 3.4.19(tsx@4.23.9)
-      typescript:
-        specifier: ^5.2.2
-        version: 5.7.3
-
   apps/web-master:
     dependencies:
       '@hookform/resolvers':

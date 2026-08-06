@@ -7,76 +7,45 @@ on:
     branches: [main, staging, development]
 
 jobs:
-  build-test:
+  required-production-gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-      - name: Checkout
+      - name: Checkout LiNKsites
         uses: actions/checkout@v4
-
+      - name: Checkout exact LiNKplatform migration dependency
+        uses: actions/checkout@v4
+        with:
+          repository: linktrend/LiNKplatform
+          ref: 63635ecec576887e5e25080745c4ad169b335508
+          path: .ci/linkplatform
+          # Private-repository read access must be granted to this workflow.
+          # No fallback or skipped RLS suite is permitted if it is absent.
+          token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # apps/web-company is intentionally excluded (Decision DR-02: paused special-case
-      # LiNKtrend-website build, not on the active customer-factory path; it also has no
-      # eslint devDependency installed, so a lint run would fail for unrelated reasons).
-      - name: Lint (cms, web-master)
-        run: pnpm exec turbo run lint --filter=@linksites/cms --filter=@linksites/web-master
-
-      # GAP-45 (cookies()/headers()/params() -> async, Next.js 14->16 App Router migration) is
-      # now fixed -- `tsc --noEmit` passes for apps/web-master. web-master is re-included below.
-      - name: Typecheck (all workspaces)
-        run: pnpm run typecheck
-
-      # GAP-46 is now fixed: apps/web-master and apps/web-company were upgraded to React 19.1.0
-      # to match Next.js 16.2.2's generated route types, resolving the React 18/19 @types/react
-      # mismatch. `next build` now succeeds for both apps and is verified below.
-      - name: Build (web-master)
-        run: pnpm --filter @linksites/web-master run build
-
-      - name: Build (web-company)
-        run: pnpm --filter @linksites/web-company run build
-
-      # GAP-43 is now fixed: apps/cms's Vitest suite was failing to resolve "@/..." path
-      # aliases because vite-tsconfig-paths discovers every tsconfig in the pnpm workspace and
-      # could match the wrong one (e.g. the now-archived old_linktrend app's unrelated tsconfig) for
-      # files under tests/**, which apps/cms's own tsconfig.json intentionally excludes from
-      # its `include`. Fixed via a dedicated tsconfig.vitest.json + a scoped `projects` option.
-      - name: CMS unit/contract tests
-        run: pnpm --filter @linksites/cms run test:int
-
-      # Phase 2 foundation (audit/14_implementation_roadmap.md): the Program Ledger's
-      # exit-gate contract tests (manual §62 -- duplicate dispatch, worker crash/lease
-      # reclaim, timeout/retry, cancellation, replay, Gate authority, traceability), run
-      # against BOTH the in-memory store and a real embedded Postgres engine
-      # (@electric-sql/pglite) exercising supabase/migrations/20260714_000001_program_ledger_core.sql
-      # -- no live database connection is required or used.
-      - name: Program Ledger tests (in-memory + pglite-backed Postgres)
-        run: pnpm --filter @linksites/program-ledger run test
-
-      # Phase 3 (reusable asset factory, audit/14_implementation_roadmap.md): Tier
-      # Specification entitlement-enforcement engine (manual §08.16).
-      - name: Factory Catalog tests
-        run: pnpm --filter @linksites/factory-catalog run test
-
-      # Hardening pass (2026-07-14, DR-09): catches dependency-vulnerability
-      # regressions automatically. This checks the `development` branch's own
-      # dependency tree via `pnpm audit`, which is authoritative and current --
-      # NOT the same figure as GitHub's Dependabot alert count shown on git
-      # push output, which reflects the separate, not-yet-promoted `main`
-      # (default) branch per this repo's staging->main promotion policy
-      # (docs/archive/BRANCHING_AND_DEPLOYMENT_POLICY.md). Fails the build on any
-      # moderate-or-higher advisory so a new transitive vulnerability is
-      # caught here, not discovered later.
-      - name: Dependency vulnerability audit
-        run: pnpm audit --audit-level=moderate
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.81.3
+      - name: Required production readiness gate
+        env:
+          LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
+        run: bash scripts/ci-required.sh
+      - name: Dependency and secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload sanitized evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: w2-07-ci-evidence
+          path: .ci-artifacts/
+          if-no-files-found: error

@@ -35,8 +35,14 @@ RUN mkdir -p apps/web-master/.next && chown nextjs:nodejs apps/web-master/.next
 RUN mkdir -p /var/lib/linksites && chown nextjs:nodejs /var/lib/linksites
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web-master/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web-master/.next/static ./apps/web-master/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/deploy ./deploy
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-CMD ["node", "apps/web-master/server.js"]
+ARG LINKSITES_RELEASE_SHA
+LABEL org.opencontainers.image.title="LiNKsites web-master" \
+      org.opencontainers.image.vendor="LiNKtrend" \
+      org.opencontainers.image.revision="${LINKSITES_RELEASE_SHA}"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD node -e "fetch('http://127.0.0.1:3000/api/readyz').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+CMD ["node", "deploy/scripts/entrypoint.mjs", "web-master", "node", "apps/web-master/server.js"]

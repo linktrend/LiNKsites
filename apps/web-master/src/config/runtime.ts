@@ -6,7 +6,11 @@ const payloadBaseUrl =
   resolve("PAYLOAD_BASE_URL", process.env.PAYLOAD_BASE_URL) ||
   resolve("PAYLOAD_PUBLIC_SERVER_URL", process.env.PAYLOAD_PUBLIC_SERVER_URL) ||
   resolve("NEXT_PUBLIC_PAYLOAD_API_URL", process.env.NEXT_PUBLIC_PAYLOAD_API_URL) ||
-  "http://localhost:3000";
+  (process.env.LINKSITES_DEPLOYMENT_ENV === "production" ? "" : "http://localhost:3000");
+
+if (process.env.LINKSITES_DEPLOYMENT_ENV === "production" && !payloadBaseUrl) {
+  throw new Error("LiNKsites production web-master requires an explicit Payload HTTPS URL.");
+}
 
 const dedicatedSiteId = resolve("SITE_ID", process.env.SITE_ID, "");
 

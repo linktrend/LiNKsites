@@ -17,9 +17,15 @@ import { CommercialOutcomeIngress } from './commercial-outcome-ingress.ts'
 
 export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; commercialOutcomeIngress: CommercialOutcomeIngress; close: () => Promise<void> }
 
-function repositoryRoot(): string { return execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim() }
-function actualRevision(): string { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim() }
+function repositoryRoot(): string { return process.env.LINKSITES_REPOSITORY_ROOT ?? execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim() }
+function actualRevision(): string {
+  const declared = process.env.W2_02_EXECUTION_REVISION
+  if (declared && /^[a-f0-9]{40}$/i.test(declared)) return declared
+  return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+}
 function executableCheckpoint(): string {
+  const declared = process.env.W2_02_EXECUTABLE_CHECKPOINT
+  if (declared && /^[a-f0-9]{64}$/i.test(declared)) return declared
   const root = repositoryRoot()
   const files = execFileSync('git', ['ls-files', 'apps/program-orchestrator/src', 'apps/program-orchestrator/package.json', 'packages/factory-catalog/src', 'packages/factory-catalog/package.json', 'packages/program-ledger/src', 'packages/program-ledger/package.json'], { cwd: root, encoding: 'utf8' }).split(/\r?\n/).filter(Boolean).sort()
   const hash = createHash('sha256')
@@ -59,6 +65,7 @@ export function configFromEnvironment(env: NodeJS.ProcessEnv, baseDir: string): 
   if (env.W2_02_MODE !== 'local' || !env.W2_02_ORG_ID) throw new Error('W2-02 configuration is incomplete; set W2_02_MODE=local and W2_02_ORG_ID explicitly')
   const config = createLocalConfig(env.W2_02_STATE_DIR ? resolve(baseDir, env.W2_02_STATE_DIR) : baseDir, env.W2_02_ORG_ID)
   if (env.W2_02_EXECUTION_REVISION && env.W2_02_EXECUTION_REVISION !== config.executingRevision) throw new Error('W2-02 refuses an execution revision that is not the checked-out commit')
+  if (env.LINKSITES_DEPLOYMENT_ENV === 'production' && env.LINKSITES_RELEASE_SHA !== config.executingRevision) throw new Error('W2-02 production execution identity must equal the release SHA')
   return validateRuntimeConfig({ ...config, approvedFactsPath: env.W2_02_APPROVED_FACTS_PATH ? resolve(baseDir, env.W2_02_APPROVED_FACTS_PATH) : config.approvedFactsPath, maxAttempts: env.W2_02_MAX_ATTEMPTS ? Number(env.W2_02_MAX_ATTEMPTS) : config.maxAttempts, concurrency: env.W2_02_CONCURRENCY ? Number(env.W2_02_CONCURRENCY) : config.concurrency, leaseDurationMs: env.W2_02_LEASE_MS ? Number(env.W2_02_LEASE_MS) : config.leaseDurationMs, payloadBaseUrl: env.W2_02_PAYLOAD_BASE_URL ?? config.payloadBaseUrl, payloadApiKey: env.W2_02_PAYLOAD_API_KEY ?? config.payloadApiKey, payloadSiteId: env.W2_02_PAYLOAD_SITE_ID ?? config.payloadSiteId, webMasterBaseUrl: env.W2_02_WEB_MASTER_BASE_URL ?? config.webMasterBaseUrl, previewAccessToken: env.W2_02_PREVIEW_ACCESS_TOKEN ?? config.previewAccessToken, commercialOutcomeGatewaySecret: env.W2_05_OUTCOME_GATEWAY_SECRET ?? config.commercialOutcomeGatewaySecret, commercialOutcomeGatewayKeyId: env.W2_05_OUTCOME_GATEWAY_KEY_ID ?? config.commercialOutcomeGatewayKeyId, libraryRepositoryPath: env.W2_02_LIBRARY_REPOSITORY_PATH ?? config.libraryRepositoryPath })
 }
 

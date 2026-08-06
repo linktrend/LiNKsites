@@ -1,64 +1,146 @@
-name: cms
+name: linksites
+
+# Phase 1 bundle only. All ${VAR:?} values are deliberate fail-closed inputs;
+# Phase 2 creates their protected runtime file and performs no DNS/domain work
+# through this compose definition.
+x-runtime: &runtime
+  env_file:
+    - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+  restart: unless-stopped
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+  deploy:
+    resources:
+      limits:
+        cpus: '1.00'
+        memory: 1024M
+      reservations:
+        memory: 256M
+  networks: [internal]
 
 services:
+  supabase-migrate:
+    image: ${LINKSITES_MIGRATIONS_IMAGE:?set immutable migration image digest}
+    build:
+      context: ..
+      dockerfile: deploy/docker/migrations.Dockerfile
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+    environment:
+      LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: ${LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA:?set verified platform migration SHA}
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    networks: [internal]
+
+  payload-migrate:
+    image: ${LINKSITES_WORKER_IMAGE:?set immutable worker image digest}
+    build:
+      context: ..
+      dockerfile: deploy/docker/autowork-worker.Dockerfile
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+    depends_on:
+      supabase-migrate:
+        condition: service_completed_successfully
+    command: ["node", "/app/deploy/scripts/entrypoint.mjs", "autowork-worker", "node_modules/.bin/payload", "migrate", "--config", "apps/cms/src/payload.config.ts"]
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    networks: [internal]
+
   payload:
+    <<: *runtime
+    image: ${LINKSITES_CMS_IMAGE:?set immutable CMS image digest}
     build:
       context: ..
       dockerfile: deploy/docker/cms.Dockerfile
-    env_file:
-      - ${LINKSITES_RUNTIME_ENV_FILE:-/opt/linktrend/runtime/linksites-cms/prod.env.runtime}
-    restart: unless-stopped
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    depends_on:
+      payload-migrate:
+        condition: service_completed_successfully
     volumes:
-      - linkautowork-outbox:/var/lib/linksites
-      - ${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH:-/etc/linktrend/gcp/linktrend-service-account.json}:${GOOGLE_APPLICATION_CREDENTIALS:-/etc/linktrend/gcp/linktrend-service-account.json}:ro
+      - linksites-runtime:/var/lib/linksites
+    tmpfs: [/tmp]
+    networks: [internal, edge]
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.rule=Host(`${TRAEFIK_CMS_HOST:-cms.linktrend.internal}`)
-      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
-      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.tls=true
-      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.priority=100
-      - traefik.http.services.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.loadbalancer.server.port=3000
-    networks:
-      - traefik
+      traefik.enable: 'true'
+      traefik.docker.network: ${TRAEFIK_NETWORK:?set Traefik external network name}
+      traefik.http.routers.linksites-cms.rule: Host(`${TRAEFIK_CMS_HOST:?set private CMS host}`)
+      traefik.http.routers.linksites-cms.entrypoints: ${TRAEFIK_ENTRYPOINT:?set TLS entrypoint}
+      traefik.http.routers.linksites-cms.tls: 'true'
+      traefik.http.routers.linksites-cms.middlewares: ${TRAEFIK_CMS_PRIVATE_MIDDLEWARE:?set preconfigured CMS privacy middleware}
+      traefik.http.services.linksites-cms.loadbalancer.server.port: '3000'
 
-  frontend-shared:
+  web-master:
+    <<: *runtime
+    image: ${LINKSITES_WEB_MASTER_IMAGE:?set immutable web-master image digest}
     build:
       context: ..
       dockerfile: deploy/docker/web-master.Dockerfile
       args:
-        NEXT_PUBLIC_PAYLOAD_API_URL: ${NEXT_PUBLIC_PAYLOAD_API_URL:-https://cms.linktrend.internal}
-        PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:-https://cms.linktrend.internal}
-    env_file:
-      - ${LINKSITES_RUNTIME_ENV_FILE:-/opt/linktrend/runtime/linksites-cms/prod.env.runtime}
-    restart: unless-stopped
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+        NEXT_PUBLIC_PAYLOAD_API_URL: ${NEXT_PUBLIC_PAYLOAD_API_URL:?set private CMS HTTPS URL}
+        PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:?set private CMS HTTPS URL}
+    depends_on:
+      payload:
+        condition: service_healthy
     volumes:
-      - linkautowork-outbox:/var/lib/linksites
+      - linksites-runtime:/var/lib/linksites:ro
+    tmpfs: [/tmp]
+    networks: [internal, edge]
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.rule=HostRegexp(`^[a-z0-9-]+\\.linktrend\\.internal$`)
-      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
-      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.tls=true
-      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.priority=10
-      - traefik.http.services.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.loadbalancer.server.port=3000
-    networks:
-      - traefik
+      traefik.enable: 'true'
+      traefik.docker.network: ${TRAEFIK_NETWORK:?set Traefik external network name}
+      traefik.http.routers.linksites-preview.rule: Host(`${TRAEFIK_PREVIEW_HOST:?set explicit private preview host}`)
+      traefik.http.routers.linksites-preview.entrypoints: ${TRAEFIK_ENTRYPOINT:?set TLS entrypoint}
+      traefik.http.routers.linksites-preview.tls: 'true'
+      traefik.http.routers.linksites-preview.middlewares: ${TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE:?set preconfigured preview privacy middleware}
+      traefik.http.routers.linksites-preview.priority: '100'
+      traefik.http.services.linksites-preview.loadbalancer.server.port: '3000'
 
   autowork-worker:
+    <<: *runtime
+    image: ${LINKSITES_WORKER_IMAGE:?set immutable worker image digest}
     build:
       context: ..
-      dockerfile: deploy/docker/cms.Dockerfile
-    env_file:
-      - ${LINKSITES_RUNTIME_ENV_FILE:-/opt/linktrend/runtime/linksites-cms/prod.env.runtime}
-    command: ["node", "--experimental-strip-types", "apps/cms/cron/workerLiNKautowork.ts"]
-    restart: unless-stopped
+      dockerfile: deploy/docker/autowork-worker.Dockerfile
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    depends_on:
+      payload:
+        condition: service_healthy
     volumes:
-      - linkautowork-outbox:/var/lib/linksites
-    networks:
-      - traefik
+      - linksites-runtime:/var/lib/linksites
+
+  program-orchestrator:
+    <<: *runtime
+    image: ${LINKSITES_ORCHESTRATOR_IMAGE:?set immutable orchestrator image digest}
+    build:
+      context: ..
+      dockerfile: deploy/docker/program-orchestrator.Dockerfile
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    depends_on:
+      payload:
+        condition: service_healthy
+      web-master:
+        condition: service_healthy
+    volumes:
+      - linksites-runtime:/var/lib/linksites
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/var/lib/linksites/linklibraries:ro
 
 networks:
-  traefik:
+  edge:
     external: true
+    name: ${TRAEFIK_NETWORK:?set Traefik external network name}
+  internal:
+    internal: true
 
 volumes:
-  linkautowork-outbox:
+  linksites-runtime:
