@@ -49,3 +49,13 @@ test('manifest and Compose name the same five deployable images', async () => {
   }
   assert.ok(manifest.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA'))
 })
+
+test('local Compose rehearsal is an explicit disposable overlay of the deploy bundle', async () => {
+  const overlay = await read('deploy/docker-compose.local-proof.yml')
+  const rehearsal = await read('deploy/scripts/rehearse-compose-stack.mjs')
+  assert.ok(overlay.includes('deploy/docker-compose.deploy.yml') === false, 'overlay is composed by the rehearsal command, not recursively')
+  for (const service of ['local-postgres:', 'local-tls:', 'payload-seed:', 'supabase-migrate:', 'program-orchestrator:']) assert.ok(overlay.includes(service), service)
+  assert.ok(rehearsal.includes("externalPlatformAdmission: 'not asserted; separate governed prerequisite remains'"))
+  assert.ok(rehearsal.includes("['up', '--detach', '--no-build', '--wait'"))
+  assert.ok(rehearsal.includes("completedIssues: 16"))
+})

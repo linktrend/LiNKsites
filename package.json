@@ -13,6 +13,7 @@
     "deploy:preflight": "bash deploy/scripts/preflight.sh",
     "deploy:postdeploy-smoke": "bash deploy/scripts/postdeploy-smoke.sh",
     "deploy:restore-rehearsal": "node deploy/scripts/rehearse-local-restore.mjs",
+    "deploy:compose-rehearsal": "node deploy/scripts/rehearse-compose-stack.mjs",
     "ci:required": "bash scripts/ci-required.sh",
     "test:w2-04": "node scripts/w2-04-contract-tests.mjs && node scripts/w2-04-behavioral-tests.mjs && node scripts/w2-04-route-adversarial-tests.mjs && bash scripts/w2-04-local-proof.sh",
     "dev": "turbo run dev"

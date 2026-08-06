@@ -24,7 +24,9 @@ docker build --pull=false \
 build deploy/docker/autowork-worker.Dockerfile linksites-autowork-worker:w2-07-local
 build deploy/docker/program-orchestrator.Dockerfile linksites-program-orchestrator:w2-07-local
 echo '==> Building linksites-migrations:w2-07-local'
-docker build --pull=false -f deploy/docker/migrations.Dockerfile -t linksites-migrations:w2-07-local .
+docker build --pull=false \
+  --build-arg "LINKSITES_RELEASE_SHA=$release_sha" \
+  -f deploy/docker/migrations.Dockerfile -t linksites-migrations:w2-07-local .
 
 for image in linksites-cms:w2-07-local linksites-web-master:w2-07-local linksites-autowork-worker:w2-07-local linksites-program-orchestrator:w2-07-local linksites-migrations:w2-07-local; do
   id="$(docker image inspect --format '{{.Id}}' "$image")"

@@ -77,7 +77,10 @@ const language = await within('creating language', payload.create({ collection: 
 console.error('W2-04 seed: language created')
 const site = await within('creating site', payload.create({
   collection: 'sites',
-  data: { name: 'W2-04 local proof site', domain: '127.0.0.1', status: 'published', templateId: 'marketing-smb-v1', defaultLanguage: language.id, languages: [language.id] },
+  // The current canonical Sites contract requires the Program ownership tuple
+  // even for this disposable local proof.  These are non-customer fixture
+  // identifiers and are used only to exercise the same shape as production.
+  data: { name: 'W2-04 local proof site', domain: '127.0.0.1', status: 'published', templateId: 'marketing-smb-v1', orgId: 'local-org', programId: 'w2-04-local-proof', leadId: 'w2-04-local-proof', defaultLanguage: language.id, languages: [language.id] },
   ...options,
 }))
 console.error('W2-04 seed: site created')

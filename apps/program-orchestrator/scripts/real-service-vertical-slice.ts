@@ -22,6 +22,8 @@ const webUrl = required('W2_02_WEB_MASTER_BASE_URL')
 const apiKey = required('W2_02_PAYLOAD_API_KEY')
 const siteId = required('W2_02_PAYLOAD_SITE_ID')
 const previewToken = required('W2_02_PREVIEW_ACCESS_TOKEN')
+const outcomeGatewaySecret = required('W2_05_OUTCOME_GATEWAY_SECRET')
+const outcomeGatewayKeyId = required('W2_05_OUTCOME_GATEWAY_KEY_ID')
 const chromiumPath = required('W2_02_CHROMIUM_EXECUTABLE')
 const artifactPath = required('W2_02_ARTIFACT_PATH')
 const runMarker = required('W2_02_RUN_MARKER')
@@ -32,6 +34,7 @@ await mkdir(stateDir, { recursive: true })
 const config = {
   ...createLocalConfig(stateDir), payloadBaseUrl: cmsUrl, payloadApiKey: apiKey,
   payloadSiteId: siteId, webMasterBaseUrl: webUrl, previewAccessToken: previewToken,
+  commercialOutcomeGatewaySecret: outcomeGatewaySecret, commercialOutcomeGatewayKeyId: outcomeGatewayKeyId,
 }
 await writeFile(config.approvedFactsPath, JSON.stringify({ schemaVersion: { major: 1, minor: 0 }, orgId: 'local-org', leadId, businessName: `W2-02 ${runMarker}`, geography: 'Taipei', services: ['Local service consultation'], credentials: ['Founder-provided credentials'], reviews: [{ quote: 'Founder-provided review', author: 'Approved customer' }], contact: { phone: '+886200000000', email: 'proof@local.invalid', address: 'Taipei, Taiwan', website: 'https://local.invalid.test' }, pricing: 'Contact for an approved quote', legalClaims: ['Founder-approved legal copy'], media: [] }))
 const composition = await createProductionComposition(config)
