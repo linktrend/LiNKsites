@@ -1,6 +1,6 @@
 # W2-04 — Master Template and Private Demo Proof
 
-**Implementation gate:** PASS
+**Implementation gate:** Local proof recorded; independent certification required
 
 **Verified:** 2026-08-05 (Asia/Taipei)
 
@@ -17,7 +17,9 @@ final optimized-server response.
 The production-mode browser gate covers home, about, services, contact, privacy policy,
 terms of use, cookie policy, the controlled not-found boundary, and the private demo.
 It checks the main landmark, named links, desktop and mobile rendering, and horizontal
-overflow. The resulting screenshots are stored beside this receipt.
+overflow. The resulting screenshots are copied from the disposable
+optimized-server browser run into `browser/`; they prove the W2-04 public
+render, not W2-02 promoted private drafts.
 
 ## Corrections included
 
@@ -38,7 +40,7 @@ overflow. The resulting screenshots are stored beside this receipt.
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `pnpm test:w2-04` | PASS | Contract, behavioral/adversarial, real Payload, optimized server, and browser gates all passed. |
+| `pnpm test:w2-04` | Local proof command | Contract, behavioral/adversarial, real Payload, optimized server, and browser gates run; command output is the authoritative current count. |
 | `pnpm --filter @linksites/web-master lint` | PASS | Frontend lint passed. |
 | `pnpm --filter @linksites/web-master typecheck` | PASS | Frontend TypeScript validation passed. |
 | `pnpm --filter @linksites/cms typecheck` | PASS | CMS TypeScript validation passed. |
