@@ -288,9 +288,14 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   async emitCompletion(_envelope: DemoCompletionEnvelope): Promise<void> { throw new Error('completion delivery must use the durable outbox sink') }
 
   async compensate(issueId: string, reason: string): Promise<'compensated' | 'manual_attention'> { const artifact = await this.writeArtifact('manual-attention-compensation', issueId, { issueId, reason, postMutation: issueId === 'site-render-validation', action: 'retain-payload-draft-and-create-manual-review', publicActivation: false }); return artifact.path ? 'manual_attention' : 'manual_attention' }
-  async health(): Promise<{ cms: boolean; frontend: boolean; eventBoundary: boolean }> {
+  async health(): Promise<{ cms: boolean; frontend: boolean; library: boolean; eventBoundary: boolean }> {
     const cms = await fetch(`${this.config.payloadBaseUrl}/api/pages?site=${encodeURIComponent(this.config.payloadSiteId)}&limit=1`, { headers: { Authorization: `users API-Key ${this.config.payloadApiKey}` } }).then((response) => response.ok).catch(() => false)
     const frontend = await fetch(`${this.config.webMasterBaseUrl}/api/healthz`).then(async (response) => response.ok && (await response.json() as { service?: unknown }).service === 'web-master').catch(() => false)
+    const library = await Promise.resolve().then(() => {
+      const authority = MARKETING_SMB_V1_CATALOG_AUTHORITY
+      execFileSync('git', ['-C', this.config.libraryRepositoryPath, 'cat-file', '-e', `${authority.commitSha}^{commit}`], { stdio: 'ignore' })
+      return true
+    }).catch(() => false)
     // Exercise the actual durable boundary with a reversible write/read/delete,
     // not merely a directory creation check.
     const probePath = `${this.config.completionPath}.health-${process.pid}-${randomUUID()}`
@@ -304,7 +309,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       await import('node:fs/promises').then(({ unlink }) => unlink(probePath)).catch(() => undefined)
       return false
     })
-    return { cms, frontend, eventBoundary }
+    return { cms, frontend, library, eventBoundary }
   }
 }
 

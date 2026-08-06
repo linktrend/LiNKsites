@@ -29,6 +29,7 @@ export const SERVICE_CONFIGURATION = {
     required('LINKAUTOWORK_ENVIRONMENT', 'literal:production'),
     required('LINKAUTOWORK_OUTBOX_PATH', 'absolute-path'),
     required('LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET', 'secret-min-32', true),
+    required('LINKAUTOWORK_EVENT_GRANTS', 'nonempty-json-array'),
   ],
   'web-master': [
     required('NEXT_PUBLIC_CMS_PROVIDER', 'literal:payload'),
@@ -47,6 +48,7 @@ export const SERVICE_CONFIGURATION = {
     required('LINKAUTOWORK_ENVIRONMENT', 'literal:production'),
     required('LINKAUTOWORK_OUTBOX_PATH', 'absolute-path'),
     required('LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET', 'secret-min-32', true),
+    required('LINKAUTOWORK_EVENT_GRANTS', 'nonempty-json-array'),
   ],
   'program-orchestrator': [
     required('W2_02_MODE', 'literal:local'),
@@ -79,6 +81,9 @@ function validateValue(value, format) {
   if (format === 'slug') return /^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$/.test(trimmed) ? null : 'must be a 3-128 character identifier'
   if (format === 'absolute-path') return trimmed.startsWith('/') && !trimmed.includes('\0') ? null : 'must be an absolute non-NUL path'
   if (format === 'secret-min-32') return trimmed.length >= 32 && !/^(.)\1+$/.test(trimmed) ? null : 'must be at least 32 non-repeated characters'
+  if (format === 'nonempty-json-array') {
+    try { return Array.isArray(JSON.parse(trimmed)) && JSON.parse(trimmed).length > 0 ? null : 'must be a non-empty JSON array' } catch { return 'must be valid JSON' }
+  }
   if (format === 'postgres-url') {
     try {
       const url = new URL(trimmed)

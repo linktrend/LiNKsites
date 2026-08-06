@@ -1,6 +1,6 @@
 # LinkSites shared frontend (web-master) — monorepo root build context (Wave 9.2).
 
-FROM node:22.17.0-alpine AS base
+FROM node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed AS base
 WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN apk add --no-cache libc6-compat \
@@ -41,6 +41,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ARG LINKSITES_RELEASE_SHA
+RUN test -n "$LINKSITES_RELEASE_SHA" && test "${#LINKSITES_RELEASE_SHA}" = 40
 LABEL org.opencontainers.image.title="LiNKsites web-master" \
       org.opencontainers.image.vendor="LiNKtrend" \
       org.opencontainers.image.revision="${LINKSITES_RELEASE_SHA}"

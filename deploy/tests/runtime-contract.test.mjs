@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CONFIG_SCHEMA_VERSION, validateRuntimeConfig } from '../config/runtime-contract.mjs'
+import { CONFIG_SCHEMA_VERSION, SERVICE_CONFIGURATION, validateRuntimeConfig } from '../config/runtime-contract.mjs'
+import { readFile } from 'node:fs/promises'
 
 const secret = 'aB9!'.repeat(10)
 const base = {
@@ -17,6 +18,7 @@ const base = {
   LINKAUTOWORK_ENVIRONMENT: 'production',
   LINKAUTOWORK_OUTBOX_PATH: '/var/lib/linksites/outbox.json',
   LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: secret,
+  LINKAUTOWORK_EVENT_GRANTS: JSON.stringify([{ eventName: 'demo.completed', environments: ['production'], orgIds: ['linksites-test'] }]),
   NEXT_PUBLIC_CMS_PROVIDER: 'payload',
   PAYLOAD_BASE_URL: 'https://cms.example.test',
   NEXT_PUBLIC_PAYLOAD_API_URL: 'https://cms.example.test',
@@ -49,4 +51,9 @@ test('rejects fixture mode and placeholders', () => {
   assert.equal(result.ok, false)
   assert.ok(result.errors.some((error) => error.name === 'NEXT_PUBLIC_CMS_PROVIDER'))
   assert.ok(result.errors.some((error) => error.name === 'PAYLOAD_API_KEY'))
+})
+
+test('configuration reference documents every executable runtime name', async () => {
+  const reference = await readFile(new URL('../config/README.md', import.meta.url), 'utf8')
+  for (const requirement of Object.values(SERVICE_CONFIGURATION).flat()) assert.ok(reference.includes(`\`${requirement.name}\``), requirement.name)
 })

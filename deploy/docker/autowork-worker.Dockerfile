@@ -1,26 +1,27 @@
-FROM node:22.17.0-alpine AS base
+FROM node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed AS base
 WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN apk add --no-cache libc6-compat && corepack enable && corepack prepare pnpm@10.0.0 --activate
 
-FROM base AS deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
-COPY packages/types/package.json packages/types/package.json
-COPY packages/autowork-boundary/package.json packages/autowork-boundary/package.json
-COPY apps/cms/package.json apps/cms/package.json
+FROM base AS runtime-source
+# Keep the complete frozen workspace graph in the runtime image.  The worker
+# executes TypeScript source through Node's strip-types loader and its
+# @linksites/* imports are pnpm workspace symlinks; copying only selected
+# package directories leaves those links dangling at runtime.
+COPY . .
 RUN pnpm install --frozen-lockfile
 
 FROM base AS runner
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 linksites && adduser --system --uid 1001 --ingroup linksites linksites
-COPY --from=deps /app/node_modules /app/node_modules
-COPY --chown=linksites:linksites packages /app/packages
-COPY --chown=linksites:linksites apps/cms /app/apps/cms
-COPY --chown=linksites:linksites deploy /app/deploy
+COPY --from=runtime-source --chown=linksites:linksites /app /app
 RUN mkdir -p /var/lib/linksites && chown linksites:linksites /var/lib/linksites
 USER linksites
+ARG LINKSITES_RELEASE_SHA
+RUN test -n "$LINKSITES_RELEASE_SHA" && test "${#LINKSITES_RELEASE_SHA}" = 40
 LABEL org.opencontainers.image.title="LiNKsites LiNKautowork durable worker" \
       org.opencontainers.image.vendor="LiNKtrend" \
-      org.opencontainers.image.version="${LINKSITES_RELEASE_SHA:-unbound}"
+      org.opencontainers.image.revision="${LINKSITES_RELEASE_SHA}" \
+      org.opencontainers.image.version="${LINKSITES_RELEASE_SHA}"
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD node /app/deploy/scripts/validate-runtime-config.mjs autowork-worker
 CMD ["node", "/app/deploy/scripts/entrypoint.mjs", "autowork-worker", "node", "--experimental-strip-types", "apps/cms/cron/workerLiNKautowork.ts"]

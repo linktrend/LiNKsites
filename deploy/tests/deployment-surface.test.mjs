@@ -30,3 +30,22 @@ test('production Dockerfiles validate configuration before app startup', async (
     assert.ok(dockerfile.includes('HEALTHCHECK'), `${file} has health check`)
   }
 })
+
+test('every deployed image has an immutable base and release label contract', async () => {
+  for (const file of ['deploy/docker/cms.Dockerfile', 'deploy/docker/web-master.Dockerfile', 'deploy/docker/autowork-worker.Dockerfile', 'deploy/docker/program-orchestrator.Dockerfile', 'deploy/docker/migrations.Dockerfile']) {
+    const dockerfile = await read(file)
+    assert.match(dockerfile, /^FROM .+@sha256:[a-f0-9]{64}/m, `${file} pins a base image digest`)
+    assert.match(dockerfile, /ARG LINKSITES_RELEASE_SHA/, `${file} declares release identity`)
+    assert.match(dockerfile, /org\.opencontainers\.image\.revision/, `${file} labels release identity`)
+  }
+})
+
+test('manifest and Compose name the same five deployable images', async () => {
+  const compose = await read('deploy/docker-compose.deploy.yml')
+  const manifest = await read('deploy/scripts/generate-deployment-manifest.mjs')
+  for (const name of ['CMS', 'WEB_MASTER', 'ORCHESTRATOR', 'WORKER', 'MIGRATIONS']) {
+    assert.ok(compose.includes(`LINKSITES_${name}_IMAGE`), `Compose image input ${name}`)
+    assert.ok(manifest.includes(`LINKSITES_${name}_IMAGE_DIGEST`), `manifest digest ${name}`)
+  }
+  assert.ok(manifest.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA'))
+})

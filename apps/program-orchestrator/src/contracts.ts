@@ -120,7 +120,7 @@ export interface LocalBoundaryAdapters {
   emitCompletion(envelope: DemoCompletionEnvelope): Promise<void>
   compensate(issueId: string, reason: string): Promise<'compensated' | 'manual_attention'>
   /** Reachability is a real request, never configuration-presence shorthand. */
-  health(): Promise<{ cms: boolean; frontend: boolean; eventBoundary: boolean }>
+  health(): Promise<{ cms: boolean; frontend: boolean; library: boolean; eventBoundary: boolean }>
 }
 
 export type RuntimeConfig = {
