@@ -26,7 +26,7 @@ import {
   type LibraryCandidateSubmission,
   type PinnedLibraryCatalogReference,
 } from './libraryConsumer.js'
-import { archiveAndRecycleFoundation, type ProspectAdaptation } from './prospectAdaptation.js'
+import { archiveAndReleaseExactFoundation, type ProspectAdaptation } from './prospectAdaptation.js'
 import type { ConversionLockRegistry } from './conversionLock.js'
 import type { FoundationReservationManager } from './reusableFoundation.js'
 
@@ -75,6 +75,9 @@ export interface LifecycleRecord {
   status: LifecycleStatus
   retentionUntil: string | null
   activationRequest: ActivationRequest | null
+  recyclingRequest: RecyclingRequest | null
+  /** Immutable, completed proof from the no-sale recycle operation. */
+  recycleEvidence: RecycleEvidence | null
   receipts: LifecycleReceipt[]
   refactoringRequests: RefactoringRequest[]
   candidateSubmissions: ArchitectCandidateSubmissionEvidence[]
@@ -91,6 +94,17 @@ export interface RefactoringRequest {
   status: 'ready_for_review'
   sanitizedDetails: Record<string, string | number | boolean | null>
   createdAt: string
+}
+
+export interface RecycleEvidence {
+  adaptationId: string
+  foundationId: string
+  reservationId: string
+  templateInventoryId: string
+  sourceRunId: string
+  qualityEvidenceReference: string
+  passingTestEvidenceReference: string
+  recycleReceipt: LifecycleReceipt
 }
 
 export interface ArchitectCandidateSubmissionEvidence {
@@ -206,16 +220,63 @@ function isCandidateSubmissionEvidence(value: unknown): value is ArchitectCandid
   return isNonEmpty(evidence.candidateId) && isNonEmpty(evidence.lifecycleId) && isNonEmpty(evidence.proposalId) && /^[a-f0-9]{40}$/.test(evidence.canonicalCatalogCommitSha) &&
     [evidence.sourceRunIds, evidence.sourceEvidenceReferences, evidence.qualityEvidenceReferences, evidence.commercialEvidenceReferences, evidence.testEvidenceReferences].every((items) => Array.isArray(items) && items.length > 0 && items.every(isNonEmpty)) && isLifecycleReceipt(evidence.submissionReceipt) && isIso(evidence.createdAt)
 }
+function isRecycleEvidence(value: unknown): value is RecycleEvidence {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const evidence = value as RecycleEvidence
+  return isNonEmpty(evidence.adaptationId) && isNonEmpty(evidence.foundationId) && isNonEmpty(evidence.reservationId) && isNonEmpty(evidence.templateInventoryId) && isNonEmpty(evidence.sourceRunId) && isNonEmpty(evidence.qualityEvidenceReference) && isNonEmpty(evidence.passingTestEvidenceReference) && isLifecycleReceipt(evidence.recycleReceipt)
+}
 function isLifecycleRecord(value: unknown): value is LifecycleRecord {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false
   const record = value as LifecycleRecord
   return record.schemaVersion === SITE_LIFECYCLE_SCHEMA_VERSION && isNonEmpty(record.lifecycleId) && isNonEmpty(record.orgId) && isNonEmpty(record.leadId) && isNonEmpty(record.siteId) &&
     isNonEmpty(record.outcomeEventId) && isCommercialOutcomeEnvelope(record.outcomeEnvelope) && record.outcomeEventId === record.outcomeEnvelope.replay_protection.event_id && record.orgId === record.outcomeEnvelope.org_id && record.leadId === record.outcomeEnvelope.lead_id && record.siteId === record.outcomeEnvelope.site_id && record.outcome === record.outcomeEnvelope.outcome && record.reachAuthorizationReference === record.outcomeEnvelope.reach_authorization_reference &&
-    ['outcome_recorded', 'awaiting_activation', 'activation_dry_run_complete', 'recycled', 'retained', 'abandoned', 'manual_attention'].includes(record.status) && (record.retentionUntil === null || isIso(record.retentionUntil)) && (record.activationRequest === null || isActivationRequest(record.activationRequest)) && Array.isArray(record.receipts) && record.receipts.every(isLifecycleReceipt) && Array.isArray(record.refactoringRequests) && record.refactoringRequests.every(isRefactoringRequest) && Array.isArray(record.candidateSubmissions) && record.candidateSubmissions.every(isCandidateSubmissionEvidence) && isIso(record.createdAt) && isIso(record.updatedAt)
+    ['outcome_recorded', 'awaiting_activation', 'activation_dry_run_complete', 'recycled', 'retained', 'abandoned', 'manual_attention'].includes(record.status) && (record.retentionUntil === null || isIso(record.retentionUntil)) && (record.activationRequest === null || isActivationRequest(record.activationRequest)) && (record.recyclingRequest === null || isRecyclingRequest(record.recyclingRequest)) && (record.recycleEvidence === null || isRecycleEvidence(record.recycleEvidence)) && Array.isArray(record.receipts) && record.receipts.every(isLifecycleReceipt) && Array.isArray(record.refactoringRequests) && record.refactoringRequests.every(isRefactoringRequest) && Array.isArray(record.candidateSubmissions) && record.candidateSubmissions.every(isCandidateSubmissionEvidence) && isIso(record.createdAt) && isIso(record.updatedAt) && hasConsistentLifecycleInvariants(record)
+}
+
+/** Reject records whose individually-valid nested objects belong to another lifecycle. */
+function hasConsistentLifecycleInvariants(record: LifecycleRecord): boolean {
+  const outcomeReceipt = record.receipts.find((entry) => entry.kind === 'outcome_recorded')
+  if (!outcomeReceipt || record.receipts.filter((entry) => entry.kind === 'outcome_recorded').length !== 1 || outcomeReceipt.subjectId !== record.siteId || outcomeReceipt.idempotencyKey !== record.outcomeEnvelope.idempotency_key || outcomeReceipt.action !== `outcome.${record.outcome}` || outcomeReceipt.status !== 'accepted' || outcomeReceipt.mode !== 'dry_run' || outcomeReceipt.details.eventId !== record.outcomeEventId) return false
+  if (record.activationRequest && (record.activationRequest.org_id !== record.orgId || record.activationRequest.lead_id !== record.leadId || record.activationRequest.site_id !== record.siteId || record.activationRequest.reach_authorization_reference !== record.reachAuthorizationReference)) return false
+  if (record.recyclingRequest && (record.recyclingRequest.org_id !== record.orgId || record.recyclingRequest.lead_id !== record.leadId || record.recyclingRequest.site_id !== record.siteId || record.recyclingRequest.reason !== 'no_sale')) return false
+  if (record.status === 'recycled') {
+    if (record.outcome !== 'no_sale' || !record.recyclingRequest || !record.recycleEvidence) return false
+    const evidence = record.recycleEvidence
+    const release = record.receipts.find((entry) => entry.receiptId === evidence.recycleReceipt.receiptId)
+    if (!release || release.kind !== 'recycling' || release.action !== 'inventory.release' || release.status !== 'completed' || release.mode !== 'dry_run' || release.subjectId !== record.siteId || release.idempotencyKey !== record.recyclingRequest.idempotency_key || release.details.adaptationId !== evidence.adaptationId || release.details.foundationId !== evidence.foundationId || release.details.reservationId !== evidence.reservationId || release.details.inventoryId !== evidence.templateInventoryId || release.details.publicMutation !== false) return false
+  } else if (record.recyclingRequest || record.recycleEvidence) return false
+  for (const refactor of record.refactoringRequests) {
+    if (refactor.lifecycleId !== record.lifecycleId || refactor.siteId !== record.siteId || record.status !== 'recycled' || !record.recycleEvidence || refactor.foundationId !== record.recycleEvidence.foundationId || refactor.templateInventoryId !== record.recycleEvidence.templateInventoryId) return false
+  }
+  for (const candidate of record.candidateSubmissions) {
+    if (record.status !== 'recycled' || record.outcome !== 'no_sale' || !record.recycleEvidence || candidate.lifecycleId !== record.lifecycleId || candidate.submissionReceipt.subjectId !== record.siteId || candidate.submissionReceipt.kind !== 'architect_candidate' || candidate.submissionReceipt.action !== 'linklibraries.submitArchitectCandidate' || candidate.submissionReceipt.status !== 'accepted' || candidate.submissionReceipt.mode !== 'dry_run' || candidate.submissionReceipt.idempotencyKey !== `candidate:${candidate.proposalId}` || candidate.submissionReceipt.details.submissionReference !== candidate.proposalId || candidate.submissionReceipt.details.publicMutation !== false || !record.receipts.some((receipt) => receipt.receiptId === candidate.submissionReceipt.receiptId) || !candidate.sourceRunIds.includes(record.recycleEvidence.sourceRunId) || !candidate.qualityEvidenceReferences.includes(record.recycleEvidence.qualityEvidenceReference) || !candidate.testEvidenceReferences.includes(record.recycleEvidence.passingTestEvidenceReference) || !candidate.commercialEvidenceReferences.includes(record.outcomeEventId)) return false
+  }
+  if (record.status === 'activation_dry_run_complete' && (!record.activationRequest || record.outcome !== 'sold')) return false
+  if (record.status === 'awaiting_activation' && record.outcome !== 'sold') return false
+  if (record.status === 'retained' && record.outcome !== 'deferred') return false
+  if (record.status === 'abandoned' && record.outcome !== 'abandoned') return false
+  for (const nested of record.receipts) {
+    if (nested.subjectId !== record.siteId) return false
+    if (nested.kind === 'activation_step' || nested.kind === 'activation_rollback') {
+      if (!record.activationRequest || nested.idempotencyKey !== record.activationRequest.idempotency_key || nested.mode !== 'dry_run' || !/^(payload|private_wall|domain|dns|route|tls|health)\.(execute|rollback)$/.test(nested.action)) return false
+    }
+    if (nested.kind === 'recycling') {
+      if (record.recyclingRequest) {
+        if (nested.idempotencyKey !== record.recyclingRequest.idempotency_key || nested.mode !== 'dry_run') return false
+      } else if (nested.status !== 'failed' || nested.action !== 'inventory.binding') return false
+    }
+    if (nested.kind === 'architect_candidate' && !record.candidateSubmissions.some((candidate) => candidate.submissionReceipt.receiptId === nested.receiptId)) return false
+  }
+  return true
 }
 
 export interface LiNKreachAuthorizationVerifier {
   verify(input: { orgId: string; leadId: string; siteId: string; reference: string; capability: 'outcome' | 'activation' }): Promise<boolean>
+}
+
+/** Resolves evidence against the durable run/quality/test authority, not caller strings. */
+export interface LifecycleEvidenceVerifier {
+  verifyCompletedRecycleEvidence(input: { orgId: string; siteId: string; sourceRunId: string; qualityEvidenceReference: string; passingTestEvidenceReference: string }): Promise<boolean>
 }
 
 export interface ActivationProvider {
@@ -255,6 +316,10 @@ export interface RecyclingContext {
   adaptation: ProspectAdaptation
   reservations: FoundationReservationManager
   conversionLocks: ConversionLockRegistry
+  /** Immutable binding recorded by the inventory/adaptation assembly path. */
+  inventoryBinding: { templateInventoryId: string; adaptationId: string; foundationId: string; reservationId: string }
+  /** Completed source run and its actual accepted quality/test evidence. */
+  completedEvidence: { sourceRunId: string; qualityEvidenceReference: string; passingTestEvidenceReference: string }
   /** Removes lead-specific working/Payload references from active use; must return a receipt, not raw data. */
   quarantineLeadContent(): Promise<LifecycleReceipt>
 }
@@ -272,6 +337,8 @@ export interface ArchitectInput {
   /** This is metadata only; bytes must have their own SHA-256 in candidate.files. */
   assetPreview: Record<string, unknown>
   knownLeadValues: string[]
+  /** Exact candidate bytes, keyed by candidate.files path, not caller-provided metadata. */
+  candidateFileContents: Record<string, string>
   catalogReference: PinnedLibraryCatalogReference
   candidate: LibraryCandidateEntry
 }
@@ -283,6 +350,7 @@ export class SiteLifecycleService {
     private readonly store: LifecycleStore,
     private readonly authorization: LiNKreachAuthorizationVerifier,
     private readonly activationProviders: ActivationProvider[] = createPhaseOneActivationProviders(),
+    private readonly evidenceVerifier?: LifecycleEvidenceVerifier,
   ) {
     const providerNames = new Set(activationProviders.map((provider) => provider.providerName))
     if (activationProviders.length !== ACTIVATION_PROVIDER_NAMES.length || providerNames.size !== ACTIVATION_PROVIDER_NAMES.length || ACTIVATION_PROVIDER_NAMES.some((name) => !providerNames.has(name))) {
@@ -310,6 +378,7 @@ export class SiteLifecycleService {
       lifecycleId: randomUUID(), orgId: envelope.org_id, leadId: envelope.lead_id, siteId: envelope.site_id,
       outcomeEventId: envelope.replay_protection.event_id, outcomeEnvelope: structuredClone(envelope), outcome: envelope.outcome,
       reachAuthorizationReference: envelope.reach_authorization_reference, status, retentionUntil, activationRequest: null,
+      recyclingRequest: null, recycleEvidence: null,
       receipts: [receipt('outcome_recorded', envelope.idempotency_key, envelope.site_id, 'dry_run', `outcome.${envelope.outcome}`, 'accepted', { eventId: envelope.replay_protection.event_id })],
       refactoringRequests: [], candidateSubmissions: [],
       createdAt: now, updatedAt: now,
@@ -326,6 +395,8 @@ export class SiteLifecycleService {
     if (lifecycle.leadId !== request.lead_id || lifecycle.reachAuthorizationReference !== request.reach_authorization_reference) throw new LifecycleError('Activation request does not match the authorized commercial outcome.')
     if (!(await this.authorization.verify({ orgId: request.org_id, leadId: request.lead_id, siteId: request.site_id, reference: request.reach_authorization_reference, capability: 'activation' }))) throw new LifecycleError('LiNKreach activation authorization was denied.')
     if (lifecycle.status === 'activation_dry_run_complete') return lifecycle
+    // Persist this parent binding as part of any failure evidence too.
+    lifecycle.activationRequest = structuredClone(request)
     const receipts: LifecycleReceipt[] = []
     const attemptedProviders: ActivationProvider[] = []
     try {
@@ -356,7 +427,6 @@ export class SiteLifecycleService {
       await this.store.save(lifecycle)
       throw new LifecycleError(`Activation dry-run failed${rollbackFailure ? ' and rollback also failed' : ''}; execution and rollback evidence were recorded: ${error instanceof Error ? error.message : 'unknown error'}`)
     }
-    lifecycle.activationRequest = request
     lifecycle.status = 'activation_dry_run_complete'
     lifecycle.receipts.push(...receipts)
     lifecycle.updatedAt = new Date().toISOString()
@@ -370,14 +440,33 @@ export class SiteLifecycleService {
     if (!lifecycle || lifecycle.outcome !== 'no_sale') throw new LifecycleError('Recycling requires an authorized no_sale outcome.')
     if (lifecycle.status === 'recycled') return lifecycle
     if (lifecycle.leadId !== context.request.lead_id) throw new LifecycleError('Recycling request does not match the original lead.')
+    try {
+      assertRecyclingBinding(lifecycle, context)
+      if (!this.evidenceVerifier || !(await this.evidenceVerifier.verifyCompletedRecycleEvidence({ orgId: lifecycle.orgId, siteId: lifecycle.siteId, ...context.completedEvidence }))) throw new LifecycleError('No-sale recycling evidence did not resolve to completed durable run, quality, and passing-test records.')
+    } catch (error) {
+      await recordManualAttention(this.store, lifecycle, context.request.idempotency_key, 'inventory.binding')
+      throw error
+    }
     // Check the conversion lock before touching prospect content. A sold/locked
     // site must be left completely unchanged if a stale no-sale request arrives.
     context.conversionLocks.assertRecycleAllowed(context.adaptation.foundationId)
     const quarantine = await context.quarantineLeadContent()
     assertQuarantineReceipt(quarantine, lifecycle, context)
-    archiveAndRecycleFoundation(context.adaptation, context.reservations, context.conversionLocks)
+    let released: { release: { reservationId: string; foundationId: string; status: 'released' } }
+    try {
+      released = archiveAndReleaseExactFoundation(context.adaptation, context.reservations, context.conversionLocks)
+    } catch (error) {
+      await recordManualAttention(this.store, lifecycle, context.request.idempotency_key, 'inventory.release')
+      throw error
+    }
+    if (released.release.status !== 'released' || released.release.reservationId !== context.adaptation.reservationId || released.release.foundationId !== context.adaptation.foundationId) {
+      await recordManualAttention(this.store, lifecycle, context.request.idempotency_key, 'inventory.release')
+      throw new LifecycleError('No-sale recycling requires a successful exact inventory release result.')
+    }
+    const recycleReceipt = receipt('recycling', context.request.idempotency_key, lifecycle.siteId, 'dry_run', 'inventory.release', 'completed', { inventoryId: context.request.template_inventory_id, foundationId: context.adaptation.foundationId, reservationId: released.release.reservationId, adaptationId: context.adaptation.adaptationId, leadContentRetained: false, publicMutation: false })
     lifecycle.status = 'recycled'
-    const recycleReceipt = receipt('recycling', context.request.idempotency_key, lifecycle.siteId, 'dry_run', 'inventory.release', 'completed', { inventoryId: context.request.template_inventory_id, foundationId: context.adaptation.foundationId, leadContentRetained: false, publicMutation: false })
+    lifecycle.recyclingRequest = structuredClone(context.request)
+    lifecycle.recycleEvidence = { adaptationId: context.adaptation.adaptationId, foundationId: context.adaptation.foundationId, reservationId: released.release.reservationId, templateInventoryId: context.request.template_inventory_id, sourceRunId: context.completedEvidence.sourceRunId, qualityEvidenceReference: context.completedEvidence.qualityEvidenceReference, passingTestEvidenceReference: context.completedEvidence.passingTestEvidenceReference, recycleReceipt }
     const refactoringRequest: RefactoringRequest = { requestId: `refactor:${randomUUID()}`, lifecycleId: lifecycle.lifecycleId, siteId: lifecycle.siteId, foundationId: context.adaptation.foundationId, templateInventoryId: context.request.template_inventory_id, status: 'ready_for_review', sanitizedDetails: { outcome: 'no_sale', inventoryReleased: true, leadContentRemoved: true, publicMutation: false }, createdAt: new Date().toISOString() }
     lifecycle.receipts.push(quarantine, recycleReceipt)
     lifecycle.refactoringRequests.push(refactoringRequest)
@@ -400,10 +489,11 @@ export class SiteLifecycleService {
 
   async proposeArchitectCandidate(input: ArchitectInput): Promise<{ submission: LibraryCandidateSubmission; receipt: LifecycleReceipt }> {
     const lifecycle = await this.store.getBySiteId(input.orgId, input.siteId)
-    if (!lifecycle || lifecycle.outcome !== 'no_sale' || lifecycle.status !== 'recycled') throw new LifecycleError('LiNKsites Architect requires a persisted, completed no_sale lifecycle.')
-    if (!input.sourceRunIds.length || !input.sourceEvidenceReferences.length || !input.qualityEvidenceReferences.length || !input.commercialEvidenceReferences.length || !input.testEvidenceReferences.length) throw new LifecycleError('LiNKsites Architect candidate requires source-run, quality, commercial, and passing-test evidence.')
-    if (input.candidate.status !== 'candidate' || !input.candidate.license.redistributionAllowed) throw new LifecycleError('LiNKsites Architect requires a redistributable candidate asset only.')
+    if (!lifecycle || lifecycle.outcome !== 'no_sale' || lifecycle.status !== 'recycled' || !lifecycle.recycleEvidence || !lifecycle.recyclingRequest) throw new LifecycleError('LiNKsites Architect requires a persisted, completed no_sale lifecycle.')
+    assertArchitectEvidenceBoundToLifecycle(input, lifecycle)
+    if (input.candidate.status !== 'candidate' || !isRedistributableSpdx(input.candidate.license.spdx) || !input.candidate.license.redistributionAllowed) throw new LifecycleError('LiNKsites Architect requires a known redistributable SPDX candidate asset only.')
     if (!isRuntimeCompatible(input.candidate.compatibility.node, input.candidate.compatibility.runtimes)) throw new LifecycleError('LiNKsites Architect candidate is not compatible with the LiNKsites Node 22 browser runtime.')
+    assertCandidateBytes(input.candidate, input.candidateFileContents, input.knownLeadValues)
     if (containsProspectData(input.assetPreview, input.knownLeadValues) || containsLeadValues(candidateHumanText(input.candidate), input.knownLeadValues)) throw new LifecycleError('Reusable candidate contains lead/customer data and cannot be submitted.')
     try { assertLiNKSitesLibraryConsumerPolicy({ ...input.candidate, status: 'approved' }) } catch (error) { throw new LifecycleError(`LiNKsites Architect candidate failed LiNKlibraries contract validation: ${error instanceof Error ? error.message : 'invalid candidate'}`) }
     let submission: LibraryCandidateSubmission
@@ -432,6 +522,46 @@ function assertActivationReceipt(value: LifecycleReceipt, provider: ActivationPr
 function assertQuarantineReceipt(value: LifecycleReceipt, lifecycle: LifecycleRecord, context: RecyclingContext): void {
   if (!isLifecycleReceipt(value) || value.kind !== 'recycling' || value.mode !== 'dry_run' || value.status !== 'completed' || value.subjectId !== lifecycle.siteId || value.idempotencyKey !== context.request.idempotency_key || value.action !== 'content.quarantine' || value.details.publicMutation !== false || value.details.leadContentRetained !== false || value.details.leadContentRemoved !== true || value.details.adaptationId !== context.adaptation.adaptationId || value.details.foundationId !== context.adaptation.foundationId || value.details.reservationId !== context.adaptation.reservationId || value.details.templateInventoryId !== context.request.template_inventory_id) {
     throw new LifecycleError('No-sale recycling requires a matching Phase-1 dry-run quarantine receipt with a completed lead-content removal proof.')
+  }
+}
+
+function assertRecyclingBinding(lifecycle: LifecycleRecord, context: RecyclingContext): void {
+  const { request, adaptation, inventoryBinding, completedEvidence, reservations } = context
+  if (request.org_id !== lifecycle.orgId || request.site_id !== lifecycle.siteId || request.lead_id !== lifecycle.leadId ||
+    inventoryBinding.templateInventoryId !== request.template_inventory_id || inventoryBinding.adaptationId !== adaptation.adaptationId || inventoryBinding.foundationId !== adaptation.foundationId || inventoryBinding.reservationId !== adaptation.reservationId ||
+    !isNonEmpty(completedEvidence.sourceRunId) || !isNonEmpty(completedEvidence.qualityEvidenceReference) || !isNonEmpty(completedEvidence.passingTestEvidenceReference)) {
+    throw new LifecycleError('No-sale recycling inventory/adaptation/evidence binding is invalid; manual attention is required.')
+  }
+  const active = reservations.getActiveReservation(adaptation.foundationId)
+  if (!active || active.reservationId !== adaptation.reservationId || active.foundationId !== adaptation.foundationId) {
+    throw new LifecycleError('No-sale recycling requires the exact active reservation; inventory has changed and needs manual attention.')
+  }
+}
+
+async function recordManualAttention(store: LifecycleStore, lifecycle: LifecycleRecord, idempotencyKey: string, action: string): Promise<void> {
+  lifecycle.status = 'manual_attention'
+  lifecycle.receipts.push(receipt('recycling', idempotencyKey, lifecycle.siteId, 'dry_run', action, 'failed', { publicMutation: false, errorRecorded: true }))
+  lifecycle.updatedAt = new Date().toISOString()
+  await store.save(lifecycle)
+}
+
+function assertArchitectEvidenceBoundToLifecycle(input: ArchitectInput, lifecycle: LifecycleRecord): void {
+  const evidence = lifecycle.recycleEvidence
+  if (!evidence || !input.sourceRunIds.includes(evidence.sourceRunId) || !input.sourceEvidenceReferences.some((reference) => reference.endsWith(evidence.sourceRunId)) || !input.qualityEvidenceReferences.includes(evidence.qualityEvidenceReference) || !input.testEvidenceReferences.includes(evidence.passingTestEvidenceReference) || !input.commercialEvidenceReferences.includes(lifecycle.outcomeEventId)) {
+    throw new LifecycleError('LiNKsites Architect evidence must be bound to this persisted completed recycle, its source run, quality proof, passing test proof, and commercial outcome.')
+  }
+}
+
+const REDISTRIBUTABLE_SPDX = new Set(['MIT', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', 'CC0-1.0', 'MPL-2.0'])
+function isRedistributableSpdx(value: string): boolean { return REDISTRIBUTABLE_SPDX.has(value) }
+
+function assertCandidateBytes(candidate: LibraryCandidateEntry, contents: Record<string, string>, knownLeadValues: string[]): void {
+  const filePaths = new Set(candidate.files.map((file) => file.path))
+  if (Object.keys(contents).length !== filePaths.size || [...filePaths].some((path) => typeof contents[path] !== 'string')) throw new LifecycleError('LiNKsites Architect requires every submitted candidate file byte-for-byte for inspection.')
+  for (const file of candidate.files) {
+    const bytes = contents[file.path]
+    if (digest(bytes) !== file.sha256) throw new LifecycleError(`LiNKsites Architect candidate content checksum does not match ${file.path}.`)
+    if (containsLeadValues(bytes, knownLeadValues)) throw new LifecycleError(`Reusable candidate file ${file.path} contains lead/customer data and cannot be submitted.`)
   }
 }
 

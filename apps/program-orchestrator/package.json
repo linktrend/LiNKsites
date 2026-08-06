@@ -17,6 +17,7 @@
   "dependencies": {
     "@electric-sql/pglite": "0.5.4",
     "@linksites/factory-catalog": "workspace:*",
+    "@linksites/autowork-boundary": "workspace:*",
     "@linksites/intake-orchestrator": "workspace:*",
     "@linksites/program-ledger": "workspace:*",
     "@linksites/types": "workspace:*"

@@ -1,6 +1,7 @@
 import type { DemoCompletionEnvelope, EvidenceReceipt, LeadResearchPackage } from '@linksites/types'
 import type { CompletionSink, WorkIntakePort } from '@linksites/intake-orchestrator'
 import type { ProgramDefinition } from '@linksites/program-ledger'
+import type { LiNKreachAuthorizationVerifier } from '@linksites/factory-catalog'
 
 export type IssueState = 'ready' | 'running' | 'retry_scheduled' | 'completed' | 'failed' | 'manual_attention'
 export type RunState = 'running' | 'succeeded' | 'retry_scheduled' | 'dead_lettered' | 'manual_attention'
@@ -140,11 +141,16 @@ export type RuntimeConfig = {
   payloadSiteId: string
   webMasterBaseUrl: string
   previewAccessToken: string
+  /** Inbound W2-05 HMAC verifier configuration; never emitted in evidence. */
+  commercialOutcomeGatewaySecret: string
+  commercialOutcomeGatewayKeyId: string
   /** Read-only local clone/cache used to read the immutable LiNKlibraries pin. */
   libraryRepositoryPath: string
   approvedExecutors: Record<string, string>
   approvedCapabilities: Record<string, string[]>
 }
+
+export type OutcomeIngressDependencies = { outcomeAuthorization: LiNKreachAuthorizationVerifier }
 
 export type SharedPorts = {
   intake: WorkIntakePort

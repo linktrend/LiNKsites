@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
+import { createHmac } from 'node:crypto'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -11,6 +12,7 @@ import { W2_02_GRAPH } from '../src/graph.ts'
 import { configFromEnvironment, createLocalConfig, createProductionComposition, validateRuntimeConfig } from '../src/composition.ts'
 import { runFirstReadyFileLead } from '../src/intake.ts'
 import { CommercialOutcomeIngress } from '../src/commercial-outcome-ingress.ts'
+import { LiNKautoworkGateway } from '@linksites/autowork-boundary'
 
 const lead = (id = 'lead-local-001'): LeadResearchPackage => ({
   schema_version: { major: 1, minor: 0 }, org_id: 'local-org', correlation_id: `corr:${id}`, idempotency_key: `lead:${id}`, lead_id: id,
@@ -24,22 +26,26 @@ const approvedFacts = (id: string) => ({
   pricing: 'Contact for an approved quote', legalClaims: ['Founder-approved legal copy'], media: [],
 })
 
-test('W2-05 accepted commercial outcomes enter the W2-02 durable lifecycle path and reject unaccepted/raw events', async () => {
+test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durable lifecycle path and reject forged signatures', async () => {
   const authorization: LiNKreachAuthorizationVerifier = { verify: async () => true }
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-06-ingress-'))
   const lifecycle = new SiteLifecycleService(createFileLifecycleStore(directory), authorization)
-  const ingress = new CommercialOutcomeIngress(lifecycle)
-  const envelope = {
+  const secret = 'outcome-gateway-test-secret'
+  const timestamp = Math.floor(Date.now() / 1000)
+  const nonce = 'outcome-nonce-001'
+  const unsigned = {
     schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'corr-outcome', idempotency_key: 'outcome:001', event_id: 'gateway-outcome-001', event_name: 'commercial.outcome.recorded' as const,
     payload: { lead_id: 'lead_demo', site_id: 'site_demo', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-001', outcome_event_id: 'commercial-event-001', outcome_nonce: 'nonce-001', recorded_at: '2026-08-04T00:10:00.000Z' } },
-    signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: 'test-signature' }, delivery_attempt: 1, acknowledgement: { status: 'accepted' as const },
+    delivery_attempt: 1, acknowledgement: { status: 'accepted' as const },
   }
+  const envelope = { ...unsigned, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: createHmac('sha256', secret).update(`${timestamp}.${nonce}.${JSON.stringify(unsigned)}`).digest('hex') } }
+  const gateway = new LiNKautoworkGateway({ secret, keyId: 'key-1', environment: 'development', transport: async () => { throw new Error('not used') } })
+  const ingress = new CommercialOutcomeIngress(lifecycle, gateway)
   try {
-    const first = await ingress.accept({ verifiedBy: 'w2-05-linkautowork-gateway', envelope })
+    const first = await ingress.accept({ timestamp, nonce, envelope })
     assert.equal(first.outcome, 'no_sale')
-    assert.equal((await ingress.accept({ verifiedBy: 'w2-05-linkautowork-gateway', envelope })).lifecycleId, first.lifecycleId)
     assert.equal((await createFileLifecycleStore(directory).getBySiteId('org_demo', 'site_demo'))?.lifecycleId, first.lifecycleId)
-    await assert.rejects(ingress.accept({ verifiedBy: 'w2-05-linkautowork-gateway', envelope: { ...envelope, acknowledgement: { status: 'pending' } } as never }), /verified and accepted/i)
+    await assert.rejects(ingress.accept({ timestamp, nonce: 'forged-nonce', envelope: { ...envelope, signature: { ...envelope.signature, signature: 'forged' } } }), /invalid_signature/i)
   } finally { await rm(directory, { recursive: true, force: true }) }
 })
 
@@ -70,9 +76,9 @@ async function composition(id = 'lead-local-001') {
   const web = createServer((_request, response) => { response.writeHead(200, { 'content-type': 'text/html', 'x-robots-tag': 'noindex, nofollow', 'cache-control': 'private, no-store' }); response.end('<main data-private-preview="true" data-route="/"><h1>Private preview</h1></main>') })
   await new Promise<void>((resolve) => web.listen(0, '127.0.0.1', resolve))
   const webPort = (web.address() as import('node:net').AddressInfo).port
-  const config = { ...createLocalConfig(directory), payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'test-preview-token' }
+  const config = { ...createLocalConfig(directory), payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'test-preview-token', commercialOutcomeGatewaySecret: 'composition-outcome-secret', commercialOutcomeGatewayKeyId: 'composition-outcome-key' }
   await writeFile(config.approvedFactsPath, JSON.stringify(approvedFacts(id)))
-  const value = await createProductionComposition(config)
+  const value = await createProductionComposition(config, { outcomeAuthorization: { verify: async () => true } })
   const close = value.close
   return { ...value, directory, docs, close: async () => { await close(); await new Promise<void>((resolve) => payload.close(() => resolve())); await new Promise<void>((resolve) => web.close(() => resolve())) } }
 }
@@ -83,6 +89,10 @@ test('production composition boots with complete approved local configuration', 
     assert.equal((await value.runtime.health()).readiness, false)
     await value.runtime.runLead(lead())
     assert.equal((await value.runtime.health()).programState, 'completed')
+    const timestamp = Math.floor(Date.now() / 1000); const nonce = 'composed-outcome-nonce'
+    const unsigned = { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'composed-outcome', idempotency_key: 'composed-outcome:001', event_id: 'event:composed-outcome:001', event_name: 'commercial.outcome.recorded' as const, payload: { lead_id: 'lead-composed', site_id: 'site-composed', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-composed', outcome_event_id: 'commercial-outcome-composed', outcome_nonce: 'outcome-nonce-composed', recorded_at: '2026-08-06T00:00:00.000Z' } }, delivery_attempt: 1, acknowledgement: { status: 'accepted' as const } }
+    const envelope = { ...unsigned, signature: { algorithm: 'hmac-sha256' as const, key_id: value.config.commercialOutcomeGatewayKeyId, signature: createHmac('sha256', value.config.commercialOutcomeGatewaySecret).update(`${timestamp}.${nonce}.${JSON.stringify(unsigned)}`).digest('hex') } }
+    assert.equal((await value.commercialOutcomeIngress.accept({ timestamp, nonce, envelope })).status, 'outcome_recorded')
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
 

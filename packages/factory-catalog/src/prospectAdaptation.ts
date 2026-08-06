@@ -156,3 +156,27 @@ export function archiveAndRecycleFoundation(
   }
   return archived
 }
+
+/**
+ * The lifecycle service uses this stricter operation.  Unlike the historical
+ * helper above, it never treats a missing or moved reservation as a successful
+ * recycle: callers receive a concrete post-release result only after the
+ * exact active reservation was released and read back as absent.
+ */
+export function archiveAndReleaseExactFoundation(
+  adaptation: ProspectAdaptation,
+  reservationManager: FoundationReservationManager,
+  conversionLockRegistry: ConversionLockRegistry,
+): { adaptation: ProspectAdaptation; release: { reservationId: string; foundationId: string; status: 'released' } } {
+  conversionLockRegistry.assertRecycleAllowed(adaptation.foundationId)
+  const active = reservationManager.getActiveReservation(adaptation.foundationId)
+  if (!active || active.reservationId !== adaptation.reservationId || active.foundationId !== adaptation.foundationId) {
+    throw new ProspectAdaptationError(`Cannot recycle Adaptation "${adaptation.adaptationId}": its exact active reservation is absent or has moved to another adaptation.`)
+  }
+  const archived = transitionAdaptation(adaptation, 'archived')
+  reservationManager.release(active.reservationId)
+  if (reservationManager.getActiveReservation(adaptation.foundationId) !== null) {
+    throw new ProspectAdaptationError(`Cannot recycle Adaptation "${adaptation.adaptationId}": reservation release did not complete.`)
+  }
+  return { adaptation: archived, release: { reservationId: active.reservationId, foundationId: active.foundationId, status: 'released' } }
+}

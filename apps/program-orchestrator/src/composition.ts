@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import type { RuntimeConfig } from './contracts.ts'
+import type { OutcomeIngressDependencies, RuntimeConfig } from './contracts.ts'
 import { EXECUTOR_BINDINGS, W2_02_GRAPH } from './graph.ts'
 import { createLocalDependencyPorts, DurableCompletionSink, LocalBoundaryAdaptersImpl, type LocalDependencyPorts } from './adapters.ts'
 import { DurableLedger } from './durable-store.ts'
@@ -11,8 +11,11 @@ import { ProgramRuntime } from './runtime.ts'
 import { ExecutorRegistry } from './executors.ts'
 import { FileWorkIntakePort, type CompletionSink, type WorkIntakePort } from '@linksites/intake-orchestrator'
 import { closeLocalDatabase, openLocalDatabase } from './local-database.ts'
+import { LiNKautoworkGateway, type GatewayTransport } from '@linksites/autowork-boundary'
+import { createFileLifecycleStore, SiteLifecycleService, type LifecycleEvidenceVerifier } from '@linksites/factory-catalog'
+import { CommercialOutcomeIngress } from './commercial-outcome-ingress.ts'
 
-export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; close: () => Promise<void> }
+export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; commercialOutcomeIngress: CommercialOutcomeIngress; close: () => Promise<void> }
 
 function repositoryRoot(): string { return execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim() }
 function actualRevision(): string { return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim() }
@@ -45,17 +48,17 @@ export function validateRuntimeConfig(config: RuntimeConfig): RuntimeConfig {
 
 export function createLocalConfig(baseDir: string, orgId = 'local-org'): RuntimeConfig {
   const statePath = resolve(baseDir, 'program-ledger.json')
-  return { mode: 'local', orgId, statePath, intakePath: resolve(baseDir, 'leads.ndjson'), completionPath: resolve(baseDir, 'completions.ndjson'), approvedFactsPath: resolve(baseDir, 'approved-facts.json'), maxAttempts: 3, concurrency: 2, leaseDurationMs: 30_000, executingRevision: actualRevision(), executableCheckpoint: executableCheckpoint(), workerId: `w2-02:${process.pid}:${randomUUID()}`, payloadBaseUrl: '', payloadApiKey: '', payloadSiteId: '', webMasterBaseUrl: '', previewAccessToken: '', libraryRepositoryPath: process.env.W2_02_LIBRARY_REPOSITORY_PATH ?? '/Users/linktrend/Projects/LiNKlibraries', approvedExecutors: Object.fromEntries(W2_02_GRAPH.map((issue) => [issue.executorKind, issue.executorVersion])), approvedCapabilities: Object.fromEntries(Object.entries(EXECUTOR_BINDINGS).map(([kind, binding]) => [kind, [...binding.capabilities]])) }
+  return { mode: 'local', orgId, statePath, intakePath: resolve(baseDir, 'leads.ndjson'), completionPath: resolve(baseDir, 'completions.ndjson'), approvedFactsPath: resolve(baseDir, 'approved-facts.json'), maxAttempts: 3, concurrency: 2, leaseDurationMs: 30_000, executingRevision: actualRevision(), executableCheckpoint: executableCheckpoint(), workerId: `w2-02:${process.pid}:${randomUUID()}`, payloadBaseUrl: '', payloadApiKey: '', payloadSiteId: '', webMasterBaseUrl: '', previewAccessToken: '', commercialOutcomeGatewaySecret: 'local-w2-06-inbound-test-secret', commercialOutcomeGatewayKeyId: 'local-w2-06-inbound-test-key', libraryRepositoryPath: process.env.W2_02_LIBRARY_REPOSITORY_PATH ?? '/Users/linktrend/Projects/LiNKlibraries', approvedExecutors: Object.fromEntries(W2_02_GRAPH.map((issue) => [issue.executorKind, issue.executorVersion])), approvedCapabilities: Object.fromEntries(Object.entries(EXECUTOR_BINDINGS).map(([kind, binding]) => [kind, [...binding.capabilities]])) }
 }
 
 export function configFromEnvironment(env: NodeJS.ProcessEnv, baseDir: string): RuntimeConfig {
   if (env.W2_02_MODE !== 'local' || !env.W2_02_ORG_ID) throw new Error('W2-02 configuration is incomplete; set W2_02_MODE=local and W2_02_ORG_ID explicitly')
   const config = createLocalConfig(env.W2_02_STATE_DIR ? resolve(baseDir, env.W2_02_STATE_DIR) : baseDir, env.W2_02_ORG_ID)
   if (env.W2_02_EXECUTION_REVISION && env.W2_02_EXECUTION_REVISION !== config.executingRevision) throw new Error('W2-02 refuses an execution revision that is not the checked-out commit')
-  return validateRuntimeConfig({ ...config, approvedFactsPath: env.W2_02_APPROVED_FACTS_PATH ? resolve(baseDir, env.W2_02_APPROVED_FACTS_PATH) : config.approvedFactsPath, maxAttempts: env.W2_02_MAX_ATTEMPTS ? Number(env.W2_02_MAX_ATTEMPTS) : config.maxAttempts, concurrency: env.W2_02_CONCURRENCY ? Number(env.W2_02_CONCURRENCY) : config.concurrency, leaseDurationMs: env.W2_02_LEASE_MS ? Number(env.W2_02_LEASE_MS) : config.leaseDurationMs, payloadBaseUrl: env.W2_02_PAYLOAD_BASE_URL ?? config.payloadBaseUrl, payloadApiKey: env.W2_02_PAYLOAD_API_KEY ?? config.payloadApiKey, payloadSiteId: env.W2_02_PAYLOAD_SITE_ID ?? config.payloadSiteId, webMasterBaseUrl: env.W2_02_WEB_MASTER_BASE_URL ?? config.webMasterBaseUrl, previewAccessToken: env.W2_02_PREVIEW_ACCESS_TOKEN ?? config.previewAccessToken, libraryRepositoryPath: env.W2_02_LIBRARY_REPOSITORY_PATH ?? config.libraryRepositoryPath })
+  return validateRuntimeConfig({ ...config, approvedFactsPath: env.W2_02_APPROVED_FACTS_PATH ? resolve(baseDir, env.W2_02_APPROVED_FACTS_PATH) : config.approvedFactsPath, maxAttempts: env.W2_02_MAX_ATTEMPTS ? Number(env.W2_02_MAX_ATTEMPTS) : config.maxAttempts, concurrency: env.W2_02_CONCURRENCY ? Number(env.W2_02_CONCURRENCY) : config.concurrency, leaseDurationMs: env.W2_02_LEASE_MS ? Number(env.W2_02_LEASE_MS) : config.leaseDurationMs, payloadBaseUrl: env.W2_02_PAYLOAD_BASE_URL ?? config.payloadBaseUrl, payloadApiKey: env.W2_02_PAYLOAD_API_KEY ?? config.payloadApiKey, payloadSiteId: env.W2_02_PAYLOAD_SITE_ID ?? config.payloadSiteId, webMasterBaseUrl: env.W2_02_WEB_MASTER_BASE_URL ?? config.webMasterBaseUrl, previewAccessToken: env.W2_02_PREVIEW_ACCESS_TOKEN ?? config.previewAccessToken, commercialOutcomeGatewaySecret: env.W2_05_OUTCOME_GATEWAY_SECRET ?? config.commercialOutcomeGatewaySecret, commercialOutcomeGatewayKeyId: env.W2_05_OUTCOME_GATEWAY_KEY_ID ?? config.commercialOutcomeGatewayKeyId, libraryRepositoryPath: env.W2_02_LIBRARY_REPOSITORY_PATH ?? config.libraryRepositoryPath })
 }
 
-export async function createProductionComposition(config: RuntimeConfig): Promise<Composition> {
+export async function createProductionComposition(config: RuntimeConfig, outcomeDependencies?: OutcomeIngressDependencies): Promise<Composition> {
   const validated = validateRuntimeConfig(config)
   await mkdir(resolve(validated.statePath, '..'), { recursive: true })
   const orgUuid = '00000000-0000-4000-8000-000000000001'
@@ -65,6 +68,7 @@ export async function createProductionComposition(config: RuntimeConfig): Promis
   // it to the separately started local Payload schema and real web-master
   // process (the W2-04 proof harness supplies these URLs).
   if (!validated.payloadBaseUrl || !validated.payloadApiKey || !validated.payloadSiteId || !validated.webMasterBaseUrl || !validated.previewAccessToken) throw new Error('W2-02 requires explicit authenticated local Payload, scoped site, and protected web-master service configuration')
+  if (!validated.commercialOutcomeGatewaySecret || !validated.commercialOutcomeGatewayKeyId) throw new Error('W2-06 requires explicit W2-05 gateway verification configuration')
   const runtimeConfig = validated
   const ledger = new DurableLedger(validated)
   const adapters = new LocalBoundaryAdaptersImpl(runtimeConfig, db)
@@ -73,9 +77,23 @@ export async function createProductionComposition(config: RuntimeConfig): Promis
   const completionSink = new DurableCompletionSink(runtimeConfig, adapters)
   const intake = new FileWorkIntakePort(runtimeConfig.intakePath, `${runtimeConfig.statePath}.intake.json`, { claimLeaseMs: runtimeConfig.leaseDurationMs })
   const dependencies = createLocalDependencyPorts(adapters, completionSink)
+  const noOutboundTransport: GatewayTransport = async () => { throw new Error('W2-06 inbound verifier does not send gateway events') }
+  const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment: 'development', transport: noOutboundTransport })
+  // A composition without a real LiNKreach authorization port is safely
+  // runnable for the W2-02 preview graph, but can never persist an outcome.
+  const lifecycleEvidence: LifecycleEvidenceVerifier = {
+    async verifyCompletedRecycleEvidence(input) {
+      const state = await ledger.snapshot()
+      const source = state.runs.find((run) => run.runId === input.sourceRunId && run.state === 'succeeded')
+      const references = state.runs.flatMap((run) => run.evidence.map((evidence) => evidence.storage_location))
+      return state.program.orgId === input.orgId && state.program.state === 'completed' && Boolean(source) && references.includes(input.qualityEvidenceReference) && references.includes(input.passingTestEvidenceReference)
+    },
+  }
+  const lifecycle = new SiteLifecycleService(createFileLifecycleStore(`${validated.statePath}.lifecycle`), outcomeDependencies?.outcomeAuthorization ?? { verify: async () => false }, undefined, lifecycleEvidence)
+  const commercialOutcomeIngress = new CommercialOutcomeIngress(lifecycle, gateway)
   if (!(await ledger.isAvailable())) throw new Error('W2-02 durable ledger is unavailable')
   let closed = false
-  return { config: runtimeConfig, ledger, adapters, dependencies, executors, intake, completionSink, runtime: new ProgramRuntime(runtimeConfig, ledger, adapters, executors, dependencies), close: async () => {
+  return { config: runtimeConfig, ledger, adapters, dependencies, executors, intake, completionSink, runtime: new ProgramRuntime(runtimeConfig, ledger, adapters, executors, dependencies), commercialOutcomeIngress, close: async () => {
     if (closed) return
     closed = true
     await closeLocalDatabase(`${validated.statePath}.db`, db)

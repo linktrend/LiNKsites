@@ -241,6 +241,9 @@ importers:
       '@electric-sql/pglite':
         specifier: 0.5.4
         version: 0.5.4
+      '@linksites/autowork-boundary':
+        specifier: workspace:*
+        version: link:../../packages/autowork-boundary
       '@linksites/factory-catalog':
         specifier: workspace:*
         version: link:../../packages/factory-catalog
@@ -297,12 +300,12 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.72.0(react@19.1.0))
-      '@linksites/factory-catalog':
-        specifier: workspace:*
-        version: link:../../packages/factory-catalog
       '@linksites/autowork-boundary':
         specifier: workspace:*
         version: link:../../packages/autowork-boundary
+      '@linksites/factory-catalog':
+        specifier: workspace:*
+        version: link:../../packages/factory-catalog
       '@linksites/types':
         specifier: workspace:*
         version: link:../../packages/types
