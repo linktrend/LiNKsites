@@ -1,0 +1,18 @@
+{
+  "program": "linksites-first-site-private-demo",
+  "hierarchy": "Module > Phase > Issue > Run",
+  "module": { "id": "module-first-site-factory", "title": "First-site private demo factory" },
+  "phases": [
+    "phase-intake",
+    "phase-foundation",
+    "phase-content",
+    "phase-cms",
+    "phase-preview",
+    "phase-completion"
+  ],
+  "parallel_ready_branches": [
+    ["foundation-reserve", "library-resolve"],
+    ["information-architecture-copy", "media-provenance"]
+  ],
+  "excluded": ["sold-site-public-activation", "Stripe", "Odoo", "raw n8n", "VPS", "cloud", "DNS", "live credentials"]
+}
