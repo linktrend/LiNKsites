@@ -72,7 +72,7 @@ export class ProgramRuntime {
     return state.completion.envelope
   }
 
-  async exportState(): Promise<unknown> { const state = await this.ledger.snapshot(); return { ...(sanitize(state) as Record<string, unknown>), executionRevision: this.config.executingRevision, executableCheckpoint: this.config.executableCheckpoint, canonicalGraph: sanitize(state.program.graph), executorRegistry: this.executors.list(), persistedEvidence: state.runs.flatMap((run) => run.evidence).map((evidence) => ({ receiptId: evidence.receipt_id, storageLocation: evidence.storage_location, revisionSha: evidence.revision_sha, checksum: evidence.checksum })) } }
+  async exportState(): Promise<unknown> { const state = await this.ledger.snapshot(); return { ...(sanitize(state) as Record<string, unknown>), executionRevision: this.config.executingRevision, executableCheckpoint: this.config.executableCheckpoint, canonicalGraph: sanitize(state.program.graph), executorRegistry: this.executors.list(), persistedEvidence: state.runs.flatMap((run) => run.evidence.map((evidence) => ({ issueId: run.issueId, receiptId: evidence.receipt_id, storageLocation: evidence.storage_location, revisionSha: evidence.revision_sha, checksum: evidence.checksum }))) } }
 
   private async execute(issue: IssueRecord, runId: string, fencingToken: number): Promise<void> {
     this.active += 1

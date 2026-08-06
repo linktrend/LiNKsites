@@ -4,6 +4,20 @@
 live credentials, public activation, Stripe, Odoo, or raw n8n path is included.
 This document is correction evidence, not a W2-02 PASS declaration.
 
+## Proof binding and audit target
+
+- Protocol: `w2-02-proof-binding-v1`. The proof runner refuses any source that
+  is not the checked-out immutable Git commit and records that full SHA plus an
+  executable-input checkpoint in the receipt as `testedSourceRevision`.
+- Audit target: the exact `testedSourceRevision` named in
+  `real-service-vertical-slice.json`, plus the receipt's executable checkpoint.
+  The evidence commit is the later Git commit which first adds that receipt;
+  it is deliberately not substituted for the tested source revision.
+- The receipt is generated only after the source-under-test commit is clean.
+  Its evidence commit is reported in the implementation handoff, so auditors
+  can independently verify both `git show <tested-source>` and
+  `git show <evidence-commit>:docs/production-roadmap/evidence/w2-02/real-service-vertical-slice.json`.
+
 ## Source and composition
 
 - Audited correction base: `fb22bb0ce6e7925baba4a0889179d432c8ca7737`.
@@ -59,7 +73,7 @@ logical event under replay.
 | --- | --- |
 | `pnpm install --lockfile-only` / `pnpm install --offline` | Completed; added the embedded PostgreSQL dependency and lockfile entry |
 | `pnpm --filter @linksites/program-orchestrator typecheck` | PASS |
-| `pnpm --filter @linksites/program-orchestrator test` | PASS; 14 focused tests, including lease fencing, process termination/recreation, outbox replay, and post-mutation compensation |
+| `pnpm --filter @linksites/program-orchestrator test` | Focused suite; the exact passing count is emitted by the executed test run and handoff, including stale external-mutation rejection |
 | `pnpm --filter @linksites/program-orchestrator build` | PASS |
 | `pnpm --filter @linksites/program-ledger typecheck && pnpm --filter @linksites/program-ledger test` | PASS; 126 passed, 1 skipped |
 | `pnpm --filter @linksites/factory-catalog typecheck && pnpm --filter @linksites/factory-catalog test` | PASS; 265 passed, 4 skipped live-Payload integration cases |
@@ -78,10 +92,22 @@ credential path was used here.
 required disposable local vertical slice. It creates a temporary local
 database, starts the actual Payload app with its authenticated REST API, builds
 and starts the optimized `apps/web-master`, then runs all 16 Issues and a real
-Chromium token-gate check. It writes only the sanitized
+Chromium missing-token, wrong-token, and valid-token browser gate. It creates a
+runtime-only unique W2-02 run marker and asserts exactly the five promoted
+marker-matched records have `status=draft` and `_status=draft`; the separate
+W2-04 seeded published preview record is explicitly excluded. It writes only the sanitized
 `real-service-vertical-slice.json` receipt; temporary credentials, URLs, state,
 database, and processes are removed in the shell trap. This receipt is not a
 PASS declaration.
+
+The receipt contains per-issue state, gate decision, and evidence IDs rather
+than an aggregate count. Its site-scoped mutation/readback section records
+draft-only REST operations, both status-field readback, and the absence of a
+published-state PATCH or public activation. The adapter checks its durable
+lease immediately before and after each fenced external mutation; a focused
+test proves a stale lease is rejected before the protected-preview mutation can
+write evidence. This is local-process fencing, not a claim that an unmodified
+remote Payload endpoint independently understands W2-02 fencing tokens.
 
 `pnpm --filter @linksites/program-orchestrator validate:graph` fails if the
 committed `program-graph.json` is not the canonical exporter output. The stale

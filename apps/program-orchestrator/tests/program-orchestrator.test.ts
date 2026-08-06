@@ -235,6 +235,18 @@ test('a paused stale worker cannot acknowledge an irreversible receipt after lea
   } finally { await second?.close?.(); await first.close(); await rm(directory, { recursive: true, force: true }) }
 })
 
+test('a stale lease is rejected before the token-gated external preview mutation can write evidence', async () => {
+  const value = await composition('lead-stale-external-mutation')
+  try {
+    await value.ledger.createOrResume(lead('lead-stale-external-mutation'))
+    await assert.rejects(
+      value.adapters.createPrivatePreview('site:lead-stale-external-mutation', { payloadDocumentIds: ['pages::stale'], parity: true }, { runId: 'run:expired', fencingToken: 0 }),
+      /stale lease fencing token|not found/,
+    )
+    await assert.rejects(readdir(`${value.directory}/evidence`), /ENOENT/)
+  } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
+})
+
 test('two independent workers fence the same ready issue to one claim', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-race-'))
   const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', workerId: 'setup-worker' }

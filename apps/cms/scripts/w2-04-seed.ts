@@ -89,7 +89,9 @@ if (process.env.W2_04_SCHEMA_ONLY === '1') {
   process.exit(0)
 }
 const common = { site: site.id, locale: 'en', status: 'published' as const }
-const previewApiKey = 'w2-04-disposable-preview-api-key'
+const previewApiKey = process.env.W2_04_PREVIEW_API_KEY
+const previewPassword = process.env.W2_04_PREVIEW_PASSWORD
+if (!previewApiKey || !previewPassword) throw new Error('W2-04 local proof requires runtime-generated preview credentials')
 const previewRole = await within('creating preview role', payload.create({
   collection: 'roles',
   // The same disposable, site-scoped API user is used by the W2-02 local
@@ -105,7 +107,7 @@ await within('creating preview API user', payload.create({
   collection: 'users',
   data: {
     email: `w2-04-preview-${randomUUID()}@example.test`,
-    password: 'w2-04-disposable-password',
+    password: previewPassword,
     roles: [previewRole.id],
     assignedSites: [site.id],
     allowedLocales: ['en'],

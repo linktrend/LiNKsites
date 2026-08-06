@@ -8,6 +8,9 @@ cms_port="4311"
 web_port="4312"
 cms_pid=""
 web_pid=""
+random_value() { node -e "process.stdout.write(require('node:crypto').randomBytes(24).toString('hex'))"; }
+payload_secret="$(random_value)"
+preview_token="$(random_value)"
 
 kill_tree() {
   local parent_pid="$1"
@@ -43,10 +46,12 @@ export SUPABASE_TELEMETRY_DISABLED=1
 supabase --workdir "$local_root" start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
 export DATABASE_URI="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
-export PAYLOAD_SECRET="w2-04-disposable-local-secret"
+export PAYLOAD_SECRET="$payload_secret"
 export PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}"
 export LINKSITES_W2_04_LOCAL_PROOF=1
 export W2_04_PROOF_PATH="$local_root/proof.json"
+export W2_04_PREVIEW_API_KEY="$(random_value)"
+export W2_04_PREVIEW_PASSWORD="$(random_value)"
 if ! seed_output="$(cd "$repo_root" && pnpm --filter @linksites/cms exec tsx scripts/w2-04-seed.ts)"; then
   printf '%s\n' "$seed_output" >&2
   echo 'W2-04 seed failed' >&2
@@ -77,7 +82,7 @@ web_environment=(
   PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" \
   NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:${cms_port}" \
   PAYLOAD_API_KEY="$preview_api_key" \
-  PREVIEW_ACCESS_TOKEN="w2-04-preview-token" \
+  PREVIEW_ACCESS_TOKEN="$preview_token" \
   LINKSITES_W2_04_LOCAL_PROOF=1 \
   LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID="marketing-smb-v1" \
   LINKSITES_ADMITTED_TEMPLATE_SHA="1111111111111111111111111111111111111111" \
@@ -91,7 +96,7 @@ wait_for "http://127.0.0.1:${web_port}/api/healthz" || { cat "$local_root/web.lo
 
 if ! browser_output="$(W2_04_CMS_URL="http://127.0.0.1:${cms_port}" \
   W2_04_WEB_URL="http://127.0.0.1:${web_port}" \
-  PREVIEW_ACCESS_TOKEN="w2-04-preview-token" \
+  PREVIEW_ACCESS_TOKEN="$preview_token" \
   W2_04_PREVIEW_API_KEY="$preview_api_key" \
   W2_04_SITE_ID="$site_id" \
   W2_04_ARTIFACT_DIR="$local_root/artifacts" \
