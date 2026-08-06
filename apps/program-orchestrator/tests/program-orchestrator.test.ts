@@ -6,9 +6,11 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import type { LeadResearchPackage } from '@linksites/types'
+import { createFileLifecycleStore, SiteLifecycleService, type LiNKreachAuthorizationVerifier } from '@linksites/factory-catalog'
 import { W2_02_GRAPH } from '../src/graph.ts'
 import { configFromEnvironment, createLocalConfig, createProductionComposition, validateRuntimeConfig } from '../src/composition.ts'
 import { runFirstReadyFileLead } from '../src/intake.ts'
+import { CommercialOutcomeIngress } from '../src/commercial-outcome-ingress.ts'
 
 const lead = (id = 'lead-local-001'): LeadResearchPackage => ({
   schema_version: { major: 1, minor: 0 }, org_id: 'local-org', correlation_id: `corr:${id}`, idempotency_key: `lead:${id}`, lead_id: id,
@@ -20,6 +22,25 @@ const approvedFacts = (id: string) => ({
   services: ['Local service consultation'], credentials: ['Founder-provided credentials'], reviews: [{ quote: 'Founder-provided review', author: 'Approved customer' }],
   contact: { phone: '+886200000000', email: `${id}@invalid.test`, address: 'Taipei, Taiwan', website: `https://${id}.invalid.test` },
   pricing: 'Contact for an approved quote', legalClaims: ['Founder-approved legal copy'], media: [],
+})
+
+test('W2-05 accepted commercial outcomes enter the W2-02 durable lifecycle path and reject unaccepted/raw events', async () => {
+  const authorization: LiNKreachAuthorizationVerifier = { verify: async () => true }
+  const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-06-ingress-'))
+  const lifecycle = new SiteLifecycleService(createFileLifecycleStore(directory), authorization)
+  const ingress = new CommercialOutcomeIngress(lifecycle)
+  const envelope = {
+    schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'corr-outcome', idempotency_key: 'outcome:001', event_id: 'gateway-outcome-001', event_name: 'commercial.outcome.recorded' as const,
+    payload: { lead_id: 'lead_demo', site_id: 'site_demo', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-001', outcome_event_id: 'commercial-event-001', outcome_nonce: 'nonce-001', recorded_at: '2026-08-04T00:10:00.000Z' } },
+    signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: 'test-signature' }, delivery_attempt: 1, acknowledgement: { status: 'accepted' as const },
+  }
+  try {
+    const first = await ingress.accept({ verifiedBy: 'w2-05-linkautowork-gateway', envelope })
+    assert.equal(first.outcome, 'no_sale')
+    assert.equal((await ingress.accept({ verifiedBy: 'w2-05-linkautowork-gateway', envelope })).lifecycleId, first.lifecycleId)
+    assert.equal((await createFileLifecycleStore(directory).getBySiteId('org_demo', 'site_demo'))?.lifecycleId, first.lifecycleId)
+    await assert.rejects(ingress.accept({ verifiedBy: 'w2-05-linkautowork-gateway', envelope: { ...envelope, acknowledgement: { status: 'pending' } } as never }), /verified and accepted/i)
+  } finally { await rm(directory, { recursive: true, force: true }) }
 })
 
 async function composition(id = 'lead-local-001') {

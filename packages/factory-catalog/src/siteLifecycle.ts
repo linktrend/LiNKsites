@@ -19,6 +19,13 @@ import {
   type CommercialOutcomeEnvelope,
   type RecyclingRequest,
 } from '@linksites/types'
+import {
+  assertLiNKSitesLibraryConsumerPolicy,
+  submitArchitectCandidate,
+  type LibraryCandidateEntry,
+  type LibraryCandidateSubmission,
+  type PinnedLibraryCatalogReference,
+} from './libraryConsumer.js'
 import { archiveAndRecycleFoundation, type ProspectAdaptation } from './prospectAdaptation.js'
 import type { ConversionLockRegistry } from './conversionLock.js'
 import type { FoundationReservationManager } from './reusableFoundation.js'
@@ -49,7 +56,7 @@ export interface LifecycleReceipt {
   subjectId: string
   mode: 'dry_run' | 'live'
   action: string
-  status: 'accepted' | 'completed' | 'rolled_back' | 'skipped'
+  status: 'accepted' | 'completed' | 'rolled_back' | 'failed' | 'skipped'
   createdAt: string
   details: Record<string, string | number | boolean | null>
 }
@@ -61,14 +68,43 @@ export interface LifecycleRecord {
   leadId: string
   siteId: string
   outcomeEventId: string
+  /** The complete immutable commercial input makes replay equivalence auditable. */
+  outcomeEnvelope: CommercialOutcomeEnvelope
   outcome: CommercialOutcomeEnvelope['outcome']
   reachAuthorizationReference: string
   status: LifecycleStatus
   retentionUntil: string | null
   activationRequest: ActivationRequest | null
   receipts: LifecycleReceipt[]
+  refactoringRequests: RefactoringRequest[]
+  candidateSubmissions: ArchitectCandidateSubmissionEvidence[]
   createdAt: string
   updatedAt: string
+}
+
+export interface RefactoringRequest {
+  requestId: string
+  lifecycleId: string
+  siteId: string
+  foundationId: string
+  templateInventoryId: string
+  status: 'ready_for_review'
+  sanitizedDetails: Record<string, string | number | boolean | null>
+  createdAt: string
+}
+
+export interface ArchitectCandidateSubmissionEvidence {
+  candidateId: string
+  lifecycleId: string
+  proposalId: string
+  canonicalCatalogCommitSha: string
+  sourceRunIds: string[]
+  sourceEvidenceReferences: string[]
+  qualityEvidenceReferences: string[]
+  commercialEvidenceReferences: string[]
+  testEvidenceReferences: string[]
+  submissionReceipt: LifecycleReceipt
+  createdAt: string
 }
 
 export interface LifecycleStore {
@@ -148,11 +184,34 @@ function isErrno(error: unknown, code: string): error is NodeJS.ErrnoException {
   return error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === code
 }
 
+const isNonEmpty = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0
+const isIso = (value: unknown): value is string => isNonEmpty(value) && !Number.isNaN(Date.parse(value))
+const isDetails = (value: unknown): value is Record<string, string | number | boolean | null> =>
+  Boolean(value) && typeof value === 'object' && !Array.isArray(value) && Object.values(value as Record<string, unknown>).every((item) => item === null || ['string', 'number', 'boolean'].includes(typeof item) && (typeof item !== 'number' || Number.isFinite(item)))
+function isLifecycleReceipt(value: unknown): value is LifecycleReceipt {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const receipt = value as LifecycleReceipt
+  return isNonEmpty(receipt.receiptId) && ['outcome_recorded', 'activation_step', 'activation_rollback', 'recycling', 'retention', 'architect_candidate'].includes(receipt.kind) &&
+    isNonEmpty(receipt.idempotencyKey) && isNonEmpty(receipt.subjectId) && ['dry_run', 'live'].includes(receipt.mode) && isNonEmpty(receipt.action) &&
+    ['accepted', 'completed', 'rolled_back', 'failed', 'skipped'].includes(receipt.status) && isIso(receipt.createdAt) && isDetails(receipt.details)
+}
+function isRefactoringRequest(value: unknown): value is RefactoringRequest {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const request = value as RefactoringRequest
+  return isNonEmpty(request.requestId) && isNonEmpty(request.lifecycleId) && isNonEmpty(request.siteId) && isNonEmpty(request.foundationId) && isNonEmpty(request.templateInventoryId) && request.status === 'ready_for_review' && isDetails(request.sanitizedDetails) && isIso(request.createdAt)
+}
+function isCandidateSubmissionEvidence(value: unknown): value is ArchitectCandidateSubmissionEvidence {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const evidence = value as ArchitectCandidateSubmissionEvidence
+  return isNonEmpty(evidence.candidateId) && isNonEmpty(evidence.lifecycleId) && isNonEmpty(evidence.proposalId) && /^[a-f0-9]{40}$/.test(evidence.canonicalCatalogCommitSha) &&
+    [evidence.sourceRunIds, evidence.sourceEvidenceReferences, evidence.qualityEvidenceReferences, evidence.commercialEvidenceReferences, evidence.testEvidenceReferences].every((items) => Array.isArray(items) && items.length > 0 && items.every(isNonEmpty)) && isLifecycleReceipt(evidence.submissionReceipt) && isIso(evidence.createdAt)
+}
 function isLifecycleRecord(value: unknown): value is LifecycleRecord {
-  return typeof value === 'object' && value !== null &&
-    typeof (value as LifecycleRecord).lifecycleId === 'string' &&
-    typeof (value as LifecycleRecord).outcomeEventId === 'string' &&
-    Array.isArray((value as LifecycleRecord).receipts)
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const record = value as LifecycleRecord
+  return record.schemaVersion === SITE_LIFECYCLE_SCHEMA_VERSION && isNonEmpty(record.lifecycleId) && isNonEmpty(record.orgId) && isNonEmpty(record.leadId) && isNonEmpty(record.siteId) &&
+    isNonEmpty(record.outcomeEventId) && isCommercialOutcomeEnvelope(record.outcomeEnvelope) && record.outcomeEventId === record.outcomeEnvelope.replay_protection.event_id && record.orgId === record.outcomeEnvelope.org_id && record.leadId === record.outcomeEnvelope.lead_id && record.siteId === record.outcomeEnvelope.site_id && record.outcome === record.outcomeEnvelope.outcome && record.reachAuthorizationReference === record.outcomeEnvelope.reach_authorization_reference &&
+    ['outcome_recorded', 'awaiting_activation', 'activation_dry_run_complete', 'recycled', 'retained', 'abandoned', 'manual_attention'].includes(record.status) && (record.retentionUntil === null || isIso(record.retentionUntil)) && (record.activationRequest === null || isActivationRequest(record.activationRequest)) && Array.isArray(record.receipts) && record.receipts.every(isLifecycleReceipt) && Array.isArray(record.refactoringRequests) && record.refactoringRequests.every(isRefactoringRequest) && Array.isArray(record.candidateSubmissions) && record.candidateSubmissions.every(isCandidateSubmissionEvidence) && isIso(record.createdAt) && isIso(record.updatedAt)
 }
 
 export interface LiNKreachAuthorizationVerifier {
@@ -202,45 +261,19 @@ export interface RecyclingContext {
 
 export type CandidateAssetKind = 'component' | 'layout' | 'pattern' | 'vertical_asset'
 
-export interface ArchitectCandidateManifest {
-  schemaVersion: number
-  candidateId: string
-  status: 'candidate'
-  sourceRunIds: string[]
-  sourceEvidenceReferences: string[]
-  kind: CandidateAssetKind
-  versionIntent: 'new_entry' | 'new_variant' | 'new_version'
-  compatibility: { nodeMajor: number; runtimes: string[] }
-  license: { spdx: string; redistributionAllowed: boolean; provenance: string }
-  tests: { command: string; passed: boolean }[]
-  privacyReview: { passed: true; removedFields: string[]; scannedValues: number }
-  assets: Record<string, unknown>
-}
-
-export interface CandidateSubmissionPort {
-  submit(candidate: ArchitectCandidateManifest): Promise<{ submissionReference: string }>
-}
-
-/** Queue-only interface to LiNKlibraries: it creates no catalog entry and cannot select or approve an asset. */
-export class InMemoryCandidateSubmissionPort implements CandidateSubmissionPort {
-  readonly candidates: ArchitectCandidateManifest[] = []
-  async submit(candidate: ArchitectCandidateManifest): Promise<{ submissionReference: string }> {
-    if (candidate.status !== 'candidate') throw new LifecycleError('LiNKsites Architect can submit candidate assets only.')
-    this.candidates.push(structuredClone(candidate))
-    return { submissionReference: `linklibraries-candidate:${candidate.candidateId}` }
-  }
-}
-
 export interface ArchitectInput {
+  orgId: string
+  siteId: string
   sourceRunIds: string[]
   sourceEvidenceReferences: string[]
-  kind: CandidateAssetKind
-  versionIntent: ArchitectCandidateManifest['versionIntent']
-  assets: Record<string, unknown>
+  qualityEvidenceReferences: string[]
+  commercialEvidenceReferences: string[]
+  testEvidenceReferences: string[]
+  /** This is metadata only; bytes must have their own SHA-256 in candidate.files. */
+  assetPreview: Record<string, unknown>
   knownLeadValues: string[]
-  license: ArchitectCandidateManifest['license']
-  tests: ArchitectCandidateManifest['tests']
-  compatibility?: ArchitectCandidateManifest['compatibility']
+  catalogReference: PinnedLibraryCatalogReference
+  candidate: LibraryCandidateEntry
 }
 
 export class LifecycleError extends Error {}
@@ -261,7 +294,7 @@ export class SiteLifecycleService {
     if (!isCommercialOutcomeEnvelope(envelope)) throw new LifecycleError('Commercial outcome envelope failed canonical contract validation.')
     const prior = await this.store.getByEventId(envelope.replay_protection.event_id)
     if (prior) {
-      if (prior.orgId === envelope.org_id && prior.leadId === envelope.lead_id && prior.siteId === envelope.site_id && prior.outcome === envelope.outcome && prior.reachAuthorizationReference === envelope.reach_authorization_reference) return prior
+      if (sameCanonicalValue(prior.outcomeEnvelope, envelope)) return prior
       throw new LifecycleError('Commercial outcome replay event conflicts with the prior immutable outcome record.')
     }
     if (!(await this.authorization.verify({ orgId: envelope.org_id, leadId: envelope.lead_id, siteId: envelope.site_id, reference: envelope.reach_authorization_reference, capability: 'outcome' }))) {
@@ -275,9 +308,10 @@ export class SiteLifecycleService {
     const record: LifecycleRecord = {
       schemaVersion: SITE_LIFECYCLE_SCHEMA_VERSION,
       lifecycleId: randomUUID(), orgId: envelope.org_id, leadId: envelope.lead_id, siteId: envelope.site_id,
-      outcomeEventId: envelope.replay_protection.event_id, outcome: envelope.outcome,
+      outcomeEventId: envelope.replay_protection.event_id, outcomeEnvelope: structuredClone(envelope), outcome: envelope.outcome,
       reachAuthorizationReference: envelope.reach_authorization_reference, status, retentionUntil, activationRequest: null,
       receipts: [receipt('outcome_recorded', envelope.idempotency_key, envelope.site_id, 'dry_run', `outcome.${envelope.outcome}`, 'accepted', { eventId: envelope.replay_protection.event_id })],
+      refactoringRequests: [], candidateSubmissions: [],
       createdAt: now, updatedAt: now,
     }
     await this.store.save(record)
@@ -293,15 +327,34 @@ export class SiteLifecycleService {
     if (!(await this.authorization.verify({ orgId: request.org_id, leadId: request.lead_id, siteId: request.site_id, reference: request.reach_authorization_reference, capability: 'activation' }))) throw new LifecycleError('LiNKreach activation authorization was denied.')
     if (lifecycle.status === 'activation_dry_run_complete') return lifecycle
     const receipts: LifecycleReceipt[] = []
+    const attemptedProviders: ActivationProvider[] = []
     try {
-      for (const provider of this.activationProviders) receipts.push(await provider.execute({ lifecycle, request, idempotencyKey: request.idempotency_key, mode: 'dry_run' }))
+      for (const provider of this.activationProviders) {
+        // A provider may have changed its sandbox state before returning a
+        // malformed receipt, so it belongs in the compensating set first.
+        attemptedProviders.push(provider)
+        const providerReceipt = await provider.execute({ lifecycle, request, idempotencyKey: request.idempotency_key, mode: 'dry_run' })
+        assertActivationReceipt(providerReceipt, provider.providerName, lifecycle.siteId, request.idempotency_key, 'execute')
+        receipts.push(providerReceipt)
+      }
     } catch (error) {
-      for (const provider of [...this.activationProviders].reverse()) receipts.push(await provider.rollback({ lifecycle, request, idempotencyKey: request.idempotency_key, mode: 'dry_run' }))
+      receipts.push(receipt('activation_step', request.idempotency_key, lifecycle.siteId, 'dry_run', 'activation.execution', 'failed', { publicMutation: false, errorRecorded: true }))
+      let rollbackFailure = false
+      for (const provider of [...attemptedProviders].reverse()) {
+        try {
+          const rollbackReceipt = await provider.rollback({ lifecycle, request, idempotencyKey: request.idempotency_key, mode: 'dry_run' })
+          assertActivationReceipt(rollbackReceipt, provider.providerName, lifecycle.siteId, request.idempotency_key, 'rollback')
+          receipts.push(rollbackReceipt)
+        } catch {
+          rollbackFailure = true
+          receipts.push(receipt('activation_rollback', request.idempotency_key, lifecycle.siteId, 'dry_run', `${provider.providerName}.rollback`, 'failed', { publicMutation: false, provider: provider.providerName, errorRecorded: true }))
+        }
+      }
       lifecycle.status = 'manual_attention'
       lifecycle.receipts.push(...receipts)
       lifecycle.updatedAt = new Date().toISOString()
       await this.store.save(lifecycle)
-      throw new LifecycleError(`Activation dry-run failed and compensating rollback was recorded: ${error instanceof Error ? error.message : 'unknown error'}`)
+      throw new LifecycleError(`Activation dry-run failed${rollbackFailure ? ' and rollback also failed' : ''}; execution and rollback evidence were recorded: ${error instanceof Error ? error.message : 'unknown error'}`)
     }
     lifecycle.activationRequest = request
     lifecycle.status = 'activation_dry_run_complete'
@@ -321,10 +374,13 @@ export class SiteLifecycleService {
     // site must be left completely unchanged if a stale no-sale request arrives.
     context.conversionLocks.assertRecycleAllowed(context.adaptation.foundationId)
     const quarantine = await context.quarantineLeadContent()
-    if (quarantine.mode !== 'dry_run' && quarantine.mode !== 'live') throw new LifecycleError('Recycling adapter must return a receipt.')
+    assertQuarantineReceipt(quarantine, lifecycle, context)
     archiveAndRecycleFoundation(context.adaptation, context.reservations, context.conversionLocks)
     lifecycle.status = 'recycled'
-    lifecycle.receipts.push(quarantine, receipt('recycling', context.request.idempotency_key, lifecycle.siteId, 'dry_run', 'inventory.release', 'completed', { inventoryId: context.request.template_inventory_id, leadContentRetained: false }))
+    const recycleReceipt = receipt('recycling', context.request.idempotency_key, lifecycle.siteId, 'dry_run', 'inventory.release', 'completed', { inventoryId: context.request.template_inventory_id, foundationId: context.adaptation.foundationId, leadContentRetained: false, publicMutation: false })
+    const refactoringRequest: RefactoringRequest = { requestId: `refactor:${randomUUID()}`, lifecycleId: lifecycle.lifecycleId, siteId: lifecycle.siteId, foundationId: context.adaptation.foundationId, templateInventoryId: context.request.template_inventory_id, status: 'ready_for_review', sanitizedDetails: { outcome: 'no_sale', inventoryReleased: true, leadContentRemoved: true, publicMutation: false }, createdAt: new Date().toISOString() }
+    lifecycle.receipts.push(quarantine, recycleReceipt)
+    lifecycle.refactoringRequests.push(refactoringRequest)
     lifecycle.updatedAt = new Date().toISOString()
     await this.store.save(lifecycle)
     return lifecycle
@@ -342,19 +398,23 @@ export class SiteLifecycleService {
     return lifecycle
   }
 
-  async proposeArchitectCandidate(input: ArchitectInput, submission: CandidateSubmissionPort): Promise<{ candidate: ArchitectCandidateManifest; receipt: LifecycleReceipt }> {
-    if (!input.sourceRunIds.length || !input.sourceEvidenceReferences.length) throw new LifecycleError('LiNKsites Architect candidate requires source run and evidence references.')
-    if (!input.license.spdx || !input.license.provenance || !input.tests.length || input.tests.some((test) => !test.passed)) throw new LifecycleError('LiNKsites Architect candidate requires passing tests and license/provenance evidence.')
-    const scrubbed = scrubProspectData(input.assets, input.knownLeadValues)
-    if (containsProspectData(scrubbed.value, input.knownLeadValues)) throw new LifecycleError('Reusable candidate still contains lead/customer data after privacy processing.')
-    const candidate: ArchitectCandidateManifest = {
-      schemaVersion: SITE_LIFECYCLE_SCHEMA_VERSION, candidateId: `architect-${randomUUID()}`, status: 'candidate',
-      sourceRunIds: [...input.sourceRunIds], sourceEvidenceReferences: [...input.sourceEvidenceReferences], kind: input.kind, versionIntent: input.versionIntent,
-      compatibility: input.compatibility ?? { nodeMajor: 22, runtimes: ['node', 'browser'] }, license: input.license,
-      tests: input.tests.map((test) => ({ ...test })), privacyReview: { passed: true, removedFields: scrubbed.removedFields, scannedValues: scrubbed.scannedValues }, assets: scrubbed.value,
-    }
-    const queued = await submission.submit(candidate)
-    return { candidate, receipt: receipt('architect_candidate', `candidate:${candidate.candidateId}`, candidate.candidateId, 'dry_run', 'linklibraries.candidate.submit', 'accepted', { submissionReference: queued.submissionReference, canonicalAssetChanged: false }) }
+  async proposeArchitectCandidate(input: ArchitectInput): Promise<{ submission: LibraryCandidateSubmission; receipt: LifecycleReceipt }> {
+    const lifecycle = await this.store.getBySiteId(input.orgId, input.siteId)
+    if (!lifecycle || lifecycle.outcome !== 'no_sale' || lifecycle.status !== 'recycled') throw new LifecycleError('LiNKsites Architect requires a persisted, completed no_sale lifecycle.')
+    if (!input.sourceRunIds.length || !input.sourceEvidenceReferences.length || !input.qualityEvidenceReferences.length || !input.commercialEvidenceReferences.length || !input.testEvidenceReferences.length) throw new LifecycleError('LiNKsites Architect candidate requires source-run, quality, commercial, and passing-test evidence.')
+    if (input.candidate.status !== 'candidate' || !input.candidate.license.redistributionAllowed) throw new LifecycleError('LiNKsites Architect requires a redistributable candidate asset only.')
+    if (!isRuntimeCompatible(input.candidate.compatibility.node, input.candidate.compatibility.runtimes)) throw new LifecycleError('LiNKsites Architect candidate is not compatible with the LiNKsites Node 22 browser runtime.')
+    if (containsProspectData(input.assetPreview, input.knownLeadValues) || containsLeadValues(candidateHumanText(input.candidate), input.knownLeadValues)) throw new LifecycleError('Reusable candidate contains lead/customer data and cannot be submitted.')
+    try { assertLiNKSitesLibraryConsumerPolicy({ ...input.candidate, status: 'approved' }) } catch (error) { throw new LifecycleError(`LiNKsites Architect candidate failed LiNKlibraries contract validation: ${error instanceof Error ? error.message : 'invalid candidate'}`) }
+    let submission: LibraryCandidateSubmission
+    try { submission = submitArchitectCandidate({ catalogReference: input.catalogReference, candidate: structuredClone(input.candidate) }) } catch (error) { throw new LifecycleError(`LiNKsites Architect governed submission was rejected: ${error instanceof Error ? error.message : 'unknown rejection'}`) }
+    const lifecycleCandidateId = `architect:${submission.proposalId}`
+    const submissionReceipt = receipt('architect_candidate', `candidate:${submission.proposalId}`, lifecycle.siteId, 'dry_run', 'linklibraries.submitArchitectCandidate', 'accepted', { submissionReference: submission.proposalId, canonicalAssetChanged: false, publicMutation: false })
+    lifecycle.receipts.push(submissionReceipt)
+    lifecycle.candidateSubmissions.push({ candidateId: lifecycleCandidateId, lifecycleId: lifecycle.lifecycleId, proposalId: submission.proposalId, canonicalCatalogCommitSha: submission.canonicalCatalogCommitSha, sourceRunIds: [...input.sourceRunIds], sourceEvidenceReferences: [...input.sourceEvidenceReferences], qualityEvidenceReferences: [...input.qualityEvidenceReferences], commercialEvidenceReferences: [...input.commercialEvidenceReferences], testEvidenceReferences: [...input.testEvidenceReferences], submissionReceipt, createdAt: new Date().toISOString() })
+    lifecycle.updatedAt = new Date().toISOString()
+    await this.store.save(lifecycle)
+    return { submission, receipt: submissionReceipt }
   }
 }
 
@@ -362,33 +422,54 @@ function receipt(kind: LifecycleReceiptKind, idempotencyKey: string, subjectId: 
   return { receiptId: randomUUID(), kind, idempotencyKey, subjectId, mode, action, status, details, createdAt: new Date().toISOString() }
 }
 
+/** Phase 1 accepts only the exact recorded/sandbox receipt for each provider. */
+function assertActivationReceipt(value: LifecycleReceipt, provider: ActivationProvider['providerName'], siteId: string, idempotencyKey: string, operation: 'execute' | 'rollback'): void {
+  if (!isLifecycleReceipt(value) || value.kind !== (operation === 'execute' ? 'activation_step' : 'activation_rollback') || value.mode !== 'dry_run' || value.subjectId !== siteId || value.idempotencyKey !== idempotencyKey || value.action !== `${provider}.${operation}` || value.status !== (operation === 'execute' ? 'completed' : 'rolled_back') || value.details.publicMutation !== false || value.details.provider !== provider) {
+    throw new LifecycleError(`Activation provider ${provider} returned a non-Phase-1 ${operation} receipt.`)
+  }
+}
+
+function assertQuarantineReceipt(value: LifecycleReceipt, lifecycle: LifecycleRecord, context: RecyclingContext): void {
+  if (!isLifecycleReceipt(value) || value.kind !== 'recycling' || value.mode !== 'dry_run' || value.status !== 'completed' || value.subjectId !== lifecycle.siteId || value.idempotencyKey !== context.request.idempotency_key || value.action !== 'content.quarantine' || value.details.publicMutation !== false || value.details.leadContentRetained !== false || value.details.leadContentRemoved !== true || value.details.adaptationId !== context.adaptation.adaptationId || value.details.foundationId !== context.adaptation.foundationId || value.details.reservationId !== context.adaptation.reservationId || value.details.templateInventoryId !== context.request.template_inventory_id) {
+    throw new LifecycleError('No-sale recycling requires a matching Phase-1 dry-run quarantine receipt with a completed lead-content removal proof.')
+  }
+}
+
+function sameCanonicalValue(left: unknown, right: unknown): boolean {
+  return JSON.stringify(canonicalize(left)) === JSON.stringify(canonicalize(right))
+}
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize)
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([key, child]) => [key, canonicalize(child)]))
+}
+function isRuntimeCompatible(nodeRange: string, runtimes: string[]): boolean {
+  // W1-05 performs authoritative semver parsing.  This is the explicit
+  // Phase-1 compatibility gate for LiNKsites' Node 22 + browser runtime.
+  return /(?:\^?22|>=\s*22)/.test(nodeRange) && runtimes.includes('node') && runtimes.includes('browser')
+}
+
 function addDays(now: string, days: number): string { return new Date(new Date(now).getTime() + days * 86_400_000).toISOString() }
 function digest(value: string): string { return createHash('sha256').update(value).digest('hex') }
 
 const SENSITIVE_KEY = /(?:name|email|phone|address|domain|logo|contact|customer|prospect|lead|secret|token|credential|api[_-]?key)/i
 const PERSONAL_TEXT = /(?:\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b|\+?\d[\d ()-]{7,}\d)/
-function scrubProspectData(value: unknown, knownLeadValues: string[], path = '', result: { removedFields: string[]; scannedValues: number } = { removedFields: [], scannedValues: 0 }): { value: Record<string, unknown>; removedFields: string[]; scannedValues: number } {
-  const scrub = (candidate: unknown, currentPath: string): unknown => {
-    if (typeof candidate === 'string') {
-      result.scannedValues += 1
-      return PERSONAL_TEXT.test(candidate) || knownLeadValues.some((known) => known.trim() && candidate.toLowerCase().includes(known.toLowerCase())) ? '[redacted]' : candidate
-    }
-    if (Array.isArray(candidate)) return candidate.map((item, index) => scrub(item, `${currentPath}[${index}]`))
-    if (!candidate || typeof candidate !== 'object') return candidate
-    const cleaned: Record<string, unknown> = {}
-    for (const [key, nested] of Object.entries(candidate as Record<string, unknown>)) {
-      const nextPath = currentPath ? `${currentPath}.${key}` : key
-      if (SENSITIVE_KEY.test(key)) { result.removedFields.push(nextPath); continue }
-      cleaned[key] = scrub(nested, nextPath)
-    }
-    return cleaned
-  }
-  return { value: scrub(value, path) as Record<string, unknown>, ...result }
-}
-
 function containsProspectData(value: unknown, knownLeadValues: string[]): boolean {
   if (typeof value === 'string') return value !== '[redacted]' && (PERSONAL_TEXT.test(value) || knownLeadValues.some((known) => known.trim() && value.toLowerCase().includes(known.toLowerCase())))
   if (Array.isArray(value)) return value.some((item) => containsProspectData(item, knownLeadValues))
   if (!value || typeof value !== 'object') return false
   return Object.entries(value as Record<string, unknown>).some(([key, nested]) => SENSITIVE_KEY.test(key) || containsProspectData(nested, knownLeadValues))
+}
+
+/** Candidate metadata legitimately contains fields such as `name`; inspect its values without treating schema keys as PII. */
+function containsLeadValues(value: unknown, knownLeadValues: string[]): boolean {
+  if (typeof value === 'string') return PERSONAL_TEXT.test(value) || knownLeadValues.some((known) => known.trim() && value.toLowerCase().includes(known.toLowerCase()))
+  if (Array.isArray(value)) return value.some((item) => containsLeadValues(item, knownLeadValues))
+  if (!value || typeof value !== 'object') return false
+  return Object.values(value as Record<string, unknown>).some((nested) => containsLeadValues(nested, knownLeadValues))
+}
+
+/** Excludes structural checksums/timestamps from PII scanning; they are not human asset content. */
+function candidateHumanText(candidate: LibraryCandidateEntry): unknown {
+  return { entryId: candidate.entryId, name: candidate.name, summary: candidate.summary, problemDomains: candidate.problemDomains, tags: candidate.tags, languages: candidate.languages, frameworks: candidate.frameworks, securityNotes: candidate.securityReview.notes, reviewedBy: candidate.securityReview.reviewedBy, usage: candidate.usage, integrationNotes: candidate.integrationNotes, gotchas: candidate.gotchas, provenance: { sourceUrl: candidate.provenance.sourceUrl, versionOrRange: candidate.provenance.versionOrRange, productRunId: candidate.provenance.productRunId } }
 }

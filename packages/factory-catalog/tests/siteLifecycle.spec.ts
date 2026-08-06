@@ -3,10 +3,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import type { ActivationRequest, CommercialOutcomeEnvelope, RecyclingRequest } from '@linksites/types'
+import type { LibraryCandidateEntry, PinnedLibraryCatalogReference } from '../src/libraryConsumer.js'
 import {
   createFileLifecycleStore,
   DryRunActivationProvider,
-  InMemoryCandidateSubmissionPort,
   InMemoryLifecycleStore,
   LifecycleError,
   SiteLifecycleService,
@@ -23,6 +23,14 @@ const validActivationRequest: ActivationRequest = { ...metadata, idempotency_key
 const validRecyclingRequest: RecyclingRequest = { ...metadata, idempotency_key: 'recycling:001', lead_id: 'lead_demo_example', site_id: 'site_demo_example', template_inventory_id: 'template-inventory-001', reason: 'no_sale', requested_at: '2026-08-04T00:20:00.000Z' }
 const noSale = { ...validCommercialOutcome, outcome: 'no_sale' as const, replay_protection: { event_id: 'commercial-no-sale-001', nonce: 'nonce-no-sale-001' }, idempotency_key: 'commercial:no-sale:001' }
 const deferred = { ...validCommercialOutcome, outcome: 'deferred' as const, replay_protection: { event_id: 'commercial-deferred-001', nonce: 'nonce-deferred-001' }, idempotency_key: 'commercial:deferred:001' }
+
+const catalogReference: PinnedLibraryCatalogReference = {
+  repositoryUrl: 'https://github.com/linktrend/LiNKlibraries.git', commitSha: 'a'.repeat(40), ref: 'a'.repeat(40),
+  catalog: { schemaVersion: 1, generatedAt: '2026-08-04T00:00:00.000Z', sourceCommitSha: 'a'.repeat(40), entries: [{ entryId: 'marketing-smb-v1', kind: 'template', name: 'Existing canonical', summary: 'Existing', problemDomains: ['marketing'], tags: [], languages: ['TypeScript'], frameworks: ['Next.js'], status: 'approved', path: 'entries/marketing-smb-v1' }] },
+}
+const architectCandidate: LibraryCandidateEntry = {
+  schemaVersion: 1, entryId: 'marketing-smb-v2', kind: 'template', name: 'Marketing SMB v2', summary: 'Reusable neutral layout', problemDomains: ['marketing'], tags: ['marketing'], languages: ['TypeScript'], frameworks: ['Next.js'], compatibility: { node: '>=22 <23', runtimes: ['node', 'browser'] }, license: { spdx: 'MIT', redistributionAllowed: true }, securityReview: { reviewedAt: '2026-08-04T00:00:00.000Z', reviewedBy: 'linksites-architect', notes: 'candidate reviewed' }, usage: { howToUse: 'Install into a neutral site.' }, integrationNotes: 'Candidate only.', gotchas: ['Requires Node 22.'], provenance: { sourceSystem: 'manual', contributedAt: '2026-08-04T00:00:00.000Z', productRunId: 'run-001' }, files: [{ path: 'src/index.ts', sha256: 'a'.repeat(64) }], status: 'candidate',
+}
 
 describe('W2-06 commercial outcome lifecycle', () => {
   it('validates, authorizes, deduplicates, and rejects conflicting commercial outcomes', async () => {
@@ -61,15 +69,30 @@ describe('W2-06 commercial outcome lifecycle', () => {
     expect(stored?.receipts.some((entry) => entry.kind === 'activation_rollback')).toBe(true)
   })
 
+  it('fails closed for live, public, malformed, or mismatched provider receipts and preserves rollback failures', async () => {
+    const invalid = new DryRunActivationProvider('payload')
+    invalid.execute = async () => ({ receiptId: 'invalid', kind: 'activation_step', idempotencyKey: validActivationRequest.idempotency_key, subjectId: validActivationRequest.site_id, mode: 'live', action: 'payload.execute', status: 'completed', createdAt: new Date().toISOString(), details: { publicMutation: true, provider: 'payload' } })
+    invalid.rollback = async () => { throw new Error('rollback unavailable') }
+    const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization, [invalid, new DryRunActivationProvider('private_wall'), new DryRunActivationProvider('domain'), new DryRunActivationProvider('dns'), new DryRunActivationProvider('route'), new DryRunActivationProvider('tls'), new DryRunActivationProvider('health')])
+    await service.recordOutcome(validCommercialOutcome)
+    await expect(service.dryRunActivation(validActivationRequest)).rejects.toThrow(/rollback also failed/i)
+    const stored = await (service as unknown as { store: InMemoryLifecycleStore }).store.getBySiteId(validCommercialOutcome.org_id, validCommercialOutcome.site_id)
+    expect(stored?.status).toBe('manual_attention')
+    expect(stored?.receipts.some((entry) => entry.action === 'activation.execution' && entry.status === 'failed')).toBe(true)
+    expect(stored?.receipts.some((entry) => entry.action === 'payload.rollback' && entry.status === 'failed')).toBe(true)
+  })
+
   it('quarantines no-sale content, releases inventory, and refuses to recycle a conversion-locked foundation', async () => {
     const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization)
     await service.recordOutcome(noSale)
     const reservations = new FoundationReservationManager()
     const reservation = reservations.reserve('foundation-001', 'program-001')
     const adaptation = { schemaVersion: { major: 1, minor: 0 }, adaptationId: 'adaptation-001', siteSpecId: 'spec-001', foundationId: 'foundation-001', reservationId: reservation.reservationId, status: 'published' as const, prospectContent: { businessName: 'Private Co' }, createdAt: '2026-08-01T00:00:00.000Z' }
-    const completed = await service.recycleNoSale({ request: validRecyclingRequest, adaptation, reservations, conversionLocks: new ConversionLockRegistry(), quarantineLeadContent: async () => ({ receiptId: 'quarantine-001', kind: 'recycling', idempotencyKey: 'q-001', subjectId: 'site_demo_example', mode: 'dry_run', action: 'content.quarantine', status: 'completed', createdAt: new Date().toISOString(), details: { leadContentRetained: false } }) })
+    const completed = await service.recycleNoSale({ request: validRecyclingRequest, adaptation, reservations, conversionLocks: new ConversionLockRegistry(), quarantineLeadContent: async () => ({ receiptId: 'quarantine-001', kind: 'recycling', idempotencyKey: validRecyclingRequest.idempotency_key, subjectId: 'site_demo_example', mode: 'dry_run', action: 'content.quarantine', status: 'completed', createdAt: new Date().toISOString(), details: { publicMutation: false, leadContentRetained: false, leadContentRemoved: true, adaptationId: adaptation.adaptationId, foundationId: adaptation.foundationId, reservationId: adaptation.reservationId, templateInventoryId: validRecyclingRequest.template_inventory_id } }) })
     expect(completed.status).toBe('recycled')
     expect(reservations.getActiveReservation('foundation-001')).toBeNull()
+    expect(completed.refactoringRequests).toHaveLength(1)
+    expect(JSON.stringify(completed.refactoringRequests)).not.toContain('Private Co')
 
     const lockedReservations = new FoundationReservationManager()
     const lockedReservation = lockedReservations.reserve('foundation-locked', 'program-002')
@@ -79,6 +102,18 @@ describe('W2-06 commercial outcome lifecycle', () => {
     const second = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization)
     await second.recordOutcome({ ...noSale, site_id: 'site-locked', lead_id: 'lead-locked', replay_protection: { event_id: 'no-sale-locked', nonce: 'no-sale-locked-nonce' } })
     await expect(second.recycleNoSale({ request: { ...validRecyclingRequest, site_id: 'site-locked', lead_id: 'lead-locked' }, adaptation: lockedAdaptation, reservations: lockedReservations, conversionLocks: locks, quarantineLeadContent: async () => { throw new Error('must not quarantine when recycle gate is locked') } })).rejects.toThrow(/must not quarantine|locked/i)
+  })
+
+  it('rejects no-sale quarantine receipts that are unrelated, live, skipped, public, or lack a privacy proof', async () => {
+    const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization)
+    await service.recordOutcome(noSale)
+    const reservations = new FoundationReservationManager(); const reservation = reservations.reserve('foundation-unsafe', 'program-unsafe')
+    const adaptation = { schemaVersion: { major: 1, minor: 0 }, adaptationId: 'adaptation-unsafe', siteSpecId: 'spec-unsafe', foundationId: 'foundation-unsafe', reservationId: reservation.reservationId, status: 'published' as const, prospectContent: { businessName: 'Private Co' }, createdAt: '2026-08-01T00:00:00.000Z' }
+    const bad = { receiptId: 'bad', kind: 'recycling' as const, idempotencyKey: validRecyclingRequest.idempotency_key, subjectId: validRecyclingRequest.site_id, mode: 'dry_run' as const, action: 'content.quarantine', status: 'completed' as const, createdAt: new Date().toISOString(), details: { publicMutation: false, leadContentRetained: false, leadContentRemoved: true, adaptationId: adaptation.adaptationId, foundationId: adaptation.foundationId, reservationId: adaptation.reservationId, templateInventoryId: validRecyclingRequest.template_inventory_id } }
+    for (const changed of [{ mode: 'live' as const }, { status: 'skipped' as const }, { details: { ...bad.details, publicMutation: true } }, { details: { ...bad.details, adaptationId: 'other' } }, { details: { ...bad.details, leadContentRemoved: false } }]) {
+      await expect(service.recycleNoSale({ request: validRecyclingRequest, adaptation, reservations, conversionLocks: new ConversionLockRegistry(), quarantineLeadContent: async () => ({ ...bad, ...changed } as never) })).rejects.toThrow(/quarantine receipt/i)
+    }
+    expect(reservations.getActiveReservation('foundation-unsafe')).not.toBeNull()
   })
 
   it('has bounded deferred retention with no automatic retry loop', async () => {
@@ -98,6 +133,9 @@ describe('W2-06 commercial outcome lifecycle', () => {
       const record = await first.recordOutcome(validCommercialOutcome)
       const restarted = new SiteLifecycleService(createFileLifecycleStore(directory), authorization)
       expect((await restarted.recordOutcome(validCommercialOutcome)).lifecycleId).toBe(record.lifecycleId)
+      for (const changed of [{ correlation_id: 'other-correlation' }, { idempotency_key: 'other-idempotency' }, { recorded_at: '2026-08-04T00:10:01.000Z' }, { replay_protection: { ...validCommercialOutcome.replay_protection, nonce: 'other-nonce' } }]) {
+        await expect(restarted.recordOutcome({ ...validCommercialOutcome, ...changed })).rejects.toThrow(/conflicts/i)
+      }
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
@@ -115,27 +153,25 @@ describe('W2-06 commercial outcome lifecycle', () => {
 })
 
 describe('W2-06 LiNKsites Architect', () => {
-  it('submits only privacy-clean candidate assets and never changes canonical selection', async () => {
+  it('uses the W1-05 governed candidate interface and persists its receipt only after a completed no-sale lifecycle', async () => {
     const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization)
-    const submissions = new InMemoryCandidateSubmissionPort()
-    const result = await service.proposeArchitectCandidate({
-      sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], kind: 'layout', versionIntent: 'new_variant',
-      assets: { layout: { hero: 'A reusable hero', prospectName: 'Alice Example', body: 'Hello Alice Example', hiddenContact: 'alice@example.test' } }, knownLeadValues: ['Alice Example'],
-      license: { spdx: 'MIT', redistributionAllowed: true, provenance: 'source-run-001' }, tests: [{ command: 'pnpm test', passed: true }],
-    }, submissions)
-    expect(result.candidate.status).toBe('candidate')
-    expect(result.candidate.assets).not.toHaveProperty('prospectName')
-    expect(JSON.stringify(result.candidate.assets)).not.toContain('Alice Example')
-    expect(JSON.stringify(result.candidate.assets)).not.toContain('alice@example.test')
+    await service.recordOutcome(noSale)
+    const reservations = new FoundationReservationManager(); const reservation = reservations.reserve('foundation-001', 'program-001')
+    const adaptation = { schemaVersion: { major: 1, minor: 0 }, adaptationId: 'adaptation-001', siteSpecId: 'spec-001', foundationId: 'foundation-001', reservationId: reservation.reservationId, status: 'published' as const, prospectContent: { businessName: 'Private Co' }, createdAt: '2026-08-01T00:00:00.000Z' }
+    await service.recycleNoSale({ request: validRecyclingRequest, adaptation, reservations, conversionLocks: new ConversionLockRegistry(), quarantineLeadContent: async () => ({ receiptId: 'quarantine-001', kind: 'recycling', idempotencyKey: validRecyclingRequest.idempotency_key, subjectId: validRecyclingRequest.site_id, mode: 'dry_run', action: 'content.quarantine', status: 'completed', createdAt: new Date().toISOString(), details: { publicMutation: false, leadContentRetained: false, leadContentRemoved: true, adaptationId: adaptation.adaptationId, foundationId: adaptation.foundationId, reservationId: adaptation.reservationId, templateInventoryId: validRecyclingRequest.template_inventory_id } }) })
+    const result = await service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial:no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: { layout: { hero: 'A reusable hero' } }, knownLeadValues: ['Alice Example'], catalogReference, candidate: architectCandidate })
+    expect(result.submission.candidate.status).toBe('candidate')
     expect(result.receipt.details.canonicalAssetChanged).toBe(false)
-    expect(submissions.candidates).toHaveLength(1)
-    await expect(submissions.submit({ ...result.candidate, status: 'approved' as never })).rejects.toThrow(/candidate/i)
+    const lifecycle = await (service as unknown as { store: InMemoryLifecycleStore }).store.getBySiteId(noSale.org_id, noSale.site_id)
+    expect(lifecycle?.candidateSubmissions).toHaveLength(1)
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial:no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: { leadName: 'Alice Example' }, knownLeadValues: ['Alice Example'], catalogReference, candidate: architectCandidate })).rejects.toThrow(/lead.customer data/i)
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial:no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: {}, knownLeadValues: [], catalogReference, candidate: { ...architectCandidate, entryId: 'marketing-smb-v1' } })).rejects.toThrow(/cannot replace approved canonical/i)
   })
 
-  it('rejects candidate proposals without source evidence, passing tests, or licensing provenance', async () => {
+  it('rejects candidate proposals without lifecycle, evidence, redistribution, or canonical safety', async () => {
     const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization)
-    const port = new InMemoryCandidateSubmissionPort()
-    await expect(service.proposeArchitectCandidate({ sourceRunIds: [], sourceEvidenceReferences: [], kind: 'component', versionIntent: 'new_entry', assets: {}, knownLeadValues: [], license: { spdx: '', redistributionAllowed: true, provenance: '' }, tests: [] }, port)).rejects.toBeInstanceOf(LifecycleError)
-    expect(port.candidates).toHaveLength(0)
+    await expect(service.proposeArchitectCandidate({ orgId: 'org_demo', siteId: 'site_demo_example', sourceRunIds: [], sourceEvidenceReferences: [], qualityEvidenceReferences: [], commercialEvidenceReferences: [], testEvidenceReferences: [], assetPreview: {}, knownLeadValues: [], catalogReference, candidate: architectCandidate })).rejects.toBeInstanceOf(LifecycleError)
+    await service.recordOutcome(noSale)
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial:no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: {}, knownLeadValues: [], catalogReference, candidate: architectCandidate })).rejects.toThrow(/completed no_sale/i)
   })
 })
