@@ -49,7 +49,8 @@ export class ProgramRuntime {
       const claims = await Promise.all(batch.map((issue) => this.ledger.claim(issue.issueId)))
       await Promise.all(claims.filter((claim): claim is NonNullable<typeof claim> => claim !== null).map((claim) => this.execute(claim.issue, claim.run.runId, claim.run.lease?.fencingToken ?? 0)))
     }
-    throw new Error('runtime:max-cycles-exceeded')
+    const exhausted = await this.ledger.snapshot()
+    throw new Error(`runtime:max-cycles-exceeded:${exhausted.issues.filter((issue) => issue.state !== 'completed').map((issue) => `${issue.issueId}:${issue.state}`).join(',')}`)
   }
 
   async health(): Promise<RuntimeHealth> {
@@ -60,7 +61,7 @@ export class ProgramRuntime {
       programState: state?.program.state ?? null,
       activeIssues: this.active,
       retries: state?.metrics.retries ?? 0,
-      deadLetters: state?.deadLetters.length ?? 0,
+      deadLetters: (state?.deadLetters.length ?? 0) + (state?.metrics.outboxDeadLetters ?? 0),
       manualAttention: state?.manualAttention.length ?? 0,
       completionEmits: state?.metrics.completionEmits ?? 0,
     }
@@ -143,7 +144,11 @@ export class ProgramRuntime {
     const envelope = await this.ledger.reserveCompletion()
     if (!envelope) return
     const key = envelope.idempotency_key
-    await this.ledger.outboxAttempt(key)
+    // A reserved completion is intentionally not delivery-ready until the
+    // durable outbox says its retry time has arrived.  This prevents a caller
+    // from bypassing nextAttemptAt or resurrecting a dead-lettered event.
+    if (!(await this.ledger.outboxReady(key))) return
+    if (!(await this.ledger.outboxAttempt(key))) return
     try {
       await this.dependencies.eventAdapter.write(envelope)
       await this.ledger.markCompletionEmitted()

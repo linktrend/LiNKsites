@@ -66,30 +66,27 @@ const FIRST_PRIVATE_DEMO_PHASES: Record<string, PhaseDefinition[]> = {
       issue('lead-research', 'Pull and validate lead research', 'lead.research.validate', 'Validate the canonical lead/research package before any website work.'),
       issue('program-claim', 'Create the private-demo Program', 'program.claim', 'Idempotently create or recover the private-demo Program graph.', ['lead-research']),
       issue('vertical-qualification', 'Qualify vertical compatibility', 'lead.vertical.qualify', 'Confirm the lead can use an approved vertical foundation.', ['program-claim']),
-    ]),
-  ],
-  M08: [
-    demo('planning', 'Foundation and site planning', 'Resolve approved library artifacts and create a deterministic site plan for the reserved foundation.', [
       issue('library-verification', 'Verify exact library artifacts', 'library.verify', 'Verify the exact approved LiNKlibraries artifacts and SHA receipts.', ['foundation-reservation']),
       issue('site-specification', 'Build site specification and assembly manifest', 'site.plan', 'Produce the site specification and assembly manifest for this lead.', ['library-verification']),
     ]),
   ],
+  M08: [],
   M09: [
     demo('content', 'Lead-specific content and media', 'Produce grounded copy and provenance-bearing media inputs.', [
       issue('information-architecture', 'Create information architecture and copy', 'content.information_architecture', 'Create lead-specific information architecture and copy inputs.', ['site-specification']),
       issue('media-provenance', 'Source and process media', 'content.media.provenance', 'Source/process media with a durable provenance manifest.', ['information-architecture']),
-    ]),
-  ],
-  M10: [
-    demo('working-content', 'Working-content assembly and gates', 'Assemble and accept a versioned working-content package.', [
       issue('working-content-assembly', 'Assemble working-content version', 'content.working.assemble', 'Assemble and validate one immutable working-content version.', ['media-provenance']),
       issue('content-gates', 'Run content and quality gates', 'content.gates', 'Record evidence-backed content, schema, quality, security, privacy, and asset gate results.', ['working-content-assembly']),
     ]),
   ],
-  M11: [
-    demo('private-preview', 'Private Payload preview', 'Promote the accepted version to a private, non-indexable preview and verify it.', [
+  M10: [
+    demo('promotion', 'Working-to-Payload promotion', 'Promote only an accepted exact working-content version to Payload draft and verify parity.', [
       issue('payload-draft', 'Promote exact version to Payload draft', 'payload.draft.promote', 'Promote only the accepted working version to a Payload draft.', ['content-gates']),
       issue('payload-parity', 'Run CMS read-back parity gate', 'payload.readback.gate', 'Read the draft back and record field-level parity evidence.', ['payload-draft']),
+    ]),
+  ],
+  M11: [
+    demo('private-preview', 'Private Payload preview', 'Promote the accepted version to a private, non-indexable preview and verify it.', [
       issue('private-publication', 'Publish private preview', 'preview.private.publish', 'Publish only to the authorized private preview environment.', ['payload-parity']),
       issue('site-render-validation', 'Render and validate the private site', 'preview.render.validate', 'Render and validate the complete private preview.', ['private-publication']),
     ]),
@@ -117,7 +114,7 @@ export const LINKSITES_PROGRAM: ProgramDefinition = {
   modules: [
     moduleDefinition('M01', 'Product and Tier Governance', 'Governs product outcomes, tier specifications, add-ons, and exclusions.', 'product-capability'),
     moduleDefinition('M02', 'Design Intelligence Operations', 'Governs design tokens and site design profile resolution.', 'product-capability'),
-    moduleDefinition('M03', 'Component and Frontend Platform Operations', 'Governs the Component Registry, assembly engine, and platform releases.', 'product-capability'),
+    moduleDefinition('M03', 'Component and Frontend Platform', 'Governs the Component Registry and real apps/web-master components.', 'product-capability'),
     moduleDefinition('M04', 'Vertical Kit Operations', 'Governs vertical kit lifecycle and production patterns.', 'product-capability'),
     moduleDefinition('M05', 'Reusable Site Foundation Production', 'Governs reusable foundation lifecycle and adaptation contracts.', 'product-capability'),
     moduleDefinition('M06', 'Preview Inventory Management', 'Governs preview inventory reservations and cost records.', 'preview-production'),
@@ -126,7 +123,7 @@ export const LINKSITES_PROGRAM: ProgramDefinition = {
     moduleDefinition('M09', 'Content and Media Production', 'Produces grounded copy, media plans, and provenance manifests.', 'preview-production'),
     moduleDefinition('M10', 'Working-to-Payload Promotion', 'Operates the sole trusted path from working records to Payload drafts.', 'preview-production'),
     moduleDefinition('M11', 'Preview Deployment and Validation', 'Builds, tests, and validates private preview releases.', 'preview-production'),
-    moduleDefinition('M12', 'Preview Outcome, Upgrade, and Recycling', 'Handles preview completion, outcome, and recycling records.', 'preview-production'),
+    moduleDefinition('M12', 'Preview Outcome, Upgrade, Recycling', 'Handles Outcome Records and Conversion Lock wiring.', 'preview-production'),
     moduleDefinition('M13', 'Paid-Order Intake and Customer Finalization', 'Validates paid activation packages and customer site instances.', 'paid-fulfilment'),
     moduleDefinition('M14', 'Production Publication and Launch Certification', 'Operates launch readiness and launch certification.', 'paid-fulfilment'),
     moduleDefinition('M15', 'Domain, DNS, TLS, and Hosting Provisioning', 'Provisions approved custom hostnames and hosting assignments.', 'paid-fulfilment'),

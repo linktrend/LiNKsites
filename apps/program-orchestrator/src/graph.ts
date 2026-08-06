@@ -70,5 +70,5 @@ export const GRAPH_EXPORT = {
   issues: W2_02_GRAPH,
   capabilities: EXECUTOR_BINDINGS,
   scheduledModules: [...PROGRAM_MODULE_IDS],
-  excluded: ['M01-M05 canonical modules not scheduled by W2-02', 'M08 prospect adaptation issues not scheduled by this bounded private-demo slice', 'M13-M20 paid fulfilment and managed-service modules', 'sold-site-public-activation', 'commercial-payment', 'commercial-erp', 'raw-n8n', 'VPS', 'cloud', 'live-credentials'],
+  excluded: ['M01-M05 canonical modules not scheduled by W2-02 (including M03 Component and Frontend Platform)', 'M13-M20 paid fulfilment and managed-service modules', 'sold-site-public-activation', 'commercial-payment', 'commercial-erp', 'raw-n8n', 'VPS', 'cloud', 'live-credentials'],
 }

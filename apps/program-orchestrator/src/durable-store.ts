@@ -241,14 +241,20 @@ export class DurableLedger {
     })
   }
 
-  async outboxAttempt(idempotencyKey: string): Promise<void> {
-    await this.mutate(async (current) => {
+  async outboxAttempt(idempotencyKey: string): Promise<boolean> {
+    return this.mutate(async (current) => {
       if (!current) throw new Error('program has not been created')
       const entry = current.outbox.find((candidate) => candidate.idempotencyKey === idempotencyKey)
-      if (!entry || entry.status !== 'pending') return { state: current, result: undefined }
+      if (!entry || entry.status !== 'pending' || !entry.nextAttemptAt || entry.nextAttemptAt > new Date().toISOString() || entry.attempts >= this.config.maxAttempts) return { state: current, result: false }
       entry.attempts += 1; entry.lastAttemptAt = new Date().toISOString(); current.metrics.outboxAttempts += 1
-      return { state: current, result: undefined }
+      return { state: current, result: true }
     })
+  }
+
+  async outboxReady(idempotencyKey: string, now = new Date().toISOString()): Promise<boolean> {
+    const state = await this.snapshot()
+    const entry = state.outbox.find((candidate) => candidate.idempotencyKey === idempotencyKey)
+    return Boolean(entry && entry.status === 'pending' && entry.attempts < this.config.maxAttempts && entry.nextAttemptAt && entry.nextAttemptAt <= now)
   }
 
   async outboxFailure(idempotencyKey: string, error: string): Promise<void> {
@@ -258,7 +264,7 @@ export class DurableLedger {
       if (!entry || entry.status !== 'pending') return { state: current, result: undefined }
       entry.lastError = error; current.metrics.outboxFailures += 1
       if (entry.attempts >= this.config.maxAttempts) { entry.status = 'dead_lettered'; entry.deadLetteredAt = new Date().toISOString(); entry.nextAttemptAt = null; current.metrics.outboxDeadLetters += 1 }
-      else entry.nextAttemptAt = new Date(Date.now() + 1).toISOString()
+      else entry.nextAttemptAt = new Date(Date.now() + 1_000).toISOString()
       current.metrics.outboxBacklog = current.outbox.filter((candidate) => candidate.status === 'pending').length
       return { state: current, result: undefined }
     })

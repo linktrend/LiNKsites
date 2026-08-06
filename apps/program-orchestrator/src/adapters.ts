@@ -61,7 +61,12 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   async rejectNextGate(): Promise<void> { this.faults.push({ operation: 'content.gates', remaining: 1, kind: 'permanent' }) }
   async tamperPayload(): Promise<void> { await this.db.query("update lsites_sites.payload_drafts set data = jsonb_set(data, '{title}', to_jsonb('tampered'::text), true) where id = (select id from lsites_sites.payload_drafts order by id limit 1)") }
   async tamperEvidence(): Promise<void> { const first = this.artifacts.values().next().value as { path: string } | undefined; if (!first) throw new Error('no persisted evidence exists to tamper'); await writeFile(first.path, '{"tampered":true}\n', 'utf8') }
-  async payloadDocumentCount(): Promise<number> { const result = await this.db.query('select count(*)::int as count from lsites_sites.payload_drafts') as unknown as { rows: Array<Record<string, unknown>> }; return Number(result.rows[0]?.count ?? 0) }
+  async payloadDocumentCount(): Promise<number> {
+    const response = await fetch(`${this.config.payloadBaseUrl}/api/pages`)
+    if (!response.ok) throw new Error('payload:document-count-read-failed')
+    const body = await response.json() as { totalDocs?: unknown; docs?: unknown[] }
+    return Number(body.totalDocs ?? body.docs?.length ?? 0)
+  }
   async deliveryReceipts(): Promise<Record<string, { idempotencyKey: string; deliveredAt: string }>> {
     const raw = await readFile(this.config.completionPath, 'utf8').catch(() => '')
     const result: Record<string, { idempotencyKey: string; deliveredAt: string }> = {}
@@ -153,7 +158,30 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       await this.workingContentRepository.markGateOutcome({ workingPackageId: packageId, versionNumber, expectedChecksum, outcome: 'rejected', gateReference: 'w2-02-content-gates', evidenceReferences: [artifact.path] })
       return { accepted: false, evidence: [artifact.path], reason: 'gate:working-content-rejected', artifactPath: artifact.path, artifactChecksum: artifact.checksum }
     }
-    const checks = { persisted: true, checksum: computeWorkingContentChecksum(current.contentPackage) === expectedChecksum, pageCount: current.contentPackage.content.pages.length >= 5, uniqueRoutes: new Set(current.contentPackage.content.pages.map((page) => page.route)).size === current.contentPackage.content.pages.length, provenance: current.contentPackage.provenance.length > 0, media: current.contentPackage.assetRefs.length > 0 }
+    const pages = current.contentPackage.content.pages
+    const rendered = JSON.stringify(current.contentPackage.content)
+    const routes = new Set(pages.map((page) => page.route))
+    const hasRoute = (route: string) => routes.has(route)
+    const pageSections = pages.flatMap((page) => page.sections)
+    // Each named gate has an independently persisted result.  Do not collapse
+    // these into a generic "quality" boolean: downstream promotion relies on
+    // the evidence to explain a rejection to the manual review boundary.
+    const checks = {
+      persisted: true,
+      checksum: computeWorkingContentChecksum(current.contentPackage) === expectedChecksum,
+      security: !/<script\b|javascript:/i.test(rendered),
+      privacy: hasRoute('/privacy') && !/\b(?:password|api[_-]?key|secret)\b/i.test(rendered),
+      contact: hasRoute('/contact') && /@|\+\d/.test(rendered),
+      link: !/\b(?:javascript:|data:text\/html)/i.test(rendered),
+      accessibility: pageSections.every((section) => Boolean(section.componentId) && Object.values(section.content).every((value) => typeof value !== 'string' || !/<img\b(?![^>]*\balt=)/i.test(value))),
+      brand: pages.every((page) => page.sections.length > 0) && current.contentPackage.provenance.length > 0,
+      vertical: hasRoute('/services') && hasRoute('/contact'),
+      requiredSection: pages.every((page) => page.sections.length > 0) && pageSections.some((section) => section.sectionId === 'hero'),
+      assets: current.contentPackage.assetRefs.length > 0 && current.contentPackage.assetRefs.every((asset) => Boolean(asset.source) && /^[a-f0-9]{64}$/i.test(asset.sha256)),
+      pageCount: pages.length >= 5,
+      uniqueRoutes: routes.size === pages.length,
+      provenance: current.contentPackage.provenance.length > 0,
+    }
     const accepted = Object.values(checks).every(Boolean)
     const artifact = await this.writeArtifact('working-content-gates', siteId, { siteId, packageId, versionNumber, checks, accepted })
     if (!accepted) { await this.workingContentRepository.markGateOutcome({ workingPackageId: packageId, versionNumber, expectedChecksum, outcome: 'rejected', gateReference: 'w2-02-content-gates', evidenceReferences: [artifact.path] }); return { accepted: false, evidence: [artifact.path], reason: 'gate:working-content-quality-failed', artifactPath: artifact.path, artifactChecksum: artifact.checksum } }

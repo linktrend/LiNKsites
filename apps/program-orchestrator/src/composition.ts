@@ -10,7 +10,7 @@ import { DurableLedger } from './durable-store.ts'
 import { ProgramRuntime } from './runtime.ts'
 import { ExecutorRegistry } from './executors.ts'
 import { FileWorkIntakePort, type CompletionSink, type WorkIntakePort } from '@linksites/intake-orchestrator'
-import { closeLocalDatabase, LocalPayloadProcess, LocalWebMasterProcess, openLocalDatabase } from './local-database.ts'
+import { closeLocalDatabase, openLocalDatabase } from './local-database.ts'
 
 export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; close: () => Promise<void> }
 
@@ -61,12 +61,11 @@ export async function createProductionComposition(config: RuntimeConfig): Promis
   const orgUuid = '00000000-0000-4000-8000-000000000001'
   const siteUuid = '00000000-0000-4000-8000-000000000002'
   const db = await openLocalDatabase(`${validated.statePath}.db`, orgUuid, siteUuid)
-  const payloadProcess = validated.payloadBaseUrl ? null : new LocalPayloadProcess(db)
-  const webMasterProcess = validated.webMasterBaseUrl ? null : new LocalWebMasterProcess(db)
-  const payloadBaseUrl = validated.payloadBaseUrl || await payloadProcess?.start() || ''
-  const webMasterBaseUrl = validated.webMasterBaseUrl || await webMasterProcess?.start() || ''
-  if (!payloadBaseUrl || !webMasterBaseUrl) throw new Error('W2-02 requires a Payload service and protected web-master service')
-  const runtimeConfig = { ...validated, payloadBaseUrl, webMasterBaseUrl }
+  // W2-02 is a composition root, not an HTTP emulator.  The caller must bind
+  // it to the separately started local Payload schema and real web-master
+  // process (the W2-04 proof harness supplies these URLs).
+  if (!validated.payloadBaseUrl || !validated.webMasterBaseUrl) throw new Error('W2-02 requires explicit real local Payload and protected web-master service URLs')
+  const runtimeConfig = validated
   const ledger = new DurableLedger(validated)
   const adapters = new LocalBoundaryAdaptersImpl(runtimeConfig, db)
   const executors = new ExecutorRegistry(runtimeConfig)
@@ -78,11 +77,6 @@ export async function createProductionComposition(config: RuntimeConfig): Promis
   return { config: runtimeConfig, ledger, adapters, dependencies, executors, intake, completionSink, runtime: new ProgramRuntime(runtimeConfig, ledger, adapters, executors, dependencies), close: async () => {
     if (closed) return
     closed = true
-    try {
-      await payloadProcess?.close()
-      await webMasterProcess?.close()
-    } finally {
-      await closeLocalDatabase(`${validated.statePath}.db`, db)
-    }
+    await closeLocalDatabase(`${validated.statePath}.db`, db)
   } }
 }
