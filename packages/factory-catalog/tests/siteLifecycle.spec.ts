@@ -19,7 +19,15 @@ import { FoundationReservationManager } from '../src/reusableFoundation.js'
 
 const authorization: LiNKreachAuthorizationVerifier = { verify: async () => true }
 const deniedAuthorization: LiNKreachAuthorizationVerifier = { verify: async () => false }
-const verifiedEvidence: LifecycleEvidenceVerifier = { verifyCompletedRecycleEvidence: async () => true }
+const verifiedEvidence: LifecycleEvidenceVerifier = {
+  resolveCompletedRecycleEvidence: async (input) => ({
+    sourceRunId: input.sourceRunId,
+    sourceEvidenceReference: `evidence://run/${input.sourceRunId}`,
+    qualityEvidenceReference: input.qualityEvidenceReference,
+    passingTestEvidenceReference: input.passingTestEvidenceReference,
+    privacyScanValues: ['Alice Example', 'Private Co'],
+  }),
+}
 const metadata = { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'corr-001', idempotency_key: 'commercial:sold:001' }
 const validCommercialOutcome: CommercialOutcomeEnvelope = { ...metadata, lead_id: 'lead_demo_example', site_id: 'site_demo_example', outcome: 'sold', reach_authorization_reference: 'reach-auth-001', replay_protection: { event_id: 'commercial-event-001', nonce: 'nonce-001' }, recorded_at: '2026-08-04T00:10:00.000Z' }
 const validActivationRequest: ActivationRequest = { ...metadata, idempotency_key: 'activation:001', lead_id: 'lead_demo_example', site_id: 'site_demo_example', reach_authorization_reference: 'reach-auth-001', publication: { domain: 'customer.example.com', environment: 'production', requested_at: '2026-08-04T00:15:00.000Z' } }
@@ -179,6 +187,23 @@ describe('W2-06 commercial outcome lifecycle', () => {
       await expect(store.getBySiteId(validCommercialOutcome.org_id, validCommercialOutcome.site_id)).rejects.toThrow(/invalid schema/i)
     } finally { await rm(directory, { recursive: true, force: true }) }
   })
+
+  it('rejects forged lifecycle transitions and every retained live receipt in Phase 1', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-06-transition-'))
+    try {
+      const store = createFileLifecycleStore(directory)
+      await new SiteLifecycleService(store, authorization).recordOutcome(validCommercialOutcome)
+      const [file] = await readdir(directory)
+      const stored = JSON.parse(await readFile(join(directory, file), 'utf8')) as { status: string; receipts: Array<{ mode: string }> }
+      stored.status = 'outcome_recorded' // sold may never enter the no-sale state
+      await writeFile(join(directory, file), JSON.stringify(stored), 'utf8')
+      await expect(store.getBySiteId(validCommercialOutcome.org_id, validCommercialOutcome.site_id)).rejects.toThrow(/invalid schema/i)
+      stored.status = 'awaiting_activation'
+      stored.receipts[0].mode = 'live' // Phase 1 must retain no live operation receipt
+      await writeFile(join(directory, file), JSON.stringify(stored), 'utf8')
+      await expect(store.getBySiteId(validCommercialOutcome.org_id, validCommercialOutcome.site_id)).rejects.toThrow(/invalid schema/i)
+    } finally { await rm(directory, { recursive: true, force: true }) }
+  })
 })
 
 describe('W2-06 LiNKsites Architect', () => {
@@ -188,22 +213,22 @@ describe('W2-06 LiNKsites Architect', () => {
     const reservations = new FoundationReservationManager(); const reservation = reservations.reserve('foundation-001', 'program-001')
     const adaptation = { schemaVersion: { major: 1, minor: 0 }, adaptationId: 'adaptation-001', siteSpecId: 'spec-001', foundationId: 'foundation-001', reservationId: reservation.reservationId, status: 'published' as const, prospectContent: { businessName: 'Private Co' }, createdAt: '2026-08-01T00:00:00.000Z' }
     await service.recycleNoSale({ request: validRecyclingRequest, adaptation, reservations, conversionLocks: new ConversionLockRegistry(), inventoryBinding: recycleBinding(adaptation), completedEvidence, quarantineLeadContent: async () => ({ receiptId: 'quarantine-001', kind: 'recycling', idempotencyKey: validRecyclingRequest.idempotency_key, subjectId: validRecyclingRequest.site_id, mode: 'dry_run', action: 'content.quarantine', status: 'completed', createdAt: new Date().toISOString(), details: { publicMutation: false, leadContentRetained: false, leadContentRemoved: true, adaptationId: adaptation.adaptationId, foundationId: adaptation.foundationId, reservationId: adaptation.reservationId, templateInventoryId: validRecyclingRequest.template_inventory_id } }) })
-    const result = await service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial-no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: { layout: { hero: 'A reusable hero' } }, knownLeadValues: ['Alice Example'], candidateFileContents, catalogReference, candidate: architectCandidate })
+    const result = await service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, assetPreview: { layout: { hero: 'A reusable hero' } }, candidateFileContents, catalogReference, candidate: architectCandidate })
     expect(result.submission.candidate.status).toBe('candidate')
     expect(result.receipt.details.canonicalAssetChanged).toBe(false)
     const lifecycle = await (service as unknown as { store: InMemoryLifecycleStore }).store.getBySiteId(noSale.org_id, noSale.site_id)
     expect(lifecycle?.candidateSubmissions).toHaveLength(1)
-    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial-no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: { leadName: 'Alice Example' }, knownLeadValues: ['Alice Example'], candidateFileContents, catalogReference, candidate: architectCandidate })).rejects.toThrow(/lead.customer data/i)
-    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial-no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: {}, knownLeadValues: [], candidateFileContents, catalogReference, candidate: { ...architectCandidate, entryId: 'marketing-smb-v1' } })).rejects.toThrow(/cannot replace approved canonical/i)
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, assetPreview: { leadName: 'Alice Example' }, candidateFileContents, catalogReference, candidate: architectCandidate })).rejects.toThrow(/lead.customer data/i)
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, assetPreview: {}, candidateFileContents, catalogReference, candidate: { ...architectCandidate, entryId: 'marketing-smb-v1' } })).rejects.toThrow(/cannot replace approved canonical/i)
     const customerBytes = 'export const customer = "Alice Example"\n'
-    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial-no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: {}, knownLeadValues: ['Alice Example'], candidateFileContents: { 'src/index.ts': customerBytes }, catalogReference, candidate: { ...architectCandidate, files: [{ path: 'src/index.ts', sha256: createHash('sha256').update(customerBytes).digest('hex') }] } })).rejects.toThrow(/contains lead.customer data/i)
-    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial-no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: {}, knownLeadValues: [], candidateFileContents, catalogReference, candidate: { ...architectCandidate, license: { spdx: 'LicenseRef-Unknown', redistributionAllowed: true } } })).rejects.toThrow(/SPDX/i)
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, assetPreview: {}, candidateFileContents: { 'src/index.ts': customerBytes }, catalogReference, candidate: { ...architectCandidate, files: [{ path: 'src/index.ts', sha256: createHash('sha256').update(customerBytes).digest('hex') }] } })).rejects.toThrow(/contains lead.customer data/i)
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, assetPreview: {}, candidateFileContents, catalogReference, candidate: { ...architectCandidate, license: { spdx: 'LicenseRef-Unknown', redistributionAllowed: true } } })).rejects.toThrow(/SPDX/i)
   })
 
   it('rejects candidate proposals without lifecycle, evidence, redistribution, or canonical safety', async () => {
     const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization)
-    await expect(service.proposeArchitectCandidate({ orgId: 'org_demo', siteId: 'site_demo_example', sourceRunIds: [], sourceEvidenceReferences: [], qualityEvidenceReferences: [], commercialEvidenceReferences: [], testEvidenceReferences: [], assetPreview: {}, knownLeadValues: [], candidateFileContents, catalogReference, candidate: architectCandidate })).rejects.toBeInstanceOf(LifecycleError)
+    await expect(service.proposeArchitectCandidate({ orgId: 'org_demo', siteId: 'site_demo_example', assetPreview: {}, candidateFileContents, catalogReference, candidate: architectCandidate })).rejects.toBeInstanceOf(LifecycleError)
     await service.recordOutcome(noSale)
-    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, sourceRunIds: ['run-001'], sourceEvidenceReferences: ['evidence://run-001'], qualityEvidenceReferences: ['evidence://quality-001'], commercialEvidenceReferences: ['commercial-no-sale-001'], testEvidenceReferences: ['test://candidate-001'], assetPreview: {}, knownLeadValues: [], candidateFileContents, catalogReference, candidate: architectCandidate })).rejects.toThrow(/completed no_sale/i)
+    await expect(service.proposeArchitectCandidate({ orgId: noSale.org_id, siteId: noSale.site_id, assetPreview: {}, candidateFileContents, catalogReference, candidate: architectCandidate })).rejects.toThrow(/completed no_sale/i)
   })
 })

@@ -12,7 +12,7 @@ import { ExecutorRegistry } from './executors.ts'
 import { FileWorkIntakePort, type CompletionSink, type WorkIntakePort } from '@linksites/intake-orchestrator'
 import { closeLocalDatabase, openLocalDatabase } from './local-database.ts'
 import { LiNKautoworkGateway, type GatewayTransport } from '@linksites/autowork-boundary'
-import { createFileLifecycleStore, SiteLifecycleService, type LifecycleEvidenceVerifier } from '@linksites/factory-catalog'
+import { createFileLifecycleStore, SiteLifecycleService, type LifecycleEvidenceVerifier, type VerifiedRecycleEvidence } from '@linksites/factory-catalog'
 import { CommercialOutcomeIngress } from './commercial-outcome-ingress.ts'
 
 export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; commercialOutcomeIngress: CommercialOutcomeIngress; close: () => Promise<void> }
@@ -33,6 +33,7 @@ export function validateRuntimeConfig(config: RuntimeConfig): RuntimeConfig {
   for (const path of [config.statePath, config.intakePath, config.completionPath, config.approvedFactsPath]) if (!path || path.includes('\0')) throw new Error('W2-02 path configuration is invalid')
   if (!Number.isInteger(config.maxAttempts) || config.maxAttempts < 1 || !Number.isInteger(config.concurrency) || config.concurrency < 1) throw new Error('W2-02 retry and concurrency configuration must be positive integers')
   if (!Number.isInteger(config.leaseDurationMs) || config.leaseDurationMs < 1) throw new Error('W2-02 lease duration must be a positive integer')
+  if (!config.commercialOutcomeGatewaySecret.trim() || !config.commercialOutcomeGatewayKeyId.trim()) throw new Error('W2-06 requires explicit W2-05 gateway verification configuration')
   if (!/^[a-f0-9]{40}$/.test(config.executingRevision)) throw new Error('W2-02 executingRevision must be a full Git SHA')
   if (config.executingRevision !== actualRevision()) throw new Error('W2-02 executingRevision is not the checked-out executable commit')
   if (!/^[a-f0-9]{64}$/.test(config.executableCheckpoint) || config.executableCheckpoint !== executableCheckpoint()) throw new Error('W2-02 executable checkpoint does not match the checked-out source/build inputs')
@@ -48,7 +49,10 @@ export function validateRuntimeConfig(config: RuntimeConfig): RuntimeConfig {
 
 export function createLocalConfig(baseDir: string, orgId = 'local-org'): RuntimeConfig {
   const statePath = resolve(baseDir, 'program-ledger.json')
-  return { mode: 'local', orgId, statePath, intakePath: resolve(baseDir, 'leads.ndjson'), completionPath: resolve(baseDir, 'completions.ndjson'), approvedFactsPath: resolve(baseDir, 'approved-facts.json'), maxAttempts: 3, concurrency: 2, leaseDurationMs: 30_000, executingRevision: actualRevision(), executableCheckpoint: executableCheckpoint(), workerId: `w2-02:${process.pid}:${randomUUID()}`, payloadBaseUrl: '', payloadApiKey: '', payloadSiteId: '', webMasterBaseUrl: '', previewAccessToken: '', commercialOutcomeGatewaySecret: 'local-w2-06-inbound-test-secret', commercialOutcomeGatewayKeyId: 'local-w2-06-inbound-test-key', libraryRepositoryPath: process.env.W2_02_LIBRARY_REPOSITORY_PATH ?? '/Users/linktrend/Projects/LiNKlibraries', approvedExecutors: Object.fromEntries(W2_02_GRAPH.map((issue) => [issue.executorKind, issue.executorVersion])), approvedCapabilities: Object.fromEntries(Object.entries(EXECUTOR_BINDINGS).map(([kind, binding]) => [kind, [...binding.capabilities]])) }
+  // No signing material or key identifier may be embedded as a runtime
+  // fallback. Test callers must inject their own non-secret fixture values;
+  // a real composition fails closed until configuration is supplied.
+  return { mode: 'local', orgId, statePath, intakePath: resolve(baseDir, 'leads.ndjson'), completionPath: resolve(baseDir, 'completions.ndjson'), approvedFactsPath: resolve(baseDir, 'approved-facts.json'), maxAttempts: 3, concurrency: 2, leaseDurationMs: 30_000, executingRevision: actualRevision(), executableCheckpoint: executableCheckpoint(), workerId: `w2-02:${process.pid}:${randomUUID()}`, payloadBaseUrl: '', payloadApiKey: '', payloadSiteId: '', webMasterBaseUrl: '', previewAccessToken: '', commercialOutcomeGatewaySecret: '', commercialOutcomeGatewayKeyId: '', libraryRepositoryPath: process.env.W2_02_LIBRARY_REPOSITORY_PATH ?? '/Users/linktrend/Projects/LiNKlibraries', approvedExecutors: Object.fromEntries(W2_02_GRAPH.map((issue) => [issue.executorKind, issue.executorVersion])), approvedCapabilities: Object.fromEntries(Object.entries(EXECUTOR_BINDINGS).map(([kind, binding]) => [kind, [...binding.capabilities]])) }
 }
 
 export function configFromEnvironment(env: NodeJS.ProcessEnv, baseDir: string): RuntimeConfig {
@@ -78,24 +82,44 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   const intake = new FileWorkIntakePort(runtimeConfig.intakePath, `${runtimeConfig.statePath}.intake.json`, { claimLeaseMs: runtimeConfig.leaseDurationMs })
   const dependencies = createLocalDependencyPorts(adapters, completionSink)
   const noOutboundTransport: GatewayTransport = async () => { throw new Error('W2-06 inbound verifier does not send gateway events') }
-  const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment: 'development', transport: noOutboundTransport })
+  const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment: 'development', transport: noOutboundTransport, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [validated.orgId], environments: ['development'] }] })
   // A composition without a real LiNKreach authorization port is safely
   // runnable for the W2-02 preview graph, but can never persist an outcome.
   const lifecycleEvidence: LifecycleEvidenceVerifier = {
-    async verifyCompletedRecycleEvidence(input) {
+    async resolveCompletedRecycleEvidence(input): Promise<VerifiedRecycleEvidence | null> {
       const state = await ledger.snapshot()
+      // W2-02 uses a deterministic preview-site identity. Do not allow an
+      // outcome for another site to borrow evidence from this completed run.
+      if (state.program.orgId !== input.orgId || state.program.state !== 'completed' || input.siteId !== `site:${state.program.leadId}`) return null
       const source = state.runs.find((run) => run.runId === input.sourceRunId && run.state === 'succeeded')
-      const references = state.runs.flatMap((run) => run.evidence.map((evidence) => evidence.storage_location))
-      return state.program.orgId === input.orgId && state.program.state === 'completed' && Boolean(source) && references.includes(input.qualityEvidenceReference) && references.includes(input.passingTestEvidenceReference)
+      const quality = state.runs.find((run) => run.issueId === 'content-gates' && run.state === 'succeeded' && run.evidence.some((evidence) => evidence.storage_location === input.qualityEvidenceReference && evidence.subject.type === 'issue' && evidence.subject.id === 'content-gates' && evidence.gate_association === 'content-gates'))
+      const test = state.runs.find((run) => run.issueId === 'site-render-validation' && run.state === 'succeeded' && run.evidence.some((evidence) => evidence.storage_location === input.passingTestEvidenceReference && evidence.subject.type === 'issue' && evidence.subject.id === 'site-render-validation' && evidence.gate_association === 'site-render-validation'))
+      const sourceEvidenceReference = source?.evidence.find((evidence) => evidence.subject.type === 'issue' && evidence.subject.id === source.issueId)?.storage_location
+      if (!source || !quality || !test || !sourceEvidenceReference) return null
+      // These values come from the completed, durable program state and its
+      // approved-facts input, never from the Architect proposal request.
+      const facts = JSON.parse(await import('node:fs/promises').then(({ readFile }) => readFile(validated.approvedFactsPath, 'utf8'))) as Record<string, unknown>
+      const privacyScanValues = collectStrings({ leadId: state.program.leadId, siteId: input.siteId, facts })
+      if (privacyScanValues.length === 0) return null
+      return { sourceRunId: source.runId, sourceEvidenceReference, qualityEvidenceReference: input.qualityEvidenceReference, passingTestEvidenceReference: input.passingTestEvidenceReference, privacyScanValues }
     },
   }
   const lifecycle = new SiteLifecycleService(createFileLifecycleStore(`${validated.statePath}.lifecycle`), outcomeDependencies?.outcomeAuthorization ?? { verify: async () => false }, undefined, lifecycleEvidence)
   const commercialOutcomeIngress = new CommercialOutcomeIngress(lifecycle, gateway)
+  const runtime = new ProgramRuntime(runtimeConfig, ledger, adapters, executors, dependencies)
+  runtime.bindCommercialOutcomeIngress(commercialOutcomeIngress)
   if (!(await ledger.isAvailable())) throw new Error('W2-02 durable ledger is unavailable')
   let closed = false
-  return { config: runtimeConfig, ledger, adapters, dependencies, executors, intake, completionSink, runtime: new ProgramRuntime(runtimeConfig, ledger, adapters, executors, dependencies), commercialOutcomeIngress, close: async () => {
+  return { config: runtimeConfig, ledger, adapters, dependencies, executors, intake, completionSink, runtime, commercialOutcomeIngress, close: async () => {
     if (closed) return
     closed = true
     await closeLocalDatabase(`${validated.statePath}.db`, db)
   } }
+}
+
+function collectStrings(value: unknown): string[] {
+  if (typeof value === 'string') return value.trim() ? [value.trim()] : []
+  if (Array.isArray(value)) return value.flatMap(collectStrings)
+  if (!value || typeof value !== 'object') return []
+  return Object.values(value as Record<string, unknown>).flatMap(collectStrings)
 }

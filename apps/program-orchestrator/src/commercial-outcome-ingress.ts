@@ -24,9 +24,16 @@ export class CommercialOutcomeIngress {
   async accept(request: GatewayRequest): Promise<LifecycleRecord> {
     // This call performs the actual HMAC, key-id, freshness, nonce replay and
     // event-grant checks supplied by W2-05. Do not replace it with a marker.
-    const event = this.verifier.verify(request)
-    if (event.event_name !== 'commercial.outcome.recorded' || event.acknowledgement.status !== 'accepted') {
-      throw new LifecycleError('Commercial outcome ingress accepts only W2-05 verified and accepted commercial.outcome.recorded events.')
+    const verified = this.verifier.verify(request)
+    // The external transport may only submit a signed *pending* event.  This
+    // boundary owns the transition to accepted after W2-05 verification; a
+    // caller-supplied acknowledgement is never treated as authority.
+    if (verified.event_name !== 'commercial.outcome.recorded' || verified.acknowledgement.status !== 'pending') {
+      throw new LifecycleError('Commercial outcome ingress accepts only a W2-05 verified pending commercial.outcome.recorded event.')
+    }
+    const event: LiNKautoworkEventEnvelope = {
+      ...verified,
+      acknowledgement: { status: 'accepted', acknowledged_at: new Date().toISOString() },
     }
     const submission = event.payload.submission
     const outcome = required(submission, 'outcome')

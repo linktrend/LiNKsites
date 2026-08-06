@@ -5,6 +5,9 @@ import { DurableLedger } from './durable-store.ts'
 import type { FailureClass, IssueRecord, LocalBoundaryAdapters, RuntimeConfig } from './contracts.ts'
 import type { ExecutorRegistry } from './executors.ts'
 import type { LocalDependencyPorts } from './adapters.ts'
+import type { GatewayRequest } from '@linksites/autowork-boundary'
+import type { CommercialOutcomeIngress } from './commercial-outcome-ingress.ts'
+import type { LifecycleRecord } from '@linksites/factory-catalog'
 
 export type RuntimeHealth = {
   liveness: boolean
@@ -26,6 +29,7 @@ export class ProgramRuntime {
   readonly executors: ExecutorRegistry
 
   readonly dependencies: LocalDependencyPorts
+  private commercialOutcomeIngress: CommercialOutcomeIngress | null = null
 
   constructor(config: RuntimeConfig, ledger: DurableLedger, adapters: LocalBoundaryAdapters, executors: ExecutorRegistry, dependencies: LocalDependencyPorts) { this.config = config; this.ledger = ledger; this.adapters = adapters; this.executors = executors; this.dependencies = dependencies }
 
@@ -37,6 +41,22 @@ export class ProgramRuntime {
     await this.ledger.reclaimExpiredLeases()
     await this.runUntilSettled()
     await this.deliverCompletion()
+  }
+
+  /**
+   * The W2-06 command path deliberately enters through the Program runtime,
+   * not through an incidental composition property. The ingress itself owns
+   * W2-05 verification and persists an idempotent lifecycle record before
+   * this method resolves.
+   */
+  bindCommercialOutcomeIngress(ingress: CommercialOutcomeIngress): void {
+    if (this.commercialOutcomeIngress && this.commercialOutcomeIngress !== ingress) throw new Error('commercial outcome intake is already bound')
+    this.commercialOutcomeIngress = ingress
+  }
+
+  async acceptCommercialOutcome(request: GatewayRequest): Promise<LifecycleRecord> {
+    if (!this.commercialOutcomeIngress) throw new Error('commercial outcome intake is not bound')
+    return this.commercialOutcomeIngress.accept(request)
   }
 
   async runUntilSettled(maxCycles = 200): Promise<void> {

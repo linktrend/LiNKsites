@@ -25,27 +25,30 @@ const approvedFacts = (id: string) => ({
   contact: { phone: '+886200000000', email: `${id}@invalid.test`, address: 'Taipei, Taiwan', website: `https://${id}.invalid.test` },
   pricing: 'Contact for an approved quote', legalClaims: ['Founder-approved legal copy'], media: [],
 })
+const outcomeGatewayFixture = { commercialOutcomeGatewaySecret: 'test-only-outcome-gateway-secret', commercialOutcomeGatewayKeyId: 'test-only-outcome-gateway-key' }
 
 test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durable lifecycle path and reject forged signatures', async () => {
   const authorization: LiNKreachAuthorizationVerifier = { verify: async () => true }
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-06-ingress-'))
   const lifecycle = new SiteLifecycleService(createFileLifecycleStore(directory), authorization)
   const secret = 'outcome-gateway-test-secret'
-  const timestamp = Math.floor(Date.now() / 1000)
-  const nonce = 'outcome-nonce-001'
-  const unsigned = {
-    schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'corr-outcome', idempotency_key: 'outcome:001', event_id: 'gateway-outcome-001', event_name: 'commercial.outcome.recorded' as const,
-    payload: { lead_id: 'lead_demo', site_id: 'site_demo', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-001', outcome_event_id: 'commercial-event-001', outcome_nonce: 'nonce-001', recorded_at: '2026-08-04T00:10:00.000Z' } },
-    delivery_attempt: 1, acknowledgement: { status: 'accepted' as const },
-  }
-  const envelope = { ...unsigned, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: createHmac('sha256', secret).update(`${timestamp}.${nonce}.${JSON.stringify(unsigned)}`).digest('hex') } }
   const gateway = new LiNKautoworkGateway({ secret, keyId: 'key-1', environment: 'development', transport: async () => { throw new Error('not used') } })
   const ingress = new CommercialOutcomeIngress(lifecycle, gateway)
   try {
-    const first = await ingress.accept({ timestamp, nonce, envelope })
+    // This is the actual W2-05 builder. It can produce only a signed pending
+    // transport event; the ingress performs the accepted transition after
+    // cryptographic verification.
+    const request = gateway.buildRequest('commercial.outcome.recorded', 'org_demo', 'corr-outcome', 'outcome:001', { lead_id: 'lead_demo', site_id: 'site_demo', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-001', outcome_event_id: 'commercial-event-001', outcome_nonce: 'nonce-001', recorded_at: '2026-08-04T00:10:00.000Z' } })
+    assert.equal(request.envelope.acknowledgement.status, 'pending')
+    const first = await ingress.accept(request)
     assert.equal(first.outcome, 'no_sale')
     assert.equal((await createFileLifecycleStore(directory).getBySiteId('org_demo', 'site_demo'))?.lifecycleId, first.lifecycleId)
-    await assert.rejects(ingress.accept({ timestamp, nonce: 'forged-nonce', envelope: { ...envelope, signature: { ...envelope.signature, signature: 'forged' } } }), /invalid_signature/i)
+    await assert.rejects(ingress.accept({ ...request, nonce: 'forged-nonce', envelope: { ...request.envelope, signature: { ...request.envelope.signature, signature: 'forged' } } }), /invalid_signature/i)
+    const asserted = gateway.buildRequest('commercial.outcome.recorded', 'org_demo', 'corr-outcome', 'outcome:asserted', { lead_id: 'lead_asserted', site_id: 'site_asserted', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-asserted', outcome_event_id: 'commercial-event-asserted', outcome_nonce: 'nonce-asserted', recorded_at: '2026-08-04T00:10:00.000Z' } })
+    const { signature: _signature, ...unsigned } = asserted.envelope
+    const callerAsserted = { ...unsigned, acknowledgement: { status: 'accepted' as const } }
+    const assertedEnvelope = { ...callerAsserted, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: createHmac('sha256', secret).update(`${asserted.timestamp}.${asserted.nonce}.${JSON.stringify(callerAsserted)}`).digest('hex') } }
+    await assert.rejects(ingress.accept({ ...asserted, envelope: assertedEnvelope }), /verified pending/i)
   } finally { await rm(directory, { recursive: true, force: true }) }
 })
 
@@ -76,7 +79,7 @@ async function composition(id = 'lead-local-001') {
   const web = createServer((_request, response) => { response.writeHead(200, { 'content-type': 'text/html', 'x-robots-tag': 'noindex, nofollow', 'cache-control': 'private, no-store' }); response.end('<main data-private-preview="true" data-route="/"><h1>Private preview</h1></main>') })
   await new Promise<void>((resolve) => web.listen(0, '127.0.0.1', resolve))
   const webPort = (web.address() as import('node:net').AddressInfo).port
-  const config = { ...createLocalConfig(directory), payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'test-preview-token', commercialOutcomeGatewaySecret: 'composition-outcome-secret', commercialOutcomeGatewayKeyId: 'composition-outcome-key' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'test-preview-token' }
   await writeFile(config.approvedFactsPath, JSON.stringify(approvedFacts(id)))
   const value = await createProductionComposition(config, { outcomeAuthorization: { verify: async () => true } })
   const close = value.close
@@ -89,10 +92,9 @@ test('production composition boots with complete approved local configuration', 
     assert.equal((await value.runtime.health()).readiness, false)
     await value.runtime.runLead(lead())
     assert.equal((await value.runtime.health()).programState, 'completed')
-    const timestamp = Math.floor(Date.now() / 1000); const nonce = 'composed-outcome-nonce'
-    const unsigned = { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'composed-outcome', idempotency_key: 'composed-outcome:001', event_id: 'event:composed-outcome:001', event_name: 'commercial.outcome.recorded' as const, payload: { lead_id: 'lead-composed', site_id: 'site-composed', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-composed', outcome_event_id: 'commercial-outcome-composed', outcome_nonce: 'outcome-nonce-composed', recorded_at: '2026-08-06T00:00:00.000Z' } }, delivery_attempt: 1, acknowledgement: { status: 'accepted' as const } }
-    const envelope = { ...unsigned, signature: { algorithm: 'hmac-sha256' as const, key_id: value.config.commercialOutcomeGatewayKeyId, signature: createHmac('sha256', value.config.commercialOutcomeGatewaySecret).update(`${timestamp}.${nonce}.${JSON.stringify(unsigned)}`).digest('hex') } }
-    assert.equal((await value.commercialOutcomeIngress.accept({ timestamp, nonce, envelope })).status, 'outcome_recorded')
+    const gateway = new LiNKautoworkGateway({ secret: value.config.commercialOutcomeGatewaySecret, keyId: value.config.commercialOutcomeGatewayKeyId, environment: 'development', transport: async () => { throw new Error('not used') }, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [value.config.orgId], environments: ['development'] }] })
+    const request = gateway.buildRequest('commercial.outcome.recorded', value.config.orgId, 'composed-outcome', 'composed-outcome:001', { lead_id: 'lead-composed', site_id: 'site-composed', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-composed', outcome_event_id: 'commercial-outcome-composed', outcome_nonce: 'outcome-nonce-composed', recorded_at: '2026-08-06T00:00:00.000Z' } })
+    assert.equal((await value.runtime.acceptCommercialOutcome(request)).status, 'outcome_recorded')
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
 
@@ -232,9 +234,9 @@ test('post-promotion protected render failure creates durable manual attention',
 
 test('process termination after claim and irreversible receipt is reclaimed by a new worker', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-crash-'))
-  const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token' }
   const signalPath = join(directory, 'worker-ready')
-  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import('./src/composition.ts'); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,payloadBaseUrl:'http://127.0.0.1:9',payloadApiKey:'test-api-key',payloadSiteId:'test-site',webMasterBaseUrl:'http://127.0.0.1:9',previewAccessToken:'test-preview-token',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'},claim.run.runId,claim.run.lease.fencingToken); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
+  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import('./src/composition.ts'); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,commercialOutcomeGatewaySecret:'test-only-outcome-gateway-secret',commercialOutcomeGatewayKeyId:'test-only-outcome-gateway-key',payloadBaseUrl:'http://127.0.0.1:9',payloadApiKey:'test-api-key',payloadSiteId:'test-site',webMasterBaseUrl:'http://127.0.0.1:9',previewAccessToken:'test-preview-token',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'},claim.run.runId,claim.run.lease.fencingToken); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
   const worker = spawn(process.execPath, ['--import', 'tsx/esm', '-e', workerCode], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
   let restarted: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
@@ -263,7 +265,7 @@ test('process termination after claim and irreversible receipt is reclaimed by a
 
 test('a paused stale worker cannot acknowledge an irreversible receipt after lease expiry and reclaim', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-stale-receipt-'))
-  const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', leaseDurationMs: 25, workerId: 'worker-a' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', leaseDurationMs: 25, workerId: 'worker-a' }
   const first = await createProductionComposition(config)
   let second: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
@@ -295,7 +297,7 @@ test('a stale lease is rejected before the token-gated external preview mutation
 
 test('two independent workers fence the same ready issue to one claim', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-race-'))
-  const config = { ...createLocalConfig(directory), payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', workerId: 'setup-worker' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', workerId: 'setup-worker' }
   const setup = await createProductionComposition(config)
   try {
     await setup.ledger.createOrResume(lead('lead-cross-process-race'))
@@ -316,8 +318,10 @@ test('two independent workers fence the same ready issue to one claim', async ()
 test('configuration and executor registry fail closed', () => {
   assert.throws(() => configFromEnvironment({}, '/tmp'), /configuration is incomplete/)
   const config = createLocalConfig('/tmp/w2-02-test')
-  assert.throws(() => validateRuntimeConfig({ ...config, approvedExecutors: { ...config.approvedExecutors, 'payload.draft.promote': '9.9.9' } }), /not approved/)
-  assert.throws(() => validateRuntimeConfig({ ...config, approvedExecutors: { ...config.approvedExecutors, 'unknown.executor': '1.0.0' } }), /unknown or missing executor kind/)
+  assert.throws(() => validateRuntimeConfig(config), /gateway verification configuration/)
+  const configured = { ...config, ...outcomeGatewayFixture }
+  assert.throws(() => validateRuntimeConfig({ ...configured, approvedExecutors: { ...configured.approvedExecutors, 'payload.draft.promote': '9.9.9' } }), /not approved/)
+  assert.throws(() => validateRuntimeConfig({ ...configured, approvedExecutors: { ...configured.approvedExecutors, 'unknown.executor': '1.0.0' } }), /unknown or missing executor kind/)
   assert.equal(W2_02_GRAPH.some((issue) => issue.executorKind === 'sold-site.public-activation'), false)
 })
 
