@@ -116,6 +116,9 @@ const runtimeValues = {
   PREVIEW_ACCESS_TOKEN: previewToken,
   PREVIEW_RUN_MARKER: runMarker,
   LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID: 'marketing-smb-v1',
+  // The seed must create the same private hostname that the proof requests;
+  // otherwise web-master correctly rejects the unmapped token-gated tenant.
+  W2_04_LOCAL_PROOF_HOST: 'preview.localtest',
   LINKSITES_ADMITTED_TEMPLATE_SHA: '1111111111111111111111111111111111',
   W2_02_MODE: 'local',
   W2_02_ORG_ID: 'local-proof-org',

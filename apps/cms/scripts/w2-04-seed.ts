@@ -18,6 +18,12 @@ console.error('W2-04 seed: Payload configuration loaded')
 const fixtureRoot = resolve(root, 'packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1')
 const readFixture = (path: string) => readFile(resolve(fixtureRoot, path), 'utf8')
 const commitSha = '1'.repeat(40)
+// A proof may be reached through a disposable private hostname rather than
+// loopback.  Seed that exact hostname into the real Payload mapping so the
+// token-gated web-master route exercises the same tenant-resolution boundary
+// it will use in deployment.  Keep the historical loopback default for
+// standalone local seed users that do not supply the proof-specific input.
+const proofHostname = process.env.W2_04_LOCAL_PROOF_HOST ?? '127.0.0.1'
 
 const entry = JSON.parse(await readFixture('entry.json')) as LibraryEntryContract
 const files = {
@@ -80,11 +86,11 @@ const site = await within('creating site', payload.create({
   // The current canonical Sites contract requires the Program ownership tuple
   // even for this disposable local proof.  These are non-customer fixture
   // identifiers and are used only to exercise the same shape as production.
-  data: { name: 'W2-04 local proof site', domain: '127.0.0.1', status: 'published', templateId: 'marketing-smb-v1', orgId: 'local-org', programId: 'w2-04-local-proof', leadId: 'w2-04-local-proof', defaultLanguage: language.id, languages: [language.id] },
+  data: { name: 'W2-04 local proof site', domain: proofHostname, status: 'published', templateId: 'marketing-smb-v1', orgId: 'local-org', programId: 'w2-04-local-proof', leadId: 'w2-04-local-proof', defaultLanguage: language.id, languages: [language.id] },
   ...options,
 }))
 console.error('W2-04 seed: site created')
-await within('creating hostname mapping', payload.create({ collection: 'site-domains', data: { hostname: '127.0.0.1', site: site.id, primary: true }, ...options }))
+await within('creating hostname mapping', payload.create({ collection: 'site-domains', data: { hostname: proofHostname, site: site.id, primary: true }, ...options }))
 console.error('W2-04 seed: hostname created')
 if (process.env.W2_04_SCHEMA_ONLY === '1') {
   console.log(`W2_04_SCHEMA=${JSON.stringify({ siteId: String(site.id), languageId: String(language.id) })}`)

@@ -56,6 +56,7 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   assert.ok(overlay.includes('deploy/docker-compose.deploy.yml') === false, 'overlay is composed by the rehearsal command, not recursively')
   for (const service of ['local-postgres:', 'local-tls:', 'payload-seed:', 'supabase-migrate:', 'program-orchestrator:']) assert.ok(overlay.includes(service), service)
   assert.ok(rehearsal.includes("externalPlatformAdmission: 'not asserted; separate governed prerequisite remains'"))
+  assert.ok(rehearsal.includes("W2_04_LOCAL_PROOF_HOST: 'preview.localtest'"), 'the disposable seed must map the same private hostname the proof requests')
   assert.ok(rehearsal.includes("['up', '--detach', '--no-build', '--wait'"))
   assert.ok(rehearsal.includes("completedIssues: 16"))
 })
