@@ -120,7 +120,10 @@ const runtimeValues = {
   // otherwise web-master correctly rejects the unmapped token-gated tenant.
   W2_04_LOCAL_PROOF_HOST: 'preview.localtest',
   LINKSITES_LOCAL_COMPOSE_PROOF: '1',
-  LINKSITES_ADMITTED_TEMPLATE_SHA: '1111111111111111111111111111111111',
+  // The deterministic offline consumption fixture records a full Git SHA;
+  // keep this derived so a truncated literal cannot silently bypass the
+  // template-admission contract.
+  LINKSITES_ADMITTED_TEMPLATE_SHA: '1'.repeat(40),
   W2_02_MODE: 'local',
   W2_02_ORG_ID: 'local-proof-org',
   W2_02_EXECUTION_REVISION: sourceRevision,
