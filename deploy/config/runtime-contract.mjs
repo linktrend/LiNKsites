@@ -58,7 +58,9 @@ export const SERVICE_CONFIGURATION = {
     required('W2_02_STATE_DIR', 'absolute-path'),
     required('W2_02_PAYLOAD_BASE_URL', 'https-url'),
     required('W2_02_PAYLOAD_API_KEY', 'secret-min-32', true),
-    required('W2_02_PAYLOAD_SITE_ID', 'slug'),
+    // The configured Postgres Payload adapter uses positive numeric document
+    // IDs. A first valid site can therefore be "1", not a three-character slug.
+    required('W2_02_PAYLOAD_SITE_ID', 'payload-document-id'),
     required('W2_02_WEB_MASTER_BASE_URL', 'https-url'),
     required('W2_02_PREVIEW_ACCESS_TOKEN', 'secret-min-32', true),
     required('W2_05_OUTCOME_GATEWAY_SECRET', 'secret-min-32', true),
@@ -79,6 +81,7 @@ function validateValue(value, format) {
   if (format === 'git-sha-1') return sha1.test(trimmed) ? null : 'must be a full 40-character Git SHA'
   if (format === 'sha-256') return sha256.test(trimmed) ? null : 'must be a full 64-character SHA-256'
   if (format === 'slug') return /^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$/.test(trimmed) ? null : 'must be a 3-128 character identifier'
+  if (format === 'payload-document-id') return /^[1-9][0-9]*$/.test(trimmed) ? null : 'must be a positive numeric Payload document ID'
   if (format === 'absolute-path') return trimmed.startsWith('/') && !trimmed.includes('\0') ? null : 'must be an absolute non-NUL path'
   if (format === 'secret-min-32') return trimmed.length >= 32 && !/^(.)\1+$/.test(trimmed) ? null : 'must be at least 32 non-repeated characters'
   if (format === 'nonempty-json-array') {

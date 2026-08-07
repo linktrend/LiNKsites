@@ -30,7 +30,7 @@ const base = {
   W2_02_STATE_DIR: '/var/lib/linksites/program',
   W2_02_PAYLOAD_BASE_URL: 'https://cms.example.test',
   W2_02_PAYLOAD_API_KEY: secret,
-  W2_02_PAYLOAD_SITE_ID: 'site-test',
+  W2_02_PAYLOAD_SITE_ID: '42',
   W2_02_WEB_MASTER_BASE_URL: 'https://preview.example.test',
   W2_02_PREVIEW_ACCESS_TOKEN: secret,
   W2_05_OUTCOME_GATEWAY_SECRET: secret,
@@ -51,6 +51,13 @@ test('rejects fixture mode and placeholders', () => {
   assert.equal(result.ok, false)
   assert.ok(result.errors.some((error) => error.name === 'NEXT_PUBLIC_CMS_PROVIDER'))
   assert.ok(result.errors.some((error) => error.name === 'PAYLOAD_API_KEY'))
+})
+
+test('accepts a valid first numeric Payload document ID and rejects an invalid one', () => {
+  assert.equal(validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '1' }, 'program-orchestrator').ok, true)
+  const result = validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '0' }, 'program-orchestrator')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'W2_02_PAYLOAD_SITE_ID'))
 })
 
 test('configuration reference documents every executable runtime name', async () => {
