@@ -212,7 +212,11 @@ try {
   }, 'the certified 16-issue Program fixture')
   const headers = join(proofRoot, 'preview.headers')
   const body = join(proofRoot, 'preview.html')
-  await run('curl', ['--fail', '--silent', '--show-error', '--cacert', localCa, '--resolve', `preview.localtest:${tlsPort}:127.0.0.1`, '-D', headers, '-o', body, `https://preview.localtest:${tlsPort}/en/demo/${previewToken}`])
+  // Docker Desktop can report the service graph ready a fraction before its
+  // loopback port-forward is accepting connections. Retry only that transient
+  // connection-refused state; a TLS, router, authorization, or render failure
+  // still leaves curl non-zero and fails this proof.
+  await run('curl', ['--fail', '--silent', '--show-error', '--retry', '20', '--retry-connrefused', '--retry-delay', '1', '--cacert', localCa, '--resolve', `preview.localtest:${tlsPort}:127.0.0.1`, '-D', headers, '-o', body, `https://preview.localtest:${tlsPort}/en/demo/${previewToken}`])
   assert.match(await readFile(headers, 'utf8'), /x-robots-tag:\s*noindex/i)
   assert.match(await readFile(body, 'utf8'), new RegExp(runMarker))
   await run('curl', ['--fail', '--silent', '--show-error', '--cacert', localCa, `http://127.0.0.1:${orchestratorPort}/readyz`])
