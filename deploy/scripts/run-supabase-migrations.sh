@@ -52,7 +52,11 @@ psql "$DATABASE_URI" --set ON_ERROR_STOP=1 --command "
 for migration in /migrations/*.sql; do
   [ -f "$migration" ] || continue
   echo "Applying LiNKsites migration $(basename "$migration")"
-  psql "$DATABASE_URI" --set ON_ERROR_STOP=1 --file "$migration" >/dev/null
+  # Migration files carry a documented `migrate:down` section for human
+  # recovery review.  Deployment is forward-only: feeding that section to
+  # psql would immediately undo the just-applied schema and make later
+  # migrations fail.  Execute only the source preceding that delimiter.
+  sed '/^-- migrate:down/,$d' "$migration" | psql "$DATABASE_URI" --set ON_ERROR_STOP=1 >/dev/null
 done
 receipt="$(psql "$DATABASE_URI" --no-align --tuples-only --quiet --set ON_ERROR_STOP=1 --command "select platform_commit_sha from lsites_ledger.platform_migration_receipts where platform_commit_sha = '$LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA';" | tr -d '[:space:]')"
 [ "$receipt" = "$LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA" ] || { echo 'platform migration receipt readback failed' >&2; exit 78; }
