@@ -182,7 +182,14 @@ try {
   ].join('\n') + '\n', { mode: 0o600 })
 
   await compose(['config', '--quiet'])
-  await compose(['up', '--detach', '--no-build', '--wait', '--wait-timeout', '180'])
+  try {
+    await compose(['up', '--detach', '--no-build', '--wait', '--wait-timeout', '180'])
+  } catch (error) {
+    // Preserve the service-level diagnostic before the scoped finally block
+    // tears down this disposable proof project.
+    const logs = await composeQuiet(['logs', '--no-color']).catch(() => '')
+    throw new Error(`${error instanceof Error ? error.message : String(error)}\n\nCompose service logs:\n${logs}`)
+  }
   const waitFor = async (predicate, description) => {
     for (let attempt = 0; attempt < 90; attempt += 1) {
       if (await predicate()) return
