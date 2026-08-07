@@ -119,6 +119,7 @@ const runtimeValues = {
   // The seed must create the same private hostname that the proof requests;
   // otherwise web-master correctly rejects the unmapped token-gated tenant.
   W2_04_LOCAL_PROOF_HOST: 'preview.localtest',
+  LINKSITES_LOCAL_COMPOSE_PROOF: '1',
   LINKSITES_ADMITTED_TEMPLATE_SHA: '1111111111111111111111111111111111',
   W2_02_MODE: 'local',
   W2_02_ORG_ID: 'local-proof-org',

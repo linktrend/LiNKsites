@@ -67,6 +67,13 @@ services:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites
 
   web-master:
+    # Do not start the renderer until the disposable Payload seed has produced
+    # the exact verified library-admission receipt/evidence that this proof
+    # must consume. The production Compose definition never uses this launcher.
+    depends_on:
+      payload-seed:
+        condition: service_completed_successfully
+    command: ["node", "/app/deploy/scripts/local-proof-web-master-entrypoint.mjs"]
     environment:
       NODE_EXTRA_CA_CERTS: /run/linksites-local-proof/ca.crt
     volumes:
