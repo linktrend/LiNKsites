@@ -49,7 +49,10 @@ services:
     depends_on:
       supabase-migrate:
         condition: service_completed_successfully
-    command: ["node", "/app/deploy/scripts/entrypoint.mjs", "autowork-worker", "node_modules/.bin/payload", "migrate", "--config", "apps/cms/src/payload.config.ts"]
+    # Payload resolves tsconfig aliases from its package root.  Its executable
+    # is scoped to that workspace rather than hoisted into root node_modules.
+    working_dir: /app/apps/cms
+    command: ["node", "/app/deploy/scripts/entrypoint.mjs", "autowork-worker", "node_modules/.bin/payload", "migrate", "--config", "src/payload.config.ts"]
     restart: 'no'
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
