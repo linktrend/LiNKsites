@@ -47,7 +47,11 @@ services:
     environment:
       LINKSITES_W2_04_LOCAL_PROOF: '1'
       W2_04_PROOF_PATH: /var/lib/linksites/seed.json
-    command: ["pnpm", "--filter", "@linksites/cms", "exec", "tsx", "scripts/w2-04-seed.ts"]
+    # The proof network is deliberately isolated. Invoke the CMS-local runner
+    # already bundled in the immutable worker image instead of Corepack/pnpm,
+    # which can otherwise attempt a registry download at runtime.
+    working_dir: /app/apps/cms
+    command: ["node", "/app/deploy/scripts/entrypoint.mjs", "autowork-worker", "node_modules/.bin/tsx", "scripts/w2-04-seed.ts"]
     depends_on:
       payload:
         condition: service_healthy
