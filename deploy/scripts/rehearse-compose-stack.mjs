@@ -34,7 +34,11 @@ const run = async (file, args, options = {}) => {
 const quiet = async (file, args, options = {}) => (await exec(file, args, { cwd: root, maxBuffer: 8 * 1024 * 1024, ...options })).stdout
 const random = () => randomBytes(24).toString('hex')
 const sourceRevision = (await quiet('git', ['rev-parse', 'HEAD'])).trim()
-const platformRevision = (await quiet('git', ['-C', '/Users/linktrend/Projects/LiNKplatform', 'rev-parse', 'main'])).trim()
+// Bind the disposable proof to the last fetched authoritative remote ref,
+// rather than a potentially stale local checkout branch.  This is only a
+// provenance read; it does not claim that the local bootstrap is a Platform
+// deployment or that it can promote a Platform migration.
+const platformRevision = (await quiet('git', ['-C', '/Users/linktrend/Projects/LiNKplatform', 'rev-parse', 'origin/main'])).trim()
 const libraryPath = '/Users/linktrend/Projects/LiNKlibraries'
 await run('git', ['-C', libraryPath, 'cat-file', '-e', 'a7193d40152747db2a03e094fa263f324a971a0b^{commit}'])
 
@@ -71,7 +75,17 @@ const composeQuiet = (args, options = {}) => quiet('docker', ['compose', '--proj
 const platformSql = `
 create extension if not exists pgcrypto;
 create schema if not exists platform;
-do $$ begin create type platform.member_role as enum ('client_viewer', 'staff'); exception when duplicate_object then null; end $$;
+do $$ begin create type platform.org_kind as enum ('internal', 'client'); exception when duplicate_object then null; end $$;
+do $$ begin create type platform.org_status as enum ('active', 'suspended', 'archived'); exception when duplicate_object then null; end $$;
+do $$ begin create type platform.member_role as enum ('owner', 'admin', 'staff', 'client_admin', 'client_viewer'); exception when duplicate_object then null; end $$;
+create table if not exists platform.organizations (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  kind platform.org_kind not null default 'client',
+  status platform.org_status not null default 'active',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
 do $$ begin create role svc_linksites_runtime login; exception when duplicate_object then null; end $$;
 do $$ begin create role svc_linksites_ledger login; exception when duplicate_object then null; end $$;
 create or replace function platform.has_org_access(target_org_id uuid, min_role platform.member_role)
