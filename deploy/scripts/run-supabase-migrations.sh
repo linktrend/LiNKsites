@@ -27,7 +27,10 @@ select concat_ws('|',
   has_schema_privilege('svc_linksites_ledger', 'platform', 'USAGE'),
   has_function_privilege('svc_linksites_ledger', 'platform.has_org_access(uuid,platform.member_role)', 'EXECUTE')
 );" | tr -d '[:space:]')"
-[ "$platform_state" = 'true|true|true|true|true' ] || {
+# psql's unaligned boolean representation is `t` / `f`, not the SQL text
+# `true` / `false`.  Keep the comparison strict so a partial Platform
+# prerequisite still fail-closes this migration job.
+[ "$platform_state" = 't|t|t|t|t' ] || {
   echo "required Platform migration state is absent or incomplete: $platform_state" >&2
   exit 78
 }
