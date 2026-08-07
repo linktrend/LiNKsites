@@ -191,7 +191,7 @@ try {
   await compose(['config', '--quiet'])
   try {
     await compose(['up', '--detach', '--no-build', '--wait', '--wait-timeout', '180'])
-  } catch (error) {
+  } catch {
     // Preserve the service-level diagnostic before the scoped finally block
     // tears down this disposable proof project.
     const logs = await composeQuiet(['logs', '--no-color']).catch(() => '')
@@ -216,7 +216,18 @@ try {
   // loopback port-forward is accepting connections. Retry only that transient
   // connection-refused state; a TLS, router, authorization, or render failure
   // still leaves curl non-zero and fails this proof.
-  await run('curl', ['--fail', '--silent', '--show-error', '--retry', '20', '--retry-connrefused', '--retry-delay', '1', '--cacert', localCa, '--resolve', `preview.localtest:${tlsPort}:127.0.0.1`, '-D', headers, '-o', body, `https://preview.localtest:${tlsPort}/en/demo/${previewToken}`])
+  try {
+    await run('curl', ['--fail', '--silent', '--show-error', '--retry', '20', '--retry-connrefused', '--retry-delay', '1', '--cacert', localCa, '--resolve', `preview.localtest:${tlsPort}:127.0.0.1`, '-D', headers, '-o', body, `https://preview.localtest:${tlsPort}/en/demo/${previewToken}`])
+  } catch (error) {
+    // Do not emit environment files, request URLs, or generated credentials.
+    // Service output and state identify a routing/listener failure without
+    // retaining those transport credentials in a durable evidence artifact.
+    const [state, logs] = await Promise.all([
+      composeQuiet(['ps', '--format', 'json']).catch(() => ''),
+      composeQuiet(['logs', '--no-color', 'local-tls', 'web-master', 'program-orchestrator']).catch(() => ''),
+    ])
+    throw new Error(`private preview request failed\n\nCompose listener diagnostics:\n${state}\n${logs}`)
+  }
   assert.match(await readFile(headers, 'utf8'), /x-robots-tag:\s*noindex/i)
   assert.match(await readFile(body, 'utf8'), new RegExp(runMarker))
   await run('curl', ['--fail', '--silent', '--show-error', '--cacert', localCa, `http://127.0.0.1:${orchestratorPort}/readyz`])
