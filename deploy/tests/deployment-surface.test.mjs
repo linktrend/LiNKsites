@@ -58,6 +58,7 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   assert.ok(rehearsal.includes("externalPlatformAdmission: 'not asserted; separate governed prerequisite remains'"))
   assert.ok(rehearsal.includes("W2_04_LOCAL_PROOF_HOST: 'preview.localtest'"), 'the disposable seed must map the same private hostname the proof requests')
   assert.ok(rehearsal.includes("LINKSITES_ADMITTED_TEMPLATE_SHA: '1'.repeat(40)"), 'the disposable admission fixture must use the full SHA recorded in its receipt')
+  assert.ok(rehearsal.includes('env: { ...process.env, ...composeVariables'), 'the rehearsal must override ambient Compose inputs with its generated isolated values')
   assert.ok(overlay.includes('local-proof-web-master-entrypoint.mjs'), 'the disposable renderer must consume the seed-created admission evidence through an explicit proof-only launcher')
   assert.ok(overlay.includes('payload-seed:\n        condition: service_completed_successfully'), 'the disposable renderer must wait for the admission evidence producer')
   assert.ok(rehearsal.includes("['up', '--detach', '--no-build', '--wait'"))

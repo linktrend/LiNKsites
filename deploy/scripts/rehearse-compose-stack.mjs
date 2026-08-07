@@ -69,8 +69,16 @@ const gatewaySecret = random()
 const runMarker = `w2-02-run-${random().slice(0, 16)}`
 const checkpointHash = await checkpoint()
 
-const compose = (args, options = {}) => run('docker', ['compose', '--project-name', project, '--env-file', composeEnv, '-f', 'deploy/docker-compose.deploy.yml', '-f', 'deploy/docker-compose.local-proof.yml', ...args], options)
-const composeQuiet = (args, options = {}) => quiet('docker', ['compose', '--project-name', project, '--env-file', composeEnv, '-f', 'deploy/docker-compose.deploy.yml', '-f', 'deploy/docker-compose.local-proof.yml', ...args], options)
+let composeVariables
+// Compose gives ambient shell variables precedence over --env-file. Every
+// proof value is therefore also passed explicitly to Docker so a developer's
+// old local port/network setting cannot silently change this isolated run.
+const composeOptions = (options = {}) => ({
+  ...options,
+  env: { ...process.env, ...composeVariables, ...(options.env ?? {}) },
+})
+const compose = (args, options = {}) => run('docker', ['compose', '--project-name', project, '--env-file', composeEnv, '-f', 'deploy/docker-compose.deploy.yml', '-f', 'deploy/docker-compose.local-proof.yml', ...args], composeOptions(options))
+const composeQuiet = (args, options = {}) => quiet('docker', ['compose', '--project-name', project, '--env-file', composeEnv, '-f', 'deploy/docker-compose.deploy.yml', '-f', 'deploy/docker-compose.local-proof.yml', ...args], composeOptions(options))
 
 const platformSql = `
 create extension if not exists pgcrypto;
@@ -174,19 +182,32 @@ try {
   await writeFile(runtimeEnv, `${Object.entries(runtimeValues).map(([name, value]) => `${name}=${value}`).join('\n')}\n`, { mode: 0o600 })
   await writeFile(join(runtimeDir, 'program', 'leads.ndjson'), `${JSON.stringify(lead)}\n`, { mode: 0o600 })
   await writeFile(join(runtimeDir, 'program', 'approved-facts.json'), `${JSON.stringify(facts)}\n`, { mode: 0o600 })
-  await writeFile(composeEnv, [
-    `COMPOSE_PROJECT_NAME=${project}`, `LINKSITES_RUNTIME_ENV_FILE=${runtimeEnv}`,
-    'LINKSITES_CMS_IMAGE=linksites-cms:w2-07-local', 'LINKSITES_WEB_MASTER_IMAGE=linksites-web-master:w2-07-local',
-    'LINKSITES_WORKER_IMAGE=linksites-autowork-worker:w2-07-local', 'LINKSITES_ORCHESTRATOR_IMAGE=linksites-program-orchestrator:w2-07-local',
-    'LINKSITES_MIGRATIONS_IMAGE=linksites-migrations:w2-07-local', `LINKSITES_RELEASE_SHA=${sourceRevision}`,
-    `LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA=${platformRevision}`,
-    'PAYLOAD_PUBLIC_SERVER_URL=https://cms.localtest', 'NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.localtest',
-    `LINKLIBRARIES_ARTIFACT_PATH=${libraryPath}`, `TRAEFIK_NETWORK=${project}-edge`, 'TRAEFIK_CMS_HOST=cms.localtest',
-    'TRAEFIK_PREVIEW_HOST=preview.localtest', 'TRAEFIK_ENTRYPOINT=websecure', 'TRAEFIK_CMS_PRIVATE_MIDDLEWARE=local-proof-private',
-    'TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE=local-proof-private', `LINKSITES_LOCAL_PROOF_PLATFORM_BOOTSTRAP=${platformBootstrap}`,
-    `LINKSITES_LOCAL_PROOF_TLS_DIR=${tlsDir}`, `LINKSITES_LOCAL_PROOF_RUNTIME_DIR=${runtimeDir}`,
-    `LINKSITES_LOCAL_PROOF_TLS_PORT=${tlsPort}`, `LINKSITES_LOCAL_PROOF_ORCHESTRATOR_PORT=${orchestratorPort}`,
-  ].join('\n') + '\n', { mode: 0o600 })
+  composeVariables = {
+    COMPOSE_PROJECT_NAME: project,
+    LINKSITES_RUNTIME_ENV_FILE: runtimeEnv,
+    LINKSITES_CMS_IMAGE: 'linksites-cms:w2-07-local',
+    LINKSITES_WEB_MASTER_IMAGE: 'linksites-web-master:w2-07-local',
+    LINKSITES_WORKER_IMAGE: 'linksites-autowork-worker:w2-07-local',
+    LINKSITES_ORCHESTRATOR_IMAGE: 'linksites-program-orchestrator:w2-07-local',
+    LINKSITES_MIGRATIONS_IMAGE: 'linksites-migrations:w2-07-local',
+    LINKSITES_RELEASE_SHA: sourceRevision,
+    LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: platformRevision,
+    PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
+    NEXT_PUBLIC_PAYLOAD_API_URL: 'https://cms.localtest',
+    LINKLIBRARIES_ARTIFACT_PATH: libraryPath,
+    TRAEFIK_NETWORK: `${project}-edge`,
+    TRAEFIK_CMS_HOST: 'cms.localtest',
+    TRAEFIK_PREVIEW_HOST: 'preview.localtest',
+    TRAEFIK_ENTRYPOINT: 'websecure',
+    TRAEFIK_CMS_PRIVATE_MIDDLEWARE: 'local-proof-private',
+    TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE: 'local-proof-private',
+    LINKSITES_LOCAL_PROOF_PLATFORM_BOOTSTRAP: platformBootstrap,
+    LINKSITES_LOCAL_PROOF_TLS_DIR: tlsDir,
+    LINKSITES_LOCAL_PROOF_RUNTIME_DIR: runtimeDir,
+    LINKSITES_LOCAL_PROOF_TLS_PORT: tlsPort,
+    LINKSITES_LOCAL_PROOF_ORCHESTRATOR_PORT: orchestratorPort,
+  }
+  await writeFile(composeEnv, `${Object.entries(composeVariables).map(([name, value]) => `${name}=${value}`).join('\n')}\n`, { mode: 0o600 })
 
   await compose(['config', '--quiet'])
   try {
