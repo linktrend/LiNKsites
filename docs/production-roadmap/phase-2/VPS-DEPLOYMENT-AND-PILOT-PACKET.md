@@ -102,7 +102,7 @@ Use one Principal-approved `LeadResearchPackage` supplied through the manual ada
 1. Submit the input once and let the continuous runtime pull it normally.
 2. Observe without bypassing gates or editing downstream state.
 3. Confirm the Program creates the full Module/Phase/Issue graph and runs independent Issues in safe parallelism.
-4. Confirm real content/media production, immutable working version, provenance, library SHA receipt, Payload draft promotion/read-back, separate private publication, `web-master` render, and validation gates.
+4. Confirm exact-SHA complete template-package consumption, real prospect-specific copy/text adaptation using bundled assets, immutable working version, provenance, library SHA receipt, Payload draft promotion/read-back, separate private publication, `web-master` render, and validation gates.
 5. Confirm one CRM-shaped completion record containing private URL, status, lead/site/correlation IDs, exact content/template/library/artifact revisions, and evidence references.
 6. Submit/replay the same logical input and verify no duplicate site, promotion, deployment, or completion record.
 7. Restart at one safe controlled point or exercise the approved recovery test without corrupting the successful pilot.
@@ -166,4 +166,3 @@ Stop new work and follow the approved rollback/restore procedure on data integri
 - monitoring snapshot and post-test backup proof
 - audit findings/corrections/final PASS
 - exclusions and unresolved non-pilot work
-

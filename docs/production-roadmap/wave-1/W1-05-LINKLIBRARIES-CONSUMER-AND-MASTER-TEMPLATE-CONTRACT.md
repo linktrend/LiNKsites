@@ -11,7 +11,7 @@ Make LiNKsites a governed, SHA-pinned consumer of LiNKlibraries while keeping Li
 
 ## Ownership boundary
 
-**LiNKlibraries owns:** reusable template/component/layout/design-system implementations, reusable vertical assets/copy packs, tested helpers, schemas attached to reusable entries, and version governance.
+**LiNKlibraries owns:** complete reusable vertical-template packages containing template/component/layout/design-system implementations, baseline copy/text, all media/assets required by the template, tested helpers, content schemas, licenses/provenance, and version governance. Initially, LiNKtrend creates these packages through a manual template-production process before LiNKsites consumes them. A future dedicated Program may automate that creation process, but it is not part of the current LiNKsites Program.
 
 **LiNKsites owns:** vertical/package selection rules, compatibility policy, reusable-foundation records, site specifications, reservations/inventory, prospect adaptations, assembly manifests, conversion locks, outcomes, and receipts recording exact library SHAs.
 
@@ -27,7 +27,7 @@ Make LiNKsites a governed, SHA-pinned consumer of LiNKlibraries while keeping Li
 
 1. Add LiNKsites as an explicit supported LiNKlibraries consumer using the library's existing catalog-fetch, entry-select, entry-fetch, and Git-SHA receipt pattern.
 2. Define a master-template library entry contract for `marketing-smb-v1` without falsely labeling incomplete or metadata-only content as production approved.
-3. The entry contract must include executable assets, export/entry point, compatibility/runtime versions, required content schema, optional sections, design tokens, test command, provenance/license fields, version and deprecation policy.
+3. The entry contract must include executable assets, export/entry point, compatibility/runtime versions, required content schema, baseline copy/text, the complete bundled media/asset inventory for the supported vertical/tier, optional sections, design tokens, test command, provenance/license fields, version and deprecation policy. Missing required copy or assets make the package non-selectable; LiNKsites must not compensate by requesting per-prospect generation.
 4. Implement a LiNKsites library client/adapter that:
    - reads an approved catalog reference;
    - resolves only compatible entries;
@@ -69,4 +69,3 @@ Make LiNKsites a governed, SHA-pinned consumer of LiNKlibraries while keeping Li
 ## Evidence and handoff
 
 Report both base/result SHAs, cross-repo compatibility version, entry inventory, executable asset proof, commands/results, pinning receipt example, unresolved migration work for W2-04, and integration order.
-

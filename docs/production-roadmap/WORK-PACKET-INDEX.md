@@ -29,7 +29,7 @@ Wave 1 then uses the [independent audit packet](./audit/WAVE-AUDIT-PACKET.md). W
 
 | Packet | Outcome | Dependencies | Safe parallel lane |
 |---|---|---|---|
-| [W2-01](./wave-2/W2-01-CONTENT-AND-MEDIA-PRODUCTION.md) | Real lead-specific content/media production with provenance | Wave 1 PASS | Content lane |
+| [W2-01](./wave-2/W2-01-TEMPLATE-ASSET-CONSUMPTION-AND-COPY-ADAPTATION.md) | Exact-SHA complete template-package consumption and lead-specific copy/text adaptation | Wave 1 PASS | Template/content-adaptation lane |
 | [W2-02](./wave-2/W2-02-END-TO-END-PROGRAM-ORCHESTRATION.md) | Full first-site Issue graph and durable orchestration | W2-01, W2-03, W2-04 | Runtime lane after prerequisites |
 | [W2-03](./wave-2/W2-03-PAYLOAD-PROMOTION-PUBLICATION-AND-CMS-PROOF.md) | Draft promotion, separate publication, real Payload proof | Wave 1 PASS | CMS/promotion lane |
 | [W2-04](./wave-2/W2-04-MASTER-TEMPLATE-AND-PRIVATE-DEMO.md) | Production master template, real CMS, private/noindex preview | Wave 1 PASS | Frontend lane |

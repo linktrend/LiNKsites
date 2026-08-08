@@ -19,8 +19,8 @@ The exact Module/Phase names must match the accepted canonical definitions. The 
 4. reserve foundation/template inventory
 5. resolve and verify exact LiNKlibraries artifacts
 6. build site specification and assembly manifest
-7. create lead-specific information architecture and copy
-8. source/process media with provenance
+7. verify/materialize the exact complete template package, map lead facts, and adapt its baseline copy/text for the prospect using its bundled assets
+8. verify/process the package's bundled media and any authorized prospect-owned brand assets with provenance
 9. assemble and validate a working-content version
 10. run content, schema, quality, security/privacy, and asset gates
 11. promote the exact accepted version to Payload draft
@@ -69,4 +69,3 @@ Independent ready Issues should run in parallel; unsafe side effects and gates r
 ## Evidence and handoff
 
 Provide graph export/diagram, executor registry, configuration matrix, sample redacted run trace, failure/recovery matrix, test commands/results, exact SHA, and remaining environment requirements for W2-07/Phase 2.
-

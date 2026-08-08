@@ -35,7 +35,7 @@ Program → Module → Phase → Issue → Executor → Run
 ```
 
 - **Program:** LiNKsites as the complete website-production workflow.
-- **Module:** A stable capability area such as intake, content production, assembly, promotion, validation, or preview deployment.
+- **Module:** A stable capability area such as intake, template-package consumption, prospect copy adaptation, assembly, promotion, validation, or preview deployment.
 - **Phase:** A checkpointed group of related Issues inside a Module. “Stage” is not the canonical term and must be removed from active LiNKsites contracts, code, migrations, and live documentation where it means Phase.
 - **Issue:** The atomic schedulable task.
 - **Executor:** The AI agent, LiNKautowork automation, code/script, tool, OSS adapter, or API/MCP adapter that performs an Issue.
@@ -55,7 +55,7 @@ LiNKreach
                                       │
                                       ▼
 LiNKsites continuous pull runtime
-  claim → plan → generate → assemble → promote → validate
+  claim → plan → select/materialize template package → adapt copy → assemble → promote → validate
   → private deploy → CRM demo-complete record
                                       │
                                       ▼
@@ -70,7 +70,7 @@ LiNKsites sale activation                    LiNKsites recycling
   launch evidence                              return foundation to inventory
                      │
                      ▼
-Post-sales Program
+LiNKreach post-sales/customer service
   relationship, service, support, and upsell orchestration
 ```
 
@@ -82,10 +82,11 @@ Post-sales Program
 | Outreach, sale/no-sale decision | LiNKreach | Consumes recorded outcome |
 | Payment and agreement | LiNKreach or its owned workflow | Acts only on LiNKreach's versioned activation authorization; no direct payment integration |
 | Website creation and private preview | LiNKsites | Owns and executes |
+| Reusable template, baseline copy, and template media creation | Manual LiNKtrend template-production process initially; a future dedicated Program may automate it | LiNKsites does not request per-prospect generation; it consumes the complete approved package from LiNKlibraries |
 | Payload content promotion/publication | LiNKsites | Owns controlled technical execution |
 | Domain/DNS/TLS/visibility changes | LiNKsites | Executes after LiNKreach authorization |
 | Unsold-site refactor/recycling | LiNKsites | Executes after LiNKreach outcome |
-| Customer relationship and upsell | Post-sales Program | Requests technical changes through a contract |
+| Customer relationship, support, and upsell | LiNKreach post-sales/customer service | Requests technical changes through a contract |
 | Shared reusable assets | LiNKlibraries | LiNKsites consumes SHA-pinned entries |
 | Automation runtime | LiNKautowork | LiNKsites calls governed gateway/events, never raw n8n as a separate dependency |
 | Org identity, capability and handoff envelope | LiNKplatform | Shared contracts and infrastructure only |
@@ -96,7 +97,7 @@ Post-sales Program
 - Live LiNKreach-owned payment adapters.
 - Pricing, package economics, discounts, contracts, or commercial-frontend implementation.
 - Production customer-domain activation during the first website test.
-- Post-sales workflows.
+- LiNKreach post-sales/customer-service workflows.
 - Customer self-service CMS.
 - Multi-region scaling beyond deployment-readiness seams and documented boundaries.
 
@@ -146,7 +147,7 @@ Payload continues using its own `public` schema through Payload migrations. LiNK
 
 | Location | Owns |
 |---|---|
-| LiNKlibraries | Actual templates, components, layouts, design systems, vertical media/copy packs, tested helpers, metadata, licenses, provenance, and immutable Git versions |
+| LiNKlibraries | Complete versioned vertical-template packages: templates, components, layouts, design systems, baseline copy/text, all template media/assets, tested helpers, content schemas, metadata, licenses, provenance, and immutable Git versions |
 | LiNKsites Factory Catalog | Vertical rules, compatibility, allowed combinations, inventory, reservations, Site Specifications, Assembly Manifests, lifecycle state, and exact LiNKlibraries entry/SHA references |
 | Materialized web-master source | A verified copy of selected library assets used to build the runtime; never an unrecorded fork |
 | Payload | Site-specific content and configuration |
@@ -159,6 +160,7 @@ LiNKsites must not depend on LiNKlibraries at request time. It fetches approved 
 The current `marketing-smb-v1` implementation becomes the first production master template only after it:
 
 - is represented as an approved, substantive LiNKlibraries template entry;
+- includes the complete baseline copy/text and media/assets required by its supported vertical and tier, so LiNKsites does not call a content/media generation Program for each prospect;
 - has deterministic materialization and SHA evidence;
 - reads real Payload content for the certified path;
 - contains no material demo/mock fallback in production;
@@ -195,7 +197,7 @@ This roadmap was prepared against `main` at `78f5d50ab8acbdc38de863895deb337220d
 - No production composition root currently instantiates the Ledger, repositories, executors, intake loop, and external adapters as one continuously operating Program.
 - Phase definitions and gates are incomplete, and some completed execution artifacts still expose legacy `Stage` names at a documented code-compatibility boundary.
 - The CRM pull/claim/completion adapter and the canonical shared envelope are absent.
-- The active Supabase working-content layer is not yet wired through generation, validation, exact-version promotion, and receipts.
+- The active Supabase working-content layer is not yet wired through template-package consumption, prospect copy adaptation, validation, exact-version promotion, and receipts.
 - Promotion logic does not yet prove a complete real Payload draft/read-back/separate-publication path.
 - `web-master` still has mock/fallback behavior and lacks full production browser/quality proof.
 - Current code contains direct raw-n8n boundary drift instead of a governed LiNKautowork adapter.
@@ -230,9 +232,10 @@ The first controlled test uses a file/manual adapter implementing the same inter
 ```text
 Intake validation
   → foundation/template selection
+  → exact-SHA template package verification and materialization
   → Site Specification
   → prospect adaptation
-  → content and media production
+  → lead-fact mapping and copy/text adaptation using bundled template assets
   → Site Assembly Manifest
   → working-content persistence and pre-promotion gates
   → Payload draft promotion
@@ -244,19 +247,20 @@ Intake validation
 
 Each arrow is a dependency and each material side effect is idempotent and receipted.
 
-### 7.3 Content and media production
+### 7.3 Template-bundled assets and prospect copy adaptation
 
-The first path must create real lead-specific content. It may use AI, traditional transformations, approved assets, or external providers through injected adapters. It must record:
+The initial production model does not request new content or media generation for each prospect. At first, LiNKtrend manually creates a vertical template once together with its complete baseline copy/text and media/assets, and stores the approved versioned package in LiNKlibraries. A future dedicated Program may automate that template-production process, but it is not part of the current LiNKsites Program. Template creation is therefore a one-off product-development cost outside the per-website LiNKsites run.
 
-- source lead/research fields;
-- prompt/model/provider/policy versions where AI is used;
-- factual claims and validation results;
-- asset provenance, license, attribution, and tenant ownership;
-- locale and translation lineage;
-- costs and retry counts;
-- exact working-content version produced.
+For each website, LiNKsites must:
 
-Missing facts must not be invented. Unsupported claims fail validation or remain omitted. Placeholder text, fake testimonials, fake addresses, fake certifications, and unlicensed media fail the production gate.
+- consume the exact approved LiNKlibraries template/package SHA and verify its complete inventory, integrity, compatibility, licenses, and provenance;
+- map the verified `LeadResearchPackage` facts into the package's content schema;
+- modify/adapt the package's baseline copy and text for the specific prospect without inventing facts;
+- use the package's bundled media/assets, plus only verified prospect-owned brand assets when supplied and authorized;
+- create a new immutable Supabase working-content version recording source lead/research fields, baseline package and asset SHAs, copy modifications, factual-claim validation, locale/translation lineage, costs/retries, and resulting checksum;
+- fail closed when a required asset, field, fact, license, or package component is absent instead of initiating an ungoverned per-prospect generation request.
+
+Placeholder text, fake testimonials, fake addresses, fake certifications, unsupported claims, unlicensed media, or an incomplete template package fail the production gate.
 
 ### 7.4 LiNKautowork boundary
 
@@ -310,7 +314,7 @@ Wave 1 closes only after integration and a Codex Sol Medium audit returns `PASS`
 
 Wave 2 implements:
 
-- real content/media production;
+- complete template-package consumption and real prospect-specific copy/text adaptation using bundled assets;
 - deterministic assembly and end-to-end orchestration;
 - authenticated Payload draft promotion and separate publication;
 - final master template and private preview controls;
@@ -464,7 +468,7 @@ W1-02 + W1-03 + W1-04 + W1-05
       └── Sol Wave 1 audit → corrections until PASS
 
 Wave 1 PASS
- ├── W2-01 content/media production
+ ├── W2-01 template-asset consumption/copy adaptation
  ├── W2-03 Payload promotion/publication
  ├── W2-04 master template/private demo
  └── W2-05 LiNKautowork adapter/events
@@ -512,8 +516,8 @@ These do not change the approved architecture. They are environment/business inp
 | LiNKlibraries repository access and approval workflow | W1-05/W2-04 | Blocks substantive cross-repository template completion |
 | Actual CRM vendor/API and LiNKreach field mapping | Continuous operation after the manual pilot | Does not block the contract-identical manual pilot; blocks claiming live CRM integration complete |
 | LiNKautowork signed gateway/event specification and credentials | W2-05 live proof/Phase 2 | Local contract/outbox proof can proceed; live delivery cannot be claimed |
-| Approved AI/content/media providers, models, policies, budgets, and credentials | W2-01/Phase 2 | Blocks real provider execution; deterministic adapters and tests alone are not live proof |
-| Content/media retention, privacy, and license policy | W1-04/W2-01/W2-06 | Blocks final data/RLS/recycling gates |
+| Approved complete LiNKlibraries vertical-template package, including baseline copy/text, bundled media/assets, schemas, licenses, and provenance | W1-05/W2-01/W2-04 | Blocks the real first-site path; LiNKsites does not substitute per-prospect content/media generation |
+| Working-content, prospect-asset, retention, privacy, and license policy | W1-04/W2-01/W2-06 | Blocks final data/RLS/recycling gates |
 | VPS inventory, access, hostnames, ports, backup location, and maintenance window | Phase 2 | Blocks deployment only |
 | Cloudflare zone/access method and approved private-preview authentication | Phase 2 | Blocks external TLS/private-preview proof |
 | Principal-approved first lead/research package | Phase 2 pilot | Blocks the one-website test |
@@ -527,7 +531,7 @@ The master must surface any missing item at the packet that first requires it. I
 The first deployed website completion test passes only when one manually supplied, schema-valid lead/research package produces all of the following through the real deployed LiNKsites Program:
 
 - one claimed and completed Program workflow with no duplicate side effects;
-- one complete Home Services / Standard website using the approved master template and real lead-specific content;
+- one complete Home Services / Standard website using the approved master-template package, its bundled assets, and real lead-specific adapted copy;
 - versioned Supabase working records and complete provenance;
 - authenticated Payload draft promotion and separate publication receipt;
 - a private, access-controlled, noindex URL served by web-master on the VPS;

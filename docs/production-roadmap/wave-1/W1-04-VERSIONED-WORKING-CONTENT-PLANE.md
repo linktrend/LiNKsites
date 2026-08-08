@@ -34,7 +34,7 @@ Use the existing active model where sound; extend rather than create a competing
 - parent/base version and author/executor identity
 - structured page/section/content payload
 - asset and LiNKlibraries SHA references
-- provenance for factual claims, generated copy, and media
+- provenance for factual claims, template-baseline-to-prospect copy adaptations, bundled template assets, and any authorized prospect-owned brand assets
 - deterministic content checksum
 - lifecycle state such as `working`, `ready_for_gate`, `accepted`, `promoted`, `superseded`, `rejected`
 - gate/evidence references
@@ -77,4 +77,3 @@ Use the existing active model where sound; extend rather than create a competing
 ## Evidence and handoff
 
 Provide generated migration names, schema/lineage diagram, RLS test evidence, repository API, legacy-path classification, exact SHA, and the promotion input contract for W2-03.
-
