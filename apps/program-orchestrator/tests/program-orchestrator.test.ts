@@ -57,7 +57,7 @@ test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durab
     const first = await ingress.accept(request)
     assert.equal(first.outcome, 'no_sale')
     assert.equal((await createFileLifecycleStore(directory).getBySiteId('org_demo', 'site_demo'))?.lifecycleId, first.lifecycleId)
-    await assert.rejects(ingress.accept({ ...request, nonce: 'forged-nonce', envelope: { ...request.envelope, signature: { ...request.envelope.signature, signature: 'forged' } } }), /invalid_signature/i)
+    await assert.rejects(ingress.accept({ ...request, nonce: 'forged-nonce', envelope: { ...request.envelope, signature: { ...request.envelope.signature, signature: 'a'.repeat(64) } } }), /invalid_signature/i)
     const asserted = gateway.buildRequest('commercial.outcome.recorded', 'org_demo', 'corr-outcome', 'outcome:asserted', { lead_id: 'lead_asserted', site_id: 'site_asserted', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-asserted', outcome_event_id: 'commercial-event-asserted', outcome_nonce: 'nonce-asserted', recorded_at: '2026-08-04T00:10:00.000Z' } })
     const { signature: _signature, ...unsigned } = asserted.envelope
     // An accepted transport acknowledgement is structurally complete only
