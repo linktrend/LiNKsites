@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
-import { spawn } from 'node:child_process'
-import { createHmac } from 'node:crypto'
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
+import { execFileSync, spawn } from 'node:child_process'
+import { createHash, createHmac } from 'node:crypto'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -26,6 +26,26 @@ const approvedFacts = (id: string) => ({
   pricing: 'Contact for an approved quote', legalClaims: ['Founder-approved legal copy'], media: [],
 })
 const outcomeGatewayFixture = { commercialOutcomeGatewaySecret: 'test-only-outcome-gateway-secret', commercialOutcomeGatewayKeyId: 'test-only-outcome-gateway-key' }
+
+type LibraryFixture = { repositoryPath: string; commitSha: string; catalogChecksum: string; entryChecksum: string }
+let libraryFixturePromise: Promise<LibraryFixture> | undefined
+
+/** A disposable Git fixture keeps program tests portable; production still consumes its release-manifest pin. */
+const localLibraryFixture = (): Promise<LibraryFixture> => libraryFixturePromise ??= (async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'linksites-library-fixture-'))
+  const repositoryPath = join(directory, 'repository')
+  const source = join(new URL('.', import.meta.url).pathname, '../../packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1')
+  await cp(source, join(repositoryPath, 'entries/marketing-smb-v1'), { recursive: true })
+  await mkdir(join(repositoryPath, 'indexes'), { recursive: true })
+  await writeFile(join(repositoryPath, 'indexes/catalog.json'), `${JSON.stringify({ schemaVersion: 1, entries: [{ entryId: 'marketing-smb-v1', status: 'approved' }] }, null, 2)}\n`)
+  execFileSync('git', ['init', repositoryPath], { stdio: 'ignore' })
+  execFileSync('git', ['-C', repositoryPath, 'add', '.'], { stdio: 'ignore' })
+  execFileSync('git', ['-C', repositoryPath, '-c', 'user.name=LiNKsites test', '-c', 'user.email=test@invalid.test', 'commit', '-m', 'fixture'], { stdio: 'ignore' })
+  const commitSha = execFileSync('git', ['-C', repositoryPath, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+  const catalogChecksum = createHash('sha256').update(await readFile(join(repositoryPath, 'indexes/catalog.json'), 'utf8')).digest('hex')
+  const entryChecksum = createHash('sha256').update(await readFile(join(repositoryPath, 'entries/marketing-smb-v1/entry.json'), 'utf8')).digest('hex')
+  return { repositoryPath, commitSha, catalogChecksum, entryChecksum }
+})()
 
 test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durable lifecycle path and reject forged signatures', async () => {
   const authorization: LiNKreachAuthorizationVerifier = { verify: async () => true }
@@ -54,6 +74,7 @@ test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durab
 
 async function composition(id = 'lead-local-001') {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-'))
+  const library = await localLibraryFixture()
   const docs = new Map<string, Record<string, unknown>>()
   const payload = createServer(async (request, response) => {
     const url = new URL(request.url ?? '/', 'http://127.0.0.1')
@@ -79,7 +100,7 @@ async function composition(id = 'lead-local-001') {
   const web = createServer((_request, response) => { response.writeHead(200, { 'content-type': 'text/html', 'x-robots-tag': 'noindex, nofollow', 'cache-control': 'private, no-store' }); response.end('<main data-private-preview="true" data-route="/"><h1>Private preview</h1></main>') })
   await new Promise<void>((resolve) => web.listen(0, '127.0.0.1', resolve))
   const webPort = (web.address() as import('node:net').AddressInfo).port
-  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'test-preview-token' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, libraryRepositoryPath: library.repositoryPath, libraryCommitSha: library.commitSha, libraryCatalogChecksum: library.catalogChecksum, libraryEntryChecksum: library.entryChecksum, payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'test-preview-token' }
   await writeFile(config.approvedFactsPath, JSON.stringify(approvedFacts(id)))
   const value = await createProductionComposition(config, { outcomeAuthorization: { verify: async () => true } })
   const close = value.close
