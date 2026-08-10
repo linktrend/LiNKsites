@@ -268,7 +268,13 @@ export class FileWorkIntakePort implements WorkIntakePort {
 
 /** Governed manual writer: only canonical, tenant-scoped lead packages enter NDJSON. */
 export class ManualWorkIntakeWriter {
-  constructor(private readonly inputPath: string, private readonly orgId: string) {}
+  private readonly inputPath: string
+  private readonly orgId: string
+
+  constructor(inputPath: string, orgId: string) {
+    this.inputPath = inputPath
+    this.orgId = orgId
+  }
 
   async append(envelope: LeadResearchPackage): Promise<void> {
     if (!isLeadResearchPackage(envelope) || envelope.org_id !== this.orgId) throw new Error('manual intake writer rejected a non-canonical or foreign lead package')
