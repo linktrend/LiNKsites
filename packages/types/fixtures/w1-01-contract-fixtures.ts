@@ -97,7 +97,7 @@ export const validLiNKautoworkEvent: LiNKautoworkEventEnvelope = {
   signature: {
     algorithm: 'hmac-sha256',
     key_id: 'key-001',
-    signature: 'signature-001',
+    signature: 'a'.repeat(64),
   },
   delivery_attempt: 1,
   acknowledgement: { status: 'accepted', acknowledged_at: '2026-08-04T00:21:00.000Z' },
