@@ -14,9 +14,10 @@ import { closeLocalDatabase, openLocalDatabase } from './local-database.ts'
 import { LiNKautoworkGateway, type GatewayTransport } from '@linksites/autowork-boundary'
 import { createFileLifecycleStore, createPostgresLifecycleStore, SiteLifecycleService, type LifecycleEvidenceVerifier, type VerifiedRecycleEvidence } from '@linksites/factory-catalog'
 import { CommercialOutcomeIngress, VerifiedGatewayOutcomeAuthorization } from './commercial-outcome-ingress.ts'
+import { LeadResearchIngress } from './lead-research-ingress.ts'
 import { PostgresCompletionSink, PostgresRuntimeStateStore, PostgresWorkIntakePort, type PostgresRuntimeDependencies, type PostgresExecutor } from './postgres-runtime.ts'
 
-export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; commercialOutcomeIngress: CommercialOutcomeIngress; close: () => Promise<void> }
+export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; commercialOutcomeIngress: CommercialOutcomeIngress; leadResearchIngress?: LeadResearchIngress; close: () => Promise<void> }
 
 function repositoryRoot(): string { return process.env.LINKSITES_REPOSITORY_ROOT ?? execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim() }
 function actualRevision(): string {
@@ -97,7 +98,10 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   const dependencies = createLocalDependencyPorts(adapters, completionSink)
   const noOutboundTransport: GatewayTransport = async () => { throw new Error('W2-06 inbound verifier does not send gateway events') }
   const environment = validated.mode === 'production' ? 'production' : 'development' as const
-  const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment, transport: noOutboundTransport, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [validated.orgId], environments: [environment] }] })
+  const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment, transport: noOutboundTransport, policies: [
+    { eventName: 'lead.research.ready', orgIds: [validated.orgId], environments: [environment] },
+    { eventName: 'commercial.outcome.recorded', orgIds: [validated.orgId], environments: [environment] },
+  ] })
   // A composition without a real LiNKreach authorization port is safely
   // runnable for the W2-02 preview graph, but can never persist an outcome.
   const lifecycleEvidence: LifecycleEvidenceVerifier = {
@@ -123,11 +127,12 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   const gatewayAuthorization = new VerifiedGatewayOutcomeAuthorization(outcomeDependencies?.outcomeAuthorization)
   const lifecycle = new SiteLifecycleService(lifecycleStore, gatewayAuthorization, undefined, lifecycleEvidence)
   const commercialOutcomeIngress = new CommercialOutcomeIngress(lifecycle, gateway, gatewayAuthorization)
+  const leadResearchIngress = production ? new LeadResearchIngress(gateway, intake as PostgresWorkIntakePort) : undefined
   const runtime = new ProgramRuntime(runtimeConfig, ledger, adapters, executors, dependencies)
   runtime.bindCommercialOutcomeIngress(commercialOutcomeIngress)
   if (!(await ledger.isAvailable())) throw new Error('W2-02 durable ledger is unavailable')
   let closed = false
-  return { config: runtimeConfig, ledger, adapters, dependencies, executors, intake, completionSink, runtime, commercialOutcomeIngress, close: async () => {
+  return { config: runtimeConfig, ledger, adapters, dependencies, executors, intake, completionSink, runtime, commercialOutcomeIngress, leadResearchIngress, close: async () => {
     if (closed) return
     closed = true
     if (production) await postgres?.close?.()

@@ -15,7 +15,7 @@ Replace direct raw-n8n coupling with the intended LiNKautowork gateway/event bou
 2. Implement the canonical `LiNKautoworkEventEnvelope` adapter using the approved signed gateway/event contract: authentication/signature, timestamp/nonce or replay protection, correlation/idempotency key, timeout, bounded retry, acknowledgement, and delivery receipt.
 3. LiNKsites may invoke only pre-integrated LiNKautowork automations/events authorized for its organization and environment. It must not discover or run arbitrary n8n workflows.
 4. Define production-ready CRM pull/claim/completion ports and one reference adapter or contract-test harness. The concrete CRM vendor may remain configurable/undecided; business logic must not depend on vendor fields.
-5. Maintain the manual/file adapter for the first production test. It must enter/exit at the same canonical contract boundary and generate a CRM-shaped completion artifact.
+5. Maintain the manual/file adapter for the first production test. It must enter/exit at the same canonical contract boundary and generate a CRM-shaped completion artifact. In production, the `lead.research.ready` package is carried inside the signed LiNKautowork event and accepted only by the internal orchestrator ingress; the package metadata must equal the signed event metadata.
 6. Implement outbound queue/outbox or equivalent durable delivery so a process crash cannot lose or duplicate logical events.
 7. Redact/sign safely: secrets never enter payload logs/evidence; invalid signatures and stale/replayed messages fail closed.
 8. Remove Stripe and Odoo direct client assumptions from LiNKsites active runtime/configuration. Commercial systems remain behind LiNKreach authorization contracts.
@@ -45,4 +45,3 @@ Replace direct raw-n8n coupling with the intended LiNKautowork gateway/event bou
 ## Evidence and handoff
 
 Provide integration inventory before/after, event contract version, redacted signed examples, failure/replay test results, exact SHA, external configuration names, and any live credential/network proof deferred explicitly to Phase 2.
-

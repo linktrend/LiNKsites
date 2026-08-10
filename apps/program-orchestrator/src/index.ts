@@ -6,6 +6,7 @@ export * from './runtime.ts'
 export * from './executors.ts'
 export * from './composition.ts'
 export * from './intake.ts'
+export * from './lead-research-ingress.ts'
 export * from './commercial-outcome-ingress.ts'
 
 if (import.meta.url === `file://${process.argv[1]}`) {

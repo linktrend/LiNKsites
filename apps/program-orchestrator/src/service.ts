@@ -29,6 +29,21 @@ const cycle = async () => {
 
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1')
+  if (request.method === 'POST' && url.pathname === '/ingress/lead-research') {
+    const chunks: Buffer[] = []
+    for await (const chunk of request) chunks.push(Buffer.from(chunk))
+    try {
+      if (!composition.leadResearchIngress) throw new Error('production intake ingress is unavailable outside production mode')
+      const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as unknown
+      if (!body || typeof body !== 'object' || !('envelope' in body) || !('timestamp' in body) || !('nonce' in body)) throw new Error('invalid gateway request')
+      const intake = await composition.leadResearchIngress.accept(body as Parameters<typeof composition.leadResearchIngress.accept>[0])
+      response.writeHead(202, { 'content-type': 'application/json', 'cache-control': 'no-store' })
+      response.end(JSON.stringify({ status: 'accepted', itemId: intake.itemId }))
+    } catch {
+      response.writeHead(401, { 'content-type': 'application/json', 'cache-control': 'no-store' }).end(JSON.stringify({ error: 'authenticated lead research rejected' }))
+    }
+    return
+  }
   if (request.method === 'POST' && url.pathname === '/ingress/commercial-outcome') {
     const chunks: Buffer[] = []
     for await (const chunk of request) chunks.push(Buffer.from(chunk))

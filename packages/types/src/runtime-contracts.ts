@@ -93,6 +93,12 @@ export type LiNKautoworkEventPayload = {
   lead_id: string
   site_id: string
   submission?: Record<string, string | number | boolean>
+  /**
+   * Present only on the signed `lead.research.ready` intake event.  Keeping
+   * the canonical package inside the signed envelope prevents an HTTP caller
+   * from attaching an unverified research object beside a valid gateway event.
+   */
+  lead_research?: LeadResearchPackage
 }
 
 export type EventAcknowledgement = {
@@ -373,10 +379,11 @@ const isEventPayload = (
   value: unknown,
 ): value is LiNKautoworkEventPayload =>
   isRecord(value) &&
-  hasExactKeys(value, ['lead_id', 'site_id'], ['submission']) &&
+  hasExactKeys(value, ['lead_id', 'site_id'], ['submission', 'lead_research']) &&
   isCanonicalReference(value.lead_id) &&
   isCanonicalReference(value.site_id) &&
-  (value.submission === undefined || (isRecord(value.submission) && Object.values(value.submission).every((entry) => (typeof entry === 'string' && !isSensitiveString(entry)) || typeof entry === 'number' || typeof entry === 'boolean')))
+  (value.submission === undefined || (isRecord(value.submission) && Object.values(value.submission).every((entry) => (typeof entry === 'string' && !isSensitiveString(entry)) || typeof entry === 'number' || typeof entry === 'boolean))) &&
+  (value.lead_research === undefined || isLeadResearchPackage(value.lead_research))
 
 const isEventName = (value: unknown): value is LiNKautoworkEventName =>
   value === 'contact.submitted' ||
