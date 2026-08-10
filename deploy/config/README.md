@@ -24,7 +24,8 @@ formats, and safe redacted fingerprints. It never prints values.
 | `PAYLOAD_BASE_URL` | LiNKsites operations | no | web-master | non-loopback HTTPS URL | rebuild image when public bundle changes |
 | `NEXT_PUBLIC_PAYLOAD_API_URL` | LiNKsites operations | no | web-master | non-loopback HTTPS URL | rebuild image when public bundle changes |
 | `PAYLOAD_API_KEY` | CMS owner | yes | web-master | 32+ chars | rotate server process after CMS grants replacement key |
-| `W2_02_MODE` | LiNKsites program owner | no | orchestrator | exact `local` | no rotation; non-local execution is refused |
+| `PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | web-master | 32+ chars | rotate the application-level private preview token and restart web-master |
+| `W2_02_MODE` | LiNKsites program owner | no | orchestrator | exact `production` | non-production execution is refused by the deployment contract |
 | `W2_02_ORG_ID` | LiNKsites program owner | no | orchestrator | identifier | stop intake and re-authorize tenancy |
 | `W2_02_EXECUTION_REVISION` | release process | no | orchestrator | full Git SHA equal to release | rebuild/redeploy with exact release |
 | `W2_02_EXECUTABLE_CHECKPOINT` | release process | no | orchestrator | SHA-256 of executable inputs | rebuild/redeploy with exact release |
@@ -37,7 +38,7 @@ formats, and safe redacted fingerprints. It never prints values.
 | `W2_02_PAYLOAD_API_KEY` | CMS owner | yes | orchestrator | 32+ chars | issue scoped replacement key then restart |
 | `W2_02_PAYLOAD_SITE_ID` | LiNKsites program owner | no | orchestrator | scoped Payload site identifier | tenancy review then restart |
 | `W2_02_WEB_MASTER_BASE_URL` | LiNKsites operations | no | orchestrator | private non-loopback HTTPS URL | prove private preview readiness before restart |
-| `W2_02_PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | orchestrator | 32+ chars | rotate privacy-wall token and restart |
+| `W2_02_PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | orchestrator | 32+ chars | must be the same protected token supplied to web-master as `PREVIEW_ACCESS_TOKEN` |
 | `W2_05_OUTCOME_GATEWAY_SECRET` | LiNKreach/LiNKautowork | yes | orchestrator | 32+ chars | dual-key overlap then restart |
 | `W2_05_OUTCOME_GATEWAY_KEY_ID` | LiNKreach/LiNKautowork | no | orchestrator | identifier | must name accepted gateway key |
 | `W2_02_LIBRARY_REPOSITORY_PATH` | LiNKsites operations | no | orchestrator | read-only absolute artifact mount | release only a verified immutable library artifact |
@@ -49,11 +50,11 @@ and must be supplied by the Phase 2 protected deployment environment.
 | Name | Owner | Secret | Required by | Format | Rotation effect |
 |---|---|---:|---|---|---|
 | `LINKSITES_RUNTIME_ENV_FILE` | LiNKsites operations | yes | Compose host | protected absolute env-file path | validate then recreate affected services |
-| `LINKSITES_CMS_IMAGE` | release process | no | Compose CMS | immutable `name@sha256:` image reference | new release deployment |
-| `LINKSITES_WEB_MASTER_IMAGE` | release process | no | Compose web-master | immutable `name@sha256:` image reference | new release deployment |
-| `LINKSITES_WORKER_IMAGE` | release process | no | Compose worker and Payload migration | immutable `name@sha256:` image reference | new release deployment |
-| `LINKSITES_ORCHESTRATOR_IMAGE` | release process | no | Compose orchestrator | immutable `name@sha256:` image reference | new release deployment |
-| `LINKSITES_MIGRATIONS_IMAGE` | release process | no | Compose Supabase migration | immutable `name@sha256:` image reference | one-shot, exact release only |
+| `LINKSITES_CMS_IMAGE` | release process | no | Compose CMS | exact immutable `name@sha256:` reference from the release manifest | new release deployment |
+| `LINKSITES_WEB_MASTER_IMAGE` | release process | no | Compose web-master | exact immutable `name@sha256:` reference from the release manifest | new release deployment |
+| `LINKSITES_WORKER_IMAGE` | release process | no | Compose worker and Payload migration | exact immutable `name@sha256:` reference from the release manifest | new release deployment |
+| `LINKSITES_ORCHESTRATOR_IMAGE` | release process | no | Compose orchestrator | exact immutable `name@sha256:` reference from the release manifest | new release deployment |
+| `LINKSITES_MIGRATIONS_IMAGE` | release process | no | Compose Supabase migration | exact immutable `name@sha256:` reference from the release manifest | one-shot, exact release only |
 | `LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA` | LiNKplatform release authority | no | migration job and manifest | authoritative full 40-character Git SHA | external governed admission required |
 | `LINKLIBRARIES_ARTIFACT_PATH` | LiNKlibraries release process | no | orchestrator mount | read-only absolute artifact directory | remount only an approved immutable artifact |
 | `TRAEFIK_NETWORK` | infrastructure operator | no | Compose edge | existing external Docker network name | coordinated proxy maintenance |
@@ -68,4 +69,7 @@ and must be supplied by the Phase 2 protected deployment environment.
 No default credentials, localhost URLs, fixture mode, raw webhooks, or mock
 content are valid in this contract. The Phase 2 operator creates the protected
 runtime file and runs `node deploy/scripts/validate-runtime-config.mjs SERVICE`
-before compose can start any service.
+before compose can start any service. `deploy/scripts/preflight.sh` also compares
+all five `LINKSITES_*_IMAGE` values byte-for-byte with the corresponding
+manifest digest and rejects tags, placeholders, missing paths, and missing
+Traefik inputs before invoking Compose.

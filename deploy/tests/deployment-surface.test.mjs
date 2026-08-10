@@ -50,6 +50,24 @@ test('manifest and Compose name the same five deployable images', async () => {
   assert.ok(manifest.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA'))
 })
 
+test('deployment contract binds preview token, production mode, and smoke topology', async () => {
+  const contract = await read('deploy/config/runtime-contract.mjs')
+  const preflight = await read('deploy/scripts/preflight.sh')
+  const smoke = await read('deploy/scripts/postdeploy-smoke.sh')
+  const example = await read('deploy/config/production.env.example')
+  assert.ok(contract.includes("required('PREVIEW_ACCESS_TOKEN', 'secret-min-32', true)"))
+  assert.ok(contract.includes("required('W2_02_MODE', 'literal:production')"))
+  assert.ok(example.includes('PREVIEW_ACCESS_TOKEN=<secret-manager-value-at-least-32-characters>'))
+  assert.ok(smoke.includes('http://payload:3000/api/readyz'))
+  assert.ok(smoke.includes('http://program-orchestrator:3000/readyz'))
+  assert.ok(smoke.includes('process.env.PREVIEW_ACCESS_TOKEN'))
+  assert.ok(!smoke.includes('LINKSITES_PREVIEW_SMOKE_URL'))
+  for (const name of ['LINKSITES_CMS_IMAGE', 'LINKSITES_WEB_MASTER_IMAGE', 'LINKSITES_WORKER_IMAGE', 'LINKSITES_ORCHESTRATOR_IMAGE', 'LINKSITES_MIGRATIONS_IMAGE']) {
+    assert.ok(preflight.includes(name), `preflight binds ${name}`)
+  }
+  assert.ok(preflight.includes('does not exist on the deployment host'))
+})
+
 test('local Compose rehearsal is an explicit disposable overlay of the deploy bundle', async () => {
   const overlay = await read('deploy/docker-compose.local-proof.yml')
   const rehearsal = await read('deploy/scripts/rehearse-compose-stack.mjs')

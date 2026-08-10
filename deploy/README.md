@@ -9,7 +9,7 @@ VPS, cloud account, DNS provider, Traefik host, or public domain.
 3. Create the protected runtime file from `config/production.env.example`.
 4. Run `pnpm deploy:preflight -- <runtime-env-file> <release-manifest>`.
 5. Follow [OPERATIONS.md](./OPERATIONS.md) for ordered migration, private
-   startup, smoke checks, backup verification, incidents, and rollback.
+   startup, internal-topology smoke checks, backup verification, incidents, and rollback.
 
 The Compose file fails closed on absent values. It has an internal service
 network and an existing external Traefik edge network; its routers name

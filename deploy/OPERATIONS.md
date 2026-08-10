@@ -20,7 +20,11 @@ activation is a separate LiNKreach-authorized Phase 2 operation.
 4. Confirm the named Traefik network and privacy middlewares already exist.
 5. Run the one-shot `supabase-migrate`, then `payload-migrate`; neither may be
    bypassed. The first requires a verified Platform migration SHA.
-6. Start the long-running services and run private readiness smokes.
+6. Start the long-running services and run
+   `deploy/scripts/postdeploy-smoke.sh <protected-runtime-env-file>`. The
+   script executes from `web-master` over Compose service DNS and localhost;
+   it reads the protected preview token inside the container and never accepts
+   or logs a token-bearing URL.
 7. Do not expose a public DNS name or publish Payload content in this procedure.
 
 ## Backup, retention, and restore

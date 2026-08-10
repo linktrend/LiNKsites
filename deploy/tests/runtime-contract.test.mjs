@@ -53,6 +53,12 @@ test('rejects fixture mode and placeholders', () => {
   assert.ok(result.errors.some((error) => error.name === 'PAYLOAD_API_KEY'))
 })
 
+test('rejects preview token drift between web-master and orchestrator interfaces', () => {
+  const result = validateRuntimeConfig({ ...base, W2_02_PREVIEW_ACCESS_TOKEN: 'different-' + secret }, 'web-master')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'PREVIEW_ACCESS_TOKEN'))
+})
+
 test('accepts a valid first numeric Payload document ID and rejects an invalid one', () => {
   assert.equal(validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '1' }, 'program-orchestrator').ok, true)
   const result = validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '0' }, 'program-orchestrator')
