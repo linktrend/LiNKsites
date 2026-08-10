@@ -408,7 +408,10 @@ test('Stripe webhook secrets and payment processor IDs fail closed across canoni
     ['event', isLiNKautoworkEventEnvelope, rejectedEvent, [
       ['org_id'], ['correlation_id'], ['idempotency_key'], ['event_id'],
       ['payload', 'lead_id'], ['payload', 'site_id'], ['signature', 'key_id'],
-      ['signature', 'signature'], ['acknowledgement', 'reason'],
+      // The digest is not business content: it has a separate strict
+      // hexadecimal HMAC contract, so opaque-control substitutions are not
+      // valid values for this field.
+      ['acknowledgement', 'reason'],
     ]],
     ['evidence', isEvidenceReceipt, validEvidenceReceipt, [
       ['org_id'], ['correlation_id'], ['idempotency_key'], ['receipt_id'], ['producer'],
