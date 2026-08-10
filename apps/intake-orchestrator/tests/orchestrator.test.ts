@@ -91,6 +91,7 @@ class TestIntake implements WorkIntakePort {
   readonly items: Array<{ itemId: string; envelope: unknown }> = []
   readonly claims: IntakeClaim[] = []
   readonly acknowledgements: Array<{ itemId: string; acknowledgement: IntakeAcknowledgement }> = []
+  readonly rejections: Array<{ itemId: string; reasonCode: string }> = []
   private readonly states = new Map<string, { state: string; nextAttemptAt?: string; attemptNumber?: number }>()
 
   add(itemId: string, envelope: unknown): void {
@@ -135,6 +136,11 @@ class TestIntake implements WorkIntakePort {
       attemptNumber: acknowledgement.attemptNumber,
     })
     this.acknowledgements.push({ itemId, acknowledgement })
+  }
+
+  async reject(itemId: string, reasonCode: string): Promise<void> {
+    this.states.set(itemId, { state: 'rejected' })
+    this.rejections.push({ itemId, reasonCode })
   }
 }
 
