@@ -11,9 +11,9 @@ export * from './commercial-outcome-ingress.ts'
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const { configFromEnvironment, createProductionComposition } = await import('./composition.ts')
-  const { runFirstReadyFileLead } = await import('./intake.ts')
+  const { runFirstReadyLead } = await import('./intake.ts')
   const config = configFromEnvironment(process.env, process.cwd())
   const composition = await createProductionComposition(config)
-  await runFirstReadyFileLead(composition)
+  await runFirstReadyLead(composition)
   console.log(JSON.stringify({ status: 'completed', health: await composition.runtime.health() }))
 }

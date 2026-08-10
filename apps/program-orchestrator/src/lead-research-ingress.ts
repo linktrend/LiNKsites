@@ -21,6 +21,11 @@ export class LeadResearchIngress {
     if (!lead || lead.org_id !== event.org_id || lead.lead_id !== event.payload.lead_id || lead.correlation_id !== event.correlation_id || lead.idempotency_key !== event.idempotency_key) {
       throw new Error('lead research intake event does not bind its canonical package to the signed event')
     }
-    return this.intake.submit(lead as LeadResearchPackage)
+    const submission = await this.intake.submit(lead as LeadResearchPackage)
+    // Database-backed idempotency survives a process restart. Treat a second
+    // delivery of the same signed event as a rejected replay, rather than an
+    // indistinguishable successful intake acknowledgement.
+    if (!submission.accepted) throw new Error('lead research intake replay was rejected')
+    return submission
   }
 }

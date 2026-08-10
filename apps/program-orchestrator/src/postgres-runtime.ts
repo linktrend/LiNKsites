@@ -127,13 +127,14 @@ export class PostgresWorkIntakePort implements WorkIntakePort {
     if (!isLeadResearchPackage(envelope)) throw new Error('W2-02 intake submission failed canonical LeadResearchPackage validation')
     if (envelope.org_id !== this.orgId) throw new Error('W2-02 intake submission org does not match the runtime tenant')
     const itemId = `intake:${createHash('sha256').update(`${envelope.org_id}:${envelope.idempotency_key}`).digest('hex')}`
-    await this.db.query(
+    const result = await this.db.query(
       `insert into lsites_ledger.program_intake (org_id, item_id, lead_id, idempotency_key, envelope, state)
        values ($1,$2,$3,$4,$5,'ready')
-       on conflict (org_id, idempotency_key) do nothing`,
+       on conflict (org_id, idempotency_key) do nothing
+       returning item_id`,
       [this.orgId, itemId, envelope.lead_id, envelope.idempotency_key, JSON.stringify(envelope)],
     )
-    return { itemId, accepted: true }
+    return { itemId, accepted: result.rows.length === 1 }
   }
 }
 
