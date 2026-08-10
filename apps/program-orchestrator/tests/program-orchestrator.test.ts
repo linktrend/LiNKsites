@@ -34,7 +34,7 @@ let libraryFixturePromise: Promise<LibraryFixture> | undefined
 const localLibraryFixture = (): Promise<LibraryFixture> => libraryFixturePromise ??= (async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-library-fixture-'))
   const repositoryPath = join(directory, 'repository')
-  const source = join(new URL('.', import.meta.url).pathname, '../../packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1')
+  const source = join(new URL('.', import.meta.url).pathname, '../../../packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1')
   await cp(source, join(repositoryPath, 'entries/marketing-smb-v1'), { recursive: true })
   await mkdir(join(repositoryPath, 'indexes'), { recursive: true })
   await writeFile(join(repositoryPath, 'indexes/catalog.json'), `${JSON.stringify({ schemaVersion: 1, entries: [{ entryId: 'marketing-smb-v1', status: 'approved' }] }, null, 2)}\n`)
