@@ -46,6 +46,9 @@ formats, and safe redacted fingerprints. It never prints values.
 | `W2_05_OUTCOME_GATEWAY_SECRET` | LiNKreach/LiNKautowork | yes | orchestrator | 32+ chars | dual-key overlap then restart |
 | `W2_05_OUTCOME_GATEWAY_KEY_ID` | LiNKreach/LiNKautowork | no | orchestrator | identifier | must name accepted gateway key |
 | `W2_02_LIBRARY_REPOSITORY_PATH` | LiNKsites operations | no | orchestrator | read-only absolute artifact mount | release only a verified immutable library artifact |
+| `W2_02_LIBRARY_COMMIT_SHA` | LiNKlibraries release process | no | orchestrator | full approved LiNKlibraries Git commit SHA | redeploy only with a manifest-bound approved artifact |
+| `W2_02_LIBRARY_CATALOG_SHA256` | LiNKlibraries release process | no | orchestrator | SHA-256 of the mounted catalog bytes | redeploy only with the matching manifest-bound artifact |
+| `W2_02_LIBRARY_ENTRY_SHA256` | LiNKlibraries release process | no | orchestrator | SHA-256 of the mounted selected-entry bytes | redeploy only with the matching manifest-bound artifact |
 
 The Compose host inputs are also part of the one configuration reference. They
 are evaluated before a service starts, are never copied into a browser bundle,

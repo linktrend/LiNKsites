@@ -42,6 +42,9 @@ const base = {
   W2_05_OUTCOME_GATEWAY_SECRET: secret,
   W2_05_OUTCOME_GATEWAY_KEY_ID: 'linksites-production',
   W2_02_LIBRARY_REPOSITORY_PATH: '/var/lib/linksites/linklibraries',
+  W2_02_LIBRARY_COMMIT_SHA: 'a'.repeat(40),
+  W2_02_LIBRARY_CATALOG_SHA256: 'b'.repeat(64),
+  W2_02_LIBRARY_ENTRY_SHA256: 'c'.repeat(64),
 }
 
 for (const service of ['cms', 'web-master', 'autowork-worker', 'program-orchestrator']) {
