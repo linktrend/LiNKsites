@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "exports": { ".": "./src/index.ts", "./composition": "./src/composition.ts" },
+  "exports": { ".": "./src/index.ts", "./composition": "./src/composition.ts", "./postgres-adapter": "./src/postgres-adapter.ts" },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.4",
+    "pg": "8.16.3",
     "@linksites/factory-catalog": "workspace:*",
     "@linksites/autowork-boundary": "workspace:*",
     "@linksites/intake-orchestrator": "workspace:*",
@@ -23,6 +24,7 @@
     "@linksites/types": "workspace:*"
   },
   "devDependencies": {
+    "@types/pg": "8.10.2",
     "@types/node": "22.19.15",
     "typescript": "5.7.3",
     "tsx": "4.23.9"

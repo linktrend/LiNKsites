@@ -12,8 +12,9 @@ import { ExecutorRegistry } from './executors.ts'
 import { FileWorkIntakePort, type CompletionSink, type WorkIntakePort } from '@linksites/intake-orchestrator'
 import { closeLocalDatabase, openLocalDatabase } from './local-database.ts'
 import { LiNKautoworkGateway, type GatewayTransport } from '@linksites/autowork-boundary'
-import { createFileLifecycleStore, SiteLifecycleService, type LifecycleEvidenceVerifier, type VerifiedRecycleEvidence } from '@linksites/factory-catalog'
+import { createFileLifecycleStore, createPostgresLifecycleStore, SiteLifecycleService, type LifecycleEvidenceVerifier, type VerifiedRecycleEvidence } from '@linksites/factory-catalog'
 import { CommercialOutcomeIngress } from './commercial-outcome-ingress.ts'
+import { PostgresCompletionSink, PostgresRuntimeStateStore, PostgresWorkIntakePort, type PostgresRuntimeDependencies } from './postgres-runtime.ts'
 
 export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; commercialOutcomeIngress: CommercialOutcomeIngress; close: () => Promise<void> }
 
@@ -34,9 +35,10 @@ function executableCheckpoint(): string {
 }
 
 export function validateRuntimeConfig(config: RuntimeConfig): RuntimeConfig {
-  if (config.mode !== 'local') throw new Error('W2-02 refuses non-local mode until live environment approval exists')
   if (!/^[-_a-zA-Z0-9]{3,64}$/.test(config.orgId)) throw new Error('W2-02 orgId is invalid')
-  for (const path of [config.statePath, config.intakePath, config.completionPath, config.approvedFactsPath]) if (!path || path.includes('\0')) throw new Error('W2-02 path configuration is invalid')
+  if (config.mode === 'production' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(config.orgId)) throw new Error('W2-02 production orgId must be a UUID tenant key')
+  if (config.mode === 'local' && [config.statePath, config.intakePath, config.completionPath, config.approvedFactsPath].some((path) => !path || path.includes('\0'))) throw new Error('W2-02 local path configuration is invalid')
+  if (config.mode === 'production' && !config.postgresAdapterModule) throw new Error('W2-02 production requires an explicit Postgres adapter module; local adapters are not permitted')
   if (!Number.isInteger(config.maxAttempts) || config.maxAttempts < 1 || !Number.isInteger(config.concurrency) || config.concurrency < 1) throw new Error('W2-02 retry and concurrency configuration must be positive integers')
   if (!Number.isInteger(config.leaseDurationMs) || config.leaseDurationMs < 1) throw new Error('W2-02 lease duration must be a positive integer')
   if (!config.commercialOutcomeGatewaySecret.trim() || !config.commercialOutcomeGatewayKeyId.trim()) throw new Error('W2-06 requires explicit W2-05 gateway verification configuration')
@@ -62,31 +64,33 @@ export function createLocalConfig(baseDir: string, orgId = 'local-org'): Runtime
 }
 
 export function configFromEnvironment(env: NodeJS.ProcessEnv, baseDir: string): RuntimeConfig {
-  if (env.W2_02_MODE !== 'local' || !env.W2_02_ORG_ID) throw new Error('W2-02 configuration is incomplete; set W2_02_MODE=local and W2_02_ORG_ID explicitly')
-  const config = createLocalConfig(env.W2_02_STATE_DIR ? resolve(baseDir, env.W2_02_STATE_DIR) : baseDir, env.W2_02_ORG_ID)
+  if (!env.W2_02_MODE || !['local', 'production'].includes(env.W2_02_MODE) || !env.W2_02_ORG_ID) throw new Error('W2-02 configuration is incomplete; set W2_02_MODE and W2_02_ORG_ID explicitly')
+  const config = { ...createLocalConfig(env.W2_02_STATE_DIR ? resolve(baseDir, env.W2_02_STATE_DIR) : baseDir, env.W2_02_ORG_ID), mode: env.W2_02_MODE as RuntimeConfig['mode'], postgresAdapterModule: env.W2_02_POSTGRES_ADAPTER_MODULE }
   if (env.W2_02_EXECUTION_REVISION && env.W2_02_EXECUTION_REVISION !== config.executingRevision) throw new Error('W2-02 refuses an execution revision that is not the checked-out commit')
   if (env.LINKSITES_DEPLOYMENT_ENV === 'production' && env.LINKSITES_RELEASE_SHA !== config.executingRevision) throw new Error('W2-02 production execution identity must equal the release SHA')
   return validateRuntimeConfig({ ...config, approvedFactsPath: env.W2_02_APPROVED_FACTS_PATH ? resolve(baseDir, env.W2_02_APPROVED_FACTS_PATH) : config.approvedFactsPath, maxAttempts: env.W2_02_MAX_ATTEMPTS ? Number(env.W2_02_MAX_ATTEMPTS) : config.maxAttempts, concurrency: env.W2_02_CONCURRENCY ? Number(env.W2_02_CONCURRENCY) : config.concurrency, leaseDurationMs: env.W2_02_LEASE_MS ? Number(env.W2_02_LEASE_MS) : config.leaseDurationMs, payloadBaseUrl: env.W2_02_PAYLOAD_BASE_URL ?? config.payloadBaseUrl, payloadApiKey: env.W2_02_PAYLOAD_API_KEY ?? config.payloadApiKey, payloadSiteId: env.W2_02_PAYLOAD_SITE_ID ?? config.payloadSiteId, webMasterBaseUrl: env.W2_02_WEB_MASTER_BASE_URL ?? config.webMasterBaseUrl, previewAccessToken: env.W2_02_PREVIEW_ACCESS_TOKEN ?? config.previewAccessToken, commercialOutcomeGatewaySecret: env.W2_05_OUTCOME_GATEWAY_SECRET ?? config.commercialOutcomeGatewaySecret, commercialOutcomeGatewayKeyId: env.W2_05_OUTCOME_GATEWAY_KEY_ID ?? config.commercialOutcomeGatewayKeyId, libraryRepositoryPath: env.W2_02_LIBRARY_REPOSITORY_PATH ?? config.libraryRepositoryPath })
 }
 
-export async function createProductionComposition(config: RuntimeConfig, outcomeDependencies?: OutcomeIngressDependencies): Promise<Composition> {
+export async function createProductionComposition(config: RuntimeConfig, outcomeDependencies?: OutcomeIngressDependencies, productionDependencies?: PostgresRuntimeDependencies): Promise<Composition> {
   const validated = validateRuntimeConfig(config)
-  await mkdir(resolve(validated.statePath, '..'), { recursive: true })
+  if (validated.mode === 'local') await mkdir(resolve(validated.statePath, '..'), { recursive: true })
   const orgUuid = '00000000-0000-4000-8000-000000000001'
   const siteUuid = '00000000-0000-4000-8000-000000000002'
-  const db = await openLocalDatabase(`${validated.statePath}.db`, orgUuid, siteUuid)
+  const production = validated.mode === 'production'
+  const postgres = production ? productionDependencies ?? await loadPostgresDependencies(validated.postgresAdapterModule as string) : null
+  const db = production ? postgres!.db : await openLocalDatabase(`${validated.statePath}.db`, orgUuid, siteUuid)
   // W2-02 is a composition root, not an HTTP emulator.  The caller must bind
   // it to the separately started local Payload schema and real web-master
   // process (the W2-04 proof harness supplies these URLs).
   if (!validated.payloadBaseUrl || !validated.payloadApiKey || !validated.payloadSiteId || !validated.webMasterBaseUrl || !validated.previewAccessToken) throw new Error('W2-02 requires explicit authenticated local Payload, scoped site, and protected web-master service configuration')
   if (!validated.commercialOutcomeGatewaySecret || !validated.commercialOutcomeGatewayKeyId) throw new Error('W2-06 requires explicit W2-05 gateway verification configuration')
   const runtimeConfig = validated
-  const ledger = new DurableLedger(validated)
+  const ledger = new DurableLedger(validated, production ? new PostgresRuntimeStateStore(postgres!.db) : undefined)
   const adapters = new LocalBoundaryAdaptersImpl(runtimeConfig, db)
   adapters.bindLeaseVerifier(({ runId, fencingToken }) => ledger.assertLeaseActive(runId, fencingToken))
   const executors = new ExecutorRegistry(runtimeConfig)
-  const completionSink = new DurableCompletionSink(runtimeConfig, adapters)
-  const intake = new FileWorkIntakePort(runtimeConfig.intakePath, `${runtimeConfig.statePath}.intake.json`, { claimLeaseMs: runtimeConfig.leaseDurationMs })
+  const completionSink = production ? new PostgresCompletionSink(postgres!.db, runtimeConfig.orgId) : new DurableCompletionSink(runtimeConfig, adapters)
+  const intake = production ? new PostgresWorkIntakePort(postgres!.db, runtimeConfig.orgId, runtimeConfig.leaseDurationMs) : new FileWorkIntakePort(runtimeConfig.intakePath, `${runtimeConfig.statePath}.intake.json`, { claimLeaseMs: runtimeConfig.leaseDurationMs })
   const dependencies = createLocalDependencyPorts(adapters, completionSink)
   const noOutboundTransport: GatewayTransport = async () => { throw new Error('W2-06 inbound verifier does not send gateway events') }
   const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment: 'development', transport: noOutboundTransport, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [validated.orgId], environments: ['development'] }] })
@@ -111,7 +115,8 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
       return { sourceRunId: source.runId, sourceEvidenceReference, qualityEvidenceReference: input.qualityEvidenceReference, passingTestEvidenceReference: input.passingTestEvidenceReference, privacyScanValues }
     },
   }
-  const lifecycle = new SiteLifecycleService(createFileLifecycleStore(`${validated.statePath}.lifecycle`), outcomeDependencies?.outcomeAuthorization ?? { verify: async () => false }, undefined, lifecycleEvidence)
+  const lifecycleStore = production ? createPostgresLifecycleStore(postgres!.db) : createFileLifecycleStore(`${validated.statePath}.lifecycle`)
+  const lifecycle = new SiteLifecycleService(lifecycleStore, outcomeDependencies?.outcomeAuthorization ?? { verify: async () => false }, undefined, lifecycleEvidence)
   const commercialOutcomeIngress = new CommercialOutcomeIngress(lifecycle, gateway)
   const runtime = new ProgramRuntime(runtimeConfig, ledger, adapters, executors, dependencies)
   runtime.bindCommercialOutcomeIngress(commercialOutcomeIngress)
@@ -120,8 +125,15 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   return { config: runtimeConfig, ledger, adapters, dependencies, executors, intake, completionSink, runtime, commercialOutcomeIngress, close: async () => {
     if (closed) return
     closed = true
-    await closeLocalDatabase(`${validated.statePath}.db`, db)
+    if (production) await postgres?.close?.()
+    else await closeLocalDatabase(`${validated.statePath}.db`, db)
   } }
+}
+
+async function loadPostgresDependencies(modulePath: string): Promise<PostgresRuntimeDependencies> {
+  const loaded = await import(modulePath) as { createPostgresRuntimeDependencies?: () => Promise<PostgresRuntimeDependencies> }
+  if (typeof loaded.createPostgresRuntimeDependencies !== 'function') throw new Error('W2-02 Postgres adapter module must export createPostgresRuntimeDependencies')
+  return loaded.createPostgresRuntimeDependencies()
 }
 
 function collectStrings(value: unknown): string[] {

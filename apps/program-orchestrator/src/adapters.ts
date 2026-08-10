@@ -152,7 +152,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const contentPackage = production.contentPackage as WorkingContentPackage
       assertValidWorkingContentPackage(contentPackage)
       const workingPackageId = `working:${siteId}`
-      const orgUuid = stableUuid(this.config.orgId)
+      const orgUuid = this.config.mode === 'production' ? this.config.orgId : stableUuid(this.config.orgId)
       const siteUuid = stableUuid(siteId)
       await ensureTenantRows(this.db, orgUuid, siteUuid)
       const existing = await this.workingContentRepository.readVersion(workingPackageId, 1)

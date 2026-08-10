@@ -261,7 +261,13 @@ importers:
       '@linksites/types':
         specifier: workspace:*
         version: link:../../packages/types
+      pg:
+        specifier: 8.16.3
+        version: 8.16.3
     devDependencies:
+      '@types/pg':
+        specifier: 8.10.2
+        version: 8.10.2
       '@types/node':
         specifier: 22.19.15
         version: 22.19.15
