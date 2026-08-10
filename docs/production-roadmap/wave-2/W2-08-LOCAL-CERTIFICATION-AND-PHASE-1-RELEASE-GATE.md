@@ -1,6 +1,6 @@
 # W2-08 — Pre-VPS Source Certification and Phase 1 Release Gate
 
-**Status:** Pending — requires W2-01 through W2-07 integration and an independent source/evidence audit
+**Status:** Source certification passed at `258aa36ff3cef4d6921c48e72c3d39cf74811146`; authoritative integration and separate Phase 2 VPS authority remain pending
 **Wave:** 2 final checkpoint
 **Executor:** Terra master; independent verdict by Sol Medium
 
