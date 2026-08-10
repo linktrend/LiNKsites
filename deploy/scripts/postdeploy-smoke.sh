@@ -27,7 +27,7 @@ const checks = [
   ['private preview', previewUrl.toString()],
 ]
 for (const [name, url] of checks) {
-  const response = await fetch(url, { redirect: 'manual' })
+  const response = await fetch(url, { redirect: 'manual', headers: name === 'private preview' ? { 'X-LiNKsites-Preview-Key': process.env.PREVIEW_ACCESS_TOKEN } : {} })
   if (response.status !== 200) throw new Error(`${name} smoke failed with HTTP ${response.status}`)
 }
 console.log('Post-deploy private health checks passed. This does not activate a public domain.')

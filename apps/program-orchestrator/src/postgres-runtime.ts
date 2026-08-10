@@ -21,7 +21,7 @@ export class PostgresRuntimeStateStore implements DurableStateStore {
 
   async read(orgId: string, programId: string): Promise<LedgerState | null> {
     const result = await this.db.query(
-      `select state from lsites_ledger.program_runtime_states where org_id = $1 and program_id = $2`,
+      `select state, state_checksum from lsites_ledger.program_runtime_states where org_id = $1 and program_id = $2`,
       [orgId, programId],
     )
     const row = result.rows[0]

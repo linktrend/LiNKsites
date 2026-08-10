@@ -285,7 +285,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
 
   async renderPrivatePreview(siteId: string, preview: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.boundary('frontend.render', async () => {
-      const response = await fetch(`${this.config.webMasterBaseUrl}/en/demo`)
+      const response = await fetch(`${this.config.webMasterBaseUrl}/en/demo`, { headers: { 'X-LiNKsites-Preview-Key': this.config.previewAccessToken } })
       const html = await response.text()
       const robots = response.headers.get('x-robots-tag') ?? ''
       const cache = response.headers.get('cache-control') ?? ''

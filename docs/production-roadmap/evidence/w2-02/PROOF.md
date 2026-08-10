@@ -44,7 +44,8 @@ This document is correction evidence, not a W2-02 PASS declaration.
   persisted promotion receipt. The configured `W2_02_PAYLOAD_BASE_URL` path is
   the real Payload REST boundary; local production proof uses the separately
   started disposable authenticated Payload app, not an inline emulator.
-- W2-04 path: protected token-required web-master HTTP render with noindex and
+- W2-04 path: protected secret-free completion URL (`/en/demo`) with an
+  out-of-band preview header, noindex and
   no-store checks. Local production proof uses the optimized `apps/web-master`
   server; a hosted web-master render remains unverified.
 
@@ -92,18 +93,19 @@ credential path was used here.
 required disposable local vertical slice. It creates a temporary local
 database, starts the actual Payload app with its authenticated REST API, builds
 and starts the optimized `apps/web-master`, then runs all 16 Issues and a real
-Chromium missing-token, wrong-token, and valid-token browser gate. It creates a
+Chromium missing-header, wrong-header, and valid-header browser gate. It creates a
 runtime-only unique W2-02 run marker and asserts exactly the five promoted
-marker-matched records have `status=draft` and `_status=draft`; the separate
-W2-04 seeded published preview record is explicitly excluded. It writes only the sanitized
+marker-matched records are `status=published`, `_status=published`, and
+`previewEnvironment=private-preview`; the separate W2-04 seeded published
+preview record is explicitly excluded. It writes only the sanitized
 `real-service-vertical-slice.json` receipt; temporary credentials, URLs, state,
 database, and processes are removed in the shell trap. This receipt is not a
 PASS declaration.
 
 The receipt contains per-issue state, gate decision, and evidence IDs rather
 than an aggregate count. Its site-scoped mutation/readback section records
-draft-only REST operations, both status-field readback, and the absence of a
-published-state PATCH or public activation. The adapter checks its durable
+private-audience published REST operations, both status-field readback, and the
+absence of public activation. The adapter checks its durable
 lease immediately before and after each fenced external mutation; a focused
 test proves a stale lease is rejected before the protected-preview mutation can
 write evidence. This is local-process fencing, not a claim that an unmodified

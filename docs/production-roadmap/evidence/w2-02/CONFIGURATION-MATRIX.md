@@ -2,7 +2,7 @@
 
 | Setting | Local first-test value | Production/live status |
 | --- | --- | --- |
-| `W2_02_MODE` | `local` | Any other value fails closed |
+| `W2_02_MODE` | `local` | Production requires `production`; `W2_02_DATABASE_URI` is canonical and the adapter-facing `DATABASE_URI` alias must match when supplied |
 | `W2_02_ORG_ID` | Explicit local org identifier | Required; never inferred |
 | `W2_02_APPROVED_FACTS_PATH` | Explicit approved-facts JSON path | Required for content production; missing or lead-mismatched facts fail closed |
 | `W2_02_EXECUTION_REVISION` | Must equal the checked-out Git SHA; it is not accepted as an arbitrary env-form revision | All evidence and irreversible receipts carry the actual executable commit |
@@ -13,7 +13,7 @@
 | Intake | Governed manual NDJSON writer/adapter through the shared `LeadResearchPackage` boundary | Future CRM adapter must use the same boundary; poison rows are durably rejected/acknowledged so they cannot block the head |
 | Completion | Durable ledger outbox plus idempotent local NDJSON sink; attempts/failures/backlog/dead-letter/ack are observable | Future LiNKautowork/CRM-shaped delivery boundary |
 | CMS | `PayloadRestDraftTarget` through `W2_02_PAYLOAD_BASE_URL`; real local proof uses the disposable authenticated Payload process from W2-03/W2-04 | Hosted credentials remain environment requirements |
-| Frontend/deployment | Protected token-required/noindex/no-store `apps/web-master` HTTP boundary; real local proof uses its optimized server | Hosted preview environment remains deferred |
+| Frontend/deployment | Protected secret-free `/en/demo` completion URL with an out-of-band preview header, noindex/no-store `apps/web-master` HTTP boundary | Hosted preview environment remains deferred |
 | Executors | Exact `kind@version` registry plus ordered capability allowlists in `src/graph.ts` | Unknown, missing, mismatched, or over-capable executors fail closed |
 | Secrets | None accepted or required in local mode | No live secret, Stripe, Odoo, n8n, DNS, or cloud mutation |
 
