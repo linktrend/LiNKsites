@@ -1,8 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import type { DemoCompletionEnvelope, LeadResearchPackage } from '@linksites/types'
 import type { CompletionSink, IntakeAcknowledgement, IntakeClaim, PulledWorkItem, WorkIntakePort } from '@linksites/intake-orchestrator'
-import type { DurableStateStore } from './durable-store.ts'
-import type { LedgerState } from './contracts.ts'
+import type { DurableStateStore, LedgerState } from './contracts.ts'
 
 /** The deployment-contract lane supplies a real pg PoolClient/Client adapter. */
 export interface PostgresExecutor {
@@ -99,9 +98,10 @@ export class PostgresWorkIntakePort implements WorkIntakePort {
   }
 
   async acknowledge(itemId: string, acknowledgement: IntakeAcknowledgement): Promise<void> {
+    if (!acknowledgement.claimId) return
     await this.db.query(
       `update lsites_ledger.program_intake set state = $3, reason_code = $4, next_attempt_at = $5, claim_id = null, claim_expires_at = null, updated_at = now()
-        where org_id = $1 and item_id = $2`, [this.orgId, itemId, acknowledgement.state, acknowledgement.reasonCode ?? null, acknowledgement.nextAttemptAt ?? null])
+        where org_id = $1 and item_id = $2 and claim_id = $6`, [this.orgId, itemId, acknowledgement.state, acknowledgement.reasonCode ?? null, acknowledgement.nextAttemptAt ?? null, acknowledgement.claimId])
   }
 }
 

@@ -115,6 +115,7 @@ export interface PayloadDraftTarget {
   ): Promise<{ payloadDocumentId: string; resultChecksum: string }>
   readback(payloadDocumentId: string): Promise<Record<string, unknown> | null>
   verifyParity?(expected: Record<string, unknown>, actual: Record<string, unknown>): boolean
+  publishPrivate?(payloadDocumentId: string, publicationMarker: string): Promise<{ published: boolean; readback: Record<string, unknown> }>
 }
 
 interface StoredReceipt {

@@ -95,7 +95,8 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   const intake = production ? new PostgresWorkIntakePort(postgres!.db, runtimeConfig.orgId, runtimeConfig.leaseDurationMs) : new FileWorkIntakePort(runtimeConfig.intakePath, `${runtimeConfig.statePath}.intake.json`, { claimLeaseMs: runtimeConfig.leaseDurationMs })
   const dependencies = createLocalDependencyPorts(adapters, completionSink)
   const noOutboundTransport: GatewayTransport = async () => { throw new Error('W2-06 inbound verifier does not send gateway events') }
-  const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment: 'development', transport: noOutboundTransport, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [validated.orgId], environments: ['development'] }] })
+  const environment = validated.mode === 'production' ? 'production' : 'development' as const
+  const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment, transport: noOutboundTransport, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [validated.orgId], environments: [environment] }] })
   // A composition without a real LiNKreach authorization port is safely
   // runnable for the W2-02 preview graph, but can never persist an outcome.
   const lifecycleEvidence: LifecycleEvidenceVerifier = {

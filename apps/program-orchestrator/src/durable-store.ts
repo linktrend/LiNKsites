@@ -3,17 +3,57 @@ import { dirname } from 'node:path'
 import { createHash, randomUUID } from 'node:crypto'
 import type { DemoCompletionEnvelope, EvidenceReceipt } from '@linksites/types'
 import { LINKSITES_PROGRAM, PERSISTED_PROGRAM_GRAPH, W2_02_GRAPH } from './graph.ts'
-import type { IssueRecord, LedgerState, Receipt, RunRecord, RuntimeConfig } from './contracts.ts'
+import type { DurableStateStore, IssueRecord, LedgerState, Receipt, RunRecord, RuntimeConfig } from './contracts.ts'
 
-const blankState = (orgId: string, lead: { lead_id: string; idempotency_key: string }, now: string): LedgerState => ({
+export class FileDurableStateStore implements DurableStateStore {
+  constructor(private readonly config: RuntimeConfig) {}
+  private pathFor(programId: string): string { return `${this.config.statePath}.${createHash('sha256').update(programId).digest('hex')}.json` }
+  async read(_orgId: string, programId: string): Promise<LedgerState | null> {
+    const raw = await readFile(this.pathFor(programId), 'utf8').catch((error: unknown) => {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') return null
+      throw error
+    })
+    return raw ? JSON.parse(raw) as LedgerState : null
+  }
+  async write(_orgId: string, programId: string, state: LedgerState): Promise<void> {
+    const path = this.pathFor(programId)
+    await mkdir(dirname(path), { recursive: true })
+    const temp = `${path}.${process.pid}.${randomUUID()}.tmp`
+    await writeFile(temp, `${JSON.stringify(state, null, 2)}\n`, 'utf8')
+    await rename(temp, path)
+  }
+  async isAvailable(): Promise<boolean> { try { await mkdir(dirname(this.config.statePath), { recursive: true }); return true } catch { return false } }
+  async withLock<T>(_orgId: string, _programId: string, operation: () => Promise<T>): Promise<T> {
+    const path = `${this.pathFor(_programId)}.lock`
+    await mkdir(dirname(path), { recursive: true })
+    for (let attempt = 0; attempt < 400; attempt += 1) {
+      try {
+        const handle = await open(path, 'wx')
+        try { await handle.writeFile(JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() })); return await operation() }
+        finally { await handle.close().catch(() => undefined); await unlink(path).catch(() => undefined) }
+      } catch (error: unknown) {
+        if (!(error && typeof error === 'object' && 'code' in error && error.code === 'EEXIST')) throw error
+        const owner = await readFile(path, 'utf8').then((raw) => JSON.parse(raw) as { pid?: number; createdAt?: string }).catch(() => ({} as { pid?: number; createdAt?: string }))
+        if (!owner.createdAt) { await new Promise((resolve) => setTimeout(resolve, 10)); continue }
+        let alive = false
+        if (typeof owner.pid === 'number') { try { process.kill(owner.pid, 0); alive = true } catch { alive = false } }
+        if (!alive || Date.now() - Date.parse(owner.createdAt) > Math.max(this.config.leaseDurationMs * 2, 5_000)) { await unlink(path).catch(() => undefined); continue }
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      }
+    }
+    throw new Error('ledger:cross-process-lock-timeout')
+  }
+}
+
+const blankState = (orgId: string, lead: { lead_id: string; idempotency_key: string }, programId: string, now: string): LedgerState => ({
   schemaVersion: 1,
-  program: { programId: PERSISTED_PROGRAM_GRAPH.programId, orgId, leadId: lead.lead_id, idempotencyKey: lead.idempotency_key, state: 'running', createdAt: now, updatedAt: now, graph: structuredClone(PERSISTED_PROGRAM_GRAPH) },
+  program: { programId, orgId, leadId: lead.lead_id, idempotencyKey: lead.idempotency_key, state: 'running', createdAt: now, updatedAt: now, graph: { ...structuredClone(PERSISTED_PROGRAM_GRAPH), programId } },
   modules: LINKSITES_PROGRAM.modules.map((module) => { const scheduled = W2_02_GRAPH.some((issue) => issue.moduleId === module.moduleId); return { moduleId: module.moduleId, title: module.title, state: scheduled ? 'running' as const : 'excluded' as const, scheduled } }),
   phases: LINKSITES_PROGRAM.modules.flatMap((module) => module.phases.map((phase) => { const scheduled = W2_02_GRAPH.some((issue) => issue.moduleId === module.moduleId && issue.phaseId === phase.phaseId); return { phaseId: phase.phaseId, moduleId: module.moduleId, title: phase.title, state: scheduled ? 'running' as const : 'excluded' as const, scheduled } })),
   issues: W2_02_GRAPH.map((issue): IssueRecord => ({ ...issue, state: issue.dependsOn.length === 0 ? 'ready' : 'ready', attempt: 0, nextAttemptAt: null, output: null, gate: 'pending', runIds: [] })),
   runs: [],
   receipts: [],
-  events: [{ type: 'program.created', at: now, data: { programId: PERSISTED_PROGRAM_GRAPH.programId, moduleIds: LINKSITES_PROGRAM.modules.map((module) => module.moduleId) } }],
+  events: [{ type: 'program.created', at: now, data: { programId, moduleIds: LINKSITES_PROGRAM.modules.map((module) => module.moduleId) } }],
   completion: { state: 'pending', envelope: null },
   outbox: [],
   deadLetters: [],
@@ -27,75 +67,35 @@ export class DurableLedger {
   private operation: Promise<void> = Promise.resolve()
   private cached: LedgerState | null = null
   private readonly config: RuntimeConfig
+  private readonly store: DurableStateStore
+  private programId: string | null = null
 
-  constructor(config: RuntimeConfig) { this.config = config }
+  constructor(config: RuntimeConfig, store: DurableStateStore = new FileDurableStateStore(config)) { this.config = config; this.store = store }
 
   async isAvailable(): Promise<boolean> {
     try {
-      await mkdir(dirname(this.config.statePath), { recursive: true })
-      return true
-    } catch {
-      return false
-    }
+      return await this.store.isAvailable()
+    } catch { return false }
   }
 
   private async read(fresh = false): Promise<LedgerState | null> {
     if (this.cached && !fresh) return clone(this.cached)
-    const raw = await readFile(this.config.statePath, 'utf8').catch((error: unknown) => {
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') return null
-      throw error
-    })
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as LedgerState
+    if (!this.programId) return null
+    const parsed = await this.store.read(this.config.orgId, this.programId)
+    if (!parsed) return null
     if (parsed.schemaVersion !== 1 || !parsed.program || !Array.isArray(parsed.issues)) throw new Error('ledger state schema is unsupported')
     this.cached = parsed
     return clone(parsed)
   }
 
   private async write(state: LedgerState): Promise<void> {
-    await mkdir(dirname(this.config.statePath), { recursive: true })
-    const temp = `${this.config.statePath}.${process.pid}.${randomUUID()}.tmp`
-    await writeFile(temp, `${JSON.stringify(state, null, 2)}\n`, 'utf8')
-    await rename(temp, this.config.statePath)
+    await this.store.write(state.program.orgId, state.program.programId, state)
     this.cached = clone(state)
-  }
-
-  /** Serializes independent worker processes, not merely promises in one VM.
-   * The owner record makes a SIGKILL orphan recoverable without trusting an
-   * indefinitely stale lock file. */
-  private async withProcessLock<T>(operation: () => Promise<T>): Promise<T> {
-    const path = `${this.config.statePath}.lock`
-    await mkdir(dirname(path), { recursive: true })
-    for (let attempt = 0; attempt < 400; attempt += 1) {
-      try {
-        const handle = await open(path, 'wx')
-        try {
-          await handle.writeFile(JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }))
-          return await operation()
-        } finally {
-          await handle.close().catch(() => undefined)
-          await unlink(path).catch(() => undefined)
-        }
-      } catch (error: unknown) {
-        if (!(error && typeof error === 'object' && 'code' in error && error.code === 'EEXIST')) throw error
-        const owner: { pid?: number; createdAt?: string } = await readFile(path, 'utf8').then((raw) => JSON.parse(raw) as { pid?: number; createdAt?: string }).catch(() => ({} as { pid?: number; createdAt?: string }))
-        // `open(..., 'wx')` makes the lock visible before the owner has
-        // written its identity.  That tiny window must be treated as locked:
-        // deleting it here would let a second worker mutate the same issue.
-        if (!owner.createdAt) { await new Promise((resolve) => setTimeout(resolve, 10)); continue }
-        const age = owner.createdAt ? Date.now() - Date.parse(owner.createdAt) : Number.POSITIVE_INFINITY
-        let alive = false
-        if (typeof owner.pid === 'number') { try { process.kill(owner.pid, 0); alive = true } catch { alive = false } }
-        if (!alive || age > Math.max(this.config.leaseDurationMs * 2, 5_000)) { await unlink(path).catch(() => undefined); continue }
-        await new Promise((resolve) => setTimeout(resolve, 10))
-      }
-    }
-    throw new Error('ledger:cross-process-lock-timeout')
   }
 
   private async mutate<T>(operation: (state: LedgerState | null) => Promise<{ state: LedgerState | null; result: T }> | { state: LedgerState | null; result: T }): Promise<T> {
     let result!: T
-    const currentOperation = this.operation.catch(() => undefined).then(() => this.withProcessLock(async () => {
+    const currentOperation = this.operation.catch(() => undefined).then(() => this.store.withLock(this.config.orgId, this.programId ?? 'uninitialized', async () => {
       const current = await this.read(true)
       const next = await operation(current)
       if (next.state) await this.write(next.state)
@@ -107,12 +107,14 @@ export class DurableLedger {
   }
 
   async createOrResume(lead: { lead_id: string; idempotency_key: string; org_id: string }): Promise<LedgerState['program']> {
+    const programId = `program:${createHash('sha256').update(`${lead.org_id}:${lead.lead_id}:${lead.idempotency_key}`).digest('hex').slice(0, 32)}`
+    this.programId = programId
     return this.mutate(async (current) => {
       if (current) {
         if (current.program.leadId !== lead.lead_id || current.program.idempotencyKey !== lead.idempotency_key) throw new Error('existing local ledger belongs to a different lead')
         return { state: current, result: clone(current.program) }
       }
-      const state = blankState(lead.org_id, lead, new Date().toISOString())
+      const state = blankState(lead.org_id, lead, programId, new Date().toISOString())
       return { state, result: clone(state.program) }
     })
   }
@@ -177,22 +179,22 @@ export class DurableLedger {
     if (!run || run.state !== 'running' || !run.lease || run.lease.fencingToken !== fencingToken || run.lease.expiresAt <= new Date().toISOString()) throw new Error('run external mutation rejected by stale lease fencing token')
   }
 
-  async receipt(issueId: string, operation: string): Promise<Receipt | null> {
+  async receipt(issueId: string, operation: string, runId?: string): Promise<Receipt | null> {
     const state = await this.snapshot()
-    return clone(state.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation) ?? null)
+    return clone(state.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation && (!runId || receipt.runId === runId)) ?? null)
   }
 
   async saveReceipt(issueId: string, operation: string, value: unknown, runId: string, fencingToken: number): Promise<Receipt> {
     return this.mutate(async (current) => {
       if (!current) throw new Error('program has not been created')
-      const prior = current.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation)
+      const prior = current.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation && receipt.runId === runId)
       if (prior) return { state: current, result: clone(prior) }
       const issue = current.issues.find((candidate) => candidate.issueId === issueId)
       if (!issue) throw new Error(`issue ${issueId} not found`)
       const run = current.runs.find((candidate) => candidate.runId === runId)
       if (!run || run.issueId !== issueId || run.state !== 'running' || run.lease?.fencingToken !== fencingToken || run.lease.expiresAt <= new Date().toISOString()) throw new Error('receipt rejected by stale lease fencing token')
       const valueChecksum = createHash('sha256').update(JSON.stringify(value)).digest('hex')
-      const receipt: Receipt = { receiptId: `receipt:${issueId}:${randomUUID()}`, issueId, operation, idempotencyKey: `${current.program.programId}:${issueId}`, revision: this.config.executingRevision, valueChecksum, executorKind: issue.executorKind, executorVersion: issue.executorVersion, createdAt: new Date().toISOString(), value: clone(value) }
+      const receipt: Receipt = { receiptId: `receipt:${current.program.programId}:${runId}:${randomUUID()}`, issueId, operation, runId, idempotencyKey: `${current.program.programId}:${runId}:${issueId}:${operation}`, revision: this.config.executingRevision, valueChecksum, executorKind: issue.executorKind, executorVersion: issue.executorVersion, createdAt: new Date().toISOString(), value: clone(value) }
       current.receipts.push(receipt)
       current.events.push({ type: 'irreversible.receipt', at: receipt.createdAt, issueId, data: { operation, revision: receipt.revision } })
       return { state: current, result: clone(receipt) }

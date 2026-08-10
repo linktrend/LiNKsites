@@ -9,7 +9,7 @@ import type { Composition } from './composition.ts'
  */
 export { FileWorkIntakePort }
 
-export async function runFirstReadyFileLead(composition: Composition): Promise<LeadResearchPackage | null> {
+export async function runFirstReadyLead(composition: Composition): Promise<LeadResearchPackage | null> {
   const items = await composition.intake.pullReady(1, new Date().toISOString())
   const item = items[0]
   if (!item) return null
@@ -18,11 +18,11 @@ export async function runFirstReadyFileLead(composition: Composition): Promise<L
   if (!claim) throw new Error('W2-02 manual intake claim was not acquired')
   try {
     await composition.runtime.runLead(item.envelope)
-    await composition.intake.acknowledge(item.itemId, { state: 'program_started' })
+    await composition.intake.acknowledge(item.itemId, { state: 'program_started', claimId: claim.claimId })
   } catch (error) {
     const health = await composition.runtime.health()
     const reasonCode = error instanceof Error ? error.message.split(':').slice(0, 2).join(':') : 'program:retry-required'
-    await composition.intake.acknowledge(item.itemId, { state: health.programState === 'manual_attention' ? 'program_manual_attention' : 'program_retry_scheduled', reasonCode, nextAttemptAt: new Date(Date.now() + 1).toISOString() })
+    await composition.intake.acknowledge(item.itemId, { state: health.programState === 'manual_attention' ? 'program_manual_attention' : 'program_retry_scheduled', reasonCode, nextAttemptAt: new Date(Date.now() + 1).toISOString(), claimId: claim.claimId })
     throw error
   }
   return item.envelope

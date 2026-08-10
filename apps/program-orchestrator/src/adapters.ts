@@ -248,6 +248,19 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     })
   }
 
+  async publishPrivatePayload(siteId: string, promotion: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>> {
+    return this.boundary('payload.publish-private', async () => {
+      if (!this.payloadTarget.publishPrivate) throw new Error('payload:private-publication-adapter-unavailable')
+      const ids = Array.isArray(promotion.payloadDocumentIds) ? promotion.payloadDocumentIds.map(String) : []
+      if (ids.length === 0 || promotion.parity !== true) throw new Error('payload:private-publication-requires-verified-draft')
+      const publications = await Promise.all(ids.map((id) => this.payloadTarget.publishPrivate!(id, `private-publication:${siteId}`)))
+      if (!publications.every((item) => item.published && item.readback.status === 'published')) throw new Error('payload:private-publication-readback-failed')
+      const result = { siteId, payloadDocumentIds: ids, status: 'published', audience: 'private-preview', publicActivation: false, publicationReadback: publications.map((item) => ({ published: item.published, status: item.readback.status, publicActivation: false })) }
+      const artifact = await this.writeArtifact('payload-private-publication', siteId, result)
+      return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum }
+    }, fence)
+  }
+
   async createPrivatePreview(siteId: string, promotion: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>> {
     return this.boundary('frontend.private-preview', async () => {
       const ids = Array.isArray(promotion.payloadDocumentIds) ? promotion.payloadDocumentIds.map(String) : []
@@ -262,7 +275,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const protectedBase = new URL(this.config.webMasterBaseUrl)
       if (protectedBase.username || protectedBase.password || protectedBase.search || protectedBase.hash || ['localhost', '127.0.0.1', '::1'].includes(protectedBase.hostname)) throw new Error('frontend:protected-web-master-url-is-invalid')
       const privatePreviewUrl = new URL('/en/demo', protectedBase).toString()
-      const result = { ...deployment, privatePreviewUrl, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, status: 'draft', publicActivation: false }, publicActivation: false, protectedRoute: '/en/demo/[private-token]' }
+      const result = { ...deployment, privatePreviewUrl, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, status: 'published', publicActivation: false }, publicActivation: false, protectedRoute: '/en/demo' }
       const artifact = await this.writeArtifact('frontend-private-preview', siteId, result)
       return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum }
     }, fence)
@@ -270,7 +283,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
 
   async renderPrivatePreview(siteId: string, preview: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.boundary('frontend.render', async () => {
-      const response = await fetch(`${this.config.webMasterBaseUrl}/en/demo/${encodeURIComponent(this.config.previewAccessToken)}`)
+      const response = await fetch(`${this.config.webMasterBaseUrl}/en/demo`, { headers: { 'X-LiNKsites-Preview-Key': this.config.previewAccessToken } })
       const html = await response.text()
       const robots = response.headers.get('x-robots-tag') ?? ''
       const cache = response.headers.get('cache-control') ?? ''
@@ -310,7 +323,9 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     // Exercise the actual durable boundary with a reversible write/read/delete,
     // not merely a directory creation check.
     const probePath = `${this.config.completionPath}.health-${process.pid}-${randomUUID()}`
-    const eventBoundary = await mkdir(dirname(probePath), { recursive: true }).then(async () => {
+    const eventBoundary = this.config.mode === 'production'
+      ? await this.db.query('select 1 from lsites_ledger.program_completion_deliveries limit 1').then(() => true).catch(() => false)
+      : await mkdir(dirname(probePath), { recursive: true }).then(async () => {
       const marker = `health:${randomUUID()}`
       await writeFile(probePath, marker, { flag: 'wx' })
       const readback = await readFile(probePath, 'utf8')

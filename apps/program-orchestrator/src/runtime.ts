@@ -75,9 +75,10 @@ export class ProgramRuntime {
 
   async health(): Promise<RuntimeHealth> {
     const state = await this.ledger.snapshot().catch(() => null)
+    const storeAvailable = await this.ledger.isAvailable()
     return {
       liveness: true,
-      readiness: Boolean(state) && Object.values(await this.adapters.health()).every(Boolean),
+      readiness: storeAvailable && Object.values(await this.adapters.health()).every(Boolean),
       programState: state?.program.state ?? null,
       activeIssues: this.active,
       retries: state?.metrics.retries ?? 0,
@@ -102,7 +103,7 @@ export class ProgramRuntime {
       const fence = { runId, fencingToken }
       const output = await this.executeIssue(issue, fence)
       await this.ledger.assertLeaseActive(runId, fencingToken)
-      const evidence = [this.evidence(issue, output)]
+      const evidence = [await this.evidence(issue, output, runId)]
       if (issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, output, runId, fencingToken)
       await this.ledger.succeed(runId, fencingToken, output, evidence)
     } catch (error) {
@@ -153,7 +154,11 @@ export class ProgramRuntime {
         if (result.parity !== true) throw new Error('gate:payload-readback-parity')
         return result
       }
-      case 'private-publication': return this.dependencies.frontendDeploymentAdapter.createPrivatePreview(`site:${lead.lead_id}`, output['payload-parity'] as Record<string, unknown>, fence)
+      case 'private-publication': {
+        const published = await this.dependencies.cmsAdapter.publishPrivatePayload(`site:${lead.lead_id}`, output['payload-parity'] as Record<string, unknown>, fence)
+        const preview = await this.dependencies.frontendDeploymentAdapter.createPrivatePreview(`site:${lead.lead_id}`, { ...(output['payload-parity'] as Record<string, unknown>), ...published }, fence)
+        return { ...preview, payloadPublication: published }
+      }
       case 'site-render-validation': return this.dependencies.frontendDeploymentAdapter.renderPrivatePreview(`site:${lead.lead_id}`, output['private-publication'] as Record<string, unknown>)
       case 'final-evidence': return this.dependencies.frontendDeploymentAdapter.captureEvidence(`site:${lead.lead_id}`, output['site-render-validation'] as Record<string, unknown>)
       case 'completion-record': return { completionBoundary: 'shared-completion-sink', exactlyOnce: true, evidence: output['final-evidence'], executionRevision: this.config.executingRevision, executableCheckpoint: this.config.executableCheckpoint }
@@ -161,10 +166,11 @@ export class ProgramRuntime {
     }
   }
 
-  private evidence(issue: IssueRecord, output: unknown): EvidenceReceipt {
+  private async evidence(issue: IssueRecord, output: unknown, runId: string): Promise<EvidenceReceipt> {
     const checksum = createHash('sha256').update(JSON.stringify(output)).digest('hex')
     const artifactPath = output && typeof output === 'object' && 'artifactPath' in output && typeof output.artifactPath === 'string' ? output.artifactPath : output && typeof output === 'object' && 'evidence' in output && Array.isArray(output.evidence) && typeof output.evidence[0] === 'string' ? output.evidence[0] : `local://w2-02/${issue.issueId}/${checksum}.json`
-    return { schema_version: { major: 1, minor: 0 }, org_id: this.config.orgId, correlation_id: `program:${this.config.orgId}`, idempotency_key: `evidence:${issue.issueId}`, receipt_id: `evidence:${issue.issueId}:${checksum.slice(0, 12)}`, producer: `@linksites/program-orchestrator/${issue.executorKind}@${issue.executorVersion}`, subject: { type: 'issue', id: issue.issueId }, checksum: { algorithm: 'sha256', value: checksum }, revision_sha: this.config.executingRevision, storage_location: artifactPath, gate_association: issue.issueId, timestamp: new Date().toISOString() }
+    const programId = (await this.ledger.snapshot()).program.programId
+    return { schema_version: { major: 1, minor: 0 }, org_id: this.config.orgId, correlation_id: `program:${programId}`, idempotency_key: `evidence:${programId}:${runId}:${issue.issueId}`, receipt_id: `evidence:${programId}:${runId}:${issue.issueId}:${checksum.slice(0, 12)}`, producer: `@linksites/program-orchestrator/${issue.executorKind}@${issue.executorVersion}`, subject: { type: 'issue', id: issue.issueId }, checksum: { algorithm: 'sha256', value: checksum }, revision_sha: this.config.executingRevision, storage_location: artifactPath, gate_association: issue.issueId, timestamp: new Date().toISOString() }
   }
 
   private async deliverCompletion(): Promise<void> {

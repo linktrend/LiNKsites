@@ -131,6 +131,32 @@ export interface LifecycleStore {
   save(record: LifecycleRecord): Promise<void>
 }
 
+export interface LifecyclePostgresExecutor {
+  query(sql: string, params?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>
+}
+
+/** Migration-owned lifecycle persistence. This adapter never creates or alters schema. */
+export function createPostgresLifecycleStore(db: LifecyclePostgresExecutor): LifecycleStore {
+  return {
+    async getByEventId(eventId) {
+      const result = await db.query('select record from lsites_sites.lifecycle_records where outcome_event_id = $1', [eventId])
+      return result.rows[0]?.record ? structuredClone(result.rows[0].record as LifecycleRecord) : null
+    },
+    async getBySiteId(orgId, siteId) {
+      const result = await db.query('select record from lsites_sites.lifecycle_records where org_id = $1 and site_id = $2', [orgId, siteId])
+      return result.rows[0]?.record ? structuredClone(result.rows[0].record as LifecycleRecord) : null
+    },
+    async save(record) {
+      await db.query(`insert into lsites_sites.lifecycle_records
+        (org_id, lifecycle_id, site_id, outcome_event_id, record, updated_at)
+        values ($1,$2,$3,$4,$5,now())
+        on conflict (org_id, lifecycle_id) do update set record = excluded.record,
+          site_id = excluded.site_id, outcome_event_id = excluded.outcome_event_id, updated_at = now()`,
+      [record.orgId, record.lifecycleId, record.siteId, record.outcomeEventId, JSON.stringify(record)])
+    },
+  }
+}
+
 export class InMemoryLifecycleStore implements LifecycleStore {
   private readonly byEventId = new Map<string, LifecycleRecord>()
   private readonly bySite = new Map<string, LifecycleRecord>()

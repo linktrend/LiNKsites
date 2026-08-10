@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 import { configFromEnvironment, createProductionComposition } from './composition.ts'
-import { runFirstReadyFileLead } from './intake.ts'
+import { runFirstReadyLead } from './intake.ts'
 
 const port = Number(process.env.PORT ?? '3000')
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be an integer between 1 and 65535')
@@ -16,7 +16,7 @@ const cycle = async () => {
   if (cycling || stopping) return
   cycling = true
   try {
-    await runFirstReadyFileLead(composition)
+    await runFirstReadyLead(composition)
     lastError = null
   } catch (error) {
     // No ready work is normal. The externally visible diagnostic stays safe.

@@ -49,6 +49,7 @@ export type Receipt = {
   receiptId: string
   issueId: string
   operation: string
+  runId: string
   idempotencyKey: string
   revision: string
   valueChecksum: string
@@ -95,6 +96,13 @@ export type LedgerState = {
   metrics: { attempts: number; retries: number; completedIssues: number; failedIssues: number; completionEmits: number; outboxAttempts: number; outboxBacklog: number; outboxFailures: number; outboxDeadLetters: number; outboxAcks: number }
 }
 
+export interface DurableStateStore {
+  read(orgId: string, programId: string): Promise<LedgerState | null>
+  write(orgId: string, programId: string, state: LedgerState): Promise<void>
+  isAvailable(): Promise<boolean>
+  withLock<T>(orgId: string, programId: string, operation: () => Promise<T>): Promise<T>
+}
+
 export type LeadInput = LeadResearchPackage
 
 export type AdapterFault = { operation: string; remaining: number; kind: 'transient' | 'permanent' | 'crash_after_receipt' }
@@ -114,6 +122,7 @@ export interface LocalBoundaryAdapters {
   runGates(siteId: string, workingContent: Record<string, unknown>): Promise<{ accepted: boolean; evidence: string[]; reason?: string; artifactPath?: string; artifactChecksum?: string }>
   promoteDraft(siteId: string, workingContent: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>>
   readbackDraft(siteId: string, promotion: Record<string, unknown>): Promise<Record<string, unknown>>
+  publishPrivatePayload(siteId: string, promotion: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>>
   createPrivatePreview(siteId: string, promotion: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>>
   renderPrivatePreview(siteId: string, preview: Record<string, unknown>): Promise<Record<string, unknown>>
   captureEvidence(siteId: string, render: Record<string, unknown>): Promise<Record<string, unknown>>
@@ -124,7 +133,7 @@ export interface LocalBoundaryAdapters {
 }
 
 export type RuntimeConfig = {
-  mode: 'local'
+  mode: 'local' | 'production'
   orgId: string
   /** Pre-provisioned production site UUID; local mode derives a disposable site key. */
   siteId?: string
@@ -150,6 +159,7 @@ export type RuntimeConfig = {
   libraryRepositoryPath: string
   approvedExecutors: Record<string, string>
   approvedCapabilities: Record<string, string[]>
+  postgresAdapterModule?: string
 }
 
 export type OutcomeIngressDependencies = { outcomeAuthorization: LiNKreachAuthorizationVerifier }

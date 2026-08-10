@@ -63,7 +63,7 @@ export default function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   const demoMatch = pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/([^/]+))?(?:\/|$)/);
-  if (demoMatch) {
+  if (demoMatch && demoMatch[1]) {
     const configuredToken = process.env.PREVIEW_ACCESS_TOKEN;
     const candidateToken = demoMatch[1];
     if (!configuredToken || !candidateToken || candidateToken !== configuredToken) {
@@ -74,6 +74,14 @@ export default function middleware(request: NextRequest) {
           "Cache-Control": "private, no-store, max-age=0",
         },
       });
+    }
+  }
+
+  const stableDemoMatch = pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/|$)/);
+  if (stableDemoMatch && !pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo\/[^/]+/)) {
+    const configuredKey = process.env.PREVIEW_ACCESS_TOKEN;
+    if (!configuredKey || request.headers.get("x-linksites-preview-key") !== configuredKey) {
+      return new NextResponse("Not Found", { status: 404, headers: { "X-Robots-Tag": "noindex, nofollow, noarchive", "Cache-Control": "private, no-store, max-age=0" } });
     }
   }
 

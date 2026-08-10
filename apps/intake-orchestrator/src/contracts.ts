@@ -24,6 +24,7 @@ export interface IntakeAcknowledgement {
   readonly reasonCode?: string
   readonly nextAttemptAt?: string
   readonly attemptNumber?: number
+  readonly claimId?: string
 }
 
 export interface IntakeClaim {
