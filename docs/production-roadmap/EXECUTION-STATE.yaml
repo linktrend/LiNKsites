@@ -10,7 +10,7 @@ delivery_phase_1:
   principal_implementation_approval_received: true
   active_wave: 2
   active_lane: hardening_and_pre_vps_handoff
-  release_checkpoint_sha: "6c57a690b170a627b37af2a5217ddc8b5473e439"
+  release_checkpoint_sha: pending_hosted_gate
   final_verdict: pending_hosted_gate_and_terra_verification
 delivery_phase_2:
   status: not_authorized
@@ -29,10 +29,10 @@ work_packets:
   W2-05: { status: integrated_and_source_audited, checkpoint_sha: "258aa36ff3cef4d6921c48e72c3d39cf74811146", verdict: pass }
   W2-06: { status: integrated_and_source_audited, checkpoint_sha: "258aa36ff3cef4d6921c48e72c3d39cf74811146", verdict: pass }
   W2-07: { status: implementation_complete_runtime_proof_deferred_to_phase_2, checkpoint_sha: "258aa36ff3cef4d6921c48e72c3d39cf74811146", verdict: source_pass }
-  W2-08: { status: pre_vps_hardening_candidate_pending_hosted_gate_and_authoritative_integration, checkpoint_sha: "6c57a690b170a627b37af2a5217ddc8b5473e439", verdict: pending }
+  W2-08: { status: pre_vps_hardening_candidate_pending_hosted_gate_and_authoritative_integration, checkpoint_sha: pending_hosted_gate, verdict: pending }
 wave_gates:
   wave_1_integration_audit: { status: source_audited_in_integrated_candidate, checkpoint_sha: "258aa36ff3cef4d6921c48e72c3d39cf74811146", verdict: pass }
-  wave_2_phase_1_release_audit: { status: hardening_candidate_pending_hosted_gate_and_terra_verification, checkpoint_sha: "6c57a690b170a627b37af2a5217ddc8b5473e439", verdict: pending }
+  wave_2_phase_1_release_audit: { status: hardening_candidate_pending_hosted_gate_and_terra_verification, checkpoint_sha: pending_hosted_gate, verdict: pending }
 blockers: []
 notes:
   - The earlier independent source audit at full SHA 258aa36ff3cef4d6921c48e72c3d39cf74811146 remains historical evidence only. Later hardening corrections require a fresh Terra verification and hosted required checks at the current candidate SHA.
