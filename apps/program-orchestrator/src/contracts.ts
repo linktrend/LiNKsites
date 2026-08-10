@@ -157,6 +157,10 @@ export type RuntimeConfig = {
   commercialOutcomeGatewayKeyId: string
   /** Read-only local clone/cache used to read the immutable LiNKlibraries pin. */
   libraryRepositoryPath: string
+  /** One release-manifest-bound LiNKlibraries commit and exact byte checksums. */
+  libraryCommitSha: string
+  libraryCatalogChecksum: string
+  libraryEntryChecksum: string
   approvedExecutors: Record<string, string>
   approvedCapabilities: Record<string, string[]>
   postgresAdapterModule?: string

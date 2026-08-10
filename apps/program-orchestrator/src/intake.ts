@@ -13,7 +13,12 @@ export async function runFirstReadyLead(composition: Composition): Promise<LeadR
   const items = await composition.intake.pullReady(1, new Date().toISOString())
   const item = items[0]
   if (!item) return null
-  if (!isLeadResearchPackage(item.envelope)) throw new Error('W2-02 manual intake item is invalid')
+  if (!isLeadResearchPackage(item.envelope)) {
+    // A malformed legacy/CRM row must never poison the queue head forever.
+    // The durable adapter records a terminal rejection before the next poll.
+    await composition.intake.reject(item.itemId, 'lead:canonical-contract-invalid')
+    return null
+  }
   const claim = await composition.intake.claim(item.itemId, item.envelope.lead_id, item.envelope.idempotency_key, new Date().toISOString())
   if (!claim) throw new Error('W2-02 manual intake claim was not acquired')
   try {

@@ -61,6 +61,9 @@ for (const row of manifest.schemas?.payloadMigrations ?? []) if (await checksum(
 const library = manifest.libraries
 if (!library?.catalogSha || !library?.entrySha || library.catalogSha !== library.entrySha) throw new Error('manifest must bind catalog and entry evidence to one exact LiNKlibraries commit')
 if (library.catalogSha !== process.env.LINKLIBRARIES_CATALOG_SHA || library.entrySha !== process.env.LINKLIBRARIES_ENTRY_SHA) throw new Error('LiNKlibraries ref does not match the release manifest')
+if (process.env.W2_02_LIBRARY_COMMIT_SHA && process.env.W2_02_LIBRARY_COMMIT_SHA !== library.catalogSha) throw new Error('orchestrator library commit does not match the release manifest')
+if (process.env.W2_02_LIBRARY_CATALOG_SHA256 && process.env.W2_02_LIBRARY_CATALOG_SHA256 !== library.catalogContentSha256) throw new Error('orchestrator catalog checksum does not match the release manifest')
+if (process.env.W2_02_LIBRARY_ENTRY_SHA256 && process.env.W2_02_LIBRARY_ENTRY_SHA256 !== library.entryContentSha256) throw new Error('orchestrator entry checksum does not match the release manifest')
 const artifact = process.env.LINKLIBRARIES_ARTIFACT_PATH
 const git = (args) => execFileSync('git', ['-C', artifact, ...args], { encoding: 'utf8' }).trim()
 if (git(['rev-parse', '--is-inside-work-tree']) !== 'true') throw new Error('LINKLIBRARIES_ARTIFACT_PATH is not a Git working tree')

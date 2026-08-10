@@ -158,6 +158,9 @@ services:
       W2_05_OUTCOME_GATEWAY_SECRET: ${W2_05_OUTCOME_GATEWAY_SECRET:?set outcome gateway secret}
       W2_05_OUTCOME_GATEWAY_KEY_ID: ${W2_05_OUTCOME_GATEWAY_KEY_ID:?set outcome gateway key id}
       W2_02_LIBRARY_REPOSITORY_PATH: ${W2_02_LIBRARY_REPOSITORY_PATH:?set mounted library repository path}
+      W2_02_LIBRARY_COMMIT_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
+      W2_02_LIBRARY_CATALOG_SHA256: ${LINKLIBRARIES_CATALOG_CONTENT_SHA256:?set exact LiNKlibraries catalog checksum}
+      W2_02_LIBRARY_ENTRY_SHA256: ${LINKLIBRARIES_ENTRY_CONTENT_SHA256:?set exact LiNKlibraries entry checksum}
     depends_on:
       payload:
         condition: service_healthy

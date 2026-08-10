@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import type { DemoCompletionEnvelope, LeadResearchPackage } from '@linksites/types'
 import type { CompletionSink, IntakeAcknowledgement, IntakeClaim, PulledWorkItem, WorkIntakePort } from '@linksites/intake-orchestrator'
+import { isLeadResearchPackage } from '../../../packages/types/src/runtime-contracts.ts'
 import type { DurableStateStore, LedgerState } from './contracts.ts'
 
 /** The deployment-contract lane supplies a real pg PoolClient/Client adapter. */
@@ -115,6 +116,24 @@ export class PostgresWorkIntakePort implements WorkIntakePort {
         where org_id = $1 and item_id = $2 and state in ('ready', 'program_retry_scheduled')`,
       [this.orgId, itemId, reasonCode],
     )
+  }
+
+  /**
+   * The only manual/CRM-shaped write path for the production intake table.
+   * Invalid packages are rejected before they can enter the ready queue; the
+   * unique idempotency key makes a retry of the same accepted package safe.
+   */
+  async submit(envelope: LeadResearchPackage): Promise<{ itemId: string; accepted: boolean }> {
+    if (!isLeadResearchPackage(envelope)) throw new Error('W2-02 intake submission failed canonical LeadResearchPackage validation')
+    if (envelope.org_id !== this.orgId) throw new Error('W2-02 intake submission org does not match the runtime tenant')
+    const itemId = `intake:${createHash('sha256').update(`${envelope.org_id}:${envelope.idempotency_key}`).digest('hex')}`
+    await this.db.query(
+      `insert into lsites_ledger.program_intake (org_id, item_id, lead_id, idempotency_key, envelope, state)
+       values ($1,$2,$3,$4,$5,'ready')
+       on conflict (org_id, idempotency_key) do nothing`,
+      [this.orgId, itemId, envelope.lead_id, envelope.idempotency_key, JSON.stringify(envelope)],
+    )
+    return { itemId, accepted: true }
   }
 }
 

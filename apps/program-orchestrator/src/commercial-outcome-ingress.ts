@@ -7,9 +7,35 @@
 import type { CommercialOutcomeEnvelope, LiNKautoworkEventEnvelope } from '@linksites/types'
 import type { GatewayRequest } from '@linksites/autowork-boundary'
 import { LifecycleError, SiteLifecycleService, type LifecycleRecord } from '@linksites/factory-catalog'
+import type { LiNKreachAuthorizationVerifier } from '@linksites/factory-catalog'
 
 export interface CommercialOutcomeAuthenticityVerifier {
   verify(request: GatewayRequest): LiNKautoworkEventEnvelope
+}
+
+/**
+ * Bridges a just-verified W2-05 signature to the lifecycle's existing
+ * LiNKreach authorization port.  A grant is scoped to one canonical outcome,
+ * never supplied by HTTP input, and is removed after persistence.  Activation
+ * remains delegated to an explicitly supplied LiNKreach verifier.
+ */
+export class VerifiedGatewayOutcomeAuthorization implements LiNKreachAuthorizationVerifier {
+  private readonly grants = new Set<string>()
+  constructor(private readonly activationAuthorization?: LiNKreachAuthorizationVerifier) {}
+
+  private key(input: { orgId: string; leadId: string; siteId: string; reference: string }): string {
+    return `${input.orgId}\u0000${input.leadId}\u0000${input.siteId}\u0000${input.reference}`
+  }
+  grant(envelope: CommercialOutcomeEnvelope): void {
+    this.grants.add(this.key({ orgId: envelope.org_id, leadId: envelope.lead_id, siteId: envelope.site_id, reference: envelope.reach_authorization_reference }))
+  }
+  revoke(envelope: CommercialOutcomeEnvelope): void {
+    this.grants.delete(this.key({ orgId: envelope.org_id, leadId: envelope.lead_id, siteId: envelope.site_id, reference: envelope.reach_authorization_reference }))
+  }
+  async verify(input: { orgId: string; leadId: string; siteId: string; reference: string; capability: 'outcome' | 'activation' }): Promise<boolean> {
+    if (input.capability === 'outcome') return this.grants.has(this.key(input))
+    return this.activationAuthorization?.verify(input) ?? false
+  }
 }
 
 const required = (payload: Record<string, string | number | boolean> | undefined, key: string): string => {
@@ -19,7 +45,7 @@ const required = (payload: Record<string, string | number | boolean> | undefined
 }
 
 export class CommercialOutcomeIngress {
-  constructor(private readonly lifecycle: SiteLifecycleService, private readonly verifier: CommercialOutcomeAuthenticityVerifier) {}
+  constructor(private readonly lifecycle: SiteLifecycleService, private readonly verifier: CommercialOutcomeAuthenticityVerifier, private readonly authorization: VerifiedGatewayOutcomeAuthorization) {}
 
   async accept(request: GatewayRequest): Promise<LifecycleRecord> {
     // This call performs the actual HMAC, key-id, freshness, nonce replay and
@@ -45,6 +71,11 @@ export class CommercialOutcomeIngress {
       replay_protection: { event_id: required(submission, 'outcome_event_id'), nonce: required(submission, 'outcome_nonce') },
       recorded_at: required(submission, 'recorded_at'),
     }
-    return this.lifecycle.recordOutcome(canonical)
+    this.authorization.grant(canonical)
+    try {
+      return await this.lifecycle.recordOutcome(canonical)
+    } finally {
+      this.authorization.revoke(canonical)
+    }
   }
 }

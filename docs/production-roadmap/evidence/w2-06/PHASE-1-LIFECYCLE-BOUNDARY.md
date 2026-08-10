@@ -19,7 +19,7 @@ flowchart TD
 
 ## Controls proved locally
 
-- A `CommercialOutcomeEnvelope` is schema-validated, authorized, and deduplicated by immutable event ID. A duplicate with changed commercial facts is rejected.
+- The authenticated orchestrator ingress accepts only a W2-05 HMAC/key-id/freshness/nonce/event-grant verified pending event. It turns that verifier result into a one-request scoped outcome authorization before lifecycle persistence; a caller cannot supply an authorization marker. A `CommercialOutcomeEnvelope` is schema-validated and deduplicated by immutable event ID. A duplicate with changed commercial facts is rejected.
 - A sold outcome alone cannot activate anything. A matching `ActivationRequest` and separate LiNKreach authorization are both required.
 - The only shipped activation providers are dry-run providers. Every receipt states `mode: dry_run` and `publicMutation: false`; the graph records Payload, private-wall, domain, DNS, route, TLS, and health steps plus compensation receipts if a step fails.
 - No-sale recycling checks the conversion lock before it touches prospect content. It then records quarantine and inventory-release receipts; a locked foundation is not quarantined or released.

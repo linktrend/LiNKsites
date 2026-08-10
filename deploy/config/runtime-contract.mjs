@@ -73,6 +73,9 @@ export const SERVICE_CONFIGURATION = {
     required('W2_05_OUTCOME_GATEWAY_SECRET', 'secret-min-32', true),
     required('W2_05_OUTCOME_GATEWAY_KEY_ID', 'slug'),
     required('W2_02_LIBRARY_REPOSITORY_PATH', 'absolute-path'),
+    required('W2_02_LIBRARY_COMMIT_SHA', 'git-sha-1'),
+    required('W2_02_LIBRARY_CATALOG_SHA256', 'sha-256'),
+    required('W2_02_LIBRARY_ENTRY_SHA256', 'sha-256'),
   ],
 }
 
@@ -123,6 +126,7 @@ export function validateRuntimeConfig(environment, service) {
   if (environment.W2_02_MODE && environment.W2_02_MODE !== 'production') errors.push({ name: 'W2_02_MODE', error: 'must equal production for the Phase 2 deployment contract', secret: false })
   if (service === 'web-master' && environment.PREVIEW_ACCESS_TOKEN && environment.W2_02_PREVIEW_ACCESS_TOKEN && environment.PREVIEW_ACCESS_TOKEN !== environment.W2_02_PREVIEW_ACCESS_TOKEN) errors.push({ name: 'PREVIEW_ACCESS_TOKEN', error: 'must equal W2_02_PREVIEW_ACCESS_TOKEN when both are supplied', secret: true })
   if (service === 'program-orchestrator' && environment.W2_02_EXECUTION_REVISION && environment.LINKSITES_RELEASE_SHA && environment.W2_02_EXECUTION_REVISION !== environment.LINKSITES_RELEASE_SHA) errors.push({ name: 'W2_02_EXECUTION_REVISION', error: 'must equal LINKSITES_RELEASE_SHA', secret: false })
+  if (service === 'program-orchestrator' && environment.W2_02_LIBRARY_COMMIT_SHA && environment.LINKLIBRARIES_CATALOG_SHA && environment.W2_02_LIBRARY_COMMIT_SHA !== environment.LINKLIBRARIES_CATALOG_SHA) errors.push({ name: 'W2_02_LIBRARY_COMMIT_SHA', error: 'must equal the manifest-bound LiNKlibraries catalog commit', secret: false })
   return { ok: errors.length === 0, service, schemaVersion: CONFIG_SCHEMA_VERSION, errors }
 }
 

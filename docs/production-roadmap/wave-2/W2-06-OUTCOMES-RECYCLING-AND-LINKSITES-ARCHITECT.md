@@ -1,6 +1,6 @@
 # W2-06 — Outcomes, Recycling, and LiNKsites Architect
 
-**Status:** Planned — requires W2-02 and W2-05 contracts
+**Status:** Implemented in the release candidate — pending final independent source audit and authoritative integration
 **Wave:** 2
 **Executor:** one Codex Luna High implementation agent
 **Safe lane:** commercial-outcome technical handlers and asset-curation proposal flow
@@ -20,7 +20,7 @@ Implement the technical lifecycle after LiNKreach reports `sold` or `no_sale`, a
 
 1. Validate, deduplicate, and persist `CommercialOutcomeEnvelope` events.
 2. Implement a sold-flow state machine that accepts an `ActivationRequest`, verifies LiNKreach authorization, and schedules technical publication/domain work.
-3. Complete the production adapter boundary for sold-site operations: Payload publication/visibility, private-wall transition, domain ownership/validation, DNS record changes through the approved Cloudflare/provider adapter, Traefik/site-route activation, TLS-readiness verification, health/smoke evidence, and compensating rollback. Provider calls must be idempotent and receipt-producing.
+3. Complete the Phase 1 source boundary for sold-site operations: Payload/private-wall/domain/DNS/route/TLS/health contracts and compensating rollback. Only dry-run providers are shipped in Phase 1; real provider mutation and verification occur in the separately authorized Phase 2 VPS gate.
 4. Phase 1 contract-tests these adapters against recorded/sandbox/fake provider boundaries and dry-runs the full activation graph. It must prove public actions cannot occur without explicit live authorization. Real DNS/public-domain mutation is reserved for a later separately approved operational test, not the first private-site pilot.
 5. Implement no-sale recycling: remove/quarantine lead-specific content and sensitive data according to policy, release or reclassify inventory safely, preserve required audit/evidence, and create a clean refactoring request.
 6. Define deferred/abandoned behavior with explicit retention and no infinite polling/action loop.
