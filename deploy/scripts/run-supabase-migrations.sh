@@ -49,14 +49,46 @@ psql "$DATABASE_URI" --set ON_ERROR_STOP=1 --command "
   on conflict (platform_commit_sha) do update set verified_at = excluded.verified_at;
 " >/dev/null
 
-for migration in /migrations/*.sql; do
+psql "$DATABASE_URI" --set ON_ERROR_STOP=1 --command "
+  create table if not exists lsites_ledger.linksites_migration_history (
+    filename text primary key,
+    checksum char(64) not null check (checksum ~ '^[0-9a-f]{64}$'),
+    applied_at timestamptz not null default now()
+  );
+" >/dev/null
+
+# Version-sort the timestamped filenames so date-only names such as
+# 20260804_000001 run before same-day wall-clock names such as 20260804113354.
+# The history table is the idempotency boundary: an applied filename may never
+# change bytes, while an unapplied migration is executed and recorded in one
+# database transaction.
+for migration in $(find /migrations -maxdepth 1 -type f -name '*.sql' -print | sort -V); do
   [ -f "$migration" ] || continue
-  echo "Applying LiNKsites migration $(basename "$migration")"
+  migration_name="$(basename "$migration")"
+  migration_checksum="$(sha256sum "$migration" | awk '{print $1}')"
+  applied_checksum="$(psql "$DATABASE_URI" --no-align --tuples-only --quiet --set ON_ERROR_STOP=1 \
+    -v migration_name="$migration_name" \
+    --command "select checksum from lsites_ledger.linksites_migration_history where filename = :'migration_name';" | tr -d '[:space:]')"
+  if [ -n "$applied_checksum" ]; then
+    [ "$applied_checksum" = "$migration_checksum" ] || {
+      echo "applied migration checksum mismatch: $migration_name" >&2
+      exit 78
+    }
+    echo "Skipping already-applied LiNKsites migration $migration_name"
+    continue
+  fi
+  echo "Applying LiNKsites migration $migration_name"
   # Migration files carry a documented `migrate:down` section for human
   # recovery review.  Deployment is forward-only: feeding that section to
   # psql would immediately undo the just-applied schema and make later
   # migrations fail.  Execute only the source preceding that delimiter.
-  sed '/^-- migrate:down/,$d' "$migration" | psql "$DATABASE_URI" --set ON_ERROR_STOP=1 >/dev/null
+  {
+    echo 'begin;'
+    sed '/^-- migrate:down/,$d' "$migration"
+    printf "insert into lsites_ledger.linksites_migration_history (filename, checksum) values (:'migration_name', :'migration_checksum');\n"
+    echo 'commit;'
+  } | psql "$DATABASE_URI" --set ON_ERROR_STOP=1 \
+    -v migration_name="$migration_name" -v migration_checksum="$migration_checksum" >/dev/null
 done
 receipt="$(psql "$DATABASE_URI" --no-align --tuples-only --quiet --set ON_ERROR_STOP=1 --command "select platform_commit_sha from lsites_ledger.platform_migration_receipts where platform_commit_sha = '$LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA';" | tr -d '[:space:]')"
 [ "$receipt" = "$LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA" ] || { echo 'platform migration receipt readback failed' >&2; exit 78; }

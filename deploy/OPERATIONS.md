@@ -19,7 +19,11 @@ activation is a separate LiNKreach-authorized Phase 2 operation.
 3. Render the protected runtime environment file outside Git. Run preflight.
 4. Confirm the named Traefik network and privacy middlewares already exist.
 5. Run the one-shot `supabase-migrate`, then `payload-migrate`; neither may be
-   bypassed. The first requires a verified Platform migration SHA.
+   bypassed. The first requires a verified Platform migration SHA. The
+   migration job records each filename and SHA-256 checksum, refuses altered
+   applied files, and executes each new file plus its history receipt in one
+   transaction. This source contract is VPS-only proof; no local migration is
+   performed in Phase 1.
 6. Start the long-running services and run
    `deploy/scripts/postdeploy-smoke.sh <protected-runtime-env-file>`. The
    script executes from `web-master` over Compose service DNS and localhost;
@@ -27,11 +31,14 @@ activation is a separate LiNKreach-authorized Phase 2 operation.
    or logs a token-bearing URL.
 
 The orchestrator must run with `W2_02_MODE=production`, a UUID
-`W2_02_ORG_ID`, the exact packaged
+`W2_02_ORG_ID`, a UUID `W2_02_SITE_ID`, explicit `W2_02_DATABASE_ROLE`,
+absolute `W2_02_APPROVED_FACTS_PATH`, the distinct `W2_02_DATABASE_URI`
+least-privilege credential, and the exact packaged
 `W2_02_POSTGRES_ADAPTER_MODULE=@linksites/program-orchestrator/postgres-adapter`,
-and a real `DATABASE_URI` for its provisioned least-privilege PostgreSQL
-credential. Compose passes these through the protected runtime file; no
-credential or preview token belongs in the image or this document. The
+and the release-pinned `LINKLIBRARIES_ARTIFACT_PATH` Git checkout. Compose
+passes the distinct URI to the adapter's `DATABASE_URI` name only inside the
+orchestrator container; CMS/worker/migration services retain their separate
+`DATABASE_URI`. No credential or preview token belongs in the image or this document. The
 orchestrator's `W2_02_PREVIEW_ACCESS_TOKEN` is distinct from the web-master
 variable name and is required by the production orchestrator path; it must match
 the protected token web-master receives so the internal preview proof can

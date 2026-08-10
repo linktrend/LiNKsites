@@ -10,7 +10,7 @@ formats, and safe redacted fingerprints. It never prints values.
 | `LINKSITES_CONFIG_SCHEMA_VERSION` | LiNKsites operations | no | all | exact current schema | update manifest and restart |
 | `LINKSITES_RELEASE_SHA` | release process | no | all | full Git SHA | deployment identity changes |
 | `LINKSITES_ORG_ID` | LiNKsites program owner | no | all | identifier | redeploy only after tenancy review |
-| `DATABASE_URI` | database owner | yes | CMS, worker, orchestrator | non-loopback PostgreSQL URL; orchestrator uses its least-privilege database credential | rolling restart; preserve connection compatibility |
+| `DATABASE_URI` | database owner | yes | CMS, worker, Supabase migration job | non-loopback PostgreSQL URL for CMS/worker/migration ownership | rolling restart; preserve connection compatibility |
 | `PAYLOAD_SECRET` | CMS owner | yes | CMS, worker | 32+ chars | coordinated session/key rotation; restart both |
 | `PAYLOAD_PUBLIC_SERVER_URL` | LiNKsites operations | no | CMS, worker | non-loopback HTTPS URL | coordinate CMS and frontend deployment |
 | `LINKAUTOWORK_GATEWAY_URL` | LiNKautowork | no | CMS, worker | non-loopback HTTPS URL | verify signed gateway before restart |
@@ -26,12 +26,15 @@ formats, and safe redacted fingerprints. It never prints values.
 | `PAYLOAD_API_KEY` | CMS owner | yes | web-master | 32+ chars | rotate server process after CMS grants replacement key |
 | `PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | web-master | 32+ chars | rotate the application-level private preview token and restart web-master |
 | `W2_02_MODE` | LiNKsites program owner | no | orchestrator | exact `production` | non-production execution is refused by the deployment contract |
+| `W2_02_DATABASE_URI` | database owner | yes | orchestrator | distinct non-loopback PostgreSQL URL for the least-privilege orchestrator credential; never reuse CMS `DATABASE_URI` | rolling restart; preserve adapter connection compatibility |
 | `W2_02_ORG_ID` | LiNKsites program owner | no | orchestrator | UUID tenant key | stop intake and re-authorize tenancy |
+| `W2_02_SITE_ID` | LiNKsites program owner | no | orchestrator | UUID site key bound to the organization | stop intake and re-authorize tenancy |
+| `W2_02_DATABASE_ROLE` | database owner | no | orchestrator | pre-provisioned PostgreSQL role name | coordinate grants and restart |
 | `W2_02_POSTGRES_ADAPTER_MODULE` | release process | no | orchestrator | exact `@linksites/program-orchestrator/postgres-adapter` | rebuild/redeploy with the packaged adapter |
 | `W2_02_EXECUTION_REVISION` | release process | no | orchestrator | full Git SHA equal to release | rebuild/redeploy with exact release |
 | `W2_02_EXECUTABLE_CHECKPOINT` | release process | no | orchestrator | SHA-256 of executable inputs | rebuild/redeploy with exact release |
 | `W2_02_STATE_DIR` | LiNKsites operations | no | orchestrator | absolute durable-volume path | stop, back up and restore state before changing |
-| `W2_02_APPROVED_FACTS_PATH` | LiNKsites operations | no | orchestrator | optional relative approved-facts path | review source evidence then restart |
+| `W2_02_APPROVED_FACTS_PATH` | LiNKsites operations | no | orchestrator | absolute path to approved-facts JSON | review source evidence then restart |
 | `W2_02_MAX_ATTEMPTS` | LiNKsites operations | no | orchestrator | optional positive integer | restart after retry policy review |
 | `W2_02_CONCURRENCY` | LiNKsites operations | no | orchestrator | optional positive integer | drain active leases then restart |
 | `W2_02_LEASE_MS` | LiNKsites operations | no | orchestrator | optional positive integer milliseconds | drain active leases then restart |
@@ -57,7 +60,8 @@ and must be supplied by the Phase 2 protected deployment environment.
 | `LINKSITES_ORCHESTRATOR_IMAGE` | release process | no | Compose orchestrator | exact immutable `name@sha256:` reference from the release manifest | new release deployment |
 | `LINKSITES_MIGRATIONS_IMAGE` | release process | no | Compose Supabase migration | exact immutable `name@sha256:` reference from the release manifest | one-shot, exact release only |
 | `LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA` | LiNKplatform release authority | no | migration job and manifest | authoritative full 40-character Git SHA | external governed admission required |
-| `LINKLIBRARIES_ARTIFACT_PATH` | LiNKlibraries release process | no | orchestrator mount | read-only absolute artifact directory | remount only an approved immutable artifact |
+| `LINKLIBRARIES_ARTIFACT_PATH` | LiNKlibraries release process | no | preflight and orchestrator mount | read-only absolute Git checkout containing the exact approved catalog/entry commit and evidence | remount only an approved immutable artifact |
+| `LINKLIBRARIES_CATALOG_SHA` / `LINKLIBRARIES_ENTRY_SHA` | LiNKlibraries release process | no | manifest and preflight | same exact full Git commit SHA; catalog entry must be approved | release only after ref review |
 | `TRAEFIK_NETWORK` | infrastructure operator | no | Compose edge | existing external Docker network name | coordinated proxy maintenance |
 | `TRAEFIK_ENTRYPOINT` | infrastructure operator | no | Traefik routers | existing TLS entrypoint name | coordinated proxy maintenance |
 | `TRAEFIK_CMS_HOST` | infrastructure operator | no | private CMS router | private DNS hostname | Phase 2 DNS/TLS operation only |
@@ -72,5 +76,8 @@ content are valid in this contract. The Phase 2 operator creates the protected
 runtime file and runs `node deploy/scripts/validate-runtime-config.mjs SERVICE`
 before compose can start any service. `deploy/scripts/preflight.sh` also compares
 all five `LINKSITES_*_IMAGE` values byte-for-byte with the corresponding
-manifest digest and rejects tags, placeholders, missing paths, and missing
-Traefik inputs before invoking Compose.
+manifest digest, verifies the mounted LiNKlibraries Git commit/catalog/entry
+content and approval status, and rejects tags, placeholders, missing paths, and
+missing Traefik inputs before invoking Compose. The packaged adapter receives
+the distinct `W2_02_DATABASE_URI` as its adapter-facing `DATABASE_URI` only in
+the orchestrator container.

@@ -136,9 +136,28 @@ services:
     # non-secret bindings make the production composition explicit and prevent
     # a local-mode or source-relative adapter fallback.
     environment:
+      # The adapter-facing DATABASE_URI is deliberately sourced from the
+      # distinct orchestrator credential, never the CMS credential in the
+      # shared env file.
+      DATABASE_URI: ${W2_02_DATABASE_URI:?set distinct orchestrator PostgreSQL URI}
       W2_02_MODE: ${W2_02_MODE:?set W2_02_MODE=production}
+      W2_02_DATABASE_URI: ${W2_02_DATABASE_URI:?set distinct orchestrator PostgreSQL URI}
       W2_02_ORG_ID: ${W2_02_ORG_ID:?set UUID W2_02_ORG_ID}
+      W2_02_SITE_ID: ${W2_02_SITE_ID:?set UUID W2_02_SITE_ID}
+      W2_02_DATABASE_ROLE: ${W2_02_DATABASE_ROLE:?set orchestrator database role}
+      W2_02_APPROVED_FACTS_PATH: ${W2_02_APPROVED_FACTS_PATH:?set absolute approved facts path}
       W2_02_POSTGRES_ADAPTER_MODULE: ${W2_02_POSTGRES_ADAPTER_MODULE:?set the packaged Postgres adapter module}
+      W2_02_EXECUTION_REVISION: ${W2_02_EXECUTION_REVISION:?set exact execution revision}
+      W2_02_EXECUTABLE_CHECKPOINT: ${W2_02_EXECUTABLE_CHECKPOINT:?set executable checkpoint}
+      W2_02_STATE_DIR: ${W2_02_STATE_DIR:?set orchestrator state directory}
+      W2_02_PAYLOAD_BASE_URL: ${W2_02_PAYLOAD_BASE_URL:?set private Payload URL}
+      W2_02_PAYLOAD_API_KEY: ${W2_02_PAYLOAD_API_KEY:?set scoped Payload API key}
+      W2_02_PAYLOAD_SITE_ID: ${W2_02_PAYLOAD_SITE_ID:?set Payload site identifier}
+      W2_02_WEB_MASTER_BASE_URL: ${W2_02_WEB_MASTER_BASE_URL:?set private preview URL}
+      W2_02_PREVIEW_ACCESS_TOKEN: ${W2_02_PREVIEW_ACCESS_TOKEN:?set protected preview token}
+      W2_05_OUTCOME_GATEWAY_SECRET: ${W2_05_OUTCOME_GATEWAY_SECRET:?set outcome gateway secret}
+      W2_05_OUTCOME_GATEWAY_KEY_ID: ${W2_05_OUTCOME_GATEWAY_KEY_ID:?set outcome gateway key id}
+      W2_02_LIBRARY_REPOSITORY_PATH: ${W2_02_LIBRARY_REPOSITORY_PATH:?set mounted library repository path}
     depends_on:
       payload:
         condition: service_healthy

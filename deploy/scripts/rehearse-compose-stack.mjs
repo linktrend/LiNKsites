@@ -104,7 +104,7 @@ grant execute on function platform.has_org_access(uuid, platform.member_role) to
 
 const runtimeValues = {
   LINKSITES_DEPLOYMENT_ENV: 'production',
-  LINKSITES_CONFIG_SCHEMA_VERSION: '1.0.0',
+  LINKSITES_CONFIG_SCHEMA_VERSION: '1.1.0',
   LINKSITES_RELEASE_SHA: sourceRevision,
   LINKSITES_ORG_ID: 'local-proof-org',
   DATABASE_URI: 'postgresql://postgres:local-proof-only@local-postgres:5432/postgres',
@@ -133,7 +133,11 @@ const runtimeValues = {
   // template-admission contract.
   LINKSITES_ADMITTED_TEMPLATE_SHA: '1'.repeat(40),
   W2_02_MODE: 'local',
+  W2_02_DATABASE_URI: 'postgresql://postgres:local-proof-only@local-postgres:5432/postgres',
   W2_02_ORG_ID: 'local-proof-org',
+  W2_02_SITE_ID: '00000000-0000-4000-8000-000000000002',
+  W2_02_DATABASE_ROLE: 'svc_linksites_runtime',
+  W2_02_APPROVED_FACTS_PATH: '/var/lib/linksites/program/approved-facts.json',
   W2_02_EXECUTION_REVISION: sourceRevision,
   W2_02_EXECUTABLE_CHECKPOINT: checkpointHash,
   W2_02_STATE_DIR: '/var/lib/linksites/program',

@@ -19,7 +19,11 @@ done
 node --input-type=module - "$manifest" <<'NODE'
 import { readFile } from 'node:fs/promises'
 import { stat } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
+import { resolve } from 'node:path'
 const manifest = JSON.parse(await readFile(process.argv[2], 'utf8'))
+const checksum = async (file) => createHash('sha256').update(await readFile(resolve(process.cwd(), file))).digest('hex')
 if (manifest.repository?.releaseSha !== process.env.LINKSITES_RELEASE_SHA) throw new Error('manifest release SHA does not equal runtime release SHA')
 const imageBindings = {
   LINKSITES_CMS_IMAGE: manifest.images?.cms,
@@ -44,6 +48,24 @@ for (const name of ['LINKSITES_RUNTIME_ENV_FILE', 'LINKLIBRARIES_ARTIFACT_PATH']
   if (name === 'LINKLIBRARIES_ARTIFACT_PATH' && !details.isDirectory()) throw new Error(`${name} must be a directory`)
 }
 if (manifest.platform?.migrationsAppliedSha !== process.env.LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA) throw new Error('platform migration SHA does not match the release manifest')
+const migrationRows = manifest.schemas?.supabaseMigrations
+if (!Array.isArray(migrationRows) || migrationRows.length === 0) throw new Error('manifest has no Supabase migration identity')
+for (const row of migrationRows) if (await checksum(row.file) !== row.sha256) throw new Error(`Supabase migration source checksum mismatch: ${row.file}`)
+const payloadIndex = manifest.schemas?.payloadMigrationIndex
+if (!payloadIndex || await checksum(payloadIndex.file) !== payloadIndex.sha256) throw new Error('Payload migration index checksum does not match the release manifest')
+for (const row of manifest.schemas?.payloadMigrations ?? []) if (await checksum(row.file) !== row.sha256) throw new Error(`Payload migration source checksum mismatch: ${row.file}`)
+const library = manifest.libraries
+if (!library?.catalogSha || !library?.entrySha || library.catalogSha !== library.entrySha) throw new Error('manifest must bind catalog and entry evidence to one exact LiNKlibraries commit')
+if (library.catalogSha !== process.env.LINKLIBRARIES_CATALOG_SHA || library.entrySha !== process.env.LINKLIBRARIES_ENTRY_SHA) throw new Error('LiNKlibraries ref does not match the release manifest')
+const artifact = process.env.LINKLIBRARIES_ARTIFACT_PATH
+const git = (args) => execFileSync('git', ['-C', artifact, ...args], { encoding: 'utf8' }).trim()
+if (git(['rev-parse', '--is-inside-work-tree']) !== 'true') throw new Error('LINKLIBRARIES_ARTIFACT_PATH is not a Git working tree')
+git(['cat-file', '-e', `${library.catalogSha}^{commit}`])
+const catalog = git(['show', `${library.catalogSha}:${library.catalogPath}`])
+const entry = git(['show', `${library.entrySha}:${library.entryPath}`])
+if (createHash('sha256').update(catalog).digest('hex') !== library.catalogContentSha256) throw new Error('LiNKlibraries catalog content checksum does not match the release manifest')
+if (createHash('sha256').update(entry).digest('hex') !== library.entryContentSha256) throw new Error('LiNKlibraries entry content checksum does not match the release manifest')
+if (!JSON.parse(catalog).entries?.some((row) => row.entryId === library.entryId && row.status === 'approved')) throw new Error('LiNKlibraries manifest entry is not approved in the exact catalog')
 NODE
 docker compose --env-file "$runtime_env" -f deploy/docker-compose.deploy.yml config --quiet
 echo 'LiNKsites Phase 2 preflight passed; this command performed no deployment.'
