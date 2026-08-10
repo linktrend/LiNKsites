@@ -12,18 +12,19 @@ set -a
 source "$runtime_env"
 set +a
 
-# Execute from the web-master container. The checks use the declared Compose
-# topology, while the application reads PREVIEW_ACCESS_TOKEN from its
-# protected environment and constructs the private path in memory. No
-# secret-bearing URL is supplied as an input or emitted in diagnostics.
+# Execute from the web-master container. The preview check uses the exact
+# stable completion URL; privacy is supplied by the named external middleware,
+# not by a secret-bearing URL or application header.
 docker compose --env-file "$runtime_env" -f deploy/docker-compose.deploy.yml exec -T web-master node --input-type=module <<'NODE'
-const token = process.env.PREVIEW_ACCESS_TOKEN
-if (!token || token.length < 32) throw new Error('web-master preview token is absent or too short')
+const previewBase = process.env.W2_02_WEB_MASTER_BASE_URL
+if (!previewBase) throw new Error('web-master preview base URL is absent')
+const previewUrl = new URL('/en/demo', previewBase)
+if (previewUrl.username || previewUrl.password || previewUrl.search || previewUrl.hash) throw new Error('stable preview URL must not contain credentials, query, or fragment')
 
 const checks = [
   ['CMS readiness', 'http://payload:3000/api/readyz'],
   ['orchestrator readiness', 'http://program-orchestrator:3000/readyz'],
-  ['private preview', `http://127.0.0.1:3000/en/demo/${encodeURIComponent(token)}`],
+  ['private preview', previewUrl.toString()],
 ]
 for (const [name, url] of checks) {
   const response = await fetch(url, { redirect: 'manual' })

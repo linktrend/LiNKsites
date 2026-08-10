@@ -24,7 +24,11 @@ export class PostgresRuntimeStateStore implements DurableStateStore {
       `select state from lsites_ledger.program_runtime_states where org_id = $1 and program_id = $2`,
       [orgId, programId],
     )
-    return result.rows[0]?.state ? result.rows[0].state as LedgerState : null
+    const row = result.rows[0]
+    if (!row?.state) return null
+    const state = row.state as LedgerState
+    if (typeof row.state_checksum !== 'string' || safeHash(state) !== row.state_checksum) throw new Error('W2-02 runtime state checksum mismatch')
+    return state
   }
 
   async write(orgId: string, programId: string, state: LedgerState): Promise<void> {
@@ -102,6 +106,15 @@ export class PostgresWorkIntakePort implements WorkIntakePort {
     await this.db.query(
       `update lsites_ledger.program_intake set state = $3, reason_code = $4, next_attempt_at = $5, claim_id = null, claim_expires_at = null, updated_at = now()
         where org_id = $1 and item_id = $2 and claim_id = $6`, [this.orgId, itemId, acknowledgement.state, acknowledgement.reasonCode ?? null, acknowledgement.nextAttemptAt ?? null, acknowledgement.claimId])
+  }
+
+  async reject(itemId: string, reasonCode: string): Promise<void> {
+    if (!reasonCode.trim()) throw new Error('intake rejection reason is required')
+    await this.db.query(
+      `update lsites_ledger.program_intake set state = 'rejected', reason_code = $3, updated_at = now()
+        where org_id = $1 and item_id = $2 and state in ('ready', 'program_retry_scheduled')`,
+      [this.orgId, itemId, reasonCode],
+    )
   }
 }
 

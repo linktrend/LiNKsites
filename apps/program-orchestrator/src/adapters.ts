@@ -253,9 +253,11 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       if (!this.payloadTarget.publishPrivate) throw new Error('payload:private-publication-adapter-unavailable')
       const ids = Array.isArray(promotion.payloadDocumentIds) ? promotion.payloadDocumentIds.map(String) : []
       if (ids.length === 0 || promotion.parity !== true) throw new Error('payload:private-publication-requires-verified-draft')
-      const publications = await Promise.all(ids.map((id) => this.payloadTarget.publishPrivate!(id, `private-publication:${siteId}`)))
-      if (!publications.every((item) => item.published && item.readback.status === 'published')) throw new Error('payload:private-publication-readback-failed')
-      const result = { siteId, payloadDocumentIds: ids, status: 'published', audience: 'private-preview', publicActivation: false, publicationReadback: publications.map((item) => ({ published: item.published, status: item.readback.status, publicActivation: false })) }
+      const publicationMarker = siteId.replace(/^site:/, '')
+      const publications = await Promise.all(ids.map((id) => this.payloadTarget.publishPrivate!(id, publicationMarker, this.config.payloadSiteId)))
+      const owningSite = (readback: Record<string, unknown>) => readback.site && typeof readback.site === 'object' ? String((readback.site as Record<string, unknown>).id) : String(readback.site)
+      if (!publications.every((item) => item.published && item.readback.status === 'published' && item.readback.previewEnvironment === 'private-preview' && item.readback.promotionRunMarker === publicationMarker && owningSite(item.readback) === this.config.payloadSiteId)) throw new Error('payload:private-publication-readback-failed')
+      const result = { siteId, payloadDocumentIds: ids, status: 'published', audience: 'private-preview', publicActivation: false, publicationReadback: publications.map((item) => ({ published: item.published, status: item.readback.status, previewEnvironment: item.readback.previewEnvironment, promotionRunMarker: item.readback.promotionRunMarker, owningSite: owningSite(item.readback), publicActivation: item.readback.publicActivation })) }
       const artifact = await this.writeArtifact('payload-private-publication', siteId, result)
       return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum }
     }, fence)
@@ -264,18 +266,18 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   async createPrivatePreview(siteId: string, promotion: Record<string, unknown>, fence: ExternalFence): Promise<Record<string, unknown>> {
     return this.boundary('frontend.private-preview', async () => {
       const ids = Array.isArray(promotion.payloadDocumentIds) ? promotion.payloadDocumentIds.map(String) : []
-      // The authenticated Payload promotion has already created and read back
-      // these records as private drafts. A token-gated preview deploys those
-      // drafts; it must not change their workflow status to published.
+      // The authenticated Payload publication has already read back published
+      // private-preview records. The stable completion URL is protected by the
+      // external privacy middleware, not by a secret in the URL.
       if (ids.length === 0 || promotion.parity !== true) throw new Error('payload:private-preview-requires-verified-draft-receipt')
       const manifest = { schemaVersion: { major: 1, minor: 0 }, manifestId: `manifest:${siteId}`, manifestVersion: 1, siteId, siteClass: 'preview' as const, kitId: 'home_services', tierId: 'standard', platformReleaseRef: this.config.executingRevision, designProfileRef: 'design:local', contentReleaseRef: String(promotion.checksum), pages: [], lineage: {}, resolvedAt: new Date().toISOString() }
       const deployment = createPreviewDeployment({ previewId: `preview:${siteId}`, prospectId: siteId, manifest, payloadDraftContentRef: `payload:${siteId}`, analyticsIdentityRef: `analytics:${siteId}`, accessPolicy: 'token_required', expiresAt: new Date(Date.now() + 86_400_000).toISOString(), qualityReceiptRef: null })
       // Tokens and token-bearing URLs are transport credentials. They must
       // never enter the ledger, evidence, receipt, or completion envelope.
       const protectedBase = new URL(this.config.webMasterBaseUrl)
-      if (protectedBase.username || protectedBase.password || protectedBase.search || protectedBase.hash || ['localhost', '127.0.0.1', '::1'].includes(protectedBase.hostname)) throw new Error('frontend:protected-web-master-url-is-invalid')
+      if (protectedBase.username || protectedBase.password || protectedBase.search || protectedBase.hash || (this.config.mode === 'production' && ['localhost', '127.0.0.1', '::1'].includes(protectedBase.hostname))) throw new Error('frontend:protected-web-master-url-is-invalid')
       const privatePreviewUrl = new URL('/en/demo', protectedBase).toString()
-      const result = { ...deployment, privatePreviewUrl, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, status: 'published', publicActivation: false }, publicActivation: false, protectedRoute: '/en/demo' }
+      const result = { ...deployment, privatePreviewUrl, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, status: 'published', publicActivation: false }, publicActivation: false, protectedRoute: '/en/demo', secretFreeUrl: true }
       const artifact = await this.writeArtifact('frontend-private-preview', siteId, result)
       return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum }
     }, fence)
@@ -283,7 +285,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
 
   async renderPrivatePreview(siteId: string, preview: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.boundary('frontend.render', async () => {
-      const response = await fetch(`${this.config.webMasterBaseUrl}/en/demo`, { headers: { 'X-LiNKsites-Preview-Key': this.config.previewAccessToken } })
+      const response = await fetch(`${this.config.webMasterBaseUrl}/en/demo`)
       const html = await response.text()
       const robots = response.headers.get('x-robots-tag') ?? ''
       const cache = response.headers.get('cache-control') ?? ''

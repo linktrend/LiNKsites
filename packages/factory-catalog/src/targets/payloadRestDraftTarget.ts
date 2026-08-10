@@ -164,15 +164,16 @@ export class PayloadRestDraftTarget implements PayloadDraftTarget {
     return true
   }
 
-  async publishPrivate(payloadDocumentId: string, publicationMarker: string): Promise<{ published: boolean; readback: Record<string, unknown> }> {
+  async publishPrivate(payloadDocumentId: string, publicationMarker: string, owningSiteId: string): Promise<{ published: boolean; readback: Record<string, unknown> }> {
     const parsed = parseCompoundId(payloadDocumentId)
     if (!parsed) throw new Error('payload publication document reference is invalid')
     const url = `${this.baseUrl}/api/${parsed.collection}/${encodeURIComponent(parsed.id)}?draft=false`
-    const response = await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...this.buildHeaders() }, body: JSON.stringify({ status: 'published', previewEnvironment: 'private-preview', publicActivation: false, publicationMarker }) })
+    const response = await fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...this.buildHeaders() }, body: JSON.stringify({ status: 'published', previewEnvironment: 'private-preview', publicActivation: false, promotionRunMarker: publicationMarker }) })
     if (!response.ok) throw payloadRequestError('PATCH', `${parsed.collection}/${parsed.id}`, response)
     const readResponse = await fetch(`${this.baseUrl}/api/${parsed.collection}/${encodeURIComponent(parsed.id)}?draft=false&depth=0`, { headers: this.buildHeaders() })
     const readback = readResponse.ok ? this.normaliseResponse(await readResponse.json() as PayloadDocResponse) : null
-    if (!readback || readback.status !== 'published') throw new Error('payload private publication readback failed')
+    const readbackSite = readback?.site && typeof readback.site === 'object' ? (readback.site as Record<string, unknown>).id : readback?.site
+    if (!readback || readback.status !== 'published' || readback.previewEnvironment !== 'private-preview' || readback.promotionRunMarker !== publicationMarker || String(readbackSite) !== owningSiteId) throw new Error('payload private publication readback failed')
     return { published: true, readback }
   }
 

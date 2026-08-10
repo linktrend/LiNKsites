@@ -137,14 +137,18 @@ export interface LifecyclePostgresExecutor {
 
 /** Migration-owned lifecycle persistence. This adapter never creates or alters schema. */
 export function createPostgresLifecycleStore(db: LifecyclePostgresExecutor): LifecycleStore {
+  const readRecord = (value: unknown): LifecycleRecord | null => {
+    if (!isLifecycleRecord(value)) throw new LifecycleError('Lifecycle persistence returned an invalid or inconsistent record.')
+    return structuredClone(value)
+  }
   return {
     async getByEventId(eventId) {
       const result = await db.query('select record from lsites_sites.lifecycle_records where outcome_event_id = $1', [eventId])
-      return result.rows[0]?.record ? structuredClone(result.rows[0].record as LifecycleRecord) : null
+      return result.rows[0]?.record ? readRecord(result.rows[0].record) : null
     },
     async getBySiteId(orgId, siteId) {
       const result = await db.query('select record from lsites_sites.lifecycle_records where org_id = $1 and site_id = $2', [orgId, siteId])
-      return result.rows[0]?.record ? structuredClone(result.rows[0].record as LifecycleRecord) : null
+      return result.rows[0]?.record ? readRecord(result.rows[0].record) : null
     },
     async save(record) {
       await db.query(`insert into lsites_sites.lifecycle_records

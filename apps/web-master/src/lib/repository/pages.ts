@@ -275,7 +275,9 @@ type PayloadPage = Omit<CmsPage, "content" | "status"> & {
 };
 
 export const assertAudiencePage = (page: PayloadPage, audience: PageAudience): CmsPage => {
-  const expectedStatus = audience === "private-preview" ? "draft" : "published";
+  // Private Payload publication is a published CMS revision with an explicit
+  // private-preview audience marker; workflow status alone never makes it public.
+  const expectedStatus = "published";
   if (page.status !== expectedStatus) {
     throw new PublishedContentError(`page "${page.slug || "unknown"}" is not ${expectedStatus}`);
   }
@@ -301,7 +303,7 @@ export const getPageBySlug = async ({
 }: GetPageArgs): Promise<CmsPage | null> => {
   const slug = slugSegments.length > 0 ? slugSegments.join("/") : "home";
 
-  const status = audience === "private-preview" ? "draft" : "published";
+  const status = "published";
   const where = {
     and: [...siteLocaleFilter(siteId, locale, status).and, { slug: { equals: slug } }],
   };
@@ -313,7 +315,7 @@ export const getPageBySlug = async ({
     depth: 2,
     locale,
     site: siteId,
-    draft: audience === "private-preview",
+    draft: false,
   });
 
   const previewRunMarker = audience === "private-preview" ? process.env.PREVIEW_RUN_MARKER : undefined;

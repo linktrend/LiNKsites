@@ -45,6 +45,8 @@ export interface WorkIntakePort {
     nowIso: string,
   ): Promise<IntakeClaim | null>
   acknowledge(itemId: string, acknowledgement: IntakeAcknowledgement): Promise<void>
+  /** Rejects a poison row at the source without requiring a forged claim. */
+  reject(itemId: string, reasonCode: string): Promise<void>
 }
 
 /** Vendor-neutral CRM boundary. A concrete CRM must implement these same ports. */

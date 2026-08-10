@@ -77,14 +77,6 @@ export default function middleware(request: NextRequest) {
     }
   }
 
-  const stableDemoMatch = pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/|$)/);
-  if (stableDemoMatch && !pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo\/[^/]+/)) {
-    const configuredKey = process.env.PREVIEW_ACCESS_TOKEN;
-    if (!configuredKey || request.headers.get("x-linksites-preview-key") !== configuredKey) {
-      return new NextResponse("Not Found", { status: 404, headers: { "X-Robots-Tag": "noindex, nofollow, noarchive", "Cache-Control": "private, no-store, max-age=0" } });
-    }
-  }
-
   if (pathname.startsWith("/_ai")) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.replace("/_ai", "/ai");
@@ -110,7 +102,7 @@ export default function middleware(request: NextRequest) {
   }
 
   const response = intlMiddleware(request);
-  if (pathname.includes("/demo/")) {
+  if (pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/|$)/)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
     response.headers.set("Cache-Control", "private, no-store, max-age=0");
   }

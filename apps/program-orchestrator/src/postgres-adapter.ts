@@ -13,11 +13,14 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
  * policies. There is no PGlite, file, or schema-creation fallback here.
  */
 export async function createPostgresRuntimeDependencies(): Promise<PostgresRuntimeDependencies> {
-  const databaseUri = process.env.DATABASE_URI?.trim()
+  const configuredUri = process.env.W2_02_DATABASE_URI?.trim()
+  const adapterAlias = process.env.DATABASE_URI?.trim()
+  if (configuredUri && adapterAlias && configuredUri !== adapterAlias) throw new Error('W2-02 DATABASE_URI alias does not match W2_02_DATABASE_URI')
+  const databaseUri = configuredUri || adapterAlias
   const orgId = process.env.W2_02_ORG_ID?.trim()
   const siteId = process.env.W2_02_SITE_ID?.trim()
   const databaseRole = process.env.W2_02_DATABASE_ROLE?.trim()
-  if (!databaseUri) throw new Error('W2-02 production requires DATABASE_URI')
+  if (!databaseUri) throw new Error('W2-02 production requires W2_02_DATABASE_URI (adapter alias DATABASE_URI is accepted only for the packaged compose contract)')
   if (!/^postgres(?:ql)?:\/\//i.test(databaseUri)) throw new Error('W2-02 DATABASE_URI must be a PostgreSQL connection string')
   if (!orgId || !UUID.test(orgId)) throw new Error('W2-02 production requires W2_02_ORG_ID as a UUID tenant key')
   if (!siteId || !UUID.test(siteId)) throw new Error('W2-02 production requires W2_02_SITE_ID as a UUID site key')

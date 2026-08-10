@@ -24,6 +24,10 @@ import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
 const manifest = JSON.parse(await readFile(process.argv[2], 'utf8'))
 const checksum = async (file) => createHash('sha256').update(await readFile(resolve(process.cwd(), file))).digest('hex')
+const cmsDatabase = new URL(process.env.DATABASE_URI)
+const orchestratorDatabase = new URL(process.env.W2_02_DATABASE_URI)
+const databaseIdentity = (url) => `${url.protocol}//${url.hostname}:${url.port || '5432'}/${url.username}`
+if (databaseIdentity(cmsDatabase) === databaseIdentity(orchestratorDatabase)) throw new Error('CMS and orchestrator database host credentials must be distinct')
 if (manifest.repository?.releaseSha !== process.env.LINKSITES_RELEASE_SHA) throw new Error('manifest release SHA does not equal runtime release SHA')
 const imageBindings = {
   LINKSITES_CMS_IMAGE: manifest.images?.cms,

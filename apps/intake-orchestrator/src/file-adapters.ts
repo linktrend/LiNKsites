@@ -11,6 +11,7 @@ import type {
   WorkIntakePort,
 } from './contracts.ts'
 import type { LeadResearchPackage } from '@linksites/types'
+import { isLeadResearchPackage } from '../../../packages/types/src/runtime-contracts.ts'
 import { SystemClock } from './orchestrator.ts'
 
 type IntakeState = Record<string, {
@@ -141,6 +142,15 @@ export class FileWorkIntakePort implements WorkIntakePort {
     })
   }
 
+  async reject(itemId: string, reasonCode: string): Promise<void> {
+    if (!reasonCode.trim()) throw new Error('intake rejection reason is required')
+    await this.withStateLock(async () => {
+      const state = await this.readState()
+      if (state[itemId]?.state === 'claimed') return
+      await this.writeState(itemId, { state: 'rejected', reasonCode })
+    })
+  }
+
   private async readState(): Promise<IntakeState> {
     const contents = await readFile(this.statePath, 'utf8').catch((error: unknown) => {
       const code = error && typeof error === 'object' && 'code' in error ? error.code : undefined
@@ -253,6 +263,17 @@ export class FileWorkIntakePort implements WorkIntakePort {
     const temporaryPath = `${this.statePath}.${process.pid}.${randomUUID()}.tmp`
     await writeFile(temporaryPath, `${JSON.stringify(state, null, 2)}\n`, 'utf8')
     await rename(temporaryPath, this.statePath)
+  }
+}
+
+/** Governed manual writer: only canonical, tenant-scoped lead packages enter NDJSON. */
+export class ManualWorkIntakeWriter {
+  constructor(private readonly inputPath: string, private readonly orgId: string) {}
+
+  async append(envelope: LeadResearchPackage): Promise<void> {
+    if (!isLeadResearchPackage(envelope) || envelope.org_id !== this.orgId) throw new Error('manual intake writer rejected a non-canonical or foreign lead package')
+    await mkdir(dirname(this.inputPath), { recursive: true })
+    await appendFile(this.inputPath, `${JSON.stringify(envelope)}\n`, 'utf8')
   }
 }
 

@@ -26,7 +26,7 @@ formats, and safe redacted fingerprints. It never prints values.
 | `PAYLOAD_API_KEY` | CMS owner | yes | web-master | 32+ chars | rotate server process after CMS grants replacement key |
 | `PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | web-master | 32+ chars | rotate the application-level private preview token and restart web-master |
 | `W2_02_MODE` | LiNKsites program owner | no | orchestrator | exact `production` | non-production execution is refused by the deployment contract |
-| `W2_02_DATABASE_URI` | database owner | yes | orchestrator | distinct non-loopback PostgreSQL URL for the least-privilege orchestrator credential; never reuse CMS `DATABASE_URI` | rolling restart; preserve adapter connection compatibility |
+| `W2_02_DATABASE_URI` | database owner | yes | orchestrator | canonical distinct non-loopback PostgreSQL URL for the least-privilege orchestrator credential; the packaged adapter may receive the same value as its `DATABASE_URI` alias; never reuse CMS `DATABASE_URI` | rolling restart; preserve adapter connection compatibility |
 | `W2_02_ORG_ID` | LiNKsites program owner | no | orchestrator | UUID tenant key | stop intake and re-authorize tenancy |
 | `W2_02_SITE_ID` | LiNKsites program owner | no | orchestrator | UUID site key bound to the organization | stop intake and re-authorize tenancy |
 | `W2_02_DATABASE_ROLE` | database owner | no | orchestrator | pre-provisioned PostgreSQL role name | coordinate grants and restart |

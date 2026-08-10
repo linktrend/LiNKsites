@@ -266,7 +266,7 @@ export class DurableLedger {
       const privatePreviewUrl = typeof publication?.privatePreviewUrl === 'string' ? publication.privatePreviewUrl : ''
       let parsedPreviewUrl: URL
       try { parsedPreviewUrl = new URL(privatePreviewUrl) } catch { throw new Error('completion:private-preview-publication-receipt-missing') }
-      if (!['http:', 'https:'].includes(parsedPreviewUrl.protocol) || parsedPreviewUrl.username || parsedPreviewUrl.password || parsedPreviewUrl.search || parsedPreviewUrl.hash || ['localhost', '127.0.0.1', '::1'].includes(parsedPreviewUrl.hostname)) throw new Error('completion:private-preview-publication-receipt-invalid')
+      if (!['http:', 'https:'].includes(parsedPreviewUrl.protocol) || parsedPreviewUrl.username || parsedPreviewUrl.password || parsedPreviewUrl.search || parsedPreviewUrl.hash || (this.config.mode === 'production' && ['localhost', '127.0.0.1', '::1'].includes(parsedPreviewUrl.hostname)) || parsedPreviewUrl.pathname !== '/en/demo') throw new Error('completion:private-preview-publication-receipt-invalid')
       const envelope: DemoCompletionEnvelope = {
         schema_version: { major: 1, minor: 0 }, org_id: current.program.orgId, correlation_id: `program:${current.program.programId}`, idempotency_key: `completion:${current.program.idempotencyKey}`, lead_id: current.program.leadId, site_id: `site:${current.program.leadId}`, private_preview_url: parsedPreviewUrl.toString(), status: 'completed', artifact_revision: this.config.executingRevision, library_revision: this.libraryRevision(current), content_revision: this.contentRevision(current), evidence_references: current.runs.flatMap((run) => run.evidence.map((item) => item.receipt_id)), started_at: current.program.createdAt, completed_at: now,
       }

@@ -10,7 +10,7 @@
 | Executable checkpoint | SHA-256 of the checked-out orchestrator/factory/ledger source and package inputs | Exported with every run proof; build must be rerun before certification |
 | State ledger | `program-ledger.json` with atomic writes; adapter effects are not stored in a JSON sidecar | Replace the local ledger with the approved durable service before VPS |
 | Working content | Durable embedded PostgreSQL-compatible database using `WorkingContentRepository` | Supabase/Postgres service and RLS proof remain environment requirements |
-| Intake | Manual NDJSON file through `runFirstReadyFileLead` | Future CRM adapter must use the same `LeadResearchPackage` boundary |
+| Intake | Governed manual NDJSON writer/adapter through the shared `LeadResearchPackage` boundary | Future CRM adapter must use the same boundary; poison rows are durably rejected/acknowledged so they cannot block the head |
 | Completion | Durable ledger outbox plus idempotent local NDJSON sink; attempts/failures/backlog/dead-letter/ack are observable | Future LiNKautowork/CRM-shaped delivery boundary |
 | CMS | `PayloadRestDraftTarget` through `W2_02_PAYLOAD_BASE_URL`; real local proof uses the disposable authenticated Payload process from W2-03/W2-04 | Hosted credentials remain environment requirements |
 | Frontend/deployment | Protected token-required/noindex/no-store `apps/web-master` HTTP boundary; real local proof uses its optimized server | Hosted preview environment remains deferred |

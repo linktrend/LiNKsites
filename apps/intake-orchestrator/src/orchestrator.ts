@@ -198,10 +198,7 @@ export class IntakeOrchestrator {
         if (this.stopRequested) break
         if (!isLeadResearchPackage(item.envelope)) {
           invalid += 1
-          await this.dependencies.intake.acknowledge(item.itemId, {
-            state: 'rejected',
-            reasonCode: 'validation:invalid-lead-research-package',
-          })
+          await this.dependencies.intake.reject(item.itemId, 'validation:invalid-lead-research-package')
           continue
         }
 
