@@ -1,6 +1,6 @@
 # LiNKsites Phase 1 Work-Packet Index
 
-**Status:** Draft — pending Principal approval.
+**Status:** Implementation candidate pending authoritative integration and final independent source/evidence audit.
 
 Before any packet, read [`EXECUTION-PROTOCOL.md`](./EXECUTION-PROTOCOL.md), [`WAVE-MANIFEST.yaml`](./WAVE-MANIFEST.yaml), and the current [`EXECUTION-STATE.yaml`](./EXECUTION-STATE.yaml). Use the canonical [`templates/`](./templates/) for Issue, Proof, Review, Integration, and higher-level gate artifacts.
 
@@ -36,7 +36,7 @@ Wave 1 then uses the [independent audit packet](./audit/WAVE-AUDIT-PACKET.md). W
 | [W2-05](./wave-2/W2-05-LINKAUTOWORK-AND-EXTERNAL-EVENT-BOUNDARY.md) | Governed LiNKautowork adapter/events; raw n8n boundary removed | Wave 1 PASS | Integration lane |
 | [W2-06](./wave-2/W2-06-OUTCOMES-RECYCLING-AND-LINKSITES-ARCHITECT.md) | Sale/no-sale technical flows and Architect proposal path | W2-02, W2-05 | Lifecycle lane |
 | [W2-07](./wave-2/W2-07-DEPLOYMENT-OPERATIONS-CI-AND-LEGACY-REMOVAL.md) | Buildable deploy bundle, ops readiness, CI, web-company removal | All Wave 2 product packets | Deployment/hardening lane |
-| [W2-08](./wave-2/W2-08-LOCAL-CERTIFICATION-AND-PHASE-1-RELEASE-GATE.md) | One clean exact-SHA local certification and release evidence | W2-01 through W2-07 | Master/release lane |
+| [W2-08](./wave-2/W2-08-LOCAL-CERTIFICATION-AND-PHASE-1-RELEASE-GATE.md) | One clean exact-SHA pre-VPS source certification and release evidence | W2-01 through W2-07 | Master/release lane |
 
 Wave 2 and the Phase 1 release use the same independent audit packet. Phase 1 completes only on final `PASS`.
 

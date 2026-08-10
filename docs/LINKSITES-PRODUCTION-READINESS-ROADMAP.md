@@ -294,7 +294,7 @@ The implementation and both audits must enforce all of the following:
 
 ### Delivery Phase 1 — everything ready before VPS deployment
 
-Phase 1 contains two implementation waves followed by independent audits and one final local release gate. Phase 1 changes source, migrations, tests, contracts, documentation, and deploy artifacts. It does not mutate the VPS, live Supabase, Cloudflare, DNS, Payload, LiNKautowork, CRM, secrets, or protected branches without separate authority.
+Phase 1 contains two implementation waves followed by independent audits and one final pre-VPS source release gate. Phase 1 changes source, migrations, tests, contracts, documentation, and deploy artifacts. It does not mutate the VPS, live Supabase, Cloudflare, DNS, Payload, LiNKautowork, CRM, secrets, or protected branches without separate authority. By Principal direction on 2026-08-10, runtime, recovery, and end-to-end testing are executed on the VPS as part of separately authorized Phase 2 rather than repeated locally.
 
 #### Wave 1 — contracts and durable foundations
 
@@ -321,7 +321,7 @@ Wave 2 implements:
 - LiNKautowork boundary and event behavior;
 - sale/no-sale technical outcome flows and LiNKsites Architect baseline;
 - Docker/deploy/health/backup/rollback/observability preparation;
-- CI, integration, browser, security, tenancy, failure, and local release certification.
+- CI, integration, browser, security, tenancy, failure, and pre-VPS source certification.
 
 Wave 2 closes only after a Codex Sol Medium audit returns `PASS`, every correction is re-audited, and the Phase 1 release gate passes from a clean exact commit.
 
@@ -378,14 +378,14 @@ Phase 1 is complete only when every condition below is evidenced from one exact,
 
 ### 10.6 Deploy and operate
 
-- CMS, web-master, and orchestrator production images build and run locally from pinned bases.
+- CMS, web-master, and orchestrator have pinned production image definitions, startup contracts, and deployment instructions; the exact image build/run proof occurs on the authorized VPS in Phase 2.
 - Compose/deployment artifacts use health checks, non-root runtime users, bounded resources, restart behavior, volumes, networks, and secret injection.
 - Environment contract, migration/apply/rollback procedure, deployment order, smoke tests, backup/restore, rollback, monitoring, and incident evidence are documented and mechanically checked where possible.
 - Phase 2 operator packet identifies every external input and Principal gate without embedding secret values.
 
 ### 10.7 Verification baseline
 
-At minimum, the clean candidate passes:
+At minimum, the clean candidate has no unaddressed source-level failure from:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -396,18 +396,18 @@ pnpm build
 pnpm audit --audit-level=moderate
 ```
 
-It also passes dedicated:
+Its source/evidence audit also covers dedicated:
 
 - orchestrator end-to-end and recovery tests;
 - CMS contract/integration and Playwright tests using disposable real services;
 - web-master browser and multi-tenant tests;
 - Payload promotion/publication integration tests;
 - RLS/tenant-isolation tests;
-- Docker image build/run and health probes;
+- Docker image/build/run, health, private-preview, migration, backup/restore, and rollback procedures, whose execution is a Phase 2 VPS gate;
 - secret scan and configuration-contract validation;
-- one local or disposable-environment full website completion rehearsal using real software components rather than mocked success.
+- one VPS full website completion rehearsal using real software components rather than mocked success, during Phase 2.
 
-Skipped tests, cached-only evidence, missing credentials, unavailable Docker, or unavailable live services must be reported. They cannot be silently counted as a pass for the Phase 1 release gate.
+No runtime outcome, cached-only evidence, missing credential, unavailable Docker service, or unavailable live service may be counted as a Phase 1 runtime pass. Each is explicitly deferred to the matching Phase 2 gate and must pass there before the pilot is complete.
 
 ---
 
@@ -481,7 +481,7 @@ W2-02 + W2-05
 
 All Wave 2 implementation packets
  └── W2-07 deployment/operations/CI hardening
-      └── W2-08 local certification and release evidence
+      └── W2-08 pre-VPS source certification and release evidence
            └── Sol Wave 2 release audit → corrections until PASS
                 └── Phase 1 complete
                      └── Principal authorization required for Phase 2 VPS work
@@ -497,7 +497,7 @@ VPS deployment may begin only when:
 
 1. Phase 1 Definition of Done is satisfied.
 2. Final Sol Medium audit verdict is `PASS`.
-3. Exact release candidate SHA and container image digests are recorded.
+3. Exact release candidate SHA, lockfile, configuration schema, and image build instructions are recorded. Image digests are generated and frozen during the authorized Phase 2 build.
 4. Worktrees are clean and expected branches are pushed.
 5. Phase 2 external prerequisites are inventoried without exposing values.
 6. Backup/rollback targets are named and verified available.

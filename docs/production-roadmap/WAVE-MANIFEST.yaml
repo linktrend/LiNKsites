@@ -1,7 +1,7 @@
 schema_version: 1
 program: linksites-production-readiness
 overall_goal: delivery_phase_1_pre_vps
-status: draft_awaiting_principal_approval
+status: implementation_candidate_pending_authoritative_integration_and_final_source_audit
 prepared_at: "2026-08-04"
 model_policy:
   master: codex_gpt_5_6_terra_medium

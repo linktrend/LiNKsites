@@ -1,6 +1,6 @@
 # W2-07 — Deployment, Operations, CI, and Legacy Removal
 
-**Status:** Planned — follows all Wave 2 product packets
+**Status:** Implementation complete in the release candidate; runtime proof deferred to Phase 2 VPS execution
 **Wave:** 2
 **Executor:** one or more Luna High agents with non-overlapping lanes; integrated by the master
 **Boundary:** prepare deployable artifacts only; do not access or mutate the VPS
@@ -33,7 +33,7 @@ Produce a reproducible, secure, observable, backup-aware deployment bundle and C
 
 10. Migration ordering and one-shot migration job/process for Supabase/Postgres and Payload data stores.
 11. Backup and restore procedure for CMS, working content, Ledger/evidence, and required media; include retention/encryption/verification expectations.
-12. Automated local restore rehearsal showing a clean environment can recover and serve a certified site/run.
+12. Prepare the automated recovery rehearsal. Its execution against the deployed environment is a Phase 2 VPS gate; do not describe the unexecuted rehearsal as a pass.
 
 ### Observability and operations
 
@@ -51,14 +51,12 @@ Produce a reproducible, secure, observable, backup-aware deployment bundle and C
 
 ## Acceptance gates
 
-- A clean machine/isolated environment can build the deploy bundle using documented commands.
-- Local production-shaped stack boots, reports healthy, migrates, processes the certified fixture, and shuts down cleanly.
-- Backup/restore and rollback rehearsal produce evidence.
-- CI covers all production components and has no silently skipped mandatory suite.
+- The source includes documented build, preflight, migration, startup, health, backup, restore, rollback, and shutdown procedures for the exact candidate.
+- The deployment bundle has been independently source-audited and integrated through the governed branch path.
 - `web-company` and retired integrations are absent from active build/deploy surfaces.
-- No VPS/live external mutation occurred.
+- Runtime stack startup, migration execution, private-preview rendering, backup/restore, and rollback evidence are required Phase 2 VPS gates. They are not claimed as completed by this packet.
+- No VPS/live external mutation occurs under this packet.
 
 ## Evidence and handoff
 
-Provide build/image digests, deployment manifest, config-name matrix, topology, CI run, backup/restore and rollback reports, legacy-removal search results, exact SHA, clean Git status, and Phase 2 preflight checklist.
-
+Provide the exact SHA, deployment source/manifest generator, config-name matrix, topology, operations manual, legacy-removal search results, clean Git status, and Phase 2 preflight checklist. Phase 2 provides the build/image digests and runtime backup/restore/rollback evidence.
