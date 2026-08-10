@@ -13,6 +13,7 @@ import {
   type WorkingContentPromotionInput,
   produceWorkingContent,
   buildPromotionRequestFromPreparedWorkingContent,
+  canonicalJsonChecksum,
   promotePreparedWorkingContent,
   assertValidWorkingContentPackage,
   computeWorkingContentChecksum,
@@ -130,7 +131,11 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     const entry = JSON.parse(entryRaw) as LibraryConsumptionEvidence['entry']
     const files = Object.fromEntries(entry.files.map((asset) => [asset.path, git('show', `${authority.commitSha}:${authority.entryPath}/${asset.path}`)]))
     for (const asset of entry.files) if (createHash('sha256').update(files[asset.path] ?? '', 'utf8').digest('hex') !== asset.sha256) throw new Error(`library:asset-checksum-mismatch:${asset.path}`)
-    const entryChecksum = authority.entryChecksum
+    // The deployment manifest pins the raw entry.json bytes above. The
+    // Factory Catalog evidence contract separately records the canonical
+    // entry-object digest, so consumers can verify the parsed metadata and
+    // every materialized asset independent of JSON whitespace/order.
+    const entryChecksum = canonicalJsonChecksum(entry)
     const assetChecksums = Object.fromEntries(entry.files.map((asset) => [asset.path, asset.sha256]))
     return { entry, files, receipt: { schemaVersion: { major: 1, minor: 0 }, receiptId: `library-consumption:${authority.entryId}:${authority.commitSha}`, consumer: 'linksites', entryId: authority.entryId, catalogCommitSha: authority.commitSha, libraryCommitSha: authority.commitSha, entryChecksum, assetChecksums, entrypoint: 'src/index.mjs', testFiles: ['tests/marketing-smb-v1.test.mjs'], verificationId: authority.verificationId, compatibility: { compatible: true, consumer: 'linksites', nodeMajor: 22, runtimes: ['node', 'browser'] }, recordedAt: new Date().toISOString() }, verification: { authorityId: 'linklibraries.release-manifest.v1', repositoryUrl: 'https://github.com/linktrend/LiNKlibraries.git', ...authority, assetChecksums } } as LibraryConsumptionEvidence
   }
