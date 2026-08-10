@@ -260,8 +260,13 @@ export class DurableLedger {
       if (!current || current.completion.state === 'emitted' || current.program.state !== 'completed') return { state: current, result: null }
       if (current.completion.envelope) return { state: current, result: clone(current.completion.envelope) }
       const now = new Date().toISOString()
+      const publication = current.runs.find((run) => run.issueId === 'private-publication' && run.state === 'succeeded' && run.output && typeof run.output === 'object')?.output as Record<string, unknown> | undefined
+      const privatePreviewUrl = typeof publication?.privatePreviewUrl === 'string' ? publication.privatePreviewUrl : ''
+      let parsedPreviewUrl: URL
+      try { parsedPreviewUrl = new URL(privatePreviewUrl) } catch { throw new Error('completion:private-preview-publication-receipt-missing') }
+      if (!['http:', 'https:'].includes(parsedPreviewUrl.protocol) || parsedPreviewUrl.username || parsedPreviewUrl.password || parsedPreviewUrl.search || parsedPreviewUrl.hash || ['localhost', '127.0.0.1', '::1'].includes(parsedPreviewUrl.hostname)) throw new Error('completion:private-preview-publication-receipt-invalid')
       const envelope: DemoCompletionEnvelope = {
-        schema_version: { major: 1, minor: 0 }, org_id: current.program.orgId, correlation_id: `program:${current.program.programId}`, idempotency_key: `completion:${current.program.idempotencyKey}`, lead_id: current.program.leadId, site_id: `site:${current.program.leadId}`, private_preview_url: `http://127.0.0.1/private/${current.program.leadId}`, status: 'completed', artifact_revision: this.config.executingRevision, library_revision: this.libraryRevision(current), content_revision: this.contentRevision(current), evidence_references: current.runs.flatMap((run) => run.evidence.map((item) => item.receipt_id)), started_at: current.program.createdAt, completed_at: now,
+        schema_version: { major: 1, minor: 0 }, org_id: current.program.orgId, correlation_id: `program:${current.program.programId}`, idempotency_key: `completion:${current.program.idempotencyKey}`, lead_id: current.program.leadId, site_id: `site:${current.program.leadId}`, private_preview_url: parsedPreviewUrl.toString(), status: 'completed', artifact_revision: this.config.executingRevision, library_revision: this.libraryRevision(current), content_revision: this.contentRevision(current), evidence_references: current.runs.flatMap((run) => run.evidence.map((item) => item.receipt_id)), started_at: current.program.createdAt, completed_at: now,
       }
       current.completion = { state: 'reserved', envelope }
       current.metrics.completionEmits += 1

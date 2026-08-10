@@ -126,6 +126,8 @@ export interface LocalBoundaryAdapters {
 export type RuntimeConfig = {
   mode: 'local'
   orgId: string
+  /** Pre-provisioned production site UUID; local mode derives a disposable site key. */
+  siteId?: string
   statePath: string
   intakePath: string
   completionPath: string

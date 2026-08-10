@@ -153,8 +153,16 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       assertValidWorkingContentPackage(contentPackage)
       const workingPackageId = `working:${siteId}`
       const orgUuid = this.config.mode === 'production' ? this.config.orgId : stableUuid(this.config.orgId)
-      const siteUuid = stableUuid(siteId)
-      await ensureTenantRows(this.db, orgUuid, siteUuid)
+      const siteUuid = this.config.mode === 'production' ? this.config.siteId! : stableUuid(siteId)
+      if (this.config.mode === 'production') {
+        const tenant = await this.db.query(
+          `select s.id from lsites_sites.sites s where s.id = $1 and s.org_id = $2`,
+          [siteUuid, orgUuid],
+        )
+        if (tenant.rows.length !== 1) throw new Error('working-content:production-tenant-site-absent-or-unauthorized')
+      } else {
+        await ensureTenantRows(this.db, orgUuid, siteUuid)
+      }
       const existing = await this.workingContentRepository.readVersion(workingPackageId, 1)
       const version = existing ?? await this.workingContentRepository.createVersion({ workingPackageId, orgId: orgUuid, leadId: siteId.replace(/^site:/, ''), siteId: siteUuid, programRef: 'linksites', runId: null, expectedCurrentVersion: 0, authorId: 'w2-02-orchestrator', executorId: 'content.working.assemble@w2-01-deterministic-adapter.v1', contentPackage })
       return { contentVersion: `${workingPackageId}:${version.versionNumber}`, workingPackageId, workingPackageVersion: version.versionNumber, checksum: version.contentChecksum, lifecycleState: version.lifecycleState, persisted: true, contentPackageReference: `lsites_sites.working_content_versions/${workingPackageId}/${version.versionNumber}` }
@@ -251,7 +259,10 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const deployment = createPreviewDeployment({ previewId: `preview:${siteId}`, prospectId: siteId, manifest, payloadDraftContentRef: `payload:${siteId}`, analyticsIdentityRef: `analytics:${siteId}`, accessPolicy: 'token_required', expiresAt: new Date(Date.now() + 86_400_000).toISOString(), qualityReceiptRef: null })
       // Tokens and token-bearing URLs are transport credentials. They must
       // never enter the ledger, evidence, receipt, or completion envelope.
-      const result = { ...deployment, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, status: 'draft', publicActivation: false }, publicActivation: false, protectedRoute: '/en/demo/[private-token]' }
+      const protectedBase = new URL(this.config.webMasterBaseUrl)
+      if (protectedBase.username || protectedBase.password || protectedBase.search || protectedBase.hash || ['localhost', '127.0.0.1', '::1'].includes(protectedBase.hostname)) throw new Error('frontend:protected-web-master-url-is-invalid')
+      const privatePreviewUrl = new URL('/en/demo', protectedBase).toString()
+      const result = { ...deployment, privatePreviewUrl, payloadDocumentIds: ids, cmsPublication: { audience: 'private-preview', authenticated: true, status: 'draft', publicActivation: false }, publicActivation: false, protectedRoute: '/en/demo/[private-token]' }
       const artifact = await this.writeArtifact('frontend-private-preview', siteId, result)
       return { ...result, artifactPath: artifact.path, artifactChecksum: artifact.checksum }
     }, fence)

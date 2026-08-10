@@ -9,10 +9,11 @@ import type { Composition } from './composition.ts'
  */
 export { FileWorkIntakePort }
 
-export async function runFirstReadyFileLead(composition: Composition): Promise<LeadResearchPackage> {
+export async function runFirstReadyFileLead(composition: Composition): Promise<LeadResearchPackage | null> {
   const items = await composition.intake.pullReady(1, new Date().toISOString())
   const item = items[0]
-  if (!item || !isLeadResearchPackage(item.envelope)) throw new Error('W2-02 manual intake is empty or invalid')
+  if (!item) return null
+  if (!isLeadResearchPackage(item.envelope)) throw new Error('W2-02 manual intake item is invalid')
   const claim = await composition.intake.claim(item.itemId, item.envelope.lead_id, item.envelope.idempotency_key, new Date().toISOString())
   if (!claim) throw new Error('W2-02 manual intake claim was not acquired')
   try {

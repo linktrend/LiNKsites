@@ -14,7 +14,7 @@ import { closeLocalDatabase, openLocalDatabase } from './local-database.ts'
 import { LiNKautoworkGateway, type GatewayTransport } from '@linksites/autowork-boundary'
 import { createFileLifecycleStore, createPostgresLifecycleStore, SiteLifecycleService, type LifecycleEvidenceVerifier, type VerifiedRecycleEvidence } from '@linksites/factory-catalog'
 import { CommercialOutcomeIngress } from './commercial-outcome-ingress.ts'
-import { PostgresCompletionSink, PostgresRuntimeStateStore, PostgresWorkIntakePort, type PostgresRuntimeDependencies } from './postgres-runtime.ts'
+import { PostgresCompletionSink, PostgresRuntimeStateStore, PostgresWorkIntakePort, type PostgresRuntimeDependencies, type PostgresExecutor } from './postgres-runtime.ts'
 
 export type Composition = { config: RuntimeConfig; ledger: DurableLedger; adapters: LocalBoundaryAdaptersImpl; dependencies: LocalDependencyPorts; executors: ExecutorRegistry; intake: WorkIntakePort; completionSink: CompletionSink; runtime: ProgramRuntime; commercialOutcomeIngress: CommercialOutcomeIngress; close: () => Promise<void> }
 
@@ -37,6 +37,7 @@ function executableCheckpoint(): string {
 export function validateRuntimeConfig(config: RuntimeConfig): RuntimeConfig {
   if (!/^[-_a-zA-Z0-9]{3,64}$/.test(config.orgId)) throw new Error('W2-02 orgId is invalid')
   if (config.mode === 'production' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(config.orgId)) throw new Error('W2-02 production orgId must be a UUID tenant key')
+  if (config.mode === 'production' && (!config.siteId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(config.siteId))) throw new Error('W2-02 production requires W2_02_SITE_ID as a UUID site key')
   if (config.mode === 'local' && [config.statePath, config.intakePath, config.completionPath, config.approvedFactsPath].some((path) => !path || path.includes('\0'))) throw new Error('W2-02 local path configuration is invalid')
   if (config.mode === 'production' && !config.postgresAdapterModule) throw new Error('W2-02 production requires an explicit Postgres adapter module; local adapters are not permitted')
   if (!Number.isInteger(config.maxAttempts) || config.maxAttempts < 1 || !Number.isInteger(config.concurrency) || config.concurrency < 1) throw new Error('W2-02 retry and concurrency configuration must be positive integers')
@@ -65,7 +66,7 @@ export function createLocalConfig(baseDir: string, orgId = 'local-org'): Runtime
 
 export function configFromEnvironment(env: NodeJS.ProcessEnv, baseDir: string): RuntimeConfig {
   if (!env.W2_02_MODE || !['local', 'production'].includes(env.W2_02_MODE) || !env.W2_02_ORG_ID) throw new Error('W2-02 configuration is incomplete; set W2_02_MODE and W2_02_ORG_ID explicitly')
-  const config = { ...createLocalConfig(env.W2_02_STATE_DIR ? resolve(baseDir, env.W2_02_STATE_DIR) : baseDir, env.W2_02_ORG_ID), mode: env.W2_02_MODE as RuntimeConfig['mode'], postgresAdapterModule: env.W2_02_POSTGRES_ADAPTER_MODULE }
+  const config = { ...createLocalConfig(env.W2_02_STATE_DIR ? resolve(baseDir, env.W2_02_STATE_DIR) : baseDir, env.W2_02_ORG_ID), mode: env.W2_02_MODE as RuntimeConfig['mode'], siteId: env.W2_02_SITE_ID, postgresAdapterModule: env.W2_02_POSTGRES_ADAPTER_MODULE }
   if (env.W2_02_EXECUTION_REVISION && env.W2_02_EXECUTION_REVISION !== config.executingRevision) throw new Error('W2-02 refuses an execution revision that is not the checked-out commit')
   if (env.LINKSITES_DEPLOYMENT_ENV === 'production' && env.LINKSITES_RELEASE_SHA !== config.executingRevision) throw new Error('W2-02 production execution identity must equal the release SHA')
   return validateRuntimeConfig({ ...config, approvedFactsPath: env.W2_02_APPROVED_FACTS_PATH ? resolve(baseDir, env.W2_02_APPROVED_FACTS_PATH) : config.approvedFactsPath, maxAttempts: env.W2_02_MAX_ATTEMPTS ? Number(env.W2_02_MAX_ATTEMPTS) : config.maxAttempts, concurrency: env.W2_02_CONCURRENCY ? Number(env.W2_02_CONCURRENCY) : config.concurrency, leaseDurationMs: env.W2_02_LEASE_MS ? Number(env.W2_02_LEASE_MS) : config.leaseDurationMs, payloadBaseUrl: env.W2_02_PAYLOAD_BASE_URL ?? config.payloadBaseUrl, payloadApiKey: env.W2_02_PAYLOAD_API_KEY ?? config.payloadApiKey, payloadSiteId: env.W2_02_PAYLOAD_SITE_ID ?? config.payloadSiteId, webMasterBaseUrl: env.W2_02_WEB_MASTER_BASE_URL ?? config.webMasterBaseUrl, previewAccessToken: env.W2_02_PREVIEW_ACCESS_TOKEN ?? config.previewAccessToken, commercialOutcomeGatewaySecret: env.W2_05_OUTCOME_GATEWAY_SECRET ?? config.commercialOutcomeGatewaySecret, commercialOutcomeGatewayKeyId: env.W2_05_OUTCOME_GATEWAY_KEY_ID ?? config.commercialOutcomeGatewayKeyId, libraryRepositoryPath: env.W2_02_LIBRARY_REPOSITORY_PATH ?? config.libraryRepositoryPath })
@@ -74,16 +75,17 @@ export function configFromEnvironment(env: NodeJS.ProcessEnv, baseDir: string): 
 export async function createProductionComposition(config: RuntimeConfig, outcomeDependencies?: OutcomeIngressDependencies, productionDependencies?: PostgresRuntimeDependencies): Promise<Composition> {
   const validated = validateRuntimeConfig(config)
   if (validated.mode === 'local') await mkdir(resolve(validated.statePath, '..'), { recursive: true })
-  const orgUuid = '00000000-0000-4000-8000-000000000001'
-  const siteUuid = '00000000-0000-4000-8000-000000000002'
   const production = validated.mode === 'production'
   const postgres = production ? productionDependencies ?? await loadPostgresDependencies(validated.postgresAdapterModule as string) : null
+  const orgUuid = production ? validated.orgId : '00000000-0000-4000-8000-000000000001'
+  const siteUuid = production ? validated.siteId! : '00000000-0000-4000-8000-000000000002'
   const db = production ? postgres!.db : await openLocalDatabase(`${validated.statePath}.db`, orgUuid, siteUuid)
   // W2-02 is a composition root, not an HTTP emulator.  The caller must bind
   // it to the separately started local Payload schema and real web-master
   // process (the W2-04 proof harness supplies these URLs).
   if (!validated.payloadBaseUrl || !validated.payloadApiKey || !validated.payloadSiteId || !validated.webMasterBaseUrl || !validated.previewAccessToken) throw new Error('W2-02 requires explicit authenticated local Payload, scoped site, and protected web-master service configuration')
   if (!validated.commercialOutcomeGatewaySecret || !validated.commercialOutcomeGatewayKeyId) throw new Error('W2-06 requires explicit W2-05 gateway verification configuration')
+  if (production) await assertProvisionedTenant(postgres!.db, validated.orgId, validated.siteId!)
   const runtimeConfig = validated
   const ledger = new DurableLedger(validated, production ? new PostgresRuntimeStateStore(postgres!.db) : undefined)
   const adapters = new LocalBoundaryAdaptersImpl(runtimeConfig, db)
@@ -128,6 +130,14 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
     if (production) await postgres?.close?.()
     else await closeLocalDatabase(`${validated.statePath}.db`, db)
   } }
+}
+
+async function assertProvisionedTenant(db: PostgresExecutor, orgId: string, siteId: string): Promise<void> {
+  const result = await db.query(
+    `select s.id from lsites_sites.sites s where s.id = $1 and s.org_id = $2`,
+    [siteId, orgId],
+  )
+  if (result.rows.length !== 1) throw new Error('W2-02 production tenant/site is absent or unauthorized')
 }
 
 async function loadPostgresDependencies(modulePath: string): Promise<PostgresRuntimeDependencies> {
