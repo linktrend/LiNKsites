@@ -35,6 +35,7 @@ import type { TierId, TierSpecification } from '../tierSpecification.js'
 import { FoundationError, type ReusableSiteFoundation } from '../reusableFoundation.js'
 import type { SiteDesignProfile } from '../designCatalog.js'
 import { ComponentRegistryError, type ComponentRegistry } from '../componentRegistry.js'
+import type { LibraryConsumption, LibraryConsumptionReceipt } from '../libraryConsumer.js'
 
 export const SITE_SPECIFICATION_ISSUE_TYPE = 'linksites.factory.resolve_site_specification'
 
@@ -54,6 +55,9 @@ export interface SiteSpecificationExecutorInput {
   foundationId: string
   selectedComponentIds: string[]
   pageCount: number
+  libraryEntryId?: string
+  libraryReceipt?: LibraryConsumptionReceipt
+  libraryConsumption?: LibraryConsumption
 }
 
 function isValidInput(input: Record<string, unknown>): input is SiteSpecificationExecutorInput & Record<string, unknown> {
@@ -64,7 +68,10 @@ function isValidInput(input: Record<string, unknown>): input is SiteSpecificatio
     typeof input.tierId === 'string' &&
     typeof input.foundationId === 'string' &&
     Array.isArray(input.selectedComponentIds) &&
-    typeof input.pageCount === 'number'
+    typeof input.pageCount === 'number' &&
+    (input.libraryEntryId === undefined || typeof input.libraryEntryId === 'string') &&
+    (input.libraryReceipt === undefined || typeof input.libraryReceipt === 'object') &&
+    (input.libraryConsumption === undefined || typeof input.libraryConsumption === 'object')
   )
 }
 
@@ -121,6 +128,9 @@ export class SiteSpecificationExecutor implements ExecutorAdapter {
         componentRegistry: this.deps.componentRegistry,
         selectedComponentIds: issue.input.selectedComponentIds,
         pageCount: issue.input.pageCount,
+        libraryEntryId: issue.input.libraryEntryId,
+        libraryReceipt: issue.input.libraryReceipt,
+        libraryConsumption: issue.input.libraryConsumption,
       })
       return { kind: 'success', output: spec }
     } catch (error) {

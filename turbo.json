@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["DATABASE_URI", "PAYLOAD_SECRET", "PAYLOAD_PUBLIC_SERVER_URL"],
+  "globalEnv": ["DATABASE_URI", "PAYLOAD_SECRET", "PAYLOAD_PUBLIC_SERVER_URL", "LINKSITES_BUILD_NO_DATABASE", "LINKSITES_DEPLOYMENT_ENV", "NEXT_PUBLIC_PAYLOAD_API_URL", "PAYLOAD_BASE_URL", "NEXT_PUBLIC_CMS_PROVIDER"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

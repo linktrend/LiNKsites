@@ -13,7 +13,7 @@
  * import { ENV } from '@/config/env.config';
  * 
  * const apiUrl = ENV.CMS.PAYLOAD_API_URL;
- * const webhookUrl = ENV.CONTACT.WEBHOOK_URL;
+ * Contact delivery uses the signed LiNKautowork boundary; raw webhook URLs are not supported.
  * ```
  * 
  * IMPORTANT: Never access process.env directly in application code.
@@ -186,19 +186,10 @@ export const FEATURE_FLAGS_ENV = {
 } as const;
 
 // ============================================================================
-// CONTACT & WEBHOOKS
+// CONTACT & GOVERNED AUTOWORK
 // ============================================================================
 
 export const CONTACT_ENV = {
-  /** Contact form webhook URL (N8N or other automation) */
-  WEBHOOK_URL: process.env.CONTACT_WEBHOOK_URL || '',
-  
-  /** Contact form webhook secret for authentication */
-  WEBHOOK_SECRET: process.env.CONTACT_WEBHOOK_SECRET || '',
-  
-  /** Fallback email for contact form submissions */
-  FALLBACK_EMAIL: process.env.CONTACT_FALLBACK_EMAIL || '',
-  
   /** Contact form API endpoint */
   FORM_ENDPOINT: process.env.CONTACT_FORM_ENDPOINT || '/api/contact',
 } as const;
@@ -275,7 +266,7 @@ export const ENV = {
   /** Feature flags */
   FEATURES: FEATURE_FLAGS_ENV,
   
-  /** Contact & webhooks */
+  /** Contact & governed delivery */
   CONTACT: CONTACT_ENV,
 
   /** Legal & compliance */

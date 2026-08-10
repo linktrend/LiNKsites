@@ -58,7 +58,7 @@ This document provides comprehensive documentation for the **Forms and Validatio
 - **Purpose**: General contact form for user inquiries
 - **Fields**: name, email, message, captcha (optional)
 - **Validation**: Min/max length, email format, captcha verification
-- **Submission**: Posts to `/api/contact` with webhook integration
+- **Submission**: Posts to `/api/contact` into the governed durable outbox
 - **Success/Error**: Full UI feedback with translated messages
 
 #### 2. DynamicContactForm
@@ -620,8 +620,8 @@ interface FormSubmissionResponse {
 #### Features
 
 - ✅ **Zod Validation**: Server-side validation with Zod schemas
-- ✅ **Webhook Integration**: Forwards to N8N or other webhooks
-- ✅ **Retry Logic**: Exponential backoff for webhook failures
+- ✅ **Governed delivery**: Enqueues signed `contact.submitted` events through LiNKautowork
+- ✅ **Retry Logic**: Exponential backoff for governed gateway failures
 - ✅ **Security**: Request size limits, input sanitization, no data leaks
 - ✅ **Metadata Collection**: Timestamp, user agent, referrer, language, IP
 - ✅ **Error Handling**: Comprehensive error handling with user-friendly messages
@@ -630,10 +630,14 @@ interface FormSubmissionResponse {
 #### Environment Variables
 
 ```bash
-# Webhook Configuration
-CONTACT_WEBHOOK_URL=https://your-webhook-url.com
-CONTACT_WEBHOOK_SECRET=your-secret-key
-CONTACT_FALLBACK_EMAIL=contact@yoursite.com
+# Governed Delivery Configuration
+LINKAUTOWORK_GATEWAY_URL=https://gateway.example.com/events
+LINKAUTOWORK_SIGNING_SECRET=<secret-manager reference>
+LINKAUTOWORK_SIGNING_KEY_ID=web-master
+LINKAUTOWORK_ENVIRONMENT=production
+LINKAUTOWORK_EVENT_GRANTS='[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]'
+LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
 ```
 
 ---
@@ -1355,8 +1359,8 @@ export const contactFormSchema = z.object({
 Configure webhook URLs and endpoints in environment variables:
 
 ```bash
-CONTACT_WEBHOOK_URL=https://client-webhook.com
-CONTACT_WEBHOOK_SECRET=client-secret
+LINKAUTOWORK_GATEWAY_URL=https://gateway.client.example/events
+LINKAUTOWORK_SIGNING_KEY_ID=web-master
 ```
 
 #### 6. Customize UI Components

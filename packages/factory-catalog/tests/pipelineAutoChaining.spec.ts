@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { InMemoryLedgerStore, ProgramLedger, ExecutorRegistry, runIssueOnce, type Run } from '@linksites/program-ledger'
+import { createHash } from 'node:crypto'
+import { canonicalSerialize, InMemoryLedgerStore, ProgramLedger, ExecutorRegistry, runIssueOnce, type Run } from '@linksites/program-ledger'
 import {
   SITE_SPECIFICATION_ISSUE_TYPE,
   SiteSpecificationExecutor,
@@ -170,6 +171,29 @@ async function runToAwaitingGate(issueId: string): Promise<Run> {
   return run
 }
 
+async function canonicalIssueEvidence(issueId: string, runId: string, checksumOverride?: string): Promise<Record<string, unknown>> {
+  const issue = await ledger.getIssue(issueId)
+  if (!issue) throw new Error(`missing Issue ${issueId}`)
+  const run = await ledger.getRun(runId)
+  if (!run || run.output == null) throw new Error(`missing completed Run ${runId}`)
+  return {
+    evidenceReceipts: [{
+      schema_version: { major: 1, minor: 0 },
+      org_id: issue.orgId,
+      correlation_id: `corr-${issueId}`,
+      idempotency_key: `evidence:${issueId}`,
+      receipt_id: `receipt-${issueId}`,
+      producer: 'factory-catalog.test',
+      subject: { type: 'issue', id: issueId },
+      checksum: { algorithm: 'sha256', value: checksumOverride ?? createHash('sha256').update(canonicalSerialize(run.output)).digest('hex') },
+      revision_sha: await ledger.getSubjectRevision({ subjectType: 'issue', subjectId: issueId, orgId: issue.orgId!, programId: issue.programRef, moduleId: issue.moduleRef, phaseId: issue.phaseRef }),
+      storage_location: `evidence://issue/${issueId}`,
+      gate_association: `gate:issue:${issueId}:run:${runId}`,
+      timestamp: '2026-08-04T00:00:00.000Z',
+    }],
+  }
+}
+
 describe('Pipeline auto-chaining: Site Specification -> Site Assembly', () => {
   it('(a) spawns a Site Assembly Issue with correctly-mapped input once a Site Specification Issue passes its Gate', async () => {
     const specIssue = await ledger.createIssue({
@@ -180,7 +204,7 @@ describe('Pipeline auto-chaining: Site Specification -> Site Assembly', () => {
     const specRun = await runToAwaitingGate(specIssue.issueId)
 
     // The Gate genuinely passes.
-    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', { reviewed: true }, 'test-gate')
+    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
     expect(gate.decision).toBe('accepted')
 
     const outcome = await chainSiteSpecificationToSiteAssembly(ledger, gate, {
@@ -246,7 +270,7 @@ describe('Pipeline auto-chaining: Site Assembly -> Promotion', () => {
     const assemblyRun = await runToAwaitingGate(assemblyIssue.issueId)
     const manifest = assemblyRun.output as SiteAssemblyManifest
 
-    const gate = await ledger.decideGate(assemblyIssue.issueId, assemblyRun.runId, 'accepted', { reviewed: true }, 'test-gate')
+    const gate = await ledger.decideGate(assemblyIssue.issueId, assemblyRun.runId, 'accepted', await canonicalIssueEvidence(assemblyIssue.issueId, assemblyRun.runId), 'test-gate')
     expect(gate.decision).toBe('accepted')
 
     const outcome = await chainSiteAssemblyToPromotion(ledger, gate, {
@@ -304,11 +328,149 @@ describe('Pipeline auto-chaining: gate-discipline guards and full-chain proof', 
       input: SITE_SPEC_INPUT,
     })
     const specRun = await runToAwaitingGate(specIssue.issueId)
-    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', {}, 'test-gate')
+    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
 
     await expect(
       chainSiteAssemblyToPromotion(ledger, gate, { promotionInput: PROMOTION_EXTRAS, placement: PLACEMENT }),
     ).rejects.toBeInstanceOf(PipelineAutoChainingError)
+  })
+
+  it('rejects a Gate receipt with a wrong checksum or a checksum for a different output', async () => {
+    const specIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: SITE_SPEC_INPUT,
+    })
+    const specRun = await runToAwaitingGate(specIssue.issueId)
+    const createSpy = vi.spyOn(ledger, 'createIssue')
+
+    const wrongChecksumGate = await ledger.decideGate(
+      specIssue.issueId,
+      specRun.runId,
+      'accepted',
+      await canonicalIssueEvidence(specIssue.issueId, specRun.runId, 'b'.repeat(64)),
+      'test-gate',
+    )
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, wrongChecksumGate, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/checksum verified against the exact immutable output/)
+    expect(createSpy).not.toHaveBeenCalled()
+
+    createSpy.mockRestore()
+
+    const secondIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: { ...SITE_SPEC_INPUT, siteSpecId: 'sitespec-wrong-output' },
+    })
+    const secondRun = await runToAwaitingGate(secondIssue.issueId)
+    const wrongOutput = { ...(secondRun.output as Record<string, unknown>), siteRef: 'site-wrong-output' }
+    const wrongOutputChecksum = createHash('sha256').update(canonicalSerialize(wrongOutput)).digest('hex')
+    const wrongOutputGate = await ledger.decideGate(
+      secondIssue.issueId,
+      secondRun.runId,
+      'accepted',
+      await canonicalIssueEvidence(secondIssue.issueId, secondRun.runId, wrongOutputChecksum),
+      'test-gate',
+    )
+    const secondCreateSpy = vi.spyOn(ledger, 'createIssue')
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, wrongOutputGate, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/checksum verified against the exact immutable output/)
+    expect(secondCreateSpy).not.toHaveBeenCalled()
+    secondCreateSpy.mockRestore()
+  })
+
+  it('rejects a fabricated or cross-tenant Gate result instead of chaining', async () => {
+    const specIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: SITE_SPEC_INPUT,
+    })
+    const specRun = await runToAwaitingGate(specIssue.issueId)
+    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
+    const createSpy = vi.spyOn(ledger, 'createIssue')
+
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, { ...gate, gateId: 'fabricated-gate-id' }, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/current authoritative Gate/)
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, { ...gate, orgId: 'cross-tenant-org' }, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/current authoritative Gate/)
+    expect(createSpy).not.toHaveBeenCalled()
+    createSpy.mockRestore()
+  })
+
+  it('rejects a stale Gate result when the ledger current Gate has advanced', async () => {
+    const specIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: SITE_SPEC_INPUT,
+    })
+    const specRun = await runToAwaitingGate(specIssue.issueId)
+    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
+    const currentGateSpy = vi.spyOn(ledger, 'getCurrentGate').mockResolvedValue({ ...gate, gateId: 'newer-authoritative-gate-id' })
+    const createSpy = vi.spyOn(ledger, 'createIssue')
+
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, gate, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/current authoritative Gate/)
+    expect(createSpy).not.toHaveBeenCalled()
+
+    createSpy.mockRestore()
+    currentGateSpy.mockRestore()
+  })
+
+  it('rejects a Gate that points at a different Run and a ledger Run whose Issue does not match', async () => {
+    const specIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: SITE_SPEC_INPUT,
+    })
+    const specRun = await runToAwaitingGate(specIssue.issueId)
+    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
+    const otherIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: { ...SITE_SPEC_INPUT, siteSpecId: 'sitespec-other' },
+    })
+    const otherRun = await runToAwaitingGate(otherIssue.issueId)
+    const createSpy = vi.spyOn(ledger, 'createIssue')
+
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, { ...gate, runId: otherRun.runId }, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/current authoritative Gate/)
+    expect(createSpy).not.toHaveBeenCalled()
+    createSpy.mockRestore()
+
+    const getRunSpy = vi.spyOn(ledger, 'getRun').mockResolvedValue(otherRun)
+    const secondCreateSpy = vi.spyOn(ledger, 'createIssue')
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, gate, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/exact tenant-scoped Run/)
+    expect(secondCreateSpy).not.toHaveBeenCalled()
+    secondCreateSpy.mockRestore()
+    getRunSpy.mockRestore()
+  })
+
+  it('rejects an accepted current Gate whose evidence is not canonical', async () => {
+    const specIssue = await ledger.createIssue({
+      issueType: SITE_SPECIFICATION_ISSUE_TYPE,
+      programRef: 'linksites-manual-alignment',
+      input: SITE_SPEC_INPUT,
+    })
+    const specRun = await runToAwaitingGate(specIssue.issueId)
+    const gate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
+    const currentGateSpy = vi.spyOn(ledger, 'getCurrentGate').mockResolvedValue({ ...gate, evidenceReceipts: [] })
+    const createSpy = vi.spyOn(ledger, 'createIssue')
+
+    await expect(
+      chainSiteSpecificationToSiteAssembly(ledger, gate, { assemblyInput: ASSEMBLY_EXTRAS, placement: PLACEMENT }),
+    ).rejects.toThrow(/evidence-backed acceptance/)
+    expect(createSpy).not.toHaveBeenCalled()
+
+    createSpy.mockRestore()
+    currentGateSpy.mockRestore()
   })
 
   it('drives the full Site Specification -> Site Assembly -> Promotion chain, requiring a passed Gate at every hop', async () => {
@@ -319,7 +481,7 @@ describe('Pipeline auto-chaining: gate-discipline guards and full-chain proof', 
       input: SITE_SPEC_INPUT,
     })
     const specRun = await runToAwaitingGate(specIssue.issueId)
-    const specGate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', {}, 'test-gate')
+    const specGate = await ledger.decideGate(specIssue.issueId, specRun.runId, 'accepted', await canonicalIssueEvidence(specIssue.issueId, specRun.runId), 'test-gate')
 
     const toAssembly = await chainSiteSpecificationToSiteAssembly(ledger, specGate, {
       assemblyInput: ASSEMBLY_EXTRAS,
@@ -330,7 +492,7 @@ describe('Pipeline auto-chaining: gate-discipline guards and full-chain proof', 
 
     // Hop 2: the auto-created Site Assembly Issue runs and passes ITS OWN Gate.
     const assemblyRun = await runToAwaitingGate(toAssembly.nextIssue.issueId)
-    const assemblyGate = await ledger.decideGate(toAssembly.nextIssue.issueId, assemblyRun.runId, 'accepted', {}, 'test-gate')
+    const assemblyGate = await ledger.decideGate(toAssembly.nextIssue.issueId, assemblyRun.runId, 'accepted', await canonicalIssueEvidence(toAssembly.nextIssue.issueId, assemblyRun.runId), 'test-gate')
 
     const toPromotion = await chainSiteAssemblyToPromotion(ledger, assemblyGate, {
       promotionInput: PROMOTION_EXTRAS,

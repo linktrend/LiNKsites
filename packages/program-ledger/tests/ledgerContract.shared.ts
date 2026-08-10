@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { LedgerStore } from '../src/store.js'
 import { ProgramLedger, LedgerError } from '../src/ledger.js'
+import { canonicalEvidence } from './evidence.js'
 
 /**
  * Shared contract test suite -- proves the manual §62 (Phase 2) exit gate
@@ -10,8 +11,7 @@ import { ProgramLedger, LedgerError } from '../src/ledger.js'
  *    cancellation, and replay. One Issue can be traced through accepted
  *    output and cost. No model owns workflow truth or authority."
  *
- * ("cost" tracing and full Program/Module/Stage hierarchy are out of
- * scope for this first slice -- see src/types.ts scope note.)
+ * ("cost" tracing remains outside this focused contract suite.)
  *
  * Run against EVERY `LedgerStore` implementation (in-memory AND
  * Postgres/pglite) so the same correctness properties are proven
@@ -223,7 +223,7 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
 
       const claimed2 = await ledger.claim(run2.runId, 'executor-b')
       await ledger.complete(run2.runId, claimed2.lease!.fencingToken, { draft: 'v2-fixed' })
-      const finalGate = await ledger.decideGate(issue.issueId, run2.runId, 'accepted', {}, 'reviewer-1')
+      const finalGate = await ledger.decideGate(issue.issueId, run2.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issue.issueId, issue.orgId!), 'reviewer-1')
       expect(finalGate.decision).toBe('accepted')
     })
 
@@ -266,9 +266,9 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       const run = await ledger.dispatch(issue.issueId)
       const claimed = await ledger.claim(run.runId, 'executor-a')
       await ledger.complete(run.runId, claimed.lease!.fencingToken, { result: 'ok' })
-      await ledger.decideGate(issue.issueId, run.runId, 'accepted', {}, 'reviewer-1')
+      await ledger.decideGate(issue.issueId, run.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issue.issueId, issue.orgId!), 'reviewer-1')
 
-      const events = await store.listEvents(issue.issueId)
+      const events = await store.listEvents(issue.issueId, issue.orgId!)
       expect(events.map((e) => e.type)).toEqual([
         'issue.created',
         'run.dispatched',
@@ -294,7 +294,7 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       const claimed = await ledger.claim(run.runId, 'executor-a')
       await ledger.complete(run.runId, claimed.lease!.fencingToken, { result: 'ok' })
 
-      const gate = await ledger.decideGate(issue.issueId, run.runId, 'accepted', { checked: true }, 'reviewer-1')
+      const gate = await ledger.decideGate(issue.issueId, run.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issue.issueId, issue.orgId!), 'reviewer-1')
       expect(gate.decision).toBe('accepted')
     })
   })

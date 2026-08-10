@@ -20,13 +20,13 @@ These were not invented for this cleanup — they are the live residual from `au
 
 1. **GAP-33/34/35 — Sales / Stripe / Odoo spine** — No live paid-activation adapters in this repo. Phase 5 blocked on cross-Program access. **Severity: blocker for first real sale.**
 2. **GAP-23/24 — Monitoring and backup/restore** — Autonomous hosting ops (M16) not built. Docker/Traefik scaffolding exists only. **Severity: critical before real customers.**
-3. **GAP-50 residual — Live Payload/Postgres verification** — `PayloadRestDraftTarget` (REST) exists; CI integration tests skip without live credentials. Promotion path proven with doubles.
+3. **GAP-50 residual — hosted Payload/Postgres verification** — local real-service tests are required in the pre-VPS CI gate, but hosted credential and VPS proof remains Phase 2 work; a passing local suite must never be described as hosted proof.
 4. **Publication / launch certification automation (M14)** — Promotion is correctly draft-only; automated publish→launch certificate Module not built.
 5. **M09 content/media production pipeline** — Governed copy/media factory workflow incomplete (CMS Media collection exists).
 6. **M17–M19 managed-service Modules** — Customer change entitlement workflow, capacity planner, suspension/export/termination not built as Program Modules.
 7. **Phase 8 observability / cost accounting** — No OpenTelemetry/Langfuse/dollar-cost dashboard in repo.
 8. **First real customer pilot (Phase 9)** — Pilot slice approved (Home Services / Standard); not executed live end-to-end.
-9. **web-company disposition (DR-02)** — Smaller template remains paused/ambiguous relative to web-master.
+9. **Paused web-company source** — moved to `archive/paused-applications/web-company/`; it is absent from active workspace, CI and deployment. Any reactivation needs a new approved packet.
 10. **Final commercial configuration** — Tier prices, legal packaging, exact entitlements remain Principal/business decisions (provisional placeholders only in code).
 
 ### Recently closed / substantially advanced (do not re-open casually)
@@ -79,3 +79,7 @@ Every in-repo cross-reference to these old **top-level `docs/`** paths (README, 
 **Verification performed for real after structural moves:** workspace `pnpm typecheck` / `pnpm test` (and build as applicable) — this was a pure documentation/file-organization pass; no product `apps/**/src` or `packages/**/src` logic was intentionally changed beyond comment path updates.
 
 **What this deliberately does NOT do:** delete any archived document (moved only); touch `apps/*/docs/**`; invent a fake “factory complete” claim; resolve GAP-33/23/50 by documentation alone.
+
+## 2. W1-01 terminology boundary clarification — 2026-08-04
+
+The seeded GAP-33/34/35 label above is retained as historical build-log terminology because this file is append-only. The current commercial owner is **LiNKreach**; LiNKsites has no direct Sales, Stripe, or Odoo runtime dependency. Existing payment/CRM-shaped names remain only as explicitly documented compatibility or historical references, and the live LiNKreach commercial adapter remains open.

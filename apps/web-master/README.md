@@ -17,7 +17,7 @@ A production-ready, AI-first, multi-language, CMS-driven corporate/marketing sit
 
 ### Prerequisites
 
-- Node.js 18+ (see `.nvmrc` for exact version)
+- Node.js 22 (see `.nvmrc` for exact version)
 - pnpm (recommended) or npm
 
 ### Installation
@@ -42,7 +42,7 @@ A production-ready, AI-first, multi-language, CMS-driven corporate/marketing sit
    - `PAYLOAD_BASE_URL`: Your Payload CMS base URL (example: `http://localhost:3000`)
    - `PAYLOAD_API_KEY`: Optional (use only if you want private/authenticated reads)
    - `SITE_ID`: Only for dedicated/premium deployments (locks this frontend to one `siteId`)
-   - `DEFAULT_SITE_ID`: Optional local fallback `siteId` (shared-platform mode normally resolves by hostname)
+   - Shared and fixture mode require an explicit hostname mapping to a published CMS site with published content; there is no default tenant fallback.
    - Theme defaults and other configuration
    - **Analytics Configuration** (optional, see Analytics section below):
      - `NEXT_PUBLIC_GA_MEASUREMENT_ID`: Google Analytics 4 Measurement ID

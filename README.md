@@ -1,6 +1,6 @@
 # LiNKsites
 
-LiNKsites is LiNKtrend's autonomous website factory and managed SMB website service. It assembles governed reusable foundations into real prospect previews and paying-customer sites, promotes content through a trusted Payload CMS path, and hosts them on a shared Next.js platform — with Sales owning commercial lifecycle and human day-to-day involvement limited to strategy and exceptional escalation.
+LiNKsites is LiNKtrend's autonomous website factory and managed SMB website service. It continuously pulls and claims eligible work from the LiNKreach-owned CRM boundary, assembles governed reusable foundations into real prospect previews and paying-customer sites, promotes content through a trusted Payload CMS path, and hosts them on a shared Next.js platform — with LiNKreach owning the commercial lifecycle and human day-to-day involvement limited to strategy and exceptional escalation.
 
 Legacy name: Dev_Sites Website Factory (renamed **LiNKsites**).
 
@@ -21,13 +21,14 @@ LiNKsites/
 ├── apps/
 │   ├── cms/           # Payload CMS (draft/published content authority)
 │   ├── web-master/    # Primary multi-tenant Next.js frontend
-│   └── web-company/   # Smaller starter template (investment paused; see OPEN-ISSUES)
+│   └── program-orchestrator/ # Continuous Program/Phase/Issue execution service
 ├── packages/
 │   ├── program-ledger/   # Issue/Run/Gate/Event + Postgres store
 │   ├── factory-catalog/  # Vertical kits, foundations, promotion, preview path
 │   └── types/            # Shared types
 ├── supabase/          # Migrations for lsites_ledger + lsites_sites (+ archive)
-├── deploy/            # Docker + Traefik compose for CMS + shared frontend
+├── deploy/            # Fail-closed pre-VPS deployment, recovery and operations bundle
+├── archive/paused-applications/web-company/ # Preserved, inactive corporate-site source
 ├── audit/             # Phase 0 audit deliverables + living roadmap notes
 ├── execution/         # Program/Module/Issue execution artifacts
 └── docs/              # Intent, Technical PRD, Operations Manual, OPEN-ISSUES; archive/
@@ -44,6 +45,6 @@ Older experiment/project copies previously under `sites_projects/` were archived
 
 ## Status
 
-**Core CMS/frontend + Program Ledger + Phase 3/4 factory objects are real and tested on `development` (as of 2026-07-19).** Live Sales/Stripe/Odoo activation, full autonomous monitoring/backup, and the first real paying-customer pilot remain deliberately open — see Technical PRD §9 and Operations Manual "Current status."
+**Core CMS/frontend + Program Ledger + Phase 3/4 factory objects are real and tested on `development` (as of 2026-07-19).** Live LiNKreach commercial activation, full autonomous monitoring/backup, and the first real paying-customer pilot remain deliberately open. The names Sales, Stripe, and Odoo are preserved only in historical records and compatibility fields; they are not current LiNKsites runtime dependencies — see Technical PRD §9 and Operations Manual "Current status."
 
 Superseded documentation (24-section Program Manual, ADRs, ops SOPs, etc.) is under [`docs/archive/`](docs/archive/README.md).

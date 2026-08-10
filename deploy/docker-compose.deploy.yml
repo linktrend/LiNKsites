@@ -1,45 +1,195 @@
-name: cms
+name: linksites
+
+# Phase 1 bundle only. All ${VAR:?} values are deliberate fail-closed inputs;
+# Phase 2 creates their protected runtime file and performs no DNS/domain work
+# through this compose definition.
+x-runtime: &runtime
+  env_file:
+    - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+  restart: unless-stopped
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+  deploy:
+    resources:
+      limits:
+        cpus: '1.00'
+        memory: 1024M
+      reservations:
+        memory: 256M
+  networks: [internal]
 
 services:
+  supabase-migrate:
+    image: ${LINKSITES_MIGRATIONS_IMAGE:?set immutable migration image digest}
+    build:
+      context: ..
+      dockerfile: deploy/docker/migrations.Dockerfile
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+    environment:
+      LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: ${LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA:?set verified platform migration SHA}
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    networks: [internal, egress]
+
+  payload-migrate:
+    image: ${LINKSITES_WORKER_IMAGE:?set immutable worker image digest}
+    build:
+      context: ..
+      dockerfile: deploy/docker/autowork-worker.Dockerfile
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+    depends_on:
+      supabase-migrate:
+        condition: service_completed_successfully
+    # Payload resolves tsconfig aliases from its package root.  Its executable
+    # is scoped to that workspace rather than hoisted into root node_modules.
+    working_dir: /app/apps/cms
+    command: ["node", "/app/deploy/scripts/entrypoint.mjs", "autowork-worker", "node_modules/.bin/payload", "migrate", "--config", "src/payload.config.ts"]
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    networks: [internal]
+
   payload:
+    <<: *runtime
+    image: ${LINKSITES_CMS_IMAGE:?set immutable CMS image digest}
     build:
       context: ..
       dockerfile: deploy/docker/cms.Dockerfile
-    env_file:
-      - ${LINKSITES_RUNTIME_ENV_FILE:-/opt/linktrend/runtime/linksites-cms/prod.env.runtime}
-    restart: unless-stopped
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    depends_on:
+      payload-migrate:
+        condition: service_completed_successfully
     volumes:
-      - ${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH:-/etc/linktrend/gcp/linktrend-service-account.json}:${GOOGLE_APPLICATION_CREDENTIALS:-/etc/linktrend/gcp/linktrend-service-account.json}:ro
+      - linksites-runtime:/var/lib/linksites
+    tmpfs: [/tmp]
+    networks: [internal, edge, egress]
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.rule=Host(`${TRAEFIK_CMS_HOST:-cms.linktrend.internal}`)
-      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
-      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.tls=true
-      - traefik.http.routers.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.priority=100
-      - traefik.http.services.${TRAEFIK_CMS_ROUTER_NAME:-linksites-cms}.loadbalancer.server.port=3000
-    networks:
-      - traefik
+      traefik.enable: 'true'
+      traefik.docker.network: ${TRAEFIK_NETWORK:?set Traefik external network name}
+      traefik.http.routers.linksites-cms.rule: Host(`${TRAEFIK_CMS_HOST:?set private CMS host}`)
+      traefik.http.routers.linksites-cms.entrypoints: ${TRAEFIK_ENTRYPOINT:?set TLS entrypoint}
+      traefik.http.routers.linksites-cms.tls: 'true'
+      traefik.http.routers.linksites-cms.middlewares: ${TRAEFIK_CMS_PRIVATE_MIDDLEWARE:?set preconfigured CMS privacy middleware}
+      traefik.http.services.linksites-cms.loadbalancer.server.port: '3000'
 
-  frontend-shared:
+  web-master:
+    <<: *runtime
+    image: ${LINKSITES_WEB_MASTER_IMAGE:?set immutable web-master image digest}
     build:
       context: ..
       dockerfile: deploy/docker/web-master.Dockerfile
       args:
-        NEXT_PUBLIC_PAYLOAD_API_URL: ${NEXT_PUBLIC_PAYLOAD_API_URL:-https://cms.linktrend.internal}
-        PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:-https://cms.linktrend.internal}
-    env_file:
-      - ${LINKSITES_RUNTIME_ENV_FILE:-/opt/linktrend/runtime/linksites-cms/prod.env.runtime}
-    restart: unless-stopped
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+        NEXT_PUBLIC_PAYLOAD_API_URL: ${NEXT_PUBLIC_PAYLOAD_API_URL:?set private CMS HTTPS URL}
+        PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:?set private CMS HTTPS URL}
+    depends_on:
+      payload:
+        condition: service_healthy
+    environment:
+      # The renderer loads only the same immutable LiNKlibraries checkout that
+      # is pinned by the release manifest. The admission SHA is deliberately
+      # injected from that manifest rather than copied as a second operator
+      # value.
+      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /var/lib/linksites/linklibraries
+      LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
+    volumes:
+      - linksites-runtime:/var/lib/linksites:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/var/lib/linksites/linklibraries:ro
+    tmpfs: [/tmp]
+    networks: [internal, edge, egress]
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.rule=HostRegexp(`^[a-z0-9-]+\\.linktrend\\.internal$`)
-      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
-      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.tls=true
-      - traefik.http.routers.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.priority=10
-      - traefik.http.services.${TRAEFIK_PREVIEW_ROUTER_NAME:-linksites-preview}.loadbalancer.server.port=3000
-    networks:
-      - traefik
+      traefik.enable: 'true'
+      traefik.docker.network: ${TRAEFIK_NETWORK:?set Traefik external network name}
+      traefik.http.routers.linksites-preview.rule: Host(`${TRAEFIK_PREVIEW_HOST:?set explicit private preview host}`)
+      traefik.http.routers.linksites-preview.entrypoints: ${TRAEFIK_ENTRYPOINT:?set TLS entrypoint}
+      traefik.http.routers.linksites-preview.tls: 'true'
+      traefik.http.routers.linksites-preview.middlewares: ${TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE:?set preconfigured preview privacy middleware}
+      traefik.http.routers.linksites-preview.priority: '100'
+      traefik.http.services.linksites-preview.loadbalancer.server.port: '3000'
+
+  autowork-worker:
+    <<: *runtime
+    image: ${LINKSITES_WORKER_IMAGE:?set immutable worker image digest}
+    build:
+      context: ..
+      dockerfile: deploy/docker/autowork-worker.Dockerfile
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    depends_on:
+      payload:
+        condition: service_healthy
+    networks: [internal, egress]
+    volumes:
+      - linksites-runtime:/var/lib/linksites
+
+  program-orchestrator:
+    <<: *runtime
+    image: ${LINKSITES_ORCHESTRATOR_IMAGE:?set immutable orchestrator image digest}
+    build:
+      context: ..
+      dockerfile: deploy/docker/program-orchestrator.Dockerfile
+      args:
+        LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    # The protected env_file carries DATABASE_URI and all secret values. These
+    # non-secret bindings make the production composition explicit and prevent
+    # a local-mode or source-relative adapter fallback.
+    environment:
+      # The adapter-facing DATABASE_URI is deliberately sourced from the
+      # distinct orchestrator credential, never the CMS credential in the
+      # shared env file.
+      DATABASE_URI: ${W2_02_DATABASE_URI:?set distinct orchestrator PostgreSQL URI}
+      W2_02_MODE: ${W2_02_MODE:?set W2_02_MODE=production}
+      W2_02_DATABASE_URI: ${W2_02_DATABASE_URI:?set distinct orchestrator PostgreSQL URI}
+      W2_02_ORG_ID: ${W2_02_ORG_ID:?set UUID W2_02_ORG_ID}
+      W2_02_SITE_ID: ${W2_02_SITE_ID:?set UUID W2_02_SITE_ID}
+      W2_02_DATABASE_ROLE: ${W2_02_DATABASE_ROLE:?set orchestrator database role}
+      W2_02_APPROVED_FACTS_PATH: ${W2_02_APPROVED_FACTS_PATH:?set absolute approved facts path}
+      W2_02_POSTGRES_ADAPTER_MODULE: ${W2_02_POSTGRES_ADAPTER_MODULE:?set the packaged Postgres adapter module}
+      W2_02_EXECUTION_REVISION: ${W2_02_EXECUTION_REVISION:?set exact execution revision}
+      W2_02_EXECUTABLE_CHECKPOINT: ${W2_02_EXECUTABLE_CHECKPOINT:?set executable checkpoint}
+      W2_02_STATE_DIR: ${W2_02_STATE_DIR:?set orchestrator state directory}
+      W2_02_PAYLOAD_BASE_URL: ${W2_02_PAYLOAD_BASE_URL:?set private Payload URL}
+      W2_02_PAYLOAD_API_KEY: ${W2_02_PAYLOAD_API_KEY:?set scoped Payload API key}
+      W2_02_PAYLOAD_SITE_ID: ${W2_02_PAYLOAD_SITE_ID:?set Payload site identifier}
+      W2_02_WEB_MASTER_BASE_URL: ${W2_02_WEB_MASTER_BASE_URL:?set private preview URL}
+      W2_02_PREVIEW_ACCESS_TOKEN: ${W2_02_PREVIEW_ACCESS_TOKEN:?set protected preview token}
+      W2_05_OUTCOME_GATEWAY_SECRET: ${W2_05_OUTCOME_GATEWAY_SECRET:?set outcome gateway secret}
+      W2_05_OUTCOME_GATEWAY_KEY_ID: ${W2_05_OUTCOME_GATEWAY_KEY_ID:?set outcome gateway key id}
+      W2_02_LIBRARY_REPOSITORY_PATH: ${W2_02_LIBRARY_REPOSITORY_PATH:?set mounted library repository path}
+      W2_02_LIBRARY_COMMIT_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
+      W2_02_LIBRARY_CATALOG_SHA256: ${LINKLIBRARIES_CATALOG_CONTENT_SHA256:?set exact LiNKlibraries catalog checksum}
+      W2_02_LIBRARY_ENTRY_SHA256: ${LINKLIBRARIES_ENTRY_CONTENT_SHA256:?set exact LiNKlibraries entry checksum}
+    depends_on:
+      payload:
+        condition: service_healthy
+      web-master:
+        condition: service_healthy
+    networks: [internal, egress]
+    volumes:
+      - linksites-runtime:/var/lib/linksites
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/var/lib/linksites/linklibraries:ro
 
 networks:
-  traefik:
+  edge:
     external: true
+    name: ${TRAEFIK_NETWORK:?set Traefik external network name}
+  internal:
+    internal: true
+  # No inbound ports are published from this network.  Phase 2 host firewall
+  # policy restricts this outbound-only bridge to the explicit HTTPS/database
+  # endpoints named in the runtime contract.
+  egress:
+    internal: false
+
+volumes:
+  linksites-runtime:

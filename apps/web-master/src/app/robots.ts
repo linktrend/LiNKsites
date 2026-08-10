@@ -16,6 +16,7 @@
 import { MetadataRoute } from 'next';
 import { headers } from "next/headers";
 import { ENVIRONMENT, CRAWL_POLICY } from '@/config';
+import { getSiteIdFromRequest } from "@/lib/site-context";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,20 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   
   // In non-production environments, disallow all crawling
   if (!isProduction) {
+    return {
+      rules: {
+        userAgent: '*',
+        disallow: '/',
+      },
+    };
+  }
+
+  // A production hostname is crawlable only after the same public-site
+  // eligibility check used by normal HTML and AI routes. A private-only site
+  // must not advertise a sitemap or allow crawling when its URL leaks.
+  try {
+    await getSiteIdFromRequest();
+  } catch {
     return {
       rules: {
         userAgent: '*',

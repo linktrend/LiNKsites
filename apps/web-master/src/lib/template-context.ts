@@ -1,5 +1,5 @@
-import { DEFAULT_TEMPLATE_ID } from "@/templates/registry";
 import { getSiteSettings } from "@/lib/repository/siteSettings";
+import { assertTemplateAdmission } from "@/lib/template-admission";
 import type { LocaleCode } from "@linksites/types";
 
 export const getTemplateIdForSite = async ({
@@ -9,10 +9,9 @@ export const getTemplateIdForSite = async ({
   siteId: string;
   locale: LocaleCode;
 }): Promise<string> => {
-  try {
-    const settings = await getSiteSettings({ siteId, locale });
-    return settings?.templateId || DEFAULT_TEMPLATE_ID;
-  } catch {
-    return DEFAULT_TEMPLATE_ID;
-  }
+  const settings = await getSiteSettings({ siteId, locale });
+  const templateId = settings?.templateId;
+  if (!templateId) throw new Error(`Published site "${siteId}" has no admitted template selection`);
+  assertTemplateAdmission(templateId);
+  return templateId;
 };

@@ -37,7 +37,7 @@ export const Pages: CollectionConfig<'pages'> = {
     description: 'Unified pages collection - aggregates all page types',
   },
   access: {
-    read: createSiteFilteredAccess(),
+    read: createSiteFilteredAccess({ excludePrivatePreviewForAnonymousReads: true }),
     create: createAccess,
     update: updateAccess,
     delete: deleteAccess,
@@ -135,6 +135,33 @@ export const Pages: CollectionConfig<'pages'> = {
           relationTo: 'media',
         },
       ],
+    },
+    {
+      name: 'previewEnvironment',
+      type: 'select',
+      options: [{ label: 'Private preview', value: 'private-preview' }],
+      admin: {
+        readOnly: true,
+        description: 'Marks content published only for the token-gated private preview route.',
+      },
+    },
+    {
+      name: 'promotionRunMarker',
+      type: 'text',
+      index: true,
+      admin: {
+        readOnly: true,
+        description: 'Stable orchestration run marker for authenticated draft-promotion readback.',
+      },
+    },
+    {
+      name: 'publicActivation',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        readOnly: true,
+        description: 'Private preview publication never activates a public customer site.',
+      },
     },
     ...workflowFields,
   ],

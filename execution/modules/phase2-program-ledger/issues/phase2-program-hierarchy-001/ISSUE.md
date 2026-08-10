@@ -7,13 +7,13 @@ parent_module: "phase2-program-ledger"
 parent_phase: ""
 depends_on:
   - "phase2-ledger-core (PR #47)"
-objective: "Model the LiNKsites Program's own 20 Modules (M01-M20, manual §05) as real, queryable data, and make Issue.programRef/moduleRef/stageRef validated references instead of opaque strings, as an opt-in capability on ProgramLedger."
+objective: "Model the LiNKsites Program's own 20 Modules (M01-M20, manual §05) as real, queryable data, and align the documented Issue.programRef/moduleRef/phaseRef contract with the canonical Program → Module → Phase → Issue → Run hierarchy. The current implementation's stageRef field remains only a documented persistence/code compatibility boundary until W1-06 isolates or migrates it."
 scope:
-  - "packages/program-ledger/src/hierarchy.ts: ProgramDefinition/ModuleDefinition/StageDefinition types, LINKSITES_PROGRAM constant, HierarchyRegistry"
+  - "packages/program-ledger/src/hierarchy.ts: ProgramDefinition/ModuleDefinition types, the legacy StageDefinition compatibility type, LINKSITES_PROGRAM constant, HierarchyRegistry"
   - "Optional, backward-compatible wiring into ProgramLedger.createIssue()"
 out_of_scope:
-  - "Stage-level decomposition within each Module (left as an empty array per Module, to be filled in when each Module's own implementation work defines its Stages)"
-  - "Cross-Program Program definitions (Sales, Odoo, Stripe) -- explicitly out of this repository's ownership per manual §02/§21"
+  - "Phase-level decomposition within each Module (left as an empty array per Module, to be filled in when each Module's own implementation work defines its Phases)"
+  - "Cross-Program definitions for LiNKreach-owned CRM/payment systems -- historical code names Sales, Odoo, and Stripe are not LiNKsites-owned"
 inputs:
   - "docs/archive/specs/linksites-program-manual/05_program_modules_and_major_handoffs.md (Module descriptions)"
   - "packages/program-ledger/src/ledger.ts, types.ts (PR #47/#48 state)"

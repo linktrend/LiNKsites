@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "entryId": "marketing-smb-v1",
+  "kind": "template",
+  "name": "Marketing SMB v1",
+  "summary": "LiNKsites master-template composition for a prospect-neutral small-business marketing site.",
+  "problemDomains": ["small-business marketing sites"],
+  "tags": ["master-template", "marketing", "migration-source"],
+  "languages": ["typescript"],
+  "frameworks": ["next", "react"],
+  "compatibility": {
+    "node": ">=22",
+    "runtimes": ["node", "browser"]
+  },
+  "license": {
+    "spdx": "UNLICENSED",
+    "redistributionAllowed": false
+  },
+  "securityReview": {
+    "reviewedAt": "2026-08-04T00:00:00.000Z",
+    "reviewedBy": "migration-fixture",
+    "notes": "Offline migration fixture only; not evidence of external admission or production approval."
+  },
+  "usage": {
+    "howToUse": "Use the LiNKsites-owned entrypoint selection to load the materialized template asset.",
+    "examples": ["marketingSmbV1LibraryAsset.render({ title: 'Example' })"]
+  },
+  "integrationNotes": "The physical LiNKsites template remains the migration source until W2-04 admits a substantive external entry.",
+  "gotchas": ["Do not treat this offline fixture as external catalog admission.", "Do not render prospect data from the neutral foundation asset."],
+  "provenance": {
+    "sourceSystem": "migration",
+    "contributedAt": "2026-08-04T00:00:00.000Z"
+  },
+  "files": [
+    {"path": "README.md", "sha256": "5ecdd28fd51c5a3e7922daa8b693542943654d242c8257121773aa8ca70fe398"},
+    {"path": "assets/marketingSmbV1.ts", "sha256": "bc2a1813815d3334364cc936765483ab3135a7c9c457f2fee9b0b325f68386c9"},
+    {"path": "tests/marketingSmbV1.fixture.ts", "sha256": "eb7588f0d0f8bff0da325075b7f5616dfcf0182cedb4018f9cbc7990a590cc19"}
+  ],
+  "status": "approved"
+}

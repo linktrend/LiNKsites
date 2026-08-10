@@ -3,7 +3,7 @@ module_id: "repo-hardening"
 title: "Repository hardening and test-coverage pass"
 status: "in_progress"
 parent_program: "linksites-manual-alignment"
-objective: "Per Carlos's explicit instruction (2026-07-14, after confirming little further engineering was buildable without live Stripe/Odoo/Supabase access): clean up repository content unrelated to LiNKsites' intent (see audit/13_decision_and_contradiction_register.md, DR-09), then harden and increase test coverage of everything built this session, before moving to the Supabase and Odoo integration phases."
+objective: "Per Carlos's explicit instruction (2026-07-14, after confirming little further engineering was buildable without live LiNKreach-owned commercial/Supabase access): clean up repository content unrelated to LiNKsites' intent (see audit/13_decision_and_contradiction_register.md, DR-09), then harden and increase test coverage of everything built this session, before moving to the LiNKreach-owned commercial and Supabase integration phases."
 scope:
   - "Dependency vulnerability remediation, re-verified independently of GitHub's default-branch (main) Dependabot count (done: hardening-security-001)"
   - "CI: add an automated dependency-audit gate so future vulnerabilities are caught, not just fixed reactively (done: hardening-security-001)"
@@ -13,7 +13,7 @@ scope:
   - "Removing a dead, orphaned pnpm-lock.yaml that GitHub was scanning as if live, explaining a post-promotion vulnerability-count discrepancy (done: remove-stray-lockfile-001)"
 out_of_scope:
   - "Live Supabase/Postgres verification -- still blocked on live infrastructure access (GAP-50), explicitly deferred to the next phase per Carlos's own sequencing instruction"
-  - "Live Stripe/Odoo integration -- still blocked on cross-Program access (GAP-33/34/35), explicitly deferred to the phase after Supabase"
+  - "Live LiNKreach-owned commercial integration -- still blocked on cross-Program access (GAP-33/34/35), explicitly deferred to the phase after Supabase"
   - "Rewriting or removing any already-reviewed Issue's PROOF.md open_gaps -- hardening documents and closes gaps where genuinely closable, it does not retroactively mark unclosable gaps as closed"
 phases: []
 read_first:

@@ -1,0 +1,2 @@
+-- W1-02 local gate intentionally keeps fixtures in supabase/tests so every
+-- pgTAP file owns and rolls back its own setup transaction.

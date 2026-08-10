@@ -23,13 +23,13 @@ The problem LiNKsites solves is: **repeatedly produce, validate, sell-from-proof
 | Role | Relationship to LiNKsites |
 |---|---|
 | **Principal (Carlos)** | Sole human authority. Approves product strategy, material pricing/architecture, destructive or high-spend exceptions, and security/legal matters. Does not write code or manage day-to-day hosting. |
-| **SMB prospects** | Receive a real website preview (build-first, sell-later) before purchase where Sales authorizes the investment. |
+| **SMB prospects** | Receive a real website preview (build-first, sell-later) before purchase where LiNKreach authorizes the investment. |
 | **SMB customers** | Purchase a managed website outcome: hosted, maintained, recoverable site — not a code dump or DIY builder. |
-| **LiNKtrend Sales Program** | Discovers leads, sells, processes Stripe payment, owns Odoo commercial records; requests previews and sends paid activation packages. |
+| **LiNKreach** | Owns lead research, outreach, commercial decisions, and authorization; sends versioned outcome and activation envelopes. |
 | **LiNKtrend studio (agent roles)** | Planners, executors, graders, and operators work under this Program's Modules, Ledger, and gates. |
 | **OpenClaw** | Optional external operations overseer for exceptions. Not required for normal production or hosting. |
 
-LiNKsites is **both** a customer-facing managed-website product **and** LiNKtrend's internal website factory Program. It is not a sales CRM, payment processor, or general automation factory.
+LiNKsites is **both** a customer-facing managed-website product **and** LiNKtrend's internal website factory Program. It is not a commercial CRM, payment processor, or general automation factory.
 
 ---
 
@@ -38,13 +38,13 @@ LiNKsites is **both** a customer-facing managed-website product **and** LiNKtren
 A healthy LiNKsites production path is done when:
 
 1. A governed **Reusable Site Foundation** exists for a supported Vertical Kit and tier.
-2. Sales can request a **Progressive Sales Proof Level** preview; LiNKsites produces, validates, and returns a Preview Ready Package.
+2. LiNKreach can request a **Progressive Proof Level** preview; LiNKsites produces, validates, and returns a Preview Ready Package.
 3. Unsold previews can be **recycled** (prospect identity removed) and the foundation returned to inventory without leakage.
-4. After verified payment (Sales → Paid Website Activation Package), LiNKsites **finalizes, publishes, launches, and certifies** a customer site.
+4. After LiNKreach sends an authorized `ActivationRequest`, LiNKsites **finalizes, publishes, launches, and certifies** a customer site.
 5. The site is **hosted** on LiNKtrend-managed infrastructure (shared Next.js frontend + central Payload CMS), monitored, backed up, and updatable through governed change workflows.
 6. Every material step leaves **Ledger / Gate / cost evidence** — completion is never "an agent said it was done."
 
-**Studio-level "coding done" bar (as of 2026-07-19):** the CMS (`apps/cms`), multi-tenant frontend (`apps/web-master`), Program Ledger (`packages/program-ledger`), factory-catalog objects and executors (`packages/factory-catalog`), and Supabase working/ledger schemas build, typecheck, and pass their automated tests. That is **not** the same as "a real paying customer has been sold, launched, and operated end-to-end in production." Live Stripe/Odoo integration, full autonomous hosting ops (monitoring/backup), and the first real customer pilot remain open (see Technical PRD § deferred / `docs/OPEN-ISSUES.md`).
+**Pre-VPS readiness bar:** the active CMS (`apps/cms`), shared renderer (`apps/web-master`), Program Ledger, Factory Catalog, working/ledger schemas, and the `deploy/` bundle must build and pass their required local gates. The bundle is intentionally fail-closed: it requires an immutable release manifest, protected runtime configuration, ordered migrations, private Traefik middleware, backup/restore rehearsal, and evidence before Phase 2 can deploy it. That is **not** the same as a real paying customer being sold, launched, and operated end-to-end in production. Live LiNKreach commercial integration, actual VPS configuration, and the first real customer pilot remain separately authorized work (see `docs/OPEN-ISSUES.md`). Historical Sales/Stripe/Odoo references describe the former commercial boundary, not LiNKsites runtime dependencies.
 
 ---
 
@@ -53,8 +53,8 @@ A healthy LiNKsites production path is done when:
 ### Inputs (what LiNKsites takes)
 
 - Versioned **Product / Tier Specifications** and Vertical Kits (factory capability definitions).
-- **Lead Research Packages** and **Preview Production Requests** from the Sales Program.
-- **Paid Website Activation Packages** after verified Stripe + Odoo state (via Sales).
+- **Lead Research Packages** and **Preview Production Requests** pulled and claimed through LiNKreach's owned CRM boundary. The future CRM adapter and the manual first-test input use the same versioned contract; LiNKsites does not own the CRM.
+- **Commercial Outcome** and **Activation Request** envelopes authorized by LiNKreach.
 - Customer-supplied facts, logos, media, domain authorization, and approvals where required.
 - Credentials and environment for runtime: Payload, Supabase/Postgres (shared `linkplatform-*` projects), Cloudflare/Traefik/VPS, GSM secrets — see app `.env.example` files and ops notes.
 
@@ -64,15 +64,15 @@ A healthy LiNKsites production path is done when:
 - Private/controlled **previews** with quality evidence, cost, analytics refs, and expiration.
 - **Payload draft → published** website content (via Promotion Service; public frontends read published only).
 - Launched **Customer Site Instances** with hosting assignment, domain/TLS, launch manifest.
-- Fulfilment, launch, and service-health packages back to Sales/Odoo.
+- Fulfilment, launch, and service-health evidence back to LiNKreach.
 - Durable Program Ledger audit trail (Issues, Runs, Gates, Events) for factory work.
 
 ### Explicit out of scope (deliberate — not forgotten)
 
 | Out of scope | Why / status |
 |---|---|
-| General SMB discovery, outreach, CRM, quotations | Belongs to LiNKtrend Sales / Odoo. |
-| Payment processing | Stripe via Sales; LiNKsites activates only on verified packages. |
+| General SMB discovery, outreach, CRM, quotations | Belongs to LiNKreach. |
+| Payment processing | Belongs to LiNKreach-owned systems; LiNKsites receives only an authorized outcome or activation envelope. |
 | General managed business automation | Belongs to LiNKautowork (may be sold as add-on; not absorbed). |
 | Unrestricted custom app development per customer | Productized tiers; Enterprise requires explicit approval. |
 | Dependence on postponed LiNKaios | Manual doctrine: operate independently. |
@@ -87,7 +87,7 @@ A healthy LiNKsites production path is done when:
 These are the operational principles this Program is built around. Full doctrine lived in the archived Program Manual (24 sections); the Technical PRD maps each to code.
 
 1. **Factory doctrine** — LiNKsites is the complete production + managed-hosting Program, not merely templates or a CMS.
-2. **Independent operation** — Integrates with Sales, LiNKplatform, and LiNKautowork via contracts; does not require LiNKaios or OpenClaw to run.
+2. **Independent operation** — Integrates with LiNKreach, LiNKplatform, and LiNKautowork via contracts; does not require LiNKaios or OpenClaw to run.
 3. **Reuse-first / thin custom layer** — Prefer governed foundations and open-source over one-off codebases.
 4. **AI-assisted deterministic assembly** — Agents select/adapt/evaluate; they do not invent a new React app per customer by default.
 5. **Build-first proof** — Qualified prospects see a real website; speculative cost is inventory investment.
@@ -106,8 +106,8 @@ These are the operational principles this Program is built around. Full doctrine
 | Factory code is structurally progressing | Workspace packages build/typecheck/test; CMS + web-master are real apps (verified continuously on `development`). |
 | Reusable asset objects exist | Vertical Kit, Tier Spec, Foundation, Design Catalog, Component Registry, Site Spec, Prospect Adaptation, Assembly Manifest, Promotion Service — in `packages/factory-catalog` with tests. |
 | Ledger is real | `packages/program-ledger` Issue/Run/Gate/Event + Postgres store + capability-grant checks; migrations under `supabase/migrations/`. |
-| Preview path objects exist | Proof levels, inventory snapshot, foundation matching, conversion lock, preview deployment, outcome record — code objects; live Sales/hosting wiring still partial. |
-| Live commercial + ops proof | **Not yet a claimed success.** Stripe/Odoo spine, monitoring/backup, and first real customer pilot remain open. |
+| Preview path objects exist | Proof levels, inventory snapshot, foundation matching, conversion lock, preview deployment, outcome record — code objects; live LiNKreach/hosting wiring still partial. |
+| Live commercial + ops proof | **Not yet a claimed success.** The LiNKreach-owned commercial adapter, monitoring/backup, and first real customer pilot remain open. Historical Stripe/Odoo references are not LiNKsites dependencies. |
 
 ---
 
@@ -127,4 +127,4 @@ These are the operational principles this Program is built around. Full doctrine
 
 ## 8. One-sentence Intent
 
-**LiNKsites is LiNKtrend's autonomous website factory and managed SMB website service: it assembles governed reusable foundations into real prospect previews and paying-customer sites, promotes content through a trusted Payload path, hosts them on a shared Next.js/Cloudflare/Traefik platform, and operates them as a continuing service — with Sales owning commercial lifecycle and human day-to-day involvement limited to strategy and exceptional escalation.**
+**LiNKsites is LiNKtrend's autonomous website factory and managed SMB website service: it continuously pulls and claims governed work, assembles reusable foundations into real prospect previews and paying-customer sites, promotes content through a trusted Payload path, hosts them on a shared Next.js/Cloudflare/Traefik platform, and operates them as a continuing service — with LiNKreach owning commercial lifecycle and human day-to-day involvement limited to strategy and exceptional escalation.**

@@ -1,0 +1,12 @@
+{
+  "evidence_schema": "linksites.wave.legacy-boundary.v2",
+  "subject_sha": "c8f61b8e78b807bec94f79ddfb38c2ea420a30d2",
+  "classification_result": "reviewed_not_cleaned",
+  "classifications": [
+    {"surface": "lsites_core mirror/schema", "classification": "historical_or_archived", "evidence": "archive and schema references remain; active W1 migrations use lsites_sites/lsites_ledger/working content", "action": "none; W2-07 owns destructive removal"},
+    {"surface": "raw n8n/N8N_WEBHOOK_URL", "classification": "documented boundary", "evidence": "environment matrix and historical references remain; no active W1 orchestrator dependency", "action": "none; broader external-event boundary is later work"},
+    {"surface": "apps/web-company", "classification": "paused duplicate", "evidence": "accepted root scripts explicitly filter @linksites/web-company", "action": "preserved; removal reserved for W2-07"},
+    {"surface": "mock/fixture content", "classification": "explicit local fixture", "evidence": "tests and offline LiNKlibraries adapter identify fixture/non-live behavior", "action": "preserved and excluded from live-proof claims"},
+    {"surface": "Stage terminology", "classification": "compatibility boundary", "evidence": "stage_ref is retained read-only and backfilled into quarantined Phase structures; active APIs use Phase", "action": "preserved for migration safety"}
+  ]
+}

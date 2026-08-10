@@ -1,0 +1,33 @@
+{
+  "evidence_schema": "linksites.w1-06.linklibraries-linux-proof.v1",
+  "work_packet": "W1-06",
+  "integration_source_sha": "a8242b9f615bd8b6a86e72743fa7b2817b5ea4da",
+  "library_repository": "LiNKlibraries",
+  "library_sha": "b4819032cb9ab13b1886189968f690f6288cb065",
+  "runtime": {
+    "execution_boundary": "container-native checkout and execution",
+    "image": "node:20-bookworm",
+    "image_digest": "sha256:8f693eaa7e0a8e71560c9a82b55fd54c2ae920a2ba5d2cde28bac7d1c01c9ba5",
+    "hosted_execution": false
+  },
+  "boundary_checks": {
+    "verified": ["sudo", "unshare", "setpriv", "env", "id", "sudo -u nobody"],
+    "checkout": "immutable library SHA checked out inside the container"
+  },
+  "validations": [
+    {"command": "npm run test:librarian-diff", "passed": 19, "failed": 0, "skipped": 0, "result": "pass"},
+    {"validation": "schema", "passed": 16, "failed": 0, "skipped": 0, "result": "pass"},
+    {"validation": "schema fixtures", "result": "pass"},
+    {"validation": "entries", "passed": 9, "failed": 0, "skipped": 0, "result": "pass"},
+    {"validation": "catalog check", "result": "pass"},
+    {"validation": "Librarian", "passed": 11, "failed": 0, "skipped": 0, "result": "pass"},
+    {"validation": "security", "passed": 16, "failed": 0, "skipped": 0, "result": "pass"},
+    {"validation": "promotion workflows", "passed": 9, "failed": 0, "skipped": 0, "result": "pass"},
+    {"validation": "workflow validation", "passed": 7, "failed": 0, "skipped": 0, "result": "pass"}
+  ],
+  "limitations": [
+    "Local Docker proof only.",
+    "No hosted CI, deployment, live service, or production claim is made.",
+    "Independent SOL audit remains required."
+  ]
+}

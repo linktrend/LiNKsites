@@ -27,18 +27,6 @@ export function CaseStudiesPageContent({ lang, cases: cmsCases }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const caseStudiesPerPage = 6;
-  const formattedDefaultCaseDate = useMemo(
-    () => formatDateForSSR("2024-01-01T00:00:00Z"),
-    []
-  );
-
-  // CMS Data Structure - These will be replaced by CMS content
-  const heroData = {
-    // CMS: hero object
-    title: "Real Solutions", // CMS: hero.title
-    subtitle: "Discover how leading companies achieve measurable results with our platform", // CMS: hero.subtitle
-  };
-
   // Convert CMS cases to component format
   const allCaseStudies = useMemo(
     () =>
@@ -49,9 +37,9 @@ export function CaseStudiesPageContent({ lang, cases: cmsCases }: Props) {
         excerpt: caseStudy?.summary || "",
         image: getFallbackImage("case"),
         category: "Case Study",
-        date: formattedDefaultCaseDate,
+        date: caseStudy?.lastUpdated ? formatDateForSSR(caseStudy.lastUpdated) : "",
       })),
-    [cmsCases, formattedDefaultCaseDate]
+    [cmsCases]
   );
 
   const categories: Category[] = [
@@ -151,14 +139,8 @@ export function CaseStudiesPageContent({ lang, cases: cmsCases }: Props) {
               className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-white"
               data-cms-field="hero.title"
             >
-              {heroData.title}
+              Case studies
             </h1>
-            <p
-              className="text-lg sm:text-xl text-white/90"
-              data-cms-field="hero.subtitle"
-            >
-              {heroData.subtitle}
-            </p>
           </div>
         </div>
       </section>
@@ -217,8 +199,7 @@ export function CaseStudiesPageContent({ lang, cases: cmsCases }: Props) {
       >
         <div className="container px-4 sm:px-6">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-center">Real Solutions</h2>
-            <p className="text-center text-base sm:text-lg text-muted-foreground mb-6">Search through our collection of success stories</p>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-center">Case studies</h2>
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input

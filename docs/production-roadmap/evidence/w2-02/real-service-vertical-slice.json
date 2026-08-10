@@ -1,0 +1,279 @@
+{
+  "scope": "disposable local actual Payload plus optimized web-master plus Chromium",
+  "executedRevision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+  "executableCheckpoint": "8f1f6865a68bfc826cb94741362d0611b43ecfeddb0d104deb24be60ee992ad9",
+  "proofBinding": {
+    "protocol": "w2-02-proof-binding-v1",
+    "testedSourceRevision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+    "executableCheckpoint": "8f1f6865a68bfc826cb94741362d0611b43ecfeddb0d104deb24be60ee992ad9",
+    "evidenceCommit": "the Git commit that first adds this receipt; it is intentionally distinct from testedSourceRevision"
+  },
+  "issues": [
+    {
+      "issueId": "foundation-reservation",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:foundation-reservation:3cebebe72691"
+      ]
+    },
+    {
+      "issueId": "lead-research",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:lead-research:30acf3ac25d2"
+      ]
+    },
+    {
+      "issueId": "program-claim",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:program-claim:741593ea25f3"
+      ]
+    },
+    {
+      "issueId": "vertical-qualification",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:vertical-qualification:f183936e8c02"
+      ]
+    },
+    {
+      "issueId": "library-verification",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:library-verification:0b15a4bcbc7a"
+      ]
+    },
+    {
+      "issueId": "site-specification",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:site-specification:3217f6e46c71"
+      ]
+    },
+    {
+      "issueId": "information-architecture",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:information-architecture:1c674b30464b"
+      ]
+    },
+    {
+      "issueId": "media-provenance",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:media-provenance:132129eb77e9"
+      ]
+    },
+    {
+      "issueId": "working-content-assembly",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:working-content-assembly:415d334cc6d1"
+      ]
+    },
+    {
+      "issueId": "content-gates",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:content-gates:6e9f14e714ad"
+      ]
+    },
+    {
+      "issueId": "payload-draft",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:payload-draft:fec383888a69"
+      ]
+    },
+    {
+      "issueId": "payload-parity",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:payload-parity:f5dffb91d7f6"
+      ]
+    },
+    {
+      "issueId": "private-publication",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:private-publication:23293f9e2df0"
+      ]
+    },
+    {
+      "issueId": "site-render-validation",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:site-render-validation:e85b61554b60"
+      ]
+    },
+    {
+      "issueId": "final-evidence",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:final-evidence:c84fc8e022aa"
+      ]
+    },
+    {
+      "issueId": "completion-record",
+      "state": "completed",
+      "gateDecision": "accepted",
+      "evidenceIds": [
+        "evidence:completion-record:9d0451a5e217"
+      ]
+    }
+  ],
+  "serviceReceipts": [
+    {
+      "issueId": "foundation-reservation",
+      "operation": "factory-catalog",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "3cebebe72691678d7a7cd1dc53a842ae0f2f5cbfc5ea06ccd9f7150ee5f98ec9"
+    },
+    {
+      "issueId": "library-verification",
+      "operation": "library-consumer",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "0b15a4bcbc7a4d7e9af78f26fc886601e669c6065efe8a55efb298aec9d6de3c"
+    },
+    {
+      "issueId": "information-architecture",
+      "operation": "working-content",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "1c674b30464bd5c798eb0fb135e6b21790e8741bfd46bfa2675e15057bf4ed10"
+    },
+    {
+      "issueId": "media-provenance",
+      "operation": "working-content",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "132129eb77e955bf86d71fad3cd5ace9b8892befbe53d36ca6f8ab6518352f0d"
+    },
+    {
+      "issueId": "working-content-assembly",
+      "operation": "working-content",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "415d334cc6d1b0efbc987c3f7a872a2c385bc1d2968ba4d17c619cabac9c9218"
+    },
+    {
+      "issueId": "payload-draft",
+      "operation": "payload-cms",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "fec383888a6919bb492c4474b72988a232011d01e0c58e2ee33fa2e5b8a8a4ce"
+    },
+    {
+      "issueId": "payload-parity",
+      "operation": "payload-cms",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "f5dffb91d7f67b63c3ea9426e8410813e6f39439cc57e5f4657ed3e6276e994a"
+    },
+    {
+      "issueId": "private-publication",
+      "operation": "frontend",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "23293f9e2df0ae04725b98afd1137954a80d90875a90acec400e3e0aec5ea713"
+    },
+    {
+      "issueId": "site-render-validation",
+      "operation": "frontend",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "e85b61554b608b99c369c5d27efa2cda9df7137415fc94a1f09eab009d79b37d"
+    },
+    {
+      "issueId": "completion-record",
+      "operation": "completion-sink",
+      "revision": "d9a69ad9a71b7bdb03a16b02ee55e1f208f34d21",
+      "valueChecksum": "9d0451a5e2176a4879d60b0bc31bbd370264cfc8166fdc552c42333298a8c453"
+    }
+  ],
+  "persistedEvidenceReceipts": 16,
+  "payloadReadback": {
+    "siteId": "1",
+    "runMarker": "w2-02-run-66e948c35ede345c",
+    "promotedDraftDocumentIds": [
+      "13",
+      "12",
+      "11",
+      "10",
+      "9"
+    ],
+    "statusFields": [
+      {
+        "id": "13",
+        "status": "draft",
+        "_status": "draft"
+      },
+      {
+        "id": "12",
+        "status": "draft",
+        "_status": "draft"
+      },
+      {
+        "id": "11",
+        "status": "draft",
+        "_status": "draft"
+      },
+      {
+        "id": "10",
+        "status": "draft",
+        "_status": "draft"
+      },
+      {
+        "id": "9",
+        "status": "draft",
+        "_status": "draft"
+      }
+    ],
+    "excludedSeededPublishedRecord": true,
+    "authenticated": true
+  },
+  "privateOnly": true,
+  "browserGates": {
+    "missingToken": 404,
+    "wrongToken": 404,
+    "validToken": 200,
+    "renderedRunMarker": true
+  },
+  "completion": {
+    "emitted": true,
+    "outboxStatus": "delivered",
+    "outboxAckAt": "2026-08-06T13:46:41.226Z",
+    "backlog": 0,
+    "deadLetters": 0
+  },
+  "health": {
+    "liveness": true,
+    "readiness": true,
+    "programState": "completed",
+    "activeIssues": 0,
+    "retries": 0,
+    "deadLetters": 0,
+    "manualAttention": 0,
+    "completionEmits": 1
+  },
+  "mutationReadback": {
+    "siteId": "1",
+    "operations": [
+      "POST/PATCH draft=true only"
+    ],
+    "publishedStatePatchObserved": false,
+    "publicActivationObserved": false,
+    "readbackBothStatusFieldsDraft": true
+  },
+  "publicActivation": false,
+  "tokenBearingUrlsPersisted": false
+}
