@@ -37,5 +37,5 @@ blockers: []
 notes:
   - The earlier independent source audit at full SHA 258aa36ff3cef4d6921c48e72c3d39cf74811146 remains historical evidence only. Later hardening corrections require a fresh Terra verification and hosted required checks at the current candidate SHA.
   - Principal direction on 2026-08-10 moved local Compose, restore, and end-to-end runtime proof from Phase 1 to the separately authorized Phase 2 VPS execution gate.
-  - Phase 1 source/evidence audit has passed; governed integration remains required. Phase 2 proves runtime behaviour, recovery, and the first website completion on the VPS.
+  - The current Phase 1 hardening candidate awaits hosted checks and Terra verification; governed integration then remains required. Phase 2 proves runtime behaviour, recovery, and the first website completion on the VPS.
   - Every final verdict and deployment claim must use a full 40-character immutable Git SHA.

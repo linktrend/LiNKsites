@@ -2,7 +2,7 @@
 
 **Status:** Pre-VPS hardening candidate pending Terra verification, hosted required checks, and protected-branch promotion; separate Phase 2 VPS authority remains pending
 **Wave:** 2 final checkpoint
-**Executor:** Terra master; independent verdict by Sol Medium
+**Executor:** Terra Medium master verifier; Luna High agents execute correction packets
 
 ## Outcome
 
