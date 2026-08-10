@@ -522,7 +522,7 @@ test('invalid input is rejected before source claim', async () => {
   const result = await orchestrator.runCycle()
   assert.equal(result.invalid, 1)
   assert.equal(setup.intake.claims.length, 0)
-  assert.equal(setup.intake.acknowledgements[0]?.acknowledgement.state, 'rejected')
+  assert.deepEqual(setup.intake.rejections, [{ itemId: 'invalid', reasonCode: 'validation:invalid-lead-research-package' }])
 })
 
 test('no work is a normal idle result and unavailable durable state is not ready', async () => {
