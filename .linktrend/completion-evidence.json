@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "headSha": "2834ef2b0f9a7c42658cf9ebca3a88876b0792e7",
+  "classification": "tests",
+  "acceptance": "IDE Development managed-core v2.1.0 is installed and cleanly verified in the LiNKsites consumer; the exact reviewed rollout checkpoint is ready for governed Packager review into development.",
+  "commands": [
+    {
+      "cmd": "python3 scripts/ide-development.py version --package /Users/linktrend/Projects/IDE Development --target . --json",
+      "exitCode": 0
+    },
+    {
+      "cmd": "python3 scripts/ide-development.py verify --package /Users/linktrend/Projects/IDE Development --target . --json",
+      "exitCode": 0
+    },
+    {
+      "cmd": "python3 scripts/ide-development.py drift --package /Users/linktrend/Projects/IDE Development --target . --json",
+      "exitCode": 0
+    },
+    {
+      "cmd": "python3 -m compileall -q scripts/ide_development scripts/gitops",
+      "exitCode": 0
+    },
+    {
+      "cmd": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "cmd": "find .cursor .agents .ide-development -type l -print",
+      "exitCode": 0
+    }
+  ],
+  "at": "2026-08-10T04:08:58Z"
+}
