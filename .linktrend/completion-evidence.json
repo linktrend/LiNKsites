@@ -1,19 +1,15 @@
 {
   "schemaVersion": 1,
-  "headSha": "3aaa1b0b76ef0c96ef303769ecd23e4455bdcd49",
+  "headSha": "2a5184701e25f01251de73614ae106d2739ff7fc",
   "classification": "tests",
-  "acceptance": "IDE Development managed-core v2.1.0 is installed and cleanly verified in the LiNKsites consumer; the exact reviewed rollout checkpoint is ready for governed Packager review into development.",
+  "acceptance": "LiNKsites IDE Development v2.1.0 and the canonical managed GitOps foundation are rendered, validated, and pushed on the exact Issue #78 tip for governed Packager review into development.",
   "commands": [
     {
-      "cmd": "python3 scripts/ide-development.py version --package /Users/linktrend/Projects/IDE Development --target . --json",
+      "cmd": "bash /Users/linktrend/Projects/IDE Development/scripts/sync-managed-workflows.sh . --dry-run",
       "exitCode": 0
     },
     {
-      "cmd": "python3 scripts/ide-development.py verify --package /Users/linktrend/Projects/IDE Development --target . --json",
-      "exitCode": 0
-    },
-    {
-      "cmd": "python3 scripts/ide-development.py drift --package /Users/linktrend/Projects/IDE Development --target . --json",
+      "cmd": "python3 /Users/linktrend/Projects/IDE Development/scripts/ide-development.py drift --repo .",
       "exitCode": 0
     },
     {
@@ -25,9 +21,13 @@
       "exitCode": 0
     },
     {
-      "cmd": "find .cursor .agents .ide-development -type l -print",
+      "cmd": "bash scripts/manage-repository-protections.sh --repo linktrend/LiNKsites verify",
+      "exitCode": 0
+    },
+    {
+      "cmd": "ruby -e 'require \"yaml\"; Dir[\".github/workflows/*.yml\"].each { YAML.load_file(_1) }'",
       "exitCode": 0
     }
   ],
-  "at": "2026-08-10T04:09:24Z"
+  "at": "2026-08-10T04:48:51Z"
 }
