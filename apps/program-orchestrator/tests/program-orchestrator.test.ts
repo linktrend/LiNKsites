@@ -119,6 +119,7 @@ test('manual NDJSON intake uses the shared port and claims once', async () => {
     const candidate = lead('lead-file-intake')
     await writeFile(value.config.intakePath, `${JSON.stringify(candidate)}\n`, 'utf8')
     const accepted = await runFirstReadyLead(value)
+    assert.ok(accepted)
     assert.equal(accepted.idempotency_key, candidate.idempotency_key)
     assert.match(await readFile(`${value.config.statePath}.intake.json`, 'utf8'), /program_started/)
     assert.equal((await value.runtime.health()).programState, 'completed')
