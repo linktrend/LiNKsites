@@ -1,6 +1,6 @@
 # W2-08 — Pre-VPS Source Certification and Phase 1 Release Gate
 
-**Status:** Source certification passed at `258aa36ff3cef4d6921c48e72c3d39cf74811146`; authoritative integration and separate Phase 2 VPS authority remain pending
+**Status:** Pre-VPS hardening candidate pending Terra verification, hosted required checks, and protected-branch promotion; separate Phase 2 VPS authority remains pending
 **Wave:** 2 final checkpoint
 **Executor:** Terra master; independent verdict by Sol Medium
 
@@ -21,7 +21,7 @@ Demonstrate at one exact, clean checkpoint that all product coding and deploymen
 2. Confirm every W1/W2 implementation commit is reachable from that candidate and that the executable deployment bundle, configuration contract, migration process, operations manual, and Phase 2 packet are present.
 3. Confirm the active build/deploy surface excludes `web-company`, retired mirror-sync, and direct raw-n8n paths.
 4. Reconcile documentation, source, package scripts, Compose definitions, and configuration names so the Phase 2 operator has no undocumented coding task.
-5. Dispatch a fresh independent source/evidence audit at the frozen SHA. A verdict other than `PASS` creates narrow correction work and a fresh audit.
+5. Terra verifies the frozen SHA against every packet acceptance criterion and the repository evidence. A failed criterion creates a narrow Luna High correction packet followed by Terra re-verification.
 6. Record the release handoff and request separate Phase 2 VPS authority. Do not execute the VPS operation under this packet.
 
 ## Phase 1 definition of done
@@ -33,7 +33,7 @@ Phase 1 is complete only when:
 - deployable artifacts, configuration schema, runbooks, rollback, and Phase 2 packet are complete;
 - no mock, legacy sync, direct raw-n8n, active `web-company`, or undocumented manual coding step remains on the production path;
 - every claim is backed by evidence tied to exact source/artifact/library/schema revisions;
-- the independent source/evidence audit returns `PASS` at the same exact SHA;
+- Terra verification and all required hosted checks pass at the same exact SHA;
 - the worktree is clean.
 
 Runtime proof is deliberately deferred to Phase 2. The VPS test must prove service startup, migrations, private access, noindex, recovery, backups, rollback, real CRM-shaped delivery, and live operational behavior; Phase 1 makes no claim about those unexecuted conditions.
@@ -50,9 +50,9 @@ Runtime proof is deliberately deferred to Phase 2. The VPS test must prove servi
 - known limitations, all explicitly assigned to Phase 2 or later approved scope
 - clean Git status
 
-## Independent audit and correction loop
+## Terra verification and correction loop
 
-Freeze the candidate and dispatch the audit packet to a fresh Sol Medium agent. Any verdict other than `PASS` is not completion. Convert each finding to an atomic correction Issue, assign non-overlapping Luna High agents, integrate, rerun affected and full certification, then dispatch a fresh independent re-audit on the new SHA.
+Freeze the candidate and have Terra verify it against the Phase 1 requirements and the exact hosted-check result. Any failed requirement is not completion. Convert each finding to an atomic correction Issue, assign non-overlapping Luna High agents, integrate, rerun affected hosted checks, and have Terra re-verify the new SHA.
 
 ## Handoff
 
