@@ -28,7 +28,7 @@ pnpm --filter @linksites/cms run build
 pnpm --filter @linksites/web-master run build
 # Browser provisioning and disposable service bootstrap happen before their
 # mandatory dependent suites. Nothing is treated as an optional convenience.
-pnpm exec playwright install --with-deps chromium
+pnpm --filter @linksites/cms exec playwright install --with-deps chromium
 LINKSITES_PLATFORM_REPOSITORY="$LINKSITES_PLATFORM_REPOSITORY" bash scripts/test-supabase-local.sh
 pnpm --filter @linksites/cms run test:local
 # CMS local integration owns its disposable database/browser lifecycle above.
