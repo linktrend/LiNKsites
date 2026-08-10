@@ -28,8 +28,13 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
   const currentStatusFallback = (doc as Record<string, unknown>)?._status
   const wasPublished = previousStatus === 'published' || previousStatusFallback === 'published'
   const isPublished = currentStatus === 'published' || currentStatusFallback === 'published'
+  const privatePreview = (doc as Record<string, unknown>).previewEnvironment === 'private-preview'
 
-  if (!wasPublished && isPublished) {
+  // A private preview uses Payload's published-content authority so that
+  // web-master can render the exact approved records behind its privacy wall.
+  // It is not a public customer-site activation and must not trigger public
+  // rebuild or LiNKautowork side effects.
+  if (!wasPublished && isPublished && !privatePreview) {
     const siteValue = (doc as Record<string, unknown>).site as
       | string
       | { id?: unknown }
