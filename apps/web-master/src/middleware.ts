@@ -63,26 +63,15 @@ export default function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   const demoMatch = pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/([^/]+))?(?:\/|$)/);
-  if (demoMatch && demoMatch[1]) {
-    const configuredToken = process.env.PREVIEW_ACCESS_TOKEN;
-    const candidateToken = demoMatch[1];
-    if (!configuredToken || !candidateToken || candidateToken !== configuredToken) {
-      return new NextResponse("Not Found", {
-        status: 404,
-        headers: {
-          "X-Robots-Tag": "noindex, nofollow, noarchive",
-          "Cache-Control": "private, no-store, max-age=0",
-        },
-      });
-    }
-  }
-
-  // The completion URL is stable and contains no credential. The protected
-  // preview boundary carries the application key as a request header.
-  const stableDemoMatch = pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/|$)/);
-  if (stableDemoMatch && !pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo\/[^/]+/)) {
+  if (demoMatch) {
     const configuredKey = process.env.PREVIEW_ACCESS_TOKEN;
-    if (!configuredKey || request.headers.get("x-linksites-preview-key") !== configuredKey) {
+    const headerAuthorized = Boolean(configuredKey && request.headers.get("x-linksites-preview-key") === configuredKey);
+    // Stable completion URLs contain no credential. Header authorization takes
+    // precedence for every route, so /en/demo/about is a protected stable
+    // route rather than a mistaken legacy-token attempt. The token path stays
+    // available for direct human preview links.
+    const tokenAuthorized = Boolean(configuredKey && demoMatch[1] && demoMatch[1] === configuredKey);
+    if (!headerAuthorized && !tokenAuthorized) {
       return new NextResponse("Not Found", { status: 404, headers: { "X-Robots-Tag": "noindex, nofollow, noarchive", "Cache-Control": "private, no-store, max-age=0" } });
     }
   }

@@ -39,6 +39,10 @@ export const SERVICE_CONFIGURATION = {
     required('NEXT_PUBLIC_PAYLOAD_API_URL', 'https-url'),
     required('PAYLOAD_API_KEY', 'secret-min-32', true),
     required('PREVIEW_ACCESS_TOKEN', 'secret-min-32', true),
+    required('LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH', 'absolute-path'),
+    required('LINKSITES_ADMITTED_TEMPLATE_SHA', 'git-sha-1'),
+    required('LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON', 'nonempty-json-object'),
+    required('LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON', 'nonempty-json-object'),
   ],
   'autowork-worker': [
     required('DATABASE_URI', 'postgres-url', true),
@@ -76,6 +80,11 @@ export const SERVICE_CONFIGURATION = {
     required('W2_02_LIBRARY_COMMIT_SHA', 'git-sha-1'),
     required('W2_02_LIBRARY_CATALOG_SHA256', 'sha-256'),
     required('W2_02_LIBRARY_ENTRY_SHA256', 'sha-256'),
+    required('LINKAUTOWORK_GATEWAY_URL', 'https-url'),
+    required('LINKAUTOWORK_SIGNING_SECRET', 'secret-min-32', true),
+    required('LINKAUTOWORK_SIGNING_KEY_ID', 'slug'),
+    required('LINKAUTOWORK_ENVIRONMENT', 'literal:production'),
+    required('LINKAUTOWORK_EVENT_GRANTS', 'nonempty-json-array'),
   ],
 }
 
@@ -97,6 +106,9 @@ function validateValue(value, format) {
   if (format === 'secret-min-32') return trimmed.length >= 32 && !/^(.)\1+$/.test(trimmed) ? null : 'must be at least 32 non-repeated characters'
   if (format === 'nonempty-json-array') {
     try { return Array.isArray(JSON.parse(trimmed)) && JSON.parse(trimmed).length > 0 ? null : 'must be a non-empty JSON array' } catch { return 'must be valid JSON' }
+  }
+  if (format === 'nonempty-json-object') {
+    try { const parsed = JSON.parse(trimmed); return parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Object.keys(parsed).length > 0 ? null : 'must be a non-empty JSON object' } catch { return 'must be valid JSON' }
   }
   if (format === 'postgres-url') {
     try {
@@ -125,6 +137,7 @@ export function validateRuntimeConfig(environment, service) {
   if (environment.NEXT_PUBLIC_CMS_PROVIDER === 'fixture' || environment.CMS_FIXTURE_PATH) errors.push({ name: 'NEXT_PUBLIC_CMS_PROVIDER', error: 'fixture content is forbidden in the production bundle', secret: false })
   if (environment.W2_02_MODE && environment.W2_02_MODE !== 'production') errors.push({ name: 'W2_02_MODE', error: 'must equal production for the Phase 2 deployment contract', secret: false })
   if (service === 'web-master' && environment.PREVIEW_ACCESS_TOKEN && environment.W2_02_PREVIEW_ACCESS_TOKEN && environment.PREVIEW_ACCESS_TOKEN !== environment.W2_02_PREVIEW_ACCESS_TOKEN) errors.push({ name: 'PREVIEW_ACCESS_TOKEN', error: 'must equal W2_02_PREVIEW_ACCESS_TOKEN when both are supplied', secret: true })
+  if (service === 'web-master' && environment.LINKSITES_ADMITTED_TEMPLATE_SHA && environment.LINKLIBRARIES_CATALOG_SHA && environment.LINKSITES_ADMITTED_TEMPLATE_SHA !== environment.LINKLIBRARIES_CATALOG_SHA) errors.push({ name: 'LINKSITES_ADMITTED_TEMPLATE_SHA', error: 'must equal the manifest-bound LiNKlibraries catalog commit', secret: false })
   if (service === 'program-orchestrator' && environment.W2_02_EXECUTION_REVISION && environment.LINKSITES_RELEASE_SHA && environment.W2_02_EXECUTION_REVISION !== environment.LINKSITES_RELEASE_SHA) errors.push({ name: 'W2_02_EXECUTION_REVISION', error: 'must equal LINKSITES_RELEASE_SHA', secret: false })
   if (service === 'program-orchestrator' && environment.W2_02_LIBRARY_COMMIT_SHA && environment.LINKLIBRARIES_CATALOG_SHA && environment.W2_02_LIBRARY_COMMIT_SHA !== environment.LINKLIBRARIES_CATALOG_SHA) errors.push({ name: 'W2_02_LIBRARY_COMMIT_SHA', error: 'must equal the manifest-bound LiNKlibraries catalog commit', secret: false })
   return { ok: errors.length === 0, service, schemaVersion: CONFIG_SCHEMA_VERSION, errors }

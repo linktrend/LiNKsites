@@ -152,6 +152,11 @@ export type RuntimeConfig = {
   payloadSiteId: string
   webMasterBaseUrl: string
   previewAccessToken: string
+  /** Signed outbound completion delivery to LiNKautowork; separate from W2-05 inbound authorization. */
+  linkautoworkGatewayUrl: string
+  linkautoworkSigningSecret: string
+  linkautoworkSigningKeyId: string
+  linkautoworkEventGrants: string
   /** Inbound W2-05 HMAC verifier configuration; never emitted in evidence. */
   commercialOutcomeGatewaySecret: string
   commercialOutcomeGatewayKeyId: string

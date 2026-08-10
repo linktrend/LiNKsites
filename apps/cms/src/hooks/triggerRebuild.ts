@@ -1,6 +1,5 @@
 import type { CollectionAfterChangeHook, PayloadRequest } from 'payload'
 import { cacheInvalidatePattern } from '@/payload/utils/cache'
-import { triggerLiNKautowork } from '@/payload/utils/autowork'
 import { triggerSiteRebuild } from '@/utils/webhook'
 
 export const triggerRebuild: CollectionAfterChangeHook = async ({
@@ -32,15 +31,12 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
   // an operational LiNKsites event: cache invalidation, rebuild delivery, and
   // governed automation must not be silently bypassed.
   if (!wasPublished && isPublished) {
-    const siteValue = (doc as Record<string, unknown>).site as
-      | string
-      | { id?: unknown }
-      | undefined
+    const siteValue = (doc as Record<string, unknown>).site as string | number | { id?: unknown } | undefined
     const siteId =
-      typeof siteValue === 'string'
-        ? siteValue
-        : typeof siteValue?.id === 'string'
-          ? siteValue.id
+      typeof siteValue === 'string' || typeof siteValue === 'number'
+        ? String(siteValue)
+        : typeof siteValue?.id === 'string' || typeof siteValue?.id === 'number'
+          ? String(siteValue.id)
           : undefined
 
     if (siteId) {
@@ -51,16 +47,6 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
       triggerSiteRebuild(siteId, req, 'content_published').catch((error) => {
         console.error('Failed to trigger rebuild:', error)
       })
-      if (collection?.slug && doc?.id) {
-        await triggerLiNKautowork({
-          id: doc.id as string | number,
-          collection: collection.slug,
-          eventType: 'content_published',
-          site: siteId,
-          locale: req.locale ?? undefined,
-          req,
-        })
-      }
     }
   }
 

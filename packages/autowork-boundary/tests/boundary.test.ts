@@ -53,7 +53,7 @@ test('a fixed-format HMAC is not treated as submitted payment data', () => {
 test('outbox deduplicates, retries 5xx, dead-letters 4xx, and recovers an ambiguous send idempotently', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-05-')); const metrics = new Metrics(); let sends = 0
   const outbox = new FileOutbox(join(directory, 'outbox.json'), { maxAttempts: 3, metrics, integritySecret: 'queue-integrity-test', resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined })
-  const request: GatewayRequest = { timestamp: 1_000, nonce: 'nonce-1', envelope: { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'corr', idempotency_key: 'outbox-1', event_id: 'event:outbox-1', event_name: 'demo.completed', payload, signature: { algorithm: 'hmac-sha256', key_id: 'key-1', signature: 'signature' }, delivery_attempt: 1, acknowledgement: { status: 'pending' } } }
+  const request: GatewayRequest = { timestamp: 1_000, nonce: 'nonce-1', envelope: { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'corr', idempotency_key: 'outbox-1', event_id: 'event:outbox-1', event_name: 'demo.completed', payload, signature: { algorithm: 'hmac-sha256', key_id: 'key-1', signature: 'a'.repeat(64) }, delivery_attempt: 1, acknowledgement: { status: 'pending' } } }
   assert.equal(await outbox.enqueue(request), await outbox.enqueue(request))
   await outbox.drain(async () => ({ status: 503, receiptId: 'none', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() }), 0)
   await outbox.drain(async () => ({ status: 503, receiptId: 'none', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() }), 200)
@@ -119,7 +119,7 @@ test('queue integrity secret is mandatory, stored records are untrusted, grants 
 test('a child-process crash after lease persistence is recovered by a fresh worker', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-05-crash-'))
   const path = join(directory, 'queue.json')
-  const request = { timestamp: 1_000, nonce: 'crash-nonce', envelope: { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'crash', idempotency_key: 'crash-restart', event_id: 'event:crash-restart', event_name: 'demo.completed' as const, payload, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: 'signature' }, delivery_attempt: 1, acknowledgement: { status: 'pending' as const } } }
+  const request = { timestamp: 1_000, nonce: 'crash-nonce', envelope: { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'crash', idempotency_key: 'crash-restart', event_id: 'event:crash-restart' as const, payload, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: 'a'.repeat(64) }, delivery_attempt: 1, acknowledgement: { status: 'pending' as const } } }
   const workerPath = new URL('./fixtures/outbox-crash-worker.ts', import.meta.url).pathname
   const child = spawn(process.execPath, ['--experimental-strip-types', workerPath], {
     stdio: 'ignore',

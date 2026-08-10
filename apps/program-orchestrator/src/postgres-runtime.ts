@@ -3,6 +3,7 @@ import type { DemoCompletionEnvelope, LeadResearchPackage } from '@linksites/typ
 import type { CompletionSink, IntakeAcknowledgement, IntakeClaim, PulledWorkItem, WorkIntakePort } from '@linksites/intake-orchestrator'
 import { isLeadResearchPackage } from '../../../packages/types/src/runtime-contracts.ts'
 import type { DurableStateStore, LedgerState } from './contracts.ts'
+import type { LiNKautoworkGateway } from '@linksites/autowork-boundary'
 
 /** The deployment-contract lane supplies a real pg PoolClient/Client adapter. */
 export interface PostgresExecutor {
@@ -139,7 +140,7 @@ export class PostgresWorkIntakePort implements WorkIntakePort {
 }
 
 export class PostgresCompletionSink implements CompletionSink {
-  constructor(private readonly db: PostgresExecutor, private readonly orgId: string) {}
+  constructor(private readonly db: PostgresExecutor, private readonly orgId: string, private readonly gateway: LiNKautoworkGateway) {}
 
   async write(envelope: DemoCompletionEnvelope): Promise<void> {
     await this.db.query(
@@ -148,6 +149,13 @@ export class PostgresCompletionSink implements CompletionSink {
        values ($1,$2,$3,$4,now()) on conflict (org_id, idempotency_key) do nothing`,
       [this.orgId, envelope.idempotency_key, JSON.stringify(envelope), safeHash(envelope)],
     )
+    // The database delivery record is the durable outbox boundary. A gateway
+    // failure leaves it available for ProgramRuntime's idempotent retry; only
+    // a signed LiNKautowork acknowledgement lets the Program emit.
+    await this.gateway.send('demo.completed', envelope.org_id, envelope.correlation_id, envelope.idempotency_key, {
+      lead_id: envelope.lead_id,
+      site_id: envelope.site_id,
+    })
   }
 }
 

@@ -85,6 +85,8 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   const rehearsal = await read('deploy/scripts/rehearse-compose-stack.mjs')
   assert.ok(overlay.includes('deploy/docker-compose.deploy.yml') === false, 'overlay is composed by the rehearsal command, not recursively')
   for (const service of ['local-postgres:', 'local-tls:', 'payload-seed:', 'supabase-migrate:', 'program-orchestrator:']) assert.ok(overlay.includes(service), service)
+  assert.ok(overlay.includes('LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /var/lib/linksites/linklibraries'), 'web-master must mount and address the admitted LiNKlibraries artifact')
+  assert.ok(overlay.includes('LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA'), 'web-master admission SHA must bind to the manifest authority')
   assert.ok(rehearsal.includes("externalPlatformAdmission: 'not asserted; separate governed prerequisite remains'"))
   assert.ok(rehearsal.includes("W2_04_LOCAL_PROOF_HOST: 'preview.localtest'"), 'the disposable seed must map the same private hostname the proof requests')
   assert.ok(rehearsal.includes("LINKSITES_ADMITTED_TEMPLATE_SHA: '1'.repeat(40)"), 'the disposable admission fixture must use the full SHA recorded in its receipt')

@@ -13,18 +13,22 @@ formats, and safe redacted fingerprints. It never prints values.
 | `DATABASE_URI` | database owner | yes | CMS, worker, Supabase migration job | non-loopback PostgreSQL URL for CMS/worker/migration ownership | rolling restart; preserve connection compatibility |
 | `PAYLOAD_SECRET` | CMS owner | yes | CMS, worker | 32+ chars | coordinated session/key rotation; restart both |
 | `PAYLOAD_PUBLIC_SERVER_URL` | LiNKsites operations | no | CMS, worker | non-loopback HTTPS URL | coordinate CMS and frontend deployment |
-| `LINKAUTOWORK_GATEWAY_URL` | LiNKautowork | no | CMS, worker | non-loopback HTTPS URL | verify signed gateway before restart |
-| `LINKAUTOWORK_SIGNING_SECRET` | LiNKautowork | yes | CMS, worker | 32+ chars | dual-key overlap required; restart senders after gateway accepts new key |
-| `LINKAUTOWORK_SIGNING_KEY_ID` | LiNKautowork | no | CMS, worker | identifier | must name an accepted gateway key |
-| `LINKAUTOWORK_ENVIRONMENT` | LiNKautowork | no | CMS, worker | exact `production` | never substitute a development value |
+| `LINKAUTOWORK_GATEWAY_URL` | LiNKautowork | no | CMS, worker, orchestrator | non-loopback HTTPS URL | verify signed gateway before restart |
+| `LINKAUTOWORK_SIGNING_SECRET` | LiNKautowork | yes | CMS, worker, orchestrator | 32+ chars | dual-key overlap required; restart senders after gateway accepts new key |
+| `LINKAUTOWORK_SIGNING_KEY_ID` | LiNKautowork | no | CMS, worker, orchestrator | identifier | must name an accepted gateway key |
+| `LINKAUTOWORK_ENVIRONMENT` | LiNKautowork | no | CMS, worker, orchestrator | exact `production` | never substitute a development value |
 | `LINKAUTOWORK_OUTBOX_PATH` | LiNKsites operations | no | CMS, worker | absolute path | preserve/restore durable outbox before changing |
 | `LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET` | LiNKsites operations | yes | CMS, worker | 32+ chars | stop/drain then rotate with verified restore |
-| `LINKAUTOWORK_EVENT_GRANTS` | LiNKautowork policy owner | no | CMS, worker | non-empty JSON event/org/environment grant array | policy change; drain and restart only after LiNKautowork acceptance |
+| `LINKAUTOWORK_EVENT_GRANTS` | LiNKautowork policy owner | no | CMS, worker, orchestrator | non-empty JSON event/org/environment grant array; must authorize this tenant's `demo.completed` event for the orchestrator | policy change; drain and restart only after LiNKautowork acceptance |
 | `NEXT_PUBLIC_CMS_PROVIDER` | LiNKsites operations | no | web-master | exact `payload` | build-time public value; rebuild image |
 | `PAYLOAD_BASE_URL` | LiNKsites operations | no | web-master | non-loopback HTTPS URL | rebuild image when public bundle changes |
 | `NEXT_PUBLIC_PAYLOAD_API_URL` | LiNKsites operations | no | web-master | non-loopback HTTPS URL | rebuild image when public bundle changes |
 | `PAYLOAD_API_KEY` | CMS owner | yes | web-master | 32+ chars | rotate server process after CMS grants replacement key |
 | `PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | web-master | 32+ chars | rotate the application-level private preview token and restart web-master |
+| `LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH` | LiNKsites operations | no | web-master | read-only absolute artifact mount | remount only the manifest-bound approved LiNKlibraries checkout |
+| `LINKSITES_ADMITTED_TEMPLATE_SHA` | LiNKlibraries release process | no | web-master | full SHA equal to `LINKLIBRARIES_CATALOG_SHA` | redeploy only with matching receipt/evidence |
+| `LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON` | LiNKlibraries/LiNKsites release process | no | web-master | verified non-empty library-consumption receipt JSON | replace only with evidence for the mounted approved artifact |
+| `LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON` | LiNKlibraries/LiNKsites release process | no | web-master | verified non-empty materialization evidence JSON | replace only with the matching receipt and artifact bytes |
 | `W2_02_MODE` | LiNKsites program owner | no | orchestrator | exact `production` | non-production execution is refused by the deployment contract |
 | `W2_02_DATABASE_URI` | database owner | yes | orchestrator | canonical distinct non-loopback PostgreSQL URL for the least-privilege orchestrator credential; the packaged adapter may receive the same value as its `DATABASE_URI` alias; never reuse CMS `DATABASE_URI` | rolling restart; preserve adapter connection compatibility |
 | `W2_02_ORG_ID` | LiNKsites program owner | no | orchestrator | UUID tenant key | stop intake and re-authorize tenancy |

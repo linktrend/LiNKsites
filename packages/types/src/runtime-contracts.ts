@@ -230,6 +230,12 @@ const isNonEmptyString = (value: unknown): value is string =>
   value.trim().length > 0 &&
   !isSensitiveString(value)
 
+// HMAC output is cryptographic proof, rather than user-controlled business
+// content.  It must be structurally validated without routing it through the
+// content scanner, which can mistake a valid hexadecimal prefix for a card.
+const isHmacSha256Digest = (value: unknown): value is string =>
+  typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
+
 const MAX_CANONICAL_REFERENCE_LENGTH = 128
 
 // Stable contract references are ASCII tokens separated by one of `-`, `_`, `.`, `:`, or `/`.
@@ -533,7 +539,7 @@ export const isLiNKautoworkEventEnvelope = (
     hasExactKeys(signature, ['algorithm', 'key_id', 'signature']) &&
     signature.algorithm === 'hmac-sha256' &&
     isCanonicalReference(signature.key_id) &&
-    isNonEmptyString(signature.signature) &&
+    isHmacSha256Digest(signature.signature) &&
     typeof value.delivery_attempt === 'number' &&
     Number.isInteger(value.delivery_attempt) &&
     value.delivery_attempt > 0 &&

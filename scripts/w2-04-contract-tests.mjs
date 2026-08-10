@@ -102,11 +102,15 @@ assert.match(templateAdmission, /LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON/);
 assert.match(templateAdmission, /assertLibraryConsumptionReceipt/);
 assert.match(templateAdmission, /assertLibraryConsumptionEvidence/);
 assert.match(templateAdmission, /materializedAssetBytes/);
+assert.match(templateRegistry, /readMaterializedAssets/);
+assert.match(templateRegistry, /LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH/);
+assert.match(templateRegistry, /materializeAdmittedTemplate/);
 assert.match(templateAdmission, /evidence\.files/);
 assert.match(publicRouteGuard, /getSiteIdFromRequest/);
 assert.match(publicRouteGuard, /status: 404/);
-assert.match(middleware, /const candidateToken = demoMatch\[1\]/);
-assert.match(middleware, /!candidateToken \|\| candidateToken !== configuredToken/);
+assert.match(middleware, /headerAuthorized/);
+assert.match(middleware, /tokenAuthorized/);
+assert.match(middleware, /\/en\/demo\/about/);
 assert.match(nextConfig, /source: '\/:lang\(en\|es\|zh-tw\|zh-cn\)\/demo\/:path\*'/);
 assert.match(nextConfig, /'Cache-Control', value: 'private, no-store, max-age=0'/);
 for (const publicRoute of publicRoutes) {

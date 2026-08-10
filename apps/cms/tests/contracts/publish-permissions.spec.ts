@@ -5,7 +5,6 @@ import { triggerRebuild } from '@/hooks/triggerRebuild'
 const mocks = vi.hoisted(() => ({
   cacheInvalidatePattern: vi.fn(async () => 1),
   triggerSiteRebuild: vi.fn(async () => {}),
-  triggerLiNKautowork: vi.fn(async () => {}),
 }))
 
 vi.mock('@/payload/utils/cache', () => ({
@@ -14,10 +13,6 @@ vi.mock('@/payload/utils/cache', () => ({
 
 vi.mock('@/utils/webhook', () => ({
   triggerSiteRebuild: mocks.triggerSiteRebuild,
-}))
-
-vi.mock('@/payload/utils/autowork', () => ({
-  triggerLiNKautowork: mocks.triggerLiNKautowork,
 }))
 
 const publisherUser = {
@@ -79,7 +74,7 @@ describe('Publish permissions workflow', () => {
     ).rejects.toThrow(/Only publishers can revert/)
   })
 
-  it('triggers rebuild, cache invalidation, and the optional automation hook on publish', async () => {
+  it('triggers rebuild and cache invalidation for a published private-preview record', async () => {
     const data = { status: 'published', site: 'site-1', id: 'doc-1', locale: 'en' }
     const req = buildReq(publisherUser, data)
     await validatePublishPermissions({
@@ -103,6 +98,21 @@ describe('Publish permissions workflow', () => {
 
     expect(mocks.cacheInvalidatePattern).toHaveBeenCalledWith('site:site-1')
     expect(mocks.triggerSiteRebuild).toHaveBeenCalled()
-    expect(mocks.triggerLiNKautowork).toHaveBeenCalled()
+  })
+
+  it('accepts the numeric Payload site relationship used by the production schema', async () => {
+    const data = { status: 'published', site: 42, id: 'doc-1', locale: 'en', previewEnvironment: 'private-preview' }
+    await triggerRebuild({
+      collection: { slug: 'articles' } as never,
+      context: {},
+      data,
+      doc: data as never,
+      req: buildReq(publisherUser, data) as never,
+      operation: 'update',
+      previousDoc: { status: 'pending', site: 42, id: 'doc-1', locale: 'en' } as never,
+    })
+
+    expect(mocks.cacheInvalidatePattern).toHaveBeenCalledWith('site:42')
+    expect(mocks.triggerSiteRebuild).toHaveBeenCalledWith('42', expect.anything(), 'content_published')
   })
 })
