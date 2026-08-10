@@ -382,7 +382,14 @@ const isEventPayload = (
   hasExactKeys(value, ['lead_id', 'site_id'], ['submission', 'lead_research']) &&
   isCanonicalReference(value.lead_id) &&
   isCanonicalReference(value.site_id) &&
-  (value.submission === undefined || (isRecord(value.submission) && Object.values(value.submission).every((entry) => (typeof entry === 'string' && !isSensitiveString(entry)) || typeof entry === 'number' || typeof entry === 'boolean))) &&
+  (value.submission === undefined || (
+    isRecord(value.submission) &&
+    Object.values(value.submission).every((entry) =>
+      (typeof entry === 'string' && !isSensitiveString(entry)) ||
+      typeof entry === 'number' ||
+      typeof entry === 'boolean',
+    )
+  )) &&
   (value.lead_research === undefined || isLeadResearchPackage(value.lead_research))
 
 const isEventName = (value: unknown): value is LiNKautoworkEventName =>
