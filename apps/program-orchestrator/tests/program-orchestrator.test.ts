@@ -27,6 +27,18 @@ const approvedFacts = (id: string) => ({
 })
 const outcomeGatewayFixture = { commercialOutcomeGatewaySecret: 'test-only-outcome-gateway-secret', commercialOutcomeGatewayKeyId: 'test-only-outcome-gateway-key' }
 
+function programFailureDiagnostic(state: { program: { state: string }; issues: Array<{ issueId: string; state: string; gate: string }>; runs: Array<{ issueId: string; failure: unknown }> }): string {
+  return JSON.stringify({
+    programState: state.program.state,
+    nonCompletedIssues: state.issues
+      .filter((issue) => issue.state !== 'completed')
+      .map((issue) => ({ issueId: issue.issueId, state: issue.state, gate: issue.gate })),
+    failedRuns: state.runs
+      .filter((run) => run.failure)
+      .map((run) => ({ issueId: run.issueId, failure: run.failure })),
+  })
+}
+
 test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durable lifecycle path and reject forged signatures', async () => {
   const authorization: LiNKreachAuthorizationVerifier = { verify: async () => true }
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-06-ingress-'))
@@ -91,7 +103,8 @@ test('production composition boots with complete approved local configuration', 
   try {
     assert.equal((await value.runtime.health()).readiness, false)
     await value.runtime.runLead(lead())
-    assert.equal((await value.runtime.health()).programState, 'completed')
+    const state = await value.runtime.exportState() as { program: { state: string }; issues: Array<{ issueId: string; state: string; gate: string }>; runs: Array<{ issueId: string; failure: unknown }> }
+    assert.equal(state.program.state, 'completed', programFailureDiagnostic(state))
     const gateway = new LiNKautoworkGateway({ secret: value.config.commercialOutcomeGatewaySecret, keyId: value.config.commercialOutcomeGatewayKeyId, environment: 'development', transport: async () => { throw new Error('not used') }, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [value.config.orgId], environments: ['development'] }] })
     const request = gateway.buildRequest('commercial.outcome.recorded', value.config.orgId, 'composed-outcome', 'composed-outcome:001', { lead_id: 'lead-composed', site_id: 'site-composed', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-composed', outcome_event_id: 'commercial-outcome-composed', outcome_nonce: 'outcome-nonce-composed', recorded_at: '2026-08-06T00:00:00.000Z' } })
     assert.equal((await value.runtime.acceptCommercialOutcome(request)).status, 'outcome_recorded')
