@@ -24,7 +24,7 @@ test('invalid signature, stale timestamp, nonce replay, and unauthorized event f
   let captured!: GatewayRequest
   let gateway!: LiNKautoworkGateway; gateway = setup(async (request) => { captured = request; return { status: 202, receiptId: 'r', receiptSignature: gateway.signAcknowledgement(request, 'r', clock.nowIso()), acknowledgedAt: clock.nowIso() } })
   await gateway.send('demo.completed', 'org_demo', 'corr', 'key', payload)
-  assert.throws(() => gateway.verify({ ...captured, envelope: { ...captured.envelope, signature: { ...captured.envelope.signature, signature: 'bad' } } }), (error: ReplayError) => error.code === 'invalid_signature')
+  assert.throws(() => gateway.verify({ ...captured, envelope: { ...captured.envelope, signature: { ...captured.envelope.signature, signature: 'a'.repeat(64) } } }), (error: ReplayError) => error.code === 'invalid_signature')
   assert.throws(() => gateway.verify({ ...captured, timestamp: 1 }), (error: ReplayError) => error.code === 'stale_timestamp')
   let replay!: LiNKautoworkGateway; replay = setup(async (request) => { captured = request; return { status: 202, receiptId: 'r', receiptSignature: replay.signAcknowledgement(request, 'r', clock.nowIso()), acknowledgedAt: clock.nowIso() } })
   await replay.send('demo.completed', 'org_demo', 'corr', 'replay', payload); replay.verify(captured)
@@ -119,7 +119,7 @@ test('queue integrity secret is mandatory, stored records are untrusted, grants 
 test('a child-process crash after lease persistence is recovered by a fresh worker', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-05-crash-'))
   const path = join(directory, 'queue.json')
-  const request = { timestamp: 1_000, nonce: 'crash-nonce', envelope: { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'crash', idempotency_key: 'crash-restart', event_id: 'event:crash-restart' as const, payload, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: 'a'.repeat(64) }, delivery_attempt: 1, acknowledgement: { status: 'pending' as const } } }
+  const request = { timestamp: 1_000, nonce: 'crash-nonce', envelope: { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'crash', idempotency_key: 'crash-restart', event_id: 'event:crash-restart' as const, event_name: 'demo.completed' as const, payload, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: 'a'.repeat(64) }, delivery_attempt: 1, acknowledgement: { status: 'pending' as const } } }
   const workerPath = new URL('./fixtures/outbox-crash-worker.ts', import.meta.url).pathname
   const child = spawn(process.execPath, ['--experimental-strip-types', workerPath], {
     stdio: 'ignore',
