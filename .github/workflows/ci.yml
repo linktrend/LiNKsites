@@ -22,6 +22,13 @@ jobs:
           # Private-repository read access must be granted to this workflow.
           # No fallback or skipped RLS suite is permitted if it is absent.
           token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
+      - name: Checkout exact LiNKlibraries authority
+        uses: actions/checkout@v4
+        with:
+          repository: linktrend/LiNKlibraries
+          ref: a7193d40152747db2a03e094fa263f324a971a0b
+          path: .ci/linklibraries
+          token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -38,6 +45,7 @@ jobs:
       - name: Required production readiness gate
         env:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
+          W2_02_LIBRARY_REPOSITORY_PATH: ${{ github.workspace }}/.ci/linklibraries
         run: bash scripts/ci-required.sh
       - name: Dependency and secret scan
         uses: gitleaks/gitleaks-action@v2

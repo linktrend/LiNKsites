@@ -14,6 +14,7 @@ import {
   produceWorkingContent,
   buildPromotionRequestFromPreparedWorkingContent,
   canonicalJsonChecksum,
+  MARKETING_SMB_V1_CATALOG_AUTHORITY,
   promotePreparedWorkingContent,
   assertValidWorkingContentPackage,
   computeWorkingContentChecksum,
@@ -118,7 +119,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       entryChecksum: this.config.libraryEntryChecksum,
       entryId: 'marketing-smb-v1',
       entryPath: 'entries/marketing-smb-v1',
-      verificationId: `linklibraries.release-manifest.v1:marketing-smb-v1:${this.config.libraryCommitSha}`,
+      verificationId: MARKETING_SMB_V1_CATALOG_AUTHORITY.verificationId,
     }
     const git = (...args: string[]) => execFileSync('git', ['-C', this.config.libraryRepositoryPath, ...args], { encoding: 'utf8' })
     git('cat-file', '-e', `${authority.commitSha}^{commit}`)
@@ -137,7 +138,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     // every materialized asset independent of JSON whitespace/order.
     const entryChecksum = canonicalJsonChecksum(entry)
     const assetChecksums = Object.fromEntries(entry.files.map((asset) => [asset.path, asset.sha256]))
-    return { entry, files, receipt: { schemaVersion: { major: 1, minor: 0 }, receiptId: `library-consumption:${authority.entryId}:${authority.commitSha}`, consumer: 'linksites', entryId: authority.entryId, catalogCommitSha: authority.commitSha, libraryCommitSha: authority.commitSha, entryChecksum, assetChecksums, entrypoint: 'src/index.mjs', testFiles: ['tests/marketing-smb-v1.test.mjs'], verificationId: authority.verificationId, compatibility: { compatible: true, consumer: 'linksites', nodeMajor: 22, runtimes: ['node', 'browser'] }, recordedAt: new Date().toISOString() }, verification: { authorityId: 'linklibraries.release-manifest.v1', repositoryUrl: 'https://github.com/linktrend/LiNKlibraries.git', ...authority, entryChecksum, assetChecksums } } as LibraryConsumptionEvidence
+    return { entry, files, receipt: { schemaVersion: { major: 1, minor: 0 }, receiptId: `library-consumption:${authority.entryId}:${authority.commitSha}`, consumer: 'linksites', entryId: authority.entryId, catalogCommitSha: authority.commitSha, libraryCommitSha: authority.commitSha, entryChecksum, assetChecksums, entrypoint: 'src/index.mjs', testFiles: ['tests/marketing-smb-v1.test.mjs'], verificationId: authority.verificationId, compatibility: { compatible: true, consumer: 'linksites', nodeMajor: 22, runtimes: ['node', 'browser'] }, recordedAt: new Date().toISOString() }, verification: { ...MARKETING_SMB_V1_CATALOG_AUTHORITY, assetChecksums } } as LibraryConsumptionEvidence
   }
 
   async buildSiteSpecification(siteId: string, dependencies: Record<string, unknown>): Promise<Record<string, unknown>> { return { siteSpecId: `site-spec:${siteId}`, siteId, kitId: 'home_services', tierId: 'standard', foundation: dependencies.foundation, library: dependencies.library, pages: 5, reservationOwner: 'M06' } }
