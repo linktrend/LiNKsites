@@ -273,9 +273,25 @@ export interface Site {
    */
   domain: string;
   /**
+   * A site must be published before hostname resolution can serve it publicly.
+   */
+  status: 'draft' | 'active' | 'published' | 'archived';
+  /**
    * Which frontend template module should render this site
    */
   templateId: string;
+  /**
+   * Canonical platform organization owning the linked Program and site
+   */
+  orgId: string;
+  /**
+   * Canonical Program Ledger identity for this site
+   */
+  programId: string;
+  /**
+   * Canonical lead identity claimed by the linked Program
+   */
+  leadId: string;
   /**
    * Default language for this site
    */
@@ -2137,6 +2153,18 @@ export interface Page {
     image?: (number | null) | Media;
   };
   /**
+   * Marks content published only for the token-gated private preview route.
+   */
+  previewEnvironment?: 'private-preview' | null;
+  /**
+   * Stable orchestration run marker for authenticated draft-promotion readback.
+   */
+  promotionRunMarker?: string | null;
+  /**
+   * Whether this record has activated a public customer site.
+   */
+  publicActivation?: boolean | null;
+  /**
    * Content workflow state
    */
   status: 'draft' | 'pending' | 'approved' | 'published';
@@ -2932,7 +2960,11 @@ export interface RolesSelect<T extends boolean = true> {
 export interface SitesSelect<T extends boolean = true> {
   name?: T;
   domain?: T;
+  status?: T;
   templateId?: T;
+  orgId?: T;
+  programId?: T;
+  leadId?: T;
   defaultLanguage?: T;
   languages?: T;
   youtubeApiKey?: T;
@@ -3802,6 +3834,9 @@ export interface PagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  previewEnvironment?: T;
+  promotionRunMarker?: T;
+  publicActivation?: T;
   status?: T;
   submittedBy?: T;
   reviewedBy?: T;

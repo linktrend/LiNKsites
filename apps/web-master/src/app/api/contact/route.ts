@@ -1,55 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { ENVIRONMENT, ENV } from "@/config";
-
-// Environment variables for webhook configuration
-const WEBHOOK_URL = ENV.CONTACT.WEBHOOK_URL;
-const WEBHOOK_SECRET = ENV.CONTACT.WEBHOOK_SECRET;
-const FALLBACK_EMAIL = ENV.CONTACT.FALLBACK_EMAIL;
+import { ENVIRONMENT } from "@/config";
+import { getPublicSiteIdOrNull, publicRouteNotFound } from "@/lib/public-route-guard";
+import { FileOutbox, LiNKautoworkGateway, parseGatewayEventPolicies, type GatewayEnvironment } from "@linksites/autowork-boundary";
 
 // Request size limit (1MB)
 const MAX_REQUEST_SIZE = 1024 * 1024;
 
-/**
- * Retry logic for webhook failures with exponential backoff
- */
-async function sendWithRetry(url: string, data: any, maxRetries = 3) {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(WEBHOOK_SECRET && { "X-Webhook-Secret": WEBHOOK_SECRET }),
-        },
-        body: JSON.stringify(data),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        return { success: true, attempt };
-      }
-
-      if (attempt === maxRetries) {
-        throw new Error(`Webhook failed after ${maxRetries} attempts: ${response.statusText}`);
-      }
-
-      // Exponential backoff: 1s, 2s, 4s
-      await new Promise((resolve) => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
-    } catch (error) {
-      if (attempt === maxRetries) {
-        throw error;
-      }
-      // Wait before retry
-      await new Promise((resolve) => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
-    }
-  }
-}
+const enqueueContact = async (payload: { intent: string; submission: Record<string, string | number | boolean>; metadata: Record<string, string> }) => {
+  const url = process.env.LINKAUTOWORK_GATEWAY_URL;
+  const secret = process.env.LINKAUTOWORK_SIGNING_SECRET;
+  const keyId = process.env.LINKAUTOWORK_SIGNING_KEY_ID;
+  const environment = process.env.LINKAUTOWORK_ENVIRONMENT as GatewayEnvironment;
+  const orgId = process.env.LINKSITES_ORG_ID;
+  const siteId = process.env.LINKSITES_SITE_ID;
+  const outboxPath = process.env.LINKAUTOWORK_OUTBOX_PATH;
+  const integritySecret = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET;
+  const grants = process.env.LINKAUTOWORK_EVENT_GRANTS;
+  if (!url || !secret || !keyId || !environment || !orgId || !siteId || !outboxPath || !integritySecret || !grants) throw new Error('governed LiNKautowork contact configuration is incomplete');
+  const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: parseGatewayEventPolicies(grants), transport: async (request) => {
+    const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) });
+    const acknowledgedAt = response.headers.get('x-linkautowork-acknowledged-at') ?? new Date().toISOString();
+    return { status: response.status, receiptId: response.headers.get('x-linkautowork-receipt') ?? 'missing', receiptSignature: response.headers.get('x-linkautowork-receipt-signature') ?? 'missing', acknowledgedAt };
+  }});
+  const outbox = new FileOutbox(outboxPath, { maxAttempts: 5, metrics: gateway.metrics, integritySecret, resigner: (request, attempt) => gateway.resignRequest(request, attempt), validator: (request) => gateway.verifyStored(request) });
+  await outbox.enqueue(gateway.buildRequest('contact.submitted', orgId, `web:${siteId}`, `contact:${siteId}:${payload.metadata.timestamp}:${payload.intent}`, { lead_id: `contact:${siteId}`, site_id: siteId, submission: payload.submission }));
+};
 
 /**
  * API Route Payload Schema
@@ -78,12 +54,14 @@ type ContactApiPayload = z.infer<typeof contactApiSchema>;
 
 /**
  * POST /api/contact
- * Handles contact form submissions and forwards to N8N webhook or other destinations
+ * Handles contact form submissions and appends them to the shared governed outbox.
  * 
  * @param request - Next.js request object
  * @returns JSON response with success status and message
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  if (!(await getPublicSiteIdOrNull())) return publicRouteNotFound();
+
   try {
     // Check request size (prevent DoS attacks)
     const contentLength = request.headers.get("content-length");
@@ -133,7 +111,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       {} as Record<string, string | number | boolean>
     );
 
-    // Prepare payload for webhook (N8N or other automation)
+    // Prepare the vendor-neutral governed event payload.
     const payload = {
       intent: validated.intentTag,
       submission: sanitizedFormData,
@@ -146,29 +124,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     };
 
-    // Send to webhook with retry logic
-    if (WEBHOOK_URL) {
-      try {
-        await sendWithRetry(WEBHOOK_URL, payload);
-        console.log(`[Contact Form] Successfully sent to webhook: ${validated.intentTag}`);
-      } catch (webhookError) {
-        console.error("[Contact Form] Webhook failed:", webhookError);
-        // Log the submission for manual processing
-        console.log("[Contact Form] Failed submission data:", JSON.stringify(payload, null, 2));
-        
-        // Still return success to user (data is logged for recovery)
-        return NextResponse.json({
-          success: true,
-          message: "Contact request received. We'll respond as soon as possible.",
-        });
-      }
-    } else {
-      // Development mode: log to console
-      console.log("[Contact Form Submission - DEV MODE]");
-      console.log("Intent:", validated.intentTag);
-      console.log("Data:", JSON.stringify(payload, null, 2));
-      console.log("---");
-    }
+    await enqueueContact(payload);
 
     return NextResponse.json({
       success: true,
@@ -228,6 +184,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  * Handles CORS preflight requests
  */
 export async function OPTIONS(): Promise<NextResponse> {
+  if (!(await getPublicSiteIdOrNull())) return publicRouteNotFound();
+
   return new NextResponse(null, {
     status: 204,
     headers: {

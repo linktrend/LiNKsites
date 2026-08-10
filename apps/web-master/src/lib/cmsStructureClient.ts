@@ -1,6 +1,6 @@
 import { dynamicOfferNavLabel } from "./offerLabel";
-import { runtimeConfig } from "@/config/runtime";
 import { normalizeLocale } from "@/lib/locale-context";
+import { getSiteIdFromRequest } from "@/lib/site-context";
 import { listOffers, CmsOffer } from "@/lib/repository/offers";
 import { getNavigation, CmsNavigation } from "@/lib/repository/navigation";
 import { CmsPage } from "@/lib/repository/pages";
@@ -13,7 +13,7 @@ export async function getStructuralData(): Promise<{
   offers: CmsOffer[];
 }> {
   const locale = normalizeLocale("en");
-  const site = { id: runtimeConfig.defaultSiteId, primaryLanguage: locale };
+  const site = { id: await getSiteIdFromRequest(), primaryLanguage: locale };
   const [offers, navigation] = await Promise.all([
     listOffers({ siteId: site.id, locale }),
     getNavigation({ siteId: site.id, locale, key: "primary" }),

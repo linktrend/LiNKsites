@@ -14,7 +14,7 @@ scope:
   - "Reproduce any suspected bug with a targeted test before fixing it"
   - "Fix confirmed bugs and add a regression test proving each fix"
 out_of_scope:
-  - "New features or scope beyond bug-fixing (Program/Module/Stage hierarchy, executor registry -- separate future Issues)"
+  - "New features or scope beyond bug-fixing (Program/Module/Phase hierarchy, executor registry -- separate future Issues)"
 inputs:
   - "packages/program-ledger/src/ledger.ts, store.ts, types.ts (PR #47/#48 state)"
 expected_outputs:

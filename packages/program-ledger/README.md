@@ -11,9 +11,15 @@ Run with `pnpm --filter @linksites/program-ledger test`.
 | File | What it proves |
 |---|---|
 | `tests/exit-gate.spec.ts` | Manual §62 exit gate against the in-memory store. |
-| `tests/hierarchy.spec.ts`, `tests/executor.spec.ts` | Program/Module/Stage and executor logic. |
-| `tests/postgres-store.spec.ts` | The `PostgresLedgerStore` adapter against a real embedded Postgres engine (`@electric-sql/pglite`) exercising `supabase/migrations/20260714_000001_program_ledger_core.sql`. |
+| `tests/hierarchy.spec.ts`, `tests/executor.spec.ts` | Program/Module/Phase and executor logic. |
+| `tests/postgres-store.spec.ts` | The `PostgresLedgerStore` adapter against a real embedded Postgres engine (`@electric-sql/pglite`) exercising the core schema and additive W1-02 migration. |
 | **`tests/tenant-isolation.spec.ts`** | **Tenant-isolation NEGATIVE test matrix (GAP-06, manual §18.84-85).** 12 cross-tenant attack vectors, each with a denied (negative) case and a paired same-org (positive) case, run against the real `lsites_sites` + `platform` RLS from `supabase/migrations/20260715_000001_lsites_sites_core.sql` and the shared platform foundation. |
+
+W1-02 adds durable Program/Module/Phase records, the first private-demo Issue
+graph, dependency-aware runnable queries, atomic lease claims, and evidence-
+backed Issue/Phase/Module/Program gate records. The in-memory snapshot API is
+used for deterministic restart/rebuild tests; Postgres persistence is exercised
+through the additive Supabase migration and pglite tests.
 
 ### Why the tenant-isolation matrix lives in this package
 

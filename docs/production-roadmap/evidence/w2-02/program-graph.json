@@ -1,0 +1,815 @@
+{
+  "program": {
+    "schemaVersion": {
+      "major": 1,
+      "minor": 0
+    },
+    "programId": "linksites",
+    "title": "LiNKsites — autonomous website factory and managed-website business",
+    "modules": [
+      {
+        "moduleId": "M01",
+        "title": "Product and Tier Governance",
+        "purpose": "Governs product outcomes, tier specifications, add-ons, and exclusions.",
+        "band": "product-capability",
+        "phases": []
+      },
+      {
+        "moduleId": "M02",
+        "title": "Design Intelligence Operations",
+        "purpose": "Governs design tokens and site design profile resolution.",
+        "band": "product-capability",
+        "phases": []
+      },
+      {
+        "moduleId": "M03",
+        "title": "Component and Frontend Platform",
+        "purpose": "Governs the Component Registry and real apps/web-master components.",
+        "band": "product-capability",
+        "phases": []
+      },
+      {
+        "moduleId": "M04",
+        "title": "Vertical Kit Operations",
+        "purpose": "Governs vertical kit lifecycle and production patterns.",
+        "band": "product-capability",
+        "phases": []
+      },
+      {
+        "moduleId": "M05",
+        "title": "Reusable Site Foundation Production",
+        "purpose": "Governs reusable foundation lifecycle and adaptation contracts.",
+        "band": "product-capability",
+        "phases": []
+      },
+      {
+        "moduleId": "M06",
+        "title": "Preview Inventory Management",
+        "purpose": "Governs preview inventory reservations and cost records.",
+        "band": "preview-production",
+        "phases": [
+          {
+            "phaseId": "inventory",
+            "title": "Preview inventory management",
+            "objective": "Match and reserve one compatible reusable foundation without conflicting reservations.",
+            "issues": [
+              {
+                "issueKey": "foundation-reservation",
+                "title": "Reserve foundation inventory",
+                "issueType": "foundation.reserve",
+                "objective": "Reserve a compatible foundation/template inventory item for the accepted preview request.",
+                "dependsOnIssueKeys": [
+                  "vertical-qualification"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "moduleId": "M07",
+        "title": "Preview Request Intake and Planning",
+        "purpose": "Validates preview requests and produces site specifications.",
+        "band": "preview-production",
+        "phases": [
+          {
+            "phaseId": "intake",
+            "title": "Lead intake and qualification",
+            "objective": "Accept and qualify one canonical lead package for the private demo.",
+            "issues": [
+              {
+                "issueKey": "lead-research",
+                "title": "Pull and validate lead research",
+                "issueType": "lead.research.validate",
+                "objective": "Validate the canonical lead/research package before any website work.",
+                "dependsOnIssueKeys": []
+              },
+              {
+                "issueKey": "program-claim",
+                "title": "Create the private-demo Program",
+                "issueType": "program.claim",
+                "objective": "Idempotently create or recover the private-demo Program graph.",
+                "dependsOnIssueKeys": [
+                  "lead-research"
+                ]
+              },
+              {
+                "issueKey": "vertical-qualification",
+                "title": "Qualify vertical compatibility",
+                "issueType": "lead.vertical.qualify",
+                "objective": "Confirm the lead can use an approved vertical foundation.",
+                "dependsOnIssueKeys": [
+                  "program-claim"
+                ]
+              },
+              {
+                "issueKey": "library-verification",
+                "title": "Verify exact library artifacts",
+                "issueType": "library.verify",
+                "objective": "Verify the exact approved LiNKlibraries artifacts and SHA receipts.",
+                "dependsOnIssueKeys": [
+                  "foundation-reservation"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "moduleId": "M08",
+        "title": "Prospect Site Adaptation",
+        "purpose": "Applies the prospect adaptation contract atop a reserved foundation.",
+        "band": "preview-production",
+        "phases": [
+          {
+            "phaseId": "prospect-adaptation",
+            "title": "Prospect site adaptation",
+            "objective": "Bind the approved foundation and exact library inputs to this prospect before content production.",
+            "issues": [
+              {
+                "issueKey": "site-specification",
+                "title": "Build site specification and assembly manifest",
+                "issueType": "site.plan",
+                "objective": "Produce the lead-specific site specification and assembly manifest from the reserved foundation and verified library.",
+                "dependsOnIssueKeys": [
+                  "library-verification"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "moduleId": "M09",
+        "title": "Content and Media Production",
+        "purpose": "Produces grounded copy, media plans, and provenance manifests.",
+        "band": "preview-production",
+        "phases": [
+          {
+            "phaseId": "content",
+            "title": "Lead-specific content and media",
+            "objective": "Produce grounded copy and provenance-bearing media inputs.",
+            "issues": [
+              {
+                "issueKey": "information-architecture",
+                "title": "Create information architecture and copy",
+                "issueType": "content.information_architecture",
+                "objective": "Create lead-specific information architecture and copy inputs.",
+                "dependsOnIssueKeys": [
+                  "site-specification"
+                ]
+              },
+              {
+                "issueKey": "media-provenance",
+                "title": "Source and process media",
+                "issueType": "content.media.provenance",
+                "objective": "Source/process media with a durable provenance manifest.",
+                "dependsOnIssueKeys": [
+                  "information-architecture"
+                ]
+              },
+              {
+                "issueKey": "working-content-assembly",
+                "title": "Assemble working-content version",
+                "issueType": "content.working.assemble",
+                "objective": "Assemble and validate one immutable working-content version.",
+                "dependsOnIssueKeys": [
+                  "media-provenance"
+                ]
+              },
+              {
+                "issueKey": "content-gates",
+                "title": "Run content and quality gates",
+                "issueType": "content.gates",
+                "objective": "Record evidence-backed content, schema, quality, security, privacy, and asset gate results.",
+                "dependsOnIssueKeys": [
+                  "working-content-assembly"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "moduleId": "M10",
+        "title": "Working-to-Payload Promotion",
+        "purpose": "Operates the sole trusted path from working records to Payload drafts.",
+        "band": "preview-production",
+        "phases": [
+          {
+            "phaseId": "promotion",
+            "title": "Working-to-Payload promotion",
+            "objective": "Promote only an accepted exact working-content version to Payload draft and verify parity.",
+            "issues": [
+              {
+                "issueKey": "payload-draft",
+                "title": "Promote exact version to Payload draft",
+                "issueType": "payload.draft.promote",
+                "objective": "Promote only the accepted working version to a Payload draft.",
+                "dependsOnIssueKeys": [
+                  "content-gates"
+                ]
+              },
+              {
+                "issueKey": "payload-parity",
+                "title": "Run CMS read-back parity gate",
+                "issueType": "payload.readback.gate",
+                "objective": "Read the draft back and record field-level parity evidence.",
+                "dependsOnIssueKeys": [
+                  "payload-draft"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "moduleId": "M11",
+        "title": "Preview Deployment and Validation",
+        "purpose": "Builds, tests, and validates private preview releases.",
+        "band": "preview-production",
+        "phases": [
+          {
+            "phaseId": "private-preview",
+            "title": "Private Payload preview",
+            "objective": "Promote the accepted version to a private, non-indexable preview and verify it.",
+            "issues": [
+              {
+                "issueKey": "private-publication",
+                "title": "Publish private preview",
+                "issueType": "preview.private.publish",
+                "objective": "Publish only to the authorized private preview environment.",
+                "dependsOnIssueKeys": [
+                  "payload-parity"
+                ]
+              },
+              {
+                "issueKey": "site-render-validation",
+                "title": "Render and validate the private site",
+                "issueType": "preview.render.validate",
+                "objective": "Render and validate the complete private preview.",
+                "dependsOnIssueKeys": [
+                  "private-publication"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "moduleId": "M12",
+        "title": "Preview Outcome, Upgrade, Recycling",
+        "purpose": "Handles Outcome Records and Conversion Lock wiring.",
+        "band": "preview-production",
+        "phases": [
+          {
+            "phaseId": "completion",
+            "title": "Evidence and completion",
+            "objective": "Capture final evidence and emit one replay-safe completion record.",
+            "issues": [
+              {
+                "issueKey": "final-evidence",
+                "title": "Capture functional, visual, SEO, accessibility, and privacy evidence",
+                "issueType": "preview.evidence.capture",
+                "objective": "Capture the required final evidence receipts for the private preview.",
+                "dependsOnIssueKeys": [
+                  "site-render-validation"
+                ]
+              },
+              {
+                "issueKey": "completion-record",
+                "title": "Emit CRM-shaped completion record",
+                "issueType": "completion.emit",
+                "objective": "Emit exactly one evidence-backed completion record for the accepted private demo.",
+                "dependsOnIssueKeys": [
+                  "final-evidence"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "moduleId": "M13",
+        "title": "Paid-Order Intake and Customer Finalization",
+        "purpose": "Validates paid activation packages and customer site instances.",
+        "band": "paid-fulfilment",
+        "phases": []
+      },
+      {
+        "moduleId": "M14",
+        "title": "Production Publication and Launch Certification",
+        "purpose": "Operates launch readiness and launch certification.",
+        "band": "paid-fulfilment",
+        "phases": []
+      },
+      {
+        "moduleId": "M15",
+        "title": "Domain, DNS, TLS, and Hosting Provisioning",
+        "purpose": "Provisions approved custom hostnames and hosting assignments.",
+        "band": "paid-fulfilment",
+        "phases": []
+      },
+      {
+        "moduleId": "M16",
+        "title": "Site Operations, Monitoring, and Recovery",
+        "purpose": "Operates monitoring, incidents, and recovery.",
+        "band": "managed-service",
+        "phases": []
+      },
+      {
+        "moduleId": "M17",
+        "title": "Customer Changes and Service Evolution",
+        "purpose": "Handles entitlement-bounded customer change requests.",
+        "band": "managed-service",
+        "phases": []
+      },
+      {
+        "moduleId": "M18",
+        "title": "Capacity, Regional Placement, and Infrastructure Scaling",
+        "purpose": "Operates capacity and placement decisions.",
+        "band": "managed-service",
+        "phases": []
+      },
+      {
+        "moduleId": "M19",
+        "title": "Suspension, Export, Termination, and Decommissioning",
+        "purpose": "Handles suspension, export, and decommissioning.",
+        "band": "managed-service",
+        "phases": []
+      },
+      {
+        "moduleId": "M20",
+        "title": "Quality, Cost, Performance, and Program Improvement",
+        "purpose": "Operates cross-cutting quality, cost, and performance improvement.",
+        "band": "control-improvement",
+        "phases": []
+      }
+    ]
+  },
+  "hierarchy": "Module > Phase > Issue > Run",
+  "issues": [
+    {
+      "issueId": "foundation-reservation",
+      "moduleId": "M06",
+      "phaseId": "inventory",
+      "title": "Reserve foundation inventory",
+      "objective": "Reserve a compatible foundation/template inventory item for the accepted preview request.",
+      "issueType": "foundation.reserve",
+      "executorKind": "foundation.reserve",
+      "executorVersion": "w1-04-factory-catalog.v1",
+      "capabilities": [
+        "factory-catalog",
+        "idempotent",
+        "receipt-producing"
+      ],
+      "dependsOn": [
+        "vertical-qualification"
+      ],
+      "externalBoundary": "factory-catalog"
+    },
+    {
+      "issueId": "lead-research",
+      "moduleId": "M07",
+      "phaseId": "intake",
+      "title": "Pull and validate lead research",
+      "objective": "Validate the canonical lead/research package before any website work.",
+      "issueType": "lead.research.validate",
+      "executorKind": "lead.research.validate",
+      "executorVersion": "w1-01-contract.v1",
+      "capabilities": [
+        "deterministic",
+        "evidence-producing"
+      ],
+      "dependsOn": []
+    },
+    {
+      "issueId": "program-claim",
+      "moduleId": "M07",
+      "phaseId": "intake",
+      "title": "Create the private-demo Program",
+      "objective": "Idempotently create or recover the private-demo Program graph.",
+      "issueType": "program.claim",
+      "executorKind": "program.claim",
+      "executorVersion": "w1-02-ledger.v1",
+      "capabilities": [
+        "durable-ledger",
+        "idempotent",
+        "evidence-producing"
+      ],
+      "dependsOn": [
+        "lead-research"
+      ]
+    },
+    {
+      "issueId": "vertical-qualification",
+      "moduleId": "M07",
+      "phaseId": "intake",
+      "title": "Qualify vertical compatibility",
+      "objective": "Confirm the lead can use an approved vertical foundation.",
+      "issueType": "lead.vertical.qualify",
+      "executorKind": "lead.vertical.qualify",
+      "executorVersion": "w1-02-ledger.v1",
+      "capabilities": [
+        "deterministic",
+        "evidence-producing"
+      ],
+      "dependsOn": [
+        "program-claim"
+      ]
+    },
+    {
+      "issueId": "library-verification",
+      "moduleId": "M07",
+      "phaseId": "intake",
+      "title": "Verify exact library artifacts",
+      "objective": "Verify the exact approved LiNKlibraries artifacts and SHA receipts.",
+      "issueType": "library.verify",
+      "executorKind": "library.verify",
+      "executorVersion": "w1-05-library-consumer.v1",
+      "capabilities": [
+        "library-consumer",
+        "sha-bound",
+        "receipt-producing"
+      ],
+      "dependsOn": [
+        "foundation-reservation"
+      ],
+      "externalBoundary": "library-consumer"
+    },
+    {
+      "issueId": "site-specification",
+      "moduleId": "M08",
+      "phaseId": "prospect-adaptation",
+      "title": "Build site specification and assembly manifest",
+      "objective": "Produce the lead-specific site specification and assembly manifest from the reserved foundation and verified library.",
+      "issueType": "site.plan",
+      "executorKind": "site.plan",
+      "executorVersion": "w1-04-factory-catalog.v1",
+      "capabilities": [
+        "factory-catalog",
+        "deterministic",
+        "evidence-producing"
+      ],
+      "dependsOn": [
+        "library-verification"
+      ]
+    },
+    {
+      "issueId": "information-architecture",
+      "moduleId": "M09",
+      "phaseId": "content",
+      "title": "Create information architecture and copy",
+      "objective": "Create lead-specific information architecture and copy inputs.",
+      "issueType": "content.information_architecture",
+      "executorKind": "content.information_architecture",
+      "executorVersion": "w2-01-deterministic-adapter.v1",
+      "capabilities": [
+        "w2-01-content-production",
+        "provenance",
+        "deterministic"
+      ],
+      "dependsOn": [
+        "site-specification"
+      ],
+      "externalBoundary": "working-content"
+    },
+    {
+      "issueId": "media-provenance",
+      "moduleId": "M09",
+      "phaseId": "content",
+      "title": "Source and process media",
+      "objective": "Source/process media with a durable provenance manifest.",
+      "issueType": "content.media.provenance",
+      "executorKind": "content.media.provenance",
+      "executorVersion": "w2-01-deterministic-adapter.v1",
+      "capabilities": [
+        "w2-01-content-production",
+        "media-provenance",
+        "deterministic"
+      ],
+      "dependsOn": [
+        "information-architecture"
+      ],
+      "externalBoundary": "working-content"
+    },
+    {
+      "issueId": "working-content-assembly",
+      "moduleId": "M09",
+      "phaseId": "content",
+      "title": "Assemble working-content version",
+      "objective": "Assemble and validate one immutable working-content version.",
+      "issueType": "content.working.assemble",
+      "executorKind": "content.working.assemble",
+      "executorVersion": "w2-01-deterministic-adapter.v1",
+      "capabilities": [
+        "w2-01-content-production",
+        "immutable-working-content",
+        "receipt-producing"
+      ],
+      "dependsOn": [
+        "media-provenance"
+      ],
+      "externalBoundary": "working-content",
+      "irreversible": true
+    },
+    {
+      "issueId": "content-gates",
+      "moduleId": "M09",
+      "phaseId": "content",
+      "title": "Run content and quality gates",
+      "objective": "Record evidence-backed content, schema, quality, security, privacy, and asset gate results.",
+      "issueType": "content.gates",
+      "executorKind": "content.gates",
+      "executorVersion": "w2-01-deterministic-adapter.v1",
+      "capabilities": [
+        "w2-01-content-production",
+        "evidence-producing",
+        "fail-closed"
+      ],
+      "dependsOn": [
+        "working-content-assembly"
+      ]
+    },
+    {
+      "issueId": "payload-draft",
+      "moduleId": "M10",
+      "phaseId": "promotion",
+      "title": "Promote exact version to Payload draft",
+      "objective": "Promote only the accepted working version to a Payload draft.",
+      "issueType": "payload.draft.promote",
+      "executorKind": "payload.draft.promote",
+      "executorVersion": "w2-03-promotion-service.v1",
+      "capabilities": [
+        "w2-03-payload-promotion",
+        "readback-parity",
+        "idempotent",
+        "receipt-producing"
+      ],
+      "dependsOn": [
+        "content-gates"
+      ],
+      "externalBoundary": "payload-cms",
+      "irreversible": true
+    },
+    {
+      "issueId": "payload-parity",
+      "moduleId": "M10",
+      "phaseId": "promotion",
+      "title": "Run CMS read-back parity gate",
+      "objective": "Read the draft back and record field-level parity evidence.",
+      "issueType": "payload.readback.gate",
+      "executorKind": "payload.readback.gate",
+      "executorVersion": "w2-03-promotion-service.v1",
+      "capabilities": [
+        "w2-03-payload-promotion",
+        "readback-parity",
+        "evidence-producing"
+      ],
+      "dependsOn": [
+        "payload-draft"
+      ],
+      "externalBoundary": "payload-cms"
+    },
+    {
+      "issueId": "private-publication",
+      "moduleId": "M11",
+      "phaseId": "private-preview",
+      "title": "Publish private preview",
+      "objective": "Publish only to the authorized private preview environment.",
+      "issueType": "preview.private.publish",
+      "executorKind": "preview.private.publish",
+      "executorVersion": "w2-04-private-preview.v1",
+      "capabilities": [
+        "private-preview",
+        "noindex",
+        "idempotent"
+      ],
+      "dependsOn": [
+        "payload-parity"
+      ],
+      "externalBoundary": "frontend",
+      "irreversible": true
+    },
+    {
+      "issueId": "site-render-validation",
+      "moduleId": "M11",
+      "phaseId": "private-preview",
+      "title": "Render and validate the private site",
+      "objective": "Render and validate the complete private preview.",
+      "issueType": "preview.render.validate",
+      "executorKind": "preview.render.validate",
+      "executorVersion": "w2-04-private-preview.v1",
+      "capabilities": [
+        "frontend-render",
+        "route-validation",
+        "fail-closed"
+      ],
+      "dependsOn": [
+        "private-publication"
+      ],
+      "externalBoundary": "frontend"
+    },
+    {
+      "issueId": "final-evidence",
+      "moduleId": "M12",
+      "phaseId": "completion",
+      "title": "Capture functional, visual, SEO, accessibility, and privacy evidence",
+      "objective": "Capture the required final evidence receipts for the private preview.",
+      "issueType": "preview.evidence.capture",
+      "executorKind": "preview.evidence.capture",
+      "executorVersion": "w2-04-private-preview.v1",
+      "capabilities": [
+        "evidence-producing",
+        "persisted-artifact",
+        "tamper-detecting"
+      ],
+      "dependsOn": [
+        "site-render-validation"
+      ]
+    },
+    {
+      "issueId": "completion-record",
+      "moduleId": "M12",
+      "phaseId": "completion",
+      "title": "Emit CRM-shaped completion record",
+      "objective": "Emit exactly one evidence-backed completion record for the accepted private demo.",
+      "issueType": "completion.emit",
+      "executorKind": "completion.emit",
+      "executorVersion": "w2-05-completion-sink.v1",
+      "capabilities": [
+        "shared-completion-sink",
+        "durable-delivery",
+        "idempotent"
+      ],
+      "dependsOn": [
+        "final-evidence"
+      ],
+      "externalBoundary": "completion-sink",
+      "irreversible": true
+    }
+  ],
+  "capabilities": {
+    "lead.research.validate": {
+      "version": "w1-01-contract.v1",
+      "capabilities": [
+        "deterministic",
+        "evidence-producing"
+      ]
+    },
+    "program.claim": {
+      "version": "w1-02-ledger.v1",
+      "capabilities": [
+        "durable-ledger",
+        "idempotent",
+        "evidence-producing"
+      ]
+    },
+    "lead.vertical.qualify": {
+      "version": "w1-02-ledger.v1",
+      "capabilities": [
+        "deterministic",
+        "evidence-producing"
+      ]
+    },
+    "foundation.reserve": {
+      "version": "w1-04-factory-catalog.v1",
+      "capabilities": [
+        "factory-catalog",
+        "idempotent",
+        "receipt-producing"
+      ],
+      "externalBoundary": "factory-catalog"
+    },
+    "library.verify": {
+      "version": "w1-05-library-consumer.v1",
+      "capabilities": [
+        "library-consumer",
+        "sha-bound",
+        "receipt-producing"
+      ],
+      "externalBoundary": "library-consumer"
+    },
+    "site.plan": {
+      "version": "w1-04-factory-catalog.v1",
+      "capabilities": [
+        "factory-catalog",
+        "deterministic",
+        "evidence-producing"
+      ]
+    },
+    "content.information_architecture": {
+      "version": "w2-01-deterministic-adapter.v1",
+      "capabilities": [
+        "w2-01-content-production",
+        "provenance",
+        "deterministic"
+      ],
+      "externalBoundary": "working-content"
+    },
+    "content.media.provenance": {
+      "version": "w2-01-deterministic-adapter.v1",
+      "capabilities": [
+        "w2-01-content-production",
+        "media-provenance",
+        "deterministic"
+      ],
+      "externalBoundary": "working-content"
+    },
+    "content.working.assemble": {
+      "version": "w2-01-deterministic-adapter.v1",
+      "capabilities": [
+        "w2-01-content-production",
+        "immutable-working-content",
+        "receipt-producing"
+      ],
+      "externalBoundary": "working-content",
+      "irreversible": true
+    },
+    "content.gates": {
+      "version": "w2-01-deterministic-adapter.v1",
+      "capabilities": [
+        "w2-01-content-production",
+        "evidence-producing",
+        "fail-closed"
+      ]
+    },
+    "payload.draft.promote": {
+      "version": "w2-03-promotion-service.v1",
+      "capabilities": [
+        "w2-03-payload-promotion",
+        "readback-parity",
+        "idempotent",
+        "receipt-producing"
+      ],
+      "externalBoundary": "payload-cms",
+      "irreversible": true
+    },
+    "payload.readback.gate": {
+      "version": "w2-03-promotion-service.v1",
+      "capabilities": [
+        "w2-03-payload-promotion",
+        "readback-parity",
+        "evidence-producing"
+      ],
+      "externalBoundary": "payload-cms"
+    },
+    "preview.private.publish": {
+      "version": "w2-04-private-preview.v1",
+      "capabilities": [
+        "private-preview",
+        "noindex",
+        "idempotent"
+      ],
+      "externalBoundary": "frontend",
+      "irreversible": true
+    },
+    "preview.render.validate": {
+      "version": "w2-04-private-preview.v1",
+      "capabilities": [
+        "frontend-render",
+        "route-validation",
+        "fail-closed"
+      ],
+      "externalBoundary": "frontend"
+    },
+    "preview.evidence.capture": {
+      "version": "w2-04-private-preview.v1",
+      "capabilities": [
+        "evidence-producing",
+        "persisted-artifact",
+        "tamper-detecting"
+      ]
+    },
+    "completion.emit": {
+      "version": "w2-05-completion-sink.v1",
+      "capabilities": [
+        "shared-completion-sink",
+        "durable-delivery",
+        "idempotent"
+      ],
+      "externalBoundary": "completion-sink",
+      "irreversible": true
+    }
+  },
+  "scheduledModules": [
+    "M06",
+    "M07",
+    "M08",
+    "M09",
+    "M10",
+    "M11",
+    "M12"
+  ],
+  "excluded": [
+    "M01-M05 canonical modules not scheduled by W2-02 (including M03 Component and Frontend Platform)",
+    "M13-M20 paid fulfilment and managed-service modules",
+    "sold-site-public-activation",
+    "commercial-payment",
+    "commercial-erp",
+    "raw-n8n",
+    "VPS",
+    "cloud",
+    "live-credentials"
+  ]
+}

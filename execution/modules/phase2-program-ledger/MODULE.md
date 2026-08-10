@@ -7,7 +7,7 @@ objective: "Build the Issue/Run/Gate/Event/Idempotency execution core the LiNKsi
 scope:
   - "packages/program-ledger: Issue/Run/Gate/Event/Idempotency contracts and core state machine"
   - "In-memory and Postgres-backed (pglite-tested) LedgerStore implementations"
-  - "Program/Module/Stage hierarchy objects (not yet started)"
+  - "Program/Module/Phase hierarchy objects (not yet started)"
   - "Executor registry and at least one real executor exercising the ledger end to end (not yet started)"
 out_of_scope:
   - "Live Supabase/Postgres connection and RLS verification (blocked on live infrastructure access, GAP-50)"

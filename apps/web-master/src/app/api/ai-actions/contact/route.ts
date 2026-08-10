@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { ENV } from "@/config";
 import { checkRateLimit } from "@/lib/ai/rateLimit";
+import { getPublicSiteIdOrNull, publicRouteNotFound } from "@/lib/public-route-guard";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  if (!(await getPublicSiteIdOrNull())) return publicRouteNotFound();
+
   const token = request.headers.get("x-ai-action-token");
   if (!ENV.AI.ACTIONS_SECRET) {
     return NextResponse.json(

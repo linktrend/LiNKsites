@@ -5,12 +5,16 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-family, "Inter", system-ui, sans-serif);
   background: var(--color-background);
   color: var(--color-foreground);
-  /* Prevent horizontal scroll on mobile */
-  overflow-x: hidden;
   /* Smooth scrolling for better mobile experience */
   -webkit-overflow-scrolling: touch;
 }

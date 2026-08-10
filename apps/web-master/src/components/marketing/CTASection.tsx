@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getSiteName } from "@/config";
-import { routes } from "@/lib/routes";
 
 interface CTASectionProps {
   lang: string;
@@ -21,37 +18,32 @@ type CTAData = {
   trustIndicators?: string[];
 };
 
-export function CTASection({ lang, data }: CTASectionProps) {
-  const t = useTranslations();
-  const siteName = getSiteName();
+export function CTASection({ data }: CTASectionProps) {
   const parsed = (data ?? {}) as CTAData;
-  
-  const trustIndicators =
-    parsed.trustIndicators && Array.isArray(parsed.trustIndicators) && parsed.trustIndicators.length > 0
-      ? parsed.trustIndicators
-      : [
-          t("cta.trustIndicators.noCreditCard"),
-          t("cta.trustIndicators.freeTemplates"),
-          t("cta.trustIndicators.cancelAnytime"),
-        ];
+  const trustIndicators = Array.isArray(parsed.trustIndicators) ? parsed.trustIndicators : [];
 
-  const title = parsed.title ?? t("cta.ready");
-  const description = parsed.body ?? t("cta.description", { siteName });
-  const ctaLabel = parsed.ctaLabel ?? t("cta.getStartedFree");
-  const ctaUrl = parsed.ctaUrl ?? routes.contact(lang);
+  if (!parsed.title || !parsed.body || !parsed.ctaLabel || !parsed.ctaUrl) {
+    return (
+      <Card className="h-full rounded-xl border border-dashed">
+        <CardContent className="py-8 text-sm text-muted-foreground">
+          Call-to-action content is unavailable for this published page.
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card className="h-full rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-white">
       <CardContent className="flex h-full flex-col gap-6 px-8 pt-10 pb-8">
         <div className="space-y-3">
-          <h2 className="text-3xl font-bold">{title}</h2>
+          <h2 className="text-3xl font-bold">{parsed.title}</h2>
           <p className="text-lg text-muted-foreground">
-            {description}
+            {parsed.body}
           </p>
         </div>
         <Button className="w-full bg-rose-500 text-white hover:bg-rose-600" size="lg" asChild>
-          <Link href={ctaUrl} data-ai-action="contact" data-ai-action-target={ctaUrl}>
-            {ctaLabel}
+          <Link href={parsed.ctaUrl} data-ai-action="contact" data-ai-action-target={parsed.ctaUrl}>
+            {parsed.ctaLabel}
           </Link>
         </Button>
         <div className="space-y-2">

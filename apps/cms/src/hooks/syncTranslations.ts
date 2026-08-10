@@ -161,10 +161,6 @@ const runSync = async ({
   collectionSlug: string
   locale: string
 }) => {
-  const metaSource = (req as WorkflowRequest & { meta?: Record<string, unknown> }).meta?.source
-  if (metaSource === 'n8n') {
-    return doc
-  }
   if (!doc?.id || shouldSkipTranslationSync(req)) {
     return doc
   }

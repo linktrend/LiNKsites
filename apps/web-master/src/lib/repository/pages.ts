@@ -1,5 +1,7 @@
 import { payloadFind } from "@/lib/payload-client";
 import { siteLocaleFilter } from "@/lib/repository/shared-filters";
+import { selectPageForAudience } from "@/lib/public-surface";
+import type { PageAudience } from "@/lib/public-surface";
 
 export type PageBlockCommon = {
   id?: string;
@@ -249,38 +251,78 @@ export interface CmsPage {
   title: string;
   pageType?: string;
   content: CmsPageBlock[];
+  status: "draft" | "published";
+  revision?: string | number;
   seo?: CmsPageSeo;
   reviewedAt?: string | null;
   reviewedBy?: { id?: string | number; name?: string; email?: string } | string | null;
+  previewEnvironment?: "public" | "private-preview";
 }
+
+export class PublishedContentError extends Error {
+  constructor(message: string) {
+    super(`Published CMS content contract failed: ${message}`);
+    this.name = "PublishedContentError";
+  }
+}
+
+type PayloadPage = Omit<CmsPage, "content" | "status"> & {
+  content?: CmsPageBlock[];
+  layout?: CmsPageBlock[];
+  status?: string;
+  previewEnvironment?: string | null;
+  promotionRunMarker?: string | null;
+};
+
+export const assertAudiencePage = (page: PayloadPage, audience: PageAudience): CmsPage => {
+  // Private Payload publication is a published CMS revision with an explicit
+  // private-preview audience marker; workflow status alone never makes it public.
+  const expectedStatus = "published";
+  if (page.status !== expectedStatus) {
+    throw new PublishedContentError(`page "${page.slug || "unknown"}" is not ${expectedStatus}`);
+  }
+  const content = Array.isArray(page.content) ? page.content : page.layout;
+  if (!page.id || !page.site || !page.locale || !page.slug || !page.title || !Array.isArray(content) || content.length === 0) {
+    throw new PublishedContentError(`page "${page.slug || "unknown"}" is missing required fields`);
+  }
+  return { ...page, content, status: expectedStatus } as CmsPage;
+};
 
 type GetPageArgs = {
   siteId: string;
   locale: string;
   slugSegments: string[];
+  audience?: PageAudience;
 };
 
 export const getPageBySlug = async ({
   siteId,
   locale,
   slugSegments,
+  audience = "public",
 }: GetPageArgs): Promise<CmsPage | null> => {
   const slug = slugSegments.length > 0 ? slugSegments.join("/") : "home";
 
+  const status = "published";
   const where = {
-    and: [...siteLocaleFilter(siteId, locale).and, { slug: { equals: slug } }],
+    and: [...siteLocaleFilter(siteId, locale, status).and, { slug: { equals: slug } }],
   };
 
   const result = await payloadFind<CmsPage>({
     collection: "pages",
     where,
-    limit: 1,
+    limit: 20,
     depth: 2,
     locale,
     site: siteId,
+    draft: false,
   });
 
-  return result.docs[0] ?? null;
+  const previewRunMarker = audience === "private-preview" ? process.env.PREVIEW_RUN_MARKER : undefined;
+  if (previewRunMarker && !/^w2-02-run-[a-f0-9]{16}$/.test(previewRunMarker)) return null;
+  const candidates = previewRunMarker ? result.docs.filter((candidate) => (candidate as PayloadPage).promotionRunMarker === previewRunMarker) : result.docs;
+  const page = selectPageForAudience(candidates as PayloadPage[], audience);
+  return page ? assertAudiencePage(page, audience) : null;
 };
 
 export const getHomepage = async ({

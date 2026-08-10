@@ -16,15 +16,15 @@ LiNKsites is a monorepo website factory + managed hosting Program:
 |---|---|---|
 | **Control / working** | Program Ledger, factory objects, working packages, provenance | `packages/program-ledger`, `packages/factory-catalog`, schemas `lsites_ledger` + `lsites_sites` on shared Supabase/Postgres (`linkplatform-*`) |
 | **CMS** | Draft + published website content authority | `apps/cms` — Payload CMS 3.x on Next.js, Postgres `public` schema |
-| **Serving** | Multi-tenant frontend by hostname | `apps/web-master` — shared Next.js platform; optional `apps/web-company` (smaller template; legacy/paused per audit DR-02) |
+| **Serving** | Multi-tenant frontend by hostname | `apps/web-master` — the sole active shared Next.js platform; the paused corporate-site source is preserved under `archive/paused-applications/web-company/` and is not deployable |
 | **Edge / origin** | Public edge + VPS reverse proxy | Cloudflare (edge) + Traefik labels in `deploy/docker-compose.deploy.yml` |
-| **Commercial** | Leads, payment, Odoo | **Not in this repo** — contracts defined; Sales/Stripe/Odoo integration deferred (GAP-33/34/35) |
+| **Commercial boundary** | Lead research, outcomes, authorization | **LiNKreach-owned** — LiNKsites continuously pulls and atomically claims eligible CRM work through a versioned adapter; payment and CRM systems remain LiNKreach-owned and are not LiNKsites dependencies |
 | **Shared substrate** | Org/RBAC/capability grants | LiNKplatform `platform.*` schemas; Ledger checks `platform.capability_grants` at dispatch |
 
 ### Process topology (intended)
 
 ```
-Sales Preview Request / Paid Activation
+LiNKreach Lead / Activation Authorization
         ↓
 Program Ledger (Issue → Run → Gate)
         ↓
@@ -40,7 +40,7 @@ Payload published
 web-master (hostname → site) behind Traefik + Cloudflare
 ```
 
-Today the Ledger ↔ catalog executor path is real and tested. Live Sales ingress, full publication automation, and autonomous hosting remediation are not yet end-to-end.
+Today the Ledger ↔ catalog executor path is real and tested. Live LiNKreach ingress, full publication automation, and autonomous hosting remediation are not yet end-to-end.
 
 ---
 
@@ -52,7 +52,7 @@ Terms match the Program Manual's vocabulary (ADR 0001: LiNKsites-internal engine
 |---|---|
 | **Program** | LiNKsites as a whole governed factory + managed service |
 | **Module** | One of twenty capability divisions (M01–M20); modeled in `packages/program-ledger` hierarchy |
-| **Stage** | Ordered segment inside a Module |
+| **Phase** | Ordered segment inside a Module |
 | **Issue** | Atomic schedulable work unit in the Program Ledger |
 | **Run** | One execution attempt of an Issue |
 | **Executor** | Adapter that performs a Run (`ExecutorAdapter`) |
@@ -63,9 +63,9 @@ Terms match the Program Manual's vocabulary (ADR 0001: LiNKsites-internal engine
 | **Prospect Adaptation** | Prospect-specific overlay on a reserved Foundation |
 | **Site Specification** | Resolved per-site contract composing Kit/Tier/Foundation/components |
 | **Site Assembly Manifest** | Deterministic page/section plan from a Site Specification |
-| **Proof level** | Progressive Sales Proof Levels 0–4 (investment before sale) — **separate from paid tier** |
+| **Proof level** | Progressive Proof Levels 0–4 (investment before commercial decision) — **separate from paid tier** |
 | **Promotion Service** | Only trusted path from working package → Payload **draft** |
-| **Preview Inventory** | Portfolio of foundations/adaptations/deployments as measurable sales inventory |
+| **Preview Inventory** | Portfolio of foundations/adaptations/deployments as measurable preview inventory |
 | **Conversion Lock** | Blocks recycle once a preview is locked for paid finalization |
 | **Site Assignment** | Where/how a site is served (hostname, VPS, region, release) — doctrine; control-plane records partial |
 
@@ -98,7 +98,7 @@ Authoritative Module list from Program Manual §05 / `packages/program-ledger` h
 ### Paid fulfilment
 | ID | Name | Code status |
 |---|---|---|
-| M13 | Paid-Order Intake and Customer Finalization | Conversion Lock only; no Stripe/Odoo spine |
+| M13 | Paid-Order Intake and Customer Finalization | Conversion Lock only; no LiNKreach-owned commercial adapter |
 | M14 | Production Publication and Launch Certification | **Not built** as automated Module |
 | M15 | Domain, DNS, TLS, Hosting Provisioning | Docker/Traefik scaffolding; not Program-controlled |
 
@@ -115,7 +115,7 @@ Authoritative Module list from Program Manual §05 / `packages/program-ledger` h
 
 ```
 Capability:     M01→M02→M03→M04→M05→M06
-Preview:        Sales request → M07→M06→M08↔M09→M10→M11 → Sales package → M12
+Preview:        LiNKreach request → M07→M06→M08↔M09→M10→M11 → LiNKreach package → M12
 Paid customer:  Activation → M13→M10→M14↔M15 → active site
 Managed:        Active → M16 ↔ M17 ↔ M18 → M19 when instructed
 ```
@@ -124,7 +124,7 @@ Managed:        Active → M16 ↔ M17 ↔ M18 → M19 when instructed
 
 ## 4. Site-generation lifecycle (lead → recycle / launch)
 
-### 4.1 Progressive Sales Proof Levels (≠ paid tier)
+### 4.1 Progressive Proof Levels (≠ paid tier)
 
 | Level | Use | Website proof |
 |---|---|---|
@@ -141,13 +141,13 @@ Code: `packages/factory-catalog/src/proofLevel.ts` — versioned `ProofSpecifica
 4. **Site Assembly Manifest** — deterministic page/section plan (`siteAssemblyManifest.ts` + `SiteAssemblyExecutor`).
 5. **Promotion** — working package → Payload draft only; checksum idempotency + readback (`promotionService.ts` + `PromotionExecutor`).
 6. **Preview Deployment record** — isolated analytics identity; `noindex` by default (`previewDeployment.ts`).
-7. **Outcome / Conversion Lock** — Sales outcome → technical disposition; lock blocks recycle (`outcomeRecord.ts`, `conversionLock.ts`).
+7. **Outcome / Conversion Lock** — LiNKreach outcome → technical disposition; lock blocks recycle (`outcomeRecord.ts`, `conversionLock.ts`).
 
-Pipeline chaining helpers exist (`pipelineChaining.ts`, `pipelineAutoChaining.ts`) but full autonomous Sales→preview→hosting orchestration is not claimed complete.
+Pipeline chaining helpers exist (`pipelineChaining.ts`, `pipelineAutoChaining.ts`) but full autonomous LiNKreach→preview→hosting orchestration is not claimed complete.
 
 ### 4.3 Paid path (doctrine vs code)
 
-Manual requires: verified Paid Website Activation Package → finalization → publication → domain/TLS → launch certificate. **Code today:** Conversion Lock accepts opaque Stripe/Odoo refs; no live payment/Odoo adapters in this repo.
+Manual requires: verified LiNKreach Activation Request → finalization → publication → domain/TLS → launch certificate. **Code today:** the technical path is not fully wired; historical Conversion Lock records may contain opaque Sales/Stripe/Odoo references, but those systems are not LiNKsites runtime dependencies.
 
 ### 4.4 Recycle
 
@@ -240,18 +240,18 @@ Program-controlled Site Assignment registry, automated DNS/TLS issuance, monitor
 ### LiNKautowork
 
 - Separate automation factory. LiNKsites may **consume** approved automation products or hand off form events; it does **not** use LiNKautowork as universal executor.
-- Cross-Program handoffs should use versioned envelopes (`platform.handoff_envelopes` doctrine); full Sales/Autowork contract implementations are deferred.
+- Cross-Program handoffs should use versioned envelopes (`platform.handoff_envelopes` doctrine); full LiNKreach/LiNKautowork contract implementations are deferred.
 
-### LiNKtrend Sales / Stripe / Odoo
+### Historical commercial boundary
 
-- Required contracts (manual §02/§21): Preview Request/Ready, Paid Activation, Fulfilment Status, Launch Completion, etc.
-- **Zero live adapters in this repo** for Stripe/Odoo as of 2026-07-19 (GAP-33/34/35).
+- Older documents call the commercial counterpart Sales and mention Stripe/Odoo. The current owner is LiNKreach.
+- LiNKsites consumes `CommercialOutcomeEnvelope` and `ActivationRequest` with LiNKreach authorization. Its runtime pulls and claims eligible CRM records through a versioned LiNKreach-owned adapter; it does not own or directly integrate with the CRM or payment systems. The live adapter remains deferred, while the manual first-test fixture uses the same `LeadResearchPackage` boundary.
 
 ---
 
 ## 9. Out of scope for this version / deliberately deferred
 
-1. **Live Sales/Stripe/Odoo spine** — blocked on cross-Program access (Phase 5).
+1. **Live LiNKreach commercial adapter** — blocked on cross-Program access (Phase 5); payment and CRM implementation remain LiNKreach-owned.
 2. **Full autonomous hosting ops** — monitoring, backup, restore, incident runbooks (Phase 7; GAP-23/24).
 3. **First real paying customer pilot** — Phase 9; not reached.
 4. **Customer CMS self-service** — intentionally `none` at launch for all tiers.
@@ -270,12 +270,12 @@ Program-controlled Site Assignment registry, automated DNS/TLS issuance, monitor
 |---|---|---|
 | `apps/cms` | Payload CMS | Central draft/published content app (~25 collections) |
 | `apps/web-master` | Next.js frontend | Primary multi-tenant shared platform (hostname → site) |
-| `apps/web-company` | Next.js frontend | Smaller starter template; investment paused (DR-02) |
+| `archive/paused-applications/web-company` | Archived source | Preserved paused corporate-site source; outside workspace, CI and deployment |
 | `packages/types` | `@linksites/types` | Shared types / `SchemaVersion` / data-contract exports |
 | `packages/program-ledger` | `@linksites/program-ledger` | Issue/Run/Gate/Event, hierarchy, Postgres store, capability gate |
 | `packages/factory-catalog` | `@linksites/factory-catalog` | Vertical Kit, Tier, Foundation, Design, Components, Spec, Adaptation, Assembly, Promotion, preview path objects, executors |
 | `supabase/migrations` | — | `lsites_ledger`, `lsites_sites`, capability columns; archive of retired `lsites_core` |
-| `deploy/` | — | Docker + Traefik compose for CMS + shared frontend |
+| `deploy/` | — | Fail-closed Docker/Traefik bundle, immutable manifest generator, migrations, recovery rehearsal and operations runbooks |
 | `audit/` | — | Phase 0 audit set + living roadmap notes |
 | `execution/` | — | Program/Module/Issue execution artifacts |
 
@@ -307,7 +307,7 @@ Program-controlled Site Assignment registry, automated DNS/TLS issuance, monitor
 | GAP-16 "no foundation matching" | **First slice closed** (`foundationMatching.ts`) |
 | Fake-always-green CI | **Fixed** — real lint/typecheck/test gate in `.github/workflows/ci.yml` |
 | "No Program Ledger" (early audit prose) | **Built** — packages + migrations; still maturing toward full Module automation |
-| web-company as equal primary template | **Paused/ambiguous** per DR-02; web-master is primary |
+| web-company as equal primary template | **Retired from active LiNKsites surfaces**; web-master is the only factory renderer and source remains archived for history |
 
 ---
 
