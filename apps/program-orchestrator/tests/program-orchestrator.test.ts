@@ -35,7 +35,15 @@ const localLibraryFixture = (): Promise<LibraryFixture> => libraryFixturePromise
   const directory = await mkdtemp(join(tmpdir(), 'linksites-library-fixture-'))
   const repositoryPath = join(directory, 'repository')
   const source = join(new URL('.', import.meta.url).pathname, '../../../packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1')
-  await cp(source, join(repositoryPath, 'entries/marketing-smb-v1'), { recursive: true })
+  const entryDirectory = join(repositoryPath, 'entries/marketing-smb-v1')
+  await cp(source, entryDirectory, { recursive: true })
+  const executablePath = join(entryDirectory, 'src/index.mjs')
+  await mkdir(join(entryDirectory, 'src'), { recursive: true })
+  await writeFile(executablePath, "export const entryId = 'marketing-smb-v1'\n")
+  const entryPath = join(entryDirectory, 'entry.json')
+  const entry = JSON.parse(await readFile(entryPath, 'utf8')) as { files: Array<{ path: string; sha256: string }> }
+  entry.files.push({ path: 'src/index.mjs', sha256: createHash('sha256').update(await readFile(executablePath, 'utf8')).digest('hex') })
+  await writeFile(entryPath, `${JSON.stringify(entry, null, 2)}\n`)
   await mkdir(join(repositoryPath, 'indexes'), { recursive: true })
   await writeFile(join(repositoryPath, 'indexes/catalog.json'), `${JSON.stringify({ schemaVersion: 1, entries: [{ entryId: 'marketing-smb-v1', status: 'approved' }] }, null, 2)}\n`)
   execFileSync('git', ['init', repositoryPath], { stdio: 'ignore' })
@@ -43,7 +51,7 @@ const localLibraryFixture = (): Promise<LibraryFixture> => libraryFixturePromise
   execFileSync('git', ['-C', repositoryPath, '-c', 'user.name=LiNKsites test', '-c', 'user.email=test@invalid.test', 'commit', '-m', 'fixture'], { stdio: 'ignore' })
   const commitSha = execFileSync('git', ['-C', repositoryPath, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
   const catalogChecksum = createHash('sha256').update(await readFile(join(repositoryPath, 'indexes/catalog.json'), 'utf8')).digest('hex')
-  const entryChecksum = createHash('sha256').update(await readFile(join(repositoryPath, 'entries/marketing-smb-v1/entry.json'), 'utf8')).digest('hex')
+  const entryChecksum = createHash('sha256').update(await readFile(entryPath, 'utf8')).digest('hex')
   return { repositoryPath, commitSha, catalogChecksum, entryChecksum }
 })()
 
