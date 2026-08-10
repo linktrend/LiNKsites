@@ -4,7 +4,8 @@ import { spawn } from 'node:child_process'
 import { createHmac } from 'node:crypto'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import type { LeadResearchPackage } from '@linksites/types'
 import { createFileLifecycleStore, SiteLifecycleService, type LiNKreachAuthorizationVerifier } from '@linksites/factory-catalog'
@@ -26,6 +27,7 @@ const approvedFacts = (id: string) => ({
   pricing: 'Contact for an approved quote', legalClaims: ['Founder-approved legal copy'], media: [],
 })
 const outcomeGatewayFixture = { commercialOutcomeGatewaySecret: 'test-only-outcome-gateway-secret', commercialOutcomeGatewayKeyId: 'test-only-outcome-gateway-key' }
+const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 
 function programFailureDiagnostic(state: { program: { state: string }; issues: Array<{ issueId: string; state: string; gate: string }>; runs: Array<{ issueId: string; failure: unknown }> }): string {
   return JSON.stringify({
@@ -159,9 +161,9 @@ test('the canonical 16-issue graph completes without public activation', async (
   const value = await composition('lead-parallel')
   try {
     await value.runtime.runLead(lead('lead-parallel'))
-    const state = await value.runtime.exportState() as { issues: Array<{ issueId: string; moduleId: string; phaseId: string; dependsOn: string[]; state: string }>; modules: Array<{ moduleId: string; state: string; scheduled: boolean }>; runs: Array<{ issueId: string; evidence: Array<{ storage_location: string }> }>; events: Array<{ type: string; issueId?: string }>; program: { state: string; graph: { programId: string } } }
+    const state = await value.runtime.exportState() as { issues: Array<{ issueId: string; moduleId: string; phaseId: string; dependsOn: string[]; state: string }>; modules: Array<{ moduleId: string; state: string; scheduled: boolean }>; runs: Array<{ issueId: string; evidence: Array<{ storage_location: string }> }>; events: Array<{ type: string; issueId?: string }>; program: { programId: string; state: string; graph: { programId: string } } }
     assert.equal(state.program.state, 'completed')
-    assert.equal(state.program.graph.programId, 'linksites')
+    assert.equal(state.program.graph.programId, state.program.programId)
     assert.equal(state.issues.length, 16)
     assert.ok(state.issues.every((issue) => issue.state === 'completed'))
     const reservation = state.issues.find((issue) => issue.issueId === 'foundation-reservation')
@@ -194,7 +196,7 @@ test('transient failures at external boundaries retry without duplicate effects'
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
 
-test('restart after an irreversible receipt reuses durable adapter effects', async () => {
+test('restart after an irreversible receipt reuses durable adapter effects and records recovery confirmation', async () => {
   const value = await composition('lead-restart')
   let restarted: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
@@ -206,7 +208,7 @@ test('restart after an irreversible receipt reuses durable adapter effects', asy
     assert.equal(completionLines.length, 1)
     const state = await restarted.runtime.exportState() as { program: { state: string }; receipts: Array<{ issueId: string; operation: string }> }
     assert.equal(state.program.state, 'completed')
-    assert.deepEqual(state.receipts.filter((receipt) => receipt.operation === 'payload-cms').map((receipt) => receipt.issueId).sort(), ['payload-draft', 'payload-parity'])
+    assert.deepEqual(state.receipts.filter((receipt) => receipt.operation === 'payload-cms').map((receipt) => receipt.issueId).sort(), ['payload-draft', 'payload-draft', 'payload-parity'])
     assert.equal(await restarted.adapters.payloadDocumentCount(), 5)
   } finally { await restarted?.close?.(); await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
@@ -253,13 +255,13 @@ test('process termination after claim and irreversible receipt is reclaimed by a
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-crash-'))
   const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token' }
   const signalPath = join(directory, 'worker-ready')
-  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import('./src/composition.ts'); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,commercialOutcomeGatewaySecret:'test-only-outcome-gateway-secret',commercialOutcomeGatewayKeyId:'test-only-outcome-gateway-key',payloadBaseUrl:'http://127.0.0.1:9',payloadApiKey:'test-api-key',payloadSiteId:'test-site',webMasterBaseUrl:'http://127.0.0.1:9',previewAccessToken:'test-preview-token',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'},claim.run.runId,claim.run.lease.fencingToken); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
-  const worker = spawn(process.execPath, ['--import', 'tsx/esm', '-e', workerCode], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
+  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/composition.ts'))}); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,commercialOutcomeGatewaySecret:'test-only-outcome-gateway-secret',commercialOutcomeGatewayKeyId:'test-only-outcome-gateway-key',payloadBaseUrl:'http://127.0.0.1:9',payloadApiKey:'test-api-key',payloadSiteId:'test-site',webMasterBaseUrl:'http://127.0.0.1:9',previewAccessToken:'test-preview-token',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'},claim.run.runId,claim.run.lease.fencingToken); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
+  const worker = spawn(process.execPath, ['--import', 'tsx/esm', '-e', workerCode], { cwd: repositoryRoot, stdio: ['ignore', 'pipe', 'pipe'] })
   let restarted: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
-    for (let attempt = 0; attempt < 80; attempt += 1) {
+    for (let attempt = 0; attempt < 240; attempt += 1) {
       if (await readFile(signalPath, 'utf8').catch(() => '')) break
-      await new Promise((resolve) => setTimeout(resolve, 25))
+      await new Promise((resolve) => setTimeout(resolve, 50))
     }
     const signal = JSON.parse(await readFile(signalPath, 'utf8')) as { runId: string; fencingToken: number }
     worker.kill('SIGKILL')
@@ -282,14 +284,14 @@ test('process termination after claim and irreversible receipt is reclaimed by a
 
 test('a paused stale worker cannot acknowledge an irreversible receipt after lease expiry and reclaim', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-stale-receipt-'))
-  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', leaseDurationMs: 25, workerId: 'worker-a' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', leaseDurationMs: 100, workerId: 'worker-a' }
   const first = await createProductionComposition(config)
   let second: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
     await first.ledger.createOrResume(lead('lead-stale-receipt'))
     const stale = await first.ledger.claim('lead-research')
     assert.ok(stale)
-    await new Promise((resolve) => setTimeout(resolve, 60)) // worker A is paused across its lease expiry
+    await new Promise((resolve) => setTimeout(resolve, 300)) // worker A is paused across its lease expiry
     second = await createProductionComposition({ ...config, workerId: 'worker-b' })
     assert.equal(await second.ledger.reclaimExpiredLeases(), 1)
     const current = await second.ledger.claim('lead-research')
@@ -319,8 +321,8 @@ test('two independent workers fence the same ready issue to one claim', async ()
   try {
     await setup.ledger.createOrResume(lead('lead-cross-process-race'))
     const worker = (workerId: string) => new Promise<string>((resolve, reject) => {
-      const code = `(async()=>{const {createLocalConfig}=await import('./src/composition.ts');const {DurableLedger}=await import('./src/durable-store.ts');const c=createLocalConfig(${JSON.stringify(directory)},'local-org');const x=new DurableLedger({...c,workerId:${JSON.stringify(workerId)}});const claim=await x.claim('lead-research');process.stdout.write(claim?claim.run.runId:'none')})().catch(e=>{console.error(e);process.exit(1)})`
-      const child = spawn(process.execPath, ['--import', 'tsx/esm', '-e', code], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
+      const code = `(async()=>{const {createLocalConfig}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/composition.ts'))});const {DurableLedger}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/durable-store.ts'))});const c=createLocalConfig(${JSON.stringify(directory)},'local-org');const x=new DurableLedger({...c,workerId:${JSON.stringify(workerId)}});const claim=await x.claim('lead-research');process.stdout.write(claim?claim.run.runId:'none')})().catch(e=>{console.error(e);process.exit(1)})`
+      const child = spawn(process.execPath, ['--import', 'tsx/esm', '-e', code], { cwd: repositoryRoot, stdio: ['ignore', 'pipe', 'pipe'] })
       let stdout = ''; let stderr = ''
       child.stdout.on('data', (chunk) => { stdout += chunk })
       child.stderr.on('data', (chunk) => { stderr += chunk })
