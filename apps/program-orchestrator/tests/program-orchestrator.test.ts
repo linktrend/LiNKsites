@@ -60,7 +60,10 @@ test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durab
     await assert.rejects(ingress.accept({ ...request, nonce: 'forged-nonce', envelope: { ...request.envelope, signature: { ...request.envelope.signature, signature: 'forged' } } }), /invalid_signature/i)
     const asserted = gateway.buildRequest('commercial.outcome.recorded', 'org_demo', 'corr-outcome', 'outcome:asserted', { lead_id: 'lead_asserted', site_id: 'site_asserted', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-asserted', outcome_event_id: 'commercial-event-asserted', outcome_nonce: 'nonce-asserted', recorded_at: '2026-08-04T00:10:00.000Z' } })
     const { signature: _signature, ...unsigned } = asserted.envelope
-    const callerAsserted = { ...unsigned, acknowledgement: { status: 'accepted' as const } }
+    // An accepted transport acknowledgement is structurally complete only
+    // when it carries its acknowledgement timestamp. The ingress must still
+    // reject it because only a signed *pending* event is admissible here.
+    const callerAsserted = { ...unsigned, acknowledgement: { status: 'accepted' as const, acknowledged_at: '2026-08-04T00:10:01.000Z' } }
     const assertedEnvelope = { ...callerAsserted, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: createHmac('sha256', secret).update(`${asserted.timestamp}.${asserted.nonce}.${JSON.stringify(callerAsserted)}`).digest('hex') } }
     await assert.rejects(ingress.accept({ ...asserted, envelope: assertedEnvelope }), /verified pending/i)
   } finally { await rm(directory, { recursive: true, force: true }) }
