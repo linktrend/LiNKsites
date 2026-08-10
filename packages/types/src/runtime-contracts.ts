@@ -155,9 +155,6 @@ const STRIPE_PAYMENT_IDENTIFIER_PATTERN =
 const KNOWN_TOKEN_PATTERN =
   /(?:^|[^a-z0-9])(?:sk-(?:proj|ant|live|test)-[a-z0-9_-]+|sk_(?:live|test)_[a-z0-9]+|rk_(?:live|test)_[a-z0-9]+|gh[pousr]_[a-z0-9]+|github_pat_[a-z0-9_]+|glpat-[a-z0-9_-]+|xox[baprs]-[a-z0-9-]+|npm_[a-z0-9]+|akia[0-9a-z]{16}|asia[0-9a-z]{16}|AIza[0-9a-z_-]{20,})(?:$|[^a-z0-9])/i
 
-const JWT_PATTERN =
-  /(?:^|[^a-z0-9])eyJ[a-z0-9_-]+\.[a-z0-9_-]+\.[a-z0-9_-]+(?:$|[^a-z0-9])/i
-
 const TOKEN_PREFIX_PATTERN = /(?:^|[^a-z0-9])(?:token|secret|password)[_-][a-z0-9]{8,}(?:$|[^a-z0-9])/i
 
 const PAYMENT_LABEL_PATTERN =
@@ -199,6 +196,36 @@ const hasCardNumber = (value: string): boolean => {
   return false
 }
 
+const isJwtCharacter = (character: string): boolean =>
+  (character >= 'a' && character <= 'z') ||
+  (character >= 'A' && character <= 'Z') ||
+  (character >= '0' && character <= '9') ||
+  character === '_' ||
+  character === '-'
+
+const isAsciiAlphaNumeric = (character: string | undefined): boolean =>
+  Boolean(character && ((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9')))
+
+// Bounded, linear JWT detector. The old nested optional-segment expression
+// could consume polynomial time on adversarial `eyJ-...` strings.
+const hasJwt = (value: string): boolean => {
+  const maxTokenLength = 8_192
+  for (let start = value.indexOf('eyJ'); start !== -1; start = value.indexOf('eyJ', start + 3)) {
+    if (isAsciiAlphaNumeric(value[start - 1])) continue
+    let cursor = start
+    let valid = true
+    for (let segment = 0; segment < 3; segment += 1) {
+      const segmentStart = cursor
+      const limit = Math.min(value.length, start + maxTokenLength)
+      while (cursor < limit && isJwtCharacter(value[cursor]!)) cursor += 1
+      if (cursor === segmentStart || (segment < 2 && value[cursor] !== '.')) { valid = false; break }
+      if (segment < 2) cursor += 1
+    }
+    if (valid && !isAsciiAlphaNumeric(value[cursor])) return true
+  }
+  return false
+}
+
 const isSensitiveString = (value: string): boolean =>
   SENSITIVE_ASSIGNMENT_PATTERN.test(value) ||
   AUTHORIZATION_HEADER_PATTERN.test(value) ||
@@ -206,7 +233,7 @@ const isSensitiveString = (value: string): boolean =>
   URL_CREDENTIAL_PATTERN.test(value) ||
   STRIPE_PAYMENT_IDENTIFIER_PATTERN.test(value) ||
   KNOWN_TOKEN_PATTERN.test(value) ||
-  JWT_PATTERN.test(value) ||
+  hasJwt(value) ||
   TOKEN_PREFIX_PATTERN.test(value) ||
   PAYMENT_LABEL_PATTERN.test(value) ||
   hasCardNumber(value)
