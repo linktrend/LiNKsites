@@ -262,8 +262,12 @@ test('process termination after claim and irreversible receipt is reclaimed by a
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-crash-'))
   const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token' }
   const signalPath = join(directory, 'worker-ready')
-  const workerCode = `(async()=>{const {writeFile}=await import('node:fs/promises'); const {createLocalConfig,createProductionComposition}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/composition.ts'))}); const config=createLocalConfig(${JSON.stringify(directory)},'local-org'); const value=await createProductionComposition({...config,commercialOutcomeGatewaySecret:'test-only-outcome-gateway-secret',commercialOutcomeGatewayKeyId:'test-only-outcome-gateway-key',payloadBaseUrl:'http://127.0.0.1:9',payloadApiKey:'test-api-key',payloadSiteId:'test-site',webMasterBaseUrl:'http://127.0.0.1:9',previewAccessToken:'test-preview-token',leaseDurationMs:50,workerId:'crashed-worker'}); const lead=${JSON.stringify(lead('lead-process-crash'))}; await value.ledger.createOrResume(lead); const claim=await value.ledger.claim('lead-research'); if(!claim) throw new Error('claim-not-acquired'); await value.ledger.saveReceipt('lead-research','crash-boundary',{receipt:'irreversible-before-termination'},claim.run.runId,claim.run.lease.fencingToken); await writeFile(${JSON.stringify(signalPath)},JSON.stringify({runId:claim.run.runId,fencingToken:claim.run.lease?.fencingToken})); await new Promise(()=>{})})().catch(error=>{console.error(error); process.exit(1)})`
-  const worker = spawn(process.execPath, ['--import', 'tsx/esm', '-e', workerCode], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
+  const workerPath = join(repositoryRoot, 'apps/program-orchestrator/tests/fixtures/crash-claim-worker.ts')
+  const worker = spawn(process.execPath, ['--import', 'tsx/esm', workerPath], {
+    cwd: process.cwd(),
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: { ...process.env, LINKSITES_TEST_CRASH_CLAIM_INPUT: JSON.stringify({ directory, signalPath, lead: lead('lead-process-crash') }) },
+  })
   let restarted: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
     for (let attempt = 0; attempt < 240; attempt += 1) {
@@ -330,8 +334,12 @@ test('two independent workers fence the same ready issue to one claim', async ()
   try {
     await setup.ledger.createOrResume(lead('lead-cross-process-race'))
     const worker = (workerId: string) => new Promise<string>((resolve, reject) => {
-      const code = `(async()=>{const {createLocalConfig}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/composition.ts'))});const {DurableLedger}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/durable-store.ts'))});const c=createLocalConfig(${JSON.stringify(directory)},'local-org');const x=new DurableLedger({...c,workerId:${JSON.stringify(workerId)}});await x.createOrResume(${JSON.stringify(lead('lead-cross-process-race'))});const claim=await x.claim('lead-research');process.stdout.write(claim?claim.run.runId:'none')})().catch(e=>{console.error(e);process.exit(1)})`
-      const child = spawn(process.execPath, ['--import', 'tsx/esm', '-e', code], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
+      const workerPath = join(repositoryRoot, 'apps/program-orchestrator/tests/fixtures/race-claim-worker.ts')
+      const child = spawn(process.execPath, ['--import', 'tsx/esm', workerPath], {
+        cwd: process.cwd(),
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, LINKSITES_TEST_RACE_CLAIM_INPUT: JSON.stringify({ directory, workerId, lead: lead('lead-cross-process-race') }) },
+      })
       let stdout = ''; let stderr = ''
       child.stdout.on('data', (chunk) => { stdout += chunk })
       child.stderr.on('data', (chunk) => { stderr += chunk })

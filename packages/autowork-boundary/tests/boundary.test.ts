@@ -120,9 +120,11 @@ test('a child-process crash after lease persistence is recovered by a fresh work
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-05-crash-'))
   const path = join(directory, 'queue.json')
   const request = { timestamp: 1_000, nonce: 'crash-nonce', envelope: { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'crash', idempotency_key: 'crash-restart', event_id: 'event:crash-restart', event_name: 'demo.completed' as const, payload, signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: 'signature' }, delivery_attempt: 1, acknowledgement: { status: 'pending' as const } } }
-  const modulePath = new URL('../src/index.ts', import.meta.url).pathname
-  const script = `import { FileOutbox } from ${JSON.stringify(modulePath)}; const outbox = new FileOutbox(${JSON.stringify(path)}, { integritySecret: 'queue-integrity-test', leaseMs: 30, lockStaleMs: 1, resigner: (request, attempt) => ({ ...request, envelope: { ...request.envelope, delivery_attempt: attempt } }), validator: () => undefined }); await outbox.enqueue(${JSON.stringify(request)}); await outbox.drain(async () => { process.exit(42) }, 0)`
-  const child = spawn(process.execPath, ['--experimental-strip-types', '--input-type=module', '-e', script], { stdio: 'ignore' })
+  const workerPath = new URL('./fixtures/outbox-crash-worker.ts', import.meta.url).pathname
+  const child = spawn(process.execPath, ['--experimental-strip-types', workerPath], {
+    stdio: 'ignore',
+    env: { ...process.env, LINKSITES_TEST_OUTBOX_CRASH_INPUT: JSON.stringify({ path, request }) },
+  })
   const exitCode = await new Promise<number | null>((resolve) => child.once('exit', (code) => resolve(code)))
   assert.equal(exitCode, 42)
   await new Promise((resolve) => setTimeout(resolve, 10))

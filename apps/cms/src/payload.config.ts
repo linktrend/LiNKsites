@@ -79,7 +79,8 @@ const { connectionString: databaseConnectionString, sslMode } = (() => {
     const isSupabaseHost =
       hostname.endsWith('.supabase.co') ||
       hostname.endsWith('.supabase.com') ||
-      hostname.includes('pooler.supabase.com')
+      hostname === 'pooler.supabase.com' ||
+      hostname.endsWith('.pooler.supabase.com')
     if (isSupabaseHost) {
       const options = url.searchParams.get('options') ?? ''
       const prefersLegacyCore = /search_path\s*=\s*lsites_core/i.test(options)

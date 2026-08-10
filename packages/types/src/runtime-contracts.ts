@@ -181,11 +181,22 @@ const hasValidLuhnChecksum = (digits: string): boolean => {
 }
 
 const hasCardNumber = (value: string): boolean => {
-  const candidates = value.match(/(?:^|[^0-9])((?:\d[ -]?){13,19})(?=$|[^0-9])/g) ?? []
-  return candidates.some((candidate) => {
-    const digits = candidate.replace(/[^0-9]/g, '')
+  let candidate = ''
+  const inspect = (): boolean => {
+    const digits = candidate.replace(/[ -]/g, '')
+    candidate = ''
     return digits.length >= 13 && digits.length <= 19 && hasValidLuhnChecksum(digits)
-  })
+  }
+  // This deliberately scans one character at a time. The former nested,
+  // optional-separator regex could take polynomial time on hostile input.
+  for (const character of `${value}\u0000`) {
+    if (/\d/.test(character) || character === ' ' || character === '-') {
+      candidate += character
+      continue
+    }
+    if (candidate && inspect()) return true
+  }
+  return false
 }
 
 const isSensitiveString = (value: string): boolean =>
