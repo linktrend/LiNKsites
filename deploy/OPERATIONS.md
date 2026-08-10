@@ -25,6 +25,17 @@ activation is a separate LiNKreach-authorized Phase 2 operation.
    script executes from `web-master` over Compose service DNS and localhost;
    it reads the protected preview token inside the container and never accepts
    or logs a token-bearing URL.
+
+The orchestrator must run with `W2_02_MODE=production`, a UUID
+`W2_02_ORG_ID`, the exact packaged
+`W2_02_POSTGRES_ADAPTER_MODULE=@linksites/program-orchestrator/postgres-adapter`,
+and a real `DATABASE_URI` for its provisioned least-privilege PostgreSQL
+credential. Compose passes these through the protected runtime file; no
+credential or preview token belongs in the image or this document. The
+orchestrator's `W2_02_PREVIEW_ACCESS_TOKEN` is distinct from the web-master
+variable name and is required by the production orchestrator path; it must match
+the protected token web-master receives so the internal preview proof can
+authenticate.
 7. Do not expose a public DNS name or publish Payload content in this procedure.
 
 ## Backup, retention, and restore

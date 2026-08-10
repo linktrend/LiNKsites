@@ -10,7 +10,7 @@ formats, and safe redacted fingerprints. It never prints values.
 | `LINKSITES_CONFIG_SCHEMA_VERSION` | LiNKsites operations | no | all | exact current schema | update manifest and restart |
 | `LINKSITES_RELEASE_SHA` | release process | no | all | full Git SHA | deployment identity changes |
 | `LINKSITES_ORG_ID` | LiNKsites program owner | no | all | identifier | redeploy only after tenancy review |
-| `DATABASE_URI` | database owner | yes | CMS, worker | non-loopback PostgreSQL URL | rolling restart; preserve connection compatibility |
+| `DATABASE_URI` | database owner | yes | CMS, worker, orchestrator | non-loopback PostgreSQL URL; orchestrator uses its least-privilege database credential | rolling restart; preserve connection compatibility |
 | `PAYLOAD_SECRET` | CMS owner | yes | CMS, worker | 32+ chars | coordinated session/key rotation; restart both |
 | `PAYLOAD_PUBLIC_SERVER_URL` | LiNKsites operations | no | CMS, worker | non-loopback HTTPS URL | coordinate CMS and frontend deployment |
 | `LINKAUTOWORK_GATEWAY_URL` | LiNKautowork | no | CMS, worker | non-loopback HTTPS URL | verify signed gateway before restart |
@@ -26,7 +26,8 @@ formats, and safe redacted fingerprints. It never prints values.
 | `PAYLOAD_API_KEY` | CMS owner | yes | web-master | 32+ chars | rotate server process after CMS grants replacement key |
 | `PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | web-master | 32+ chars | rotate the application-level private preview token and restart web-master |
 | `W2_02_MODE` | LiNKsites program owner | no | orchestrator | exact `production` | non-production execution is refused by the deployment contract |
-| `W2_02_ORG_ID` | LiNKsites program owner | no | orchestrator | identifier | stop intake and re-authorize tenancy |
+| `W2_02_ORG_ID` | LiNKsites program owner | no | orchestrator | UUID tenant key | stop intake and re-authorize tenancy |
+| `W2_02_POSTGRES_ADAPTER_MODULE` | release process | no | orchestrator | exact `@linksites/program-orchestrator/postgres-adapter` | rebuild/redeploy with the packaged adapter |
 | `W2_02_EXECUTION_REVISION` | release process | no | orchestrator | full Git SHA equal to release | rebuild/redeploy with exact release |
 | `W2_02_EXECUTABLE_CHECKPOINT` | release process | no | orchestrator | SHA-256 of executable inputs | rebuild/redeploy with exact release |
 | `W2_02_STATE_DIR` | LiNKsites operations | no | orchestrator | absolute durable-volume path | stop, back up and restore state before changing |

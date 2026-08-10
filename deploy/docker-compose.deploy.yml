@@ -132,6 +132,13 @@ services:
       dockerfile: deploy/docker/program-orchestrator.Dockerfile
       args:
         LINKSITES_RELEASE_SHA: ${LINKSITES_RELEASE_SHA:?set full release SHA}
+    # The protected env_file carries DATABASE_URI and all secret values. These
+    # non-secret bindings make the production composition explicit and prevent
+    # a local-mode or source-relative adapter fallback.
+    environment:
+      W2_02_MODE: ${W2_02_MODE:?set W2_02_MODE=production}
+      W2_02_ORG_ID: ${W2_02_ORG_ID:?set UUID W2_02_ORG_ID}
+      W2_02_POSTGRES_ADAPTER_MODULE: ${W2_02_POSTGRES_ADAPTER_MODULE:?set the packaged Postgres adapter module}
     depends_on:
       payload:
         condition: service_healthy

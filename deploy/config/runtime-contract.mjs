@@ -5,6 +5,7 @@ export const CONFIG_SCHEMA_VERSION = '1.0.0'
 const placeholder = /^(?:|<[^>]+>|change[-_ ]?me|replace[-_ ]?me|example|todo|mock|undefined|null)$/i
 const sha1 = /^[a-f0-9]{40}$/i
 const sha256 = /^[a-f0-9]{64}$/i
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const required = (name, format, secret = false) => ({ name, required: true, format, secret })
 
@@ -53,7 +54,9 @@ export const SERVICE_CONFIGURATION = {
   ],
   'program-orchestrator': [
     required('W2_02_MODE', 'literal:production'),
-    required('W2_02_ORG_ID', 'slug'),
+    required('DATABASE_URI', 'postgres-url', true),
+    required('W2_02_ORG_ID', 'uuid'),
+    required('W2_02_POSTGRES_ADAPTER_MODULE', 'literal:@linksites/program-orchestrator/postgres-adapter'),
     required('W2_02_EXECUTION_REVISION', 'git-sha-1'),
     required('W2_02_EXECUTABLE_CHECKPOINT', 'sha-256'),
     required('W2_02_STATE_DIR', 'absolute-path'),
@@ -81,6 +84,7 @@ function validateValue(value, format) {
   if (format.startsWith('literal:')) return trimmed === format.slice('literal:'.length) ? null : `must equal ${format.slice('literal:'.length)}`
   if (format === 'git-sha-1') return sha1.test(trimmed) ? null : 'must be a full 40-character Git SHA'
   if (format === 'sha-256') return sha256.test(trimmed) ? null : 'must be a full 64-character SHA-256'
+  if (format === 'uuid') return uuid.test(trimmed) ? null : 'must be a UUID'
   if (format === 'slug') return /^[A-Za-z0-9][A-Za-z0-9_-]{2,127}$/.test(trimmed) ? null : 'must be a 3-128 character identifier'
   if (format === 'payload-document-id') return /^[1-9][0-9]*$/.test(trimmed) ? null : 'must be a positive numeric Payload document ID'
   if (format === 'absolute-path') return trimmed.startsWith('/') && !trimmed.includes('\0') ? null : 'must be an absolute non-NUL path'
