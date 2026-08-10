@@ -181,7 +181,7 @@ test('the canonical 16-issue graph completes without public activation', async (
     assert.equal(JSON.stringify(state).includes('sold-site-public-activation'), false)
     const generated = [
       value.config.completionPath,
-      ...(await readdir(value.directory)).filter((file) => file.startsWith('program-ledger.json.')).map((file) => join(value.directory, file)),
+      ...(await readdir(value.directory)).filter((file) => /^program-ledger\.json\.[a-f0-9]{64}\.json$/u.test(file)).map((file) => join(value.directory, file)),
       ...(await readdir(`${value.directory}/evidence`)).map((file) => join(value.directory, 'evidence', file)),
     ]
     for (const file of generated) assert.equal((await readFile(file, 'utf8')).includes('test-preview-token'), false, `preview token leaked into generated ${file}`)
@@ -327,7 +327,7 @@ test('two independent workers fence the same ready issue to one claim', async ()
   try {
     await setup.ledger.createOrResume(lead('lead-cross-process-race'))
     const worker = (workerId: string) => new Promise<string>((resolve, reject) => {
-      const code = `(async()=>{const {createLocalConfig}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/composition.ts'))});const {DurableLedger}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/durable-store.ts'))});const c=createLocalConfig(${JSON.stringify(directory)},'local-org');const x=new DurableLedger({...c,workerId:${JSON.stringify(workerId)}});const claim=await x.claim('lead-research');process.stdout.write(claim?claim.run.runId:'none')})().catch(e=>{console.error(e);process.exit(1)})`
+      const code = `(async()=>{const {createLocalConfig}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/composition.ts'))});const {DurableLedger}=await import(${JSON.stringify(join(repositoryRoot, 'apps/program-orchestrator/src/durable-store.ts'))});const c=createLocalConfig(${JSON.stringify(directory)},'local-org');const x=new DurableLedger({...c,workerId:${JSON.stringify(workerId)}});await x.createOrResume(${JSON.stringify(lead('lead-cross-process-race'))});const claim=await x.claim('lead-research');process.stdout.write(claim?claim.run.runId:'none')})().catch(e=>{console.error(e);process.exit(1)})`
       const child = spawn(process.execPath, ['--import', 'tsx/esm', '-e', code], { cwd: process.cwd(), stdio: ['ignore', 'pipe', 'pipe'] })
       let stdout = ''; let stderr = ''
       child.stdout.on('data', (chunk) => { stdout += chunk })
