@@ -113,13 +113,17 @@ export class ProgramRuntime {
       // Retain that exact safe diagnostic in the terminal ledger without
       // persisting Payload's response body (which can echo submitted content).
       const payloadHttpStatus = message.match(/payload-rest:(?:POST|PATCH):[^:]+:http-(\d{3}):/u)?.[1]
+      const staleLease = message.includes('stale lease fencing token')
+      const privateRouteConfiguration = message === 'frontend:protected-web-master-url-is-invalid'
+      const privatePreviewPrerequisite = message === 'payload:private-preview-requires-verified-draft-receipt'
+      const evidenceWriteFailure = message.startsWith('evidence:') && message.endsWith(':readback-failed')
       if (crashAfterReceipt && issue.externalBoundary) await this.ledger.saveReceipt(issue.issueId, issue.externalBoundary, { recovered: true, safeCode: 'boundary:recovered-after-receipt' }, runId, fencingToken)
       const issueBoundary = Boolean(issue.externalBoundary)
       const permanentBoundary = message.includes(':permanent-failure')
       const priorIrreversibleEffect = (await this.ledger.snapshot()).issues.some((candidate) => candidate.irreversible && candidate.state === 'completed')
       const failure: { class: FailureClass; safeCode: string } = {
         class: message.startsWith('gate:') ? 'gate_rejected' : message.startsWith('qualification:') ? 'invalid_input' : permanentBoundary && issue.irreversible ? 'partial_mutation' : crashAfterReceipt ? 'transient_boundary' : issueBoundary ? 'transient_boundary' : 'unknown',
-        safeCode: message.startsWith('gate:') ? 'gate:rejected' : message.startsWith('qualification:') ? 'qualification:unsupported-vertical' : permanentBoundary ? `boundary:${issue.externalBoundary ?? issue.issueId}:permanent-failure` : crashAfterReceipt ? 'boundary:recovered-after-receipt' : payloadHttpStatus && issue.externalBoundary === 'payload-cms' ? `boundary:payload-cms:http-${payloadHttpStatus}` : issueBoundary ? `boundary:${issue.externalBoundary}:failed` : `issue:${issue.issueId}:failed`,
+        safeCode: message.startsWith('gate:') ? 'gate:rejected' : message.startsWith('qualification:') ? 'qualification:unsupported-vertical' : staleLease ? 'lease:stale-fencing-token' : privateRouteConfiguration ? 'frontend:protected-route-configuration-invalid' : privatePreviewPrerequisite ? 'payload:private-preview-prerequisite-missing' : evidenceWriteFailure ? 'evidence:artifact-readback-failed' : permanentBoundary ? `boundary:${issue.externalBoundary ?? issue.issueId}:permanent-failure` : crashAfterReceipt ? 'boundary:recovered-after-receipt' : payloadHttpStatus && issue.externalBoundary === 'payload-cms' ? `boundary:payload-cms:http-${payloadHttpStatus}` : issueBoundary ? `boundary:${issue.externalBoundary}:failed` : `issue:${issue.issueId}:failed`,
       }
       if (permanentBoundary && priorIrreversibleEffect && failure.class !== 'gate_rejected') failure.class = 'partial_mutation'
       const retryable = failure.class === 'transient_boundary'
