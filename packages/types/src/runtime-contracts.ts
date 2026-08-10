@@ -517,7 +517,7 @@ export const isLiNKautoworkEventEnvelope = (
   if (!isRecord(value)) return false
   // A signature is a cryptographic digest, not submitted business content.
   // Scan every unsigned field for secrets/payment data, then validate this
-  // fixed-format HMAC separately. Scanning the complete envelope can
+  // signature field separately. Scanning the complete envelope can
   // nondeterministically mistake a valid hexadecimal digest for a card number.
   const { signature, ...unsigned } = value
   return (
@@ -533,8 +533,7 @@ export const isLiNKautoworkEventEnvelope = (
     hasExactKeys(signature, ['algorithm', 'key_id', 'signature']) &&
     signature.algorithm === 'hmac-sha256' &&
     isCanonicalReference(signature.key_id) &&
-    typeof signature.signature === 'string' &&
-    /^[a-f0-9]{64}$/i.test(signature.signature) &&
+    isNonEmptyString(signature.signature) &&
     typeof value.delivery_attempt === 'number' &&
     Number.isInteger(value.delivery_attempt) &&
     value.delivery_attempt > 0 &&
