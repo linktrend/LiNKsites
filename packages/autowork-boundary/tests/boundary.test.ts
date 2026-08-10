@@ -5,6 +5,7 @@ import test from 'node:test'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { FileOutbox, LiNKautoworkGateway, Metrics, ReplayError, redactForLog, type GatewayRequest } from '../src/index.ts'
+import { isLiNKautoworkEventEnvelope } from '../../types/src/runtime-contracts.ts'
 
 const clock = { nowSeconds: () => 1_000, nowIso: () => '1970-01-01T00:16:40.000Z' }
 const setup = (transport: (request: GatewayRequest) => Promise<{ status: number; receiptId: string; receiptSignature: string; acknowledgedAt: string }>) => new LiNKautoworkGateway({ secret: 'test-secret', keyId: 'key-1', environment: 'development', transport, clock })
@@ -29,6 +30,24 @@ test('invalid signature, stale timestamp, nonce replay, and unauthorized event f
   await replay.send('demo.completed', 'org_demo', 'corr', 'replay', payload); replay.verify(captured)
   assert.throws(() => replay.verify(captured), (error: ReplayError) => error.code === 'nonce_replay')
   assert.throws(() => replay.verify({ ...captured, envelope: { ...captured.envelope, org_id: 'other-org' } }), (error: ReplayError) => error.code === 'unauthorized_event' || error.code === 'invalid_signature')
+})
+
+test('a fixed-format HMAC is not treated as submitted payment data', () => {
+  const envelope = {
+    schema_version: { major: 1, minor: 0 } as const,
+    org_id: 'org_demo',
+    correlation_id: 'corr',
+    idempotency_key: 'hmac-regression',
+    event_id: 'event:hmac-regression',
+    event_name: 'demo.completed' as const,
+    payload,
+    // Begins with a well-known Luhn-valid sequence. It is still a digest,
+    // never user-supplied card data.
+    signature: { algorithm: 'hmac-sha256' as const, key_id: 'key-1', signature: `4111111111111111${'a'.repeat(48)}` },
+    delivery_attempt: 1,
+    acknowledgement: { status: 'pending' as const },
+  }
+  assert.equal(isLiNKautoworkEventEnvelope(envelope), true)
 })
 
 test('outbox deduplicates, retries 5xx, dead-letters 4xx, and recovers an ambiguous send idempotently', async () => {

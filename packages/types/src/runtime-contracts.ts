@@ -502,24 +502,34 @@ export const isRecyclingRequest = (value: unknown): value is RecyclingRequest =>
 
 export const isLiNKautoworkEventEnvelope = (
   value: unknown,
-): value is LiNKautoworkEventEnvelope =>
-  isMetadata(value) &&
-  hasExactKeys(
-    value,
-    [...METADATA_KEYS, 'event_id', 'event_name', 'payload', 'signature', 'delivery_attempt', 'acknowledgement'],
-  ) &&
-  isCanonicalReference(value.event_id) &&
-  isEventName(value.event_name) &&
-  isEventPayload(value.payload) &&
-  isRecord(value.signature) &&
-  hasExactKeys(value.signature, ['algorithm', 'key_id', 'signature']) &&
-  value.signature.algorithm === 'hmac-sha256' &&
-  isCanonicalReference(value.signature.key_id) &&
-  isNonEmptyString(value.signature.signature) &&
-  typeof value.delivery_attempt === 'number' &&
-  Number.isInteger(value.delivery_attempt) &&
-  value.delivery_attempt > 0 &&
-  isEventAcknowledgement(value.acknowledgement)
+): value is LiNKautoworkEventEnvelope => {
+  if (!isRecord(value)) return false
+  // A signature is a cryptographic digest, not submitted business content.
+  // Scan every unsigned field for secrets/payment data, then validate this
+  // fixed-format HMAC separately. Scanning the complete envelope can
+  // nondeterministically mistake a valid hexadecimal digest for a card number.
+  const { signature, ...unsigned } = value
+  return (
+    isMetadata(unsigned) &&
+    hasExactKeys(
+      value,
+      [...METADATA_KEYS, 'event_id', 'event_name', 'payload', 'signature', 'delivery_attempt', 'acknowledgement'],
+    ) &&
+    isCanonicalReference(value.event_id) &&
+    isEventName(value.event_name) &&
+    isEventPayload(value.payload) &&
+    isRecord(signature) &&
+    hasExactKeys(signature, ['algorithm', 'key_id', 'signature']) &&
+    signature.algorithm === 'hmac-sha256' &&
+    isCanonicalReference(signature.key_id) &&
+    typeof signature.signature === 'string' &&
+    /^[a-f0-9]{64}$/i.test(signature.signature) &&
+    typeof value.delivery_attempt === 'number' &&
+    Number.isInteger(value.delivery_attempt) &&
+    value.delivery_attempt > 0 &&
+    isEventAcknowledgement(value.acknowledgement)
+  )
+}
 
 export const isEvidenceReceipt = (value: unknown): value is EvidenceReceipt =>
   isMetadata(value) &&
