@@ -2,7 +2,11 @@ import { mkdir } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { PGlite } from '@electric-sql/pglite'
 
-export type SqlDatabase = PGlite & {
+export type SqlQueryExecutor = {
+  query(sql: string, params?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>
+}
+
+export type SqlDatabase = PGlite & SqlQueryExecutor & {
   transaction?: <T>(callback: (tx: { query(sql: string, params?: unknown[]): Promise<{ rows: Record<string, unknown>[] }> }) => Promise<T>) => Promise<T>
 }
 

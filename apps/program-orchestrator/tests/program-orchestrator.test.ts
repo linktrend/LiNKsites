@@ -10,8 +10,8 @@ import type { LeadResearchPackage } from '@linksites/types'
 import { createFileLifecycleStore, SiteLifecycleService, type LiNKreachAuthorizationVerifier } from '@linksites/factory-catalog'
 import { W2_02_GRAPH } from '../src/graph.ts'
 import { configFromEnvironment, createLocalConfig, createProductionComposition, validateRuntimeConfig } from '../src/composition.ts'
-import { runFirstReadyFileLead } from '../src/intake.ts'
-import { CommercialOutcomeIngress } from '../src/commercial-outcome-ingress.ts'
+import { runFirstReadyLead } from '../src/intake.ts'
+import { CommercialOutcomeIngress, VerifiedGatewayOutcomeAuthorization } from '../src/commercial-outcome-ingress.ts'
 import { LiNKautoworkGateway } from '@linksites/autowork-boundary'
 
 const lead = (id = 'lead-local-001'): LeadResearchPackage => ({
@@ -33,7 +33,7 @@ test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durab
   const lifecycle = new SiteLifecycleService(createFileLifecycleStore(directory), authorization)
   const secret = 'outcome-gateway-test-secret'
   const gateway = new LiNKautoworkGateway({ secret, keyId: 'key-1', environment: 'development', transport: async () => { throw new Error('not used') } })
-  const ingress = new CommercialOutcomeIngress(lifecycle, gateway)
+  const ingress = new CommercialOutcomeIngress(lifecycle, gateway, new VerifiedGatewayOutcomeAuthorization(authorization))
   try {
     // This is the actual W2-05 builder. It can produce only a signed pending
     // transport event; the ingress performs the accepted transition after
@@ -118,7 +118,7 @@ test('manual NDJSON intake uses the shared port and claims once', async () => {
   try {
     const candidate = lead('lead-file-intake')
     await writeFile(value.config.intakePath, `${JSON.stringify(candidate)}\n`, 'utf8')
-    const accepted = await runFirstReadyFileLead(value)
+    const accepted = await runFirstReadyLead(value)
     assert.equal(accepted.idempotency_key, candidate.idempotency_key)
     assert.match(await readFile(`${value.config.statePath}.intake.json`, 'utf8'), /program_started/)
     assert.equal((await value.runtime.health()).programState, 'completed')
@@ -130,7 +130,7 @@ test('intake records retry disposition when durable completion delivery is pendi
   try {
     await value.adapters.injectFault({ operation: 'completion.emit', remaining: 1, kind: 'transient' })
     await writeFile(value.config.intakePath, `${JSON.stringify(lead('lead-intake-retry-disposition'))}\n`, 'utf8')
-    await assert.rejects(runFirstReadyFileLead(value), /boundary:completion-sink:transient-failure/)
+    await assert.rejects(runFirstReadyLead(value), /boundary:completion-sink:transient-failure/)
     const intakeState = JSON.parse(await readFile(`${value.config.statePath}.intake.json`, 'utf8')) as Record<string, { state?: string; nextAttemptAt?: string }>
     const item = Object.values(intakeState)[0]
     assert.equal(item.state, 'program_retry_scheduled')

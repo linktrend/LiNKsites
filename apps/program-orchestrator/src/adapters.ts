@@ -19,7 +19,7 @@ import {
 } from '@linksites/factory-catalog'
 import { PayloadRestDraftTarget } from '@linksites/factory-catalog'
 import type { AdapterFault, ExternalFence, LeadInput, LocalBoundaryAdapters, RuntimeConfig } from './contracts.ts'
-import { ensureTenantRows, type SqlDatabase } from './local-database.ts'
+import { ensureTenantRows, type SqlDatabase, type SqlQueryExecutor } from './local-database.ts'
 
 const stable = (value: unknown): string => value === null || typeof value !== 'object' ? JSON.stringify(value) : Array.isArray(value) ? `[${value.map(stable).join(',')}]` : `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${stable((value as Record<string, unknown>)[key])}`).join(',')}}`
 const checksum = (value: unknown): string => createHash('sha256').update(stable(value)).digest('hex')
@@ -45,13 +45,13 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   private readonly faults: AdapterFault[] = []
   private readonly artifacts = new Map<string, { path: string; checksum: string }>()
   private readonly config: RuntimeConfig
-  private readonly db: SqlDatabase
+  private readonly db: SqlQueryExecutor
   private readonly workingContentRepository: WorkingContentRepository
   private readonly payloadTarget: PayloadDraftTarget
   private leaseVerifier: ((fence: ExternalFence) => Promise<void>) | null = null
   private payloadDiagnostic = 'not-attempted'
 
-  constructor(config: RuntimeConfig, db: SqlDatabase) {
+  constructor(config: RuntimeConfig, db: SqlQueryExecutor) {
     this.config = config
     this.db = db
     this.workingContentRepository = new WorkingContentRepository(db)
@@ -168,7 +168,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
         )
         if (tenant.rows.length !== 1) throw new Error('working-content:production-tenant-site-absent-or-unauthorized')
       } else {
-        await ensureTenantRows(this.db, orgUuid, siteUuid)
+        await ensureTenantRows(this.db as SqlDatabase, orgUuid, siteUuid)
       }
       const existing = await this.workingContentRepository.readVersion(workingPackageId, 1)
       const version = existing ?? await this.workingContentRepository.createVersion({ workingPackageId, orgId: orgUuid, leadId: siteId.replace(/^site:/, ''), siteId: siteUuid, programRef: 'linksites', runId: null, expectedCurrentVersion: 0, authorId: 'w2-02-orchestrator', executorId: 'content.working.assemble@w2-01-deterministic-adapter.v1', contentPackage })
@@ -364,5 +364,5 @@ export class DurableCompletionSink implements CompletionSink {
   async write(envelope: DemoCompletionEnvelope): Promise<void> { await this.adapters.recordCompletionDelivery(envelope, () => this.sink.write(envelope)) }
 }
 
-export type LocalDependencyPorts = { factoryCatalog: Pick<LocalBoundaryAdapters, 'reserveFoundation'>; workingContent: Pick<LocalBoundaryAdapters, 'produceInformationArchitecture' | 'processMedia' | 'assembleWorkingContent' | 'runGates'>; libraryClient: Pick<LocalBoundaryAdapters, 'resolveLibrary'>; cmsAdapter: Pick<LocalBoundaryAdapters, 'promoteDraft' | 'readbackDraft'>; frontendDeploymentAdapter: Pick<LocalBoundaryAdapters, 'createPrivatePreview' | 'renderPrivatePreview' | 'captureEvidence'>; eventAdapter: CompletionSink }
+export type LocalDependencyPorts = { factoryCatalog: Pick<LocalBoundaryAdapters, 'reserveFoundation'>; workingContent: Pick<LocalBoundaryAdapters, 'produceInformationArchitecture' | 'processMedia' | 'assembleWorkingContent' | 'runGates'>; libraryClient: Pick<LocalBoundaryAdapters, 'resolveLibrary'>; cmsAdapter: Pick<LocalBoundaryAdapters, 'promoteDraft' | 'readbackDraft' | 'publishPrivatePayload'>; frontendDeploymentAdapter: Pick<LocalBoundaryAdapters, 'createPrivatePreview' | 'renderPrivatePreview' | 'captureEvidence'>; eventAdapter: CompletionSink }
 export function createLocalDependencyPorts(adapter: LocalBoundaryAdaptersImpl, completionSink: CompletionSink): LocalDependencyPorts { return { factoryCatalog: adapter, workingContent: adapter, libraryClient: adapter, cmsAdapter: adapter, frontendDeploymentAdapter: adapter, eventAdapter: completionSink } }

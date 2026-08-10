@@ -81,7 +81,8 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   const postgres = production ? productionDependencies ?? await loadPostgresDependencies(validated.postgresAdapterModule as string) : null
   const orgUuid = production ? validated.orgId : '00000000-0000-4000-8000-000000000001'
   const siteUuid = production ? validated.siteId! : '00000000-0000-4000-8000-000000000002'
-  const db = production ? postgres!.db : await openLocalDatabase(`${validated.statePath}.db`, orgUuid, siteUuid)
+  const localDb = production ? null : await openLocalDatabase(`${validated.statePath}.db`, orgUuid, siteUuid)
+  const db = production ? postgres!.db : localDb!
   // W2-02 is a composition root, not an HTTP emulator.  The caller must bind
   // it to the separately started local Payload schema and real web-master
   // process (the W2-04 proof harness supplies these URLs).
@@ -136,7 +137,7 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
     if (closed) return
     closed = true
     if (production) await postgres?.close?.()
-    else await closeLocalDatabase(`${validated.statePath}.db`, db)
+    else await closeLocalDatabase(`${validated.statePath}.db`, localDb!)
   } }
 }
 
