@@ -1,7 +1,5 @@
 import type { CollectionAfterChangeHook, PayloadRequest } from 'payload'
 import { cacheInvalidatePattern } from '@/payload/utils/cache'
-import { triggerN8N } from '@/payload/utils/n8n'
-import type { WorkflowRequest } from '@/types/PayloadRequestExtended'
 import { triggerSiteRebuild } from '@/utils/webhook'
 
 export const triggerRebuild: CollectionAfterChangeHook = async ({
@@ -17,11 +15,6 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
   collection?: { slug?: string }
   previousDoc: Record<string, unknown> | null
 }): Promise<Record<string, unknown>> => {
-  const workflowReq = req as WorkflowRequest
-  const metaSource = (workflowReq as WorkflowRequest & { meta?: Record<string, unknown> }).meta?.source
-  if (metaSource === 'n8n') {
-    return doc
-  }
   // Only trigger on update or create
   if (operation !== 'create' && operation !== 'update') {
     return doc
@@ -34,17 +27,16 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
   const currentStatusFallback = (doc as Record<string, unknown>)?._status
   const wasPublished = previousStatus === 'published' || previousStatusFallback === 'published'
   const isPublished = currentStatus === 'published' || currentStatusFallback === 'published'
-
+  // A private preview is never public activation, but its publication is still
+  // an operational LiNKsites event: cache invalidation, rebuild delivery, and
+  // governed automation must not be silently bypassed.
   if (!wasPublished && isPublished) {
-    const siteValue = (doc as Record<string, unknown>).site as
-      | string
-      | { id?: unknown }
-      | undefined
+    const siteValue = (doc as Record<string, unknown>).site as string | number | { id?: unknown } | undefined
     const siteId =
-      typeof siteValue === 'string'
-        ? siteValue
-        : typeof siteValue?.id === 'string'
-          ? siteValue.id
+      typeof siteValue === 'string' || typeof siteValue === 'number'
+        ? String(siteValue)
+        : typeof siteValue?.id === 'string' || typeof siteValue?.id === 'number'
+          ? String(siteValue.id)
           : undefined
 
     if (siteId) {
@@ -52,20 +44,9 @@ export const triggerRebuild: CollectionAfterChangeHook = async ({
         console.error('Cache invalidation failed during rebuild trigger', error),
       )
       // Trigger rebuild asynchronously (don't wait)
-      triggerSiteRebuild(siteId, workflowReq, 'content_published').catch((error) => {
+      triggerSiteRebuild(siteId, req, 'content_published').catch((error) => {
         console.error('Failed to trigger rebuild:', error)
       })
-      if (collection?.slug && doc?.id) {
-        void triggerN8N({
-          id: doc.id as string | number,
-          collection: collection.slug,
-          eventType: 'content_published',
-          site: siteId,
-          locale: workflowReq.locale ?? undefined,
-          meta: { source: 'payload' },
-          req: workflowReq,
-        }).catch((error) => console.error('n8n publish trigger failed', error))
-      }
     }
   }
 

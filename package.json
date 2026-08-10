@@ -7,7 +7,15 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
+    "test": "turbo run test --concurrency=1",
+    "deploy:config:validate": "node deploy/scripts/validate-runtime-config.mjs",
+    "deploy:manifest": "node deploy/scripts/generate-deployment-manifest.mjs",
+    "deploy:preflight": "bash deploy/scripts/preflight.sh",
+    "deploy:postdeploy-smoke": "bash deploy/scripts/postdeploy-smoke.sh",
+    "deploy:restore-rehearsal": "node deploy/scripts/rehearse-local-restore.mjs",
+    "deploy:compose-rehearsal": "node deploy/scripts/rehearse-compose-stack.mjs",
+    "ci:required": "bash scripts/ci-required.sh",
+    "test:w2-04": "node scripts/w2-04-contract-tests.mjs && node scripts/w2-04-behavioral-tests.mjs && node scripts/w2-04-route-adversarial-tests.mjs && bash scripts/w2-04-local-proof.sh",
     "dev": "turbo run dev"
   },
   "devDependencies": {
@@ -77,7 +85,12 @@
       "uuid@<11.1.1": ">=11.1.1 <12.0.0",
       "icu-minify@<=4.9.1": ">=4.9.2 <5.0.0",
       "drizzle-orm@<0.45.2": ">=0.45.2 <0.46.0",
-      "esbuild@<0.28.1": ">=0.28.1 <0.29.0"
+      "esbuild@<0.28.1": ">=0.28.1 <0.29.0",
+      "immutable@<4.3.9": ">=4.3.9 <5.0.0",
+      "fast-uri@<3.1.5": ">=3.1.5 <4.0.0",
+      "sharp@<0.35.0": ">=0.35.0 <1.0.0",
+      "next@>=16.0.0 <16.2.11": ">=16.2.11 <17.0.0",
+      "undici@>=7.0.0 <7.29.0": ">=7.29.0 <8.0.0"
     }
   }
 }

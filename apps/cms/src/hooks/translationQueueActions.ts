@@ -13,10 +13,6 @@ export const processTranslationQueueAction: CollectionAfterChangeHook = async ({
   req,
   operation,
 }): Promise<TranslationQueue> => {
-  const metaSource = (req as { meta?: Record<string, unknown> }).meta?.source
-  if (metaSource === 'n8n') {
-    return doc
-  }
   if (operation !== 'update') {
     return doc
   }

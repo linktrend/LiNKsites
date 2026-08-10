@@ -46,6 +46,7 @@ import type { ProspectAdaptation } from './prospectAdaptation.js'
 import { assertKitIsProductionReady, type VerticalKit } from './verticalKit.js'
 import type { ComponentRegistry } from './componentRegistry.js'
 import { TIER_SPECIFICATIONS } from './tierSpecification.js'
+import { assertLibraryConsumptionEvidence, canonicalJsonStringify, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.js'
 
 export type SiteClass = 'foundation' | 'preview' | 'customer'
 
@@ -83,6 +84,12 @@ export interface SiteAssemblyManifest {
   pages: SiteAssemblyPage[]
   lineage: SiteAssemblyLineage
   resolvedAt: string
+  /** Explicit selection marker; when present, trusted materialized consumption is mandatory. */
+  libraryEntryId?: string
+  /** Carried forward from the Site Specification as durable Library evidence. */
+  libraryReceipt?: LibraryConsumptionReceipt
+  /** Carried forward from the Site Specification as materialized provenance. */
+  libraryConsumption?: LibraryConsumption
 }
 
 export class SiteAssemblyError extends Error {
@@ -157,6 +164,14 @@ export function assembleSiteManifest(input: AssembleSiteManifestInput): SiteAsse
     )
   }
 
+  const hasLibrarySelection = Boolean(siteSpec.libraryEntryId || siteSpec.libraryReceipt || siteSpec.libraryConsumption)
+  if (hasLibrarySelection) {
+    if (!siteSpec.libraryConsumption) throw new SiteAssemblyError('A library-backed Assembly Manifest requires intrinsic trusted LiNKlibraries consumption evidence; a receipt alone is insufficient.')
+    assertLibraryConsumptionEvidence(siteSpec.libraryConsumption)
+    const libraryEntryId = siteSpec.libraryEntryId ?? siteSpec.libraryConsumption.receipt.entryId
+    if (libraryEntryId !== siteSpec.libraryConsumption.receipt.entryId || !siteSpec.libraryReceipt || canonicalJsonStringify(siteSpec.libraryReceipt) !== canonicalJsonStringify(siteSpec.libraryConsumption.receipt)) throw new SiteAssemblyError('A library-backed Assembly Manifest requires Site Specification provenance and receipt bound to the same consumption evidence.')
+  }
+
   const tier = TIER_SPECIFICATIONS[siteSpec.tierId]
 
   const pages: SiteAssemblyPage[] = pagePlan.map((pageEntry) => {
@@ -194,5 +209,6 @@ export function assembleSiteManifest(input: AssembleSiteManifestInput): SiteAsse
     pages,
     lineage: lineage ?? {},
     resolvedAt: new Date().toISOString(),
+    ...(siteSpec.libraryConsumption ? { libraryEntryId: siteSpec.libraryConsumption.receipt.entryId, libraryReceipt: siteSpec.libraryConsumption.receipt, libraryConsumption: siteSpec.libraryConsumption } : {}),
   }
 }

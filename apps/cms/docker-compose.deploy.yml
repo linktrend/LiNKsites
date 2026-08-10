@@ -1,5 +1,6 @@
-# Deprecated path — use repo-root deploy/docker-compose.deploy.yml (Wave 9.1).
-# Kept as a pointer for VPS runbooks that still `cd apps/cms`.
+# Compatibility pointer only — Phase 2 operators use repo-root
+# deploy/docker-compose.deploy.yml and deploy/OPERATIONS.md. This file has no
+# independent service definitions and must not become a second deployment path.
 name: cms
 
 include:

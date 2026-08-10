@@ -206,7 +206,7 @@ describe('SiteSpecificationExecutor, driven end-to-end through the Program Ledge
 
     await runIssueOnce(ledger, registry, issue.issueId)
 
-    const events = await store.listEvents(issue.issueId)
+    const events = await store.listEvents(issue.issueId, issue.orgId!)
     const eventTypes = events.map((e) => e.type)
     expect(eventTypes).toEqual(expect.arrayContaining(['issue.created', 'run.dispatched', 'run.claimed', 'run.succeeded']))
   })

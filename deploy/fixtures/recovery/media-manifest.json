@@ -1,0 +1,5 @@
+{
+  "assets": [
+    { "assetId": "recovery-fixture-asset", "license": "local-test-fixture", "sha256": "fixture-only-no-customer-media" }
+  ]
+}

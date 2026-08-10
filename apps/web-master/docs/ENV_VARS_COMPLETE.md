@@ -272,36 +272,38 @@ NEXT_PUBLIC_ENABLE_BLOG=true
 
 ---
 
-### Contact Form & Webhooks
+### Contact Form & Governed LiNKautowork
 
 | Variable | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
-| `CONTACT_WEBHOOK_URL` | Server | ⚠️ Production | `""` | Webhook URL for contact submissions |
-| `CONTACT_WEBHOOK_SECRET` | Server | ❌ | `""` | Webhook authentication secret |
-| `CONTACT_FALLBACK_EMAIL` | Server | ❌ | `""` | Fallback email if webhook fails |
+| `LINKAUTOWORK_GATEWAY_URL` | Server | ⚠️ Production | `""` | Governed signed event gateway |
+| `LINKAUTOWORK_SIGNING_SECRET` | Server | ⚠️ Production | `""` | Secret-manager signing secret |
+| `LINKAUTOWORK_EVENT_GRANTS` | Server | ⚠️ Production | `[]` | Explicit event/org/environment grants |
+| `LINKAUTOWORK_OUTBOX_PATH` | Server | ⚠️ Production | `""` | Durable recoverable outbox |
+| `LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET` | Server | ⚠️ Production | `""` | Separate secret for queue integrity framing |
 | `CONTACT_FORM_ENDPOINT` | Server | ❌ | `/api/contact` | Contact form API endpoint |
 
 **Access via**: `ENV.CONTACT.*`
 
 **⚠️ SECURITY WARNING**: These are server-only variables. Never prefix with `NEXT_PUBLIC_`.
 
-**Webhook Integration**:
-- Supports N8N, Zapier, Make, or custom endpoints
-- Webhook receives POST requests with form data
-- Optional secret header for authentication
-- Automatic retry with exponential backoff
+**Governed Integration**:
+- Contact submissions are signed `contact.submitted` events
+- A durable worker retries and requires a valid gateway receipt
 
-**Example (N8N)**:
+**Example**:
 ```bash
-CONTACT_WEBHOOK_URL=https://n8n.acme.com/webhook/contact
-CONTACT_WEBHOOK_SECRET=your-secret-key-here
-CONTACT_FALLBACK_EMAIL=support@acme.com
+LINKAUTOWORK_GATEWAY_URL=https://gateway.acme.example/events
+LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
+LINKAUTOWORK_EVENT_GRANTS='[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]'
+LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
 ```
 
 **Example (Development)**:
 ```bash
-# Leave empty to log submissions to console
-CONTACT_WEBHOOK_URL=
+# Leave the governed gateway configuration empty only when the form is disabled
+LINKAUTOWORK_GATEWAY_URL=
 ```
 
 ---
@@ -432,7 +434,7 @@ NEXT_PUBLIC_ENABLE_CASE_STUDIES=false
 - ✅ `NEXT_PUBLIC_SITE_NAME` - Client's brand name
 - ✅ `NEXT_PUBLIC_SITE_URL` - Client's domain
 - ✅ CMS configuration (if using Payload)
-- ⚠️ Contact webhook (recommended)
+- ⚠️ Governed contact delivery gateway and durable outbox
 
 **Recommended Variables**:
 - Analytics configuration
@@ -467,10 +469,9 @@ NEXT_PUBLIC_LINKEDIN_URL=https://linkedin.com/company/acme
 NEXT_PUBLIC_APP_LOGIN_URL=https://app.acme.com/login
 NEXT_PUBLIC_APP_SIGNUP_URL=https://app.acme.com/signup
 
-# Contact Form
-CONTACT_WEBHOOK_URL=https://n8n.acme.com/webhook/contact
-CONTACT_WEBHOOK_SECRET=prod-webhook-secret
-CONTACT_FALLBACK_EMAIL=support@acme.com
+# Contact Form / governed delivery
+LINKAUTOWORK_GATEWAY_URL=https://gateway.acme.example/events
+LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
 
 # Feature Flags (customize as needed)
 NEXT_PUBLIC_ENABLE_LIVE_CHAT=true
@@ -516,8 +517,8 @@ NEXT_PUBLIC_DEFAULT_THEME=default
 NEXT_PUBLIC_GA_MEASUREMENT_ID=
 NEXT_PUBLIC_GTM_ID=
 
-# Contact Form (logs to console)
-CONTACT_WEBHOOK_URL=
+# Contact Form (governed delivery disabled locally)
+LINKAUTOWORK_GATEWAY_URL=
 
 # Feature Flags
 NEXT_PUBLIC_ENABLE_COOKIE_CONSENT=true
@@ -567,9 +568,9 @@ PAYLOAD_API_KEY=staging-api-key
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-STAGING123
 NEXT_PUBLIC_GTM_ID=GTM-STAGING
 
-# Contact Form (staging webhook)
-CONTACT_WEBHOOK_URL=https://n8n-staging.acme.com/webhook/contact
-CONTACT_WEBHOOK_SECRET=staging-webhook-secret
+# Contact Form (staging governed gateway)
+LINKAUTOWORK_GATEWAY_URL=https://gateway-staging.acme.example/events
+LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
 
 # Feature Flags (all enabled)
 NEXT_PUBLIC_ENABLE_COOKIE_CONSENT=true
@@ -632,10 +633,9 @@ NEXT_PUBLIC_FACEBOOK_URL=https://facebook.com/acmecorp
 NEXT_PUBLIC_APP_LOGIN_URL=https://app.acme.com/login
 NEXT_PUBLIC_APP_SIGNUP_URL=https://app.acme.com/signup
 
-# Contact Form (REQUIRED)
-CONTACT_WEBHOOK_URL=https://n8n.acme.com/webhook/contact
-CONTACT_WEBHOOK_SECRET=prod-strong-webhook-secret
-CONTACT_FALLBACK_EMAIL=support@acme.com
+# Contact Form (governed boundary REQUIRED)
+LINKAUTOWORK_GATEWAY_URL=https://gateway.acme.example/events
+LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
 
 # Database (if needed)
 REDIS_URL=redis://user:password@redis.acme.com:6379
@@ -793,24 +793,21 @@ npm run dev
 curl https://cms.acme.com/api/health
 ```
 
-### Contact Form Webhook Fails
+### Governed Contact Delivery Fails
 
-**Error**: `Webhook failed after 3 attempts`
+**Error**: `governed LiNKautowork contact configuration is incomplete`
 
 **Checklist**:
-1. ✅ `CONTACT_WEBHOOK_URL` correct?
-2. ✅ Webhook endpoint accessible?
-3. ✅ `CONTACT_WEBHOOK_SECRET` matches webhook config?
-4. ✅ Webhook accepts POST requests?
-5. ✅ Webhook returns 200 OK?
+1. ✅ `LINKAUTOWORK_GATEWAY_URL` correct?
+2. ✅ Explicit event/org/environment grant is present?
+3. ✅ Signing secret and key id are loaded from the secret manager?
+4. ✅ Durable outbox path and separate integrity secret are writable/configured?
+5. ✅ Gateway returns a valid acknowledgement receipt?
 
 **Debug**:
 ```bash
-# Test webhook manually
-curl -X POST https://n8n.acme.com/webhook/contact \
-  -H "Content-Type: application/json" \
-  -H "X-Webhook-Secret: your-secret" \
-  -d '{"test": true}'
+# Exercise the local governed worker; unsigned manual posts are not supported
+pnpm --filter @linksites/cms autowork:drain
 ```
 
 ### TypeScript Errors After Adding ENV

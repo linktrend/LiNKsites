@@ -19,19 +19,15 @@ export function VideosPageContent({ lang: _lang, videos: cmsVideos }: Props) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const videosPerPage = 6;
 
-  const heroData = {
-    title: "Videos",
-    subtitle: "Watch tutorials, demos, and insights to help you succeed",
-  };
-
   const allVideos = useMemo(() => {
-    return (cmsVideos ?? []).map((video, index) => ({
+    return (cmsVideos ?? []).filter((video) => video.youtubeId).map((video, index) => ({
       id: video.slug || `video-${index}`,
-      videoId: (video as any)?.youtubeId || "dQw4w9WgXcQ",
+      videoId: video.youtubeId as string,
       title: video.title || "Video",
       thumbnail: getFallbackImage("default"),
       category: (video as any)?.category || "all",
-      publishedAt: formatDateForSSR((video as any)?.publishedDate || "2024-01-01T00:00:00Z"),
+      publishedAt: (video as any)?.publishedDate ? formatDateForSSR((video as any).publishedDate) : "",
+      description: video.description,
     }));
   }, [cmsVideos]);
 
@@ -61,8 +57,7 @@ export function VideosPageContent({ lang: _lang, videos: cmsVideos }: Props) {
             <p className="text-sm font-semibold uppercase tracking-wide text-primary/80">
               {t("pages.resources.videos.breadcrumb")}
             </p>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">{heroData.title}</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">{heroData.subtitle}</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Videos</h1>
           </div>
           <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-background/60 backdrop-blur">
             <Image
@@ -164,9 +159,7 @@ export function VideosPageContent({ lang: _lang, videos: cmsVideos }: Props) {
                 {formatDateForSSR(video.publishedAt)}
               </p>
               <h3 className="text-lg font-semibold">{video.title}</h3>
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {t("pages.resources.videos.description")}
-              </p>
+              {video.description ? <p className="text-sm text-muted-foreground line-clamp-2">{video.description}</p> : null}
             </div>
           </article>
         ))}

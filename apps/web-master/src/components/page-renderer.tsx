@@ -9,7 +9,6 @@ import { OfferShowcase } from "@/components/marketing/OfferShowcase";
 import { ArticlesGrid } from "@/components/marketing/ArticlesGrid";
 import { PricingHomepage } from "@/components/marketing/PricingHomepage";
 import { ScrollIndicator } from "@/components/marketing/ScrollIndicator";
-import { SignupHero } from "@/components/marketing/SignupHero";
 import { CmsPage, CmsPageBlock, HeroBlock, FeaturesBlock, PricingBlock, TestimonialsBlock, CtaBlock, FaqBlock, RichTextBlock, MediaBlock, ArticlesBlock, CaseStudiesBlock, OfferShowcaseBlock, NewsletterBlock, CalloutBlock, RelatedContentBlock, VideoEmbedBlock, SingleTestimonialBlock, TrustFeedBlock } from "@/lib/repository/pages";
 import { CmsCaseStudy } from "@/lib/repository/caseStudies";
 import { CmsArticle } from "@/lib/repository/articles";
@@ -17,7 +16,6 @@ import { CmsTestimonial } from "@/lib/repository/testimonials";
 import { CmsFaq } from "@/lib/repository/faq";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getImageWithFallback } from "@/lib/imageFallback";
 
 type PageRendererProps = {
   page: CmsPage;
@@ -25,6 +23,17 @@ type PageRendererProps = {
   footerNav?: unknown;
   siteKey: string;
   locale: string;
+};
+
+const getCmsImageUrl = (value: unknown): string | undefined => {
+  if (typeof value === "string" && value.trim()) return value;
+  if (!value || typeof value !== "object") return undefined;
+  const media = value as { url?: unknown; sizes?: Record<string, { url?: unknown }> };
+  if (typeof media.url === "string" && media.url.trim()) return media.url;
+  for (const size of Object.values(media.sizes ?? {})) {
+    if (typeof size?.url === "string" && size.url.trim()) return size.url;
+  }
+  return undefined;
 };
 
 export const PageRenderer = ({ page, siteKey, locale }: PageRendererProps) => {
@@ -57,19 +66,19 @@ export const PageRenderer = ({ page, siteKey, locale }: PageRendererProps) => {
     <div className="flex-1">
       {layoutBlocks.map((block, index) => (
         <section key={block.id ?? `${block.blockType}-${index}`} className="scroll-mt-20">
-          {renderBlock(block, locale, page.slug)}
+        {renderBlock(block, locale, page.slug, page.title)}
         </section>
       ))}
     </div>
   );
 };
 
-const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string): ReactNode => {
+const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string, pageTitle?: string): ReactNode => {
   const type = block.blockType;
 
   switch (type) {
     case "hero":
-      return <HeroSection block={block as HeroBlock} locale={locale} pageSlug={pageSlug} />;
+      return <HeroSection block={block as HeroBlock} locale={locale} pageSlug={pageSlug} pageTitle={pageTitle} />;
     case "features":
       return <FeaturesSection block={block as FeaturesBlock} locale={locale} />;
     case "pricing":
@@ -146,28 +155,28 @@ const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string): Re
   }
 };
 
-const HeroSection = ({ block, locale, pageSlug }: { block: HeroBlock; locale: string; pageSlug?: string }) => {
-  const heading = block.title ?? "Welcome";
+const HeroSection = ({ block, locale, pageSlug, pageTitle }: { block: HeroBlock; locale: string; pageSlug?: string; pageTitle?: string }) => {
+  const heading = block.title ?? pageTitle;
   const subheading = block.subtitle ?? block.body ?? "";
-  const ctaLabel = block.cta?.text ?? "Get started";
-  const ctaUrl = block.cta?.url ?? `/${locale}/contact`;
+  const ctaLabel = block.cta?.text;
+  const ctaUrl = block.cta?.url;
   const socialProof = Array.isArray(block.socialProof) ? block.socialProof : [];
-  const backgroundImage = block.backgroundImage ? getImageWithFallback(block.backgroundImage, "hero") : undefined;
+  const backgroundImage = getCmsImageUrl(block.backgroundImage);
   const isHome = pageSlug === "home";
 
   return (
     <DynamicBgSection backgroundImage={backgroundImage}>
-      <div className={isHome ? "container mx-auto px-4 sm:px-6 py-10 sm:py-12 text-white" : "container mx-auto px-4 sm:px-6 py-10 sm:py-12 text-white"}>
+      <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-12 text-white">
         {isHome ? (
-          <div className="grid gap-8 lg:grid-cols-3 items-center">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid gap-8 items-center">
+            <div className="space-y-6">
               <div className="space-y-3">
                 {block.badge ? (
                   <span className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
                     {block.badge}
                   </span>
                 ) : null}
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">{heading}</h1>
+                {heading ? <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">{heading}</h1> : null}
                 {subheading ? <p className="text-lg text-white/80 leading-relaxed">{subheading}</p> : null}
               </div>
 
@@ -191,17 +200,16 @@ const HeroSection = ({ block, locale, pageSlug }: { block: HeroBlock; locale: st
                 </div>
               ) : null}
 
-              <div className="flex flex-wrap gap-3">
-                <Button asChild variant="secondary">
-                  <a href={ctaUrl} data-ai-action="contact" data-ai-action-target={ctaUrl}>{ctaLabel}</a>
-                </Button>
-                <ScrollIndicator />
-              </div>
+              {ctaLabel && ctaUrl ? (
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild variant="secondary">
+                    <a href={ctaUrl} data-ai-action="contact" data-ai-action-target={ctaUrl}>{ctaLabel}</a>
+                  </Button>
+                  <ScrollIndicator />
+                </div>
+              ) : null}
             </div>
 
-            <div className="order-first lg:order-none">
-              <SignupHero lang={locale} />
-            </div>
           </div>
         ) : (
           <div className="max-w-3xl mx-auto space-y-4 text-center">
@@ -210,7 +218,7 @@ const HeroSection = ({ block, locale, pageSlug }: { block: HeroBlock; locale: st
                 {block.badge}
               </span>
             ) : null}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">{heading}</h1>
+            {heading ? <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">{heading}</h1> : null}
             {subheading ? <p className="text-lg text-white/80 leading-relaxed">{subheading}</p> : null}
           </div>
         )}
@@ -220,15 +228,13 @@ const HeroSection = ({ block, locale, pageSlug }: { block: HeroBlock; locale: st
 };
 
 const FeaturesSection = ({ block, locale }: { block: FeaturesBlock; locale: string }) => {
-  const title = block.title ?? "Features";
-  const subtitle = block.subtitle ?? "What you get";
   const items = Array.isArray(block.items) ? block.items : [];
 
   return (
     <div className="container px-4 sm:px-6 py-12 sm:py-14 space-y-6">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold">{title}</h2>
-        <p className="text-lg text-muted-foreground">{subtitle}</p>
+        {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
+        {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         {items.length === 0 ? (
@@ -241,7 +247,7 @@ const FeaturesSection = ({ block, locale }: { block: FeaturesBlock; locale: stri
           items.map((item, index) => (
             <Card key={item.id ?? index} className="h-full border-slate-200">
               <CardHeader>
-                <CardTitle className="text-xl">{item.title}</CardTitle>
+                {item.title ? <CardTitle className="text-xl">{item.title}</CardTitle> : null}
                 {item.linkText && item.linkUrl ? (
                   <CardDescription>
                     <a href={item.linkUrl} className="text-primary hover:underline">
@@ -251,7 +257,7 @@ const FeaturesSection = ({ block, locale }: { block: FeaturesBlock; locale: stri
                 ) : null}
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
+                {item.description ? <p className="text-sm text-muted-foreground">{item.description}</p> : null}
               </CardContent>
             </Card>
           ))
@@ -309,7 +315,7 @@ const TestimonialsSection = ({ block }: { block: TestimonialsBlock }) => {
   return (
     <div className="container px-4 sm:px-6 py-12 sm:py-14 space-y-6">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold">{block.title ?? "Testimonials"}</h2>
+        {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
       {testimonials.length === 0 ? (
@@ -380,7 +386,7 @@ const FaqSection = ({ block }: { block: FaqBlock }) => {
   return (
     <div className="container px-4 sm:px-6 py-12 sm:py-14 space-y-4">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold">{block.title ?? "FAQs"}</h2>
+        {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
       {questions.length === 0 ? (
@@ -394,7 +400,7 @@ const FaqSection = ({ block }: { block: FaqBlock }) => {
           {questions.map((item, idx) => (
             <details key={item.id ?? idx} className="group border-b border-border/60 last:border-none">
               <summary className="flex cursor-pointer items-center justify-between px-4 py-3 font-semibold">
-                {item.question ?? "Untitled question"}
+                {item.question ?? ""}
                 <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
               </summary>
               <div className="px-4 pb-4 text-sm text-muted-foreground whitespace-pre-wrap">
@@ -413,7 +419,7 @@ const LocationsSection = ({ block }: { block: any }) => {
   return (
     <div className="container px-4 sm:px-6 py-12 sm:py-14 space-y-6">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold">{block.title ?? "Locations"}</h2>
+        {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
       {items.length === 0 ? (
@@ -427,7 +433,7 @@ const LocationsSection = ({ block }: { block: any }) => {
           {items.map((loc: any, idx: number) => (
             <Card key={loc?.id ?? idx} className="h-full border-slate-200">
               <CardHeader>
-                <CardTitle className="text-xl">{loc?.name ?? "Location"}</CardTitle>
+                {loc?.name ? <CardTitle className="text-xl">{loc.name}</CardTitle> : null}
                 <CardDescription>
                   {[loc?.city, loc?.state].filter(Boolean).join(", ")}
                 </CardDescription>
@@ -457,7 +463,7 @@ const TeamMembersSection = ({ block }: { block: any }) => {
   return (
     <div className="container px-4 sm:px-6 py-12 sm:py-14 space-y-6">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold">{block.title ?? "Team"}</h2>
+        {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
       {items.length === 0 ? (
@@ -471,7 +477,7 @@ const TeamMembersSection = ({ block }: { block: any }) => {
           {items.map((member: any, idx: number) => (
             <Card key={member?.id ?? idx} className="h-full border-slate-200">
               <CardHeader>
-                <CardTitle className="text-xl">{member?.name ?? "Team Member"}</CardTitle>
+                {member?.name ? <CardTitle className="text-xl">{member.name}</CardTitle> : null}
                 {member?.role ? <CardDescription>{member.role}</CardDescription> : null}
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground space-y-2">
@@ -641,7 +647,7 @@ const TrustFeedSection = ({ block }: { block: TrustFeedBlock }) => {
     <div className="container px-4 sm:px-6 py-12 sm:py-14">
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-semibold">{block.title ?? "Trusted by customers"}</h2>
+          {block.title ? <h2 className="text-2xl font-semibold">{block.title}</h2> : null}
           <p className="text-sm text-muted-foreground">
             Showing {allowPositiveOnly ? `reviews rated ${minRating}+` : "all reviews"}.
           </p>
@@ -651,14 +657,14 @@ const TrustFeedSection = ({ block }: { block: TrustFeedBlock }) => {
             <Card key={review.url ?? index} className="border-slate-200">
               <CardHeader>
                 <CardTitle className="text-base">
-                  {review.platform ?? "Review"} • {review.rating ?? minRating}/5
+                  {review.platform ? `${review.platform} • ` : ""}{typeof review.rating === "number" ? `${review.rating}/5` : ""}
                 </CardTitle>
                 <CardDescription>
-                  {review.author ? `${review.author}` : "Verified reviewer"}
+                  {review.author ?? ""}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">&ldquo;{review.quote ?? ""}&rdquo;</p>
+                {review.quote ? <p className="text-sm text-muted-foreground">&ldquo;{review.quote}&rdquo;</p> : null}
                 {review.url ? (
                   <a className="mt-2 inline-flex text-xs text-primary hover:underline" href={review.url}>
                     View source
@@ -718,12 +724,12 @@ const RichTextSection = ({ block }: { block: RichTextBlock }) => {
 };
 
 const MediaSection = ({ block }: { block: MediaBlock }) => {
-  if (!block.media) {
+  const src = getCmsImageUrl(block.media);
+  if (!src) {
     return null;
   }
 
-  const src = getImageWithFallback(block.media, "default");
-  const altText = block.altText ?? block.caption ?? "Media content";
+  const altText = block.altText ?? block.caption ?? "";
 
   return (
     <div className="container px-4 sm:px-6 py-10">

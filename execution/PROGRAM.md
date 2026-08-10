@@ -8,7 +8,7 @@ scope:
   - "Phase 2: Program Ledger (Issue/Run/Gate/Event/Idempotency execution core)"
   - "Phase 3 onward: reusable asset factory, preview pipeline, commercial spine, hosting operations, observability, pilot (per audit/14_implementation_roadmap.md)"
 out_of_scope:
-  - "Cross-Program repositories this workspace cannot reach (LiNKtrend Sales, Odoo, live Stripe) until they are made available"
+  - "LiNKreach-owned commercial/CRM/payment repositories and live systems until they are made available through the contract boundary"
   - "Any live-infrastructure (Supabase/production) verification while working remotely without a live connection"
 modules:
   - module_id: "phase0-phase1-stabilization"
@@ -75,6 +75,17 @@ repository).
 ### Out Of Scope
 
 - Cross-Program repositories and live infrastructure not reachable from this workspace (see manual §8 audit scope and `audit/09_gap_and_risk_register.yaml`'s cross-Program gaps).
+
+## Canonical hierarchy and ownership
+
+LiNKsites uses `Program -> Module -> Phase -> Issue -> Run`; a Run is one
+Executor attempt to complete an Issue. LiNKsites continuously pulls and claims
+ready work. LiNKreach owns lead research, commercial outcomes, and technical
+activation authorization. LiNKsites exclusively executes website operations,
+including content and publication through Payload. Supabase holds working
+versions and workflow evidence; Payload published content is the live content
+authority. LiNKlibraries owns reusable implementations, while the LiNKsites
+Factory Catalog owns selection/lifecycle metadata and exact SHA receipts.
 
 ## Modules
 

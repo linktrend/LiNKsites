@@ -62,6 +62,20 @@ const intlMiddleware = createMiddleware({
 export default function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
+  const demoMatch = pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/([^/]+))?(?:\/|$)/);
+  if (demoMatch) {
+    const configuredKey = process.env.PREVIEW_ACCESS_TOKEN;
+    const headerAuthorized = Boolean(configuredKey && request.headers.get("x-linksites-preview-key") === configuredKey);
+    // Stable completion URLs contain no credential. Header authorization takes
+    // precedence for every route, so /en/demo/about is a protected stable
+    // route rather than a mistaken legacy-token attempt. The token path stays
+    // available for direct human preview links.
+    const tokenAuthorized = Boolean(configuredKey && demoMatch[1] && demoMatch[1] === configuredKey);
+    if (!headerAuthorized && !tokenAuthorized) {
+      return new NextResponse("Not Found", { status: 404, headers: { "X-Robots-Tag": "noindex, nofollow, noarchive", "Cache-Control": "private, no-store, max-age=0" } });
+    }
+  }
+
   if (pathname.startsWith("/_ai")) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.replace("/_ai", "/ai");
@@ -87,6 +101,10 @@ export default function middleware(request: NextRequest) {
   }
 
   const response = intlMiddleware(request);
+  if (pathname.match(/^\/(?:en|es|zh-tw|zh-cn)\/demo(?:\/|$)/)) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+  }
   return withTrafficCookie(request, withTrainingSignal(response));
 }
 

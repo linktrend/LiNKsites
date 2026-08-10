@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { LedgerStore } from '../src/store.js'
 import { ProgramLedger, LedgerError } from '../src/ledger.js'
+import { canonicalEvidence } from './evidence.js'
 
 /**
  * Shared dependency test suite. Runs against EVERY `LedgerStore`
@@ -25,7 +26,8 @@ export function runDependencyTests(storeName: string, makeStore: () => Promise<L
     const run = await ledger.dispatch(issueId)
     const claimed = await ledger.claim(run.runId, 'executor-a')
     await ledger.complete(run.runId, claimed.lease!.fencingToken, { result: 'ok' })
-    await ledger.decideGate(issueId, run.runId, 'accepted', {}, 'reviewer-1')
+    const issue = await ledger.getIssue(issueId)
+    await ledger.decideGate(issueId, run.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issueId, issue!.orgId!), 'reviewer-1')
   }
 
   // -----------------------------------------------------------------------
@@ -87,7 +89,7 @@ export function runDependencyTests(storeName: string, makeStore: () => Promise<L
       const run2 = await ledger.retryIssue(dep.issueId)
       const claimed2 = await ledger.claim(run2.runId, 'executor-b')
       await ledger.complete(run2.runId, claimed2.lease!.fencingToken, { draft: 'v2-fixed' })
-      await ledger.decideGate(dep.issueId, run2.runId, 'accepted', {}, 'reviewer-1')
+      await ledger.decideGate(dep.issueId, run2.runId, 'accepted', await canonicalEvidence(ledger, 'issue', dep.issueId, dep.orgId!), 'reviewer-1')
 
       // Now downstream IS dispatchable.
       const downstreamRun = await ledger.dispatch(downstream.issueId)
@@ -181,14 +183,12 @@ export function runDependencyTests(storeName: string, makeStore: () => Promise<L
 
       const nonExistentIssueId = '00000000-dead-beef-0000-000000000000'
 
-      const downstream = await ledger.createIssue({
+      const err = await ledger.createIssue({
         issueType: 'test.downstream',
         programRef: 'program-1',
         input: { step: 'second' },
         dependsOn: [nonExistentIssueId],
-      })
-
-      const err = await ledger.dispatch(downstream.issueId).catch((e) => e)
+      }).catch((e) => e)
       expect(err).toBeInstanceOf(LedgerError)
       expect((err as LedgerError).code).toBe('dependency_not_satisfied')
       expect((err as LedgerError).message).toMatch(/does not exist/)
@@ -336,7 +336,7 @@ export function runDependencyTests(storeName: string, makeStore: () => Promise<L
       const run = await ledger.dispatch(issue.issueId)
       const claimed = await ledger.claim(run.runId, 'executor-a')
       await ledger.complete(run.runId, claimed.lease!.fencingToken, { result: 'done' })
-      const gate = await ledger.decideGate(issue.issueId, run.runId, 'accepted', {}, 'reviewer-1')
+      const gate = await ledger.decideGate(issue.issueId, run.runId, 'accepted', await canonicalEvidence(ledger, 'issue', issue.issueId, issue.orgId!), 'reviewer-1')
       expect(gate.decision).toBe('accepted')
       const final = await ledger.getIssue(issue.issueId)
       expect(final!.state).toBe('completed')

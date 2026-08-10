@@ -12,8 +12,8 @@ scope:
   - "packages/factory-catalog/src/index.ts: export the new module"
 out_of_scope:
   - "Real numeric budgets/page-counts per level -- manual §10.48 explicitly leaves exact dollar budgets and per-level feature allowlists as open policy; all numeric values in this Issue's code/tests are structural PROVISIONAL placeholders, not commercial commitments"
-  - "Per-level integration allowlists, Gate profiles, or Sales-handoff content requirements the manual also describes for each level -- only the level/specification/authority/escalation mechanics are built here"
-  - "Real Sales-authority validation -- `authorityRef` is an opaque string reference only; no organizational authority-verification system exists to check against, this module validates budget arithmetic, not who actually granted the authority"
+  - "Per-level integration allowlists, Gate profiles, or LiNKreach-handoff content requirements the manual also describes for each level -- only the level/specification/authority/escalation mechanics are built here"
+  - "Real LiNKreach-authorization validation -- `authorityRef` is an opaque string reference only; no organizational authority-verification system exists to check against, this module validates budget arithmetic, not who actually granted the authority"
   - "Wiring this module into Site Specification's own `proof.level` field or into a real Preview Production Request object -- ProofBlock deliberately references a Site Specification only via an opaque `siteSpecId` string to stay decoupled, per this Issue's own interface contract"
 inputs:
   - "docs/archive/specs/linksites-program-manual/10_preview_inventory_and_build_first_sell_later_production_model.md"
@@ -40,7 +40,7 @@ read_first:
 read_forbidden:
   - "unrelated modules"
 blocking_questions:
-  - "Real per-level dollar budgets, page counts, and feature allowlists remain Carlos's/Sales's decision -- not blocking this Issue (which only builds the mechanism), but blocking any real commercial use of it."
+  - "Real per-level dollar budgets, page counts, and feature allowlists remain Carlos's/LiNKreach's decision -- not blocking this Issue (which only builds the mechanism), but blocking any real commercial use of it."
 optional_fields:
   priority: "high"
   risk_level: "low -- new, additive, isolated module; no existing file's exported behavior is changed"

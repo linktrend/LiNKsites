@@ -1,11 +1,18 @@
 import { runtimeConfig } from "@/config/runtime";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
-const isMockProvider = (process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "payload") !== "payload";
+const cmsProvider = process.env.NEXT_PUBLIC_CMS_PROVIDER ?? "payload";
+const isFixtureProvider = cmsProvider === "fixture";
+const isPayloadProvider = cmsProvider === "payload";
 
 type MockPayloadData = {
-  site?: { id?: string };
+  sites?: Array<{ id?: string; status?: string }>;
+  siteDomains?: Array<{
+    id?: string;
+    hostname?: string;
+    site?: string | { id?: string };
+    primary?: boolean;
+  }>;
   navigation?: Record<string, Array<{ label?: string; slug?: string }>>;
   offers?: unknown[];
   resources?: unknown[];
@@ -17,6 +24,7 @@ type MockPayloadData = {
   cases?: unknown[];
   contactForms?: unknown[];
   pricing?: unknown;
+  pages?: unknown[];
 };
 
 let mockPayloadCache: MockPayloadData | null = null;
@@ -24,12 +32,13 @@ let mockPayloadCache: MockPayloadData | null = null;
 const loadMockPayload = (): MockPayloadData | null => {
   if (mockPayloadCache) return mockPayloadCache;
   try {
-    const filePath = join(process.cwd(), "data", "cmsPayload.json");
+    const filePath = process.env.CMS_FIXTURE_PATH;
+    if (!filePath) throw new Error("CMS_FIXTURE_PATH is required in fixture mode.");
     const raw = readFileSync(filePath, "utf8");
     mockPayloadCache = JSON.parse(raw) as MockPayloadData;
     return mockPayloadCache;
-  } catch {
-    return null;
+  } catch (error) {
+    throw new Error(`CMS fixture is unavailable: ${error instanceof Error ? error.message : "unknown error"}`);
   }
 };
 
@@ -72,15 +81,14 @@ const mockPayloadFind = async <T>({
   const mock = loadMockPayload();
   const safeLimit = typeof limit === "number" ? limit : 100;
 
-  if (!mock) {
-    return { docs: [], page: 1, totalDocs: 0, totalPages: 1, limit: safeLimit };
-  }
+  if (!mock) throw new Error("CMS fixture is empty.");
 
-  const siteId = site || mock.site?.id || "company-site";
+  const siteId = site;
   const andFilters = Array.isArray((where as any)?.and) ? (where as any).and : [];
   const navKeyFilter = andFilters.find((f: any) => f?.navKey?.equals)?.navKey?.equals;
 
   if (collection === "navigation") {
+    if (!siteId) throw new Error("Fixture navigation queries require an explicit site.");
     const nav = mock.navigation ?? {};
     const items = Array.isArray(nav[navKeyFilter]) ? (nav[navKeyFilter] as any[]) : [];
     const docs = items.map((item, index) => ({
@@ -104,19 +112,35 @@ const mockPayloadFind = async <T>({
 
   if (collection === "site-domains") {
     const hostnameFilter = (where as any)?.hostname?.equals as string | undefined;
-    const doc = hostnameFilter
-      ? { id: "localhost-domain", hostname: hostnameFilter, site: siteId, primary: true }
-      : { id: "localhost-domain", hostname: "localhost", site: siteId, primary: true };
+    const docs = (mock.siteDomains ?? []).filter((doc) =>
+      hostnameFilter ? doc.hostname?.trim().toLowerCase() === hostnameFilter : true,
+    );
     return {
-      docs: [doc as any] as T[],
+      docs: docs as T[],
       page: 1,
-      totalDocs: 1,
+      totalDocs: docs.length,
+      totalPages: 1,
+      limit: safeLimit,
+    };
+  }
+
+  if (collection === "sites") {
+    const idFilter = (where as any)?.id?.equals as string | undefined;
+    const docs = (mock.sites ?? []).filter((doc) => (idFilter ? doc.id === idFilter : true));
+    return {
+      docs: docs as T[],
+      page: 1,
+      totalDocs: docs.length,
       totalPages: 1,
       limit: safeLimit,
     };
   }
 
   const collectionsMap: Record<string, unknown[]> = {
+    pages: mock.pages ?? [],
+    "privacy-pages": (mock.pages ?? []).filter((doc: any) => doc.slug === "legal/privacy-policy"),
+    "terms-pages": (mock.pages ?? []).filter((doc: any) => doc.slug === "legal/terms-of-use"),
+    "cookie-policy-pages": (mock.pages ?? []).filter((doc: any) => doc.slug === "legal/cookie-policy"),
     offers: mock.offers ?? [],
     resources: mock.resources ?? [],
     videos: mock.videos ?? [],
@@ -132,11 +156,15 @@ const mockPayloadFind = async <T>({
     const statusFilter = andFilters.find((f: any) => f?.status?.equals)?.status?.equals;
     const filtered = (items as any[]).filter((doc) => {
       if (slugFilter && !matchesEquals(doc, "slug", slugFilter)) return false;
-      if (statusFilter && doc.status && !matchesEquals(doc, "status", statusFilter)) return false;
+      if (statusFilter && !matchesEquals(doc, "status", statusFilter)) return false;
+      if (collection === "pages" && doc.status !== "published") return false;
+      if (doc.status !== undefined && doc.status !== "published") return false;
+      if (doc.site !== undefined && doc.site !== siteId) return false;
+      if (doc.locale !== undefined && locale && doc.locale !== locale) return false;
       return true;
     });
     return {
-      docs: withSiteLocale(filtered as any, siteId, locale) as T[],
+      docs: filtered as T[],
       page: 1,
       totalDocs: filtered.length,
       totalPages: 1,
@@ -163,7 +191,7 @@ const withAuthHeader = (headers: HeadersInit = {}): HeadersInit => {
   if (!runtimeConfig.payloadApiKey) return headers;
   return {
     ...headers,
-    Authorization: `Bearer ${runtimeConfig.payloadApiKey}`,
+    Authorization: `users API-Key ${runtimeConfig.payloadApiKey}`,
   };
 };
 
@@ -199,8 +227,11 @@ const appendWhereParams = (
 };
 
 export const payloadFetch = async <T>({ path, init }: FetchArgs): Promise<T> => {
-  if (isMockProvider) {
-    throw new Error(`Payload fetch blocked in mock mode for ${path}`);
+  if (!isPayloadProvider && !isFixtureProvider) {
+    throw new Error(`Unsupported CMS provider "${cmsProvider}".`);
+  }
+  if (isFixtureProvider) {
+    throw new Error(`Payload fetch blocked in fixture mode for ${path}`);
   }
   const response = await fetch(buildUrl(path), {
     cache: "no-store",
@@ -237,6 +268,7 @@ type FindArgs = {
    * The CMS access layer scopes public reads by this query param.
    */
   site?: string;
+  select?: string[];
 };
 
 export const payloadFind = async <T>({
@@ -248,6 +280,7 @@ export const payloadFind = async <T>({
   locale,
   draft,
   site,
+  select,
 }: FindArgs): Promise<{
   docs: T[];
   page: number;
@@ -255,7 +288,10 @@ export const payloadFind = async <T>({
   totalPages: number;
   limit: number;
 }> => {
-  if (isMockProvider) {
+  if (!isPayloadProvider && !isFixtureProvider) {
+    throw new Error(`Unsupported CMS provider "${cmsProvider}".`);
+  }
+  if (isFixtureProvider) {
     return mockPayloadFind<T>({ collection, where, limit, locale, site });
   }
   const url = new URL(`api/${collection}`, runtimeConfig.payloadBaseUrl);
@@ -266,6 +302,7 @@ export const payloadFind = async <T>({
   if (locale) url.searchParams.set("locale", locale);
   if (typeof draft === "boolean") url.searchParams.set("draft", String(draft));
   if (site) url.searchParams.set("site", site);
+  for (const field of select ?? []) url.searchParams.set(`select[${field}]`, "true");
   if (where) {
     appendWhereParams(url.searchParams, where);
   }
@@ -280,9 +317,9 @@ export const payloadReadGlobal = async <T>(
   locale?: string,
   site?: string,
 ): Promise<T> => {
-  if (isMockProvider) {
+  if (isFixtureProvider) {
     const mock = loadMockPayload();
-    if (!mock) return null as T;
+    if (!mock) throw new Error("CMS fixture is empty.");
     const globals: Record<string, unknown> = {
       about: mock.about ?? null,
       contact: mock.contact ?? null,

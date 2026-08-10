@@ -2,6 +2,8 @@ import type { CollectionConfig, Field } from 'payload'
 import { manageSitesAccess } from '@/access'
 import { isBootstrapMode } from '@/utils/bootstrap'
 
+const privateSiteFieldRead = ({ req }: { req: { user?: unknown } }) => Boolean(req.user)
+
 export const Sites: CollectionConfig<'sites'> = {
   slug: 'sites',
   admin: {
@@ -11,7 +13,14 @@ export const Sites: CollectionConfig<'sites'> = {
   access: {
     read: async ({ req }) => {
       if (await isBootstrapMode(req)) return true
-      return manageSitesAccess({ req })
+      if (req.user) {
+        const adminAccess = await manageSitesAccess({ req })
+        if (adminAccess) return adminAccess
+      }
+
+      const url = req.url ? new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`) : null
+      const requestedId = url?.searchParams.get('where[id][equals]')?.trim()
+      return requestedId ? { id: { equals: requestedId } } : false
     },
     create: manageSitesAccess,
     update: manageSitesAccess,
@@ -36,13 +45,48 @@ export const Sites: CollectionConfig<'sites'> = {
       },
     },
     {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'draft',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Active', value: 'active' },
+        { label: 'Published', value: 'published' },
+        { label: 'Archived', value: 'archived' },
+      ],
+      admin: {
+        description: 'A site must be published before hostname resolution can serve it publicly.',
+      },
+    },
+    {
       name: 'templateId',
       type: 'text',
       required: true,
-      defaultValue: 'marketing-smb-v1',
       admin: {
         description: 'Which frontend template module should render this site',
       },
+    },
+    {
+      name: 'orgId',
+      type: 'text',
+      required: true,
+      index: true,
+      admin: { description: 'Canonical platform organization owning the linked Program and site' },
+    },
+    {
+      name: 'programId',
+      type: 'text',
+      required: true,
+      index: true,
+      admin: { description: 'Canonical Program Ledger identity for this site' },
+    },
+    {
+      name: 'leadId',
+      type: 'text',
+      required: true,
+      index: true,
+      admin: { description: 'Canonical lead identity claimed by the linked Program' },
     },
     {
       name: 'defaultLanguage',
@@ -65,6 +109,7 @@ export const Sites: CollectionConfig<'sites'> = {
     {
       name: 'youtubeApiKey',
       type: 'text',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'YouTube Data API v3 key for video ingestion',
       },
@@ -72,6 +117,7 @@ export const Sites: CollectionConfig<'sites'> = {
     {
       name: 'youtubeChannelId',
       type: 'text',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'YouTube channel ID for automatic sync',
       },
@@ -79,6 +125,7 @@ export const Sites: CollectionConfig<'sites'> = {
     {
       name: 'youtubePlaylistIds',
       type: 'array',
+      access: { read: privateSiteFieldRead },
       label: 'YouTube Playlists',
       admin: {
         description: 'Playlist IDs to sync videos from',
@@ -95,6 +142,7 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'defaultVideoCategory',
       type: 'relationship',
       relationTo: 'video-categories',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'Default category for auto-ingested videos',
       },
@@ -137,6 +185,7 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'rebuildWebhookUrl',
       type: 'text',
       label: 'Rebuild Webhook URL',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'Webhook URL to trigger site rebuild on content publish',
       },
@@ -145,6 +194,7 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'rebuildWebhookSecret',
       type: 'text',
       label: 'Rebuild Webhook Secret',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'Secret key for webhook authentication',
       },
@@ -153,6 +203,7 @@ export const Sites: CollectionConfig<'sites'> = {
       name: 'permissionOverrides',
       type: 'array',
       label: 'Permission Overrides',
+      access: { read: privateSiteFieldRead },
       admin: {
         description: 'Override default role permissions for this site',
       },

@@ -11,14 +11,17 @@
     "test:coverage": "vitest run --coverage"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./library-consumer": "./src/libraryConsumer.ts"
   },
   "dependencies": {
     "@linksites/program-ledger": "workspace:*",
     "@linksites/types": "workspace:*"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.4",
     "@vitest/coverage-v8": "3.2.6",
+    "@types/node": "22.19.15",
     "typescript": "5.7.3",
     "vitest": "3.2.6"
   }

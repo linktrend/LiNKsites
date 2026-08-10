@@ -40,13 +40,6 @@ export function ArticlesPageContent({ lang, articles: cmsArticles }: Props) {
     setFormattedDates(dates);
   }, [cmsArticles]);
 
-  // CMS Data Structure - These will be replaced by CMS content
-  const heroData = {
-    // CMS: hero object
-    title: "Articles", // CMS: hero.title
-    subtitle: "Insights, tips, and best practices to help you succeed", // CMS: hero.subtitle
-  };
-
   // Extract unique categories from CMS articles
   const uniqueCategories = Array.from(new Set((cmsArticles || []).map(a => a?.category).filter(Boolean)));
   const categories: Category[] = [
@@ -162,14 +155,8 @@ export function ArticlesPageContent({ lang, articles: cmsArticles }: Props) {
               className="text-4xl sm:text-5xl font-bold tracking-tight mb-4 text-white"
               data-cms-field="hero.title"
             >
-              {heroData.title}
+              Articles
             </h1>
-            <p
-              className="text-lg sm:text-xl text-white/90"
-              data-cms-field="hero.subtitle"
-            >
-              {heroData.subtitle}
-            </p>
           </div>
         </div>
       </section>

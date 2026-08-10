@@ -56,11 +56,11 @@ const dirname = path.dirname(filename)
 // hard-fail when DATABASE_URI is missing, because they don't need a live DB.
 const isPayloadCodegen = process.argv.some((arg) => {
   return arg.includes('generate:types') || arg.includes('generate:importmap')
-})
+}) || process.env.LINKSITES_BUILD_NO_DATABASE === '1'
 
 const databaseUri =
   process.env.DATABASE_URI ??
-  (isPayloadCodegen ? 'postgresql://user:pass@localhost:5432/payload' : undefined)
+  (isPayloadCodegen ? 'postgresql://build:build@localhost:5432/payload' : undefined)
 
 if (!databaseUri) {
   throw new Error('DATABASE_URI environment variable is required. Please add it to your .env file.')
@@ -79,7 +79,8 @@ const { connectionString: databaseConnectionString, sslMode } = (() => {
     const isSupabaseHost =
       hostname.endsWith('.supabase.co') ||
       hostname.endsWith('.supabase.com') ||
-      hostname.includes('pooler.supabase.com')
+      hostname === 'pooler.supabase.com' ||
+      hostname.endsWith('.pooler.supabase.com')
     if (isSupabaseHost) {
       const options = url.searchParams.get('options') ?? ''
       const prefersLegacyCore = /search_path\s*=\s*lsites_core/i.test(options)
@@ -106,10 +107,8 @@ const useSupabaseSsl =
   databaseHostname.endsWith('.supabase.co') || databaseHostname.endsWith('.supabase.com')
 const useDatabaseSsl = useSupabaseSsl || sslMode === 'require'
 
-if (!process.env.PAYLOAD_SECRET) {
-  console.warn(
-    '⚠️  PAYLOAD_SECRET is not set. This is required for production. Generating temporary secret...'
-  )
+if (!process.env.PAYLOAD_SECRET && process.env.LINKSITES_DEPLOYMENT_ENV === 'production') {
+  throw new Error('PAYLOAD_SECRET is required by the LiNKsites production configuration contract.')
 }
 
 export default buildConfig({

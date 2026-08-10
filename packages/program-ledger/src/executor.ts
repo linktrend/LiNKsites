@@ -49,7 +49,7 @@ export class NoExecutorAvailableError extends Error {
  * Performs one real dispatch -> claim -> execute -> complete/fail cycle
  * for a `ready`/`retry_scheduled` Issue, using whichever registered
  * executor claims to handle its `issueType`. This stands in for what a
- * real worker runtime (n8n, CrewAI, Agent Zero, a Cursor/Codex agent,
+ * real worker runtime (a governed worker, agent, or local executor,
  * etc.) would do in a polling or event-driven loop -- it is a
  * deterministic, synchronous driver for tests and synthetic workflows,
  * not a production scheduler.

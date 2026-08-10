@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_FEATURES, DEFAULT_LANGUAGE, isLanguageSupported } from "@/config";
 import { normalizeLocale } from "@/lib/locale-context";
-import { getSiteIdFromRequest } from "@/lib/site-context";
+import { getPublicSiteIdOrNull, publicRouteNotFound } from "@/lib/public-route-guard";
 import { getPageBySlug } from "@/lib/repository/pages";
-import { getLegalBySlug } from "@/lib/repository/legal";
 import {
   getOfferIndex,
   getOfferPage,
@@ -26,7 +25,6 @@ import {
   markdownForFaq,
   markdownForAbout,
   markdownForContact,
-  markdownForLegal,
 } from "@/lib/ai/markdown";
 
 export const dynamic = "force-dynamic";
@@ -52,7 +50,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     slugSegments = segments.slice(1);
   }
   const locale = normalizeLocale(lang);
-  const siteId = await getSiteIdFromRequest();
+  const siteId = await getPublicSiteIdOrNull();
+  if (!siteId) return publicRouteNotFound();
 
   let markdown = "";
 
@@ -110,8 +109,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     markdown = markdownForContact(page.data.contact ?? null, locale);
   } else if (slugSegments[0] === "legal") {
     const slug = slugSegments[1] ?? "terms-of-use";
-    const legal = await getLegalBySlug({ siteId, locale, slug });
-    markdown = markdownForLegal(legal, locale, slug);
+    const page = await getPageBySlug({ siteId, locale, slugSegments: ["legal", slug] });
+    if (!page) return new NextResponse("Not Found", { status: 404 });
+    markdown = markdownForPage(page, locale);
   } else {
     const page = await getPageBySlug({ siteId, locale, slugSegments });
     if (!page) return new NextResponse("Not Found", { status: 404 });

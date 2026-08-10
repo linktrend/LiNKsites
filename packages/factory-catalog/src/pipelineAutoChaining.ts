@@ -47,7 +47,8 @@
  * content this repository does not have.
  */
 
-import type { CreateIssueInput, GateResult, Issue, ProgramLedger, SideEffectClass } from '@linksites/program-ledger'
+import { createHash } from 'node:crypto'
+import { canonicalSerialize, DEFAULT_ORG_ID, type CreateIssueInput, type GateResult, type HierarchySubjectRef, type Issue, type ProgramLedger, type SideEffectClass } from '@linksites/program-ledger'
 import { SITE_ASSEMBLY_ISSUE_TYPE } from './executors/siteAssemblyExecutor.js'
 import { SITE_SPECIFICATION_ISSUE_TYPE } from './executors/siteSpecificationExecutor.js'
 import { PROMOTE_WORKING_PACKAGE_ISSUE_TYPE } from './executors/promotionExecutor.js'
@@ -83,7 +84,7 @@ export type PipelineChainOutcome =
 export interface NextIssuePlacement {
   programRef: string
   moduleRef?: string
-  stageRef?: string
+  phaseRef?: string
   sideEffectClass?: SideEffectClass
   maxAttempts?: number
   backoffBaseMs?: number
@@ -124,7 +125,7 @@ function placementToCreateInput(
     issueType,
     programRef: placement.programRef,
     moduleRef: placement.moduleRef,
-    stageRef: placement.stageRef,
+    phaseRef: placement.phaseRef,
     input,
     sideEffectClass: placement.sideEffectClass,
     maxAttempts: placement.maxAttempts,
@@ -134,11 +135,17 @@ function placementToCreateInput(
   }
 }
 
+function checksumForRunOutput(output: unknown): string {
+  return createHash('sha256').update(canonicalSerialize(output)).digest('hex')
+}
+
 /**
  * Resolves the accepted source Issue for a Gate result, enforcing the
- * gate-discipline invariant. Returns the successful Run's output when
- * (and only when) the Gate genuinely passed; otherwise returns a
- * `blocked` reason so the caller can record it and create nothing.
+ * gate-discipline invariant. The caller-supplied Gate is only a proposal:
+ * the ledger's current tenant-scoped Gate and its exact source Run are the
+ * authority. Returns the successful Run's output when (and only when) the
+ * Gate genuinely passed; otherwise returns a `blocked` reason so the caller
+ * can record it and create nothing.
  *
  * Throws `PipelineAutoChainingError` only for caller misuse: a source
  * Issue whose type is not `expectedSourceIssueType`, or ledger records
@@ -156,6 +163,9 @@ async function resolveAcceptedGateOutput(
     return { ok: false, reason: `Gate ${gateResult.gateId} for Issue ${gateResult.issueId} was not accepted (decision: "${gateResult.decision}") -- not chaining.` }
   }
 
+  if (!gateResult.issueId) {
+    throw new PipelineAutoChainingError(`Gate ${gateResult.gateId} has no source Issue association.`)
+  }
   const issue = await ledger.getIssue(gateResult.issueId)
   if (!issue) {
     throw new PipelineAutoChainingError(`Source Issue ${gateResult.issueId} referenced by Gate ${gateResult.gateId} was not found in the ledger.`)
@@ -164,6 +174,58 @@ async function resolveAcceptedGateOutput(
     throw new PipelineAutoChainingError(
       `Gate ${gateResult.gateId} belongs to Issue type "${issue.issueType}", but this chaining step expects a "${expectedSourceIssueType}" source Issue.`,
     )
+  }
+
+  const subject: HierarchySubjectRef = {
+    subjectType: 'issue',
+    subjectId: issue.issueId,
+    orgId: issue.orgId ?? DEFAULT_ORG_ID,
+    programId: issue.programRef,
+    moduleId: issue.moduleRef,
+    phaseId: issue.phaseRef,
+  }
+  const authoritativeGate = await ledger.getCurrentGate(subject)
+  if (!authoritativeGate) {
+    throw new PipelineAutoChainingError(`Issue ${issue.issueId} has no authoritative current Gate -- not chaining.`)
+  }
+  if (
+    authoritativeGate.subjectType !== 'issue' ||
+    authoritativeGate.subjectId !== issue.issueId ||
+    authoritativeGate.orgId !== subject.orgId ||
+    authoritativeGate.subjectProgramId !== issue.programRef ||
+    (authoritativeGate.subjectModuleId ?? null) !== (issue.moduleRef ?? null) ||
+    (authoritativeGate.subjectPhaseId ?? null) !== (issue.phaseRef ?? null) ||
+    authoritativeGate.issueId !== issue.issueId ||
+    authoritativeGate.runId == null
+  ) {
+    throw new PipelineAutoChainingError(`Authoritative Gate for Issue ${issue.issueId} has an incomplete or mismatched tenant/Issue identity -- not chaining.`)
+  }
+  if (
+    gateResult.gateId !== authoritativeGate.gateId ||
+    gateResult.orgId !== authoritativeGate.orgId ||
+    gateResult.issueId !== authoritativeGate.issueId ||
+    gateResult.runId !== authoritativeGate.runId ||
+    gateResult.subjectType !== authoritativeGate.subjectType ||
+    gateResult.subjectId !== authoritativeGate.subjectId ||
+    gateResult.subjectProgramId !== authoritativeGate.subjectProgramId ||
+    (gateResult.subjectModuleId ?? null) !== (authoritativeGate.subjectModuleId ?? null) ||
+    (gateResult.subjectPhaseId ?? null) !== (authoritativeGate.subjectPhaseId ?? null)
+  ) {
+    throw new PipelineAutoChainingError(`Supplied Gate ${gateResult.gateId} is not the current authoritative Gate for Issue ${issue.issueId} -- not chaining.`)
+  }
+  if (authoritativeGate.decision !== 'accepted' || !Array.isArray(authoritativeGate.evidenceReceipts) || authoritativeGate.evidenceReceipts.length === 0) {
+    throw new PipelineAutoChainingError(`Authoritative Gate ${authoritativeGate.gateId} for Issue ${issue.issueId} is not an evidence-backed acceptance -- not chaining.`)
+  }
+
+  const expectedGateAssociation = `gate:issue:${issue.issueId}:run:${authoritativeGate.runId}`
+  if (authoritativeGate.evidenceReceipts.some((receipt) =>
+    receipt.org_id !== subject.orgId ||
+    receipt.revision_sha !== authoritativeGate.subjectRevision ||
+    receipt.subject.type !== 'issue' ||
+    receipt.subject.id !== issue.issueId ||
+    receipt.gate_association !== expectedGateAssociation,
+  )) {
+    throw new PipelineAutoChainingError(`Authoritative Gate ${authoritativeGate.gateId} for Issue ${issue.issueId} does not carry canonical evidence for its current revision and Run -- not chaining.`)
   }
 
   // 2. Cross-check against the ledger's authoritative state. The Program
@@ -177,12 +239,23 @@ async function resolveAcceptedGateOutput(
 
   // 3. The Gate's Run must actually have succeeded and produced output to
   //    map from.
-  const run = await ledger.getRun(gateResult.runId)
+  if (!gateResult.runId) {
+    throw new PipelineAutoChainingError(`Gate ${gateResult.gateId} has no source Run association.`)
+  }
+  const run = await ledger.getRun(authoritativeGate.runId)
   if (!run) {
-    throw new PipelineAutoChainingError(`Run ${gateResult.runId} referenced by Gate ${gateResult.gateId} was not found in the ledger.`)
+    throw new PipelineAutoChainingError(`Run ${authoritativeGate.runId} referenced by Gate ${authoritativeGate.gateId} was not found in the ledger.`)
+  }
+  if (run.runId !== authoritativeGate.runId || run.issueId !== issue.issueId || run.orgId !== subject.orgId || run.attemptNumber !== issue.attemptCount) {
+    throw new PipelineAutoChainingError(`Run ${authoritativeGate.runId} is not the exact tenant-scoped Run for Issue ${issue.issueId} -- not chaining.`)
   }
   if (run.state !== 'succeeded' || run.output == null) {
-    return { ok: false, reason: `Run ${gateResult.runId} for Issue ${gateResult.issueId} did not produce a successful output (state: "${run.state}") -- not chaining.` }
+    return { ok: false, reason: `Run ${authoritativeGate.runId} for Issue ${issue.issueId} did not produce a successful output (state: "${run.state}") -- not chaining.` }
+  }
+
+  const expectedOutputChecksum = checksumForRunOutput(run.output)
+  if (!authoritativeGate.evidenceReceipts.some((receipt) => receipt.checksum.algorithm === 'sha256' && receipt.checksum.value === expectedOutputChecksum)) {
+    throw new PipelineAutoChainingError(`Authoritative Gate ${authoritativeGate.gateId} for Issue ${issue.issueId} does not carry a checksum verified against the exact immutable output of Run ${run.runId} -- not chaining.`)
   }
 
   return { ok: true, output: run.output }
