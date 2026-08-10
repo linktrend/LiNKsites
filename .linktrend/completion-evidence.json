@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "headSha": "2834ef2b0f9a7c42658cf9ebca3a88876b0792e7",
+  "headSha": "3aaa1b0b76ef0c96ef303769ecd23e4455bdcd49",
   "classification": "tests",
   "acceptance": "IDE Development managed-core v2.1.0 is installed and cleanly verified in the LiNKsites consumer; the exact reviewed rollout checkpoint is ready for governed Packager review into development.",
   "commands": [
@@ -29,5 +29,5 @@
       "exitCode": 0
     }
   ],
-  "at": "2026-08-10T04:08:58Z"
+  "at": "2026-08-10T04:09:24Z"
 }
