@@ -83,7 +83,10 @@ async function composition(id = 'lead-local-001') {
     if (request.method === 'GET') return docs.has(id) ? send(200, docs.get(id)) : send(404, {})
     const body = JSON.parse(Buffer.concat(chunks).toString() || '{}') as Record<string, unknown>
     const documentId = id ?? `test-page-${docs.size + 1}`
-    docs.set(documentId, { ...body, id: documentId })
+    // Payload PATCH preserves fields that are not part of the update. This is
+    // material to the private-publication readback: the authenticated site
+    // ownership written at draft promotion must still be present afterwards.
+    docs.set(documentId, { ...(id ? docs.get(documentId) : {}), ...body, id: documentId })
     return send(id ? 200 : 201, { doc: docs.get(documentId) })
   })
   await new Promise<void>((resolve) => payload.listen(0, '127.0.0.1', resolve))
@@ -111,7 +114,7 @@ test('production composition boots with complete approved local configuration', 
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
 
-test('promotion maps the stable run marker onto all five schema-backed Payload drafts', async () => {
+test('private publication maps the stable run marker onto all five schema-backed Payload pages without public activation', async () => {
   const id = 'w2-02-run-0123456789abcdef'
   const value = await composition(id)
   try {
@@ -122,7 +125,7 @@ test('promotion maps the stable run marker onto all five schema-backed Payload d
     // independently of marker-bearing rendered copy.
     assert.equal(value.docs.size, 5)
     assert.ok([...value.docs.values()].every((doc) => doc.promotionRunMarker === id))
-    assert.ok([...value.docs.values()].every((doc) => doc.status === 'draft' && doc.previewEnvironment === 'private-preview'))
+    assert.ok([...value.docs.values()].every((doc) => doc.status === 'published' && doc.previewEnvironment === 'private-preview' && doc.publicActivation === false))
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
 
