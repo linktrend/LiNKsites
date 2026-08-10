@@ -154,6 +154,15 @@ export const Pages: CollectionConfig<'pages'> = {
         description: 'Stable orchestration run marker for authenticated draft-promotion readback.',
       },
     },
+    {
+      name: 'publicActivation',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        readOnly: true,
+        description: 'Private preview publication never activates a public customer site.',
+      },
+    },
     ...workflowFields,
   ],
 }

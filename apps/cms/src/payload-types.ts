@@ -2161,6 +2161,10 @@ export interface Page {
    */
   promotionRunMarker?: string | null;
   /**
+   * Whether this record has activated a public customer site.
+   */
+  publicActivation?: boolean | null;
+  /**
    * Content workflow state
    */
   status: 'draft' | 'pending' | 'approved' | 'published';
@@ -3832,6 +3836,7 @@ export interface PagesSelect<T extends boolean = true> {
       };
   previewEnvironment?: T;
   promotionRunMarker?: T;
+  publicActivation?: T;
   status?: T;
   submittedBy?: T;
   reviewedBy?: T;
