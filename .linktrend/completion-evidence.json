@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "headSha": "2a5184701e25f01251de73614ae106d2739ff7fc",
+  "classification": "tests",
+  "acceptance": "LiNKsites IDE Development v2.1.0 and the canonical managed GitOps foundation are rendered, validated, and pushed on the exact Issue #78 tip for governed Packager review into development.",
+  "commands": [
+    {
+      "cmd": "bash /Users/linktrend/Projects/IDE Development/scripts/sync-managed-workflows.sh . --dry-run",
+      "exitCode": 0
+    },
+    {
+      "cmd": "python3 /Users/linktrend/Projects/IDE Development/scripts/ide-development.py drift --repo .",
+      "exitCode": 0
+    },
+    {
+      "cmd": "python3 -m compileall -q scripts/ide_development scripts/gitops",
+      "exitCode": 0
+    },
+    {
+      "cmd": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "cmd": "bash scripts/manage-repository-protections.sh --repo linktrend/LiNKsites verify",
+      "exitCode": 0
+    },
+    {
+      "cmd": "ruby -e 'require \"yaml\"; Dir[\".github/workflows/*.yml\"].each { YAML.load_file(_1) }'",
+      "exitCode": 0
+    }
+  ],
+  "at": "2026-08-10T04:48:51Z"
+}
