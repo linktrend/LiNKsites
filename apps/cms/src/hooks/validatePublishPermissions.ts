@@ -47,6 +47,9 @@ const resolveStatus = (value?: unknown): string | undefined => {
   return undefined
 }
 
+const isPrivatePreviewPublication = (data?: unknown): boolean =>
+  isRecord(data) && data.previewEnvironment === 'private-preview' && data.publicActivation === false
+
 export const validatePublishPermissions: CollectionBeforeChangeHook = async ({
   data,
   req,
@@ -88,6 +91,10 @@ export const validatePublishPermissions: CollectionBeforeChangeHook = async ({
     user: typedUser,
     siteId,
     allowAutoApprove: autoApproveEnabled,
+    // This narrow exception is valid only for the private-preview publication
+    // boundary. Public activation is structurally false and the ordinary
+    // customer-content workflow remains unchanged.
+    allowPrivatePreviewPublication: isPrivatePreviewPublication(data),
   })
 
   data.status = validatedStatus
