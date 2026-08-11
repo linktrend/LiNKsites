@@ -5,16 +5,19 @@ import { generateSlug, generateUniqueSlug } from '@/utils/slug'
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
 
+const identifier = (value: unknown): string | undefined =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : undefined
+
 const resolveSiteId = (data: unknown, originalDoc: unknown): string | undefined => {
   const read = (value: unknown): string | undefined => {
-    if (typeof value === 'string') {
-      return value
-    }
+    const direct = identifier(value)
+    if (direct) return direct
 
     if (isRecord(value)) {
-      if (typeof value.site === 'string') return value.site
-      if (isRecord(value.site) && typeof value.site.id === 'string') return value.site.id
-      if (typeof value.id === 'string') return value.id
+      const site = identifier(value.site)
+      if (site) return site
+      if (isRecord(value.site)) return identifier(value.site.id)
+      return identifier(value.id)
     }
 
     return undefined
@@ -28,7 +31,7 @@ export const autoGenerateSlug =
   async ({ data, operation, value, originalDoc, req }) => {
     const workflowReq = req as WorkflowRequest
     const siteId = resolveSiteId(data, originalDoc)
-    const docId = typeof originalDoc?.id === 'string' ? originalDoc.id : undefined
+    const docId = identifier(originalDoc?.id)
     const localizationConfig = workflowReq.payload?.config.localization
     const defaultLocaleFromConfig =
       localizationConfig && typeof localizationConfig === 'object'

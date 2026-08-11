@@ -13,20 +13,38 @@ import { getAutoApproveSetting, normalizeWorkflowStatus } from '@/utils/workflow
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
 
+const identifier = (value: unknown): string | undefined =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : undefined
+
 const resolveSiteId = (input?: unknown, fallback?: unknown): string | undefined => {
   const read = (value?: unknown): string | undefined => {
     if (!value) return undefined
-    if (typeof value === 'string') return value
+    const direct = identifier(value)
+    if (direct) return direct
     if (isRecord(value)) {
-      if (typeof value.site === 'string') return value.site
-      if (isRecord(value.site) && typeof value.site.id === 'string') return value.site.id
-      if (typeof value.id === 'string') return value.id
+      const site = identifier(value.site)
+      if (site) return site
+      if (isRecord(value.site)) return identifier(value.site.id)
+      return identifier(value.id)
     }
     return undefined
   }
 
   return read(input) ?? read(fallback)
 }
+
+const isPrivatePreviewPublication = (data: unknown, originalDoc: unknown): boolean => {
+  const current = isRecord(data) ? data : {}
+  const stored = isRecord(originalDoc) ? originalDoc : {}
+  return (current.previewEnvironment ?? stored.previewEnvironment) === 'private-preview' &&
+    (current.publicActivation ?? stored.publicActivation) === false
+}
+
+const isPrivatePreviewPublisher = (user: unknown): boolean =>
+  isRecord(user) && Array.isArray(user.roles) && user.roles.some((role) =>
+    (typeof role === 'string' && role === 'private-preview-publisher') ||
+    (isRecord(role) && role.name === 'private-preview-publisher'),
+  )
 
 const resolveUserId = (input: unknown): string | undefined => {
   if (!input) return undefined
@@ -109,7 +127,14 @@ const workflowStatusHook: FieldHook = async ({ data, originalDoc, req, value }) 
   }
 
   if (nextStatus === 'published' && previousStatus !== 'published') {
-    if (data.autoApproved !== true) {
+    // This Program transition is separately gated and is published only to the
+    // authenticated private-preview audience.  It must not fabricate a human
+    // approval record or require the service publisher to receive broad
+    // approval authority merely because Payload's workflow metadata exists.
+    if (!(
+      isPrivatePreviewPublisher(req?.user) &&
+      isPrivatePreviewPublication(data, originalDoc)
+    ) && data.autoApproved !== true) {
       data.autoApproved = false
       data.reviewedBy = userId ?? resolveUserId(originalDoc?.reviewedBy) ?? null
       data.reviewedAt = now
