@@ -11,6 +11,10 @@ export const Users: CollectionConfig<'users'> = {
   },
   auth: {
     useAPIKey: true,
+    // Collection access resolves a caller's site-scoped role grants.  Payload
+    // must therefore hydrate the roles and assigned-sites relationships on
+    // the authenticated request instead of supplying relationship IDs only.
+    depth: 1,
   },
   access: {
     // Allow any authenticated admin user to see the Users collection in the UI

@@ -9,14 +9,19 @@ import { isBootstrapMode } from '@/utils/bootstrap'
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
 
+const identifier = (value: unknown): string | undefined =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : undefined
+
 const resolveSiteId = (data?: unknown, fallback?: unknown): string | undefined => {
   const read = (value?: unknown): string | undefined => {
     if (!value) return undefined
-    if (typeof value === 'string') return value
+    const direct = identifier(value)
+    if (direct) return direct
     if (isRecord(value)) {
-      if (typeof value.site === 'string') return value.site
-      if (isRecord(value.site) && typeof value.site.id === 'string') return value.site.id
-      if (typeof value.id === 'string') return value.id
+      const site = identifier(value.site)
+      if (site) return site
+      if (isRecord(value.site)) return identifier(value.site.id)
+      return identifier(value.id)
     }
     return undefined
   }
@@ -27,11 +32,13 @@ const resolveSiteId = (data?: unknown, fallback?: unknown): string | undefined =
 const resolveLocale = (data?: unknown, fallback?: unknown): string | undefined => {
   const read = (value?: unknown): string | undefined => {
     if (!value) return undefined
-    if (typeof value === 'string') return value
+    const direct = identifier(value)
+    if (direct) return direct
     if (isRecord(value)) {
-      if (typeof value.locale === 'string') return value.locale
-      if (isRecord(value.locale) && typeof value.locale.id === 'string') return value.locale.id
-      if (typeof value.id === 'string') return value.id
+      const locale = identifier(value.locale)
+      if (locale) return locale
+      if (isRecord(value.locale)) return identifier(value.locale.id)
+      return identifier(value.id)
     }
     return undefined
   }
@@ -46,6 +53,19 @@ const resolveStatus = (value?: unknown): string | undefined => {
   }
   return undefined
 }
+
+const isPrivatePreviewPublication = (data?: unknown, originalDoc?: unknown): boolean => {
+  const current = isRecord(data) ? data : {}
+  const stored = isRecord(originalDoc) ? originalDoc : {}
+  return (current.previewEnvironment ?? stored.previewEnvironment) === 'private-preview' &&
+    (current.publicActivation ?? stored.publicActivation) === false
+}
+
+const isPrivatePreviewPublisher = (user: unknown): boolean =>
+  isRecord(user) && Array.isArray(user.roles) && user.roles.some((role) =>
+    (typeof role === 'string' && role === 'private-preview-publisher') ||
+    (isRecord(role) && role.name === 'private-preview-publisher'),
+  )
 
 export const validatePublishPermissions: CollectionBeforeChangeHook = async ({
   data,
@@ -88,6 +108,11 @@ export const validatePublishPermissions: CollectionBeforeChangeHook = async ({
     user: typedUser,
     siteId,
     allowAutoApprove: autoApproveEnabled,
+    // This narrow exception is valid only for the private-preview publication
+    // boundary. Public activation is structurally false and the ordinary
+    // customer-content workflow remains unchanged.
+    allowPrivatePreviewPublication:
+      isPrivatePreviewPublisher(typedUser) && isPrivatePreviewPublication(data, originalDoc),
   })
 
   data.status = validatedStatus

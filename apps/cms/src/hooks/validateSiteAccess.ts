@@ -8,16 +8,20 @@ import { isBootstrapMode } from '@/utils/bootstrap'
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
 
+const identifier = (value: unknown): string | null =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : null
+
 const resolveSiteId = (data: unknown, originalDoc: unknown): string | null => {
   const read = (value: unknown): string | null => {
-    if (typeof value === 'string') {
-      return value
-    }
+    const direct = identifier(value)
+    if (direct) return direct
 
     if (isRecord(value)) {
-      if (typeof value.site === 'string') return value.site
-      if (isRecord(value.site) && typeof value.site.id === 'string') return value.site.id
-      if (typeof value.id === 'string') return value.id
+      const site = identifier(value.site)
+      if (site) return site
+      if (isRecord(value.site)) return identifier(value.site.id)
+      const id = identifier(value.id)
+      if (id) return id
     }
 
     return null
@@ -28,16 +32,13 @@ const resolveSiteId = (data: unknown, originalDoc: unknown): string | null => {
 
 const resolveLocale = (data: unknown, originalDoc: unknown): string | null => {
   const read = (value: unknown): string | null => {
-    if (typeof value === 'string') {
-      return value
-    }
+    const direct = identifier(value)
+    if (direct) return direct
 
-    if (isRecord(value) && typeof value.locale === 'string') {
-      return value.locale
-    }
-
-    if (isRecord(value) && isRecord(value.locale) && typeof value.locale.id === 'string') {
-      return value.locale.id
+    if (isRecord(value)) {
+      const locale = identifier(value.locale)
+      if (locale) return locale
+      if (isRecord(value.locale)) return identifier(value.locale.id)
     }
 
     return null
