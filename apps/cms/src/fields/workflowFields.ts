@@ -33,8 +33,18 @@ const resolveSiteId = (input?: unknown, fallback?: unknown): string | undefined 
   return read(input) ?? read(fallback)
 }
 
-const isPrivatePreviewPublication = (data: unknown): boolean =>
-  isRecord(data) && data.previewEnvironment === 'private-preview' && data.publicActivation === false
+const isPrivatePreviewPublication = (data: unknown, originalDoc: unknown): boolean => {
+  const current = isRecord(data) ? data : {}
+  const stored = isRecord(originalDoc) ? originalDoc : {}
+  return (current.previewEnvironment ?? stored.previewEnvironment) === 'private-preview' &&
+    (current.publicActivation ?? stored.publicActivation) === false
+}
+
+const isPrivatePreviewPublisher = (user: unknown): boolean =>
+  isRecord(user) && Array.isArray(user.roles) && user.roles.some((role) =>
+    (typeof role === 'string' && role === 'private-preview-publisher') ||
+    (isRecord(role) && role.name === 'private-preview-publisher'),
+  )
 
 const resolveUserId = (input: unknown): string | undefined => {
   if (!input) return undefined
@@ -121,7 +131,10 @@ const workflowStatusHook: FieldHook = async ({ data, originalDoc, req, value }) 
     // authenticated private-preview audience.  It must not fabricate a human
     // approval record or require the service publisher to receive broad
     // approval authority merely because Payload's workflow metadata exists.
-    if (!isPrivatePreviewPublication(data) && data.autoApproved !== true) {
+    if (!(
+      isPrivatePreviewPublisher(req?.user) &&
+      isPrivatePreviewPublication(data, originalDoc)
+    ) && data.autoApproved !== true) {
       data.autoApproved = false
       data.reviewedBy = userId ?? resolveUserId(originalDoc?.reviewedBy) ?? null
       data.reviewedAt = now

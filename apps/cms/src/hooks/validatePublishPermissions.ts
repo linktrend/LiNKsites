@@ -54,8 +54,18 @@ const resolveStatus = (value?: unknown): string | undefined => {
   return undefined
 }
 
-const isPrivatePreviewPublication = (data?: unknown): boolean =>
-  isRecord(data) && data.previewEnvironment === 'private-preview' && data.publicActivation === false
+const isPrivatePreviewPublication = (data?: unknown, originalDoc?: unknown): boolean => {
+  const current = isRecord(data) ? data : {}
+  const stored = isRecord(originalDoc) ? originalDoc : {}
+  return (current.previewEnvironment ?? stored.previewEnvironment) === 'private-preview' &&
+    (current.publicActivation ?? stored.publicActivation) === false
+}
+
+const isPrivatePreviewPublisher = (user: unknown): boolean =>
+  isRecord(user) && Array.isArray(user.roles) && user.roles.some((role) =>
+    (typeof role === 'string' && role === 'private-preview-publisher') ||
+    (isRecord(role) && role.name === 'private-preview-publisher'),
+  )
 
 export const validatePublishPermissions: CollectionBeforeChangeHook = async ({
   data,
@@ -101,7 +111,8 @@ export const validatePublishPermissions: CollectionBeforeChangeHook = async ({
     // This narrow exception is valid only for the private-preview publication
     // boundary. Public activation is structurally false and the ordinary
     // customer-content workflow remains unchanged.
-    allowPrivatePreviewPublication: isPrivatePreviewPublication(data),
+    allowPrivatePreviewPublication:
+      isPrivatePreviewPublisher(typedUser) && isPrivatePreviewPublication(data, originalDoc),
   })
 
   data.status = validatedStatus
