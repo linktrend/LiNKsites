@@ -78,6 +78,24 @@ export function resolvePermissions(
         permissions[permKey] = permissions[permKey] || rolePerms[permKey]
       })
     }
+
+    // Roles created for governed service boundaries are intentionally not
+    // limited to the fixed human-role catalogue above.  Payload has already
+    // resolved this relationship from the authenticated user document; honour
+    // only explicit boolean grants from that trusted role record.  This lets a
+    // site-scoped publisher receive exactly read/create/update/publish without
+    // inheriting any user, role, site-management, or approval authority.
+    const rolePermissions =
+      typeof role === 'object' && role !== null && 'permissions' in role &&
+      typeof (role as { permissions?: unknown }).permissions === 'object' &&
+      (role as { permissions?: unknown }).permissions !== null
+        ? (role as { permissions: Partial<RolePermissions> }).permissions
+        : undefined
+    if (rolePermissions) {
+      for (const permission of Object.values(PermissionFlag)) {
+        if (rolePermissions[permission] === true) permissions[permission] = true
+      }
+    }
   })
 
   // Extract assigned sites
