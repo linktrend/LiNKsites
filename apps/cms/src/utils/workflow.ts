@@ -70,12 +70,14 @@ export const validateStatusTransition = ({
   user,
   siteId,
   allowAutoApprove = false,
+  allowPrivatePreviewPublication = false,
 }: {
   existingStatus?: string | null
   requestedStatus?: string | null
   user: User | null | undefined
   siteId?: string
   allowAutoApprove?: boolean
+  allowPrivatePreviewPublication?: boolean
 }): WorkflowStatus => {
   const current = normalizeWorkflowStatus(existingStatus || undefined)
   const target = normalizeWorkflowStatus(requestedStatus || undefined)
@@ -91,6 +93,11 @@ export const validateStatusTransition = ({
   if (current === 'draft') {
     if (target === 'pending' && canSubmit) return 'pending'
     if (target === 'published' && allowAutoApprove && canSubmit) return 'published'
+    // A governed private-preview publication is not a public activation or a
+    // shortcut through the customer-content workflow.  It is the separately
+    // authorized W2-04 transition after the orchestrator's draft/readback
+    // gates, and still requires the caller's scoped publish permission.
+    if (target === 'published' && allowPrivatePreviewPublication && canPublish) return 'published'
     throw new Error('Draft content must be submitted for review before publishing.')
   }
 

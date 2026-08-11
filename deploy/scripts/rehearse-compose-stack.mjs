@@ -199,6 +199,11 @@ try {
     PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
     NEXT_PUBLIC_PAYLOAD_API_URL: 'https://cms.localtest',
     LINKLIBRARIES_ARTIFACT_PATH: libraryPath,
+    // The disposable receipt/evidence fixture is intentionally bound to a
+    // deterministic full SHA.  The Compose renderer must receive exactly the
+    // same value, otherwise this proof would exercise a different admission
+    // identity than the one produced by payload-seed.
+    LINKLIBRARIES_CATALOG_SHA: '1'.repeat(40),
     TRAEFIK_NETWORK: `${project}-edge`,
     TRAEFIK_CMS_HOST: 'cms.localtest',
     TRAEFIK_PREVIEW_HOST: 'preview.localtest',

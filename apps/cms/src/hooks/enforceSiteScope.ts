@@ -4,25 +4,24 @@ import { hasLocaleAccess, hasSiteAccess } from '@/utils/resolvePermissions'
 export const enforceSiteScope: CollectionAfterReadHook = async ({ req, doc }) => {
   const siteValue = (doc as Record<string, unknown> | null)?.site as
     | string
+    | number
     | { id?: unknown }
     | undefined
   const localeValue = (doc as Record<string, unknown> | null)?.locale as
     | string
+    | number
     | { id?: unknown }
     | undefined
 
+  const identifier = (value: unknown): string | null =>
+    typeof value === 'string' || typeof value === 'number' ? String(value) : null
+
   const siteId =
-    typeof siteValue === 'string'
-      ? siteValue
-      : typeof siteValue?.id === 'string'
-        ? siteValue.id
-        : null
+    identifier(siteValue) ??
+    (siteValue && typeof siteValue === 'object' ? identifier(siteValue.id) : null)
   const locale =
-    typeof localeValue === 'string'
-      ? localeValue
-      : typeof localeValue?.id === 'string'
-        ? localeValue.id
-        : null
+    identifier(localeValue) ??
+    (localeValue && typeof localeValue === 'object' ? identifier(localeValue.id) : null)
 
   if (!siteId || !req.user) {
     return doc
