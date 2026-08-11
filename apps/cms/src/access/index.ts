@@ -8,15 +8,19 @@ import { isBootstrapMode } from '@/utils/bootstrap'
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null
 
+const identifier = (value: unknown): string | undefined =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : undefined
+
 const extractSiteId = (value?: unknown): string | undefined => {
-  if (typeof value === 'string') return value
+  const direct = identifier(value)
+  if (direct) return direct
   if (!isRecord(value)) return undefined
 
-  if (typeof value.site === 'string') return value.site
-  if (isRecord(value.site) && typeof value.site.id === 'string') {
-    return value.site.id
-  }
-  if (typeof value.id === 'string') return value.id
+  const site = identifier(value.site)
+  if (site) return site
+  if (isRecord(value.site)) return identifier(value.site.id)
+  const id = identifier(value.id)
+  if (id) return id
 
   return undefined
 }
@@ -25,11 +29,14 @@ const resolveSiteId = (input?: unknown, fallback?: unknown): string | undefined 
   extractSiteId(input) ?? extractSiteId(fallback)
 
 const extractLocale = (value?: unknown): string | undefined => {
-  if (typeof value === 'string') return value
+  const direct = identifier(value)
+  if (direct) return direct
   if (!isRecord(value)) return undefined
-  if (typeof value.locale === 'string') return value.locale
-  if (isRecord(value.locale) && typeof value.locale.id === 'string') return value.locale.id
-  if (typeof value.id === 'string') return value.id
+  const locale = identifier(value.locale)
+  if (locale) return locale
+  if (isRecord(value.locale)) return identifier(value.locale.id)
+  const id = identifier(value.id)
+  if (id) return id
   return undefined
 }
 
