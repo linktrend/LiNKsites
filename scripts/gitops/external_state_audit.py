@@ -250,17 +250,14 @@ def required_checklist() -> list[dict[str, Any]]:
     ]
 
 
-def _secret_env_leak_warnings() -> list[str]:
-    """Detect secret material present in the process env without printing values."""
-    warnings: list[str] = []
-    for name in sorted(_SECRET_ENV_NAMES):
-        # Presence is sufficient for this warning.  Do not read the value into
-        # this process or report structure.
-        if name in os.environ:
-            warnings.append(
-                f"{name}=present_in_process_env (value redacted; audit must not print it)"
-            )
-    return warnings
+def _secret_env_leak_warning() -> str | None:
+    """Return a fixed warning without copying environment names or values."""
+    # CodeQL cannot prove that iterated environment keys are harmless even when
+    # only their names are reported. Keep all environment-derived text out of
+    # the report and expose only this fixed warning when a known key is present.
+    if any(name in os.environ for name in _SECRET_ENV_NAMES):
+        return "Credential environment detected; names and values omitted from report."
+    return None
 
 
 def _import_repository_protection() -> Any:
@@ -1824,7 +1821,7 @@ def build_report(
 ) -> dict[str, Any]:
     checks = evaluate(client, source=source)
     summary = summarize(checks)
-    leak_warnings = _secret_env_leak_warnings()
+    leak_warning = _secret_env_leak_warning()
     report: dict[str, Any] = {
         "schemaVersion": SCHEMA_VERSION,
         "mode": mode,
@@ -1838,7 +1835,7 @@ def build_report(
         "checks": checks,
         "summary": summary,
         "humanSummary": human_summary(checks, summary),
-        "warnings": leak_warnings,
+        "warnings": [leak_warning] if leak_warning else [],
         "notes": [
             "Read-only audit: mutations are always empty; apply is refused.",
             "Secret checks use Actions secret *names* only; values are never retrieved or printed.",
@@ -1918,13 +1915,11 @@ def _emit(payload: dict[str, Any], path: str | None, *, human: bool = False) -> 
             )
     # The report contains credential names and redacted presence flags only;
     # the audit never reads credential values. This is intentional reporting.
-    print(text)  # lgtm[py/clear-text-logging-sensitive-data]
+    print(text)
     if human:
         print(payload.get("humanSummary", ""), file=sys.stderr)
     if path:
-        Path(path).write_text(  # lgtm[py/clear-text-storage-sensitive-data]
-            text + "\n", encoding="utf-8"
-        )
+        Path(path).write_text(text + "\n", encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:
