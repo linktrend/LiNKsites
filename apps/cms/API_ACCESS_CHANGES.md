@@ -153,21 +153,21 @@ Once the server is fully running, test API access with your Bearer token:
 
 ```bash
 # Test navigation endpoint
-curl -i -H "Authorization: Bearer YOUR_API_KEY" \
+curl -i --oauth2-bearer "$API_KEY" \
   --get --data-urlencode 'where={"and":[{"site":{"equals":"default"}},{"locale":{"equals":"en"}},{"_status":{"equals":"published"}}]}' \
   http://localhost:3000/api/navigation
 
 # Test pages endpoint
-curl -i -H "Authorization: Bearer YOUR_API_KEY" \
+curl -i --oauth2-bearer "$API_KEY" \
   --get --data-urlencode 'where={"and":[{"site":{"equals":"default"}},{"locale":{"equals":"en"}},{"slug":{"equals":"home"}}]}' \
   http://localhost:3000/api/pages
 
 # Test offers endpoint
-curl -i -H "Authorization: Bearer YOUR_API_KEY" \
+curl -i --oauth2-bearer "$API_KEY" \
   http://localhost:3000/api/offers
 
 # Test case studies endpoint
-curl -i -H "Authorization: Bearer YOUR_API_KEY" \
+curl -i --oauth2-bearer "$API_KEY" \
   http://localhost:3000/api/case-studies
 ```
 
@@ -181,7 +181,7 @@ Ensure your API key is properly configured:
 2. Go to Users collection
 3. Select your user
 4. Generate or verify the API key in the sidebar
-5. Copy the API key and use it in the `Authorization: Bearer YOUR_API_KEY` header
+5. Export the API key as `API_KEY` and pass it with curl's `--oauth2-bearer` option
 
 ### 4. Update Master Template Configuration
 
@@ -194,7 +194,7 @@ If needed, update your master template's API client to use the correct endpoints
 
 1. User generates an API key in the CMS admin (Users collection)
 2. The API key is stored in the `users` table with `enableAPIKey: true`
-3. When a request includes `Authorization: Bearer YOUR_API_KEY` header:
+3. When a request includes the API key as a bearer token:
    - Payload CMS validates the API key
    - Authenticates the user and populates `req.user`
    - The `publicReadAccess` function checks `Boolean(req.user)`

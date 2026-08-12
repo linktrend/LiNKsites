@@ -3,8 +3,13 @@ import config from '@/payload.config'
 
 async function createUser() {
   console.log('Creating user via Payload API...\n')
-  
+
   try {
+    const firstUserPassword = process.env.FIRST_USER_PASSWORD
+    if (!firstUserPassword) {
+      throw new Error('FIRST_USER_PASSWORD is required')
+    }
+
     // Don't call payload.init - just import the local payload instance
     const { getPayload } = await import('payload')
     const payloadInstance = await getPayload({ config })
@@ -55,7 +60,7 @@ async function createUser() {
       collection: 'users',
       data: {
         email: 'sysadmin@linktrend.media',
-        password: 'cuhjyz-nabhap-muXpi9',
+        password: firstUserPassword,
         firstName: 'System',
         lastName: 'Admin',
         roles: [roles.docs[0]?.id] as any,
@@ -69,7 +74,7 @@ async function createUser() {
     console.log('User ID:', user.id)
     console.log('\nLogin at: http://localhost:3000/admin/login')
     console.log('Email: sysadmin@linktrend.media')
-    console.log('Password: cuhjyz-nabhap-muXpi9')
+    console.log('Password: read from FIRST_USER_PASSWORD')
     
     process.exit(0)
   } catch (error) {
