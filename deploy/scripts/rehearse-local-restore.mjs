@@ -57,7 +57,11 @@ const hookLines = [
   // Terminate only the listener we just started on the dedicated disposable
   // test port, after checking its command belongs to this CMS worktree.
   'is_cms_descendant() { candidate="$1"; while test -n "$candidate" && test "$candidate" != 1; do test "$candidate" = "$LINKSITES_LOCAL_PROOF_CMS_PID" && return 0; candidate="$(ps -p "$candidate" -o ppid= 2>/dev/null | tr -d " ")"; done; return 1; }',
-  'listener_pids="$(lsof -nP -tiTCP:"$LINKSITES_LOCAL_PROOF_CMS_PORT" -sTCP:LISTEN || true)"', 'test -n "$listener_pids" || die "expected local CMS listener is missing before restart"',
+  // A direct database recovery can make the development listener exit before
+  // this hook reaches the restart boundary.  An absent listener is therefore
+  // already stopped; any listener that remains must still belong to this
+  // disposable launcher before we terminate it.
+  'listener_pids="$(lsof -nP -tiTCP:"$LINKSITES_LOCAL_PROOF_CMS_PORT" -sTCP:LISTEN || true)"',
   'for listener_pid in $listener_pids; do is_cms_descendant "$listener_pid" || die "refusing to stop listener $listener_pid which is not a child of the disposable CMS launcher"; done',
   'next_lock="$root/apps/cms/.next/dev/lock"', 'test -f "$next_lock" || die "expected CMS development lock is missing before restart"', "next_lock_pid=\"$(node -p 'const value = JSON.parse(require(\"node:fs\").readFileSync(process.argv[1], \"utf8\")); if (!Number.isInteger(value.pid) || value.pid < 2) process.exit(2); value.pid' \"$next_lock\")\" || die \"CMS development lock is malformed\"", 'is_cms_descendant "$next_lock_pid" || die "refusing to remove development lock not owned by the disposable CMS launcher"',
   'cms_descendants() { for child in $(pgrep -P "$1" 2>/dev/null || true); do cms_descendants "$child"; printf "%s\\n" "$child"; done; }', 'cms_tree="$(cms_descendants "$LINKSITES_LOCAL_PROOF_CMS_PID")"', 'test -n "$cms_tree" || die "CMS launcher has no descendant tree to stop"',
