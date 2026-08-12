@@ -4,34 +4,97 @@ on:
   push:
     branches: [main, staging, development]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main, staging, development]
 
 permissions:
   contents: read
+  actions: read
+
+concurrency:
+  group: linksites-ci-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.event.action || 'push' }}
+  cancel-in-progress: true
 
 jobs:
-  required-production-gate:
+  ordinary-or-promotion-gate:
+    name: required-production-gate
+    if: github.event_name != 'pull_request' || github.event.action != 'ready_for_review'
     runs-on: [self-hosted, Linux, ARM64, linktrend-ci-isolated]
-    timeout-minutes: 60
+    timeout-minutes: 10
     steps:
       - name: Checkout LiNKsites
         uses: actions/checkout@v4
         with:
-          # The secret gate scans every commit introduced by this PR/push.
           fetch-depth: 0
-          # Do not expose the workflow token through .git/config when the
-          # repository is mounted read-only into the scanner container.
           persist-credentials: false
+
+      - name: Setup pnpm
+        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'development'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Setup Node.js
+        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'development'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Fast source checks
+        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'development'
+        run: bash scripts/ci-fast.sh
+
+      - name: Reuse exact full-suite result for promotion
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref != 'development'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/ci_full_suite_receipt.py verify \
+            --repo "${GITHUB_REPOSITORY}" \
+            --workflow ci.yml \
+            --output .ci-artifacts/full-suite-reuse.json
+          node deploy/scripts/validate-runtime-config.mjs
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Dependency and secret scan
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: bash scripts/ci-secret-scan.sh
+
+      - name: Upload sanitized evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: linksites-fast-or-release-evidence-${{ github.run_id }}
+          path: .ci-artifacts/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 14
+
+  full-production-suite:
+    name: full-production-suite
+    if: github.event_name == 'pull_request' && github.event.action == 'ready_for_review' && github.event.pull_request.base.ref == 'development'
+    runs-on: [self-hosted, Linux, ARM64, linktrend-ci-isolated]
+    timeout-minutes: 60
+    steps:
+      - name: Checkout LiNKsites final review commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
       - name: Checkout exact LiNKplatform migration dependency
         uses: actions/checkout@v4
         with:
           repository: linktrend/LiNKplatform
           ref: 63635ecec576887e5e25080745c4ad169b335508
           path: .ci/linkplatform
-          # Private-repository read access must be granted to this workflow.
-          # No fallback or skipped RLS suite is permitted if it is absent.
           token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
           persist-credentials: false
+
       - name: Checkout exact LiNKlibraries authority
         uses: actions/checkout@v4
         with:
@@ -40,61 +103,48 @@ jobs:
           path: .ci/linklibraries
           token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
           persist-credentials: false
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
+
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: 2.81.3
-      - name: Required production readiness gate
+
+      - name: Full application and recovery suite
         env:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
           W2_02_LIBRARY_REPOSITORY_PATH: ${{ github.workspace }}/.ci/linklibraries
         run: bash scripts/ci-required.sh
-      - name: Upload sanitized evidence
+
+      - name: Bind successful suite to exact source and file tree
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          TESTED_SHA: ${{ github.sha }}
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 scripts/ci_full_suite_receipt.py write \
+            --repo "${GITHUB_REPOSITORY}" \
+            --source-sha "${SOURCE_SHA}" \
+            --tested-sha "${TESTED_SHA}" \
+            --workflow-run-id "${GITHUB_RUN_ID}" \
+            --workflow-url "${WORKFLOW_URL}" \
+            --output .ci-artifacts/full-suite-receipt.json
+
+      - name: Upload exact full-suite receipt and evidence
         uses: actions/upload-artifact@v4
         with:
-          name: w2-07-ci-evidence
+          name: linksites-full-suite-${{ github.sha }}
           path: .ci-artifacts/
           if-no-files-found: error
           include-hidden-files: true
-      - name: Dependency and secret scan
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BEFORE_SHA: ${{ github.event.before }}
-        run: |
-          set -euo pipefail
-
-          if [[ "$EVENT_NAME" == "pull_request" ]]; then
-            # actions/checkout checks out the synthetic PR merge commit. Its
-            # first parent is the target branch; its second is the exact PR tip.
-            base_sha="$(git rev-parse HEAD^1)"
-            head_sha="$(git rev-parse HEAD^2)"
-          else
-            base_sha="$BEFORE_SHA"
-            head_sha="$(git rev-parse HEAD)"
-            if [[ ! "$base_sha" =~ ^[0-9a-f]{40}$ ]] || [[ "$base_sha" == "0000000000000000000000000000000000000000" ]]; then
-              # New branch/root push: scan every reachable commit fail-closed.
-              base_sha=""
-            fi
-          fi
-
-          log_opts="--all"
-          if [[ -n "$base_sha" ]]; then
-            git cat-file -e "${base_sha}^{commit}"
-            git cat-file -e "${head_sha}^{commit}"
-            log_opts="${base_sha}..${head_sha}"
-          fi
-
-          docker run --rm \
-            --volume "$PWD:/repo:ro" \
-            zricethezav/gitleaks@sha256:e1b35e12a8c6fa8901f060459cfb6b2fc4c484d3afbe3b029733a3bbfab07055 \
-            git --redact --verbose --log-opts="$log_opts" /repo
+          retention-days: 30
