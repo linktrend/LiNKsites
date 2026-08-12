@@ -60,6 +60,7 @@ jobs:
           name: w2-07-ci-evidence
           path: .ci-artifacts/
           if-no-files-found: error
+          include-hidden-files: true
       # Gitleaks may clean untracked workspace files while preparing its Git
       # range. Preserve the already-sanitized gate evidence before it runs.
       - name: Dependency and secret scan
