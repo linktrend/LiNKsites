@@ -11,11 +11,15 @@ permissions:
 
 jobs:
   required-production-gate:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, ARM64, linktrend-ci-isolated]
     timeout-minutes: 60
     steps:
       - name: Checkout LiNKsites
         uses: actions/checkout@v4
+        with:
+          # Gitleaks scans the full PR range and must be able to resolve the
+          # base commit even after several commits are pushed to the branch.
+          fetch-depth: 0
       - name: Checkout exact LiNKplatform migration dependency
         uses: actions/checkout@v4
         with:
@@ -50,13 +54,16 @@ jobs:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
           W2_02_LIBRARY_REPOSITORY_PATH: ${{ github.workspace }}/.ci/linklibraries
         run: bash scripts/ci-required.sh
-      - name: Dependency and secret scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload sanitized evidence
         uses: actions/upload-artifact@v4
         with:
           name: w2-07-ci-evidence
           path: .ci-artifacts/
           if-no-files-found: error
+          include-hidden-files: true
+      # Gitleaks may clean untracked workspace files while preparing its Git
+      # range. Preserve the already-sanitized gate evidence before it runs.
+      - name: Dependency and secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
