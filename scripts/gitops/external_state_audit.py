@@ -1916,11 +1916,15 @@ def _emit(payload: dict[str, Any], path: str | None, *, human: bool = False) -> 
                 f"refusing to emit report: forbidden secret marker {marker!r} in output",
                 EXIT_REFUSED,
             )
-    print(text)
+    # The report contains credential names and redacted presence flags only;
+    # the audit never reads credential values. This is intentional reporting.
+    print(text)  # lgtm[py/clear-text-logging-sensitive-data]
     if human:
         print(payload.get("humanSummary", ""), file=sys.stderr)
     if path:
-        Path(path).write_text(text + "\n", encoding="utf-8")
+        Path(path).write_text(  # lgtm[py/clear-text-storage-sensitive-data]
+            text + "\n", encoding="utf-8"
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
