@@ -94,13 +94,22 @@ web_environment=(
 web_pid="$!"
 wait_for "http://127.0.0.1:${web_port}/api/healthz" || { cat "$local_root/web.log" >&2; exit 1; }
 
+chromium_executable="${W2_04_CHROMIUM_EXECUTABLE:-}"
+if [ -z "$chromium_executable" ]; then
+  chromium_executable="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+fi
+if [ -z "$chromium_executable" ] && [ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then
+  chromium_executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+fi
+test -x "$chromium_executable" || { echo "No runnable Chromium/Chrome executable found" >&2; exit 1; }
+
 if ! browser_output="$(W2_04_CMS_URL="http://127.0.0.1:${cms_port}" \
   W2_04_WEB_URL="http://127.0.0.1:${web_port}" \
   PREVIEW_ACCESS_TOKEN="$preview_token" \
   W2_04_PREVIEW_API_KEY="$preview_api_key" \
   W2_04_SITE_ID="$site_id" \
   W2_04_ARTIFACT_DIR="$local_root/artifacts" \
-  W2_04_CHROMIUM_EXECUTABLE="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  W2_04_CHROMIUM_EXECUTABLE="$chromium_executable" \
   pnpm --filter @linksites/cms exec node scripts/w2-04-browser-proof.mjs 2>&1)"; then
   printf '%s\n' "$browser_output" >&2
   echo 'W2-04 browser proof failed' >&2
