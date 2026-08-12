@@ -271,7 +271,7 @@ Connect your applications with our platform using our REST API.
 All API requests require authentication using API keys:
 
 \`\`\`bash
-curl -H "Authorization: Bearer YOUR_API_KEY" \\
+curl --oauth2-bearer "$API_KEY" \\
      https://api.platform.com/v1/endpoint
 \`\`\`
 
