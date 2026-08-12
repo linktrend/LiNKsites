@@ -19,6 +19,9 @@ jobs:
         with:
           # The secret gate scans every commit introduced by this PR/push.
           fetch-depth: 0
+          # Do not expose the workflow token through .git/config when the
+          # repository is mounted read-only into the scanner container.
+          persist-credentials: false
       - name: Checkout exact LiNKplatform migration dependency
         uses: actions/checkout@v4
         with:
@@ -28,6 +31,7 @@ jobs:
           # Private-repository read access must be granted to this workflow.
           # No fallback or skipped RLS suite is permitted if it is absent.
           token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
+          persist-credentials: false
       - name: Checkout exact LiNKlibraries authority
         uses: actions/checkout@v4
         with:
@@ -35,6 +39,7 @@ jobs:
           ref: a7193d40152747db2a03e094fa263f324a971a0b
           path: .ci/linklibraries
           token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
+          persist-credentials: false
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
