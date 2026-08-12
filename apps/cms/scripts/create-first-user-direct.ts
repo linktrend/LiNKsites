@@ -8,9 +8,14 @@ const { Client } = pg
 
 type QueryRow = Record<string, any>
 
+const firstUserPassword = process.env.FIRST_USER_PASSWORD
+if (!firstUserPassword) {
+  throw new Error('FIRST_USER_PASSWORD is required')
+}
+
 const FIRST_USER = {
   email: 'sysadmin@linktrend.media',
-  password: 'cuhjyz-nabhap-muXpi9',
+  password: firstUserPassword,
   firstName: 'System',
   lastName: 'Admin',
 }

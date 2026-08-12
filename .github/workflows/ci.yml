@@ -17,9 +17,7 @@ jobs:
       - name: Checkout LiNKsites
         uses: actions/checkout@v4
         with:
-          # Gitleaks scans the full PR range and must be able to resolve the
-          # base commit even after several commits are pushed to the branch.
-          fetch-depth: 0
+          fetch-depth: 1
       - name: Checkout exact LiNKplatform migration dependency
         uses: actions/checkout@v4
         with:
@@ -61,9 +59,14 @@ jobs:
           path: .ci-artifacts/
           if-no-files-found: error
           include-hidden-files: true
-      # Gitleaks may clean untracked workspace files while preparing its Git
-      # range. Preserve the already-sanitized gate evidence before it runs.
       - name: Dependency and secret scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          scan_root="$(mktemp -d)"
+          trap 'rm -rf "$scan_root"' EXIT
+          git archive HEAD | tar -x -C "$scan_root"
+          docker run --rm \
+            --volume "$scan_root:/repo:ro" \
+            zricethezav/gitleaks@sha256:e1b35e12a8c6fa8901f060459cfb6b2fc4c484d3afbe3b029733a3bbfab07055 \
+            dir --redact --verbose /repo
