@@ -42,6 +42,10 @@ bash scripts/verify-docker-build.sh
 node --test deploy/tests/*.test.mjs deploy/tests/runtime-contract.test.mjs
 pnpm deploy:restore-rehearsal -- --evidence .ci-artifacts/w2-07-local-restore.json
 pnpm audit --audit-level=moderate
+# Next/Payload development commands regenerate these tracked derived files.
+# Restore the exact candidate versions before the clean-tree assertion so the
+# gate measures source drift rather than deterministic tool output.
+git restore --worktree -- apps/cms/next-env.d.ts apps/cms/src/payload-types.ts
 scripts/assert-active-surface-clean.sh
 git diff --exit-code
 git diff --cached --exit-code
