@@ -17,7 +17,8 @@ jobs:
       - name: Checkout LiNKsites
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          # The secret gate scans every commit introduced by this PR/push.
+          fetch-depth: 0
       - name: Checkout exact LiNKplatform migration dependency
         uses: actions/checkout@v4
         with:
@@ -61,12 +62,34 @@ jobs:
           include-hidden-files: true
       - name: Dependency and secret scan
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
-          scan_root="$(mktemp -d)"
-          trap 'rm -rf "$scan_root"' EXIT
-          git archive HEAD | tar -x -C "$scan_root"
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            # actions/checkout checks out the synthetic PR merge commit. Its
+            # first parent is the target branch; its second is the exact PR tip.
+            base_sha="$(git rev-parse HEAD^1)"
+            head_sha="$(git rev-parse HEAD^2)"
+          else
+            base_sha="$BEFORE_SHA"
+            head_sha="$(git rev-parse HEAD)"
+            if [[ ! "$base_sha" =~ ^[0-9a-f]{40}$ ]] || [[ "$base_sha" == "0000000000000000000000000000000000000000" ]]; then
+              # New branch/root push: scan every reachable commit fail-closed.
+              base_sha=""
+            fi
+          fi
+
+          log_opts="--all"
+          if [[ -n "$base_sha" ]]; then
+            git cat-file -e "${base_sha}^{commit}"
+            git cat-file -e "${head_sha}^{commit}"
+            log_opts="${base_sha}..${head_sha}"
+          fi
+
           docker run --rm \
-            --volume "$scan_root:/repo:ro" \
+            --volume "$PWD:/repo:ro" \
             zricethezav/gitleaks@sha256:e1b35e12a8c6fa8901f060459cfb6b2fc4c484d3afbe3b029733a3bbfab07055 \
-            dir --redact --verbose /repo
+            git --redact --verbose --log-opts="$log_opts" /repo
