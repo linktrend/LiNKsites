@@ -16,6 +16,10 @@ jobs:
     steps:
       - name: Checkout LiNKsites
         uses: actions/checkout@v4
+        with:
+          # Gitleaks scans the full PR range and must be able to resolve the
+          # base commit even after several commits are pushed to the branch.
+          fetch-depth: 0
       - name: Checkout exact LiNKplatform migration dependency
         uses: actions/checkout@v4
         with:
