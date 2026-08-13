@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packageName": "ide-development-managed-core",
   "packageVersion": "2.3.6",
-  "installedAt": "2026-08-13T20:53:50Z",
+  "installedAt": "2026-08-13T20:57:41Z",
   "files": {
     ".agents/skills/action-queue/SKILL.md": {
       "id": "codex-skill-action-queue",
@@ -654,8 +654,8 @@
     },
     ".ide-development/MANIFEST.json": {
       "id": "package-manifest",
-      "sourceHash": "sha256:49b1039b8e6c8060c011ee42b937b3a4fa0862911c2fd5511303acc7f6021428",
-      "contentHash": "sha256:49b1039b8e6c8060c011ee42b937b3a4fa0862911c2fd5511303acc7f6021428",
+      "sourceHash": "sha256:c7dd34f9507d99606f75f876491458ea294637c4fc6abea9e745831c5550bf9b",
+      "contentHash": "sha256:c7dd34f9507d99606f75f876491458ea294637c4fc6abea9e745831c5550bf9b",
       "mode": "0644"
     },
     ".ide-development/README.md": {
@@ -1518,8 +1518,8 @@
     },
     "scripts/gitops/require_exact_ci_success.py": {
       "id": "gitops-scripts-gitops-require-exact-ci-success-py",
-      "sourceHash": "sha256:e672b691985fa2650712fb8dd45b4f2f8d01fc2ba1821b064e094fce8e33061b",
-      "contentHash": "sha256:e672b691985fa2650712fb8dd45b4f2f8d01fc2ba1821b064e094fce8e33061b",
+      "sourceHash": "sha256:d36e78cb7f3fb18556e086838b7c6de08f1990598fa02715bd8ca8ef69949d6e",
+      "contentHash": "sha256:d36e78cb7f3fb18556e086838b7c6de08f1990598fa02715bd8ca8ef69949d6e",
       "mode": "0755"
     },
     "scripts/gitops/resolve_bugbot_user_token.sh": {
