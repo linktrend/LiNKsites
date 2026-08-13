@@ -1,0 +1,87 @@
+# Managed by IDE Development — do not edit by hand in consumers.
+# Sync: scripts/sync-managed-workflows.sh
+#
+# Remote-only cleanup of merged/abandoned work + promote branches.
+# Never deletes local worktrees (Lisa local cleanup is a separate handoff).
+# TRUST BOUNDARY: checkout default branch only; explicit manual apply and built-in token.
+name: LiNKtrend Cleanup Merged Branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply positively owned remote cleanup after the dry run"
+        required: false
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: linktrend-cleanup-merged
+  cancel-in-progress: false
+
+jobs:
+  dry-run:
+    name: Dry-run remote cleanup
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout trusted default branch only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Dry-run remote cleanup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          bash scripts/cleanup-merged-branches.sh --remote
+          echo "### Cleanup dry-run complete" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: cleanup-dry-run
+          path: |
+            gitops-outcome.json
+          if-no-files-found: ignore
+          retention-days: 3
+
+  apply:
+    name: Apply remote cleanup
+    needs: dry-run
+    if: inputs.apply == true
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout trusted default branch only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Apply remote cleanup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          bash scripts/cleanup-merged-branches.sh --remote --apply
+          echo "### Cleanup apply complete (remote only; no local worktree deletion)" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: cleanup-apply
+          path: |
+            gitops-outcome.json
+          if-no-files-found: ignore
+          retention-days: 3
