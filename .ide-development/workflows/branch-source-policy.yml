@@ -1,0 +1,53 @@
+name: Linktrend Branch Source Policy
+
+on:
+  pull_request:
+    branches: [main, staging, development]
+  workflow_call:
+    inputs:
+      source_branch:
+        required: false
+        type: string
+      target_branch:
+        required: false
+        type: string
+
+permissions:
+  pull-requests: read
+
+jobs:
+  branch-source-policy:
+    name: Linktrend Branch Source Policy
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    env:
+      BASE_BRANCH: ${{ inputs.target_branch || github.base_ref }}
+      HEAD_BRANCH: ${{ inputs.source_branch || github.head_ref }}
+    steps:
+      - name: Enforce allowed PR source branches
+        run: |
+          set -euo pipefail
+          echo "PR source: ${HEAD_BRANCH}"
+          echo "PR target: ${BASE_BRANCH}"
+          case "${BASE_BRANCH}" in
+            main)
+              case "${HEAD_BRANCH}" in
+                promote/main/*) ;;
+                *) echo "Only promote/main/* temporary branches may be merged into main."; exit 1 ;;
+              esac
+              ;;
+            staging)
+              case "${HEAD_BRANCH}" in
+                promote/staging/*) ;;
+                *) echo "Only promote/staging/* temporary branches may be merged into staging."; exit 1 ;;
+              esac
+              ;;
+            development)
+              case "${HEAD_BRANCH}" in
+                issue/*|phase/*|dev/*) ;;
+                *) echo "Only issue/*, phase/*, or dev/* branches may be merged into development."; exit 1 ;;
+              esac
+              ;;
+            *) echo "Unhandled base branch: ${BASE_BRANCH}"; exit 1 ;;
+          esac
+          echo "Linktrend Branch Source Policy passed for ${HEAD_BRANCH} -> ${BASE_BRANCH}."
