@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packageName": "ide-development-managed-core",
   "packageVersion": "2.3.6",
-  "installedAt": "2026-08-13T20:49:32Z",
+  "installedAt": "2026-08-13T20:53:50Z",
   "files": {
     ".agents/skills/action-queue/SKILL.md": {
       "id": "codex-skill-action-queue",
@@ -654,8 +654,8 @@
     },
     ".ide-development/MANIFEST.json": {
       "id": "package-manifest",
-      "sourceHash": "sha256:cb638ca2b7144a4109eef01073a7fc31e6614c3fe7a17f58b7b255caf2109bbd",
-      "contentHash": "sha256:cb638ca2b7144a4109eef01073a7fc31e6614c3fe7a17f58b7b255caf2109bbd",
+      "sourceHash": "sha256:49b1039b8e6c8060c011ee42b937b3a4fa0862911c2fd5511303acc7f6021428",
+      "contentHash": "sha256:49b1039b8e6c8060c011ee42b937b3a4fa0862911c2fd5511303acc7f6021428",
       "mode": "0644"
     },
     ".ide-development/README.md": {
@@ -1344,8 +1344,8 @@
     },
     ".ide-development/workflows/linktrend-integrator-merge.yml": {
       "id": "workflow-linktrend-integrator-merge-yml",
-      "sourceHash": "sha256:c7b5431538f0e7b3d7b3057f16aa6c7eb20a2e34ac9d765388dee8878bcd871a",
-      "contentHash": "sha256:c7b5431538f0e7b3d7b3057f16aa6c7eb20a2e34ac9d765388dee8878bcd871a",
+      "sourceHash": "sha256:2236f386cdfb0af9ba136d0adb96e1cc91ae0626beade82a1ff1518f15a1a9c9",
+      "contentHash": "sha256:2236f386cdfb0af9ba136d0adb96e1cc91ae0626beade82a1ff1518f15a1a9c9",
       "mode": "0644"
     },
     ".ide-development/workflows/linktrend-review-packager.yml": {
@@ -1518,8 +1518,8 @@
     },
     "scripts/gitops/require_exact_ci_success.py": {
       "id": "gitops-scripts-gitops-require-exact-ci-success-py",
-      "sourceHash": "sha256:b2ab3d49f9bfb2dd56048cadc9c9564748d2ce32e8b858b2f203069f7e6bab59",
-      "contentHash": "sha256:b2ab3d49f9bfb2dd56048cadc9c9564748d2ce32e8b858b2f203069f7e6bab59",
+      "sourceHash": "sha256:e672b691985fa2650712fb8dd45b4f2f8d01fc2ba1821b064e094fce8e33061b",
+      "contentHash": "sha256:e672b691985fa2650712fb8dd45b4f2f8d01fc2ba1821b064e094fce8e33061b",
       "mode": "0755"
     },
     "scripts/gitops/resolve_bugbot_user_token.sh": {
