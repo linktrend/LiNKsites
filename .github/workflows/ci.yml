@@ -19,7 +19,7 @@ jobs:
   ordinary-or-promotion-gate:
     name: required-production-gate
     if: github.event_name != 'pull_request' || github.event.action != 'ready_for_review'
-    runs-on: ubuntu-24.04-arm
+    runs-on: [self-hosted, Linux, ARM64, linktrend-ci-isolated]
     timeout-minutes: 10
     steps:
       - name: Checkout LiNKsites
@@ -77,7 +77,7 @@ jobs:
   full-production-suite:
     name: full-production-suite
     if: github.event_name == 'pull_request' && github.event.action == 'ready_for_review' && github.event.pull_request.base.ref == 'development'
-    runs-on: ubuntu-24.04-arm
+    runs-on: [self-hosted, Linux, ARM64, linktrend-ci-isolated]
     timeout-minutes: 60
     steps:
       - name: Checkout LiNKsites final review commit
