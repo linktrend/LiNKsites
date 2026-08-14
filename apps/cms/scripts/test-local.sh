@@ -30,5 +30,6 @@ export PAYLOAD_SECRET="cms-local-validation-only-not-a-secret"
 export PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:3000"
 
 cd "$cms_root"
-pnpm run build
+# The Full profile builds CMS once through this local integration path.  A
+# second pre-build in scripts/ci-required.sh is redundant and was removed.
 pnpm run test

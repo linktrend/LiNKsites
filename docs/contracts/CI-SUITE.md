@@ -12,7 +12,7 @@ The workflow is intentionally split by event:
 | Event | Required LiNKsites result | Command / evidence | Why it exists |
 | --- | --- | --- | --- |
 | Phase PR opened, updated, reopened, or marked ready | `LiNKsites CI` | `scripts/ci-fast.sh` and its artifact | Lint, type, runtime-configuration contract, receipt-verifier, active-surface, and changed-range secret checks. The script fails after 300 seconds. |
-| Final Phase PR labelled `linktrend-full-suite` | `full-production-suite` | `scripts/ci-required.sh` and `linksites-full-suite-<head>` | Application builds and tests, local Payload/browser, Supabase RLS, Docker build, deployment contract, restore rehearsal, audit, and active-surface protection. The checkout and receipt use the exact Phase head SHA. |
+| Final Phase PR labelled `linktrend-full-suite` | `full-production-suite` | `scripts/ci-required.sh` and `linksites-full-suite-<head>` | Exact-Fast receipt, application tests/builds, Supabase RLS, focused browser proof, Docker, deployment contract, and recovery rehearsal. The checkout and receipt use the exact Phase head SHA. |
 | Promotion PR to `staging` or `main` | `LiNKsites Promotion Receipt` | `scripts/ci_full_suite_receipt.py verify` | Reuses an unexpired successful `full-production-suite` artifact only when the Git tree and lockfile identity match. It never runs the Full application suite. |
 
 The managed `Linktrend Fast Checks`, `Linktrend Full Suite`, `Linktrend Receipt
@@ -38,9 +38,22 @@ that the application-specific Full suite passed for the identical tree.
 | CodeQL | Dynamic GitHub security analysis | KEEP | Security analysis; not altered by this repository-owned CI change. |
 | Dependabot Updates | GitHub-managed schedule | ADVISORY | Dependency maintenance, not a branch-merge check. |
 
-No deployment, migration, data-integrity, security, recovery, or browser/RLS
-coverage is removed. The Fast suite is repeated once by the Full suite only as
-a final-integrity confirmation; it is not re-run on unchanged promotions.
+## Command-level reduction (revision after PR #164 baseline)
+
+| Component | Decision | Coverage / boundary |
+| --- | --- | --- |
+| Full lint and typecheck | REMOVE | The final workflow requires successful exact-head `CI` before Full. |
+| CMS pre-build | CONSOLIDATE | `test:local` owns the single CMS production build. |
+| Generic web pre-build | REMOVE | Recovery owns the authoritative URL-specific web build. |
+| Duplicate runtime test | REMOVE | `deploy/tests/*.test.mjs` includes it. |
+| Blanket skipped/todo regex | REMOVE | Required suite exit statuses remain fail-closed. |
+| Per-candidate audit | SCHEDULED / ADVISORY | Weekly/manual production-dependency audit at high severity. |
+| Browser discovery | KEEP, corrected | Resolves Playwright installed Chromium, not only system Chrome. |
+| Component timings | KEEP, added | JSONL timestamps/results for every Full component. |
+
+The #164 baseline Full ran 9m55s and failed only at recovery-browser discovery.
+The revised profile removes Fast duplication, one CMS build, generic web build,
+duplicate runtime test, and per-candidate audit. Hosted after timing is pending.
 
 ## Required-check contract
 
@@ -48,9 +61,9 @@ The branch rules must name only checks that active workflows actually produce:
 
 | Branch | Required contexts |
 | --- | --- |
-| `development` | `Enforce allowed PR source branches`, `Linktrend Fast Checks`, `LiNKsites CI`, `Linktrend Full Suite`, `full-production-suite`, `Cursor Bugbot` |
-| `staging` | `Enforce allowed PR source branches`, `Linktrend Receipt Gate`, `LiNKsites Promotion Receipt` |
-| `main` | `Enforce allowed PR source branches`, `Linktrend Receipt Gate`, `LiNKsites Promotion Receipt` |
+| `development` | `Linktrend Branch Source Policy`, `Linktrend Fast Checks`, `LiNKsites CI`, `Linktrend Full Suite`, `full-production-suite`, `Cursor Bugbot` |
+| `staging` | `Linktrend Branch Source Policy`, `Linktrend Receipt Gate`, `LiNKsites Promotion Receipt` |
+| `main` | `Linktrend Branch Source Policy`, `Linktrend Receipt Gate`, `LiNKsites Promotion Receipt` |
 
 Cancelled, skipped, missing, or neutral checks are not accepted as successful.
 `Cursor Bugbot` belongs only to the final Phase candidate; requiring it on a
