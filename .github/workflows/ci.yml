@@ -183,6 +183,7 @@ jobs:
           pnpm --filter @linksites/cms exec playwright install --with-deps chromium
           browser_path="$(pnpm --filter @linksites/cms exec node -e "process.stdout.write(require('playwright').chromium.executablePath())")"
           test -x "${browser_path}"
+          echo "W2_02_CHROMIUM_EXECUTABLE=${browser_path}" >> "${GITHUB_ENV}"
           echo "W2_04_CHROMIUM_EXECUTABLE=${browser_path}" >> "${GITHUB_ENV}"
 
       - name: Run Full application and recovery profile
