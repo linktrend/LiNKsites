@@ -47,11 +47,17 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Restore Turbo outputs
-        uses: actions/cache@v4
+      - name: Compute immutable cache keys before Fast
+        id: cache-keys
+        run: node scripts/ci/write-cache-key-manifest.mjs --runner "${{ runner.os }}" --output .ci-artifacts/cache-key-manifest.json
+
+      - name: Restore Turbo outputs (advisory)
+        id: turbo-restore
+        continue-on-error: true
+        uses: actions/cache/restore@v4
         with:
           path: .turbo
-          key: turbo-fast-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '**/package.json', 'apps/**', 'packages/**', 'scripts/**') }}
+          key: ${{ steps.cache-keys.outputs.turbo }}
 
       - name: Run Fast application profile
         env:
@@ -68,6 +74,14 @@ jobs:
           if-no-files-found: warn
           include-hidden-files: true
           retention-days: 14
+
+      - name: Save Turbo outputs (advisory)
+        if: ${{ success() && steps.turbo-restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .turbo
+          key: ${{ steps.cache-keys.outputs.turbo }}
 
   full-production-suite:
     name: full-production-suite
@@ -115,25 +129,35 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      # Caches contain only reproducible inputs/outputs; every named Full
-      # component still executes and writes a fresh timing/result receipt.
-      - name: Restore Playwright browser payload
-        uses: actions/cache@v4
+      # Keys are computed before install/build steps. Caches are advisory only;
+      # all named Full components execute and write fresh evidence regardless.
+      - name: Compute immutable cache keys before Full
+        id: cache-keys
+        run: node scripts/ci/write-cache-key-manifest.mjs --runner "${{ runner.os }}" --output .ci-artifacts/cache-key-manifest.json
+
+      - name: Restore Playwright browser payload (advisory)
+        id: playwright-restore
+        continue-on-error: true
+        uses: actions/cache/restore@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'apps/cms/package.json') }}
+          key: ${{ steps.cache-keys.outputs.playwright }}
 
-      - name: Restore Turbo outputs
-        uses: actions/cache@v4
+      - name: Restore Turbo outputs (advisory)
+        id: turbo-restore
+        continue-on-error: true
+        uses: actions/cache/restore@v4
         with:
           path: .turbo
-          key: turbo-full-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '**/package.json', 'apps/**', 'packages/**', 'scripts/**') }}
+          key: ${{ steps.cache-keys.outputs.turbo }}
 
-      - name: Restore Docker BuildKit layers
-        uses: actions/cache@v4
+      - name: Restore Docker BuildKit layers (advisory)
+        id: buildx-restore
+        continue-on-error: true
+        uses: actions/cache/restore@v4
         with:
           path: ~/.cache/linksites-buildx
-          key: buildx-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'turbo.json', 'deploy/docker/**', 'apps/**', 'packages/**', 'scripts/**') }}
+          key: ${{ steps.cache-keys.outputs.buildx }}
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -182,6 +206,30 @@ jobs:
           if-no-files-found: warn
           include-hidden-files: true
           retention-days: 30
+
+      - name: Save Playwright browser payload (advisory)
+        if: ${{ success() && steps.playwright-restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.cache-keys.outputs.playwright }}
+
+      - name: Save Turbo outputs (advisory)
+        if: ${{ success() && steps.turbo-restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .turbo
+          key: ${{ steps.cache-keys.outputs.turbo }}
+
+      - name: Save Docker BuildKit layers (advisory)
+        if: ${{ success() && steps.buildx-restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/linksites-buildx
+          key: ${{ steps.cache-keys.outputs.buildx }}
 
   promotion-receipt:
     name: LiNKsites Promotion Receipt
