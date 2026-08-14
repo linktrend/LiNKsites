@@ -10,6 +10,8 @@ if [[ -n "${LINKSITES_LOCAL_PROOF_ROOT:-}" ]]; then
   test ! -e "$local_root" || { echo "LINKSITES_LOCAL_PROOF_ROOT must not exist" >&2; exit 64; }
   mkdir -p "$local_root"
 fi
+diagnostic_root=${LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT:-"$local_root/recovery-diagnostics"}
+mkdir -p "$diagnostic_root"
 cms_port=4321; web_port=4322; cms_pid=""; web_pid=""
 random_value() { node -e "process.stdout.write(require('node:crypto').randomBytes(24).toString('hex'))"; }
 payload_secret="$(random_value)"
@@ -19,6 +21,19 @@ run_marker="w2-02-run-$(random_value | cut -c1-16)"
 stop_tree() { local process="$1" child; [[ -n "$process" ]] || return 0; for child in $(pgrep -P "$process" 2>/dev/null || true); do stop_tree "$child"; done; kill -TERM "$process" >/dev/null 2>&1 || true; }
 cleanup() { stop_tree "$web_pid"; [[ -f "$local_root/web-restarted.pid" ]] && stop_tree "$(cat "$local_root/web-restarted.pid")"; stop_tree "$cms_pid"; [[ -f "$local_root/cms-restarted.pid" ]] && stop_tree "$(cat "$local_root/cms-restarted.pid")"; supabase --workdir "$local_root" stop --no-backup >/dev/null 2>&1 || true; [[ "${LINKSITES_KEEP_LOCAL_REHEARSAL:-}" = 1 ]] || rm -rf "$local_root"; }
 trap cleanup EXIT
+record_phase() {
+  local phase="$1" rc="$2" stdout_file="$3" stderr_file="$4"
+  node -e 'const fs=require("node:fs"); fs.appendFileSync(process.argv[1], JSON.stringify({schemaVersion:1,phase:process.argv[2],result:Number(process.argv[3])===0?"passed":"failed",exitCode:Number(process.argv[3]),stdout:process.argv[4],stderr:process.argv[5]})+"\n")' "$diagnostic_root/recovery-phases.jsonl" "$phase" "$rc" "$stdout_file" "$stderr_file"
+}
+run_phase() {
+  local phase="$1" stdout_file="$diagnostic_root/$phase.stdout.log" stderr_file="$diagnostic_root/$phase.stderr.log" rc=0
+  shift
+  if "$@" >"$stdout_file" 2>"$stderr_file"; then rc=0; else rc=$?; fi
+  cat "$stdout_file"
+  cat "$stderr_file" >&2
+  record_phase "$phase" "$rc" "$stdout_file" "$stderr_file"
+  return "$rc"
+}
 mkdir -p "$local_root/supabase" "$local_root/state"
 local_project_id="w2-02-local-${$}"
 cms_lock="$repo_root/apps/cms/.next/dev/lock"
@@ -51,11 +66,12 @@ if [ -z "$chromium_executable" ]; then
 fi
 test -x "$chromium_executable" || { echo "No runnable Chromium/Chrome executable found" >&2; exit 1; }
 
-W2_02_STATE_DIR="$local_root/state" W2_02_PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" W2_02_PAYLOAD_API_KEY="$api_key" W2_02_PAYLOAD_SITE_ID="$site_id" W2_02_WEB_MASTER_BASE_URL="http://127.0.0.1:${web_port}" W2_02_PREVIEW_ACCESS_TOKEN="$preview_token" W2_02_RUN_MARKER="$run_marker" W2_02_CHROMIUM_EXECUTABLE="$chromium_executable" W2_05_OUTCOME_GATEWAY_SECRET="$outcome_gateway_secret" W2_05_OUTCOME_GATEWAY_KEY_ID="local-proof-key" W2_02_ARTIFACT_PATH="${LINKSITES_LOCAL_PROOF_ARTIFACT_PATH:-$repo_root/docs/production-roadmap/evidence/w2-02/real-service-vertical-slice.json}" pnpm --dir "$repo_root" --filter @linksites/program-orchestrator exec tsx scripts/real-service-vertical-slice.ts
+run_phase real-service env W2_02_STATE_DIR="$local_root/state" W2_02_PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" W2_02_PAYLOAD_API_KEY="$api_key" W2_02_PAYLOAD_SITE_ID="$site_id" W2_02_WEB_MASTER_BASE_URL="http://127.0.0.1:${web_port}" W2_02_PREVIEW_ACCESS_TOKEN="$preview_token" W2_02_RUN_MARKER="$run_marker" W2_02_CHROMIUM_EXECUTABLE="$chromium_executable" W2_05_OUTCOME_GATEWAY_SECRET="$outcome_gateway_secret" W2_05_OUTCOME_GATEWAY_KEY_ID="local-proof-key" W2_02_ARTIFACT_PATH="${LINKSITES_LOCAL_PROOF_ARTIFACT_PATH:-$repo_root/docs/production-roadmap/evidence/w2-02/real-service-vertical-slice.json}" LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT="$diagnostic_root" pnpm --dir "$repo_root" --filter @linksites/program-orchestrator exec tsx scripts/real-service-vertical-slice.ts
 
 if [[ -n "${LINKSITES_LOCAL_PROOF_POSTHOOK:-}" ]]; then
   test -x "$LINKSITES_LOCAL_PROOF_POSTHOOK" || { echo "LINKSITES_LOCAL_PROOF_POSTHOOK must be executable" >&2; exit 64; }
-  LINKSITES_LOCAL_PROOF_ROOT="$local_root" \
+  run_phase posthook env LINKSITES_LOCAL_PROOF_ROOT="$local_root" \
+  LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT="$diagnostic_root" \
   LINKSITES_LOCAL_PROOF_CMS_PORT="$cms_port" \
   LINKSITES_LOCAL_PROOF_CMS_PID="$cms_pid" \
   LINKSITES_LOCAL_PROOF_WEB_PORT="$web_port" \

@@ -15,6 +15,9 @@ const run = (paths, expectedMode, expectedImages) => {
   execFileSync(process.execPath, [script, '--base', 'HEAD', '--head', 'HEAD', '--paths-file', pathsFile, '--output', output], { cwd: root })
   const result = JSON.parse(readFileSync(output, 'utf8'))
   assert.equal(result.mode, expectedMode)
+  assert.equal(result.schemaVersion, 1)
+  assert.equal(result.baseSha, 'HEAD')
+  assert.equal(result.headSha, 'HEAD')
   assert.deepEqual(result.images, expectedImages)
 }
 try {

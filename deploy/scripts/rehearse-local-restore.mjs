@@ -3,7 +3,7 @@
 // Payload, web-master and Chromium.  It never contacts a VPS or cloud system.
 import assert from 'node:assert/strict'
 import { randomBytes } from 'node:crypto'
-import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -14,21 +14,36 @@ const evidenceAt = process.argv.includes('--evidence')
   : null
 if (process.argv.includes('--evidence') && !evidenceAt) throw new Error('--evidence requires a path')
 
+const sanitize = (value) => value
+  .replace(/((?:api[_-]?key|access[_-]?token|preview[_-]?token|password|secret)\s*[:=]\s*)[^\s,}]+/gi, '$1[REDACTED]')
+  .replace(/[A-Fa-f0-9]{32,}/g, '[REDACTED]')
+  .slice(-200_000)
+
 const run = (command, args, options = {}) => new Promise((resolveRun, rejectRun) => {
-  const child = spawn(command, args, { cwd: root, stdio: 'inherit', ...options })
+  const child = spawn(command, args, { cwd: root, stdio: ['ignore', 'pipe', 'pipe'], ...options })
+  let stdout = ''
+  let stderr = ''
+  child.stdout?.on('data', (chunk) => { const text = chunk.toString(); stdout += text; process.stdout.write(text) })
+  child.stderr?.on('data', (chunk) => { const text = chunk.toString(); stderr += text; process.stderr.write(text) })
   child.once('error', rejectRun)
-  child.once('exit', (code, signal) => code === 0 ? resolveRun() : rejectRun(new Error(`${command} exited ${code ?? signal ?? 'unknown'}`)))
+  child.once('exit', (code, signal) => code === 0 ? resolveRun() : rejectRun(Object.assign(new Error(`${command} exited ${code ?? signal ?? 'unknown'}`), { code, signal, stdout, stderr })))
 })
 
 const rehearsal = await mkdtemp(join(tmpdir(), 'linksites-w2-07-recovery-'))
+const diagnosticRoot = resolve(process.env.LINKSITES_RECOVERY_DIAGNOSTIC_ROOT ?? join(process.cwd(), '.ci-artifacts', 'recovery'))
+await mkdir(diagnosticRoot, { recursive: true })
 const hook = join(rehearsal, 'posthook.sh')
 const rawReceipt = join(rehearsal, 'receipt.json')
 const mediaName = `w2-07-recovery-${randomBytes(10).toString('hex')}.txt`
 const hookLines = [
   '#!/usr/bin/env bash', 'set -euo pipefail',
-  'die() { echo "restore rehearsal: $*" >&2; exit 1; }',
+  `diagnostic_root=${JSON.stringify(diagnosticRoot)}`, 'mkdir -p "$diagnostic_root"',
+  'phase="initialization"', 'set_phase() { phase="$1"; printf "%s\n" "$phase" > "$diagnostic_root/current-phase"; }',
+  'record_failure() { rc="$1"; message="$2"; node -e \'const fs=require("node:fs"); fs.writeFileSync(process.argv[1], JSON.stringify({schemaVersion:1,result:"failed",phase:process.argv[2],exitCode:Number(process.argv[3]),message:process.argv[4],sanitized:true})+"\\n")\' "$diagnostic_root/recovery-failure.json" "$phase" "$rc" "$message"; echo "restore rehearsal [$phase]: $message" >&2; }',
+  'die() { record_failure 1 "$*"; exit 1; }',
+  'on_err() { rc=$?; record_failure "$rc" "recovery command failed"; exit "$rc"; }', 'trap on_err ERR',
   `root=${JSON.stringify(root)}`, `receipt=${JSON.stringify(rawReceipt)}`, `media_name=${JSON.stringify(mediaName)}`,
-  'backup="$LINKSITES_LOCAL_PROOF_ROOT/backup"', 'restore="$LINKSITES_LOCAL_PROOF_ROOT/restored"', 'mkdir -p "$backup" "$restore"',
+  'set_phase backup', 'backup="$LINKSITES_LOCAL_PROOF_ROOT/backup"', 'restore="$LINKSITES_LOCAL_PROOF_ROOT/restored"', 'mkdir -p "$backup" "$restore"',
   'db="supabase_db_${LINKSITES_LOCAL_PROOF_PROJECT_ID}"', 'docker inspect "$db" >/dev/null 2>&1 || die "local Supabase Postgres is unavailable"',
   '# Logical backup of the actual Payload pages graph, including the draft-version tables.  The latter use a leading underscore and are not covered by pages*. Avoid global Supabase event-trigger DDL: its privileged ownership is intentionally outside the application recovery authority.',
   'docker exec "$db" pg_dump -U postgres -d postgres --data-only --inserts --no-owner --no-privileges -t "public.pages*" -t "public._pages_v*" > "$backup/postgres.sql"', 'test -s "$backup/postgres.sql" || die "Postgres backup is empty"', 'grep -q "Data for Name: _pages_v" "$backup/postgres.sql" || die "Payload draft-version backup is missing"',
@@ -40,18 +55,18 @@ const hookLines = [
   '# Use Payload configured local media storage, with a new disposable private object.',
   'media_dir="$root/apps/cms/media"', 'mkdir -p "$media_dir"', 'media="$media_dir/$media_name"', 'printf "%s\\n" "$media_name" > "$media"',
   'media_hash="$(shasum -a 256 "$media" | awk "{print \\\u00241}")"', 'cp "$media" "$backup/$media_name"',
-  '# Destruct only disposable Payload page content, its temporary state, and test media.  The seed site/user rows remain so the restored page records retain their real relations.',
+  'set_phase destruct', '# Destruct only disposable Payload page content, its temporary state, and test media.  The seed site/user rows remain so the restored page records retain their real relations.',
   'docker exec "$db" psql -v ON_ERROR_STOP=1 -U postgres -d postgres -c "truncate table public.pages restart identity cascade" >/dev/null',
   "count=\"$(docker exec \"$db\" psql -At -U postgres -d postgres -c \"select count(*) from public.pages where promotion_run_marker = '$LINKSITES_LOCAL_PROOF_RUN_MARKER'\")\"", 'test "$count" = 0 || die "draft destructive probe failed"',
   'rm -rf "$LINKSITES_LOCAL_PROOF_ROOT/state"', 'rm -f "$media"', 'test ! -e "$media" || die "media destructive probe failed"',
-  '# Restore Payload page data, PGlite working state/ledger/outbox, and media.',
+  'set_phase restore', '# Restore Payload page data, PGlite working state/ledger/outbox, and media.',
   'docker exec -i "$db" psql -v ON_ERROR_STOP=1 -U postgres -d postgres < "$backup/postgres.sql" >/dev/null',
   'mkdir -p "$LINKSITES_LOCAL_PROOF_ROOT/state"', 'tar -C "$LINKSITES_LOCAL_PROOF_ROOT/state" -xf "$backup/program-state.tar"', 'cp "$backup/$media_name" "$media"',
   "count=\"$(docker exec \"$db\" psql -At -U postgres -d postgres -c \"select count(*) from public.pages where promotion_run_marker = '$LINKSITES_LOCAL_PROOF_RUN_MARKER'\")\"", 'test "$count" = 5 || die "restored page count is not five"', "unique_ids=\"$(docker exec \"$db\" psql -At -U postgres -d postgres -c \"select count(distinct id) from public.pages where promotion_run_marker = '$LINKSITES_LOCAL_PROOF_RUN_MARKER' and id is not null\")\"", 'test "$unique_ids" = 5 || die "restored pages do not retain five unique non-null PostgreSQL IDs"',
   'test "$(shasum -a 256 "$media" | awk "{print \\\u00241}")" = "$media_hash" || die "media checksum mismatch"',
   'grep -q "\\\"completion.emitted\\\"" "${ledger_files[@]}" || die "completion was not restored"',
   'grep -q "\\\"delivered\\\"" "${ledger_files[@]}" || die "outbox was not restored"',
-  '# Restart the actual CMS after direct PostgreSQL recovery so its database pool and Payload state are re-established exactly as in a service recovery.',
+  'set_phase cms-restart', '# Restart the actual CMS after direct PostgreSQL recovery so its database pool and Payload state are re-established exactly as in a service recovery.',
   'mkdir -p "$restore"',
   // `pnpm dev` is a wrapper; stopping it alone can leave Next.js listening.
   // Terminate only the listener we just started on the dedicated disposable
@@ -70,8 +85,9 @@ const hookLines = [
   'for attempt in $(seq 1 10); do test -z "$(lsof -nP -tiTCP:"$LINKSITES_LOCAL_PROOF_CMS_PORT" -sTCP:LISTEN || true)" && break; sleep 1; done', 'test -z "$(lsof -nP -tiTCP:"$LINKSITES_LOCAL_PROOF_CMS_PORT" -sTCP:LISTEN || true)" || die "CMS listener did not stop for recovery restart"', 'if test -n "$next_lock_pid"; then if kill -0 "$next_lock_pid" >/dev/null 2>&1; then kill -KILL "$next_lock_pid" || die "could not stop verified disposable CMS lock owner"; fi; for attempt in $(seq 1 10); do ! kill -0 "$next_lock_pid" >/dev/null 2>&1 && break; sleep 1; done; ! kill -0 "$next_lock_pid" >/dev/null 2>&1 || die "CMS development lock owner did not exit for recovery restart"; fi', 'if test -e "$next_lock"; then rm -f "$next_lock"; fi', 'test ! -e "$next_lock" || die "stale CMS development lock could not be removed"',
   '(cd "$root" && pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$LINKSITES_LOCAL_PROOF_CMS_PORT") > "$restore/cms-restarted.log" 2>&1 & restarted_cms=$!', 'echo "$restarted_cms" > "$LINKSITES_LOCAL_PROOF_ROOT/cms-restarted.pid"',
   'for attempt in $(seq 1 45); do curl -fsS "http://127.0.0.1:$LINKSITES_LOCAL_PROOF_CMS_PORT/api/readyz" >/dev/null 2>&1 && break; sleep 1; done', 'curl -fsS "http://127.0.0.1:$LINKSITES_LOCAL_PROOF_CMS_PORT/api/readyz" >/dev/null || die "restarted Payload is not ready"',
-  '# Re-read actual Payload and actual token-protected web-master after restore.',
+  'set_phase payload-readback', '# Re-read actual Payload and actual token-protected web-master after restore.',
   'sleep 2', 'mkdir -p "$restore"', 'test -d "$restore" || die "post-restart readback directory is unavailable"', 'payload_body="$restore/payload-readback.json"', ': > "$payload_body" || die "could not create post-restart Payload readback file"', 'payload_status="$(curl --globoff --retry 4 --retry-connrefused --silent -o "$payload_body" -w "%{http_code}" -H "Authorization: users API-Key $LINKSITES_LOCAL_PROOF_API_KEY" "http://127.0.0.1:$LINKSITES_LOCAL_PROOF_CMS_PORT/api/pages?site=$LINKSITES_LOCAL_PROOF_SITE_ID&where[promotionRunMarker][equals]=$LINKSITES_LOCAL_PROOF_RUN_MARKER&draft=true&limit=100" || true)"', 'test "$payload_status" = 200 || die "Payload readback HTTP status $payload_status (body bytes $(wc -c < "$payload_body" 2>/dev/null || echo 0))"', "node -e 'const value = JSON.parse(require(\"node:fs\").readFileSync(process.argv[1], \"utf8\")); const marker = process.argv[2]; const docs = value.docs; if (!Array.isArray(docs) || docs.length !== 5 || new Set(docs.map((doc) => doc.id)).size !== 5 || docs.some((doc) => !doc.id || doc.promotionRunMarker !== marker)) process.exit(1)' \"$payload_body\" \"$LINKSITES_LOCAL_PROOF_RUN_MARKER\" || die \"Payload readback did not retain five unique non-null restored page IDs\"",
+  'set_phase web-restart',
   // The web process remains alive while CMS is restored. Restart only its
   // verified disposable process tree after API restoration so it cannot serve
   // a stale private-preview cache across the service-recovery boundary.
@@ -83,7 +99,7 @@ const hookLines = [
   'web_descendants() { for child in $(pgrep -P "$1" 2>/dev/null || true); do web_descendants "$child"; printf "%s\\n" "$child"; done; }', 'web_tree="$(web_descendants "$LINKSITES_LOCAL_PROOF_WEB_PID")"', 'for web_process in $web_tree "$LINKSITES_LOCAL_PROOF_WEB_PID"; do kill -TERM "$web_process" >/dev/null 2>&1 || true; done', 'for attempt in $(seq 1 20); do test -z "$(lsof -nP -tiTCP:"$LINKSITES_LOCAL_PROOF_WEB_PORT" -sTCP:LISTEN || true)" && break; sleep 1; done', 'test -z "$(lsof -nP -tiTCP:"$LINKSITES_LOCAL_PROOF_WEB_PORT" -sTCP:LISTEN || true)" || die "web-master listener did not stop for recovery restart"',
   'web_receipt="$(node -e \'process.stdout.write(JSON.stringify(JSON.parse(require("node:fs").readFileSync(process.argv[1])).receipt))\' "$LINKSITES_LOCAL_PROOF_ROOT/seed.json")"', 'web_evidence="$(node -e \'process.stdout.write(JSON.stringify(JSON.parse(require("node:fs").readFileSync(process.argv[1])).evidence))\' "$LINKSITES_LOCAL_PROOF_ROOT/seed.json")"',
   '(cd "$root" && env PAYLOAD_BASE_URL="http://127.0.0.1:$LINKSITES_LOCAL_PROOF_CMS_PORT" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:$LINKSITES_LOCAL_PROOF_CMS_PORT" NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:$LINKSITES_LOCAL_PROOF_CMS_PORT" PAYLOAD_API_KEY="$LINKSITES_LOCAL_PROOF_API_KEY" PREVIEW_ACCESS_TOKEN="$LINKSITES_LOCAL_PROOF_PREVIEW_TOKEN" PREVIEW_RUN_MARKER="$LINKSITES_LOCAL_PROOF_RUN_MARKER" LINKSITES_W2_04_LOCAL_PROOF=1 LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID=marketing-smb-v1 LINKSITES_ADMITTED_TEMPLATE_SHA=1111111111111111111111111111111111111111 LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON="$web_receipt" LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON="$web_evidence" pnpm --filter @linksites/web-master start --hostname 127.0.0.1 --port "$LINKSITES_LOCAL_PROOF_WEB_PORT") > "$restore/web-restarted.log" 2>&1 & restarted_web=$!', 'echo "$restarted_web" > "$LINKSITES_LOCAL_PROOF_ROOT/web-restarted.pid"', 'for attempt in $(seq 1 45); do curl -fsS "http://127.0.0.1:$LINKSITES_LOCAL_PROOF_WEB_PORT/api/healthz" >/dev/null 2>&1 && break; sleep 1; done', 'curl -fsS "http://127.0.0.1:$LINKSITES_LOCAL_PROOF_WEB_PORT/api/healthz" >/dev/null || die "restarted web-master is not ready"',
-  'for attempt in $(seq 1 20); do curl --fail --silent -D "$restore/headers" -o "$restore/preview.html" "http://127.0.0.1:$LINKSITES_LOCAL_PROOF_WEB_PORT/en/demo/$LINKSITES_LOCAL_PROOF_PREVIEW_TOKEN" || die "private preview HTTP readback failed"; grep -qi "^x-robots-tag:.*noindex" "$restore/headers" && grep -q "$LINKSITES_LOCAL_PROOF_RUN_MARKER" "$restore/preview.html" && break; sleep 1; done', 'grep -qi "^x-robots-tag:.*noindex" "$restore/headers" || die "private preview lost noindex"', 'grep -q "$LINKSITES_LOCAL_PROOF_RUN_MARKER" "$restore/preview.html" || die "private preview did not render restored draft after web restart"',
+  'set_phase preview-readback', 'for attempt in $(seq 1 20); do curl --fail --silent -D "$restore/headers" -o "$restore/preview.html" "http://127.0.0.1:$LINKSITES_LOCAL_PROOF_WEB_PORT/en/demo/$LINKSITES_LOCAL_PROOF_PREVIEW_TOKEN" || die "private preview HTTP readback failed"; grep -qi "^x-robots-tag:.*noindex" "$restore/headers" && grep -q "$LINKSITES_LOCAL_PROOF_RUN_MARKER" "$restore/preview.html" && break; sleep 1; done', 'grep -qi "^x-robots-tag:.*noindex" "$restore/headers" || die "private preview lost noindex"', 'grep -q "$LINKSITES_LOCAL_PROOF_RUN_MARKER" "$restore/preview.html" || die "private preview did not render restored draft after web restart"',
   'node - "$receipt" "$media_hash" <<\'NODE\'',
   'const fs = require("node:fs")', 'const [path, mediaChecksum] = process.argv.slice(2)',
   'fs.writeFileSync(path, JSON.stringify({ schemaVersion: "1.0.0", rehearsal: "real-disposable-local-recovery", environment: "isolated-local-only", services: ["local-supabase-postgres", "payload-cms", "web-master", "program-orchestrator-state"], backupClasses: { payloadPostgres: true, supabaseWorkingContentAndPgliteState: true, durableLedgerAndOutbox: true, media: { restored: true, sha256: mediaChecksum } }, destructiveProbe: { privateDraftRowsRemovedThenRestored: true, programStateRemovedThenRestored: true, mediaRemovedThenRestored: true }, postRestoreReadback: { privateDraftCount: 5, completionEmitted: true, outboxDelivered: true, privatePreviewRendered: true, noindex: true }, publicActivation: false, credentialsPersisted: false }, null, 2) + "\\n")',
@@ -93,7 +109,27 @@ const hookLines = [
 try {
   await writeFile(hook, hookLines, { mode: 0o700 })
   await chmod(hook, 0o700)
-  await run('bash', ['scripts/w2-02-local-proof.sh'], { env: { ...process.env, LINKSITES_LOCAL_PROOF_ROOT: join(rehearsal, 'services'), LINKSITES_LOCAL_PROOF_POSTHOOK: hook, LINKSITES_LOCAL_PROOF_ARTIFACT_PATH: join(rehearsal, 'vertical-slice.json') } })
+  try {
+    await run('bash', ['scripts/w2-02-local-proof.sh'], { env: { ...process.env, LINKSITES_LOCAL_PROOF_ROOT: join(rehearsal, 'services'), LINKSITES_LOCAL_PROOF_POSTHOOK: hook, LINKSITES_LOCAL_PROOF_ARTIFACT_PATH: join(rehearsal, 'vertical-slice.json'), LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT: diagnosticRoot } })
+  } catch (error) {
+    const details = error instanceof Error ? error : new Error(String(error))
+    const failure = {
+      schemaVersion: 1,
+      result: 'failed',
+      phase: 'w2-02-local-proof',
+      command: 'bash scripts/w2-02-local-proof.sh',
+      exitCode: typeof error?.code === 'number' ? error.code : null,
+      signal: error?.signal ?? null,
+      sanitized: true,
+      stdoutFile: 'w2-02.stdout.log',
+      stderrFile: 'w2-02.stderr.log',
+      innermostFailure: 'recovery-failure.json',
+    }
+    await writeFile(join(diagnosticRoot, 'w2-02.stdout.log'), sanitize(error?.stdout ?? ''))
+    await writeFile(join(diagnosticRoot, 'w2-02.stderr.log'), sanitize(error?.stderr ?? details.message))
+    await writeFile(join(diagnosticRoot, 'w2-07-recovery-failure.json'), `${JSON.stringify(failure, null, 2)}\n`)
+    throw details
+  }
   const receipt = JSON.parse(await readFile(rawReceipt, 'utf8'))
   assert.equal(receipt.publicActivation, false)
   assert.equal(receipt.credentialsPersisted, false)

@@ -16,7 +16,7 @@ const output = option('--output')
 const pathsFile = option('--paths-file')
 if (!base || !output) throw new Error('--base and --output are required')
 
-const all = (reason, changedPaths = []) => ({ schemaVersion: 1, mode: 'all', reason, changedPaths, images })
+const all = (reason, changedPaths = []) => ({ schemaVersion: 1, mode: 'all', reason, changedPaths, baseSha: base, headSha: head, images })
 let changedPaths
 try {
   changedPaths = pathsFile
@@ -41,7 +41,7 @@ else {
     else if (path.startsWith('apps/program-orchestrator/')) selected.add('program-orchestrator')
     else result = all(`unmapped-change:${path}`, changedPaths)
   }
-  if (!result) result = selected.size ? { schemaVersion: 1, mode: 'affected', reason: 'isolated-service-change', changedPaths, images: images.filter((image) => selected.has(image)) } : all('no-mapped-production-surface', changedPaths)
+  if (!result) result = selected.size ? { schemaVersion: 1, mode: 'affected', reason: 'isolated-service-change', changedPaths, baseSha: base, headSha: head, images: images.filter((image) => selected.has(image)) } : all('no-mapped-production-surface', changedPaths)
 }
 mkdirSync(dirname(resolve(output)), { recursive: true })
 writeFileSync(resolve(output), `${JSON.stringify(result, null, 2)}\n`)
