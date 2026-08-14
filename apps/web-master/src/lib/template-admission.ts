@@ -5,6 +5,11 @@ import {
   type LibraryConsumptionEvidence,
   type LibraryConsumptionReceipt,
 } from "@linksites/factory-catalog/library-consumer";
+import {
+  materializeRevision2WebsiteTemplate,
+  type Revision2MaterializedWebsiteTemplate,
+  type Revision2ProviderPin,
+} from "@linksites/factory-catalog/revision2-materialization";
 
 const GIT_SHA_PATTERN = /^[a-f0-9]{40}$/;
 
@@ -70,6 +75,36 @@ const loadAdmittedEvidence = (): LibraryConsumptionEvidence => {
 export const getAdmittedTemplateEvidence = (): LibraryConsumptionEvidence => loadAdmittedEvidence();
 
 export const getAdmittedTemplateReceipt = (): AdmittedTemplateReceipt => loadAdmittedEvidence().receipt;
+
+/**
+ * The production path consumes a pinned Revision 2 release from LiNKlibraries.
+ * The provider directory is read-only input; no template files are copied into
+ * this repository. The legacy functions above remain only for the disposable
+ * W2-04 compatibility proof.
+ */
+export const getAdmittedRevision2Template = (): Revision2MaterializedWebsiteTemplate => {
+  const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT;
+  const sourceCommitSha = process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA;
+  const sourceTreeSha = process.env.LINKSITES_LINKLIBRARIES_TREE_SHA;
+  const dependencyLockSha256 = process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256;
+  const entryId = process.env.LINKSITES_TEMPLATE_ID ?? "master-template-type-1";
+  const version = process.env.LINKSITES_TEMPLATE_VERSION ?? "1.0.0";
+  if (!providerRoot || !sourceCommitSha || !sourceTreeSha || !dependencyLockSha256) {
+    throw new TemplateAdmissionError(
+      "no pinned LiNKlibraries Revision 2 root, source commit/tree, and dependency-lock digest are configured",
+    );
+  }
+  const pin: Revision2ProviderPin = { sourceCommitSha, sourceTreeSha, dependencyLockSha256 };
+  const result = materializeRevision2WebsiteTemplate({
+    providerRoot,
+    entryId,
+    version,
+    pin,
+    receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH,
+  });
+  if (!result.ok) throw new TemplateAdmissionError(result.errors.join("; "));
+  return result.value;
+};
 
 /**
  * Proves that the selected template is the approved catalog entry and, when
