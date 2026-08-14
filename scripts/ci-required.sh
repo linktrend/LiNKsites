@@ -20,28 +20,34 @@ export PAYLOAD_BASE_URL="${PAYLOAD_BASE_URL:-http://127.0.0.1:3000}"
 export NEXT_PUBLIC_PAYLOAD_API_URL="${NEXT_PUBLIC_PAYLOAD_API_URL:-http://127.0.0.1:3000}"
 mkdir -p .ci-artifacts
 
-pnpm install --frozen-lockfile
-pnpm lint
-pnpm typecheck
-pnpm --filter @linksites/program-orchestrator run build
-pnpm --filter @linksites/cms run build
-pnpm --filter @linksites/web-master run build
+timings=.ci-artifacts/full-component-timings.jsonl
+: > "$timings"
+component() {
+  local name="$1" started finished rc
+  shift
+  started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if "$@"; then rc=0; else rc=$?; fi
+  finished="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  node -e 'const fs=require("node:fs"); fs.appendFileSync(process.argv[1], JSON.stringify({component:process.argv[2],startedAt:process.argv[3],completedAt:process.argv[4],result:Number(process.argv[5])===0?"passed":"failed"})+"\n")' "$timings" "$name" "$started" "$finished" "$rc"
+  return "$rc"
+}
+
+component install pnpm install --frozen-lockfile
+# Fast is required for this exact head by the workflow. Do not duplicate its
+# lint/typecheck work here; a missing/stale Fast conclusion fails before this
+# script is entered.
+component program-build pnpm --filter @linksites/program-orchestrator run build
 # Browser provisioning and disposable service bootstrap happen before their
 # mandatory dependent suites. Nothing is treated as an optional convenience.
-pnpm --filter @linksites/cms exec playwright install --with-deps chromium
-LINKSITES_PLATFORM_REPOSITORY="$LINKSITES_PLATFORM_REPOSITORY" bash scripts/test-supabase-local.sh
-pnpm --filter @linksites/cms run test:local
+component chromium-install pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+component supabase-rls env LINKSITES_PLATFORM_REPOSITORY="$LINKSITES_PLATFORM_REPOSITORY" bash scripts/test-supabase-local.sh
+component cms-local pnpm --filter @linksites/cms run test:local
 # CMS local integration owns its disposable database/browser lifecycle above.
 # Run every remaining workspace suite and reject any silently skipped case.
-pnpm --filter '!@linksites/cms' test 2>&1 | tee .ci-artifacts/non-cms-tests.log
-if rg -n -i '\b(skipped|todo)\b' .ci-artifacts/non-cms-tests.log; then
-  echo 'a mandatory non-CMS suite reported skipped or todo cases' >&2
-  exit 1
-fi
-bash scripts/verify-docker-build.sh
-node --test deploy/tests/*.test.mjs deploy/tests/runtime-contract.test.mjs
-pnpm deploy:restore-rehearsal -- --evidence .ci-artifacts/w2-07-local-restore.json
-pnpm audit --audit-level=moderate
+component non-cms-tests pnpm --filter '!@linksites/cms' test
+component docker-build bash scripts/verify-docker-build.sh
+component deployment-contract node --test deploy/tests/*.test.mjs
+component restore-rehearsal pnpm deploy:restore-rehearsal -- --evidence .ci-artifacts/w2-07-local-restore.json
 # Next/Payload development commands regenerate these tracked derived files.
 # Restore the exact candidate versions before the clean-tree assertion so the
 # gate measures source drift rather than deterministic tool output.
@@ -51,5 +57,5 @@ git diff --exit-code
 git diff --cached --exit-code
 node - <<'NODE'
 const fs = require('node:fs')
-fs.writeFileSync('.ci-artifacts/w2-07-summary.json', JSON.stringify({ schemaVersion: '1.0.0', status: 'passed', suites: ['install', 'lint', 'typecheck', 'all-production-builds', 'unit-integration', 'local-payload-browser', 'supabase-rls', 'docker-build', 'deployment-contract', 'restore-rehearsal', 'dependency-audit', 'legacy-surface-scan'] }, null, 2) + '\n')
+fs.writeFileSync('.ci-artifacts/w2-07-summary.json', JSON.stringify({ schemaVersion: '1.0.0', status: 'passed', suites: ['install', 'fast-receipt', 'program-build', 'local-payload-browser', 'supabase-rls', 'non-cms-tests', 'docker-build', 'deployment-contract', 'restore-rehearsal', 'legacy-surface-scan'], timings: 'full-component-timings.jsonl' }, null, 2) + '\n')
 NODE

@@ -114,6 +114,14 @@ jobs:
         with:
           version: 2.81.3
 
+      - name: Require successful Fast CI on this exact Phase head
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/gitops/require_exact_ci_success.py \
+            --repository "${GITHUB_REPOSITORY}" \
+            --head "${{ github.event.pull_request.head.sha }}"
+
       - name: Run Full application and recovery profile
         env:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
