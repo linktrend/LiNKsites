@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto'
 import type { SchemaVersion } from '@linksites/types'
+import type { TemplateId } from './templateIdentity.js'
 
 export const WORKING_CONTENT_SCHEMA_VERSION = { major: 1, minor: 0 } as const satisfies SchemaVersion
-export const WORKING_CONTENT_TEMPLATE_ID = 'marketing-smb-v1' as const
 
 const WORKING_CONTENT_COMPONENT_CONTRACT = {
   SignupHero: { requiredContent: ['lang'] },
@@ -55,7 +55,7 @@ export interface WorkingContentProvenance {
 
 export interface WorkingContentPackage {
   schemaVersion: SchemaVersion
-  templateId: typeof WORKING_CONTENT_TEMPLATE_ID
+  templateId: TemplateId
   content: {
     pages: WorkingContentPage[]
   }
@@ -163,8 +163,8 @@ function assertContentPackage(value: unknown): asserts value is WorkingContentPa
   if (!isRecord(schema) || schema.major !== WORKING_CONTENT_SCHEMA_VERSION.major || schema.minor !== WORKING_CONTENT_SCHEMA_VERSION.minor || Object.keys(schema).length !== 2) {
     throw new WorkingContentError('working content package schema version is unsupported', 'invalid_input')
   }
-  if (value.templateId !== WORKING_CONTENT_TEMPLATE_ID) {
-    throw new WorkingContentError(`working content template ${String(value.templateId)} is not accepted`, 'invalid_input')
+  if (!isNonEmptyString(value.templateId)) {
+    throw new WorkingContentError('working content template identity is required', 'invalid_input')
   }
 
   const content = value.content
@@ -181,7 +181,7 @@ function assertContentPackage(value: unknown): asserts value is WorkingContentPa
       }
       const componentContract = WORKING_CONTENT_COMPONENT_CONTRACT[section.componentId as keyof typeof WORKING_CONTENT_COMPONENT_CONTRACT]
       if (!componentContract) {
-        throw new WorkingContentError(`working content component ${section.componentId} is not accepted by ${WORKING_CONTENT_TEMPLATE_ID}`, 'invalid_input')
+        throw new WorkingContentError(`working content component ${section.componentId} is not accepted by ${value.templateId}`, 'invalid_input')
       }
       if (!componentContract.requiredContent.every((key) => Object.prototype.hasOwnProperty.call(section.content, key))) {
         throw new WorkingContentError(`working content component ${section.componentId} does not satisfy its accepted content contract`, 'invalid_input')
