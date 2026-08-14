@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import type { LeadResearchPackage, SchemaVersion } from '@linksites/types'
 import { assertLibraryConsumptionEvidence, type LibraryConsumptionEvidence } from './libraryConsumer.js'
+import type { TemplateId } from './templateIdentity.js'
 import { assertValidWorkingContentPackage, computeWorkingContentChecksum, type WorkingContentPackage, type WorkingContentPage, type WorkingContentProvenance } from './workingContent.js'
 
 export const CONTENT_PRODUCTION_SCHEMA_VERSION = { major: 1, minor: 0 } as const satisfies SchemaVersion
@@ -20,10 +21,10 @@ export interface ApprovedLeadResearchFacts {
 export interface TemplateBaselineSection { sectionId: string; componentId: string; copy: Record<string, unknown> }
 export interface TemplateBaselinePage { pageId: string; route: string; sections: TemplateBaselineSection[] }
 export interface TemplateMediaAsset extends ApprovedLeadMedia {}
-export interface ApprovedTemplateAssetBundle { templateId: 'marketing-smb-v1'; baselinePages: TemplateBaselinePage[]; media: TemplateMediaAsset[]; libraryAssetPath: string; libraryAssetSha256: string }
+export interface ApprovedTemplateAssetBundle { templateId: TemplateId; baselinePages: TemplateBaselinePage[]; media: TemplateMediaAsset[]; libraryAssetPath: string; libraryAssetSha256: string }
 export interface MediaPolicy { allowedSourcePrefixes: string[]; allowedLicenseSpdx: string[]; maxWidth: number; maxHeight: number; allowedFormats: Array<ApprovedLeadMedia['format']>; requireTemplateMedia: boolean }
 export interface ContentProductionEvidence { schemaVersion: SchemaVersion; executorVersion: typeof CONTENT_PRODUCTION_EXECUTOR_VERSION; inputIdempotencyKey: string; inputChecksum: string; outputChecksum: string; libraryRevision: string; libraryAssetPath: string; libraryAssetSha256: string; fieldMap: Array<{ output: string; input: string; classification: 'factual' | 'generated_copy' | 'media' }>; gates: Record<string, 'pass' | 'fail'> }
-export interface ContentProductionResult { contentPackage: WorkingContentPackage; evidence: ContentProductionEvidence; informationArchitecture: { templateId: 'marketing-smb-v1'; pages: TemplateBaselinePage[] }; selectedMedia: { assets: TemplateMediaAsset[]; provenance: WorkingContentProvenance[] } }
+export interface ContentProductionResult { contentPackage: WorkingContentPackage; evidence: ContentProductionEvidence; informationArchitecture: { templateId: TemplateId; pages: TemplateBaselinePage[] }; selectedMedia: { assets: TemplateMediaAsset[]; provenance: WorkingContentProvenance[] } }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
 const nonEmpty = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0
@@ -55,11 +56,11 @@ export function produceWorkingContent(input: { lead: unknown; facts: unknown; te
   assertFacts(input.facts, lead)
   const facts = input.facts as ApprovedLeadResearchFacts
   assertLibraryConsumptionEvidence(input.library)
-  if (input.template.templateId !== 'marketing-smb-v1' || input.library.entry.entryId !== input.template.templateId || input.library.receipt.assetChecksums[input.template.libraryAssetPath] !== input.template.libraryAssetSha256) throw new ContentProductionError('template baseline is not bound to the exact LiNKlibraries asset receipt', 'untrusted_library')
+  if (!input.template.templateId || input.library.entry.entryId !== input.template.templateId || input.library.receipt.assetChecksums[input.template.libraryAssetPath] !== input.template.libraryAssetSha256) throw new ContentProductionError('template baseline is not bound to the exact LiNKlibraries asset receipt', 'untrusted_library')
   if (input.template.baselinePages.length === 0 || input.template.baselinePages.some((page) => page.sections.length === 0)) throw new ContentProductionError('template baseline is incomplete', 'untrusted_library')
   const fieldMap: ContentProductionEvidence['fieldMap'] = []
   const copyProvenance: WorkingContentProvenance[] = []
-  const pages: WorkingContentPage[] = input.template.baselinePages.map((page) => ({ pageId: page.pageId, route: page.route, sections: page.sections.map((section) => { const content = replaceTokens(section.copy, facts, fieldMap, `${page.route}/${section.sectionId}`) as Record<string, unknown>; copyProvenance.push({ claimId: `copy:${page.pageId}:${section.sectionId}`, kind: 'generated_copy', sourceReferences: ['library://marketing-smb-v1/baseline-copy'], statement: `Deterministic adaptation of the accepted Library baseline for ${page.pageId}.` }); return { sectionId: section.sectionId, componentId: section.componentId, content } }) }))
+  const pages: WorkingContentPage[] = input.template.baselinePages.map((page) => ({ pageId: page.pageId, route: page.route, sections: page.sections.map((section) => { const content = replaceTokens(section.copy, facts, fieldMap, `${page.route}/${section.sectionId}`) as Record<string, unknown>; copyProvenance.push({ claimId: `copy:${page.pageId}:${section.sectionId}`, kind: 'generated_copy', sourceReferences: [`library://${input.template.templateId}/baseline-copy`], statement: `Deterministic adaptation of the accepted Library baseline for ${page.pageId}.` }); return { sectionId: section.sectionId, componentId: section.componentId, content } }) }))
   const assets = [...input.template.media, ...facts.media]
   if (input.mediaPolicy.requireTemplateMedia && input.template.media.length === 0) throw new ContentProductionError('template requires media but the Library baseline contains none', 'media_policy')
   const seen = new Set<string>()

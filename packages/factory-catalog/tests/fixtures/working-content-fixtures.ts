@@ -2,7 +2,7 @@ import type { WorkingContentPackage } from '../../src/workingContent.js'
 
 export const workingContentFixture: WorkingContentPackage = {
   schemaVersion: { major: 1, minor: 0 },
-  templateId: 'marketing-smb-v1',
+  templateId: 'master-template-type-1',
   content: {
     pages: [
       {

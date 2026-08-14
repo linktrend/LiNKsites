@@ -10,7 +10,7 @@ const DEFAULT_LOCALES = [
   { code: 'zh-tw', name: 'Traditional Chinese', isDefault: false },
   { code: 'zh-cn', name: 'Simplified Chinese', isDefault: false },
 ]
-const DEFAULT_TEMPLATE_ID = 'marketing-smb-v1'
+const DEFAULT_TEMPLATE_ID = process.env.LINKSITES_DEFAULT_TEMPLATE_ID ?? 'master-template-type-1'
 
 const connect = async () => {
   await payload.init({

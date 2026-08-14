@@ -24,13 +24,13 @@ do $$ begin
   end if;
 end $$;
 create table if not exists lsites_sites.working_packages (
-  working_package_id text primary key, template_id text not null, org_id uuid not null references platform.organizations(id),
+  working_package_id text primary key, template_id text not null default 'master-template-type-1' check (template_id ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'), org_id uuid not null references platform.organizations(id),
   lead_id text not null, site_id uuid not null references lsites_sites.sites(id), current_version integer not null default 0,
   created_at timestamptz not null default now(), updated_at timestamptz not null default now(), unique (org_id, lead_id, site_id)
 );
 create table if not exists lsites_sites.working_content_versions (
   working_package_id text not null references lsites_sites.working_packages(working_package_id), version_number integer not null,
-  schema_version_major smallint not null, schema_version_minor smallint not null, template_id text not null,
+  schema_version_major smallint not null, schema_version_minor smallint not null, template_id text not null default 'master-template-type-1' check (template_id ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   org_id uuid not null references platform.organizations(id), lead_id text not null, site_id uuid not null references lsites_sites.sites(id),
   program_ref text not null, run_id text, parent_version_number integer, author_id text not null, executor_id text not null,
   content_payload jsonb not null, asset_refs jsonb not null, library_refs jsonb not null, provenance jsonb not null,
