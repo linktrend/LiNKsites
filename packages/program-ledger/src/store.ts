@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import { SCHEMA_VERSION } from './types.js'
-import { DEFAULT_ORG_ID } from './types.js'
+import { SCHEMA_VERSION } from './types'
+import { DEFAULT_ORG_ID } from './types'
 import type {
   GateResult,
   FailureClass,
@@ -16,7 +16,7 @@ import type {
   UnresolvedDependency,
   HierarchySubjectRef,
   WorkState,
-} from './types.js'
+} from './types'
 
 export type InMemoryHierarchyGateFailurePoint = 'after_gate' | 'after_subject' | 'after_events'
 

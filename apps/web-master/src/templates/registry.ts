@@ -1,5 +1,5 @@
 import type { TemplateId, TemplateModule } from "@/templates/types";
-import { getAdmittedRevision2Template, getAdmittedTemplateEvidence, assertTemplateAdmission } from "@/lib/template-admission";
+import { getAdmittedRevision2Template, getDraftRevision2TemplateForPairedProof, getAdmittedTemplateEvidence, assertTemplateAdmission } from "@/lib/template-admission";
 import { MASTER_TEMPLATE_ID } from "@linksites/factory-catalog";
 import { PageRenderer } from "@/components/page-renderer";
 import { readFileSync } from "node:fs";
@@ -58,7 +58,9 @@ if (process.env.LINKSITES_W2_04_LOCAL_PROOF === "1" && localProofTemplateId) {
 
 export const getTemplateModule = (templateId: TemplateId): TemplateModule => {
   if (templateId === MASTER_TEMPLATE_ID || process.env.LINKSITES_TEMPLATE_FORMAT === "revision2") {
-    const materialized = getAdmittedRevision2Template();
+    const materialized = process.env.LINKSITES_PAIRED_PROOF === "1"
+      ? getDraftRevision2TemplateForPairedProof()
+      : getAdmittedRevision2Template();
     if (materialized.reference.entryId !== templateId) {
       throw new Error(`LiNKlibraries Revision 2 release is for "${materialized.reference.entryId}", not "${templateId}"`);
     }

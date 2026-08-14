@@ -12,8 +12,8 @@
 import {
   assertOrgCapabilityGrant,
   type CapabilityGrantLookup,
-} from './capability-lookup.js'
-import type { SideEffectClass } from './types.js'
+} from './capability-lookup'
+import type { SideEffectClass } from './types'
 
 /** Side-effect classes that touch an irreversible / external system. */
 export const EXTERNAL_CAPABILITY_SIDE_EFFECTS: ReadonlySet<SideEffectClass> = new Set([

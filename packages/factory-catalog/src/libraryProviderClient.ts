@@ -52,7 +52,7 @@ export type Revision2Selection = Readonly<{
   inventorySha256: string;
   payloadSha256: string;
   dependencyLockSha256: string;
-  receiptType: "verified_cache" | "consumption";
+  receiptType: "verified_cache" | "consumption" | "candidate";
   receiptId: string;
 }>;
 export type LibraryContributionRequest = Readonly<{
@@ -82,7 +82,7 @@ export type WebsiteTemplateMaterializationReference = Readonly<{
   inventorySha256: string;
   payloadSha256: string;
   dependencyLockSha256: string;
-  receiptType: "verified_cache" | "consumption";
+  receiptType: "verified_cache" | "consumption" | "candidate";
   receiptId: string;
 }>;
 
@@ -320,6 +320,17 @@ function receipt(value: unknown, errors: string[]): JsonRecord | undefined {
   if (value.disposition !== undefined && !enumValue(value.disposition, ["no_change", "candidate_correction", "quarantine", "deprecate", "follow_up"])) errors.push("receipt.disposition is invalid");
   return value;
 }
+
+function candidateReceipt(value: unknown, errors: string[]): JsonRecord | undefined {
+  if (!object(value) || value.receiptType !== "provider_release_candidate" || !closed(value, "receipt", ["schemaVersion", "schemaRevision", "receiptType", "release", "source", "catalogue", "governance"], [], errors)) return undefined;
+  if (value.schemaVersion !== 2 || value.schemaRevision !== 2) errors.push("candidate receipt schema is invalid");
+  if (!closed(value.release, "receipt.release", ["entryId", "version", "manifestSha256", "artifactTreeSha1", "payloadSha256", "inventoryFileSha256", "dependencyLockSha256"], ["manifestPath", "inventoryProjectionSha256", "dependencyProjectionSha256"], errors)) errors.push("candidate receipt release is invalid");
+  if (object(value.release) && (!semver(value.release.version) || !digest(value.release.manifestSha256) || !digest(value.release.payloadSha256) || !digest(value.release.inventoryFileSha256) || !digest(value.release.dependencyLockSha256) || !sha1(value.release.artifactTreeSha1))) errors.push("candidate receipt release digests are invalid");
+  if (!closed(value.source, "receipt.source", ["repository", "sourceCommit", "sourceTree"], ["handoffCommit", "handoffTree", "visualInventoryEntries"], errors) || value.source.repository !== "LiNKsites" || !sha1(value.source.sourceCommit) || !sha1(value.source.sourceTree)) errors.push("candidate receipt source is invalid");
+  if (!closed(value.catalogue, "receipt.catalogue", ["fileSha256", "recordsSha256"], ["path"], errors) || !digest(value.catalogue.fileSha256) || !digest(value.catalogue.recordsSha256)) errors.push("candidate receipt catalogue is invalid");
+  if (!closed(value.governance, "receipt.governance", ["lifecycle", "selectability", "compatibility"], ["visualMasterClaimed", "pairedProofRequired", "independentQualificationRequired", "assetRights", "admission"], errors) || value.governance.lifecycle !== "draft" || value.governance.selectability !== "non_selectable" || value.governance.compatibility !== "unknown") errors.push("candidate receipt governance is invalid");
+  return value;
+}
 export function pageCatalogue(input: unknown, limit = 25, cursor: Revision2Cursor | null = null, pin: Revision2ProviderPin = FROZEN_PROVIDER_PIN): Revision2Result<Revision2Page> {
   const errors: string[] = [];
   if (!exact(input, "snapshot", ["source", "catalogue"], errors)) return { ok: false, errors };
@@ -336,7 +347,7 @@ export function pageCatalogue(input: unknown, limit = 25, cursor: Revision2Curso
   const nextOffset = Math.min(offset + limit, records.length);
   return { ok: true, value: { authority: "library_reference_only", sourceCommitSha: identity!.commitSha as string, sourceTreeSha: identity!.treeSha as string, records: visible, recordsSha256: catalog!.recordsSha256 as string, nextCursor: nextOffset < records.length ? { sourceCommitSha: identity!.commitSha as string, sourceTreeSha: identity!.treeSha as string, recordsSha256: catalog!.recordsSha256 as string, offset: nextOffset } : null } };
 }
-export function validateExactRelease(input: unknown, pin: Revision2ProviderPin = FROZEN_PROVIDER_PIN): Revision2Result<Revision2Selection> {
+export function validateExactRelease(input: unknown, pin: Revision2ProviderPin = FROZEN_PROVIDER_PIN, options: Readonly<{ allowDraftCandidate?: boolean }> = {}): Revision2Result<Revision2Selection> {
   const errors: string[] = [];
   if (!closed(input, "bundle", ["source", "catalogue", "record", "manifest", "inventory", "dependencyLock", "receipt"], [], errors)) return { ok: false, errors };
   const bundle = input as JsonRecord;
@@ -346,24 +357,32 @@ export function validateExactRelease(input: unknown, pin: Revision2ProviderPin =
   const release = manifest(bundle.manifest, errors);
   const tree = inventory(bundle.inventory, errors);
   const lock = dependencyLock(bundle.dependencyLock, errors);
-  const receiptValue = receipt(bundle.receipt, errors);
+  const receiptValue = options.allowDraftCandidate ? candidateReceipt(bundle.receipt, errors) : receipt(bundle.receipt, errors);
   if (!identity || !catalog || !item || !release || !tree || !lock || !receiptValue) return { ok: false, errors };
   const releaseIdentity = release.releaseSource as JsonRecord;
   const itemReleaseIdentity = item.releaseSource as JsonRecord;
   if (!Array.isArray(catalog.records) || !catalog.records.some((entry) => canonical(entry) === canonical(item))) errors.push("record is not in the catalogue snapshot");
-  if (!enumValue(item.lifecycle, ["admitted", "selectable"]) || item.selectability !== "selectable" || item.compatibility !== "compatible") errors.push("record is not admitted/selectable/compatible");
-  if (item.releaseManifestSha256 !== receiptValue.releaseManifestSha256 || item.inventorySha256 !== release.inventorySha256 || release.dependencyLockSha256 !== pin.dependencyLockSha256 || tree.artifactTreeSha1 !== release.artifactTreeSha1 || release.artifactTreeSha1 !== item.artifactTreeSha1) errors.push("release digest or artifact identity mismatch");
+  if (options.allowDraftCandidate) {
+    if (item.lifecycle !== "draft" || item.selectability !== "non_selectable" || item.compatibility !== "unknown") errors.push("candidate record is not draft/non_selectable/unknown");
+    const candidateRelease = receiptValue?.release as JsonRecord | undefined;
+    if (!candidateRelease || item.entryId !== candidateRelease.entryId || item.version !== candidateRelease.version || item.releaseManifestSha256 !== candidateRelease.manifestSha256 || release.inventorySha256 !== candidateRelease.inventoryFileSha256 || release.payloadSha256 !== candidateRelease.payloadSha256 || release.dependencyLockSha256 !== candidateRelease.dependencyLockSha256 || tree.artifactTreeSha1 !== candidateRelease.artifactTreeSha1) errors.push("candidate receipt digest or artifact identity mismatch");
+  } else {
+    if (!enumValue(item.lifecycle, ["admitted", "selectable"]) || item.selectability !== "selectable" || item.compatibility !== "compatible") errors.push("record is not admitted/selectable/compatible");
+    if (item.releaseManifestSha256 !== receiptValue?.releaseManifestSha256 || item.inventorySha256 !== release.inventorySha256 || release.dependencyLockSha256 !== pin.dependencyLockSha256 || tree.artifactTreeSha1 !== release.artifactTreeSha1 || release.artifactTreeSha1 !== item.artifactTreeSha1) errors.push("release digest or artifact identity mismatch");
+  }
   if (item.entryId !== release.entryId || item.version !== release.version || item.artifactType !== release.artifactType) errors.push("release identity mismatch");
   if (releaseIdentity.releaseSourceCommitSha !== itemReleaseIdentity.releaseSourceCommitSha || releaseIdentity.releaseSourceRepositoryTreeSha1 !== itemReleaseIdentity.releaseSourceRepositoryTreeSha1) errors.push("release source identity mismatch");
   projectionMatches(item.controlledMetadata, release.controlledMetadata, errors);
-  if (receiptValue.receiptType === "verified_cache") {
+  if (options.allowDraftCandidate) {
+    // Candidate receipts are validated against the immutable manifest above.
+  } else if (receiptValue.receiptType === "verified_cache") {
     const cacheReleaseIdentity = receiptValue.releaseSource as JsonRecord;
     const sourceEvidence = receiptValue.sourceEvidence as JsonRecord;
     if (cacheReleaseIdentity.releaseSourceCommitSha !== releaseIdentity.releaseSourceCommitSha || cacheReleaseIdentity.releaseSourceRepositoryTreeSha1 !== releaseIdentity.releaseSourceRepositoryTreeSha1 || sourceEvidence.selectedRepositoryCommitSha !== releaseIdentity.releaseSourceCommitSha || sourceEvidence.selectedRepositoryTreeSha1 !== releaseIdentity.releaseSourceRepositoryTreeSha1 || receiptValue.catalogueRecordsSha256 !== catalog.recordsSha256 || receiptValue.releaseManifestSha256 !== item.releaseManifestSha256 || receiptValue.inventorySha256 !== release.inventorySha256 || receiptValue.payloadSha256 !== release.payloadSha256 || receiptValue.artifactTreeSha1 !== tree.artifactTreeSha1 || receiptValue.entryId !== item.entryId || receiptValue.version !== item.version) errors.push("verified cache receipt mismatch");
   } else if (receiptValue.releaseManifestSha256 !== item.releaseManifestSha256 || receiptValue.artifactTreeSha1 !== tree.artifactTreeSha1 || receiptValue.releaseSourceCommitSha !== releaseIdentity.releaseSourceCommitSha || receiptValue.releaseSourceRepositoryTreeSha1 !== releaseIdentity.releaseSourceRepositoryTreeSha1 || receiptValue.entryId !== item.entryId || receiptValue.version !== item.version || receiptValue.result !== "pass") errors.push("consumption receipt mismatch");
   if (errors.length) return { ok: false, errors };
-  const receiptId = receiptValue.receiptType === "verified_cache" ? String((receiptValue.sourceEvidence as JsonRecord).receiptId) : String(receiptValue.receiptId);
-  const selection = Object.freeze({ authority: "library_reference_only" as const, sourceCommitSha: identity.commitSha as string, sourceTreeSha: identity.treeSha as string, releaseSourceCommitSha: releaseIdentity.releaseSourceCommitSha as string, releaseSourceTreeSha: releaseIdentity.releaseSourceRepositoryTreeSha1 as string, artifactTreeSha1: release.artifactTreeSha1 as string, entryId: item.entryId as string, version: item.version as string, artifactType: item.artifactType as "component" | "starter_kit" | "website_template", releaseManifestSha256: item.releaseManifestSha256 as string, inventorySha256: release.inventorySha256 as string, payloadSha256: release.payloadSha256 as string, dependencyLockSha256: release.dependencyLockSha256 as string, receiptType: receiptValue.receiptType as "verified_cache" | "consumption", receiptId });
+  const receiptId = options.allowDraftCandidate ? `candidate:${String((receiptValue.source as JsonRecord).handoffCommit)}` : receiptValue.receiptType === "verified_cache" ? String((receiptValue.sourceEvidence as JsonRecord).receiptId) : String(receiptValue.receiptId);
+  const selection = Object.freeze({ authority: "library_reference_only" as const, sourceCommitSha: identity.commitSha as string, sourceTreeSha: identity.treeSha as string, releaseSourceCommitSha: releaseIdentity.releaseSourceCommitSha as string, releaseSourceTreeSha: releaseIdentity.releaseSourceRepositoryTreeSha1 as string, artifactTreeSha1: release.artifactTreeSha1 as string, entryId: item.entryId as string, version: item.version as string, artifactType: item.artifactType as "component" | "starter_kit" | "website_template", releaseManifestSha256: item.releaseManifestSha256 as string, inventorySha256: release.inventorySha256 as string, payloadSha256: release.payloadSha256 as string, dependencyLockSha256: release.dependencyLockSha256 as string, receiptType: options.allowDraftCandidate ? "candidate" as const : receiptValue.receiptType as "verified_cache" | "consumption", receiptId });
   validatedSelections.add(selection);
   return { ok: true, value: selection };
 }

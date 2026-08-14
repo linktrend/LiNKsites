@@ -1,5 +1,5 @@
 import { getSiteSettings } from "@/lib/repository/siteSettings";
-import { assertTemplateAdmission, getAdmittedRevision2Template } from "@/lib/template-admission";
+import { assertTemplateAdmission, getAdmittedRevision2Template, getDraftRevision2TemplateForPairedProof } from "@/lib/template-admission";
 import { MASTER_TEMPLATE_ID } from "@linksites/factory-catalog";
 import type { LocaleCode } from "@linksites/types";
 
@@ -14,7 +14,9 @@ export const getTemplateIdForSite = async ({
   const templateId = settings?.templateId;
   if (!templateId) throw new Error(`Published site "${siteId}" has no admitted template selection`);
   if (templateId === MASTER_TEMPLATE_ID || process.env.LINKSITES_TEMPLATE_FORMAT === "revision2") {
-    const admitted = getAdmittedRevision2Template();
+    const admitted = process.env.LINKSITES_PAIRED_PROOF === "1"
+      ? getDraftRevision2TemplateForPairedProof()
+      : getAdmittedRevision2Template();
     if (admitted.reference.entryId !== templateId) throw new Error(`Published site selected template "${templateId}" but the pinned Revision 2 release is "${admitted.reference.entryId}"`);
   } else {
     assertTemplateAdmission(templateId);

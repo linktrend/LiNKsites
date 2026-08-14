@@ -36,8 +36,8 @@
  *   duplicates reservation-exclusivity logic.
  */
 
-import type { TierId } from './tierSpecification.js'
-import { FoundationReservationManager, type FoundationReservation, type ReusableSiteFoundation } from './reusableFoundation.js'
+import type { TierId } from './tierSpecification'
+import { FoundationReservationManager, type FoundationReservation, type ReusableSiteFoundation } from './reusableFoundation'
 
 export class FoundationMatchingError extends Error {}
 

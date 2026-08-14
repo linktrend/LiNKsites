@@ -11,6 +11,7 @@ web_pid=""
 random_value() { node -e "process.stdout.write(require('node:crypto').randomBytes(24).toString('hex'))"; }
 payload_secret="$(random_value)"
 preview_token="$(random_value)"
+proof_template_id="${W2_04_TEMPLATE_ID:-marketing-smb-v1}"
 
 kill_tree() {
   local parent_pid="$1"
@@ -52,7 +53,7 @@ export LINKSITES_W2_04_LOCAL_PROOF=1
 export W2_04_PROOF_PATH="$local_root/proof.json"
 export W2_04_PREVIEW_API_KEY="$(random_value)"
 export W2_04_PREVIEW_PASSWORD="$(random_value)"
-if ! seed_output="$(cd "$repo_root" && pnpm --filter @linksites/cms exec tsx scripts/w2-04-seed.ts)"; then
+if ! seed_output="$(cd "$repo_root" && W2_04_TEMPLATE_ID="$proof_template_id" pnpm --filter @linksites/cms exec tsx scripts/w2-04-seed.ts)"; then
   printf '%s\n' "$seed_output" >&2
   echo 'W2-04 seed failed' >&2
   exit 1
@@ -85,6 +86,14 @@ web_environment=(
   PREVIEW_ACCESS_TOKEN="$preview_token" \
   LINKSITES_W2_04_LOCAL_PROOF=1 \
   LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID="marketing-smb-v1" \
+  W2_04_TEMPLATE_ID="$proof_template_id" \
+  LINKSITES_TEMPLATE_FORMAT="${LINKSITES_TEMPLATE_FORMAT:-}" \
+  LINKSITES_PAIRED_PROOF="${LINKSITES_PAIRED_PROOF:-}" \
+  LINKSITES_LINKLIBRARIES_ROOT="${LINKSITES_LINKLIBRARIES_ROOT:-}" \
+  LINKSITES_LINKLIBRARIES_COMMIT_SHA="${LINKSITES_LINKLIBRARIES_COMMIT_SHA:-}" \
+  LINKSITES_LINKLIBRARIES_TREE_SHA="${LINKSITES_LINKLIBRARIES_TREE_SHA:-}" \
+  LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256="${LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256:-}" \
+  LINKSITES_LINKLIBRARIES_RECEIPT_PATH="${LINKSITES_LINKLIBRARIES_RECEIPT_PATH:-}" \
   LINKSITES_ADMITTED_TEMPLATE_SHA="1111111111111111111111111111111111111111" \
   LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON="$(node -e 'const x=JSON.parse(process.argv[1]); process.stdout.write(JSON.stringify(x.receipt))' "$proof_json")" \
   LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON="$(node -e 'const x=JSON.parse(process.argv[1]); process.stdout.write(JSON.stringify(x.evidence))' "$proof_json")"

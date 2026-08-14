@@ -15,8 +15,8 @@
  * accepted output" language), not a production executor framework.
  */
 
-import type { FailureClass, Issue, Run } from './types.js'
-import type { ProgramLedger } from './ledger.js'
+import type { FailureClass, Issue, Run } from './types'
+import type { ProgramLedger } from './ledger'
 
 export type ExecutorResult = { kind: 'success'; output: unknown } | { kind: 'failure'; failureClass: FailureClass; message: string }
 

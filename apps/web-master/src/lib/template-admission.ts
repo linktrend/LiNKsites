@@ -83,6 +83,10 @@ export const getAdmittedTemplateReceipt = (): AdmittedTemplateReceipt => loadAdm
  * W2-04 compatibility proof.
  */
 export const getAdmittedRevision2Template = (): Revision2MaterializedWebsiteTemplate => {
+  return materializeRevision2FromEnvironment(false);
+};
+
+const materializeRevision2FromEnvironment = (allowDraftCandidate: boolean): Revision2MaterializedWebsiteTemplate => {
   const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT;
   const sourceCommitSha = process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA;
   const sourceTreeSha = process.env.LINKSITES_LINKLIBRARIES_TREE_SHA;
@@ -101,9 +105,20 @@ export const getAdmittedRevision2Template = (): Revision2MaterializedWebsiteTemp
     version,
     pin,
     receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH,
+    allowDraftCandidate,
   });
   if (!result.ok) throw new TemplateAdmissionError(result.errors.join("; "));
   return result.value;
+};
+
+/**
+ * Non-production paired-proof lane only. It accepts the exact immutable
+ * provider candidate while it remains draft/non-selectable; production callers
+ * must use getAdmittedRevision2Template instead.
+ */
+export const getDraftRevision2TemplateForPairedProof = (): Revision2MaterializedWebsiteTemplate => {
+  if (process.env.LINKSITES_PAIRED_PROOF === "1") return materializeRevision2FromEnvironment(true);
+  throw new TemplateAdmissionError("draft candidate materialization is restricted to the paired-proof lane");
 };
 
 /**

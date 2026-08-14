@@ -18,9 +18,9 @@ import type {
   SchemaVersion,
   UnresolvedDependency,
   WorkState,
-} from './types.js'
-import { DEFAULT_ORG_ID } from './types.js'
-import type { LedgerStore } from './store.js'
+} from './types'
+import { DEFAULT_ORG_ID } from './types'
+import type { LedgerStore } from './store'
 
 /**
  * Minimal shape both `pg`'s `Client`/`PoolClient` and `@electric-sql/pglite`'s

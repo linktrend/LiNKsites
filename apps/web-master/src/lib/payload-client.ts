@@ -25,6 +25,7 @@ type MockPayloadData = {
   contactForms?: unknown[];
   pricing?: unknown;
   pages?: unknown[];
+  siteSettings?: unknown[];
 };
 
 let mockPayloadCache: MockPayloadData | null = null;
@@ -138,6 +139,7 @@ const mockPayloadFind = async <T>({
 
   const collectionsMap: Record<string, unknown[]> = {
     pages: mock.pages ?? [],
+    "site-settings": mock.siteSettings ?? [],
     "privacy-pages": (mock.pages ?? []).filter((doc: any) => doc.slug === "legal/privacy-policy"),
     "terms-pages": (mock.pages ?? []).filter((doc: any) => doc.slug === "legal/terms-of-use"),
     "cookie-policy-pages": (mock.pages ?? []).filter((doc: any) => doc.slug === "legal/cookie-policy"),

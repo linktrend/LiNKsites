@@ -8,10 +8,10 @@ import {
   type Revision2Selection,
   type WebsiteTemplateMaterializationReference,
   validateExactRelease,
-} from './libraryProviderClient.js'
-import { MASTER_TEMPLATE_SOURCE_COMMIT_SHA, MASTER_TEMPLATE_SOURCE_TREE_SHA } from './templateIdentity.js'
+} from './libraryProviderClient'
+import { MASTER_TEMPLATE_SOURCE_COMMIT_SHA, MASTER_TEMPLATE_SOURCE_TREE_SHA } from './templateIdentity'
 
-export type { Revision2ProviderPin } from './libraryProviderClient.js'
+export type { Revision2ProviderPin } from './libraryProviderClient'
 
 export type Revision2MaterializedWebsiteTemplate = Readonly<{
   reference: WebsiteTemplateMaterializationReference
@@ -27,6 +27,8 @@ export type Revision2MaterializationInput = Readonly<{
   version: string
   pin: Revision2ProviderPin
   receiptPath?: string
+  /** Proof-only escape hatch for an immutable provider candidate that is still draft/non-selectable. */
+  allowDraftCandidate?: boolean
 }>
 
 const sha256 = (value: Buffer | string): string => createHash('sha256').update(value).digest('hex')
@@ -43,6 +45,7 @@ const readReceipt = (input: Revision2MaterializationInput, releaseRoot: string):
     input.receiptPath,
     resolve(releaseRoot, 'receipt.json'),
     resolve(releaseRoot, 'cache-receipt.json'),
+    resolve(releaseRoot, 'release-receipt.json'),
     resolve(input.providerRoot, 'materialization/cache/cache-receipt.json'),
   ].filter((candidate): candidate is string => Boolean(candidate))
   for (const candidate of candidates) {
@@ -75,9 +78,11 @@ export function materializeRevision2WebsiteTemplate(
     return failure([error instanceof Error ? error.message : 'provider release files could not be read'])
   }
 
-  const validated = validateExactRelease(bundle, input.pin)
+  const validated = validateExactRelease(bundle, input.pin, { allowDraftCandidate: input.allowDraftCandidate === true })
   if (!validated.ok) return validated
-  const admitted = admitWebsiteTemplateMaterialization(validated)
+  const admitted = input.allowDraftCandidate === true
+    ? { ok: true as const, value: Object.freeze({ ...validated.value, authority: 'linksites_local' as const, libraryAuthority: 'reference_only' as const, materialization: 'input_reference_only' as const, artifactType: 'website_template' as const, receiptType: 'candidate' as const }) }
+    : admitWebsiteTemplateMaterialization(validated)
   if (!admitted.ok) return admitted
 
   const inventory = (bundle as { inventory: { entries?: unknown[] } }).inventory
@@ -103,8 +108,11 @@ export function materializeRevision2WebsiteTemplate(
   const sourceInventoryPath = Object.keys(files).find((path) => path === 'source-inventory.json' || path.endsWith('/source-inventory.json'))
   if (sourceInventoryPath) {
     try {
-      const sourceInventory = JSON.parse(files[sourceInventoryPath]) as { sourceRepository?: unknown; sourceCommit?: unknown; sourceTree?: unknown }
-      if (sourceInventory.sourceRepository !== 'LiNKsites' || sourceInventory.sourceCommit !== MASTER_TEMPLATE_SOURCE_COMMIT_SHA || sourceInventory.sourceTree !== MASTER_TEMPLATE_SOURCE_TREE_SHA) {
+      const sourceInventory = JSON.parse(files[sourceInventoryPath]) as { sourceRepository?: unknown; sourceCommit?: unknown; sourceTree?: unknown; template?: { sourceRepository?: unknown }; source?: { commitSha?: unknown; treeSha?: unknown } }
+      const sourceRepository = sourceInventory.sourceRepository ?? sourceInventory.template?.sourceRepository
+      const sourceCommit = sourceInventory.sourceCommit ?? sourceInventory.source?.commitSha
+      const sourceTree = sourceInventory.sourceTree ?? sourceInventory.source?.treeSha
+      if (sourceRepository !== 'LiNKsites' || sourceCommit !== MASTER_TEMPLATE_SOURCE_COMMIT_SHA || sourceTree !== MASTER_TEMPLATE_SOURCE_TREE_SHA) {
         return failure(['provider source inventory is not bound to the preserved LiNKsites visual handoff'])
       }
     } catch {

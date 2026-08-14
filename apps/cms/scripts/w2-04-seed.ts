@@ -24,6 +24,7 @@ const commitSha = '1'.repeat(40)
 // it will use in deployment.  Keep the historical loopback default for
 // standalone local seed users that do not supply the proof-specific input.
 const proofHostname = process.env.W2_04_LOCAL_PROOF_HOST ?? '127.0.0.1'
+const proofTemplateId = process.env.W2_04_TEMPLATE_ID ?? 'marketing-smb-v1'
 
 const entry = JSON.parse(await readFixture('entry.json')) as LibraryEntryContract
 const files = {
@@ -86,7 +87,7 @@ const site = await within('creating site', payload.create({
   // The current canonical Sites contract requires the Program ownership tuple
   // even for this disposable local proof.  These are non-customer fixture
   // identifiers and are used only to exercise the same shape as production.
-  data: { name: 'W2-04 local proof site', domain: proofHostname, status: 'published', templateId: 'marketing-smb-v1', orgId: 'local-org', programId: 'w2-04-local-proof', leadId: 'w2-04-local-proof', defaultLanguage: language.id, languages: [language.id] },
+  data: { name: 'W2-04 local proof site', domain: proofHostname, status: 'published', templateId: proofTemplateId, orgId: 'local-org', programId: 'w2-04-local-proof', leadId: 'w2-04-local-proof', defaultLanguage: language.id, languages: [language.id] },
   ...options,
 }))
 console.error('W2-04 seed: site created')
@@ -133,7 +134,7 @@ await client.connect()
 await client.query(
   `insert into public.site_settings (site_id, locale, template_id, status, _status, created_at, updated_at)
    values ($1, $2, $3, 'published', 'published', now(), now())`,
-  [site.id, 'en', 'marketing-smb-v1'],
+  [site.id, 'en', proofTemplateId],
 )
 console.error('W2-04 seed: site settings inserted directly into disposable database')
 await within('creating navigation', payload.create({

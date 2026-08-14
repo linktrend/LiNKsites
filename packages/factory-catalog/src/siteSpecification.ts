@@ -23,12 +23,12 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import { assertFoundationIsProductionReady, assertFoundationMatchesKitAndTier, type ReusableSiteFoundation } from './reusableFoundation.js'
-import { assertKitIsProductionReady, resolveEffectiveMaxPages, type VerticalKit } from './verticalKit.js'
-import { checkEntitlement, type TierId, type TierSpecification } from './tierSpecification.js'
-import type { SiteDesignProfile } from './designCatalog.js'
-import type { ComponentRegistry } from './componentRegistry.js'
-import { assertLibraryConsumptionEvidence, canonicalJsonStringify, isTrustedLibraryConsumption, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.js'
+import { assertFoundationIsProductionReady, assertFoundationMatchesKitAndTier, type ReusableSiteFoundation } from './reusableFoundation'
+import { assertKitIsProductionReady, resolveEffectiveMaxPages, type VerticalKit } from './verticalKit'
+import { checkEntitlement, type TierId, type TierSpecification } from './tierSpecification'
+import type { SiteDesignProfile } from './designCatalog'
+import type { ComponentRegistry } from './componentRegistry'
+import { assertLibraryConsumptionEvidence, canonicalJsonStringify, isTrustedLibraryConsumption, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer'
 
 export class SiteSpecificationError extends Error {
   constructor(message: string) {

@@ -1,0 +1,83 @@
+name: LiNKlibraries master-template paired proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider_commit:
+        description: Exact LiNKlibraries candidate commit
+        required: true
+        type: string
+      provider_tree:
+        description: Exact LiNKlibraries candidate tree
+        required: true
+        type: string
+      dependency_lock_sha256:
+        description: Exact provider dependency-lock SHA-256
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  paired-proof:
+    name: disposable Payload/browser paired proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact LiNKsites head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout exact LiNKlibraries candidate
+        uses: actions/checkout@v4
+        with:
+          repository: linktrend/LiNKlibraries
+          ref: ${{ inputs.provider_commit }}
+          path: .ci/linklibraries
+          token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
+          persist-credentials: false
+
+      - name: Setup pnpm and Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup disposable Supabase service
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.81.3
+
+      - name: Install Chromium for browser proof
+        run: pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+
+      - name: Run exact candidate and disposable Payload/browser proof
+        env:
+          LINKSITES_LINKLIBRARIES_ROOT: ${{ github.workspace }}/.ci/linklibraries
+          LINKSITES_LINKLIBRARIES_COMMIT_SHA: ${{ inputs.provider_commit }}
+          LINKSITES_LINKLIBRARIES_TREE_SHA: ${{ inputs.provider_tree }}
+          LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: ${{ inputs.dependency_lock_sha256 }}
+          W2_04_CHROMIUM_EXECUTABLE: /usr/bin/chromium
+          LINKSITES_KEEP_LOCAL_REHEARSAL: "1"
+        run: bash scripts/master-template-paired-proof.sh
+
+      - name: Upload paired-proof evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: master-template-paired-proof-${{ github.sha }}
+          path: |
+            docs/production-roadmap/evidence/w2-04/browser/
+            /tmp/linksites-w2-04-local.*/
+          if-no-files-found: warn
+          retention-days: 30

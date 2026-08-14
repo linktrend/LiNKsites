@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import type { SchemaVersion } from '@linksites/types'
-import type { TemplateId } from './templateIdentity.js'
+import type { TemplateId } from './templateIdentity'
 
 export const WORKING_CONTENT_SCHEMA_VERSION = { major: 1, minor: 0 } as const satisfies SchemaVersion
 

@@ -29,13 +29,13 @@
 
 import type { ExecutorAdapter, ExecutorResult } from '@linksites/program-ledger'
 import type { Issue, Run } from '@linksites/program-ledger'
-import { resolveSiteSpecification, SiteSpecificationError } from '../siteSpecification.js'
-import { VerticalKitError, type VerticalKit } from '../verticalKit.js'
-import type { TierId, TierSpecification } from '../tierSpecification.js'
-import { FoundationError, type ReusableSiteFoundation } from '../reusableFoundation.js'
-import type { SiteDesignProfile } from '../designCatalog.js'
-import { ComponentRegistryError, type ComponentRegistry } from '../componentRegistry.js'
-import type { LibraryConsumption, LibraryConsumptionReceipt } from '../libraryConsumer.js'
+import { resolveSiteSpecification, SiteSpecificationError } from '../siteSpecification'
+import { VerticalKitError, type VerticalKit } from '../verticalKit'
+import type { TierId, TierSpecification } from '../tierSpecification'
+import { FoundationError, type ReusableSiteFoundation } from '../reusableFoundation'
+import type { SiteDesignProfile } from '../designCatalog'
+import { ComponentRegistryError, type ComponentRegistry } from '../componentRegistry'
+import type { LibraryConsumption, LibraryConsumptionReceipt } from '../libraryConsumer'
 
 export const SITE_SPECIFICATION_ISSUE_TYPE = 'linksites.factory.resolve_site_specification'
 

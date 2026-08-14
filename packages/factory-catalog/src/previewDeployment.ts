@@ -41,7 +41,7 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import type { SiteAssemblyManifest } from './siteAssemblyManifest.js'
+import type { SiteAssemblyManifest } from './siteAssemblyManifest'
 
 export type PreviewAccessPolicy = 'public' | 'token_required' | 'internal_only'
 export type PreviewIndexingPolicy = 'noindex' | 'indexable'

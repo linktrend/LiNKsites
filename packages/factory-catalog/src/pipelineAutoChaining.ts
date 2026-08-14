@@ -49,17 +49,17 @@
 
 import { createHash } from 'node:crypto'
 import { canonicalSerialize, DEFAULT_ORG_ID, type CreateIssueInput, type GateResult, type HierarchySubjectRef, type Issue, type ProgramLedger, type SideEffectClass } from '@linksites/program-ledger'
-import { SITE_ASSEMBLY_ISSUE_TYPE } from './executors/siteAssemblyExecutor.js'
-import { SITE_SPECIFICATION_ISSUE_TYPE } from './executors/siteSpecificationExecutor.js'
-import { PROMOTE_WORKING_PACKAGE_ISSUE_TYPE } from './executors/promotionExecutor.js'
+import { SITE_ASSEMBLY_ISSUE_TYPE } from './executors/siteAssemblyExecutor'
+import { SITE_SPECIFICATION_ISSUE_TYPE } from './executors/siteSpecificationExecutor'
+import { PROMOTE_WORKING_PACKAGE_ISSUE_TYPE } from './executors/promotionExecutor'
 import {
   buildPromotionRequestFromManifest,
   buildSiteAssemblyInputFromSiteSpecification,
   type BuildPromotionRequestExtras,
   type BuildSiteAssemblyInputExtras,
-} from './pipelineChaining.js'
-import type { SiteSpecification } from './siteSpecification.js'
-import type { SiteAssemblyManifest } from './siteAssemblyManifest.js'
+} from './pipelineChaining'
+import type { SiteSpecification } from './siteSpecification'
+import type { SiteAssemblyManifest } from './siteAssemblyManifest'
 
 export class PipelineAutoChainingError extends Error {
   constructor(message: string) {

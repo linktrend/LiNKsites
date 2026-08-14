@@ -39,9 +39,9 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import type { ConversionLockRegistry } from './conversionLock.js'
-import type { FoundationReservation, FoundationReservationManager } from './reusableFoundation.js'
-import type { SiteSpecification } from './siteSpecification.js'
+import type { ConversionLockRegistry } from './conversionLock'
+import type { FoundationReservation, FoundationReservationManager } from './reusableFoundation'
+import type { SiteSpecification } from './siteSpecification'
 
 export type ProspectAdaptationStatus = 'draft' | 'previewed' | 'published' | 'archived'
 

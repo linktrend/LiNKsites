@@ -25,6 +25,10 @@ const cmsHosts = Array.from(
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  // Workspace packages are authored in TypeScript while using Node-style
+  // `.js` import specifiers for emitted ESM. Next must transpile the linked
+  // packages so those specifiers resolve to their source modules in builds.
+  transpilePackages: ['@linksites/factory-catalog', '@linksites/types', '@linksites/program-ledger', '@linksites/autowork-boundary'],
   async headers() {
     return [
       {

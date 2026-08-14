@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto'
 import type { LeadResearchPackage, SchemaVersion } from '@linksites/types'
-import { assertLibraryConsumptionEvidence, type LibraryConsumptionEvidence } from './libraryConsumer.js'
-import type { Revision2MaterializedWebsiteTemplate } from './revision2Materialization.js'
-import type { TemplateId } from './templateIdentity.js'
-import { assertValidWorkingContentPackage, computeWorkingContentChecksum, type WorkingContentPackage, type WorkingContentPage, type WorkingContentProvenance } from './workingContent.js'
+import { assertLibraryConsumptionEvidence, type LibraryConsumptionEvidence } from './libraryConsumer'
+import type { Revision2MaterializedWebsiteTemplate } from './revision2Materialization'
+import type { TemplateId } from './templateIdentity'
+import { assertValidWorkingContentPackage, computeWorkingContentChecksum, type WorkingContentPackage, type WorkingContentPage, type WorkingContentProvenance } from './workingContent'
 
 export const CONTENT_PRODUCTION_SCHEMA_VERSION = { major: 1, minor: 0 } as const satisfies SchemaVersion
 export const CONTENT_PRODUCTION_EXECUTOR_VERSION = 'w2-01-deterministic-adapter.v1' as const

@@ -44,7 +44,7 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import type { ProspectAdaptation } from './prospectAdaptation.js'
+import type { ProspectAdaptation } from './prospectAdaptation'
 
 export class ConversionLockError extends Error {}
 

@@ -25,10 +25,10 @@ import {
   type LibraryCandidateEntry,
   type LibraryCandidateSubmission,
   type PinnedLibraryCatalogReference,
-} from './libraryConsumer.js'
-import { archiveAndReleaseExactFoundation, type ProspectAdaptation } from './prospectAdaptation.js'
-import type { ConversionLockRegistry } from './conversionLock.js'
-import type { FoundationReservationManager } from './reusableFoundation.js'
+} from './libraryConsumer'
+import { archiveAndReleaseExactFoundation, type ProspectAdaptation } from './prospectAdaptation'
+import type { ConversionLockRegistry } from './conversionLock'
+import type { FoundationReservationManager } from './reusableFoundation'
 
 export const SITE_LIFECYCLE_SCHEMA_VERSION = 1 as const
 

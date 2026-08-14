@@ -39,8 +39,8 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import type { TierId } from './tierSpecification.js'
-import { resolveMostRestrictive } from './tierSpecification.js'
+import type { TierId } from './tierSpecification'
+import { resolveMostRestrictive } from './tierSpecification'
 
 /** Manual §04's reusable-capability lifecycle, applied to Vertical Kits (manual §08.10). */
 export type VerticalKitStatus = 'candidate' | 'active' | 'deprecated' | 'retired'

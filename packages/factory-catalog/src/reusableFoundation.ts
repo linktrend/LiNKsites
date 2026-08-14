@@ -28,7 +28,7 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import type { TierId } from './tierSpecification.js'
+import type { TierId } from './tierSpecification'
 
 export type FoundationStatus = 'candidate' | 'active' | 'deprecated' | 'retired'
 
