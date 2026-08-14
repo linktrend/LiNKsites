@@ -81,7 +81,11 @@ jobs:
           version: 2.81.3
 
       - name: Install Chromium for browser proof
-        run: pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+        run: |
+          pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+          browser_path="$(pnpm --filter @linksites/cms exec node -e "process.stdout.write(require('playwright').chromium.executablePath())")"
+          test -x "${browser_path}"
+          echo "W2_04_CHROMIUM_EXECUTABLE=${browser_path}" >> "${GITHUB_ENV}"
 
       - name: Run exact candidate and disposable Payload/browser proof
         env:
@@ -89,7 +93,6 @@ jobs:
           LINKSITES_LINKLIBRARIES_COMMIT_SHA: ${{ inputs.provider_commit }}
           LINKSITES_LINKLIBRARIES_TREE_SHA: ${{ inputs.provider_tree }}
           LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: ${{ inputs.dependency_lock_sha256 }}
-          W2_04_CHROMIUM_EXECUTABLE: /usr/bin/chromium
           LINKSITES_KEEP_LOCAL_REHEARSAL: "1"
         run: bash scripts/master-template-paired-proof.sh
 
