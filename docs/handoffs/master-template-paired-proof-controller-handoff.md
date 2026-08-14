@@ -7,14 +7,14 @@ This handoff is for an independent Coordinator/Controller. The implementer must 
 - LiNKsites consumer branch: `issue/167-extract-linksites-master-template-into-linklibra`
 - LiNKsites consumer checkpoint: `6776e86d61ae581f467b2b00a2de62c9640a5b8f`
 - LiNKsites consumer tree: `ab2c88ede89e77cf9eb6e52dbee8b5a3a3b18e24`
-- LiNKlibraries candidate commit: `49586ba09ea2bb61a1f49825d6124f95f13c4447`
-- LiNKlibraries candidate tree: `4dc7dc3497461cf592b351eb5f75abe676d8e632`
+- LiNKlibraries candidate commit: `19a5d85db5bd1eca8971eb349ed605cfe5342b34`
+- LiNKlibraries candidate tree: `2eeefac865cf572d552d18a217a8604a6ea0075f`
 - Candidate dependency-lock SHA-256: `59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23`
-- Candidate release receipt SHA-256: `75ab0ab5d29fce058438d586eb222924e3046d718743c3cda6a2e6a49fbef2d6`
-- Candidate manifest SHA-256: `1d06c150c085d133657d86616e6668fd6f61e6d630b1cedde98bf91fc4377d93`
-- Candidate payload SHA-256: `f8996da4561c8e31438ba51136d22070190bace550ba22bd83bb200d8fc4af3e`
-- Candidate inventory SHA-256: `1fd760c9d2c327429ec6c124f6f5927db82182bb40e8962f642c78a05fb771bb`
-- Candidate artifact tree SHA-1: `8ef8be911b976ede1810b2a7cfc44a29dded239c`
+- Candidate release receipt SHA-256: `cd9991308a3ee783f5f0cefe854d626bfdac9ae9d3c60bc65c2f8f5b4a86c576`
+- Candidate manifest SHA-256: `80d9c1f7e65695f5f3175daacf65144446ce95943dff88484f511cf0d7d44418`
+- Candidate payload/inventory projection SHA-256: `f36b5dac727536fba6e95eac2134f61703b74fa543e8c4d2cc2ca0d9df52bd84`
+- Candidate inventory file SHA-256: `ba504bec33361e3e7bef5f26c9767c0e1ff37070347986d57d8d54a0974fc6ff`
+- Candidate artifact tree SHA-1: `4dce4fd9d6a386be38a5da325183ee948e99976`
 
 The provider candidate is intentionally `draft / non_selectable / unknown`; the consumer must not promote or locally alias it.
 
