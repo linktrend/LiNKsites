@@ -1,0 +1,974 @@
+{
+  "schemaVersion": 1,
+  "handoffType": "visual_master_template_source_inventory",
+  "template": {
+    "entryId": "master-template-type-1",
+    "version": "1.0.0",
+    "displayName": "Master Template Type 1 — Version 1",
+    "sourceRepository": "LiNKsites"
+  },
+  "source": {
+    "commitSha": "315744bfa882dc3b509236ff2cc5043f10dfa217",
+    "treeSha": "42b65f13840773887be8ab0ac781542e4adc2b73",
+    "sourceRoots": [
+      "apps/web-master/src",
+      "apps/web-master/messages",
+      "apps/web-master/config",
+      "apps/web-master/template.config.json",
+      "apps/web-master/public",
+      "apps/cms/scripts"
+    ]
+  },
+  "visualFiles": [
+    {
+      "path": "apps/cms/scripts/bootstrap-seed.ts",
+      "byteLength": 5848,
+      "sha256": "802f55295915df7abe2af3260087ae9c8726ccde6681a89304b6c7cbe5dd6373",
+      "role": "default_content_seed_reference",
+      "consumerBoundary": "LiNKsites retains Payload persistence and disposable seed execution"
+    },
+    {
+      "path": "apps/cms/scripts/factory/create-demo-site.ts",
+      "byteLength": 20347,
+      "sha256": "772715cac372acb5b08c7a53402242c236a55b86c67f0ab9f0a5929f03c2cdfa",
+      "role": "disposable_content_seed_reference",
+      "consumerBoundary": "LiNKsites retains Payload persistence and disposable seed execution"
+    },
+    {
+      "path": "apps/web-master/config/theme.json",
+      "byteLength": 11469,
+      "sha256": "57851d1f82d4a3eeebacdb7cdb530cd83679cee79d53ba775719950ae4c53c20",
+      "role": "theme_variants",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/data/cmsPayload.json",
+      "byteLength": 69188,
+      "sha256": "c0b992a4d9a5b47815a61f79e13238f10130dba23557cea664561377e88dc91d",
+      "role": "content_shape_fixture",
+      "consumerBoundary": "LiNKsites retains Payload persistence and disposable seed execution"
+    },
+    {
+      "path": "apps/web-master/messages/en/common.json",
+      "byteLength": 9052,
+      "sha256": "d86982804bc25c440275cf5e185078ce76f177217a6273e9047bc66e0eb45e2f",
+      "role": "default_copy_en",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/en/footer.json",
+      "byteLength": 275,
+      "sha256": "03d139fac92615d1f4268f68c665d7c5be900db7b56b99f99b6dbcbf62c31a43",
+      "role": "default_footer_copy_en",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/en/navigation.json",
+      "byteLength": 297,
+      "sha256": "b415e91f7b1d1f46e0a478e7c16d697eff065c14c50cea409f28a7386599e341",
+      "role": "default_navigation_copy_en",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/en/pages.json",
+      "byteLength": 2530,
+      "sha256": "d2eb199382b30c83cf1c7570156c58284d17d9706a6c5cc335fd3c06471ef1b3",
+      "role": "default_page_copy_en",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/es/common.json",
+      "byteLength": 10043,
+      "sha256": "1da7ba1c8eea806270a7210f6d2402dbfbb7f38b2cf69b89d7ff669836b12c6f",
+      "role": "default_copy_es",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/es/footer.json",
+      "byteLength": 312,
+      "sha256": "69e2805efeb71d06f2d06ee3068de788f003e5268fa05dc02f976dcadc659d4b",
+      "role": "default_footer_copy_es",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/es/navigation.json",
+      "byteLength": 324,
+      "sha256": "a9de0c25ca783cf68897a153d6c06d0206989840f438379812fad09408b030da",
+      "role": "default_navigation_copy_es",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/es/pages.json",
+      "byteLength": 2784,
+      "sha256": "0a882cc997c99b23e93598baca182c6bb334b925982f572b961f0d8e36527daa",
+      "role": "default_page_copy_es",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/zh-cn/common.json",
+      "byteLength": 8649,
+      "sha256": "f25aed6be1a7f018c2fd76ed16cead49696608205cb154ae7bec296f64fe2d74",
+      "role": "default_copy_zh_cn",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/zh-cn/footer.json",
+      "byteLength": 262,
+      "sha256": "9c8ca181f341d2d6e314fa1b6cbe2a89bc97f5d657a0d854acf5b5857bb1cee0",
+      "role": "default_footer_copy_zh_cn",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/zh-cn/navigation.json",
+      "byteLength": 317,
+      "sha256": "9188f933f87bd2dd45af483b48ad609a0ebab0a2dba26d58d4f0e414d0c2d7f0",
+      "role": "default_navigation_copy_zh_cn",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/zh-cn/pages.json",
+      "byteLength": 2501,
+      "sha256": "3ba702e28aceb5f6ca8e2abd3911284603e9955588e3cadae23920a6153c2d46",
+      "role": "default_page_copy_zh_cn",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/zh-tw/common.json",
+      "byteLength": 8716,
+      "sha256": "b4bb4dcaea65d74a4ef8f709192813927e4f71bd028dc4a00437ff5dd1ff445a",
+      "role": "default_copy_zh_tw",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/zh-tw/footer.json",
+      "byteLength": 262,
+      "sha256": "9f159eecdda2dc78353753fd6c20f7ecf403eedcfcd4d25ce0e7851385fb6379",
+      "role": "default_footer_copy_zh_tw",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/zh-tw/navigation.json",
+      "byteLength": 317,
+      "sha256": "c55ba93d0baa9b5c61e00a24aecca7ca9541f9d897ab69618fe1ee31e88cf5c4",
+      "role": "default_navigation_copy_zh_tw",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/messages/zh-tw/pages.json",
+      "byteLength": 2501,
+      "sha256": "0afff8b6c2f94b969f7bdd907ff3c19f1fd9d2a111910a39a2f7926b096f21a2",
+      "role": "default_page_copy_zh_tw",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/public/favicon.ico",
+      "byteLength": 80,
+      "sha256": "119a73e4c7a62bb248ed3a92a0f2affb4754fa21721285a3404159e56a6a1c15",
+      "role": "consumer_brand_asset_slot",
+      "consumerBoundary": "LiNKsites retains tenant/brand/domain-specific bytes"
+    },
+    {
+      "path": "apps/web-master/public/humans.txt",
+      "byteLength": 933,
+      "sha256": "0d3becea796aa2a86090a22eb36872df82715ebd5619b50f1a4294267dc13078",
+      "role": "consumer_site_metadata",
+      "consumerBoundary": "LiNKsites retains tenant/brand/domain-specific bytes"
+    },
+    {
+      "path": "apps/web-master/public/logo.png",
+      "byteLength": 67,
+      "sha256": "d18cc9a97c3e6340e2ebc784e2b357d02f5c538e28e9f0f9b5f822c3c176760b",
+      "role": "consumer_brand_asset_slot",
+      "consumerBoundary": "LiNKsites retains tenant/brand/domain-specific bytes"
+    },
+    {
+      "path": "apps/web-master/public/og-image.png",
+      "byteLength": 68,
+      "sha256": "4cce52cccd4c917a8a021aaaa80aadeff114f7e2035f1ba33208ace7c9255197",
+      "role": "consumer_brand_asset_slot",
+      "consumerBoundary": "LiNKsites retains tenant/brand/domain-specific bytes"
+    },
+    {
+      "path": "apps/web-master/public/placeholders/article.jpg",
+      "byteLength": 70,
+      "sha256": "6b7fa434f92a8b80aab02d9bf1a12e49ffcae424e4013a1c4f68b67e3d2bbcd0",
+      "role": "generic_placeholder_asset",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/public/placeholders/avatar.jpg",
+      "byteLength": 70,
+      "sha256": "6b7fa434f92a8b80aab02d9bf1a12e49ffcae424e4013a1c4f68b67e3d2bbcd0",
+      "role": "generic_placeholder_asset",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/public/placeholders/case.jpg",
+      "byteLength": 70,
+      "sha256": "6b7fa434f92a8b80aab02d9bf1a12e49ffcae424e4013a1c4f68b67e3d2bbcd0",
+      "role": "generic_placeholder_asset",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/public/placeholders/default.jpg",
+      "byteLength": 70,
+      "sha256": "6b7fa434f92a8b80aab02d9bf1a12e49ffcae424e4013a1c4f68b67e3d2bbcd0",
+      "role": "generic_placeholder_asset",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/public/placeholders/hero.jpg",
+      "byteLength": 70,
+      "sha256": "6b7fa434f92a8b80aab02d9bf1a12e49ffcae424e4013a1c4f68b67e3d2bbcd0",
+      "role": "generic_placeholder_asset",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/public/placeholders/offer.jpg",
+      "byteLength": 70,
+      "sha256": "6b7fa434f92a8b80aab02d9bf1a12e49ffcae424e4013a1c4f68b67e3d2bbcd0",
+      "role": "generic_placeholder_asset",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/public/site.webmanifest",
+      "byteLength": 503,
+      "sha256": "ae49ae499ff093b54424a1d53fe59ad866e9a7c4ee522ec8fc70966295a85daa",
+      "role": "consumer_site_metadata",
+      "consumerBoundary": "LiNKsites retains tenant/brand/domain-specific bytes"
+    },
+    {
+      "path": "apps/web-master/src/cms/blocks/index.ts",
+      "byteLength": 12781,
+      "sha256": "4f2c25489f82e3a2a18794fc2eb6fb5d90c1a5111251974575885b492c747822",
+      "role": "content_block_schema",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/src/components/common/AnalyticsInitializer.tsx",
+      "byteLength": 2207,
+      "sha256": "a85dd75361e2711dfa57e0d82603b8d13544b67a598ca742a0bcd8196946c2ca",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/Breadcrumbs.tsx",
+      "byteLength": 2336,
+      "sha256": "4d7139420618cf956dfefd6713e02bbf7e9c155efe06249429ab9bb593fd2abe",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/ClientOnly.tsx",
+      "byteLength": 326,
+      "sha256": "74f87cd5b6bba62625bb72aa2c1114fcd85fdcc51d5c64ed2f1f517d201f499f",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/CookieConsentBanner.tsx",
+      "byteLength": 3770,
+      "sha256": "fecd280f5458dd41503f85475dc65a9e518cfcb9a0d5e3c93645cd5f6b4f48fb",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/CookiePreferencesButton.tsx",
+      "byteLength": 682,
+      "sha256": "e555024b9d8a9410ff6195e0d1120a2e6423300c960f2d1d80ccd5206902faa6",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/CTA.tsx",
+      "byteLength": 682,
+      "sha256": "d56e28cd5dff447be66324c4095a172d721d7d2f9901c1536ac2cc47ac4be4de",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/ManageCookiesButton.tsx",
+      "byteLength": 661,
+      "sha256": "bdda09e64bf3995d970e5228292276f9b8c141a3c7a33c5b661764bd1f5867ab",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/Modal.tsx",
+      "byteLength": 1226,
+      "sha256": "9c8e8d3342eea6e82ac3178a6af09574763ec1fe69197bc7b8a5669036596bee",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/NewsletterSection.tsx",
+      "byteLength": 6683,
+      "sha256": "2c8ba0555d5d67208fbaae0fe83c4455b56f2356ccce559d871f0fbc2ee764ef",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/ScrollToTop.tsx",
+      "byteLength": 2322,
+      "sha256": "76eb1293ae58208eb5ee174441c4c1862ce4bbd5a585f18bdb77c1fbdf58b6fc",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/common/WebVitalsMonitor.tsx",
+      "byteLength": 2298,
+      "sha256": "1690524572a16a26ee7575b53cb46aa23c8a99e143125bc5007e8cf5b12d8995",
+      "role": "shared_utility_or_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/ContactChannelCard.tsx",
+      "byteLength": 2970,
+      "sha256": "3041f05c544e34078533e8156061f31b9b15c9c15192299a66257b539dbe0c2c",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/ContactChannelList.tsx",
+      "byteLength": 607,
+      "sha256": "e5c3c97af996c539063123dc4435cc770167d0f28f60fe3dbd43cb980530e5e9",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/ContactForm.tsx",
+      "byteLength": 5503,
+      "sha256": "f666f010a9f4d2ddda738baaea402e17231cddbda88c7fe586443167124606ee",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/ContactFormContext.tsx",
+      "byteLength": 1169,
+      "sha256": "838bb1645dc8b8121a93e1e6f6dda14b273e4965894bcf0238acb1260b70e043",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/ContactPageContent.tsx",
+      "byteLength": 5681,
+      "sha256": "4bce4da6eb4f63e271a469f458d9d203ec0306f3d97c3a7e0f82512d7b069deb",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/DynamicContactForm.tsx",
+      "byteLength": 5698,
+      "sha256": "5b3fb1ead2c58f04cfa3275eb2f443c7fe8c5dbe5023363727f826e8894f0be5",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/GoogleMapEmbed.tsx",
+      "byteLength": 430,
+      "sha256": "622576f1ed1dda49cd67b32e4c772cd900862c34ccc31a044745d795ce0055c8",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/HelpDeflectionSection.tsx",
+      "byteLength": 1218,
+      "sha256": "e90182c7eaac06fef2682e4037ad307e31c93eab37f0bc3a089e4fa874bd6222",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/IntentCard.tsx",
+      "byteLength": 1475,
+      "sha256": "3ffdca59f2f63fe01625a09c6bac98763a7c2c6cf868694c261bb2df1753d88a",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/IntentGrid.tsx",
+      "byteLength": 1065,
+      "sha256": "59735a631256952d6ac431f7bbe617065722a3ce4b1e432f24f6a7aa8d646a91",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/contact/TrustFooter.tsx",
+      "byteLength": 1716,
+      "sha256": "e7b68a882a5ac9780b81957c0db3a88f0b1c987703ac07e60350d67da8ef174e",
+      "role": "contact_surface",
+      "consumerBoundary": "provider owns structure and states; LiNKsites owns form submission, validation, privacy, maps, and integrations"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpArticleBody.tsx",
+      "byteLength": 1059,
+      "sha256": "f7f3c4a3b716623e04d827d8ee8031aa6e6993e22abd95a19100df717e18499f",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpArticleFeedback.tsx",
+      "byteLength": 2325,
+      "sha256": "f84632259ebc9c1ebf52cda952033309c393cd5c66fddb9767e0ca507e570ff5",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpArticleHeader.tsx",
+      "byteLength": 1197,
+      "sha256": "256e176fcc22b9b5b5a7e06bca1e64838215bb881271576bfd2cf6200a819fa7",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpArticleList.tsx",
+      "byteLength": 4414,
+      "sha256": "8e393db337ca4b9bc7163663c39f1439a1cbf4505774e33815c1cb001f787866",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpArticleRelated.tsx",
+      "byteLength": 2556,
+      "sha256": "a212346a84d767d06c48bec85587406da3a4b6c1f730218a41131540e7a00cf6",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpBreadcrumbs.tsx",
+      "byteLength": 2607,
+      "sha256": "31218d8170553013b27b9a0f21f2691298e4c4508a836c8b3e6a9a64e8295623",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpCategoryHeader.tsx",
+      "byteLength": 2088,
+      "sha256": "0cd11525923c43a9bb64a8068353eb76453d1f3b7b2609cbc9cbccdba8abf18a",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpCentreHero.tsx",
+      "byteLength": 1050,
+      "sha256": "a79a78c0a852998edb13c2183f145eff274eb0e1be64802cc81b7baee5767fb5",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/help/HelpSearchField.tsx",
+      "byteLength": 2446,
+      "sha256": "564ceeaeffe853bcbaf32ed69ac9ff6cdac9013a9f14d12ce4ab54f4c35b2047",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/icons/FriesIcon.tsx",
+      "byteLength": 624,
+      "sha256": "b0764c140381f751205b746d3bfbf2215aad63b89166079942b21ea098eab080",
+      "role": "icon_asset",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/layouts/MarketingLayoutClient.tsx",
+      "byteLength": 1395,
+      "sha256": "40ac91715add89bc64076ee1eb27357d3d5465fd8b9f688cb3bc86233afee8d1",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/layouts/PageTypeMarker.tsx",
+      "byteLength": 396,
+      "sha256": "1b72480f0d15058a2bcc746ba7370d3ff0a8a4629dd2b61d831c1ee8721aa1b8",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/ArticlesGrid.tsx",
+      "byteLength": 3297,
+      "sha256": "2a2f181eebba4d733dd712a799b093d20d530fcca65646e1a3439dc80d9fb422",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/CaseStudiesGrid.tsx",
+      "byteLength": 3373,
+      "sha256": "58d0c813f212718bcac922e3ef73e299271f55e23eefe7b50e5d5cc43c54cdc6",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/CTASection.tsx",
+      "byteLength": 2095,
+      "sha256": "2cf48ef5828685ab7f980cffb6a1a8221d52b949b288deb4f35ee3c26f810bd9",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/DynamicBgSection.tsx",
+      "byteLength": 965,
+      "sha256": "92a9039547ac2187152cc14a4dcf4ab34212734b1632ff270b6d32a7c09a9ac4",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/OfferShowcase.tsx",
+      "byteLength": 9379,
+      "sha256": "632f480b78bd6ed7b93f4f3cabbf91033c0f7214b631a22714f52e4a083e39f3",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/PlatformFeatures.tsx",
+      "byteLength": 2864,
+      "sha256": "c6b2173c56d19f1b253166b96e2533690e8c492261a0db6b7aeaa4849043fe64",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/PricingHomepage.tsx",
+      "byteLength": 6966,
+      "sha256": "323e2a4a69d45542749e5971ff79ccf0a6d4ee3c9ab0fd61e0fe98a692b1f505",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/PricingPreview.tsx",
+      "byteLength": 8775,
+      "sha256": "6251e7151bab96c1ae3c0586e22d952aa1a9dcd8458391facbce056c79ebca9a",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/ScrollIndicator.tsx",
+      "byteLength": 1356,
+      "sha256": "4f19ae097ec47534aebdd5db42a577de828155360daba08e5583945f86c9b241",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/SignupHero.tsx",
+      "byteLength": 9808,
+      "sha256": "5692dbf7121e2a523f3214bb14b6bcb30d5167beb6aec83fd7bc47162d7b514f",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/SocialProofCarousel.tsx",
+      "byteLength": 4743,
+      "sha256": "f3ef1948e008e77670dc92281eeac1d3a572b3b70d82e5f6fb252806d04d75f0",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/SolutionsOverview.tsx",
+      "byteLength": 2424,
+      "sha256": "d77fb3683f1042be58cd8074474b74304c39aa1d9cda05c588184df34a5a7efc",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/marketing/StaticBgSection.tsx",
+      "byteLength": 1049,
+      "sha256": "c88ac7a32857a2cba56efdd68763190b74d978d620af41d5273f8b1cfad4f09d",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/modals/CookiePreferencesModal.tsx",
+      "byteLength": 6508,
+      "sha256": "d4c58023595ae37f0e8f8f06a6463a3bce62efae4185ffb8a3dc29488b500e52",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/navigation/Footer.tsx",
+      "byteLength": 15167,
+      "sha256": "b13fc24d4a409b5109d0570233e02e4f029cf679e7d2e6949f48157e33d5e0d9",
+      "role": "navigation_shell",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/navigation/Header.tsx",
+      "byteLength": 10585,
+      "sha256": "74ffa1d0b3cf0dbce755aa7a87393e57c23775e01659e6182130b466d4739b57",
+      "role": "navigation_shell",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/page-renderer.tsx",
+      "byteLength": 29137,
+      "sha256": "d588b3d70004cf270af2d80b9173e6f5e479a6e4ba071f7128d66b501c450859",
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/pricing/PricingToggle.tsx",
+      "byteLength": 1353,
+      "sha256": "e4f409e63abda2abd26f9b3044958e48dee3003feebef446910f69bbbc53946b",
+      "role": "pricing_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/resources/ArticlesPageContent.tsx",
+      "byteLength": 15460,
+      "sha256": "dda5351c0152ee2edfab3129a7fcbf250c6c64cfa196ff242f1e23608ee61b34",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/resources/CaseStudiesPageContent.tsx",
+      "byteLength": 14658,
+      "sha256": "f07d73e4ff5138d5ace15816c2051221e649e0e01bccb23a6e73b6991b6c6901",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/resources/CmsFaqList.tsx",
+      "byteLength": 625,
+      "sha256": "87c984b21d136726a47295f835269ed6d35dead8c345f1bd43355ff0b5f22d48",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/resources/VideosPageContent.tsx",
+      "byteLength": 7836,
+      "sha256": "b93b206f75e205531fb4a285dd3e5295647a7f5556232ee6f7ac36d9474f2750",
+      "role": "content_surface",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/seo/SiteStructuredData.tsx",
+      "byteLength": 659,
+      "sha256": "7c0669617887a13686f3e9ad76c3d413d947da7282af08ae8987d1efbb884097",
+      "role": "seo_visual_contract",
+      "consumerBoundary": "provider owns structured-data shape; LiNKsites supplies tenant URLs, names, and publication data"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/button.tsx",
+      "byteLength": 1550,
+      "sha256": "1a7f34cd81546131c772ae8e3b3141442bed05b40aecae751ddf07ffb1ebb380",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/card.tsx",
+      "byteLength": 1770,
+      "sha256": "fcd6c0cb44da698517ddf3d86b5b2148cc84cc43f424ab0352a4816c7627692e",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/checkbox.tsx",
+      "byteLength": 1180,
+      "sha256": "60b6ffd03daedd46794a3fc3ae62bf663db23a0567dda30e879778b018381ad8",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/dialog.tsx",
+      "byteLength": 3438,
+      "sha256": "667584ec53d7fdddcc34f4656109b36e6f7e99993f4811d0f4388cd233bb9789",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/dropdown-menu.tsx",
+      "byteLength": 7250,
+      "sha256": "470605d72b56723b8d9bbd03543dfb14b1212bd3734c4230c103514f3e92af63",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/input.tsx",
+      "byteLength": 676,
+      "sha256": "0fd92d461b006a92f9297b2ea57918ab47b28a168d1835d6dde9774e04666bcb",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/label.tsx",
+      "byteLength": 711,
+      "sha256": "fecd38afbf1b1753fc349d3b8ac6aedb24dbee235fe2d74bd2717cb93397fbae",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/sheet.tsx",
+      "byteLength": 4121,
+      "sha256": "300f9ca3d809fd1679a23d1e086b02be02319fe912c947fa981bbfa66c42394d",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/components/ui/switch.tsx",
+      "byteLength": 1314,
+      "sha256": "093a91b65ce6a850ace8e24984cd166141f043e1d6691a58bb00bffb3aa82a3f",
+      "role": "ui_primitive",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/AboutLayout.tsx",
+      "byteLength": 1876,
+      "sha256": "bc61bba8d0bd29708760a67a9939b83c8926f48446374497948f90ac0419ea1a",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/ArticleLayout.tsx",
+      "byteLength": 3126,
+      "sha256": "0950389e97500f3cca2acc0156479d8cb6926b5a84647de69b45b58d6dc277c4",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/CaseStudyLayout.tsx",
+      "byteLength": 3145,
+      "sha256": "1c7cf055e75a2b8229ee2f3b6a26d8f7416dd3b47bf5e7e9944e3554876729f6",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/ContactLayout.tsx",
+      "byteLength": 2668,
+      "sha256": "3330ca18f76793d664c8e0dd48308004e00a98b993a78cf0cd4c4af85d0239d4",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/FAQLayout.tsx",
+      "byteLength": 1035,
+      "sha256": "ebe17fd84878a3ae9c5a826ee2d539284a131c834da0a7d44287d000274b0527",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/LegalLayout.tsx",
+      "byteLength": 717,
+      "sha256": "cfdc45ed94f3ff78828ee16bdec2f62a485fe4db442ab7d93be70e53f34eabee",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/OfferIndexLayout.tsx",
+      "byteLength": 1120,
+      "sha256": "3cea86346a413c156fd3588c88467c20d138f3f4d91de28a1cb1abb70a08f649",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/OfferPageLayout.tsx",
+      "byteLength": 5565,
+      "sha256": "0bccbd51b1fa69e39ca37cdd5d71f35d9e4171f82ffbe7485f47093b2ecea603",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/ResourceCategoryLayout.tsx",
+      "byteLength": 1144,
+      "sha256": "a607183c73fae775dff6f686fba721b41e67e9a7190b0ee70f4b280d12b048c0",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/ResourceIndexLayout.tsx",
+      "byteLength": 1773,
+      "sha256": "e2bc23a75062621fe54f0a0115406523cb3e9efae5b0d85f10b05e0e2b35503d",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/layouts/VideoLayout.tsx",
+      "byteLength": 3571,
+      "sha256": "bcdeaeb385641f7658d6989a69435bbffc4292e1002dc944f64d0cfee557a067",
+      "role": "page_layout",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    },
+    {
+      "path": "apps/web-master/src/styles/globals.css",
+      "byteLength": 2396,
+      "sha256": "65d1cc8002d1205836a607cfbb4400175d159d9ce98ee1687dde13b931ae28e2",
+      "role": "global_visual_rules",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/src/styles/tokens.css",
+      "byteLength": 6787,
+      "sha256": "ba740806addf18c9052e5da82a4632b03a72debdec075abada152c452d659ec5",
+      "role": "design_tokens",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/tailwind.config.ts",
+      "byteLength": 4250,
+      "sha256": "2aa6759057d0f33576b4d1b8d8e2da381272ce2b8bfbc64c3f922e6f7ff54d7a",
+      "role": "utility_token_mapping",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "apps/web-master/template.config.json",
+      "byteLength": 2860,
+      "sha256": "44fda8d69ac5434dbeac7f0e237d65f780e34137d84b3d6834d65d3b0efc5d05",
+      "role": "route_layout_slot_contract",
+      "consumerBoundary": "provider owns portable contract/default shape; LiNKsites supplies runtime data"
+    },
+    {
+      "path": "zsh:1: parse error near `files=$(find apps/we...'",
+      "byteLength": null,
+      "role": "portable_visual_component",
+      "consumerBoundary": "provider owns visual behavior; LiNKsites supplies content and runtime adapters"
+    }
+  ],
+  "blockTypes": [
+    "hero",
+    "features",
+    "pricing",
+    "testimonials",
+    "cta",
+    "faq",
+    "richText",
+    "content",
+    "media",
+    "callout",
+    "videoEmbed",
+    "relatedContent",
+    "testimonial",
+    "trustFeed",
+    "locations",
+    "teamMembers",
+    "offerShowcase",
+    "caseStudies",
+    "articles",
+    "newsletter"
+  ],
+  "routes": [
+    "/",
+    "/about",
+    "/contact",
+    "/offers",
+    "/offers/[offerSlug]",
+    "/resources",
+    "/resources/articles",
+    "/resources/articles/[articleSlug]",
+    "/resources/cases",
+    "/resources/cases/[caseSlug]",
+    "/resources/faq",
+    "/resources/faq/[categorySlug]",
+    "/resources/faq/[categorySlug]/[articleSlug]",
+    "/resources/videos",
+    "/resources/videos/[videoSlug]",
+    "/resources/docs",
+    "/legal/privacy-policy",
+    "/legal/terms-of-use",
+    "/legal/cookie-policy"
+  ],
+  "variants": {
+    "themes": [
+      "default light",
+      "dark",
+      "industry presets: saas, healthcare, finance, ecommerce, legal, realestate, education, restaurant, agency, nonprofit"
+    ],
+    "buttonVariants": [
+      "default",
+      "secondary",
+      "ghost",
+      "outline"
+    ],
+    "buttonSizes": [
+      "default",
+      "sm",
+      "lg",
+      "icon"
+    ],
+    "pageRenderer": [
+      "home hero layout",
+      "inner-page hero layout",
+      "empty-content state",
+      "unsupported-block state",
+      "ordered block rendering"
+    ],
+    "backgrounds": [
+      "static background",
+      "dynamic media background"
+    ],
+    "pricing": [
+      "monthly",
+      "yearly",
+      "popular plan"
+    ],
+    "responsive": [
+      "mobile-first",
+      "sm",
+      "md",
+      "lg breakpoints"
+    ],
+    "contentStates": [
+      "empty",
+      "missing relationship",
+      "missing media",
+      "unsupported block"
+    ]
+  },
+  "defaultContent": {
+    "layoutConfig": "apps/web-master/template.config.json",
+    "copyLocales": [
+      "en",
+      "es",
+      "zh-cn",
+      "zh-tw"
+    ],
+    "seedReferences": [
+      "apps/cms/scripts/bootstrap-seed.ts",
+      "apps/cms/scripts/factory/create-demo-site.ts"
+    ],
+    "fixture": "apps/web-master/data/cmsPayload.json",
+    "requiredNeutralDefaults": [
+      "home",
+      "about",
+      "contact",
+      "offers",
+      "resources",
+      "legal",
+      "navigation",
+      "footer",
+      "cookie-consent copy",
+      "newsletter copy",
+      "form validation states"
+    ]
+  },
+  "assets": {
+    "generic": [
+      "public/placeholders/*"
+    ],
+    "consumerOwned": [
+      "public/logo.png",
+      "public/og-image.png",
+      "public/favicon.ico",
+      "public/site.webmanifest",
+      "public/humans.txt"
+    ],
+    "rule": "Do not copy LiNKsites brand/domain/customer bytes into LiNKlibraries; provide neutral asset slots and license/checksum records"
+  },
+  "providerMustDeliver": [
+    "framework-neutral component and layout contracts with visible token values and variants",
+    "portable default content schema and neutral default content",
+    "exhaustive release inventory and byte digests",
+    "provider-owned tests for every block, route contract, token/theme variant, missing-content and missing-file behavior",
+    "provenance pointing to this exact source commit/tree",
+    "no Payload, tenant, locale persistence, consent storage, form submission, preview/publication, hosting, deployment, live domain, customer data, secret, or LiNKsites runtime code"
+  ],
+  "consumerMustRetain": [
+    "Payload collections and repositories",
+    "tenant/site/locale selection",
+    "publication and preview/privacy controls",
+    "form validation/submission and consent behavior",
+    "media URL resolution and deployment/runtime configuration",
+    "private preview and hosting/deployment code"
+  ],
+  "acceptance": [
+    "A visible token or layout change made only in the exact provider candidate changes the next disposable LiNKsites build",
+    "No local visual fallback can satisfy a missing/tampered provider release",
+    "Receipt persists exact provider commit/tree, version, manifest, inventory, payload and dependency-lock digests",
+    "Provider candidate must be admitted/selectable/compatible before final consumer pin"
+  ],
+  "generatedAt": "2026-08-14"
+}
