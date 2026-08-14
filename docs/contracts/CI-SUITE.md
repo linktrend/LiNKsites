@@ -43,17 +43,23 @@ that the application-specific Full suite passed for the identical tree.
 | Component | Decision | Coverage / boundary |
 | --- | --- | --- |
 | Full lint and typecheck | REMOVE | The final workflow requires successful exact-head `CI` before Full. |
-| CMS pre-build | CONSOLIDATE | `test:local` owns the single CMS production build. |
+| CMS production build | KEEP (one execution) | `cms-production-build` runs `pnpm --filter @linksites/cms run build` exactly once. `test:local` remains test-only. |
 | Generic web pre-build | REMOVE | Recovery owns the authoritative URL-specific web build. |
 | Duplicate runtime test | REMOVE | `deploy/tests/*.test.mjs` includes it. |
 | Blanket skipped/todo regex | REMOVE | Required suite exit statuses remain fail-closed. |
 | Per-candidate audit | SCHEDULED / ADVISORY | Weekly/manual production-dependency audit at high severity. |
 | Browser discovery | KEEP, corrected | Resolves Playwright installed Chromium, not only system Chrome. |
-| Component timings | KEEP, added | JSONL timestamps/results for every Full component. |
+| Component timings and coverage manifest | KEEP, added | JSONL timestamps/results plus `full-required-coverage.json` fail closed when any declared mandatory component is absent. |
+| Docker validation | PATH-LIMIT | The fail-closed classifier builds all images for shared, deployment, lockfile, unknown, or unreadable changes; isolated mapped service changes build only their image(s). Classification is uploaded as evidence. |
+| Recovery rehearsal | KEEP / SCHEDULED | The candidate Full retains a destructive disposable recovery proof. A weekly/manual hosted recovery workflow supplies comprehensive recurrence. Separate disposable Supabase instances remain intentional: the recovery rehearsal destructively truncates/restores state and cannot safely share the migration/RLS or CMS test database. |
+| pnpm, Playwright, Turbo, BuildKit caches | KEEP | Lockfile/source-keyed caches accelerate inputs only. They never count as component evidence or replace a test/build. |
 
 The #164 baseline Full ran 9m55s and failed only at recovery-browser discovery.
-The revised profile removes Fast duplication, one CMS build, generic web build,
-duplicate runtime test, and per-candidate audit. Hosted after timing is pending.
+The first revised Full ran 9m50s but exposed an omitted CMS production build;
+it is not a releasable receipt. The next exact-head candidate must show the
+coverage manifest, including `cms-production-build`, before its receipt is
+accepted. GitHub's timing API does not report billable ARM minutes, so elapsed
+time—not an invented billing value—is the recorded measure.
 
 ## Required-check contract
 

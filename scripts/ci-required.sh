@@ -18,6 +18,7 @@ export PAYLOAD_PUBLIC_SERVER_URL="${PAYLOAD_PUBLIC_SERVER_URL:-http://127.0.0.1:
 export NEXT_PUBLIC_CMS_PROVIDER=payload
 export PAYLOAD_BASE_URL="${PAYLOAD_BASE_URL:-http://127.0.0.1:3000}"
 export NEXT_PUBLIC_PAYLOAD_API_URL="${NEXT_PUBLIC_PAYLOAD_API_URL:-http://127.0.0.1:3000}"
+export BASE_SHA="${BASE_SHA:-$(git rev-parse HEAD^)}"
 mkdir -p .ci-artifacts
 
 timings=.ci-artifacts/full-component-timings.jsonl
@@ -36,12 +37,14 @@ component install pnpm install --frozen-lockfile
 # Fast is required for this exact head by the workflow. Do not duplicate its
 # lint/typecheck work here; a missing/stale Fast conclusion fails before this
 # script is entered.
+printf '%s\n' '{"component":"fast-receipt","startedAt":null,"completedAt":null,"result":"passed","evidence":"workflow-exact-head-gate"}' >> "$timings"
 component program-build pnpm --filter @linksites/program-orchestrator run build
+component cms-production-build pnpm --filter @linksites/cms run build
 # Browser provisioning and disposable service bootstrap happen before their
 # mandatory dependent suites. Nothing is treated as an optional convenience.
 component chromium-install pnpm --filter @linksites/cms exec playwright install --with-deps chromium
 component supabase-rls env LINKSITES_PLATFORM_REPOSITORY="$LINKSITES_PLATFORM_REPOSITORY" bash scripts/test-supabase-local.sh
-component cms-local pnpm --filter @linksites/cms run test:local
+component cms-browser-tests pnpm --filter @linksites/cms run test:local
 # CMS local integration owns its disposable database/browser lifecycle above.
 # Run every remaining workspace suite and reject any silently skipped case.
 component non-cms-tests pnpm --filter '!@linksites/cms' test
@@ -52,10 +55,13 @@ component restore-rehearsal pnpm deploy:restore-rehearsal -- --evidence .ci-arti
 # Restore the exact candidate versions before the clean-tree assertion so the
 # gate measures source drift rather than deterministic tool output.
 git restore --worktree -- apps/cms/next-env.d.ts apps/cms/src/payload-types.ts
-scripts/assert-active-surface-clean.sh
-git diff --exit-code
-git diff --cached --exit-code
+component active-surface-clean bash -c 'scripts/assert-active-surface-clean.sh && git diff --exit-code && git diff --cached --exit-code'
+node scripts/ci/verify-full-required-components.mjs \
+  --manifest scripts/ci/full-required-components.json \
+  --timings "$timings" \
+  --recovery-required 1 \
+  > .ci-artifacts/full-required-coverage.json
 node - <<'NODE'
 const fs = require('node:fs')
-fs.writeFileSync('.ci-artifacts/w2-07-summary.json', JSON.stringify({ schemaVersion: '1.0.0', status: 'passed', suites: ['install', 'fast-receipt', 'program-build', 'local-payload-browser', 'supabase-rls', 'non-cms-tests', 'docker-build', 'deployment-contract', 'restore-rehearsal', 'legacy-surface-scan'], timings: 'full-component-timings.jsonl' }, null, 2) + '\n')
+fs.writeFileSync('.ci-artifacts/w2-07-summary.json', JSON.stringify({ schemaVersion: '1.0.0', status: 'passed', suites: ['install', 'fast-receipt', 'program-build', 'cms-production-build', 'chromium-install', 'supabase-rls', 'cms-browser-tests', 'non-cms-tests', 'docker-build', 'deployment-contract', 'restore-rehearsal', 'active-surface-clean'], timings: 'full-component-timings.jsonl', requiredCoverage: 'full-required-coverage.json' }, null, 2) + '\n')
 NODE
