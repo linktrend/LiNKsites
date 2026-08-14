@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "headSha": "db5532fa3effdd222265ffd66b9d588f68c97754",
+  "headSha": "5d1cfa82bc328d067c3d385d667cbf63bd2d82f8",
   "classification": "tests",
   "acceptance": "LiNKsites consumes a pinned LiNKlibraries Revision 2 master template, verifies release identity and file digests, and fails closed for missing or non-selectable provider releases.",
   "commands": [
@@ -25,5 +25,5 @@
       "exitCode": 0
     }
   ],
-  "at": "2026-08-14T10:43:53Z"
+  "at": "2026-08-14T10:44:12Z"
 }
