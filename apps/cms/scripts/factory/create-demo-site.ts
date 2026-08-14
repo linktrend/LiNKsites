@@ -44,7 +44,7 @@ async function main() {
 
   const name = requireArg(args, 'name')
   const hostname = requireArg(args, 'hostname') // demo or real domain
-  const templateId = args.templateId ?? 'marketing-smb-v1'
+  const templateId = args.templateId ?? process.env.LINKSITES_DEFAULT_TEMPLATE_ID ?? 'master-template-type-1'
   const locales = (args.locales ?? 'en').split(',').map((s) => s.trim()).filter(Boolean)
 
   const payload = await getPayload({ config })

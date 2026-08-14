@@ -33,7 +33,7 @@ pnpm run factory:bootstrap 2>/dev/null || true
 
 echo "==> Creating published site in Payload (factory:create-demo-site)"
 FACTORY_LOG="$(mktemp)"
-pnpm run factory:create-demo-site -- --name="$BUSINESS_NAME" --hostname="$HOSTNAME" --templateId=marketing-smb-v1 --locales=en >"$FACTORY_LOG" 2>&1
+pnpm run factory:create-demo-site -- --name="$BUSINESS_NAME" --hostname="$HOSTNAME" --templateId="${LINKSITES_DEFAULT_TEMPLATE_ID:-master-template-type-1}" --locales=en >"$FACTORY_LOG" 2>&1
 SITE_ID="$(node -e "
 const fs = require('fs');
 const text = fs.readFileSync(process.argv[1], 'utf8');

@@ -14,6 +14,7 @@ import {
   produceWorkingContent,
   buildPromotionRequestFromPreparedWorkingContent,
   canonicalJsonChecksum,
+  MASTER_TEMPLATE_ID,
   MARKETING_SMB_V1_CATALOG_AUTHORITY,
   promotePreparedWorkingContent,
   assertValidWorkingContentPackage,
@@ -108,7 +109,7 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     return this.boundary('qualify', async () => { if (!['home_services', 'home-services', 'plumbing', 'hvac', 'electrical', 'landscaping', 'cleaning'].includes(lead.requested_vertical)) throw new Error('qualification:unsupported-vertical'); return { vertical: 'home_services', tier: 'standard' as const } })
   }
 
-  async reserveFoundation(siteId: string, vertical: string): Promise<Record<string, unknown>> { return this.boundary('foundation.reserve', async () => ({ foundationId: 'foundation:marketing-smb-v1:standard', vertical, status: 'reserved', reservationId: `reservation:${siteId}`, owner: 'M06-preview-inventory-management', dependencies: ['vertical-qualification'] })) }
+  async reserveFoundation(siteId: string, vertical: string): Promise<Record<string, unknown>> { return this.boundary('foundation.reserve', async () => ({ foundationId: `foundation:${MASTER_TEMPLATE_ID}:standard`, templateId: MASTER_TEMPLATE_ID, vertical, status: 'reserved', reservationId: `reservation:${siteId}`, owner: 'M06-preview-inventory-management', dependencies: ['vertical-qualification'] })) }
 
   async resolveLibrary(siteId: string): Promise<Record<string, unknown>> { return this.boundary('library.verify', async () => { const consumption = await this.libraryEvidence(); return { entryId: consumption.entry.entryId, revision: this.config.libraryCommitSha, catalogChecksum: this.config.libraryCatalogChecksum, entryChecksum: this.config.libraryEntryChecksum, status: 'approved', materialized: true, verificationId: consumption.receipt.verificationId, consumption, siteId } }) }
 
@@ -146,13 +147,13 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   private async production(lead: LeadInput): Promise<ReturnType<typeof produceWorkingContent>> {
     const facts = JSON.parse(await readFile(this.config.approvedFactsPath, 'utf8')) as unknown
     const library = await this.libraryEvidence()
-    const template = { templateId: 'marketing-smb-v1' as const, libraryAssetPath: 'src/index.mjs', libraryAssetSha256: library.receipt.assetChecksums['src/index.mjs'], baselinePages: [
+    const template = { templateId: library.entry.entryId, libraryAssetPath: 'src/index.mjs', libraryAssetSha256: library.receipt.assetChecksums['src/index.mjs'], baselinePages: [
       { pageId: 'home', route: '/', sections: [{ sectionId: 'hero', componentId: 'SignupHero', copy: { lang: 'en', headline: '{{businessName}} serving {{geography}}', body: 'Approved local service information.' } }] },
       { pageId: 'about', route: '/about', sections: [{ sectionId: 'credentials', componentId: 'CTASection', copy: { lang: 'en', headline: 'About {{businessName}}', body: '{{credentials}}' } }] },
       { pageId: 'services', route: '/services', sections: [{ sectionId: 'offers', componentId: 'OfferShowcase', copy: { lang: 'en', headline: 'Services', offers: ['{{services}}'] } }] },
       { pageId: 'contact', route: '/contact', sections: [{ sectionId: 'contact', componentId: 'CTASection', copy: { lang: 'en', phone: '{{contact.phone}}', email: '{{contact.email}}', address: '{{contact.address}}' } }] },
       { pageId: 'privacy', route: '/privacy', sections: [{ sectionId: 'legal', componentId: 'CTASection', copy: { lang: 'en', copy: '{{legalClaims}}' } }] },
-    ], media: [{ assetId: 'library-neutral-mark', source: 'library://marketing-smb-v1/mark', sha256: 'a'.repeat(64), licenseSpdx: 'UNLICENSED', altText: 'Approved neutral template mark', width: 512, height: 512, format: 'webp' as const }] }
+    ], media: [{ assetId: 'library-neutral-mark', source: `library://${library.entry.entryId}/mark`, sha256: 'a'.repeat(64), licenseSpdx: 'UNLICENSED', altText: 'Approved neutral template mark', width: 512, height: 512, format: 'webp' as const }] }
     return produceWorkingContent({ lead, facts, template, library, mediaPolicy: { allowedSourcePrefixes: ['library://'], allowedLicenseSpdx: ['UNLICENSED'], maxWidth: 2048, maxHeight: 2048, allowedFormats: ['webp', 'avif', 'jpg', 'png'], requireTemplateMedia: true } })
   }
 
