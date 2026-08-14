@@ -40,9 +40,11 @@ component install pnpm install --frozen-lockfile
 printf '%s\n' '{"component":"fast-receipt","startedAt":null,"completedAt":null,"result":"passed","evidence":"workflow-exact-head-gate"}' >> "$timings"
 component program-build pnpm --filter @linksites/program-orchestrator run build
 component cms-production-build pnpm --filter @linksites/cms run build
-# Browser provisioning and disposable service bootstrap happen before their
-# mandatory dependent suites. Nothing is treated as an optional convenience.
-component chromium-install pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+# The workflow preflight installs Chromium once, records its version, and binds
+# both consumers to this exact executable before any application work starts.
+[[ -n "${W2_02_CHROMIUM_EXECUTABLE:-}" && -x "${W2_02_CHROMIUM_EXECUTABLE}" ]] || { echo 'preflight chromium bindings are required for W2_02' >&2; exit 69; }
+[[ -n "${W2_04_CHROMIUM_EXECUTABLE:-}" && -x "${W2_04_CHROMIUM_EXECUTABLE}" ]] || { echo 'preflight chromium bindings are required for W2_04' >&2; exit 69; }
+printf '%s\n' '{"component":"runtime-preflight","startedAt":null,"completedAt":null,"result":"passed","evidence":"workflow-runtime-binding"}' >> "$timings"
 component supabase-rls env LINKSITES_PLATFORM_REPOSITORY="$LINKSITES_PLATFORM_REPOSITORY" bash scripts/test-supabase-local.sh
 component cms-browser-tests pnpm --filter @linksites/cms run test:local
 # CMS local integration owns its disposable database/browser lifecycle above.
@@ -63,5 +65,5 @@ node scripts/ci/verify-full-required-components.mjs \
   > .ci-artifacts/full-required-coverage.json
 node - <<'NODE'
 const fs = require('node:fs')
-fs.writeFileSync('.ci-artifacts/w2-07-summary.json', JSON.stringify({ schemaVersion: '1.0.0', status: 'passed', suites: ['install', 'fast-receipt', 'program-build', 'cms-production-build', 'chromium-install', 'supabase-rls', 'cms-browser-tests', 'non-cms-tests', 'docker-build', 'deployment-contract', 'restore-rehearsal', 'active-surface-clean'], timings: 'full-component-timings.jsonl', requiredCoverage: 'full-required-coverage.json' }, null, 2) + '\n')
+fs.writeFileSync('.ci-artifacts/w2-07-summary.json', JSON.stringify({ schemaVersion: '1.0.0', status: 'passed', suites: ['install', 'fast-receipt', 'program-build', 'cms-production-build', 'runtime-preflight', 'supabase-rls', 'cms-browser-tests', 'non-cms-tests', 'docker-build', 'deployment-contract', 'restore-rehearsal', 'active-surface-clean'], timings: 'full-component-timings.jsonl', requiredCoverage: 'full-required-coverage.json' }, null, 2) + '\n')
 NODE

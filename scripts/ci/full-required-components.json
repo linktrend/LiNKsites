@@ -5,7 +5,7 @@
     "fast-receipt",
     "program-build",
     "cms-production-build",
-    "chromium-install",
+    "runtime-preflight",
     "supabase-rls",
     "cms-browser-tests",
     "non-cms-tests",
