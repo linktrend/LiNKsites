@@ -12,7 +12,9 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./library-consumer": "./src/libraryConsumer.ts"
+    "./library-consumer": "./src/libraryConsumer.ts",
+    "./library-provider": "./src/libraryProviderClient.ts",
+    "./revision2-materialization": "./src/revision2Materialization.ts"
   },
   "dependencies": {
     "@linksites/program-ledger": "workspace:*",
