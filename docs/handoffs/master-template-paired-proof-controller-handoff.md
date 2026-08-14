@@ -5,8 +5,8 @@ This handoff is for an independent Coordinator/Controller. The implementer must 
 ## Exact inputs
 
 - LiNKsites consumer branch: `issue/167-extract-linksites-master-template-into-linklibra`
-- LiNKsites consumer checkpoint: `6776e86d61ae581f467b2b00a2de62c9640a5b8f`
-- LiNKsites consumer tree: `ab2c88ede89e77cf9eb6e52dbee8b5a3a3b18e24`
+- LiNKsites consumer checkpoint: `00ed15ff3c02053589a184ae0757a13d638f8fbe`
+- LiNKsites consumer tree: `4371dd9768ee211bc92f224600de949683393a5c`
 - LiNKlibraries candidate commit: `19a5d85db5bd1eca8971eb349ed605cfe5342b34`
 - LiNKlibraries candidate tree: `2eeefac865cf572d552d18a217a8604a6ea0075f`
 - Candidate dependency-lock SHA-256: `59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23`
@@ -38,4 +38,4 @@ The script first records exact candidate materialization and receipt persistence
 
 ## Current local evidence
 
-The exact candidate/static probes PASS. The local Payload/browser attempt was intentionally not counted: Docker Desktop was unavailable. The consumer Next build now passes after the focused extension-resolution repair; the regression test is `packages/factory-catalog/tests/workspaceImportResolution.spec.ts`.
+The exact candidate/static probes PASS. The local Payload/browser attempt was intentionally not counted: Docker Desktop was unavailable. The consumer Next build and focused factory validation pass after the focused extension-resolution and bundle-path escaping repairs; the regression test is `packages/factory-catalog/tests/workspaceImportResolution.spec.ts`. Hosted proof remains required and the provider remains draft/non-selectable/unknown.
