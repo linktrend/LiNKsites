@@ -9,6 +9,7 @@ import {
   type WebsiteTemplateMaterializationReference,
   validateExactRelease,
 } from './libraryProviderClient.js'
+import { MASTER_TEMPLATE_SOURCE_COMMIT_SHA, MASTER_TEMPLATE_SOURCE_TREE_SHA } from './templateIdentity.js'
 
 export type { Revision2ProviderPin } from './libraryProviderClient.js'
 
@@ -99,5 +100,18 @@ export function materializeRevision2WebsiteTemplate(
     } catch { errors.push(`inventory file is missing: ${path}`) }
   }
   if (errors.length) return failure(errors)
+  const sourceInventoryPath = Object.keys(files).find((path) => path === 'source-inventory.json' || path.endsWith('/source-inventory.json'))
+  if (sourceInventoryPath) {
+    try {
+      const sourceInventory = JSON.parse(files[sourceInventoryPath]) as { sourceRepository?: unknown; sourceCommit?: unknown; sourceTree?: unknown }
+      if (sourceInventory.sourceRepository !== 'LiNKsites' || sourceInventory.sourceCommit !== MASTER_TEMPLATE_SOURCE_COMMIT_SHA || sourceInventory.sourceTree !== MASTER_TEMPLATE_SOURCE_TREE_SHA) {
+        return failure(['provider source inventory is not bound to the preserved LiNKsites visual handoff'])
+      }
+    } catch {
+      return failure(['provider source inventory is invalid JSON'])
+    }
+  } else {
+    return failure(['provider release is missing source-inventory.json'])
+  }
   return { ok: true, value: Object.freeze({ reference: admitted.value, providerRoot, releaseRoot, artifactRoot, files: Object.freeze(files) }) }
 }
