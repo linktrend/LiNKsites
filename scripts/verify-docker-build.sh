@@ -12,7 +12,29 @@ classification="${DOCKER_CLASSIFICATION_OUTPUT:-.ci-artifacts/docker-classificat
 buildkit_cache="${DOCKER_BUILDKIT_CACHE:-$HOME/.cache/linksites-buildx}"
 [[ -n "$base_sha" ]] || { echo 'BASE_SHA is required for fail-closed Docker classification' >&2; exit 78; }
 node scripts/ci/affected-docker-images.mjs --base "$base_sha" --head "$release_sha" --output "$classification"
-mapfile -t selected_images < <(node -e 'const v=require(process.argv[1]); for (const image of v.images) console.log(image)' "$classification")
+[[ -s "$classification" ]] || { echo "Docker classification evidence is missing or empty: $classification" >&2; exit 78; }
+classification_images="$(node - "$classification" "$base_sha" "$release_sha" <<'NODE'
+const fs = require('node:fs')
+const path = require('node:path')
+const [file, expectedBase, expectedHead] = process.argv.slice(2)
+let value
+try { value = JSON.parse(fs.readFileSync(path.resolve(file), 'utf8')) } catch (error) {
+  console.error(`Docker classification evidence is not valid JSON: ${error.message}`)
+  process.exit(78)
+}
+const allowed = new Set(['cms', 'web-master', 'autowork-worker', 'program-orchestrator', 'migrations'])
+if (value?.schemaVersion !== 1 || !['all', 'affected'].includes(value.mode) || value.baseSha !== expectedBase || value.headSha !== expectedHead || !Array.isArray(value.images) || value.images.length === 0 || value.images.some((image) => typeof image !== 'string' || !allowed.has(image))) {
+  console.error('Docker classification evidence failed schema/head/image validation')
+  process.exit(78)
+}
+process.stdout.write(value.images.join('\n'))
+NODE
+)"
+selected_images=()
+while IFS= read -r image; do
+  [[ -n "$image" ]] && selected_images+=("$image")
+done <<<"$classification_images"
+(( ${#selected_images[@]} > 0 )) || { echo 'Docker classification selected no images' >&2; exit 78; }
 mkdir -p "$buildkit_cache"
 
 docker_build() {
