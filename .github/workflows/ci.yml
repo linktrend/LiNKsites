@@ -120,8 +120,15 @@ jobs:
         with:
           version: 2.81.3
 
+      - name: Install dependencies for hosted browser checks
+        run: pnpm install --frozen-lockfile
+
       - name: Install Chromium for hosted browser checks
-        run: pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+        run: |
+          pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+          browser_path="$(pnpm --filter @linksites/cms exec node -e "process.stdout.write(require('playwright').chromium.executablePath())")"
+          test -x "${browser_path}"
+          echo "W2_04_CHROMIUM_EXECUTABLE=${browser_path}" >> "${GITHUB_ENV}"
 
       - name: Full application and recovery suite
         env:
