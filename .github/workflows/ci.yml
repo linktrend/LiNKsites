@@ -175,6 +175,9 @@ jobs:
             --repository "${GITHUB_REPOSITORY}" \
             --head "${{ github.event.pull_request.head.sha }}"
 
+      - name: Install Chromium for hosted browser checks
+        run: pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+
       - name: Run Full application and recovery profile
         env:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
