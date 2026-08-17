@@ -1,88 +1,102 @@
 name: CI
 
+# Repository-owned application checks.  The managed Fast and Full workflows
+# provide the sealed Phase lifecycle; this workflow supplies the LiNKsites
+# application commands and the cross-repository inputs they require.
 on:
-  push:
-    branches: [main, staging, development]
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main, staging, development]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
 
 permissions:
   contents: read
   actions: read
 
+# A new commit on the same PR supersedes every non-final application check.
+# The final suite is only labelled after Fast has passed, so cancelling the
+# older run cannot convert a cancelled check into a success.
 concurrency:
-  group: linksites-ci-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.event.action || 'push' }}
+  group: ${{ github.repository }}|${{ github.workflow }}|pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  ordinary-or-promotion-gate:
-    name: required-production-gate
-    if: github.event_name != 'pull_request' || github.event.action != 'ready_for_review'
+  fast:
+    name: LiNKsites CI
+    if: >-
+      github.event.pull_request.base.ref == 'development' &&
+      startsWith(github.event.pull_request.head.ref, 'phase/') &&
+      github.event.action != 'labeled'
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
-      - name: Checkout LiNKsites
+      - name: Checkout exact Phase head
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
 
       - name: Setup pnpm
-        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'development'
         uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
 
       - name: Setup Node.js
-        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'development'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
 
-      - name: Fast source checks
-        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'development'
+      - name: Compute immutable cache keys before Fast
+        id: cache-keys
+        run: node scripts/ci/write-cache-key-manifest.mjs --runner "${{ runner.os }}" --output .ci-artifacts/cache-key-manifest.json
+
+      - name: Restore Turbo outputs (advisory)
+        id: turbo-restore
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: .turbo
+          key: ${{ steps.cache-keys.outputs.turbo }}
+
+      - name: Run Fast application profile
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: bash scripts/ci-fast.sh
 
-      - name: Reuse exact full-suite result for promotion
-        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref != 'development'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          python3 scripts/ci_full_suite_receipt.py verify \
-            --repo "${GITHUB_REPOSITORY}" \
-            --workflow ci.yml \
-            --output .ci-artifacts/full-suite-reuse.json
-          node deploy/scripts/validate-runtime-config.mjs
-          git diff --exit-code
-          git diff --cached --exit-code
-
-      - name: Dependency and secret scan
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BEFORE_SHA: ${{ github.event.before }}
-        run: bash scripts/ci-secret-scan.sh
-
-      - name: Upload sanitized evidence
+      - name: Upload Fast evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: linksites-fast-or-release-evidence-${{ github.run_id }}
+          name: linksites-fast-evidence-${{ github.run_id }}
           path: .ci-artifacts/
-          if-no-files-found: error
+          if-no-files-found: warn
           include-hidden-files: true
           retention-days: 14
 
+      - name: Save Turbo outputs (advisory)
+        if: ${{ success() && steps.turbo-restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .turbo
+          key: ${{ steps.cache-keys.outputs.turbo }}
+
   full-production-suite:
     name: full-production-suite
-    if: github.event_name == 'pull_request' && github.event.action == 'ready_for_review' && github.event.pull_request.base.ref == 'development'
+    if: >-
+      github.event.pull_request.base.ref == 'development' &&
+      startsWith(github.event.pull_request.head.ref, 'phase/') &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'linktrend-full-suite'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 60
     steps:
-      - name: Checkout LiNKsites final review commit
+      - name: Checkout exact final Phase head
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -115,21 +129,64 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # Keys are computed before install/build steps. Caches are advisory only;
+      # all named Full components execute and write fresh evidence regardless.
+      - name: Compute immutable cache keys before Full
+        id: cache-keys
+        run: node scripts/ci/write-cache-key-manifest.mjs --runner "${{ runner.os }}" --output .ci-artifacts/cache-key-manifest.json
+
+      - name: Restore Playwright browser payload (advisory)
+        id: playwright-restore
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.cache-keys.outputs.playwright }}
+
+      - name: Restore Turbo outputs (advisory)
+        id: turbo-restore
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: .turbo
+          key: ${{ steps.cache-keys.outputs.turbo }}
+
+      - name: Restore Docker BuildKit layers (advisory)
+        id: buildx-restore
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/linksites-buildx
+          key: ${{ steps.cache-keys.outputs.buildx }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: 2.81.3
 
-      - name: Full application and recovery suite
+      - name: Require successful Fast CI on this exact Phase head
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/gitops/require_exact_ci_success.py \
+            --repository "${GITHUB_REPOSITORY}" \
+            --head "${{ github.event.pull_request.head.sha }}"
+
+      - name: Run Full application and recovery profile
         env:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
           W2_02_LIBRARY_REPOSITORY_PATH: ${{ github.workspace }}/.ci/linklibraries
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          DOCKER_BUILDKIT_CACHE: ${{ github.workspace }}/.cache/linksites-buildx
         run: bash scripts/ci-required.sh
 
-      - name: Bind successful suite to exact source and file tree
+      - name: Bind successful suite to exact Phase source and file tree
         env:
-          SOURCE_SHA: ${{ github.sha }}
-          TESTED_SHA: ${{ github.sha }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+          TESTED_SHA: ${{ github.event.pull_request.head.sha }}
           WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python3 scripts/ci_full_suite_receipt.py write \
@@ -140,11 +197,73 @@ jobs:
             --workflow-url "${WORKFLOW_URL}" \
             --output .ci-artifacts/full-suite-receipt.json
 
-      - name: Upload exact full-suite receipt and evidence
+      - name: Upload exact Full application evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: linksites-full-suite-${{ github.sha }}
+          name: linksites-full-suite-${{ github.event.pull_request.head.sha }}
           path: .ci-artifacts/
-          if-no-files-found: error
+          if-no-files-found: warn
+          include-hidden-files: true
+          retention-days: 30
+
+      - name: Save Playwright browser payload (advisory)
+        if: ${{ success() && steps.playwright-restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.cache-keys.outputs.playwright }}
+
+      - name: Save Turbo outputs (advisory)
+        if: ${{ success() && steps.turbo-restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: .turbo
+          key: ${{ steps.cache-keys.outputs.turbo }}
+
+      - name: Save Docker BuildKit layers (advisory)
+        if: ${{ success() && steps.buildx-restore.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/linksites-buildx
+          key: ${{ steps.cache-keys.outputs.buildx }}
+
+  promotion-receipt:
+    name: LiNKsites Promotion Receipt
+    if: >-
+      (github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'main') &&
+      github.event.action != 'labeled'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - name: Checkout promotion candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Reuse exact Full application-suite receipt
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/ci_full_suite_receipt.py verify \
+            --repo "${GITHUB_REPOSITORY}" \
+            --workflow ci.yml \
+            --output .ci-artifacts/full-suite-reuse.json
+          node deploy/scripts/validate-runtime-config.mjs
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Upload promotion receipt evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linksites-promotion-receipt-${{ github.run_id }}
+          path: .ci-artifacts/
+          if-no-files-found: warn
           include-hidden-files: true
           retention-days: 30

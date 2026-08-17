@@ -46,6 +46,9 @@ fi
 if [ -z "$chromium_executable" ] && [ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then
   chromium_executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 fi
+if [ -z "$chromium_executable" ]; then
+  chromium_executable="$(pnpm --dir "$repo_root" --filter @linksites/cms exec node -e 'const {chromium}=require("playwright"); process.stdout.write(chromium.executablePath())')"
+fi
 test -x "$chromium_executable" || { echo "No runnable Chromium/Chrome executable found" >&2; exit 1; }
 
 W2_02_STATE_DIR="$local_root/state" W2_02_PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" W2_02_PAYLOAD_API_KEY="$api_key" W2_02_PAYLOAD_SITE_ID="$site_id" W2_02_WEB_MASTER_BASE_URL="http://127.0.0.1:${web_port}" W2_02_PREVIEW_ACCESS_TOKEN="$preview_token" W2_02_RUN_MARKER="$run_marker" W2_02_CHROMIUM_EXECUTABLE="$chromium_executable" W2_05_OUTCOME_GATEWAY_SECRET="$outcome_gateway_secret" W2_05_OUTCOME_GATEWAY_KEY_ID="local-proof-key" W2_02_ARTIFACT_PATH="${LINKSITES_LOCAL_PROOF_ARTIFACT_PATH:-$repo_root/docs/production-roadmap/evidence/w2-02/real-service-vertical-slice.json}" pnpm --dir "$repo_root" --filter @linksites/program-orchestrator exec tsx scripts/real-service-vertical-slice.ts
