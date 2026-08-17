@@ -29,6 +29,7 @@ import {
   type WorkState,
 } from './types.js'
 import { LINKSITES_PROGRAM, type ProgramDefinition } from './hierarchy.js'
+import type { PlatformBaseline } from '@linksites/types'
 
 export class LedgerError extends Error {
   constructor(
@@ -146,6 +147,7 @@ export class ProgramLedger {
     private readonly store: LedgerStore,
     private readonly hierarchy?: HierarchyRegistry,
     private readonly capabilityGrants?: CapabilityGrantLookup,
+    private readonly platformBaseline?: PlatformBaseline,
   ) {}
 
   private async emit(
@@ -322,6 +324,7 @@ export class ProgramLedger {
         sideEffectClass: issue.sideEffectClass,
         requiredCapabilityId: issue.requiredCapabilityId,
         orgId: issue.orgId,
+        providerBaseline: this.platformBaseline,
       })
     } catch (err) {
       if (err instanceof CapabilityGateError) {
