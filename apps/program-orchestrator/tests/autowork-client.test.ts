@@ -49,6 +49,25 @@ test('external assistance requires an exact Brain handoff identity', async () =>
   await assert.rejects(client.request(request), /missingExactHandoff/)
 })
 
+test('accepts a structurally exact Autowork receipt baseline after JSON roundtrip', async () => {
+  const request = requestBase()
+  const roundtripped = JSON.parse(JSON.stringify(providerBaseline('autowork')))
+  const client = new AutoworkClient(transport({ request: async (value) => receipt(value, { providerBaseline: roundtripped }) }), () => new Date('2026-08-13T12:00:00.000Z'), providerBaseline('autowork'))
+  const result = await client.request(request)
+  assert.equal(result.value.state, 'accepted')
+  assert.deepEqual(result.value.providerBaseline, providerBaseline('autowork'))
+})
+
+test('rejects an Autowork receipt baseline with stale or extra fields', async () => {
+  const request = requestBase()
+  const stale = { ...JSON.parse(JSON.stringify(providerBaseline('autowork'))), commit: '0'.repeat(40) }
+  const extra = { ...JSON.parse(JSON.stringify(providerBaseline('autowork'))), extra: true }
+  const staleClient = new AutoworkClient(transport({ request: async (value) => receipt(value, { providerBaseline: stale }) }), () => new Date('2026-08-13T12:00:00.000Z'), providerBaseline('autowork'))
+  const extraClient = new AutoworkClient(transport({ request: async (value) => receipt(value, { providerBaseline: extra }) }), () => new Date('2026-08-13T12:00:00.000Z'), providerBaseline('autowork'))
+  await assert.rejects(staleClient.request(request), /commitMismatch/)
+  await assert.rejects(extraClient.request(request), /unexpectedOrMissingKey/)
+})
+
 test('acknowledges a bound callback once and rejects replay, stale, or handoff mismatch', async () => {
   const request = { ...requestBase(), exactHandoffId: 'brain-handoff-1' }
   const issued = receipt(request)
@@ -80,4 +99,51 @@ test('acknowledges a bound callback once and rejects replay, stale, or handoff m
   await assert.rejects(fresh.acknowledgeCallback(callback({ exactHandoffId: 'other-handoff' }), request, issued, 'development'), /exactHandoffMismatch/)
   await assert.rejects(fresh.acknowledgeCallback(callback({ timestamp: '2026-08-13T11:00:00.000Z', nonce: 'nonce-2' }), request, issued, 'development'), /staleCallback/)
   await assert.rejects(fresh.acknowledgeCallback(callback({ nonce: 'nonce-3', environment: 'production' }), request, issued, 'development'), /environmentMismatch/)
+})
+
+test('accepts a structurally exact Autowork callback baseline after JSON roundtrip', async () => {
+  const request = { ...requestBase(), exactHandoffId: 'brain-handoff-1' }
+  const issued = receipt(request)
+  const roundtripped = JSON.parse(JSON.stringify(providerBaseline('autowork')))
+  const client = new AutoworkClient({
+    ...transport(),
+    callback: async (value) => ({ callbackId: value.callbackId, requestId: value.requestId, receiptId: value.receiptId, acknowledgedAt: '2026-08-13T12:00:01.000Z', exactHandoffId: value.exactHandoffId, terminal: true as const }),
+  }, () => new Date('2026-08-13T12:00:00.000Z'), providerBaseline('autowork'))
+  const result = await client.acknowledgeCallback({
+    providerBaseline: roundtripped,
+    contractVersion: AUTOWORK_CONTRACT_VERSION,
+    requestId: request.requestId,
+    receiptId: issued.receiptId,
+    callbackId: 'callback-roundtrip',
+    nonce: 'nonce-roundtrip',
+    timestamp: '2026-08-13T12:00:00.000Z',
+    environment: 'development',
+    signatureRef: 'lautowork://signature/callback-roundtrip',
+    exactHandoffId: 'brain-handoff-1',
+    requestFingerprint: issued.requestFingerprint,
+  }, request, issued, 'development')
+  assert.equal(result.value.terminal, true)
+})
+
+test('rejects an Autowork callback baseline with stale or extra fields', async () => {
+  const request = { ...requestBase(), exactHandoffId: 'brain-handoff-1' }
+  const issued = receipt(request)
+  const client = new AutoworkClient({
+    ...transport(),
+    callback: async (value) => ({ callbackId: value.callbackId, requestId: value.requestId, receiptId: value.receiptId, acknowledgedAt: '2026-08-13T12:00:01.000Z', exactHandoffId: value.exactHandoffId, terminal: true as const }),
+  }, () => new Date('2026-08-13T12:00:00.000Z'), providerBaseline('autowork'))
+  const bound = {
+    contractVersion: AUTOWORK_CONTRACT_VERSION,
+    requestId: request.requestId,
+    receiptId: issued.receiptId,
+    callbackId: 'callback-stale',
+    nonce: 'nonce-stale',
+    timestamp: '2026-08-13T12:00:00.000Z',
+    environment: 'development' as const,
+    signatureRef: 'lautowork://signature/callback-stale',
+    exactHandoffId: 'brain-handoff-1',
+    requestFingerprint: issued.requestFingerprint,
+  }
+  await assert.rejects(client.acknowledgeCallback({ ...bound, providerBaseline: { ...JSON.parse(JSON.stringify(providerBaseline('autowork'))), commit: '0'.repeat(40) } }, request, issued, 'development'), /commitMismatch/)
+  await assert.rejects(client.acknowledgeCallback({ ...bound, nonce: 'nonce-extra', providerBaseline: { ...JSON.parse(JSON.stringify(providerBaseline('autowork'))), extra: true } }, request, issued, 'development'), /unexpectedOrMissingKey/)
 })

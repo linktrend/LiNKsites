@@ -175,7 +175,7 @@ function validateSummary(value: AutoworkSummary, pin: AutoworkPin & { automation
 function validateReceipt(receipt: AutoworkReceipt, request: AutoworkRequest, now: Date): AutoworkReceipt {
   rejectSensitive(receipt)
   bindProviderBaseline('autowork', receipt.providerBaseline)
-  if (receipt.providerBaseline !== request.providerBaseline || receipt.contractVersion !== AUTOWORK_CONTRACT_VERSION || receipt.requestId !== request.requestId || receipt.automation.automationId !== request.automation.automationId || receipt.automation.version !== request.automation.version || receipt.automation.definitionDigest !== request.automation.definitionDigest) throw new AutoworkPolicyError('receiptBindingMismatch')
+  if (receipt.contractVersion !== AUTOWORK_CONTRACT_VERSION || receipt.requestId !== request.requestId || receipt.automation.automationId !== request.automation.automationId || receipt.automation.version !== request.automation.version || receipt.automation.definitionDigest !== request.automation.definitionDigest) throw new AutoworkPolicyError('receiptBindingMismatch')
   requireExactDigest(receipt.requestFingerprint, 'receipt.requestFingerprint')
   if (receipt.requestFingerprint !== fingerprint(request)) throw new AutoworkPolicyError('requestFingerprintMismatch')
   requireDate(receipt.acceptedAt, 'acceptedAt', now); requireDate(receipt.updatedAt, 'updatedAt', now)
@@ -221,7 +221,7 @@ export class AutoworkClient {
   async acknowledgeCallback(callback: AutoworkCallback, request: AutoworkRequest, receipt: AutoworkReceipt, expectedEnvironment: AutoworkCallback['environment']): Promise<AutoworkObservation<AutoworkCallbackAcknowledgement>> {
     rejectSensitive(callback)
     bindProviderBaseline('autowork', callback.providerBaseline)
-    if (callback.providerBaseline !== request.providerBaseline || callback.contractVersion !== AUTOWORK_CONTRACT_VERSION) throw new AutoworkPolicyError('callbackBindingMismatch')
+    if (callback.contractVersion !== AUTOWORK_CONTRACT_VERSION) throw new AutoworkPolicyError('callbackBindingMismatch')
     if (callback.requestId !== request.requestId || callback.receiptId !== receipt.receiptId) throw new AutoworkPolicyError('callbackBindingMismatch')
     if (callback.exactHandoffId !== (request.exactHandoffId ?? '')) throw new AutoworkPolicyError('exactHandoffMismatch')
     if (!callback.nonce || !callback.signatureRef || !callback.callbackId) throw new AutoworkPolicyError('callbackSignatureMismatch')

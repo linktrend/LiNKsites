@@ -83,7 +83,6 @@ export function verifySkillsReceipt(
   if (resource.kind !== kind) throw new SkillsPolicyError('resourceKindMismatch')
   const receipt = resource.receipt
   bindProviderBaseline('skills', receipt.providerBaseline)
-  if (receipt.providerBaseline !== skillsBaseline) throw new SkillsPolicyError('providerBaselineMismatch')
   if (receipt.skillId !== pin.skillId || receipt.releaseId !== pin.releaseId || receipt.version !== pin.version || receipt.digest !== pin.digest) throw new SkillsPolicyError('exactReleaseMismatch')
   if (receipt.qualification !== 'qualified') throw new SkillsPolicyError('notQualified')
   if (receipt.lifecycle !== 'usable' && receipt.lifecycle !== 'published') throw new SkillsPolicyError('lifecycleNotUsable')

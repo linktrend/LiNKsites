@@ -84,6 +84,20 @@ test('use reports and feedback are exact-release-bound and reject private-data f
   await assert.rejects(skills.reportUse({ reportKind: 'completed_use', skillId: pin.skillId, releaseId: pin.releaseId, version: pin.version, digest: pin.digest, outcome: 'use_succeeded', prompt: 'secret' } as never), /reportContainsPrivateData/)
 })
 
+test('accepts a structurally exact Skills receipt baseline after JSON roundtrip', async () => {
+  const roundtripped = JSON.parse(JSON.stringify(providerBaseline('skills')))
+  const result = await client(payload({ receipt: { ...receipt, providerBaseline: roundtripped } })).summary(pin)
+  assert.equal(result.kind, 'summary')
+  assert.deepEqual(result.receipt.providerBaseline, providerBaseline('skills'))
+})
+
+test('rejects a Skills receipt baseline with stale or extra fields', async () => {
+  const stale = { ...JSON.parse(JSON.stringify(providerBaseline('skills'))), commit: '0'.repeat(40) }
+  const extra = { ...JSON.parse(JSON.stringify(providerBaseline('skills'))), extra: true }
+  await assert.rejects(client(payload({ receipt: { ...receipt, providerBaseline: stale } })).summary(pin), /commitMismatch/)
+  await assert.rejects(client(payload({ receipt: { ...receipt, providerBaseline: extra } })).summary(pin), /unexpectedOrMissingKey/)
+})
+
 test('rejects unknown skills and oversized catalogue dumps before local execution', async () => {
   await assert.rejects(client(payload()).summary({ ...pin, skillId: 'unlisted-skill' }), /unknownSkill/)
   const closed = new SkillsClient({ retrieve: async () => payload() }, { baseline: providerBaseline('skills') })
