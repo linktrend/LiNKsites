@@ -2,8 +2,6 @@
   "schemaVersion": 1,
   "repo": "linktrend/LiNKsites",
   "branch": "phase/pre-ide-v24-accepted-consolidation",
-  "headSha": "'"fc296e51a6fa26d9f9f62b4ae7f27ba80bd60b20"'",
-  "treeSha": "'"2229654394337ca9467935827aebfe8be080aa11"'",
   "baseDevelopmentSha": "d773991729db7a2f9cfbf0d26cd0e3b312efef77",
   "baseDevelopmentTree": "0af3cf1f86621d3259e87fe497b5d2c0c2dee5ff",
   "acceptedSources": {
@@ -23,5 +21,8 @@
   },
   "conflicts": "none",
   "fullSuite": "not_run",
-  "hold": false
+  "hold": false,
+  "integrationHeadSha": "16e384bcd4386eeca920fd0aa1b0b12677ba62a2",
+  "integrationTreeSha": "f2ed3c777fbb564735165de6ef52370443ad6b28",
+  "handoffDocsCommit": "26f8369549cabd059ada0702b9ab9a5ef3bcc274"
 }
