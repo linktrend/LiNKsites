@@ -8,7 +8,7 @@ import { FileOutbox, LiNKautoworkGateway, Metrics, ReplayError, redactForLog, ty
 import { isLiNKautoworkEventEnvelope } from '../../types/src/runtime-contracts.ts'
 
 const clock = { nowSeconds: () => 1_000, nowIso: () => '1970-01-01T00:16:40.000Z' }
-const setup = (transport: (request: GatewayRequest) => Promise<{ status: number; receiptId: string; receiptSignature: string; acknowledgedAt: string }>) => new LiNKautoworkGateway({ secret: 'test-secret', keyId: 'key-1', environment: 'development', transport, clock })
+const setup = (transport: (request: GatewayRequest) => Promise<{ status: number; receiptId: string; receiptSignature: string; acknowledgedAt: string }>) => new LiNKautoworkGateway({ secret: 'ltfx.auto.secret.4475af36fb39.v1', keyId: 'key-1', environment: 'development', transport, clock })
 const payload = { lead_id: 'lead-1', site_id: 'site-1' }
 
 test('signed happy path, fixed allow-list, and secret redaction', async () => {
@@ -52,17 +52,17 @@ test('a fixed-format HMAC is not treated as submitted payment data', () => {
 
 test('outbox deduplicates, retries 5xx, dead-letters 4xx, and recovers an ambiguous send idempotently', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-05-')); const metrics = new Metrics(); let sends = 0
-  const outbox = new FileOutbox(join(directory, 'outbox.json'), { maxAttempts: 3, metrics, integritySecret: 'queue-integrity-test', resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined })
+  const outbox = new FileOutbox(join(directory, 'outbox.json'), { maxAttempts: 3, metrics, integritySecret: 'ltfx.auto.integritysecret.4d33e4ee484a.v1', resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined })
   const request: GatewayRequest = { timestamp: 1_000, nonce: 'nonce-1', envelope: { schema_version: { major: 1, minor: 0 } as const, org_id: 'org_demo', correlation_id: 'corr', idempotency_key: 'outbox-1', event_id: 'event:outbox-1', event_name: 'demo.completed', payload, signature: { algorithm: 'hmac-sha256', key_id: 'key-1', signature: 'a'.repeat(64) }, delivery_attempt: 1, acknowledgement: { status: 'pending' } } }
   assert.equal(await outbox.enqueue(request), await outbox.enqueue(request))
   await outbox.drain(async () => ({ status: 503, receiptId: 'none', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() }), 0)
   await outbox.drain(async () => ({ status: 503, receiptId: 'none', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() }), 200)
   await outbox.drain(async () => { sends++; return { status: 202, receiptId: 'receipt', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() } }, 500)
   assert.equal((await outbox.items())[0]?.state, 'sent')
-  const recovered = new FileOutbox(join(directory, 'recovered.json'), { maxAttempts: 2, integritySecret: 'queue-integrity-test', resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined }); await recovered.enqueue({ ...request, envelope: { ...request.envelope, idempotency_key: 'crash-safe' } })
+  const recovered = new FileOutbox(join(directory, 'recovered.json'), { maxAttempts: 2, integritySecret: 'ltfx.auto.integritysecret.dca7351f2a0e.v1', resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined }); await recovered.enqueue({ ...request, envelope: { ...request.envelope, idempotency_key: 'crash-safe' } })
   const seen = new Set<string>(); const send = async (value: GatewayRequest) => { const key = value.envelope.idempotency_key; if (!seen.has(key)) { seen.add(key); throw new Error('crash-after-remote-accept') }; return { status: 202, receiptId: 'same-logical-receipt', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() } }
   await recovered.drain(send, 0); await recovered.drain(send, 200); assert.equal((await recovered.items())[0]?.state, 'sent')
-  const dead = new FileOutbox(join(directory, 'dead.json'), { maxAttempts: 1, integritySecret: 'queue-integrity-test', resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined }); await dead.enqueue({ ...request, envelope: { ...request.envelope, idempotency_key: 'dead' } }); await dead.drain(async () => ({ status: 422, receiptId: 'none', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() })); assert.equal((await dead.items())[0]?.state, 'dead_letter')
+  const dead = new FileOutbox(join(directory, 'dead.json'), { maxAttempts: 1, integritySecret: 'ltfx.auto.integritysecret.18c71e4d8fea.v1', resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined }); await dead.enqueue({ ...request, envelope: { ...request.envelope, idempotency_key: 'dead' } }); await dead.drain(async () => ({ status: 422, receiptId: 'none', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() })); assert.equal((await dead.items())[0]?.state, 'dead_letter')
   assert.equal(metrics.snapshot().attempts >= 3, true); assert.equal(sends, 1)
   const deadHealth = await dead.health()
   assert.equal(deadHealth.deadLetter, 1)
@@ -70,7 +70,7 @@ test('outbox deduplicates, retries 5xx, dead-letters 4xx, and recovers an ambigu
 })
 
 test('gateway timeout is bounded and reported as a failed delivery', async () => {
-  const gateway = new LiNKautoworkGateway({ secret: 'test-secret', keyId: 'key-1', environment: 'development', timeoutMs: 5, clock, transport: async () => new Promise(() => undefined) })
+  const gateway = new LiNKautoworkGateway({ secret: 'ltfx.auto.secret.715738c563a3.v1', keyId: 'key-1', environment: 'development', timeoutMs: 5, clock, transport: async () => new Promise(() => undefined) })
   await assert.rejects(() => gateway.send('demo.completed', 'org_demo', 'corr', 'timeout', payload), /gateway_timeout/)
 })
 
@@ -80,9 +80,9 @@ test('queue integrity secret is mandatory, stored records are untrusted, grants 
 
   const policies = [{ eventName: 'demo.completed' as const, environments: ['development' as const], orgIds: ['org_demo'] }]
   let gateway!: LiNKautoworkGateway
-  gateway = new LiNKautoworkGateway({ secret: 'signing-secret', keyId: 'key-1', environment: 'development', policies, clock, transport: async (request) => ({ status: 202, receiptId: 'receipt-1', receiptSignature: gateway.signAcknowledgement(request, 'receipt-1', clock.nowIso()), acknowledgedAt: clock.nowIso() }) })
+  gateway = new LiNKautoworkGateway({ secret: 'ltfx.auto.secret.dc2b95965611.v1', keyId: 'key-1', environment: 'development', policies, clock, transport: async (request) => ({ status: 202, receiptId: 'receipt-1', receiptSignature: gateway.signAcknowledgement(request, 'receipt-1', clock.nowIso()), acknowledgedAt: clock.nowIso() }) })
   const path = join(directory, 'queue.json')
-  const options = { integritySecret: 'queue-integrity-test', resigner: (request: GatewayRequest, attempt: number) => gateway.resignRequest(request, attempt), validator: (request: GatewayRequest) => gateway.verifyStored(request) }
+  const options = { integritySecret: 'ltfx.auto.integritysecret.42c53e0cdd39.v1', resigner: (request: GatewayRequest, attempt: number) => gateway.resignRequest(request, attempt), validator: (request: GatewayRequest) => gateway.verifyStored(request) }
   const outbox = new FileOutbox(path, options)
   await outbox.enqueue(gateway.buildRequest('demo.completed', 'org_demo', 'corr', 'security-1', payload))
   const tampered = JSON.parse(await readFile(path, 'utf8')) as { items: Array<{ request: GatewayRequest }> }
@@ -103,8 +103,8 @@ test('queue integrity secret is mandatory, stored records are untrusted, grants 
   grants.push('org_demo')
   const replayable = new FileOutbox(grantPath, options)
   await replayable.drain(async (request) => ({ status: 202, receiptId: 'receipt-2', receiptSignature: gateway.signAcknowledgement(request, 'receipt-2', clock.nowIso()), acknowledgedAt: clock.nowIso() }), 1_000)
-  const healthyGateway = new LiNKautoworkGateway({ secret: 'signing-secret', keyId: 'key-1', environment: 'development', policies: [{ eventName: 'demo.completed', environments: ['development'], orgIds: ['org_demo'] }], clock, transport: async () => { throw new Error('outbox transport is injected per drain') } })
-  const healthyOptions = { integritySecret: 'queue-integrity-test', resigner: (request: GatewayRequest, attempt: number) => healthyGateway.resignRequest(request, attempt), validator: (request: GatewayRequest) => healthyGateway.verifyStored(request) }
+  const healthyGateway = new LiNKautoworkGateway({ secret: 'ltfx.auto.secret.1eb43bdb2c06.v1', keyId: 'key-1', environment: 'development', policies: [{ eventName: 'demo.completed', environments: ['development'], orgIds: ['org_demo'] }], clock, transport: async () => { throw new Error('outbox transport is injected per drain') } })
+  const healthyOptions = { integritySecret: 'ltfx.auto.integritysecret.015eec6ff3a1.v1', resigner: (request: GatewayRequest, attempt: number) => healthyGateway.resignRequest(request, attempt), validator: (request: GatewayRequest) => healthyGateway.verifyStored(request) }
   const healthyPath = join(directory, 'healthy-queue.json')
   const healthy = new FileOutbox(healthyPath, healthyOptions)
   await healthy.enqueue(healthyGateway.buildRequest('demo.completed', 'org_demo', 'corr', 'healthy-1', payload))
@@ -128,7 +128,7 @@ test('a child-process crash after lease persistence is recovered by a fresh work
   const exitCode = await new Promise<number | null>((resolve) => child.once('exit', (code) => resolve(code)))
   assert.equal(exitCode, 42)
   await new Promise((resolve) => setTimeout(resolve, 10))
-  const recovered = new FileOutbox(path, { integritySecret: 'queue-integrity-test', leaseMs: 30, lockStaleMs: 1, resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined })
+  const recovered = new FileOutbox(path, { integritySecret: 'ltfx.auto.integritysecret.2c36f141e2df.v1', leaseMs: 30, lockStaleMs: 1, resigner: (value, attempt) => ({ ...value, envelope: { ...value.envelope, delivery_attempt: attempt } }), validator: () => undefined })
   await recovered.drain(async () => ({ status: 202, receiptId: 'crash-receipt', receiptSignature: 'a'.repeat(64), acknowledgedAt: clock.nowIso() }), 31)
   const item = (await recovered.items())[0]!
   assert.equal(item.state, 'sent')

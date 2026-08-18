@@ -128,7 +128,7 @@ Each item in the `supportOptions[]` array contains:
       "subtitle": "All help information in one place",
       "description": "Access comprehensive guides, tutorials, and FAQs to find answers to your questions. Browse through our knowledge base for step-by-step instructions and best practices.",
       "buttonText": "Help Centre",
-      "buttonUrl": "/en/resources/faq",
+      "buttonUrl": "ltfx.fix2.url.bb785cf489d1.v1",
       "buttonVariant": "primary"
     },
     {
@@ -203,22 +203,22 @@ Each resource link:
       {
         "id": 1,
         "label": "Articles",
-        "url": "/en/resources/articles"
+        "url": "ltfx.fix2.url.7459b78fa9db.v1"
       },
       {
         "id": 2,
         "label": "Case Studies",
-        "url": "/en/resources/cases"
+        "url": "ltfx.fix2.url.412847c6e4c6.v1"
       },
       {
         "id": 3,
         "label": "Videos",
-        "url": "/en/resources/videos"
+        "url": "ltfx.fix2.url.0b22713b88a4.v1"
       },
       {
         "id": 4,
         "label": "FAQ",
-        "url": "/en/resources/faq"
+        "url": "ltfx.fix2.url.6e78ae9f7efd.v1"
       }
     ]
   }
@@ -298,22 +298,22 @@ Each resource link:
         {
           "id": 1,
           "label": "Articles",
-          "url": "/en/resources/articles"
+          "url": "ltfx.fix2.url.4947bb52fc1a.v1"
         },
         {
           "id": 2,
           "label": "Case Studies",
-          "url": "/en/resources/cases"
+          "url": "ltfx.fix2.url.d8bb9a0d3728.v1"
         },
         {
           "id": 3,
           "label": "Videos",
-          "url": "/en/resources/videos"
+          "url": "ltfx.fix2.url.e1396f5a63bb.v1"
         },
         {
           "id": 4,
           "label": "FAQ",
-          "url": "/en/resources/faq"
+          "url": "ltfx.fix2.url.en_resources_faq.v1"
         }
       ]
     }

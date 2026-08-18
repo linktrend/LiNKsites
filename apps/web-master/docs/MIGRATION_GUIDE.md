@@ -28,13 +28,13 @@ npm install payload @payloadcms/db-postgres
 **MongoDB**:
 ```bash
 # .env
-DATABASE_URI=mongodb://localhost:27017/linktrend
+DATABASE_URI=ltfx.db.uri.mongodb.fb62f0fac4.v1
 ```
 
 **PostgreSQL**:
 ```bash
 # .env
-DATABASE_URI=postgresql://user:password@localhost:5432/linktrend
+DATABASE_URI=ltfx.db.uri.postgresql.52de9d4dcb.v1
 ```
 
 ### 1.3 Verify Collection Definitions
@@ -82,7 +82,7 @@ import mockData from '../data/cmsPayload.json';
 
 async function migrate() {
   await payload.init({
-    secret: process.env.PAYLOAD_SECRET!,
+    secret: ltfx.fix2.secret.edad0798ef2f.v1,
     mongoURL: process.env.DATABASE_URI!,
     local: true,
   });
@@ -187,8 +187,8 @@ npx ts-node scripts/migrate-to-payload.ts
 NEXT_PUBLIC_CMS_PROVIDER=payload
 NEXT_PUBLIC_PAYLOAD_API_URL=http://localhost:3000
 PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3000
-PAYLOAD_SECRET=your-secret-key-here
-DATABASE_URI=mongodb://localhost:27017/linktrend
+PAYLOAD_SECRET=ltfx.auto.payload_secret.52ff22479716.v1
+DATABASE_URI=ltfx.db.uri.mongodb.fb62f0fac4.v1
 ```
 
 ```bash
@@ -196,7 +196,7 @@ DATABASE_URI=mongodb://localhost:27017/linktrend
 NEXT_PUBLIC_CMS_PROVIDER=payload
 NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.linktrend.com
 PAYLOAD_PUBLIC_SERVER_URL=https://cms.linktrend.com
-PAYLOAD_SECRET=your-production-secret
+PAYLOAD_SECRET=ltfx.auto.payload_secret.b4b392f0bfc2.v1
 DATABASE_URI=<not-used-in-linksites-supabase-only>
 ```
 

@@ -1,17 +1,29 @@
 {
   "schemaVersion": 1,
-  "headSha": "ca86578e1bff1c2121dcfa6cebd69a24281ff994",
+  "headSha": "5d1cfa82bc328d067c3d385d667cbf63bd2d82f8",
   "classification": "tests",
-  "acceptance": "Exact 32-fingerprint historical baseline matches the failed full-history scan with no wildcard allowlisting; documentation records compromised bootstrap credential handling.",
+  "acceptance": "LiNKsites consumes a pinned LiNKlibraries Revision 2 master template, verifies release identity and file digests, and fails closed for missing or non-selectable provider releases.",
   "commands": [
     {
       "cmd": "git diff --check",
       "exitCode": 0
     },
     {
-      "cmd": "Exact run-to-baseline fingerprint set comparison: 32 findings equals 32 exact entries with empty set difference",
+      "cmd": "pnpm --filter @linksites/factory-catalog test",
+      "exitCode": 0
+    },
+    {
+      "cmd": "pnpm --filter @linksites/factory-catalog typecheck",
+      "exitCode": 0
+    },
+    {
+      "cmd": "pnpm --filter @linksites/program-orchestrator typecheck",
+      "exitCode": 0
+    },
+    {
+      "cmd": "pnpm --filter @linksites/web-master typecheck",
       "exitCode": 0
     }
   ],
-  "at": "2026-08-12T22:06:52Z"
+  "at": "2026-08-14T10:44:12Z"
 }

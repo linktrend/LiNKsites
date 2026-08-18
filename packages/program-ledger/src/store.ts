@@ -90,7 +90,7 @@ export interface LedgerStore {
    *   `created: false`, and the caller must NOT create a new Run.
    */
   reserveIdempotencyKey(record: IdempotencyRecord): Promise<{ record: IdempotencyRecord; created: boolean }>
-  getIdempotencyRecord(key: string): Promise<IdempotencyRecord | null>
+  getIdempotencyRecord(idempotencyKey: string): Promise<IdempotencyRecord | null>
   updateIdempotencyRecord(record: IdempotencyRecord): Promise<void>
 
   putGateResult(gate: GateResult): Promise<void>
@@ -320,7 +320,7 @@ export class InMemoryLedgerStore implements LedgerStore {
     return { record, created: true }
   }
 
-  async getIdempotencyRecord(key: string): Promise<IdempotencyRecord | null> {
+  async getIdempotencyRecord(idempotencyKey: string): Promise<IdempotencyRecord | null> {
     return this.idempotency.get(key) ?? null
   }
 

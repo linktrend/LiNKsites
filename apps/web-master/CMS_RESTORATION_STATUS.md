@@ -169,7 +169,7 @@ content: [
     title: 'Welcome to the Master Template',
     subtitle: 'Connect your CMS content or use this demo layout.',
     badge: 'Demo',
-    cta: { text: 'Get Started', url: '/contact', style: 'primary' },
+    cta: { text: 'Get Started', url: 'ltfx.fix2.url.025cde78f171.v1', style: 'primary' },
   },
   {
     blockType: 'features',
@@ -191,7 +191,7 @@ content: [
         period: 'per month',
         features: [{ feature: 'Basic features', included: true }],
         highlighted: false,
-        cta: { text: 'Get Started', url: '/contact' },
+        cta: { text: 'Get Started', url: 'ltfx.fix2.url.386820e22680.v1' },
       },
       {
         name: 'Pro',
@@ -202,7 +202,7 @@ content: [
           { feature: 'Pro support', included: true },
         ],
         highlighted: true,
-        cta: { text: 'Get Started', url: '/contact' },
+        cta: { text: 'Get Started', url: 'ltfx.fix2.url.6a2206c85ec5.v1' },
       },
       {
         name: 'Enterprise',
@@ -210,7 +210,7 @@ content: [
         period: 'per month',
         features: [{ feature: 'Custom SLAs', included: true }],
         highlighted: false,
-        cta: { text: 'Contact Us', url: '/contact' },
+        cta: { text: 'Contact Us', url: 'ltfx.fix2.url.99e8aabc8cce.v1' },
       },
     ],
   },
@@ -218,7 +218,7 @@ content: [
     blockType: 'cta',
     title: 'Ready to connect your CMS?',
     text: 'Add real content in Payload CMS and it will render here.',
-    button: { text: 'Go to Contact', url: '/contact', style: 'primary' },
+    button: { text: 'Go to Contact', url: 'ltfx.fix2.url.7e9b0f0360a0.v1', style: 'primary' },
   },
   {
     blockType: 'newsletter',

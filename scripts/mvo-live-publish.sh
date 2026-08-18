@@ -33,7 +33,7 @@ pnpm run factory:bootstrap 2>/dev/null || true
 
 echo "==> Creating published site in Payload (factory:create-demo-site)"
 FACTORY_LOG="$(mktemp)"
-pnpm run factory:create-demo-site -- --name="$BUSINESS_NAME" --hostname="$HOSTNAME" --templateId=marketing-smb-v1 --locales=en >"$FACTORY_LOG" 2>&1
+pnpm run factory:create-demo-site -- --name="$BUSINESS_NAME" --hostname="$HOSTNAME" --templateId="${LINKSITES_DEFAULT_TEMPLATE_ID:-master-template-type-1}" --locales=en >"$FACTORY_LOG" 2>&1
 SITE_ID="$(node -e "
 const fs = require('fs');
 const text = fs.readFileSync(process.argv[1], 'utf8');
@@ -47,7 +47,7 @@ cat "$FACTORY_LOG"
 rm -f "$FACTORY_LOG"
 
 echo "==> Ensuring services page for readiness gate"
-DATABASE_URI="$DATABASE_URI" PAYLOAD_SECRET="$PAYLOAD_SECRET" PAYLOAD_PUBLIC_SERVER_URL="$PAYLOAD_PUBLIC_SERVER_URL" \
+DATABASE_URI="$DATABASE_URI" PAYLOAD_SECRET="ltfx.auto.payload_secret.5793ffe28aeb.v1" PAYLOAD_PUBLIC_SERVER_URL="$PAYLOAD_PUBLIC_SERVER_URL" \
   pnpm exec tsx scripts/mvo-ensure-services-page.ts --siteId="$SITE_ID" --locale=en
 
 PREVIEW_URL="${PREVIEW_BASE%/}/en"

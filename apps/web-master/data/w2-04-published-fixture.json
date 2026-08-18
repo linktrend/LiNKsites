@@ -10,7 +10,7 @@
     "primary": [
       { "label": "About", "slug": "/about" },
       { "label": "Services", "slug": "/services" },
-      { "label": "Contact", "slug": "/contact" }
+      { "label": "Contact", "slug": "ltfx.fix2.url.be2f136970aa.v1" }
     ],
     "footer": [
       { "label": "Privacy", "slug": "/legal/privacy-policy" },
@@ -28,13 +28,13 @@
       "revision": "w2-04-fixture-r1",
       "seo": { "title": "Northstar Studio", "description": "Practical support for small businesses ready to grow." },
       "content": [
-        { "blockType": "hero", "badge": "Northstar Studio", "title": "A clearer way to grow your local business", "subtitle": "Strategy, design, and delivery that turns good intentions into steady progress.", "cta": { "text": "Start a conversation", "url": "/contact" } },
+        { "blockType": "hero", "badge": "Northstar Studio", "title": "A clearer way to grow your local business", "subtitle": "Strategy, design, and delivery that turns good intentions into steady progress.", "cta": { "text": "Start a conversation", "url": "ltfx.fix2.url.f7a49edf50a5.v1" } },
         { "blockType": "features", "title": "Built around your next useful step", "subtitle": "Focused support without the agency fog.", "items": [
           { "id": "clarity", "title": "Find the focus", "description": "Turn a crowded list of ideas into a practical priority." },
           { "id": "momentum", "title": "Build momentum", "description": "Ship the next improvement with a partner who stays close." },
           { "id": "confidence", "title": "Measure what matters", "description": "Keep decisions grounded in outcomes your team can see." }
         ] },
-        { "blockType": "cta", "title": "Ready to make the next step easier?", "text": "Tell us what is getting in the way and we will help you map a sensible next move.", "button": { "text": "Contact Northstar", "url": "/contact" } }
+        { "blockType": "cta", "title": "Ready to make the next step easier?", "text": "Tell us what is getting in the way and we will help you map a sensible next move.", "button": { "text": "Contact Northstar", "url": "ltfx.fix2.url.contact_path.v1" } }
       ]
     },
     {
@@ -80,7 +80,7 @@
       "seo": { "title": "Contact Northstar Studio", "description": "Talk with Northstar Studio about your next step." },
       "content": [
         { "blockType": "hero", "title": "Let us talk about what is next", "subtitle": "Share a little context and we will come back with a useful response." },
-        { "blockType": "cta", "title": "Contact form handoff", "text": "The local contract fixture renders this non-submitting contact affordance. W2-03/W2-05 own live submission wiring.", "button": { "text": "Email Northstar", "url": "mailto:hello@example.invalid" } }
+        { "blockType": "cta", "title": "Contact form handoff", "text": "The local contract fixture renders this non-submitting contact affordance. W2-03/W2-05 own live submission wiring.", "button": { "text": "Email Northstar", "url": "ltfx.fix2.url.9a482a75e38a.v1" } }
       ]
     },
     {

@@ -86,8 +86,8 @@ branches together before W2-02 is executed.
 
 ## Evidence files
 
-- `browser/public-desktop.png` — 1280 × 900 production-render screenshot.
-- `browser/public-mobile.png` — 464 × 844 production-render screenshot. The configured test viewport was 390 × 844.
+- `browser/public-desktop.svg` — 1280 × 900 production-render screenshot.
+- `browser/public-mobile.svg` — 464 × 844 production-render screenshot. The configured test viewport was 390 × 844.
 - `apps/cms/scripts/w2-04-seed.ts` — disposable real Payload data seed.
 - `apps/cms/scripts/w2-04-browser-proof.mjs` — REST/privacy/browser assertions.
 - `scripts/w2-04-local-proof.sh` — fail-closed local production proof harness.

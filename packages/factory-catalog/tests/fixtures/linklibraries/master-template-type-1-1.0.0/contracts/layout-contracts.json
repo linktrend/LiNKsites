@@ -1,0 +1,120 @@
+{
+  "contractType": "portable_page_archetypes",
+  "schemaVersion": 2,
+  "role": "archetypes_normative",
+  "canonicalFor": ["page-archetype-contracts"],
+  "archetypeAuthority": {
+    "canonicalDocument": "layout-contracts.json",
+    "alias": "page-archetype-contracts",
+    "note": "Page archetypes are normative here. Do not add a sibling page-archetype-contracts.json."
+  },
+  "liveRouteMap": false,
+  "sharedShell": {
+    "id": "marketing-shell",
+    "regions": ["site-header", "main", "optional-newsletter", "site-footer"],
+    "slots": {
+      "primaryNav": {
+        "type": "array",
+        "items": { "type": "object", "properties": { "label": { "type": "string" }, "targetPageSlug": { "type": "string" } } }
+      },
+      "footerNav": {
+        "type": "array",
+        "items": { "type": "object", "properties": { "heading": { "type": "string" }, "items": { "type": "array" } } }
+      },
+      "children": { "type": "slot-children" }
+    },
+    "constraints": [
+      "header_main_footer_shell",
+      "responsive_navigation",
+      "optional_newsletter_off_home",
+      "page_archetype_marker"
+    ],
+    "adapterOwned": [
+      "pathname",
+      "navigation_records",
+      "cookie_consent",
+      "runtime_renderer",
+      "tenant_locale_and_publication"
+    ]
+  },
+  "pageArchetypes": [
+    {
+      "id": "home",
+      "purpose": "Landing / starting point",
+      "regions": ["shared_shell", "hero", "feature_or_collection", "cta"],
+      "requiredBlocks": ["hero"],
+      "allowedBlocks": ["hero", "features", "offerShowcase", "articles", "caseStudies", "testimonials", "cta", "newsletter"],
+      "fallbacks": ["missing_content", "empty_collection"]
+    },
+    {
+      "id": "about",
+      "purpose": "Organization or story page",
+      "regions": ["shared_shell", "hero_or_intro", "content", "optional_cta"],
+      "requiredBlocks": ["richText"],
+      "allowedBlocks": ["hero", "features", "richText", "content", "teamMembers", "cta"],
+      "fallbacks": ["missing_content"]
+    },
+    {
+      "id": "contact",
+      "purpose": "Contact and inquiry surface",
+      "regions": ["shared_shell", "hero", "form_slot", "optional_locations"],
+      "requiredBlocks": ["content"],
+      "allowedBlocks": ["hero", "content", "locations", "faq", "cta"],
+      "slotRequirements": [{ "blockType": "content", "data.kind": "contact_form_slot" }],
+      "fallbacks": ["missing_form_adapter", "missing_locations"]
+    },
+    {
+      "id": "legal",
+      "purpose": "Legal or policy document",
+      "regions": ["shared_shell", "document_body"],
+      "requiredBlocks": ["richText"],
+      "allowedBlocks": ["hero", "richText", "callout"],
+      "fallbacks": ["missing_content"]
+    },
+    {
+      "id": "collection",
+      "purpose": "Index of related items (offers, resources, cases)",
+      "regions": ["shared_shell", "optional_hero", "collection", "optional_cta"],
+      "requiredBlocks": [],
+      "allowedBlocks": ["hero", "offerShowcase", "articles", "caseStudies", "pricing", "faq", "videoEmbed", "relatedContent", "newsletter", "cta"],
+      "fallbacks": ["empty_collection", "missing_relationship", "missing_media"]
+    },
+    {
+      "id": "detail",
+      "purpose": "Single item (article, offer, case, video, FAQ article)",
+      "regions": ["shared_shell", "hero_or_title", "body", "related"],
+      "requiredBlocks": ["richText"],
+      "allowedBlocks": ["hero", "richText", "content", "media", "videoEmbed", "features", "pricing", "testimonials", "testimonial", "relatedContent", "articles", "faq", "cta"],
+      "fallbacks": ["missing_content", "missing_relationship", "missing_media"]
+    }
+  ],
+  "starterExamplePages": {
+    "source": "content/default-content.json",
+    "role": "starter_example_pages",
+    "slugs": ["home", "about", "contact"]
+  },
+  "adapterBoundary": {
+    "LiNKlibrariesProvides": [
+      "page archetype ids",
+      "region and block constraints",
+      "starter example pages",
+      "semantic page slugs"
+    ],
+    "LiNKsitesProvides": [
+      "actual routes and URL construction",
+      "Payload repositories",
+      "tenant, locale, and publication status",
+      "preview and privacy",
+      "forms and embeds",
+      "SEO and deployment"
+    ]
+  },
+  "provenance": {
+    "role": "extraction_origin",
+    "normative": false,
+    "sourceRepository": "LiNKsites",
+    "sourceCommit": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+    "sourceTree": "873c4acc582050b416fb5a8bc59990345711df46",
+    "note": "Historical 19-route LiNKsites sitemap remains in source-handoff.json as preview/handoff only. Do not treat it as master IA."
+  }
+}

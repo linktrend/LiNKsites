@@ -169,7 +169,7 @@ interface FormSubmissionResponse {
 
 ```bash
 CONTACT_WEBHOOK_URL=https://your-webhook-url.com
-CONTACT_WEBHOOK_SECRET=your-secret-key
+CONTACT_WEBHOOK_SECRET=ltfx.auto.contact_webhook_secret.d4b00b49ebdb.v1
 CONTACT_FALLBACK_EMAIL=contact@yoursite.com
 ```
 

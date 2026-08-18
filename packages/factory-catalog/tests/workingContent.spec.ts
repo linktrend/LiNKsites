@@ -136,7 +136,7 @@ describe('working-content contract and checksum', () => {
     expect(validateWorkingContentPackage(workingContentFixture)).toBe(true)
     expect(validateWorkingContentPackage({ ...workingContentFixture, content: { pages: [] } })).toBe(false)
     expect(validateWorkingContentPackage({ ...workingContentFixture, libraryRefs: [{ libraryId: 'x', sha: '' }] })).toBe(false)
-    expect(validateWorkingContentPackage({ ...workingContentFixture, templateId: 'unknown-template' as never })).toBe(false)
+    expect(validateWorkingContentPackage({ ...workingContentFixture, templateId: '' as never })).toBe(false)
     expect(validateWorkingContentPackage({
       ...workingContentFixture,
       content: { pages: [{ ...workingContentFixture.content.pages[0], sections: [{ ...workingContentFixture.content.pages[0].sections[0], componentId: 'UnknownComponent' }] }] },
@@ -232,7 +232,7 @@ describe('working-content persistence and lineage', () => {
 
   it('rejects working-content contract type and key bypasses at the database boundary', async () => {
     const checksum = '0000000000000000000000000000000000000000000000000000000000000000'
-    const insertPackage = async (packageId: string, templateId = 'marketing-smb-v1') => {
+    const insertPackage = async (packageId: string, templateId = 'master-template-type-1') => {
       await db.query(
         `insert into lsites_sites.working_packages (working_package_id, template_id, org_id, lead_id, site_id)
          values ($1, $2, $3, $4, $5)`,
@@ -251,7 +251,7 @@ describe('working-content persistence and lineage', () => {
       )).rejects.toThrow()
     }
 
-    await expect(insertPackage('wp-db-contract-template', 'unknown-template')).rejects.toThrow()
+    await expect(insertPackage('wp-db-contract-template', 'not a template')).rejects.toThrow()
 
     const page = workingContentFixture.content.pages[0]
     const section = page.sections[0]

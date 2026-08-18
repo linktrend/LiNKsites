@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 2,
+  "schemaRevision": 2,
+  "policyType": "derivation_override_policy",
+  "baseEntryId": "master-template-type-1",
+  "cloneKinds": ["type", "vertical"],
+  "layers": [
+    {
+      "kind": "vertical",
+      "parentRule": "any_governed_parent_release_identity",
+      "mayChange": [
+        "artifact/content/default-content.json",
+        "artifact/design/theme.json",
+        "artifact/modules/manifest.json#/modules/*/enabledByDefault"
+      ],
+      "mustPreserve": [
+        "archetype_ids",
+        "module_ids",
+        "lineage_materialization_self_contained",
+        "selectability_non_selectable_until_admission",
+        "parent_release_identity_pin"
+      ]
+    },
+    {
+      "kind": "type",
+      "parentRule": "exact_parent_release_identity",
+      "mayChange": [
+        "artifact/content/default-content.json",
+        "artifact/modules/manifest.json#/modules/*/enabledByDefault"
+      ],
+      "mustPreserve": [
+        "archetype_ids",
+        "module_ids",
+        "lineage_materialization_self_contained",
+        "selectability_non_selectable_until_admission",
+        "parent_release_identity_pin"
+      ]
+    }
+  ],
+  "allowedOverridePaths": [
+    "artifact/content/default-content.json",
+    "artifact/design/theme.json",
+    "artifact/modules/manifest.json#/modules/*/enabledByDefault"
+  ],
+  "forbiddenOverridePaths": [
+    "artifact/lineage.json",
+    "artifact/design/tokens.css",
+    "artifact/design/tokens.json",
+    "artifact/design/variants.json",
+    "artifact/contracts/layout-contracts.json#/pageArchetypes/*/id",
+    "artifact/modules/manifest.json#/modules/*/id"
+  ],
+  "mergeRules": {
+    "objects": "deep_merge_parent_then_override",
+    "arrays": "replace_if_path_allowed_else_forbidden",
+    "scalars": "override_wins_if_path_allowed",
+    "unknownPaths": "fail_closed"
+  },
+  "effectiveDigest": {
+    "algorithm": "sha256",
+    "projection": "canonical_json_of_merged_allowed_overlay"
+  }
+}

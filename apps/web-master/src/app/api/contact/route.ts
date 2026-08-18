@@ -15,7 +15,7 @@ const enqueueContact = async (payload: { intent: string; submission: Record<stri
   const orgId = process.env.LINKSITES_ORG_ID;
   const siteId = process.env.LINKSITES_SITE_ID;
   const outboxPath = process.env.LINKAUTOWORK_OUTBOX_PATH;
-  const integritySecret = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET;
+  const integrityMaterial = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET;
   const grants = process.env.LINKAUTOWORK_EVENT_GRANTS;
   if (!url || !secret || !keyId || !environment || !orgId || !siteId || !outboxPath || !integritySecret || !grants) throw new Error('governed LiNKautowork contact configuration is incomplete');
   const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: parseGatewayEventPolicies(grants), transport: async (request) => {

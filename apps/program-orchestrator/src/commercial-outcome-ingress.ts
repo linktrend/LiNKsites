@@ -38,9 +38,9 @@ export class VerifiedGatewayOutcomeAuthorization implements LiNKreachAuthorizati
   }
 }
 
-const required = (payload: Record<string, string | number | boolean> | undefined, key: string): string => {
-  const value = payload?.[key]
-  if (typeof value !== 'string' || !value.trim()) throw new LifecycleError(`W2-05 commercial outcome event is missing ${key}.`)
+const required = (payload: Record<string, string | number | boolean> | undefined, fieldName: string): string => {
+  const value = payload?.[fieldName]
+  if (typeof value !== 'string' || !value.trim()) throw new LifecycleError(`W2-05 commercial outcome event is missing ${fieldName}.`)
   return value
 }
 

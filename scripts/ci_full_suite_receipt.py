@@ -90,6 +90,14 @@ def api_request(url: str, token: str, *, binary: bool = False) -> Any:
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
             payload = response.read()
+    except urllib.error.HTTPError as exc:
+        # A stale artifact from an unrelated historical run may be expired or
+        # inaccessible to the runner token.  Treat only that binary artifact
+        # as a candidate to skip; metadata/API failures remain fatal, and the
+        # exact-tree receipt below is still validated strictly.
+        if binary and exc.code in {401, 404}:
+            return None
+        fail(f"GitHub API request failed for {url}: {exc}")
     except (urllib.error.URLError, TimeoutError) as exc:
         fail(f"GitHub API request failed for {url}: {exc}")
     if binary:
@@ -157,6 +165,8 @@ def command_verify(args: argparse.Namespace) -> None:
         if artifact is None:
             continue
         archive = api_request(str(artifact["archive_download_url"]), token, binary=True)
+        if archive is None:
+            continue
         if len(archive) > 25 * 1024 * 1024:
             fail("full-suite evidence artifact exceeds 25 MiB safety limit")
         with zipfile.ZipFile(io.BytesIO(archive)) as bundle:

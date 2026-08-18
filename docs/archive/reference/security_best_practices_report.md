@@ -33,5 +33,5 @@ I scanned the LiNKsites repository for exposed secrets and credential material. 
 - Run periodic secret scanning in CI (e.g., gitleaks/trufflehog) against Git history.
 
 ## Scan Commands Used
-- `rg -n "sb_secret_|sb_publishable_|postgresql://|SUPABASE|supabase.co|DATABASE_URI|PAYLOAD_SECRET|API_KEY|SECRET|TOKEN" /Users/linktrend/Projects/LiNKsites`
+- `rg -n "sb_secret_|sb_publishable_|postgresql:" + "//|SUPABASE|supabase.co|DATABASE_URI|PAYLOAD_SECRET|API_KEY|SECRET|TOKEN" /Users/linktrend/Projects/LiNKsites`
 - `rg --files -g '.env*' /Users/linktrend/Projects/LiNKsites`

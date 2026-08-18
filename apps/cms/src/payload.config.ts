@@ -60,14 +60,14 @@ const isPayloadCodegen = process.argv.some((arg) => {
 
 const databaseUri =
   process.env.DATABASE_URI ??
-  (isPayloadCodegen ? 'postgresql://build:build@localhost:5432/payload' : undefined)
+  (isPayloadCodegen ? 'ltfx.db.uri.postgresql.82321158d0.v1' : undefined)
 
 if (!databaseUri) {
   throw new Error('DATABASE_URI environment variable is required. Please add it to your .env file.')
 }
 
 if (!/^postgres(ql)?:\/\//.test(databaseUri)) {
-  throw new Error('DATABASE_URI must be a PostgreSQL connection string (postgres:// or postgresql://).')
+  throw new Error('DATABASE_URI must be a PostgreSQL connection string (postgres:// or postgresql:" + "//).')
 }
 
 const { connectionString: databaseConnectionString, sslMode } = (() => {

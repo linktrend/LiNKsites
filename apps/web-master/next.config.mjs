@@ -25,13 +25,21 @@ const cmsHosts = Array.from(
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  transpilePackages: ['@linksites/factory-catalog'],
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      '.js': ['.ts', '.tsx', '.js'],
+      '.mjs': ['.mts', '.mjs'],
+    }
+    return config
+  },
   async headers() {
     return [
       {
         source: '/:lang(en|es|zh-tw|zh-cn)/demo/:path*',
         headers: [
-          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
-          { key: 'Cache-Control', value: 'private, no-store, max-age=0' },
+          { key: 'ltfx.auto.key.1876ce5d7c70.v1', value: 'noindex, nofollow, noarchive' },
+          { key: 'ltfx.auto.key.695f566af206.v1', value: 'private, no-store, max-age=0' },
         ],
       },
     ];

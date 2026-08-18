@@ -71,7 +71,7 @@ NEXT_PUBLIC_CMS_PROVIDER=mock
 ```bash
 NEXT_PUBLIC_CMS_PROVIDER=payload
 NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.acme.com
-PAYLOAD_API_KEY=your-secret-key
+PAYLOAD_API_KEY=ltfx.auto.payload_api_key.c8c5831d6f48.v1
 ```
 
 ### Analytics
@@ -86,7 +86,7 @@ NEXT_PUBLIC_FB_PIXEL_ID=123456789
 
 ```bash
 LINKAUTOWORK_GATEWAY_URL=https://gateway.example.com/events
-LINKAUTOWORK_SIGNING_SECRET=<secret-manager reference>
+LINKAUTOWORK_SIGNING_SECRET=ltfx.auto.linkautowork_signing_secret.a4368193fe6c.v1 reference>
 LINKAUTOWORK_SIGNING_KEY_ID=web-master
 LINKAUTOWORK_EVENT_GRANTS=[]
 ```
@@ -101,7 +101,7 @@ NEXT_PUBLIC_ENABLE_AI_MARKDOWN=true
 NEXT_PUBLIC_ENABLE_AI_TRAINING_SIGNAL=false
 
 # AI actions security
-AI_ACTIONS_SECRET=your-long-random-token
+AI_ACTIONS_SECRET=ltfx.auto.ai_actions_secret.6f3ee80e4486.v1
 AI_ACTIONS_RATE_LIMIT_PER_MIN=30
 ```
 

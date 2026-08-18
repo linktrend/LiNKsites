@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 2,
+  "role": "starter_example_pages",
+  "source": "provider-neutral-defaults",
+  "pages": [
+    {
+      "archetypeId": "home",
+      "slug": "home",
+      "title": "Northline",
+      "description": "A neighborhood office that helps local teams and households get a clear plan and stay easy to reach.",
+      "examplePath": "/",
+      "content": [
+        {
+          "id": "home-hero",
+          "blockType": "hero",
+          "data": {
+            "eyebrow": "Neighborhood office",
+            "heading": "Straightforward help for the work in front of you",
+            "description": "We work with local teams and households who want a clear plan, honest timing, and someone easy to reach.",
+            "primaryAction": {
+              "label": "See how we work",
+              "targetPageSlug": "about"
+            }
+          }
+        },
+        {
+          "id": "home-features",
+          "blockType": "features",
+          "data": {
+            "heading": "What to expect",
+            "description": "A finished office site should make the next step obvious.",
+            "features": [
+              {
+                "title": "A clear first visit",
+                "description": "Hours, location, and how to get in touch sit on the first screen."
+              },
+              {
+                "title": "Plain-language plans",
+                "description": "We explain the work, the timing, and the cost before anything starts."
+              },
+              {
+                "title": "Someone answers",
+                "description": "Messages reach the office, not a generic inbox that nobody checks."
+              }
+            ]
+          }
+        },
+        {
+          "id": "home-testimonials",
+          "blockType": "testimonials",
+          "data": {
+            "label": "From nearby clients",
+            "items": [
+              {
+                "title": "Jordan Hale",
+                "summary": "They told us exactly what would happen next week. That was enough to decide."
+              },
+              {
+                "title": "Priya Sen",
+                "summary": "We called on a Tuesday and had a plan written down by Thursday."
+              }
+            ]
+          }
+        },
+        {
+          "id": "home-cta",
+          "blockType": "cta",
+          "data": {
+            "eyebrow": "Ready when you are",
+            "heading": "Talk with the office",
+            "description": "Share what you need. We will tell you if we can help, and what the first step looks like.",
+            "primary": {
+              "label": "Get in touch",
+              "targetPageSlug": "contact"
+            },
+            "secondary": {
+              "label": "Read about the team",
+              "targetPageSlug": "about"
+            },
+            "background": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "archetypeId": "about",
+      "slug": "about",
+      "title": "About Northline",
+      "description": "A small local office with a simple way of working.",
+      "examplePath": "/about",
+      "content": [
+        {
+          "id": "about-content",
+          "blockType": "richText",
+          "data": {
+            "heading": "A small office, close to the work",
+            "body": "Northline is a neighborhood practice for everyday professional work: planning, paperwork, and the follow-through that usually slips. We keep the site and the office the same: short sentences, visible hours, and no surprise steps. This is sample copy for a reusable starter site, not a live business listing."
+          }
+        },
+        {
+          "id": "about-team",
+          "blockType": "teamMembers",
+          "data": {
+            "heading": "Who you will meet",
+            "items": [
+              {
+                "title": "Alex Rivera",
+                "summary": "Leads first conversations and writes the plan you can take home."
+              },
+              {
+                "title": "Morgan Cho",
+                "summary": "Keeps the calendar honest and makes sure follow-up actually happens."
+              }
+            ]
+          }
+        },
+        {
+          "id": "about-cta",
+          "blockType": "cta",
+          "data": {
+            "heading": "Visit or write",
+            "description": "The contact page has hours, a sample address, and a form slot for the site adapter.",
+            "primary": {
+              "label": "Open contact",
+              "targetPageSlug": "contact"
+            },
+            "background": "surface"
+          }
+        }
+      ]
+    },
+    {
+      "archetypeId": "contact",
+      "slug": "contact",
+      "title": "Contact Northline",
+      "description": "Hours, a sample location, and a form slot for the consumer adapter.",
+      "examplePath": "/contact",
+      "content": [
+        {
+          "id": "contact-hero",
+          "blockType": "hero",
+          "data": {
+            "eyebrow": "Visit, call, or write",
+            "heading": "Start with a short note",
+            "description": "Tell us what you need and the best time to reply. The form itself is owned by the site adapter."
+          }
+        },
+        {
+          "id": "contact-form",
+          "blockType": "content",
+          "data": {
+            "kind": "contact_form_slot",
+            "heading": "Send a message",
+            "description": "Name, email, and a short note. The consumer adapter owns validation, privacy, and delivery."
+          }
+        },
+        {
+          "id": "contact-locations",
+          "blockType": "locations",
+          "data": {
+            "heading": "Office hours",
+            "features": [
+              {
+                "title": "Harbor Street studio",
+                "description": "120 Harbor Street, Suite 4. Example address only."
+              },
+              {
+                "title": "Weekdays",
+                "description": "Tuesday to Friday, 9:00 to 17:00."
+              },
+              {
+                "title": "Saturday",
+                "description": "10:00 to 13:00, by appointment."
+              }
+            ]
+          }
+        },
+        {
+          "id": "contact-faq",
+          "blockType": "faq",
+          "data": {
+            "heading": "Before you write",
+            "items": [
+              {
+                "title": "How fast do you reply?",
+                "summary": "Most notes get an answer the next working day."
+              },
+              {
+                "title": "Do I need an account?",
+                "summary": "No. Send a short message and we will tell you the next step."
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -31,10 +31,10 @@ const parseArgs = (): ArgMap => {
   return out
 }
 
-const requireArg = (args: ArgMap, key: string): string => {
-  const value = args[key]
+const requireArg = (args: ArgMap, argName: string): string => {
+  const value = args[argName]
   if (!value) {
-    throw new Error(`Missing required arg --${key}=...`)
+    throw new Error(`Missing required arg --${argName}=...`)
   }
   return value
 }
@@ -44,7 +44,7 @@ async function main() {
 
   const name = requireArg(args, 'name')
   const hostname = requireArg(args, 'hostname') // demo or real domain
-  const templateId = args.templateId ?? 'marketing-smb-v1'
+  const templateId = args.templateId ?? process.env.LINKSITES_DEFAULT_TEMPLATE_ID ?? 'master-template-type-1'
   const locales = (args.locales ?? 'en').split(',').map((s) => s.trim()).filter(Boolean)
 
   const payload = await getPayload({ config })

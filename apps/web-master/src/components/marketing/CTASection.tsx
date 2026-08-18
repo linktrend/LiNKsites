@@ -41,7 +41,12 @@ export function CTASection({ data }: CTASectionProps) {
             {parsed.body}
           </p>
         </div>
-        <Button className="w-full bg-rose-500 text-white hover:bg-rose-600" size="lg" asChild>
+        <Button
+          className="w-full text-white hover:opacity-90"
+          style={{ background: "var(--color-accent)", color: "var(--color-accent-foreground)" }}
+          size="lg"
+          asChild
+        >
           <Link href={parsed.ctaUrl} data-ai-action="contact" data-ai-action-target={parsed.ctaUrl}>
             {parsed.ctaLabel}
           </Link>

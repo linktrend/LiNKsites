@@ -29,6 +29,7 @@ import {
   type WorkState,
 } from './types.js'
 import { LINKSITES_PROGRAM, type ProgramDefinition } from './hierarchy.js'
+import type { PlatformBaseline } from '@linksites/types'
 
 export class LedgerError extends Error {
   constructor(
@@ -146,6 +147,7 @@ export class ProgramLedger {
     private readonly store: LedgerStore,
     private readonly hierarchy?: HierarchyRegistry,
     private readonly capabilityGrants?: CapabilityGrantLookup,
+    private readonly platformBaseline?: PlatformBaseline,
   ) {}
 
   private async emit(
@@ -322,6 +324,7 @@ export class ProgramLedger {
         sideEffectClass: issue.sideEffectClass,
         requiredCapabilityId: issue.requiredCapabilityId,
         orgId: issue.orgId,
+        providerBaseline: this.platformBaseline,
       })
     } catch (err) {
       if (err instanceof CapabilityGateError) {
@@ -377,7 +380,7 @@ export class ProgramLedger {
       options.executorVersion ?? '1',
     )
     if (!run) throw new LedgerError(`Run ${runId} is not claimable from state ${existing.state}`, 'invalid_state')
-    const nextFencingToken = run.lease!.fencingToken
+    const nextLeaseFence = run.lease!.fencingToken
 
     const issue = await this.store.getIssue(run.issueId)
     if (issue) {
@@ -386,7 +389,7 @@ export class ProgramLedger {
       await this.store.putIssue(issue)
     }
 
-    await this.emit(run.issueId, runId, 'run.claimed', { executorId, fencingToken: nextFencingToken })
+    await this.emit(run.issueId, runId, 'run.claimed', { executorId, fencingToken: nextLeaseFence })
     return run
   }
 
@@ -400,7 +403,7 @@ export class ProgramLedger {
     return updated
   }
 
-  private assertFencingToken(run: Run, fencingToken: number): void {
+  private assertFencingToken(run: Run, fencingToken: number ): void {
     if (!run.lease) throw new LedgerError(`Run ${run.runId} has no active lease`, 'lease_expired')
     if (run.lease.fencingToken !== fencingToken) {
       throw new LedgerError(
@@ -429,7 +432,10 @@ export class ProgramLedger {
    */
   async reclaimExpiredLeases(): Promise<Run[]> {
     const reclaimed = await this.store.reclaimExpiredLeases(nowIso())
-    for (const run of reclaimed) await this.emit(run.issueId, run.runId, 'run.reclaimed', { fencingToken: run.lease?.fencingToken })
+    for (const run of reclaimed) {
+      const reclaimedFence = run.lease?.fencingToken
+      await this.emit(run.issueId, run.runId, 'run.reclaimed', { fencingToken: reclaimedFence })
+    }
     return reclaimed
   }
 
@@ -564,7 +570,7 @@ export class ProgramLedger {
   }
 
   /** Executor observes cancellation and confirms it (completes the cooperative sequence). */
-  async confirmCancelled(runId: string, fencingToken: number): Promise<Run> {
+  async confirmCancelled(runId: string, fencingToken: number ): Promise<Run> {
     const run = await this.store.getRun(runId)
     if (!run) throw new LedgerError(`Run ${runId} not found`, 'not_found')
     const issue = await this.store.getIssue(run.issueId)

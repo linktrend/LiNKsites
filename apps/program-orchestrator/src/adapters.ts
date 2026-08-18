@@ -14,10 +14,13 @@ import {
   produceWorkingContent,
   buildPromotionRequestFromPreparedWorkingContent,
   canonicalJsonChecksum,
+  MASTER_TEMPLATE_ID,
   MARKETING_SMB_V1_CATALOG_AUTHORITY,
   promotePreparedWorkingContent,
   assertValidWorkingContentPackage,
   computeWorkingContentChecksum,
+  materializeRevision2WebsiteTemplate,
+  type LibraryProductionEvidence,
 } from '@linksites/factory-catalog'
 import { PayloadRestDraftTarget } from '@linksites/factory-catalog'
 import type { AdapterFault, ExternalFence, LeadInput, LocalBoundaryAdapters, RuntimeConfig } from './contracts.ts'
@@ -108,11 +111,21 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     return this.boundary('qualify', async () => { if (!['home_services', 'home-services', 'plumbing', 'hvac', 'electrical', 'landscaping', 'cleaning'].includes(lead.requested_vertical)) throw new Error('qualification:unsupported-vertical'); return { vertical: 'home_services', tier: 'standard' as const } })
   }
 
-  async reserveFoundation(siteId: string, vertical: string): Promise<Record<string, unknown>> { return this.boundary('foundation.reserve', async () => ({ foundationId: 'foundation:marketing-smb-v1:standard', vertical, status: 'reserved', reservationId: `reservation:${siteId}`, owner: 'M06-preview-inventory-management', dependencies: ['vertical-qualification'] })) }
+  async reserveFoundation(siteId: string, vertical: string): Promise<Record<string, unknown>> { return this.boundary('foundation.reserve', async () => ({ foundationId: `foundation:${MASTER_TEMPLATE_ID}:standard`, templateId: MASTER_TEMPLATE_ID, vertical, status: 'reserved', reservationId: `reservation:${siteId}`, owner: 'M06-preview-inventory-management', dependencies: ['vertical-qualification'] })) }
 
-  async resolveLibrary(siteId: string): Promise<Record<string, unknown>> { return this.boundary('library.verify', async () => { const consumption = await this.libraryEvidence(); return { entryId: consumption.entry.entryId, revision: this.config.libraryCommitSha, catalogChecksum: this.config.libraryCatalogChecksum, entryChecksum: this.config.libraryEntryChecksum, status: 'approved', materialized: true, verificationId: consumption.receipt.verificationId, consumption, siteId } }) }
+  async resolveLibrary(siteId: string): Promise<Record<string, unknown>> { return this.boundary('library.verify', async () => { const consumption = await this.libraryEvidence(); if ('reference' in consumption) return { entryId: consumption.reference.entryId, revision: consumption.reference.releaseSourceCommitSha, releaseManifestSha256: consumption.reference.releaseManifestSha256, inventorySha256: consumption.reference.inventorySha256, status: 'approved', materialized: true, authority: 'linksites_local', libraryAuthority: 'reference_only', consumption, siteId }; return { entryId: consumption.entry.entryId, revision: this.config.libraryCommitSha, catalogChecksum: this.config.libraryCatalogChecksum, entryChecksum: this.config.libraryEntryChecksum, status: 'approved', materialized: true, verificationId: consumption.receipt.verificationId, consumption, siteId } }) }
 
-  private async libraryEvidence(): Promise<LibraryConsumptionEvidence> {
+  private async libraryEvidence(): Promise<LibraryProductionEvidence> {
+    if (process.env.LINKSITES_TEMPLATE_FORMAT === 'revision2') {
+      const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT
+      const sourceCommitSha = process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA
+      const sourceTreeSha = process.env.LINKSITES_LINKLIBRARIES_TREE_SHA
+      const dependencyLockSha256 = process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256
+      if (!providerRoot || !sourceCommitSha || !sourceTreeSha || !dependencyLockSha256) throw new Error('library:revision2-pinned-provider-input-missing')
+      const result = materializeRevision2WebsiteTemplate({ providerRoot, entryId: process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_ID, version: process.env.LINKSITES_TEMPLATE_VERSION ?? '1.0.0', pin: { sourceCommitSha, sourceTreeSha, dependencyLockSha256 }, receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH })
+      if (!result.ok) throw new Error(`library:revision2-release-rejected:${result.errors.join('|')}`)
+      return result.value
+    }
     const authority = {
       commitSha: this.config.libraryCommitSha,
       catalogChecksum: this.config.libraryCatalogChecksum,
@@ -146,13 +159,16 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   private async production(lead: LeadInput): Promise<ReturnType<typeof produceWorkingContent>> {
     const facts = JSON.parse(await readFile(this.config.approvedFactsPath, 'utf8')) as unknown
     const library = await this.libraryEvidence()
-    const template = { templateId: 'marketing-smb-v1' as const, libraryAssetPath: 'src/index.mjs', libraryAssetSha256: library.receipt.assetChecksums['src/index.mjs'], baselinePages: [
+    const libraryEntryId = 'reference' in library ? library.reference.entryId : library.entry.entryId
+    const libraryAssetPath = 'reference' in library ? (Object.keys(library.files).find((path) => path === 'src/index.mjs') ?? Object.keys(library.files)[0] ?? '') : 'src/index.mjs'
+    const libraryAssetSha256 = 'reference' in library ? createHash('sha256').update(library.files[libraryAssetPath] ?? '', 'utf8').digest('hex') : library.receipt.assetChecksums[libraryAssetPath]
+    const template = { templateId: libraryEntryId, libraryAssetPath, libraryAssetSha256, baselinePages: [
       { pageId: 'home', route: '/', sections: [{ sectionId: 'hero', componentId: 'SignupHero', copy: { lang: 'en', headline: '{{businessName}} serving {{geography}}', body: 'Approved local service information.' } }] },
       { pageId: 'about', route: '/about', sections: [{ sectionId: 'credentials', componentId: 'CTASection', copy: { lang: 'en', headline: 'About {{businessName}}', body: '{{credentials}}' } }] },
       { pageId: 'services', route: '/services', sections: [{ sectionId: 'offers', componentId: 'OfferShowcase', copy: { lang: 'en', headline: 'Services', offers: ['{{services}}'] } }] },
       { pageId: 'contact', route: '/contact', sections: [{ sectionId: 'contact', componentId: 'CTASection', copy: { lang: 'en', phone: '{{contact.phone}}', email: '{{contact.email}}', address: '{{contact.address}}' } }] },
       { pageId: 'privacy', route: '/privacy', sections: [{ sectionId: 'legal', componentId: 'CTASection', copy: { lang: 'en', copy: '{{legalClaims}}' } }] },
-    ], media: [{ assetId: 'library-neutral-mark', source: 'library://marketing-smb-v1/mark', sha256: 'a'.repeat(64), licenseSpdx: 'UNLICENSED', altText: 'Approved neutral template mark', width: 512, height: 512, format: 'webp' as const }] }
+    ], media: [{ assetId: 'library-neutral-mark', source: `library://${libraryEntryId}/mark`, sha256: 'a'.repeat(64), licenseSpdx: 'UNLICENSED', altText: 'Approved neutral template mark', width: 512, height: 512, format: 'webp' as const }] }
     return produceWorkingContent({ lead, facts, template, library, mediaPolicy: { allowedSourcePrefixes: ['library://'], allowedLicenseSpdx: ['UNLICENSED'], maxWidth: 2048, maxHeight: 2048, allowedFormats: ['webp', 'avif', 'jpg', 'png'], requireTemplateMedia: true } })
   }
 

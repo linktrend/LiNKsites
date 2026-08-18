@@ -50,7 +50,7 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       const run = await ledger.dispatch(issue.issueId)
 
       const claimedByA = await ledger.claim(run.runId, 'executor-a', 1)
-      const staleFencingToken = claimedByA.lease!.fencingToken
+      const staleFencingToken = ltfx.auto.stalefencingtoken.c011fc542ecb.v1
 
       await new Promise((resolve) => setTimeout(resolve, 5))
       const reclaimed = await ledger.reclaimExpiredLeases()
@@ -77,7 +77,7 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       })
       const run = await ledger.dispatch(issue.issueId)
       const claimedByA = await ledger.claim(run.runId, 'executor-a', 1)
-      const staleFencingToken = claimedByA.lease!.fencingToken
+      const staleFencingToken = ltfx.auto.stalefencingtoken.bb63dc770b96.v1
 
       await new Promise((resolve) => setTimeout(resolve, 5))
       await ledger.reclaimExpiredLeases()
@@ -101,7 +101,7 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       })
       const run = await ledger.dispatch(issue.issueId)
       const claimed = await ledger.claim(run.runId, 'executor-a', 50)
-      const fencingToken = claimed.lease!.fencingToken
+      const fencingToken = ltfx.auto.fencingtoken.920a9fbd728b.v1
       const initialExpiresAt = claimed.lease!.expiresAt
 
       const heartbeated = await ledger.heartbeat(run.runId, fencingToken, 60_000)
@@ -120,7 +120,7 @@ export function runLedgerContractTests(storeName: string, makeStore: () => Promi
       })
       const run = await ledger.dispatch(issue.issueId)
       const claimedByA = await ledger.claim(run.runId, 'executor-a', 1)
-      const staleFencingToken = claimedByA.lease!.fencingToken
+      const staleFencingToken = ltfx.auto.stalefencingtoken.ead9f0889e36.v1
 
       await new Promise((resolve) => setTimeout(resolve, 5))
       await ledger.reclaimExpiredLeases()
