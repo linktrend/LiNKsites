@@ -21,8 +21,11 @@ import {
   renderThemeContractCss,
 } from '../src/masterTemplateTokens.js'
 import {
+  assertProductionStillRejectsDraftMaster,
+  buildMasterTemplateCandidatePreviewFixture,
   describeMasterTemplatePreviewSeam,
   isMasterTemplateLookAndFeelProofHarnessEnabled,
+  runMasterTemplateCandidatePreview,
 } from '../src/masterTemplatePreviewSeam.js'
 
 const FIXTURE_ROOT = resolve(
@@ -167,18 +170,46 @@ describe('master-template look-and-feel render (issue/187)', () => {
     ).toThrow(/dentist|forbidden_vertical_preset|industry_preset_inventory_invalid/)
   })
 
-  it('leaves the step 3 preview seam unused and distinct from W2-04 marketing-smb-v1', () => {
+  it('implements the step 3 preview seam without selecting the draft or using the old demo', () => {
     const seam = describeMasterTemplatePreviewSeam()
-    expect(seam.implemented).toBe(false)
+    expect(seam.implemented).toBe(true)
     expect(seam.productionSelectable).toBe(false)
     expect(seam.parallelTo).toBe('LINKSITES_W2_04_LOCAL_PROOF')
     expect(seam.oldDemoTemplateId).toBe('marketing-smb-v1')
     expect(seam.notTheOldDemo).toBe(true)
+    expect(seam.wouldReuseRoute).toBe('/en/demo/<token>')
+    expect(
+      isMasterTemplateLookAndFeelProofHarnessEnabled({
+        LINKSITES_W2_04_LOCAL_PROOF: '1',
+      }),
+    ).toBe(false)
     expect(
       isMasterTemplateLookAndFeelProofHarnessEnabled({
         LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF: '1',
         LINKSITES_W2_04_LOCAL_PROOF: '1',
       }),
-    ).toBe(false)
+    ).toBe(true)
+  })
+
+  it('seeds projected Northline pages from the candidate probe and still rejects production', () => {
+    const preview = runMasterTemplateCandidatePreview({ siteId: 'northline-preview', locale: 'en' })
+    expect(preview.productionSelectable).toBe(false)
+    expect(preview.pinSha).toBe('6b87993ddaf403aebe7bef97bd268a543a1d14eb')
+    expect(preview.probe.starterPages.map((page) => page.title)).toEqual([
+      'Northline',
+      'About Northline',
+      'Contact Northline',
+    ])
+    expect(() => selectMasterTemplateForProduction(loadBundle())).toThrow(/Production path rejects/)
+    expect(() => assertProductionStillRejectsDraftMaster()).not.toThrow()
+    const fixture = buildMasterTemplateCandidatePreviewFixture({
+      hostname: '127.0.0.1',
+      siteId: 'northline-preview',
+    })
+    expect(fixture.productionSelectable).toBe(false)
+    expect(fixture.siteSettings[0]?.templateId).toBe('master-template-type-1')
+    expect(fixture.pages.map((page) => page.slug)).toEqual(['home', 'about', 'contact'])
+    expect(fixture.pages.every((page) => page.previewEnvironment === 'private-preview')).toBe(true)
+    expect(fixture.pages.some((page) => page.slug === 'marketing-smb-v1')).toBe(false)
   })
 })
