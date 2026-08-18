@@ -25,6 +25,7 @@ type MockPayloadData = {
   contactForms?: unknown[];
   pricing?: unknown;
   pages?: unknown[];
+  siteSettings?: unknown[];
 };
 
 let mockPayloadCache: MockPayloadData | null = null;
@@ -127,6 +128,25 @@ const mockPayloadFind = async <T>({
   if (collection === "sites") {
     const idFilter = (where as any)?.id?.equals as string | undefined;
     const docs = (mock.sites ?? []).filter((doc) => (idFilter ? doc.id === idFilter : true));
+    return {
+      docs: docs as T[],
+      page: 1,
+      totalDocs: docs.length,
+      totalPages: 1,
+      limit: safeLimit,
+    };
+  }
+
+  if (collection === "site-settings") {
+    const siteFilter = andFilters.find((f: any) => f?.site?.equals)?.site?.equals ?? siteId;
+    const localeFilter = andFilters.find((f: any) => f?.locale?.equals)?.locale?.equals ?? locale;
+    const statusFilter = andFilters.find((f: any) => f?.status?.equals)?.status?.equals;
+    const docs = ((mock.siteSettings ?? []) as any[]).filter((doc) => {
+      if (siteFilter && doc.site !== siteFilter) return false;
+      if (localeFilter && doc.locale !== localeFilter) return false;
+      if (statusFilter && doc.status !== statusFilter) return false;
+      return true;
+    });
     return {
       docs: docs as T[],
       page: 1,

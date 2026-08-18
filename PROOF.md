@@ -1,32 +1,53 @@
-# Issue 187 — Master-template look-and-feel render
+# Issue 188 — Local Mac Mini preview of the Library master draft
 
-LiNKsites now consumes the landed Library look-and-feel pin, not the superseded token-hygiene SHA.
+This is a **private local preview** on the Mac Mini. It is **not** a live website, not VPS, not staging, and not production.
 
-**Pin:** `issue/134-master-template-look-and-feel` @ `6b87993ddaf403aebe7bef97bd268a543a1d14eb`  
+**Pin:** Library `issue/134-master-template-look-and-feel` @ `6b87993ddaf403aebe7bef97bd268a543a1d14eb`  
 **artifactTreeSha1:** `a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d`  
 **Identity:** `master-template-type-1@1.0.0` draft / non_selectable  
-**Rejected:** `3bf53b8` / `92e6d6ad…`, plus earlier retired prefixes
+**Look-and-feel:** authored `theme.json` CSS variables only. Generated `tokens.css` / `tokens.json` / `variants.json` are not overlaid. No dentist preset.
 
-## What now looks styled
+## What Principal can open
 
-Authored `theme.json` only. Generated `tokens.css` / `tokens.json` / `variants.json` are not overlaid. In-memory CSS keeps the existing variable names (`--color-primary`, `--color-accent`, `--font-family`, spacing, radius) on `:root`, `data-theme="default|light|dark"`, and the ten industry ids. No dentist preset.
+On this Mini, a private preview is running now:
 
-The inspectable composition maps Northline starter pages to distinct regions, not a flattened hero:
+1. Home: `http://127.0.0.1:4312/en/demo/local-northline-preview`
+2. About: `http://127.0.0.1:4312/en/demo/local-northline-preview/about`
+3. Contact: `http://127.0.0.1:4312/en/demo/local-northline-preview/contact`
 
-- Home: hero, features, proof, cta
-- About: prose, collection, cta
-- Contact: hero, form, features, collection
+Wrong token or missing token returns 404. Public `/en` is not a live Northline site.
 
-Look: cool stone paper (`#eef1ef`), pine (`#1e5a40`), steel (`#2a6f97`), Libre Franklin.
+The pages are Northline starter copy (Home / About / Contact) styled with pine, steel, and cool stone paper from the Library theme.
 
-## What this is not
+## What this proof does
 
-- Production still rejects this draft. `apps/web-master` admission still requires `approved`.
-- W2-04 / `marketing-smb-v1` is the old demo, not this master.
-- Local preview (`/en/demo/<token>`, Payload seed) is step 3 and is not implemented. The unused flag does nothing.
-- No dentists. No implementer PR.
+- Loads the pinned Library bundle from the consumer fixture cache.
+- Runs the candidate probe (inspect draft, do not admit it).
+- Seeds projected Home / About / Contact into a disposable CMS fixture (lite) or disposable Payload (full W2-04 path).
+- Reuses the existing `/en/demo/<token>` private preview route. No new public surface.
+- Sets `LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF=1` only. That flag is parallel to `LINKSITES_W2_04_LOCAL_PROOF` and does not replace the old marketing demo.
 
-## Validation
+## What stays fail-closed
 
-- `packages/factory-catalog` focused: `tests/masterTemplateConnection.spec.ts` and `tests/masterTemplateLookAndFeel.spec.ts` — 13 passed
-- `apps/web-master` `tests/master-template-look-and-feel.test.ts` plus existing private-preview query test
+- Production admission still requires an approved catalog entry.
+- `selectMasterTemplateForProduction()` still rejects this draft.
+- The proof flag does **not** emit production admission evidence.
+- The draft stays `non_selectable`.
+
+## Commands
+
+```bash
+# Focused tests
+pnpm --filter @linksites/factory-catalog test tests/masterTemplateLookAndFeel.spec.ts tests/masterTemplateConnection.spec.ts
+pnpm --filter @linksites/web-master exec tsx --test tests/master-template-look-and-feel.test.ts tests/master-template-candidate-preview.test.ts
+
+# Lite browser preview (fixture CMS, no disposable Postgres)
+LINKSITES_MASTER_TEMPLATE_PREVIEW_KEEP=1 bash scripts/master-template-candidate-preview-lite.sh
+
+# Full W2-04 mechanism (disposable Supabase + Payload on :4311 / :4312)
+bash scripts/master-template-candidate-preview.sh
+```
+
+## Gaps
+
+The lite harness opens the same token URL and pages without starting disposable Postgres. The full script is the W2-04 Payload path. Production selectability is not opened by either path.

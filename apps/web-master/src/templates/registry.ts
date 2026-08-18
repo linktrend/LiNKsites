@@ -2,8 +2,10 @@ import type { TemplateId, TemplateModule } from "@/templates/types";
 import { getAdmittedRevision2Template, getAdmittedTemplateEvidence, assertTemplateAdmission } from "@/lib/template-admission";
 import { MASTER_TEMPLATE_ID } from "@linksites/factory-catalog";
 import { PageRenderer } from "@/components/page-renderer";
+import { MasterTemplateCandidatePreviewRenderer } from "@/components/master-template/MasterTemplateCandidatePreviewRenderer";
 import { readFileSync } from "node:fs";
 import { resolve, sep } from "node:path";
+import { MASTER_TEMPLATE_PIN } from "@linksites/factory-catalog/master-template-pin";
 import { isMasterTemplateLookAndFeelProofHarnessEnabled } from "@linksites/factory-catalog/master-template-preview-seam";
 
 // The executable module is supplied by the admitted LiNKlibraries artifact.
@@ -57,11 +59,12 @@ if (process.env.LINKSITES_W2_04_LOCAL_PROOF === "1" && localProofTemplateId) {
   });
 }
 
-// Step 3 seam only. W2-04 still seeds marketing-smb-v1 and is not the master.
-// A later proof-only flag would seed projected starter pages into disposable
-// Payload and reuse /en/demo/<token>. The harness is unused now.
 if (isMasterTemplateLookAndFeelProofHarnessEnabled()) {
-  throw new Error("master-template look-and-feel proof harness is not implemented");
+  TEMPLATES.set(MASTER_TEMPLATE_PIN.entryId, {
+    id: MASTER_TEMPLATE_PIN.entryId,
+    name: "Master template candidate preview (draft, not selectable)",
+    PageRenderer: MasterTemplateCandidatePreviewRenderer,
+  });
 }
 
 export const getTemplateModule = (templateId: TemplateId): TemplateModule => {

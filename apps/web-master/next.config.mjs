@@ -25,6 +25,14 @@ const cmsHosts = Array.from(
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  transpilePackages: ['@linksites/factory-catalog'],
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      '.js': ['.ts', '.tsx', '.js'],
+      '.mjs': ['.mts', '.mjs'],
+    }
+    return config
+  },
   async headers() {
     return [
       {

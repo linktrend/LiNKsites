@@ -3,20 +3,21 @@ import type { StyledMasterTemplatePage, StyledSection } from "@linksites/factory
 type Props = {
   page: StyledMasterTemplatePage;
   css?: string;
+  previewSeam?: "unmounted" | "candidate-preview";
 };
 
 /**
  * Inspectable marketing-shell composition for mapped master-template pages.
  * Not mounted on the public production renderer. Not the W2-04 marketing-smb-v1 demo.
  */
-export function MasterTemplateComposition({ page, css }: Props) {
+export function MasterTemplateComposition({ page, css, previewSeam = "unmounted" }: Props) {
   return (
     <article
       className="flex min-h-screen flex-col"
       data-composition={page.composition}
       data-archetype={page.archetypeId}
       data-production-selectable="false"
-      data-preview-seam="unmounted"
+      data-preview-seam={previewSeam}
     >
       {css ? <style data-theme-contract="theme.json" dangerouslySetInnerHTML={{ __html: css }} /> : null}
       {page.chrome.header ? (

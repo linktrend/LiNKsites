@@ -33,13 +33,19 @@ test("theme.json becomes data-theme CSS without overlaying generated token files
   assert.doesNotMatch(css, /SINGLE SOURCE OF TRUTH/);
 });
 
-test("step 3 look-and-feel proof harness stays unused even if the flag is set", () => {
+test("step 3 look-and-feel proof flag is parallel to W2-04 and off by default", () => {
+  assert.equal(isMasterTemplateLookAndFeelProofHarnessEnabled({}), false);
   assert.equal(
     isMasterTemplateLookAndFeelProofHarnessEnabled({
-      LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF: "1",
       LINKSITES_W2_04_LOCAL_PROOF: "1",
       LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID: "marketing-smb-v1",
     }),
     false,
+  );
+  assert.equal(
+    isMasterTemplateLookAndFeelProofHarnessEnabled({
+      LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF: "1",
+    }),
+    true,
   );
 });

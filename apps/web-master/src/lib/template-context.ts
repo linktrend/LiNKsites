@@ -1,6 +1,7 @@
 import { getSiteSettings } from "@/lib/repository/siteSettings";
-import { assertTemplateAdmission, getAdmittedRevision2Template } from "@/lib/template-admission";
-import { MASTER_TEMPLATE_ID } from "@linksites/factory-catalog";
+import { assertTemplateAdmission } from "@/lib/template-admission";
+import { MASTER_TEMPLATE_PIN } from "@linksites/factory-catalog/master-template-pin";
+import { isMasterTemplateLookAndFeelProofHarnessEnabled } from "@linksites/factory-catalog/master-template-preview-seam";
 import type { LocaleCode } from "@linksites/types";
 
 export const getTemplateIdForSite = async ({
@@ -12,12 +13,13 @@ export const getTemplateIdForSite = async ({
 }): Promise<string> => {
   const settings = await getSiteSettings({ siteId, locale });
   const templateId = settings?.templateId;
-  if (!templateId) throw new Error(`Published site "${siteId}" has no admitted template selection`);
-  if (templateId === MASTER_TEMPLATE_ID || process.env.LINKSITES_TEMPLATE_FORMAT === "revision2") {
-    const admitted = getAdmittedRevision2Template();
-    if (admitted.reference.entryId !== templateId) throw new Error(`Published site selected template "${templateId}" but the pinned Revision 2 release is "${admitted.reference.entryId}"`);
-  } else {
+  if (templateId) {
     assertTemplateAdmission(templateId);
+    return templateId;
   }
-  return templateId;
+  if (isMasterTemplateLookAndFeelProofHarnessEnabled()) {
+    assertTemplateAdmission(MASTER_TEMPLATE_PIN.entryId);
+    return MASTER_TEMPLATE_PIN.entryId;
+  }
+  throw new Error(`Published site "${siteId}" has no admitted template selection`);
 };
