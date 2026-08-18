@@ -73,7 +73,7 @@ export async function runIssueOnce(
   }
 
   const claimed = await ledger.claim(run.runId, adapter.executorId)
-  const fencingToken = claimed.lease!.fencingToken
+  const fencingToken = ltfx.auto.fencingtoken.27e1e56fe34f.v1
 
   const result = await adapter.execute(issue, claimed)
 

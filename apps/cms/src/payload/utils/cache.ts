@@ -22,16 +22,16 @@ class LRUCache<T> {
     this.store = new Map()
   }
 
-  get(key: string): T | undefined {
-    const entry = this.store.get(key)
+  get(cacheKey: string): T | undefined {
+    const entry = this.store.get(cacheKey)
     if (!entry) return undefined
     if (entry.expiresAt <= Date.now()) {
-      this.store.delete(key)
+      this.store.delete(cacheKey)
       return undefined
     }
     // refresh recency
-    this.store.delete(key)
-    this.store.set(key, entry)
+    this.store.delete(cacheKey)
+    this.store.set(cacheKey, entry)
     return entry.value
   }
 
@@ -49,8 +49,8 @@ class LRUCache<T> {
     }
   }
 
-  delete(key: string): void {
-    this.store.delete(key)
+  delete(cacheKey: string): void {
+    this.store.delete(cacheKey)
   }
 
   deleteMatching(regex: RegExp): number {
@@ -88,18 +88,18 @@ const getPatternRegex = (pattern: string | RegExp): RegExp => {
 /**
  * Two-tier cache getter. Memory LRU first, then external (Map fallback).
  */
-export async function cacheGet<T = unknown>(key: string): Promise<T | undefined> {
-  const fast = memoryCache.get(key)
+export async function cacheGet<T = unknown>(cacheKey: string): Promise<T | undefined> {
+  const fast = memoryCache.get(cacheKey)
   if (fast !== undefined) return fast as T
 
-  const external = externalStore.get(key)
+  const external = externalStore.get(cacheKey)
   if (!external) return undefined
   if (external.expiresAt <= Date.now()) {
-    externalStore.delete(key)
+    externalStore.delete(cacheKey)
     return undefined
   }
 
-  memoryCache.set(key, external.value, external.expiresAt - Date.now())
+  memoryCache.set(cacheKey, external.value, external.expiresAt - Date.now())
   return external.value as T
 }
 

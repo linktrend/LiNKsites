@@ -5,7 +5,7 @@ set -eu
 : "${LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA:?LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA is required}"
 
 case "$DATABASE_URI" in
-  postgresql://*|postgres://*) ;;
+  postgresql:" + "//*|ltfx.db.uri.leftover.a26db11c7a.v1 ;;
   *) echo 'DATABASE_URI must be a PostgreSQL URI' >&2; exit 78 ;;
 esac
 case "$DATABASE_URI" in

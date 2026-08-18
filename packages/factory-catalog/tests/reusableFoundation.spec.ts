@@ -72,7 +72,7 @@ describe('prospect-neutrality scanning (manual §08.19)', () => {
   })
 
   it('flags credentials/secrets/analytics IDs', () => {
-    const violations = scanForProhibitedFields({ apiKey: 'sk_live_x', gaTrackingId: 'UA-123' })
+    const violations = scanForProhibitedFields({ apiKey: 'ltfx.auto.apikey.83891f03a778.v1', gaTrackingId: 'UA-123' })
     expect(violations.length).toBe(2)
   })
 

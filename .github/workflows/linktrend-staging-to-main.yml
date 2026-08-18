@@ -60,27 +60,51 @@ jobs:
               raise SystemExit("receipt_gate_promotion_marker_missing")
           marker = json.loads(match.group(1))
           run_id = str(marker.get("fullRunId") or "").strip()
-          artifact = ""
+          source_pr = str(marker.get("sourcePr") or "").strip()
+          receipt_digest = str(marker.get("receiptDigest") or "").strip()
+          artifact = str(marker.get("artifactName") or "").strip()
           if not run_id.isdigit() or int(run_id) < 1:
               raise SystemExit("receipt_gate_full_run_invalid")
-          print(json.dumps({"runId": run_id, "artifactName": artifact}))
+          if not source_pr.isdigit() or int(source_pr) < 1:
+              raise SystemExit("receipt_gate_source_pr_invalid")
+          if not re.fullmatch(r"sha256:[0-9a-f]{64}", receipt_digest):
+              raise SystemExit("receipt_gate_receipt_digest_invalid")
+          if not artifact:
+              raise SystemExit("receipt_gate_artifact_name_missing")
+          print(json.dumps({"runId": run_id, "sourcePr": source_pr, "receiptDigest": receipt_digest, "artifactName": artifact}))
           PY
           )"
           run_id="$(jq -r .runId <<<"${coordinates}")"
+          source_pr="$(jq -r .sourcePr <<<"${coordinates}")"
+          receipt_digest="$(jq -r .receiptDigest <<<"${coordinates}")"
           requested_name="$(jq -r .artifactName <<<"${coordinates}")"
           run="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")"
-          jq -e '.path == ".github/workflows/linktrend-integrator-merge.yml" and .event == "pull_request" and .conclusion == "success"' <<<"${run}" >/dev/null \
+          run_head="$(jq -r .head_sha <<<"${run}")"
+          run_attempt="$(jq -r .run_attempt <<<"${run}")"
+          jq -e --arg repo "${GITHUB_REPOSITORY}" --arg head "${HEAD_SHA}" \
+            --argjson source_pr "${source_pr}" \
+            '.path == ".github/workflows/linktrend-integrator-merge.yml" and
+             .event == "pull_request" and .conclusion == "success" and
+             (.run_attempt | type == "number" and . >= 1) and
+             (.head_sha | type == "string" and test("^[0-9a-f]{40}$")) and
+             (.pull_requests | any(.[]; .number == $source_pr and
+               .base.ref == "development" and
+               .base.repo.url == ("https://api.github.com/repos/" + $repo) and
+               .head.repo.url == ("https://api.github.com/repos/" + $repo) and
+               .head.sha == $head))' <<<"${run}" >/dev/null \
             || { echo "receipt_gate_full_run_not_reusable=${run_id}"; exit 1; }
+          test "${run_head}" = "${HEAD_SHA}" || { echo "receipt_gate_run_head_stale=${run_id}"; exit 1; }
           artifacts="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/artifacts?per_page=100")"
           artifact_name="$(jq -r --arg requested "${requested_name}" --arg suffix "-${run_id}" '
             [.artifacts[] | select(.expired == false)
               | select(.name | startswith("linktrend-full-suite-receipt-"))
               | select(.name | endswith($suffix))
-              | select($requested == "" or .name == $requested)]
+              | select(.name == $requested)]
             | if length == 1 then .[0].name else empty end
           ' <<<"${artifacts}")"
           test -n "${artifact_name}" || { echo "receipt_gate_artifact_not_unique_or_missing=${run_id}"; exit 1; }
-          printf 'run_id=%s\nartifact_name=%s\n' "${run_id}" "${artifact_name}" >> "$GITHUB_OUTPUT"
+          printf 'run_id=%s\nrun_attempt=%s\nrun_head=%s\nsource_pr=%s\nreceipt_digest=%s\nartifact_name=%s\n' \
+            "${run_id}" "${run_attempt}" "${run_head}" "${source_pr}" "${receipt_digest}" "${artifact_name}" >> "$GITHUB_OUTPUT"
 
       - name: Fetch exact promotion candidate without executing it
         run: |
@@ -110,5 +134,17 @@ jobs:
             --repo "${candidate_dir}" \
             --profile full \
             --workflow-run-id "${RECEIPT_RUN_ID}" \
+            --workflow-run-attempt "${{ steps.receipt.outputs.run_attempt }}" \
+            --workflow-head-commit "${{ steps.receipt.outputs.run_head }}" \
             --gate full-gate
+          receipt_digest="$(python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          value = json.loads(Path('receipt-artifact/full-suite-receipt.json').read_text())
+          value.pop('receiptDigest', None)
+          payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode() + b'\n'
+          print('sha256:' + hashlib.sha256(payload).hexdigest())
+          PY
+          )"
+          test "${receipt_digest}" = "${{ steps.receipt.outputs.receipt_digest }}" || { echo "receipt_gate_digest_mismatch"; exit 1; }
           echo "Linktrend Receipt Gate passed: exact tree/dependency/profile/workflow identity reused; no full suite rerun."

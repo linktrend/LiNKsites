@@ -15,3 +15,4 @@ coverage/
 secrets/
 LiNKdev/factory/STATE.local.md
 LiNKdev/product/reports/**/*.local.md
+__pycache__/

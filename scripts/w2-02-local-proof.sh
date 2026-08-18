@@ -10,6 +10,8 @@ if [[ -n "${LINKSITES_LOCAL_PROOF_ROOT:-}" ]]; then
   test ! -e "$local_root" || { echo "LINKSITES_LOCAL_PROOF_ROOT must not exist" >&2; exit 64; }
   mkdir -p "$local_root"
 fi
+diagnostic_root=${LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT:-"$local_root/recovery-diagnostics"}
+mkdir -p "$diagnostic_root"
 cms_port=4321; web_port=4322; cms_pid=""; web_pid=""
 random_value() { node -e "process.stdout.write(require('node:crypto').randomBytes(24).toString('hex'))"; }
 payload_secret="$(random_value)"
@@ -17,8 +19,47 @@ preview_token="$(random_value)"
 outcome_gateway_secret="$(random_value)"
 run_marker="w2-02-run-$(random_value | cut -c1-16)"
 stop_tree() { local process="$1" child; [[ -n "$process" ]] || return 0; for child in $(pgrep -P "$process" 2>/dev/null || true); do stop_tree "$child"; done; kill -TERM "$process" >/dev/null 2>&1 || true; }
-cleanup() { stop_tree "$web_pid"; [[ -f "$local_root/web-restarted.pid" ]] && stop_tree "$(cat "$local_root/web-restarted.pid")"; stop_tree "$cms_pid"; [[ -f "$local_root/cms-restarted.pid" ]] && stop_tree "$(cat "$local_root/cms-restarted.pid")"; supabase --workdir "$local_root" stop --no-backup >/dev/null 2>&1 || true; [[ "${LINKSITES_KEEP_LOCAL_REHEARSAL:-}" = 1 ]] || rm -rf "$local_root"; }
+sanitize_file() {
+  local source="$1" target="$2"
+  [[ -f "$source" ]] || return 0
+  node - "$source" "$target" <<'NODE'
+const fs = require('node:fs')
+const [source, target] = process.argv.slice(2)
+const sanitized = fs.readFileSync(source, 'utf8')
+  .replace(/((?:api[_-]?key|access[_-]?token|preview[_-]?token|password|secret)\s*[:=]\s*)[^\s,}]+/gi, '$1[REDACTED]')
+  .replace(/[A-Fa-f0-9]{32,}/g, '[REDACTED]')
+  .slice(-200000)
+fs.writeFileSync(target, sanitized)
+NODE
+}
+cleanup() {
+  stop_tree "$web_pid"; [[ -f "$local_root/web-restarted.pid" ]] && stop_tree "$(cat "$local_root/web-restarted.pid")"
+  stop_tree "$cms_pid"; [[ -f "$local_root/cms-restarted.pid" ]] && stop_tree "$(cat "$local_root/cms-restarted.pid")"
+  supabase --workdir "$local_root" stop --no-backup >/dev/null 2>&1 || true
+  for raw in "$diagnostic_root"/.*.raw "$diagnostic_root"/*.raw; do
+    [[ -f "$raw" ]] || continue
+    sanitize_file "$raw" "${raw%.raw}"
+    rm -f "$raw"
+  done
+  [[ "${LINKSITES_KEEP_LOCAL_REHEARSAL:-}" = 1 ]] || rm -rf "$local_root"
+}
 trap cleanup EXIT
+record_phase() {
+  local phase="$1" rc="$2" stdout_file="$3" stderr_file="$4"
+  node -e 'const fs=require("node:fs"); fs.appendFileSync(process.argv[1], JSON.stringify({schemaVersion:1,phase:process.argv[2],result:Number(process.argv[3])===0?"passed":"failed",exitCode:Number(process.argv[3]),stdout:process.argv[4],stderr:process.argv[5]})+"\n")' "$diagnostic_root/recovery-phases.jsonl" "$phase" "$rc" "$stdout_file" "$stderr_file"
+}
+run_phase() {
+  local phase="$1" stdout_file="$diagnostic_root/$phase.stdout.log" stderr_file="$diagnostic_root/$phase.stderr.log" stdout_raw="$diagnostic_root/.$phase.stdout.raw" stderr_raw="$diagnostic_root/.$phase.stderr.raw" rc=0
+  shift
+  if "$@" >"$stdout_raw" 2>"$stderr_raw"; then rc=0; else rc=$?; fi
+  sanitize_file "$stdout_raw" "$stdout_file"
+  sanitize_file "$stderr_raw" "$stderr_file"
+  cat "$stdout_file"
+  cat "$stderr_file" >&2
+  record_phase "$phase" "$rc" "$stdout_file" "$stderr_file"
+  rm -f "$stdout_raw" "$stderr_raw"
+  return "$rc"
+}
 mkdir -p "$local_root/supabase" "$local_root/state"
 local_project_id="w2-02-local-${$}"
 cms_lock="$repo_root/apps/cms/.next/dev/lock"
@@ -29,16 +70,16 @@ if [[ -f "$cms_lock" ]]; then
 fi
 sed "s/^project_id = .*/project_id = \"${local_project_id}\"/" "$repo_root/supabase/config.toml" > "$local_root/supabase/config.toml"
 SUPABASE_TELEMETRY_DISABLED=1 supabase --workdir "$local_root" start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor >/dev/null
-export DATABASE_URI="postgresql://postgres:postgres@127.0.0.1:54322/postgres" PAYLOAD_SECRET="$payload_secret" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" LINKSITES_W2_04_LOCAL_PROOF=1 W2_04_PROOF_PATH="$local_root/seed.json" W2_04_PREVIEW_API_KEY="$(random_value)" W2_04_PREVIEW_PASSWORD="$(random_value)"
-pnpm --dir "$repo_root" --filter @linksites/cms exec tsx scripts/w2-04-seed.ts >/dev/null
+export DATABASE_URI="ltfx.db.uri.postgresql.cf6453a9f9.v1" PAYLOAD_SECRET="ltfx.auto.payload_secret.358a305eeb90.v1" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" LINKSITES_W2_04_LOCAL_PROOF=1 W2_04_PROOF_PATH="$local_root/seed.json" W2_04_PREVIEW_API_KEY="$(random_value)" W2_04_PREVIEW_PASSWORD="$(random_value)"
+run_phase payload-seed pnpm --dir "$repo_root" --filter @linksites/cms exec tsx scripts/w2-04-seed.ts
 api_key="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(process.argv[1])).previewApiKey)' "$local_root/seed.json")"
 site_id="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(process.argv[1])).siteId)' "$local_root/seed.json")"
 wait_for() { local url="$1"; for _ in $(seq 1 120); do if curl -fsS "$url" >/dev/null 2>&1; then return 0; fi; sleep 1; done; return 1; }
-(cd "$repo_root" && pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$cms_port") >"$local_root/cms.log" 2>&1 & cms_pid="$!"
-wait_for "http://127.0.0.1:${cms_port}/api/pages?site=${site_id}" || { cat "$local_root/cms.log" >&2; exit 1; }
-env PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:${cms_port}" PAYLOAD_API_KEY="$api_key" PREVIEW_ACCESS_TOKEN="$preview_token" PREVIEW_RUN_MARKER="$run_marker" LINKSITES_W2_04_LOCAL_PROOF=1 LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID=marketing-smb-v1 LINKSITES_ADMITTED_TEMPLATE_SHA=1111111111111111111111111111111111111111 LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1])).receipt))' "$local_root/seed.json")" LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1])).evidence))' "$local_root/seed.json")" pnpm --dir "$repo_root" --filter @linksites/web-master build >"$local_root/web-build.log" 2>&1
-(cd "$repo_root" && env PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:${cms_port}" PAYLOAD_API_KEY="$api_key" PREVIEW_ACCESS_TOKEN="$preview_token" PREVIEW_RUN_MARKER="$run_marker" LINKSITES_W2_04_LOCAL_PROOF=1 LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID=marketing-smb-v1 LINKSITES_ADMITTED_TEMPLATE_SHA=1111111111111111111111111111111111111111 LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1])).receipt))' "$local_root/seed.json")" LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1])).evidence))' "$local_root/seed.json")" pnpm --filter @linksites/web-master start --hostname 127.0.0.1 --port "$web_port") >"$local_root/web.log" 2>&1 & web_pid="$!"
-wait_for "http://127.0.0.1:${web_port}/api/healthz" || { cat "$local_root/web.log" >&2; exit 1; }
+(cd "$repo_root" && pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$cms_port") >"$diagnostic_root/.cms.log.raw" 2>&1 & cms_pid="$!"
+wait_for "http://127.0.0.1:${cms_port}/api/pages?site=${site_id}" || { sanitize_file "$diagnostic_root/.cms.log.raw" "$diagnostic_root/cms.log"; cat "$diagnostic_root/cms.log" >&2; exit 1; }
+run_phase web-build env PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:${cms_port}" PAYLOAD_API_KEY="ltfx.auto.payload_api_key.3bd5dfcd62aa.v1" PREVIEW_ACCESS_TOKEN="ltfx.auto.preview_access_token.c8b7dd7f5b4c.v1" PREVIEW_RUN_MARKER="$run_marker" LINKSITES_W2_04_LOCAL_PROOF=1 LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID=marketing-smb-v1 LINKSITES_ADMITTED_TEMPLATE_SHA=1111111111111111111111111111111111111111 LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1])).receipt))' "$local_root/seed.json")" LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1])).evidence))' "$local_root/seed.json")" pnpm --dir "$repo_root" --filter @linksites/web-master build
+(cd "$repo_root" && env PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:${cms_port}" PAYLOAD_API_KEY="ltfx.auto.payload_api_key.db1dd8b7c3f5.v1" PREVIEW_ACCESS_TOKEN="ltfx.auto.preview_access_token.3773d615ec46.v1" PREVIEW_RUN_MARKER="$run_marker" LINKSITES_W2_04_LOCAL_PROOF=1 LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID=marketing-smb-v1 LINKSITES_ADMITTED_TEMPLATE_SHA=1111111111111111111111111111111111111111 LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1])).receipt))' "$local_root/seed.json")" LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON="$(node -e 'process.stdout.write(JSON.stringify(JSON.parse(require("fs").readFileSync(process.argv[1])).evidence))' "$local_root/seed.json")" pnpm --filter @linksites/web-master start --hostname 127.0.0.1 --port "$web_port") >"$diagnostic_root/.web.log.raw" 2>&1 & web_pid="$!"
+wait_for "http://127.0.0.1:${web_port}/api/healthz" || { sanitize_file "$diagnostic_root/.web.log.raw" "$diagnostic_root/web.log"; cat "$diagnostic_root/web.log" >&2; exit 1; }
 chromium_executable="${W2_02_CHROMIUM_EXECUTABLE:-}"
 if [ -z "$chromium_executable" ]; then
   chromium_executable="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
@@ -46,13 +87,17 @@ fi
 if [ -z "$chromium_executable" ] && [ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then
   chromium_executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 fi
+if [ -z "$chromium_executable" ]; then
+  chromium_executable="$(pnpm --dir "$repo_root" --filter @linksites/cms exec node -e 'const {chromium}=require("playwright"); process.stdout.write(chromium.executablePath())')"
+fi
 test -x "$chromium_executable" || { echo "No runnable Chromium/Chrome executable found" >&2; exit 1; }
 
-W2_02_STATE_DIR="$local_root/state" W2_02_PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" W2_02_PAYLOAD_API_KEY="$api_key" W2_02_PAYLOAD_SITE_ID="$site_id" W2_02_WEB_MASTER_BASE_URL="http://127.0.0.1:${web_port}" W2_02_PREVIEW_ACCESS_TOKEN="$preview_token" W2_02_RUN_MARKER="$run_marker" W2_02_CHROMIUM_EXECUTABLE="$chromium_executable" W2_05_OUTCOME_GATEWAY_SECRET="$outcome_gateway_secret" W2_05_OUTCOME_GATEWAY_KEY_ID="local-proof-key" W2_02_ARTIFACT_PATH="${LINKSITES_LOCAL_PROOF_ARTIFACT_PATH:-$repo_root/docs/production-roadmap/evidence/w2-02/real-service-vertical-slice.json}" pnpm --dir "$repo_root" --filter @linksites/program-orchestrator exec tsx scripts/real-service-vertical-slice.ts
+run_phase real-service env W2_02_STATE_DIR="$local_root/state" W2_02_PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" W2_02_PAYLOAD_API_KEY="ltfx.auto.w2_02_payload_api_key.527ec4ecd325.v1" W2_02_PAYLOAD_SITE_ID="$site_id" W2_02_WEB_MASTER_BASE_URL="http://127.0.0.1:${web_port}" W2_02_PREVIEW_ACCESS_TOKEN="ltfx.auto.w2_02_preview_access_token.39d98d11f978.v1" W2_02_RUN_MARKER="$run_marker" W2_02_CHROMIUM_EXECUTABLE="$chromium_executable" W2_05_OUTCOME_GATEWAY_SECRET="ltfx.auto.w2_05_outcome_gateway_secret.3470ca429a0e.v1" W2_05_OUTCOME_GATEWAY_KEY_ID="local-proof-key" W2_02_ARTIFACT_PATH="${LINKSITES_LOCAL_PROOF_ARTIFACT_PATH:-$repo_root/docs/production-roadmap/evidence/w2-02/real-service-vertical-slice.json}" LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT="$diagnostic_root" pnpm --dir "$repo_root" --filter @linksites/program-orchestrator exec tsx scripts/real-service-vertical-slice.ts
 
 if [[ -n "${LINKSITES_LOCAL_PROOF_POSTHOOK:-}" ]]; then
   test -x "$LINKSITES_LOCAL_PROOF_POSTHOOK" || { echo "LINKSITES_LOCAL_PROOF_POSTHOOK must be executable" >&2; exit 64; }
-  LINKSITES_LOCAL_PROOF_ROOT="$local_root" \
+  run_phase posthook env LINKSITES_LOCAL_PROOF_ROOT="$local_root" \
+  LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT="$diagnostic_root" \
   LINKSITES_LOCAL_PROOF_CMS_PORT="$cms_port" \
   LINKSITES_LOCAL_PROOF_CMS_PID="$cms_pid" \
   LINKSITES_LOCAL_PROOF_WEB_PORT="$web_port" \
@@ -60,8 +105,8 @@ if [[ -n "${LINKSITES_LOCAL_PROOF_POSTHOOK:-}" ]]; then
   LINKSITES_LOCAL_PROOF_DATABASE_URI="$DATABASE_URI" \
   LINKSITES_LOCAL_PROOF_PROJECT_ID="$local_project_id" \
   LINKSITES_LOCAL_PROOF_SITE_ID="$site_id" \
-  LINKSITES_LOCAL_PROOF_API_KEY="$api_key" \
-  LINKSITES_LOCAL_PROOF_PREVIEW_TOKEN="$preview_token" \
+  LINKSITES_LOCAL_PROOF_API_KEY="ltfx.auto.linksites_local_proof_api_key.f0663706ec95.v1" \
+  LINKSITES_LOCAL_PROOF_PREVIEW_TOKEN="ltfx.auto.linksites_local_proof_preview_token.7fa9165e2b61.v1" \
   LINKSITES_LOCAL_PROOF_RUN_MARKER="$run_marker" \
   "$LINKSITES_LOCAL_PROOF_POSTHOOK"
 fi

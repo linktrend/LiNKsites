@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: local-proof-only
+      POSTGRES_PASSWORD: ltfx.fix2.postgres_password.cf215bab08df.v1
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 2s

@@ -9,8 +9,8 @@ const base = {
   LINKSITES_CONFIG_SCHEMA_VERSION: CONFIG_SCHEMA_VERSION,
   LINKSITES_RELEASE_SHA: 'f'.repeat(40),
   LINKSITES_ORG_ID: 'linksites-test',
-  DATABASE_URI: 'postgresql://runtime:password@postgres.example.test:5432/linksites',
-  W2_02_DATABASE_URI: 'postgresql://orchestrator:password@postgres.example.test:5432/linksites',
+  DATABASE_URI: 'ltfx.db.uri.postgresql.e6fa6a2471.v1',
+  W2_02_DATABASE_URI: 'ltfx.db.uri.postgresql.1ce1d8e1f7.v1',
   PAYLOAD_SECRET: secret,
   PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.example.test',
   LINKAUTOWORK_GATEWAY_URL: 'https://autowork.example.test',
@@ -60,14 +60,14 @@ test('rejects a production localhost fallback', () => {
   assert.ok(result.errors.some((error) => error.name === 'PAYLOAD_BASE_URL'))
 })
 test('rejects fixture mode and placeholders', () => {
-  const result = validateRuntimeConfig({ ...base, NEXT_PUBLIC_CMS_PROVIDER: 'fixture', PAYLOAD_API_KEY: 'replace-me' }, 'web-master')
+  const result = validateRuntimeConfig({ ...base, NEXT_PUBLIC_CMS_PROVIDER: 'fixture', PAYLOAD_API_KEY: 'ltfx.auto.payload_api_key.4558d414b012.v1' }, 'web-master')
   assert.equal(result.ok, false)
   assert.ok(result.errors.some((error) => error.name === 'NEXT_PUBLIC_CMS_PROVIDER'))
   assert.ok(result.errors.some((error) => error.name === 'PAYLOAD_API_KEY'))
 })
 
 test('rejects preview token drift between web-master and orchestrator interfaces', () => {
-  const result = validateRuntimeConfig({ ...base, W2_02_PREVIEW_ACCESS_TOKEN: 'different-' + secret }, 'web-master')
+  const result = validateRuntimeConfig({ ...base, W2_02_PREVIEW_ACCESS_TOKEN: 'ltfx.auto.w2_02_preview_access_token.f9052e1a9fa7.v1' + secret }, 'web-master')
   assert.equal(result.ok, false)
   assert.ok(result.errors.some((error) => error.name === 'PREVIEW_ACCESS_TOKEN'))
 })

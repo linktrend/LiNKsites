@@ -25,6 +25,7 @@ type MockPayloadData = {
   contactForms?: unknown[];
   pricing?: unknown;
   pages?: unknown[];
+  siteSettings?: unknown[];
 };
 
 let mockPayloadCache: MockPayloadData | null = null;
@@ -136,6 +137,25 @@ const mockPayloadFind = async <T>({
     };
   }
 
+  if (collection === "site-settings") {
+    const siteFilter = andFilters.find((f: any) => f?.site?.equals)?.site?.equals ?? siteId;
+    const localeFilter = andFilters.find((f: any) => f?.locale?.equals)?.locale?.equals ?? locale;
+    const statusFilter = andFilters.find((f: any) => f?.status?.equals)?.status?.equals;
+    const docs = ((mock.siteSettings ?? []) as any[]).filter((doc) => {
+      if (siteFilter && doc.site !== siteFilter) return false;
+      if (localeFilter && doc.locale !== localeFilter) return false;
+      if (statusFilter && doc.status !== statusFilter) return false;
+      return true;
+    });
+    return {
+      docs: docs as T[],
+      page: 1,
+      totalDocs: docs.length,
+      totalPages: 1,
+      limit: safeLimit,
+    };
+  }
+
   const collectionsMap: Record<string, unknown[]> = {
     pages: mock.pages ?? [],
     "privacy-pages": (mock.pages ?? []).filter((doc: any) => doc.slug === "legal/privacy-policy"),
@@ -222,7 +242,7 @@ const appendWhereParams = (
   }
 
   // Reduce over a (string | number)[] path but ensure the final key is a string.
-  const key = path.reduce<string>((acc, part) => `${acc}[${part}]`, "where");
+  const key = ltfx.auto.key.f154c32fb8da.v1, part) => `${acc}[${part}]`, "where");
   searchParams.append(key, String(value));
 };
 

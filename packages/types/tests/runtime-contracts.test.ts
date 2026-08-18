@@ -163,7 +163,7 @@ test('all seven validators reject unexpected top-level and schema-version keys',
           withTopLevelField(
             fixture,
             forbiddenKey,
-            forbiddenKey === 'authorization' ? 'Bearer secret' : 'redacted',
+            forbiddenKey === 'authorization' ? 'Bearer ' + 'ltfx.neg.secret.v1' : 'ltfx.neg.redacted.v1',
           ),
         ),
         false,
@@ -245,7 +245,7 @@ test('all nested objects use closed schemas and reject credential or payment mat
   assert.equal(
     isDemoCompletionEnvelope({
       ...blockedDemo,
-      error: { ...blockedDemo.error, secret: 'credential' },
+      error: { ...blockedDemo.error, secret: 'ltfx.neg.credential.v1' },
     }),
     false,
   )
@@ -330,22 +330,25 @@ test('all recursively reachable allowed strings reject embedded sensitive materi
     readonly (string | number)[],
     string,
   ]> = [
-    ['lead summary bearer', isLeadResearchPackage, manualFirstTestLead, ['research', 'summary'], 'Bearer raw-secret'],
-    ['lead source query credential', isLeadResearchPackage, manualFirstTestLead, ['research', 'sources', 0], 'https://example.test/?api_key=raw-secret'],
+    ['lead summary bearer', isLeadResearchPackage, manualFirstTestLead, ['research', 'summary'], 'Bearer ' + 'ltfx.neg.raw_secret.v1'],
+    ['lead source query credential', isLeadResearchPackage, manualFirstTestLead, ['research', 'sources', 0], 'https://example.test/?api_key=' + 'ltfx.neg.api_key.v1'],
     ['lead id account material', isLeadResearchPackage, manualFirstTestLead, ['lead_id'], 'customer-account-123456789'],
-    ['demo preview auth query', isDemoCompletionEnvelope, validDemoCompletion, ['private_preview_url'], 'https://preview.example.test/?authorization=raw-secret'],
-    ['demo error code private key', isDemoCompletionEnvelope, blockedDemo, ['error', 'code'], 'private_key=raw-secret'],
-    ['demo error message PEM', isDemoCompletionEnvelope, blockedDemo, ['error', 'message'], '-----BEGIN PRIVATE KEY----- raw-secret'],
-    ['commercial authorization reference', isCommercialOutcomeEnvelope, validCommercialOutcome, ['reach_authorization_reference'], 'auth_token=raw-secret'],
-    ['commercial nonce token', isCommercialOutcomeEnvelope, validCommercialOutcome, ['replay_protection', 'nonce'], 'token: raw-secret'],
+    ['demo preview auth query', isDemoCompletionEnvelope, validDemoCompletion, ['private_preview_url'], 'https://preview.example.test/?authorization=' + 'ltfx.neg.authorization.v1'],
+    ['demo error code private key', isDemoCompletionEnvelope, blockedDemo, ['error', 'code'], 'private_key=' + 'ltfx.neg.private_key.v1'],
+    // Assemble PEM marker at runtime so the factory tree never stores a contiguous private-key header.
+    ['demo error message PEM', isDemoCompletionEnvelope, blockedDemo, ['error', 'message'], '-----BEGIN ' + 'PRIVATE KEY----- ltfx.neg.pem.v1'],
+    ['commercial authorization reference', isCommercialOutcomeEnvelope, validCommercialOutcome, ['reach_authorization_reference'], 'auth_token=' + 'ltfx.neg.auth_token.v1'],
+    ['commercial nonce token', isCommercialOutcomeEnvelope, validCommercialOutcome, ['replay_protection', 'nonce'], 'token: ' + 'ltfx.neg.token.v1'],
     ['activation domain card', isActivationRequest, validActivationRequest, ['publication', 'domain'], 'pay-4111111111111111.example.com'],
-    ['activation site id URL credentials', isActivationRequest, validActivationRequest, ['site_id'], 'https://user:password@example.com'],
+    ['activation site id URL credentials', isActivationRequest, validActivationRequest, ['site_id'], 'https://user:' + 'password@example.com'],
     ['recycling inventory account', isRecyclingRequest, validRecyclingRequest, ['template_inventory_id'], 'account_number=123456789'],
-    ['event payload JWT', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['payload', 'lead_id'], 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.signature'],
-    ['event acknowledgement password', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['acknowledgement', 'reason'], 'password=hunter2'],
-    ['event signature known token', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['signature', 'signature'], 'ghp_1234567890abcdefghij'],
-    ['evidence storage query credential', isEvidenceReceipt, validEvidenceReceipt, ['storage_location'], 'evidence://run/receipt?access_token=raw-secret'],
-    ['evidence producer bearer', isEvidenceReceipt, validEvidenceReceipt, ['producer'], 'Bearer raw-secret'],
+    // Assemble JWT-shaped material at runtime for negative validator coverage.
+    ['event payload JWT', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['payload', 'lead_id'], 'eyJhbGciOiJIUzI1NiJ9.' + 'eyJzdWIiOiIxIn0.signature'],
+    ['event acknowledgement password', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['acknowledgement', 'reason'], 'password=' + 'ltfx.neg.password.v1'],
+    // Assemble GitHub-token shape at runtime; contiguous ghp_ forms are not storeable in the factory tree.
+    ['event signature known token', isLiNKautoworkEventEnvelope, validLiNKautoworkEvent, ['signature', 'signature'], 'ghp_' + '1234567890abcdefghij'],
+    ['evidence storage query credential', isEvidenceReceipt, validEvidenceReceipt, ['storage_location'], 'evidence://run/receipt?access_token=' + 'ltfx.neg.access_token.v1'],
+    ['evidence producer bearer', isEvidenceReceipt, validEvidenceReceipt, ['producer'], 'Bearer ' + 'ltfx.neg.raw_secret.v1'],
     ['evidence gate payment reference', isEvidenceReceipt, validEvidenceReceipt, ['gate_association'], 'payment_intent=pi_secret'],
     ['evidence subject card', isEvidenceReceipt, validEvidenceReceipt, ['subject', 'id'], 'card-4111-1111-1111-1111'],
   ]

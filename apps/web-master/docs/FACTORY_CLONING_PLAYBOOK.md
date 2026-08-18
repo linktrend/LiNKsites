@@ -279,7 +279,7 @@ NEXT_PUBLIC_ALLOW_THEME_SWITCHING="false"
 # ============================================================================
 NEXT_PUBLIC_CMS_PROVIDER="payload"
 NEXT_PUBLIC_PAYLOAD_API_URL="https://cms.clientdomain.com"
-PAYLOAD_API_KEY="<client-cms-api-key>"
+PAYLOAD_API_KEY="ltfx.auto.payload_api_key.1b720a831465.v1"
 
 # ============================================================================
 # ANALYTICS
@@ -319,10 +319,10 @@ NEXT_PUBLIC_ENABLE_I18N="true"
 # CONTACT FORM
 # ============================================================================
 LINKAUTOWORK_GATEWAY_URL="https://gateway.clientdomain.example/events"
-LINKAUTOWORK_SIGNING_SECRET="<secret-manager reference>"
+LINKAUTOWORK_SIGNING_SECRET="ltfx.auto.linkautowork_signing_secret.8f521902bd00.v1"
 LINKAUTOWORK_SIGNING_KEY_ID="web-master"
 LINKAUTOWORK_EVENT_GRANTS="[{\"eventName\":\"contact.submitted\",\"environments\":[\"production\"],\"orgIds\":[\"<org-id>\"]}]"
-LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET="<separate-secret-manager-reference>"
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET="ltfx.auto.linkautowork_outbox_integrity_secret.5f4b5cc3c54f.v1"
 ```
 
 ### Step 3: Replace Branding Assets

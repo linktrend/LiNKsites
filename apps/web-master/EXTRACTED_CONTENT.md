@@ -92,7 +92,7 @@
   - Basic templates
   - Email notifications
 - CTA Button: Get Started
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.3404653f6b0c.v1
 - Popular: No
 
 ### Plan 2 - Pro
@@ -110,7 +110,7 @@
   - Advanced analytics
   - API access
 - CTA Button: Start Free Trial
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.eefbb4bb3235.v1
 - Popular: Yes (Most Popular)
 
 ### Plan 3 - Enterprise
@@ -128,7 +128,7 @@
   - Custom contracts
   - 24/7 phone support
 - CTA Button: Contact Sales
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.c70b0de1b483.v1
 - Popular: No
 
 ---
@@ -148,7 +148,7 @@
   - 7-day data retention
   - Community support
 - CTA Button: Get Started
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.5d26f34d2cba.v1
 - Popular: No
 
 ### Plan 2 - Pro
@@ -166,7 +166,7 @@
   - Priority support
   - API access
 - CTA Button: Start Free Trial
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.a72de6a2841a.v1
 - Popular: Yes (Most Popular)
 
 ### Plan 3 - Enterprise
@@ -184,7 +184,7 @@
   - 24/7 support
   - Training & onboarding
 - CTA Button: Contact Sales
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.dd93019dbe0e.v1
 - Popular: No
 
 ---
@@ -203,7 +203,7 @@
   - Monthly consulting sessions
   - Email support
 - CTA Button: Get Started
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.889ca4200b1d.v1
 - Popular: No
 
 ### Plan 2 - Professional
@@ -220,7 +220,7 @@
   - Custom AI solutions
   - Performance optimization
 - CTA Button: Start Free Trial
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.51541b597e66.v1
 - Popular: Yes (Most Popular)
 
 ### Plan 3 - Enterprise
@@ -237,7 +237,7 @@
   - Change management
   - Ongoing optimization
 - CTA Button: Contact Sales
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.a4b69c6091f7.v1
 - Popular: No
 
 ---
@@ -256,7 +256,7 @@
   - Standard integrations
   - Email support
 - CTA Button: Get Started
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.2d8bfff30efb.v1
 - Popular: No
 
 ### Plan 2 - Professional
@@ -273,7 +273,7 @@
   - Priority support
   - Performance tuning
 - CTA Button: Start Free Trial
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.805ad26bea2b.v1
 - Popular: Yes (Most Popular)
 
 ### Plan 3 - Enterprise
@@ -290,7 +290,7 @@
   - SLA guarantees
   - White-glove service
 - CTA Button: Contact Sales
-- CTA URL: /contact
+- CTA URL: ltfx.fix2.url.5ce3081b73bd.v1
 - Popular: No
 
 ---

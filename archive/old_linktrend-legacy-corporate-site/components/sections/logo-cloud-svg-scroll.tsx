@@ -35,7 +35,7 @@ export default function LogoCloudScroll() {
       style={{ color: primaryColor }}
     />,
     <SupabaseSvg
-      key="supabase"
+      key="ltfx.auto.key.03a4093e2ab2.v1"
       className="size-full items-center mx-auto"
       style={{ color: primaryColor }}
     />,

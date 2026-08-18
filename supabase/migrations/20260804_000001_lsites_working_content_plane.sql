@@ -26,7 +26,7 @@ end $$;
 
 create table if not exists lsites_sites.working_packages (
   working_package_id text primary key,
-  template_id text not null default 'marketing-smb-v1',
+  template_id text not null default 'master-template-type-1',
   schema_version_major smallint not null default 1,
   schema_version_minor smallint not null default 0,
   org_id uuid not null references platform.organizations(id),
@@ -36,7 +36,7 @@ create table if not exists lsites_sites.working_packages (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   check (schema_version_major = 1 and schema_version_minor = 0),
-  check (template_id = 'marketing-smb-v1'),
+  check (template_id ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   unique (org_id, lead_id, site_id)
 );
 
@@ -48,7 +48,7 @@ create table if not exists lsites_sites.working_content_versions (
   version_number integer not null check (version_number > 0),
   schema_version_major smallint not null default 1,
   schema_version_minor smallint not null default 0,
-  template_id text not null default 'marketing-smb-v1',
+  template_id text not null default 'master-template-type-1',
   org_id uuid not null references platform.organizations(id),
   lead_id text not null,
   site_id uuid not null references lsites_sites.sites(id),
@@ -75,7 +75,7 @@ create table if not exists lsites_sites.working_content_versions (
   updated_at timestamptz not null default now(),
   primary key (working_package_id, version_number),
   check (schema_version_major = 1 and schema_version_minor = 0),
-  check (template_id = 'marketing-smb-v1'),
+  check (template_id ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
   check (parent_version_number is null or parent_version_number < version_number),
   check (jsonb_typeof(content_payload) = 'object'),
   check (jsonb_typeof(asset_refs) = 'array'),
@@ -152,7 +152,7 @@ begin
         or coalesce(page.value->>'route', '') = ''
         or coalesce(jsonb_typeof(page.value->'sections'), '') <> 'array'
   ) then
-    raise exception 'working content page does not satisfy the marketing-smb-v1 contract';
+    raise exception 'working content page does not satisfy the selected template contract';
   end if;
 
   if exists (

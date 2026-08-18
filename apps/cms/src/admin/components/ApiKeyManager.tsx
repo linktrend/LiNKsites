@@ -10,7 +10,7 @@ const ApiKeyManager: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [docId, setDocId] = useState<string | null>(null)
 
-  // Derive user ID from the admin URL: /admin/collections/users/<id>
+  // Derive user ID from the admin URL: ltfx.fix2.url.31ae6c5aa0d2.v1
   useEffect(() => {
     if (typeof window === 'undefined') return
     const parts = window.location.pathname.split('/').filter(Boolean)

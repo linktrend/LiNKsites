@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run CMS build and tests against a disposable local Supabase Postgres instance.
+# Run CMS integration and browser tests against a disposable local Supabase
+# Postgres instance. The production build is owned exactly once by
+# scripts/ci-required.sh as the cms-production-build Full component.
 # This script never links, logs in, pushes, or contacts a hosted Supabase project.
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,10 +27,11 @@ supabase --workdir "$local_root" start \
 
 # These values are valid only for the disposable local Supabase database started above.
 # They are intentionally not production credentials or application secrets.
-export DATABASE_URI="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
-export PAYLOAD_SECRET="cms-local-validation-only-not-a-secret"
+export DATABASE_URI="ltfx.db.uri.postgresql.cf6453a9f9.v1"
+export PAYLOAD_SECRET="ltfx.auto.payload_secret.2b7cc4fe3e1b.v1"
 export PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:3000"
 
 cd "$cms_root"
-pnpm run build
+# This path deliberately performs tests only; it must not hide or duplicate the
+# named production-build coverage component in the Full profile.
 pnpm run test

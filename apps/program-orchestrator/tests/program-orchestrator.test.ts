@@ -26,7 +26,7 @@ const approvedFacts = (id: string) => ({
   contact: { phone: '+886200000000', email: `${id}@invalid.test`, address: 'Taipei, Taiwan', website: `https://${id}.invalid.test` },
   pricing: 'Contact for an approved quote', legalClaims: ['Founder-approved legal copy'], media: [],
 })
-const outcomeGatewayFixture = { commercialOutcomeGatewaySecret: 'test-only-outcome-gateway-secret', commercialOutcomeGatewayKeyId: 'test-only-outcome-gateway-key' }
+const outcomeGatewayFixture = { commercialOutcomeGatewaySecret: 'ltfx.auto.commercialoutcomegatewaysecret.d90a1f03e819.v1', commercialOutcomeGatewayKeyId: 'test-only-outcome-gateway-key' }
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 
 function programFailureDiagnostic(state: { program: { state: string }; issues: Array<{ issueId: string; state: string; gate: string }>; runs: Array<{ issueId: string; failure: unknown }> }): string {
@@ -45,7 +45,7 @@ test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durab
   const authorization: LiNKreachAuthorizationVerifier = { verify: async () => true }
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-06-ingress-'))
   const lifecycle = new SiteLifecycleService(createFileLifecycleStore(directory), authorization)
-  const secret = 'outcome-gateway-test-secret'
+  const secret = 'ltfx.auto.secret.c2f82225651c.v1'
   const gateway = new LiNKautoworkGateway({ secret, keyId: 'key-1', environment: 'development', transport: async () => { throw new Error('not used') } })
   const ingress = new CommercialOutcomeIngress(lifecycle, gateway, new VerifiedGatewayOutcomeAuthorization(authorization))
   try {
@@ -99,7 +99,7 @@ async function composition(id = 'lead-local-001') {
   const web = createServer((_request, response) => { response.writeHead(200, { 'content-type': 'text/html', 'x-robots-tag': 'noindex, nofollow', 'cache-control': 'private, no-store' }); response.end('<main data-private-preview="true" data-route="/"><h1>Private preview</h1></main>') })
   await new Promise<void>((resolve) => web.listen(0, '127.0.0.1', resolve))
   const webPort = (web.address() as import('node:net').AddressInfo).port
-  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'test-preview-token' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'ltfx.auto.payloadapikey.c68b74172574.v1', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'ltfx.auto.previewaccesstoken.78ad93431f1d.v1' }
   await writeFile(config.approvedFactsPath, JSON.stringify(approvedFacts(id)))
   const value = await createProductionComposition(config, { outcomeAuthorization: { verify: async () => true } })
   const close = value.close
@@ -113,7 +113,7 @@ test('production composition boots with complete approved local configuration', 
     await value.runtime.runLead(lead())
     const state = await value.runtime.exportState() as { program: { state: string }; issues: Array<{ issueId: string; state: string; gate: string }>; runs: Array<{ issueId: string; failure: unknown }> }
     assert.equal(state.program.state, 'completed', programFailureDiagnostic(state))
-    const gateway = new LiNKautoworkGateway({ secret: value.config.commercialOutcomeGatewaySecret, keyId: value.config.commercialOutcomeGatewayKeyId, environment: 'development', transport: async () => { throw new Error('not used') }, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [value.config.orgId], environments: ['development'] }] })
+    const gateway = new LiNKautoworkGateway({ secret: 'ltfx.entropy.a8de14a9d6f3.v1', keyId: value.config.commercialOutcomeGatewayKeyId, environment: 'development', transport: async () => { throw new Error('not used') }, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [value.config.orgId], environments: ['development'] }] })
     const request = gateway.buildRequest('commercial.outcome.recorded', value.config.orgId, 'composed-outcome', 'composed-outcome:001', { lead_id: 'lead-composed', site_id: 'site-composed', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-composed', outcome_event_id: 'commercial-outcome-composed', outcome_nonce: 'outcome-nonce-composed', recorded_at: '2026-08-06T00:00:00.000Z' } })
     assert.equal((await value.runtime.acceptCommercialOutcome(request)).status, 'outcome_recorded')
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
@@ -260,7 +260,7 @@ test('post-promotion protected render failure creates durable manual attention',
 
 test('process termination after claim and irreversible receipt is reclaimed by a new worker', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-crash-'))
-  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'ltfx.auto.payloadapikey.460dcd4c29e0.v1', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'ltfx.auto.previewaccesstoken.3dcc96165d80.v1' }
   const signalPath = join(directory, 'worker-ready')
   const workerPath = join(repositoryRoot, 'apps/program-orchestrator/tests/fixtures/crash-claim-worker.ts')
   const worker = spawn(process.execPath, ['--import', 'tsx/esm', workerPath], {
@@ -296,7 +296,7 @@ test('process termination after claim and irreversible receipt is reclaimed by a
 
 test('a paused stale worker cannot acknowledge an irreversible receipt after lease expiry and reclaim', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-stale-receipt-'))
-  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', leaseDurationMs: 100, workerId: 'worker-a' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'ltfx.auto.payloadapikey.b6be9ab83f27.v1', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'ltfx.auto.previewaccesstoken.8556ca131784.v1', leaseDurationMs: 100, workerId: 'worker-a' }
   const first = await createProductionComposition(config)
   let second: Awaited<ReturnType<typeof createProductionComposition>> | undefined
   try {
@@ -329,7 +329,7 @@ test('a stale lease is rejected before the token-gated external preview mutation
 
 test('two independent workers fence the same ready issue to one claim', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-race-'))
-  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'test-api-key', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'test-preview-token', workerId: 'setup-worker' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: 'http://127.0.0.1:9', payloadApiKey: 'ltfx.auto.payloadapikey.85f0894b1593.v1', payloadSiteId: 'test-site', webMasterBaseUrl: 'http://127.0.0.1:9', previewAccessToken: 'ltfx.auto.previewaccesstoken.df25671cedf2.v1', workerId: 'setup-worker' }
   const setup = await createProductionComposition(config)
   try {
     await setup.ledger.createOrResume(lead('lead-cross-process-race'))

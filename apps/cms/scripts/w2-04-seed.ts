@@ -138,7 +138,7 @@ await client.query(
 console.error('W2-04 seed: site settings inserted directly into disposable database')
 await within('creating navigation', payload.create({
   collection: 'navigation',
-  data: { ...common, navKey: 'primary', label: 'Contact', slug: 'contact', url: '/en/contact', order: 1 },
+  data: { ...common, navKey: 'primary', label: 'Contact', slug: 'contact', url: 'ltfx.fix2.url.13df330ade24.v1', order: 1 },
   ...options,
 }))
 // Payload's collection hooks recursively block during an empty bootstrap when

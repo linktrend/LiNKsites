@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "repo": "linktrend/LiNKsites",
+  "branch": "phase/pre-ide-v24-accepted-consolidation",
+  "baseDevelopmentSha": "d773991729db7a2f9cfbf0d26cd0e3b312efef77",
+  "baseDevelopmentTree": "0af3cf1f86621d3259e87fe497b5d2c0c2dee5ff",
+  "acceptedSources": {
+    "pr164": {
+      "head": "99716bb5506160b871268af37d4bb42e57508fa5",
+      "tree": "48853cf5822adb64a28fd65c277aa03a423bc70e"
+    },
+    "pr180": {
+      "head": "f758632f44661b49d63eb1c33ec213ada17e5150",
+      "tree": "34e562834ed943b83f68efc705029cb6637bef55"
+    },
+    "issue183": {
+      "head": "54f904ccea2e989c35b43ea3688518e9fbd10ea2",
+      "tree": "b1bd381b7b78c414bd062bde93a25e70947e6385",
+      "closedPr184Head": "2b35d94a156aada2688e3fef070ea1ab51d4fad5"
+    }
+  },
+  "conflicts": "none",
+  "fullSuite": "not_run",
+  "hold": false,
+  "integrationHeadSha": "16e384bcd4386eeca920fd0aa1b0b12677ba62a2",
+  "integrationTreeSha": "f2ed3c777fbb564735165de6ef52370443ad6b28",
+  "checkpointDocsPresent": true
+}

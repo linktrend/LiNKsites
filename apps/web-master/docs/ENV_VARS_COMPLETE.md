@@ -131,7 +131,7 @@ NEXT_PUBLIC_CMS_PROVIDER=mock
 NEXT_PUBLIC_CMS_PROVIDER=payload
 PAYLOAD_PUBLIC_SERVER_URL=https://cms.acme.com
 NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.acme.com
-PAYLOAD_API_KEY=your-secret-api-key-here
+PAYLOAD_API_KEY=ltfx.auto.payload_api_key.0b2414e539a4.v1
 ```
 
 ---
@@ -294,10 +294,10 @@ NEXT_PUBLIC_ENABLE_BLOG=true
 **Example**:
 ```bash
 LINKAUTOWORK_GATEWAY_URL=https://gateway.acme.example/events
-LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
+LINKAUTOWORK_SIGNING_SECRET=ltfx.fix2.linkautowork_signing_secret.acf3c48bf01b.v1
 LINKAUTOWORK_EVENT_GRANTS='[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]'
 LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
-LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=ltfx.fix2.linkautowork_outbox_integrity_secret.5e94c98de7e4.v1
 ```
 
 **Example (Development)**:
@@ -325,7 +325,7 @@ LINKAUTOWORK_GATEWAY_URL=
 ```bash
 NEXT_PUBLIC_ENABLE_AI_MARKDOWN=true
 NEXT_PUBLIC_ENABLE_AI_TRAINING_SIGNAL=false
-AI_ACTIONS_SECRET=your-long-random-token
+AI_ACTIONS_SECRET=ltfx.auto.ai_actions_secret.182898dd93cf.v1
 AI_ACTIONS_RATE_LIMIT_PER_MIN=30
 ```
 
@@ -454,7 +454,7 @@ NEXT_PUBLIC_COMPANY_PHONE=+1-555-0123
 NEXT_PUBLIC_CMS_PROVIDER=payload
 PAYLOAD_PUBLIC_SERVER_URL=https://cms.acme.com
 NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.acme.com
-PAYLOAD_API_KEY=prod-secret-key-here
+PAYLOAD_API_KEY=ltfx.auto.payload_api_key.7d24dba6917e.v1
 
 # Analytics
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-ABC123XYZ
@@ -471,7 +471,7 @@ NEXT_PUBLIC_APP_SIGNUP_URL=https://app.acme.com/signup
 
 # Contact Form / governed delivery
 LINKAUTOWORK_GATEWAY_URL=https://gateway.acme.example/events
-LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
+LINKAUTOWORK_SIGNING_SECRET=ltfx.fix2.linkautowork_signing_secret.75e40e146e70.v1
 
 # Feature Flags (customize as needed)
 NEXT_PUBLIC_ENABLE_LIVE_CHAT=true
@@ -562,7 +562,7 @@ NEXT_PUBLIC_SITE_URL=https://staging.acme.com
 NEXT_PUBLIC_CMS_PROVIDER=payload
 PAYLOAD_PUBLIC_SERVER_URL=https://cms-staging.acme.com
 NEXT_PUBLIC_PAYLOAD_API_URL=https://cms-staging.acme.com
-PAYLOAD_API_KEY=staging-api-key
+PAYLOAD_API_KEY=ltfx.auto.payload_api_key.098ee23cc467.v1
 
 # Analytics (test properties)
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-STAGING123
@@ -570,7 +570,7 @@ NEXT_PUBLIC_GTM_ID=GTM-STAGING
 
 # Contact Form (staging governed gateway)
 LINKAUTOWORK_GATEWAY_URL=https://gateway-staging.acme.example/events
-LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
+LINKAUTOWORK_SIGNING_SECRET=ltfx.fix2.linkautowork_signing_secret.b5913a6fabf7.v1
 
 # Feature Flags (all enabled)
 NEXT_PUBLIC_ENABLE_COOKIE_CONSENT=true
@@ -616,7 +616,7 @@ NEXT_PUBLIC_COMPANY_EMAIL=contact@acme.com
 NEXT_PUBLIC_CMS_PROVIDER=payload
 PAYLOAD_PUBLIC_SERVER_URL=https://cms.acme.com
 NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.acme.com
-PAYLOAD_API_KEY=prod-strong-secret-key
+PAYLOAD_API_KEY=ltfx.auto.payload_api_key.33e16e0996f2.v1
 
 # Analytics (RECOMMENDED)
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-PROD123XYZ
@@ -635,7 +635,7 @@ NEXT_PUBLIC_APP_SIGNUP_URL=https://app.acme.com/signup
 
 # Contact Form (governed boundary REQUIRED)
 LINKAUTOWORK_GATEWAY_URL=https://gateway.acme.example/events
-LINKAUTOWORK_SIGNING_SECRET=<secret-manager-reference>
+LINKAUTOWORK_SIGNING_SECRET=ltfx.fix2.linkautowork_signing_secret.add8acf1e8eb.v1
 
 # Database (if needed)
 REDIS_URL=redis://user:password@redis.acme.com:6379
