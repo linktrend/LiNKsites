@@ -15,8 +15,8 @@
     {
       "path": "adapters/linksites-boundary.md",
       "type": "file",
-      "byteLength": 2101,
-      "sha256": "0989690c5ae37659b4378daeea48de962c326e609b77dea6557647f76ecd614f"
+      "byteLength": 2602,
+      "sha256": "1129747006168118afeb88c608675ebf8c2a00ed12376e4e3a9a9022f48524d4"
     },
     {
       "path": "assets",
@@ -51,8 +51,8 @@
     {
       "path": "content/default-content.json",
       "type": "file",
-      "byteLength": 2468,
-      "sha256": "91ddde16db329ca59a5fd45228872c2a5fa006dc2ac75d240d7d6e0acc503f57"
+      "byteLength": 6665,
+      "sha256": "a8441ee922e2843566f2cb3afb182c9afb71de695af87c4c779622b19c6d4134"
     },
     {
       "path": "contracts",
@@ -93,8 +93,8 @@
     {
       "path": "design/theme.json",
       "type": "file",
-      "byteLength": 11679,
-      "sha256": "75487da26bf92991c3d1bc0fbd44d2e64549864136ce51d7b0e6d22608b89298"
+      "byteLength": 9464,
+      "sha256": "eb03d8f71fd282ec38690c7b005979e4ad0db92388f21adf09dc67f48ec57b3d"
     },
     {
       "path": "design/theme.schema.json",
@@ -105,14 +105,14 @@
     {
       "path": "design/tokens.css",
       "type": "file",
-      "byteLength": 7231,
-      "sha256": "dad0102f37dee104aa3f1dc31e3b0963d12a86a3175c3fddf35ec9bb869dee6e"
+      "byteLength": 5866,
+      "sha256": "22d8bd71ddab6811092f9a892808a742d8914cbbd69d8e828cc5f11dc254fa4b"
     },
     {
       "path": "design/tokens.json",
       "type": "file",
-      "byteLength": 9635,
-      "sha256": "35aa914870da2c5708a788495b2ae3f12815b5fda5726f1dd6b4c28a720f096b"
+      "byteLength": 7373,
+      "sha256": "a757affa629917c7ac6e6468c120c555ef8be4939ed9a3f20a3e10d7d91274f5"
     },
     {
       "path": "design/variants.json",
@@ -153,8 +153,8 @@
     {
       "path": "pages/home.html",
       "type": "file",
-      "byteLength": 201,
-      "sha256": "9dd8112e599b8f3310029bae3ebb66ffe86d3bcf5db0f1424fa816377c9e04d1"
+      "byteLength": 1223,
+      "sha256": "ac2ed948dbd30fb8ec4aa8ecf08602df7e7e12130815bdda55947ab6976ce470"
     },
     {
       "path": "provenance",
@@ -217,6 +217,6 @@
       "sha256": "026fbb04cbe237462b577e915938a52d811f760163e1b14c091e227f7cf7e1cd"
     }
   ],
-  "inventorySha256": "8117c862ab6c6acdba869597ece49acbfd1caec3d79666b3f020fb9d03e0b6e0",
-  "artifactTreeSha1": "92e6d6ad7b070671ad5b3b3ddadc4574309ce414"
+  "inventorySha256": "35fff23cc28a52ed0066521636855e8d5bf6d40115561bf273aa15bc29a35934",
+  "artifactTreeSha1": "a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d"
 }

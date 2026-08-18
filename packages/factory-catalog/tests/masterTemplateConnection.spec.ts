@@ -50,12 +50,12 @@ const site = {
   route: '/preview/master-template',
 }
 
-describe('master-template connection proof (issue/133 pin)', () => {
+describe('master-template connection proof (issue/134 pin)', () => {
   it('consumes the exact catalogue, manifest, inventory, receipt, and artifact tree pin', () => {
     const verified = verifyMasterTemplateBundle(loadBundle())
-    expect(verified.pin.commitSha).toBe('3bf53b8b407545fc7ed359f29cb8a5810295e8de')
-    expect(verified.pin.branch).toBe('issue/133-master-template-token-override-hygiene')
-    expect(verified.artifactTreeSha1).toBe('92e6d6ad7b070671ad5b3b3ddadc4574309ce414')
+    expect(verified.pin.commitSha).toBe('6b87993ddaf403aebe7bef97bd268a543a1d14eb')
+    expect(verified.pin.branch).toBe('issue/134-master-template-look-and-feel')
+    expect(verified.artifactTreeSha1).toBe('a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d')
     expect(verified.pin.entryId).toBe('master-template-type-1')
     expect(verified.pin.version).toBe('1.0.0')
     expect(verified.lifecycle).toBe('draft')
@@ -164,10 +164,11 @@ describe('master-template connection proof (issue/133 pin)', () => {
   })
 
   it('rejects superseded provider SHAs and stale marketing-smb-v1 authority', () => {
-    expect(REJECTED_PROVIDER_SHA_PREFIXES).toEqual(['d7997b6e', '9bdee5dd', 'b2d2bbb0'])
+    expect(REJECTED_PROVIDER_SHA_PREFIXES).toEqual(['d7997b6e', '9bdee5dd', 'b2d2bbb0', '3bf53b8b'])
     expect(() => assertAdmissibleProviderSha('d7997b6e3119c6efa7874973e4fe48bf88b0939b')).toThrow(/d7997b6e/)
     expect(() => assertAdmissibleProviderSha('9bdee5dd2ed34da1973dcf7e494def79bdc51776')).toThrow(/9bdee5dd/)
     expect(() => assertAdmissibleProviderSha('b2d2bbb0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')).toThrow(/b2d2bbb0/)
+    expect(() => assertAdmissibleProviderSha('3bf53b8b407545fc7ed359f29cb8a5810295e8de')).toThrow(/3bf53b8b/)
     expect(() =>
       rejectStaleMarketingSmbAuthority({ entryId: 'marketing-smb-v1', status: 'approved' }),
     ).toThrow(/cannot override current Library quarantine/)

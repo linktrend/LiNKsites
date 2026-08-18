@@ -13,8 +13,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./library-consumer": "./src/libraryConsumer.ts",
-    "./library-provider": "./src/libraryProviderClient.ts",
-    "./revision2-materialization": "./src/revision2Materialization.ts"
+    "./master-template-tokens": "./src/masterTemplateTokens.ts",
+    "./master-template-look-and-feel": "./src/masterTemplateLookAndFeel.ts",
+    "./master-template-preview-seam": "./src/masterTemplatePreviewSeam.ts"
   },
   "dependencies": {
     "@linksites/program-ledger": "workspace:*",
