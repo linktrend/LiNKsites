@@ -1,0 +1,88 @@
+{
+  "contractType": "portable_page_renderer",
+  "schemaVersion": 2,
+  "role": "semantic_block_plan",
+  "inputs": {
+    "page": {
+      "archetypeId": "home | about | contact | legal | collection | detail",
+      "slug": "string",
+      "title": "string",
+      "content": "Block[]"
+    }
+  },
+  "behavior": {
+    "emptyContent": "render_draft_empty_state",
+    "missingRequiredBlock": "use_archetype_fallback",
+    "unknownSemanticId": "fail_closed_contract",
+    "blockOrder": "preserve_source_order",
+    "unknownBlock": "render_non_fatal_unsupported_block_state",
+    "blockKey": "block.id_or_blockType_index",
+    "mediaResolution": "consumer_media_ref",
+    "missingRelationship": "render_empty_related_state",
+    "missingFile": "fail_closed_provider_receipt"
+  },
+  "blockTypes": [
+    "hero",
+    "features",
+    "pricing",
+    "testimonials",
+    "cta",
+    "faq",
+    "richText",
+    "content",
+    "media",
+    "callout",
+    "videoEmbed",
+    "relatedContent",
+    "testimonial",
+    "trustFeed",
+    "locations",
+    "teamMembers",
+    "offerShowcase",
+    "caseStudies",
+    "articles",
+    "newsletter"
+  ],
+  "blockToComponent": {
+    "hero": ["hero-banner", "media-background"],
+    "features": ["feature-list"],
+    "pricing": ["pricing-table", "pricing-preview"],
+    "testimonials": ["social-proof"],
+    "cta": ["cta-section", "action"],
+    "faq": ["article-collection"],
+    "richText": ["rich-text"],
+    "content": ["rich-text"],
+    "media": ["media-background"],
+    "callout": ["cta-section"],
+    "videoEmbed": ["media-background"],
+    "relatedContent": ["article-collection", "case-collection"],
+    "testimonial": ["social-proof"],
+    "trustFeed": ["social-proof"],
+    "locations": ["feature-list"],
+    "teamMembers": ["article-collection"],
+    "offerShowcase": ["offer-collection"],
+    "caseStudies": ["case-collection"],
+    "articles": ["article-collection"],
+    "newsletter": ["newsletter-capture"]
+  },
+  "adapterBoundary": {
+    "LiNKlibrariesProvides": [
+      "semantic block ids",
+      "Library component ids",
+      "ordering and fallback semantics"
+    ],
+    "LiNKsitesProvides": [
+      "React and Payload renderer mapping",
+      "actual routes",
+      "tenant, site, locale, publication",
+      "media URLs",
+      "runtime and deployment"
+    ]
+  },
+  "provenance": {
+    "role": "extraction_origin",
+    "normative": false,
+    "sourceRepository": "LiNKsites",
+    "note": "Consumer renderer mapping from Library component ids to framework symbols is LiNKsites-owned and is not this contract."
+  }
+}
