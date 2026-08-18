@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 2,
+  "role": "starter_example_pages",
+  "source": "provider-neutral-defaults",
+  "pages": [
+    {
+      "archetypeId": "home",
+      "slug": "home",
+      "title": "A clear starting point",
+      "description": "A neutral example landing page for consumer adaptation.",
+      "examplePath": "/",
+      "content": [
+        {
+          "id": "home-hero",
+          "blockType": "hero",
+          "data": {
+            "heading": "Build a clearer web presence",
+            "description": "Replace this neutral draft copy with consumer-owned content.",
+            "primaryAction": {
+              "label": "Learn more",
+              "targetPageSlug": "about"
+            }
+          }
+        },
+        {
+          "id": "home-features",
+          "blockType": "features",
+          "data": {
+            "heading": "Designed to adapt",
+            "features": [
+              {
+                "title": "Reusable structure",
+                "description": "Compose pages from portable sections."
+              },
+              {
+                "title": "Responsive by default",
+                "description": "Use the token and breakpoint contract."
+              }
+            ]
+          }
+        },
+        {
+          "id": "home-cta",
+          "blockType": "cta",
+          "data": {
+            "heading": "Ready to shape this site?",
+            "primary": {
+              "label": "Get started",
+              "targetPageSlug": "contact"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "archetypeId": "about",
+      "slug": "about",
+      "title": "About",
+      "examplePath": "/about",
+      "content": [
+        {
+          "id": "about-content",
+          "blockType": "richText",
+          "data": {
+            "heading": "About this draft",
+            "body": "Consumer-owned content belongs here."
+          }
+        }
+      ]
+    },
+    {
+      "archetypeId": "contact",
+      "slug": "contact",
+      "title": "Contact",
+      "examplePath": "/contact",
+      "content": [
+        {
+          "id": "contact-hero",
+          "blockType": "hero",
+          "data": {
+            "heading": "Start a conversation",
+            "description": "Connect this visual surface to the consumer-owned form adapter."
+          }
+        },
+        {
+          "id": "contact-form",
+          "blockType": "content",
+          "data": {
+            "kind": "contact_form_slot"
+          }
+        }
+      ]
+    }
+  ]
+}

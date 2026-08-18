@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 2,
+  "schemaRevision": 2,
+  "manifestType": "immutable_release",
+  "releaseId": "master-template-type-1-1.0.0",
+  "entryId": "master-template-type-1",
+  "artifactType": "website_template",
+  "version": "1.0.0",
+  "releaseSource": {
+    "releaseSourceCommitSha": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+    "releaseSourceRepositoryTreeSha1": "873c4acc582050b416fb5a8bc59990345711df46"
+  },
+  "artifactTreeSha1": "92e6d6ad7b070671ad5b3b3ddadc4574309ce414",
+  "payloadSha256": "8117c862ab6c6acdba869597ece49acbfd1caec3d79666b3f020fb9d03e0b6e0",
+  "inventorySha256": "25e3c8520db2081646cf8f41d5847d96a6a86c6f4b6fb6ab947d1f2e3595d53c",
+  "dependencyLockSha256": "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
+  "extension": {
+    "extensionType": "website_template",
+    "templateClass": "foundation_blueprint",
+    "contentScope": {
+      "siteId": true,
+      "locale": true,
+      "publicationStatus": true
+    },
+    "draftOnly": true,
+    "directPublication": false,
+    "urls": [
+      "/",
+      "https://github.com/linktrend/LiNKlibraries",
+      "https://github.com/linktrend/LiNKlibraries/blob/development/docs/adr/ADR-001-v2-revision-2-compatibility-cutover.md"
+    ],
+    "compatibilityDisposition": "unknown",
+    "routes": [
+      {
+        "route": "/",
+        "page": "pages/home.html"
+      }
+    ],
+    "assets": [
+      "assets/asset-inventory.json",
+      "provenance/rights.json",
+      "source-handoff.json"
+    ],
+    "urlPolicy": {
+      "provenanceUrls": [
+        "https://github.com/linktrend/LiNKlibraries"
+      ],
+      "docsUrls": [
+        "https://github.com/linktrend/LiNKlibraries/blob/development/docs/adr/ADR-001-v2-revision-2-compatibility-cutover.md"
+      ],
+      "licenseUrls": [
+        "https://github.com/linktrend/LiNKsites/blob/issue/167-extract-linksites-master-template-into-linklibra/docs/handoffs/master-template-type-1-visual-source-handoff.json"
+      ]
+    },
+    "runtimeEndpointContracts": [],
+    "materialization": {
+      "mode": "copy",
+      "sourceRoot": "artifact",
+      "destinationRoot": "template",
+      "commands": [],
+      "substitutions": [],
+      "outputs": [
+        "adapters/linksites-boundary.md",
+        "assets/asset-inventory.json",
+        "components/README.md",
+        "content/content.schema.json",
+        "content/default-content.json",
+        "contracts/component-contracts.json",
+        "contracts/layout-contracts.json",
+        "contracts/page-renderer-contract.json",
+        "derivation/policy.json",
+        "design/theme.json",
+        "design/theme.schema.json",
+        "design/tokens.css",
+        "design/tokens.json",
+        "design/variants.json",
+        "layouts/README.md",
+        "lineage.json",
+        "modules/manifest.json",
+        "pages/home.html",
+        "provenance/rights.json",
+        "README.md",
+        "source-handoff.json",
+        "source-inventory.json",
+        "src/contract-validation.mjs",
+        "src/index.mjs",
+        "src/page-renderer-contract.mjs",
+        "tests/master-template-type-1.test.mjs"
+      ],
+      "network": {
+        "allowNetwork": false,
+        "allowedHosts": []
+      }
+    }
+  }
+}

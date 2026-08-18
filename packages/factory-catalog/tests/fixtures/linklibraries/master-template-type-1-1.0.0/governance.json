@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "schemaRevision": 2,
+  "envelopeType": "governance_admission",
+  "envelopeId": "master-template-type-1-1.0.0-governance",
+  "entryId": "master-template-type-1",
+  "version": "1.0.0",
+  "releaseSource": {
+    "releaseSourceCommitSha": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+    "releaseSourceRepositoryTreeSha1": "873c4acc582050b416fb5a8bc59990345711df46"
+  },
+  "releaseManifestSha256": "0fcabbf2cf13239b66ebf9fa319dc64a3a109015191d9d434b7d69eb8e869a2f",
+  "lifecycle": "draft",
+  "selectability": "non_selectable",
+  "compatibility": "unknown",
+  "qualification": {
+    "status": "pending",
+    "receiptId": "qualification-master-template-type-1-1.0.0"
+  },
+  "admission": {
+    "status": "pending",
+    "receiptId": "admission-master-template-type-1-1.0.0"
+  },
+  "updatedAt": "2026-08-18T00:00:00.000Z"
+}
