@@ -4,7 +4,7 @@ import Image from 'next/image'
 export const Icon: React.FC = () => (
   <div className="icon-container">
     <Image
-      src="/branding/logo-icon-light.png"
+      src="/branding/logo-icon-light.svg"
       alt="LinkTrend Icon"
       width={32}
       height={32}
@@ -12,7 +12,7 @@ export const Icon: React.FC = () => (
       priority
     />
     <Image
-      src="/branding/logo-icon-dark.png"
+      src="/branding/logo-icon-dark.svg"
       alt="LinkTrend Icon"
       width={32}
       height={32}

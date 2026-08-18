@@ -29,7 +29,7 @@ for (const [name, mutate] of [
   ['digest mismatch', () => ({ ...summary(), automation: { ...pin.automation, definitionDigest: digest('e') } })],
   ['revoked', () => ({ request: { ...requestBase(), platform: { ...requestBase().platform, revocationRef: 'lautowork://revocation/revoked' } } })],
   ['unauthorized scope', () => ({ request: { ...requestBase(), scope: { ...requestBase().scope, scopes: ['status_collection'] } } })],
-  ['forbidden sensitive field', () => ({ summary: { ...summary(), secret: 'private-value' } as AutoworkSummary & { secret?: string } })],
+  ['forbidden sensitive field', () => ({ summary: { ...summary(), secret: 'ltfx.auto.secret.a3553cc0b764.v1' } as AutoworkSummary & { secret?: string } })],
 ] as const) test(`fails closed for ${name}`, async () => {
   const value = mutate() as any; const client = new AutoworkClient(transport({ summary: value.summary ?? value, request: async (request) => receipt(request) }), () => new Date('2026-08-13T12:00:00.000Z'), providerBaseline('autowork'))
   if (value.request) await assert.rejects(client.request(value.request), AutoworkPolicyError); else await assert.rejects(client.summary(pin), AutoworkPolicyError)

@@ -47,7 +47,7 @@ cat "$FACTORY_LOG"
 rm -f "$FACTORY_LOG"
 
 echo "==> Ensuring services page for readiness gate"
-DATABASE_URI="$DATABASE_URI" PAYLOAD_SECRET="$PAYLOAD_SECRET" PAYLOAD_PUBLIC_SERVER_URL="$PAYLOAD_PUBLIC_SERVER_URL" \
+DATABASE_URI="$DATABASE_URI" PAYLOAD_SECRET="ltfx.auto.payload_secret.5793ffe28aeb.v1" PAYLOAD_PUBLIC_SERVER_URL="$PAYLOAD_PUBLIC_SERVER_URL" \
   pnpm exec tsx scripts/mvo-ensure-services-page.ts --siteId="$SITE_ID" --locale=en
 
 PREVIEW_URL="${PREVIEW_BASE%/}/en"

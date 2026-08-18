@@ -46,8 +46,8 @@ sed "s/^project_id = .*/project_id = \"${local_project_id}\"/" "$repo_root/supab
 export SUPABASE_TELEMETRY_DISABLED=1
 supabase --workdir "$local_root" start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
-export DATABASE_URI="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
-export PAYLOAD_SECRET="$payload_secret"
+export DATABASE_URI="ltfx.db.uri.postgresql.cf6453a9f9.v1"
+export PAYLOAD_SECRET="ltfx.auto.payload_secret.beaa6d1a0a1f.v1"
 export PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}"
 export LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF=1
 export LINKSITES_MASTER_TEMPLATE_FIXTURE_ROOT="$fixture_root"
@@ -74,7 +74,7 @@ wait_for() {
   return 1
 }
 
-(cd "$repo_root" && DATABASE_URI="$DATABASE_URI" PAYLOAD_SECRET="$PAYLOAD_SECRET" PAYLOAD_PUBLIC_SERVER_URL="$PAYLOAD_PUBLIC_SERVER_URL" pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$cms_port") >"$local_root/cms.log" 2>&1 &
+(cd "$repo_root" && DATABASE_URI="$DATABASE_URI" PAYLOAD_SECRET="ltfx.auto.payload_secret.9d541be52a04.v1" PAYLOAD_PUBLIC_SERVER_URL="$PAYLOAD_PUBLIC_SERVER_URL" pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$cms_port") >"$local_root/cms.log" 2>&1 &
 cms_pid="$!"
 wait_for "http://127.0.0.1:${cms_port}/api/healthz" || wait_for "http://127.0.0.1:${cms_port}/api/pages?limit=1" || { cat "$local_root/cms.log" >&2; exit 1; }
 
@@ -82,8 +82,8 @@ web_environment=(
   PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}"
   PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}"
   NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:${cms_port}"
-  PAYLOAD_API_KEY="$preview_api_key"
-  PREVIEW_ACCESS_TOKEN="$preview_token"
+  PAYLOAD_API_KEY="ltfx.auto.payload_api_key.ff665964b80d.v1"
+  PREVIEW_ACCESS_TOKEN="ltfx.auto.preview_access_token.aa8e1854569d.v1"
   LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF=1
   LINKSITES_MASTER_TEMPLATE_FIXTURE_ROOT="$fixture_root"
 )
@@ -102,7 +102,7 @@ fi
 test -x "$chromium_executable" || { echo "No runnable Chromium/Chrome executable found" >&2; exit 1; }
 
 if ! browser_output="$(W2_04_WEB_URL="http://127.0.0.1:${web_port}" \
-  PREVIEW_ACCESS_TOKEN="$preview_token" \
+  PREVIEW_ACCESS_TOKEN="ltfx.auto.preview_access_token.8344be10cc6d.v1" \
   LINKSITES_MASTER_TEMPLATE_PREVIEW_TITLES="$titles_json" \
   LINKSITES_MASTER_TEMPLATE_FIXTURE_ROOT="$fixture_root" \
   W2_04_CHROMIUM_EXECUTABLE="$chromium_executable" \

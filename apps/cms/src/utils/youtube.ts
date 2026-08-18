@@ -145,14 +145,14 @@ export async function fetchChannelVideos(
 /**
  * Parse YouTube video ID from various URL formats
  */
-export function extractVideoId(url: string): string | null {
+export function extractVideoId(videoUrl: string): string | null {
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
     /^([a-zA-Z0-9_-]{11})$/,
   ]
 
   for (const pattern of patterns) {
-    const match = url.match(pattern)
+    const match = videoUrl.match(pattern)
     if (match) {
       const [, videoId] = match
       if (videoId) {

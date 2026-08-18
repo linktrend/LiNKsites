@@ -11,8 +11,8 @@ the temporary project id `cms-local-validation`, starts only the local database
 services, and injects these values for the duration of the command:
 
 ```text
-DATABASE_URI=postgresql://postgres:postgres@127.0.0.1:54322/postgres
-PAYLOAD_SECRET=cms-local-validation-only-not-a-secret
+DATABASE_URI=ltfx.db.uri.postgresql.cf6453a9f9.v1
+PAYLOAD_SECRET=ltfx.auto.payload_secret.f144857be2c9.v1
 PAYLOAD_PUBLIC_SERVER_URL=http://127.0.0.1:3000
 ```
 
@@ -26,8 +26,8 @@ For root-level commands that do not use the wrapper, start the disposable local
 database first and inject the same values explicitly, for example:
 
 ```sh
-DATABASE_URI=postgresql://postgres:postgres@127.0.0.1:54322/postgres \
-PAYLOAD_SECRET=cms-local-validation-only-not-a-secret \
+DATABASE_URI=ltfx.db.uri.postgresql.cf6453a9f9.v1 \
+PAYLOAD_SECRET=ltfx.auto.payload_secret.07f405759549.v1 \
 PAYLOAD_PUBLIC_SERVER_URL=http://127.0.0.1:3000 \
 pnpm build
 ```

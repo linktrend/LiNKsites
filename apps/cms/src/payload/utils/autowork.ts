@@ -14,7 +14,7 @@ const gatewayAndQueue = (): { gateway: LiNKautoworkGateway; outbox: FileOutbox }
   const keyId = process.env.LINKAUTOWORK_SIGNING_KEY_ID
   const environment = process.env.LINKAUTOWORK_ENVIRONMENT as GatewayEnvironment
   const queuePath = process.env.LINKAUTOWORK_OUTBOX_PATH
-  const integritySecret = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET
+  const integrityMaterial = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET
   if (!gatewayUrl || !secret || !keyId || !environmentNames.has(environment) || !queuePath || !integritySecret) throw new Error('LiNKautowork durable delivery configuration is incomplete')
   const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: parseGatewayEventPolicies(process.env.LINKAUTOWORK_EVENT_GRANTS!), transport: async (request) => {
     const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 3_000)

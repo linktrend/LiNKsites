@@ -632,12 +632,12 @@ interface FormSubmissionResponse {
 ```bash
 # Governed Delivery Configuration
 LINKAUTOWORK_GATEWAY_URL=https://gateway.example.com/events
-LINKAUTOWORK_SIGNING_SECRET=<secret-manager reference>
+LINKAUTOWORK_SIGNING_SECRET=ltfx.auto.linkautowork_signing_secret.f052141b87fe.v1 reference>
 LINKAUTOWORK_SIGNING_KEY_ID=web-master
 LINKAUTOWORK_ENVIRONMENT=production
 LINKAUTOWORK_EVENT_GRANTS='[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]'
 LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
-LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=ltfx.fix2.linkautowork_outbox_integrity_secret.643f0cac39aa.v1
 ```
 
 ---

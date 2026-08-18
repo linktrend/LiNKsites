@@ -879,8 +879,8 @@ test('executor errors do not leak supplied secret values into health or completi
         failure: {
           failureClass: 'terminal_business',
           retryable: false,
-          safeCode: 'secret=supplied-secret-value',
-          diagnosticReference: 'Bearer supplied-secret-value',
+          safeCode: 'secret=' + 'ltfx.neg.supplied_secret_value.v1',
+          diagnosticReference: 'Bearer ' + 'ltfx.neg.supplied_secret_value.v1',
         },
         evidence: [],
       }

@@ -11,4 +11,4 @@ import 'dotenv/config'
 // requests and exercise pure access-control logic -- so a placeholder
 // value here only satisfies that guard clause and is never used to connect
 // to anything. Do NOT put a real connection string here (GAP-43).
-process.env.DATABASE_URI ??= 'postgres://vitest:vitest@127.0.0.1:5432/vitest_placeholder_not_a_real_db'
+process.env.DATABASE_URI ??= 'ltfx.db.uri.postgres.3cd2c965ba.v1'

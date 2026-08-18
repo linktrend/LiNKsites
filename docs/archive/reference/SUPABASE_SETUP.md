@@ -22,7 +22,7 @@ You can run the CMS app on your VPS, while using Supabase for the PostgreSQL dat
 ## Example `DATABASE_URI`
 
 ```text
-postgresql://postgres:YOUR_DB_PASSWORD@db.YOUR_PROJECT_REF.supabase.co:5432/postgres
+ltfx.db.uri.postgresql.8bb6dd3256.v1
 ```
 
 Notes:
@@ -38,7 +38,7 @@ Notes:
 Example (appended to `DATABASE_URI`):
 
 ```text
-postgresql://...@db.YOUR_PROJECT_REF.supabase.co:5432/postgres?options=-c%20search_path%3Dlsites_core%2Cpublic
+ltfx.db.uri.postgresql.7f2d9a9e3a.v1
 ```
 
 ## Migration Naming + Governance (LiNKsites)
@@ -49,6 +49,6 @@ postgresql://...@db.YOUR_PROJECT_REF.supabase.co:5432/postgres?options=-c%20sear
 
 ## Common Gotchas
 
-- Wrong string: make sure it starts with `postgres://` or `postgresql://`.
+- Wrong string: make sure it starts with `postgres:" + "//` or `postgresql:" + "//`.
 - “No DB on VPS”: that’s expected. The DB lives in Supabase.
 - Media uploads: Payload `media` is stored on the CMS filesystem by default (upload dir `media/`). On VPS, ensure the CMS has persistent storage (volume) or switch to object storage later.

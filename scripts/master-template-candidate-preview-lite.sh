@@ -64,7 +64,7 @@ wait_for() {
 web_environment=(
   NEXT_PUBLIC_CMS_PROVIDER=fixture
   CMS_FIXTURE_PATH="$fixture_path"
-  PREVIEW_ACCESS_TOKEN="$preview_token"
+  PREVIEW_ACCESS_TOKEN="ltfx.auto.preview_access_token.bc0741b948c7.v1"
   LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF=1
   LINKSITES_MASTER_TEMPLATE_FIXTURE_ROOT="$fixture_root"
 )

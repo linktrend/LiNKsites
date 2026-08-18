@@ -51,7 +51,7 @@ test('rejects unknown and sensitive fields in every nested metadata collection',
     const objectField = ['preview', 'publication', 'hosting'].includes(field)
     const payload = { ...base(), [field]: objectField ? value : [value] }
     assert.throws(() => buildLinksitesOversightProjection(payload as never), (error) => error instanceof ProjectionInputError && error.code === 'unknown_field')
-    const sensitive = { ...value, secret: 'do-not-copy' }
+    const sensitive = { ...value, secret: 'ltfx.auto.secret.ead22d38f2b1.v1' }
     assert.throws(() => buildLinksitesOversightProjection({ ...base(), [field]: objectField ? sensitive : [sensitive] } as never), (error) => error instanceof ProjectionInputError && ['unknown_field', 'untrusted_narrative'].includes(error.code))
   }
 })

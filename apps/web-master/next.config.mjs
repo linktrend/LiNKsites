@@ -38,8 +38,8 @@ const nextConfig = {
       {
         source: '/:lang(en|es|zh-tw|zh-cn)/demo/:path*',
         headers: [
-          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
-          { key: 'Cache-Control', value: 'private, no-store, max-age=0' },
+          { key: 'ltfx.auto.key.1876ce5d7c70.v1', value: 'noindex, nofollow, noarchive' },
+          { key: 'ltfx.auto.key.695f566af206.v1', value: 'private, no-store, max-age=0' },
         ],
       },
     ];

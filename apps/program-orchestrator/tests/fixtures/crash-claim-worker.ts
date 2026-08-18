@@ -10,13 +10,13 @@ const input = JSON.parse(process.env.LINKSITES_TEST_CRASH_CLAIM_INPUT ?? '') as 
 const config = createLocalConfig(input.directory, 'local-org')
 const composition = await createProductionComposition({
   ...config,
-  commercialOutcomeGatewaySecret: 'test-only-outcome-gateway-secret',
+  commercialOutcomeGatewaySecret: 'ltfx.auto.commercialoutcomegatewaysecret.f44ddf6202e5.v1',
   commercialOutcomeGatewayKeyId: 'test-only-outcome-gateway-key',
   payloadBaseUrl: 'http://127.0.0.1:9',
-  payloadApiKey: 'test-api-key',
+  payloadApiKey: 'ltfx.auto.payloadapikey.2ae6f483cb04.v1',
   payloadSiteId: 'test-site',
   webMasterBaseUrl: 'http://127.0.0.1:9',
-  previewAccessToken: 'test-preview-token',
+  previewAccessToken: 'ltfx.auto.previewaccesstoken.66d0db4625a9.v1',
   leaseDurationMs: 50,
   workerId: 'crashed-worker',
 })

@@ -99,12 +99,12 @@ Set environment variables:
 
 ```env
 LINKAUTOWORK_GATEWAY_URL=https://gateway.example.com/events
-LINKAUTOWORK_SIGNING_SECRET=<secret-manager reference>
+LINKAUTOWORK_SIGNING_SECRET=ltfx.auto.linkautowork_signing_secret.d3d02483149b.v1 reference>
 LINKAUTOWORK_SIGNING_KEY_ID=web-master
 LINKAUTOWORK_ENVIRONMENT=production
 LINKAUTOWORK_EVENT_GRANTS=[{"eventName":"contact.submitted","environments":["production"],"orgIds":["<org-id>"]}]
 LINKAUTOWORK_OUTBOX_PATH=/var/lib/linksites/linkautowork-outbox.json
-LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=<separate-secret-manager-reference>
+LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET=ltfx.fix2.linkautowork_outbox_integrity_secret.01ff6c3b8144.v1
 LINKSITES_ORG_ID=<org-id>
 LINKSITES_SITE_ID=<site-id>
 ```

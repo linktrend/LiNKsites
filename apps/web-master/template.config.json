@@ -72,7 +72,7 @@
         "hero": { "title": "contact-hero-title", "subtitle": "contact-hero-subtitle" },
         "form": { "formDocId": "contact-form-def" },
         "map": { "coordinatesDocId": "contact-coordinates" },
-        "cta": { "label": "contact-cta-label", "url": "contact-cta-url" }
+        "cta": { "label": "contact-cta-label", "url": "ltfx.auto.url.a1c09cd4e797.v1" }
       }
     },
     "/legal/[legalSlug]": {

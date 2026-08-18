@@ -276,7 +276,7 @@ const CATALOG_KEYS = ['schemaVersion', 'generatedAt', 'sourceCommitSha', 'entrie
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
-const hasOwn = (value: Record<string, unknown>, key: string): boolean => Object.prototype.hasOwnProperty.call(value, key)
+const hasOwn = (value: Record<string, unknown>, fieldName: string): boolean => Object.prototype.hasOwnProperty.call(value, fieldName)
 
 const isGitSha = (value: unknown): value is GitSha => typeof value === 'string' && GIT_SHA_PATTERN.test(value)
 

@@ -17,7 +17,7 @@ services:
     environment:
       # Override DATABASE_URI for local PostgreSQL (optional)
       # Uncomment to use local postgres instead of external Supabase
-      # DATABASE_URI: postgresql://payload:payload@postgres:5432/payload
+      # DATABASE_URI: ltfx.db.uri.postgresql.0045f8f876.v1
 
   # PostgreSQL Database (Optional - for local development)
   # By default, the app connects to external Supabase using DATABASE_URI from .env

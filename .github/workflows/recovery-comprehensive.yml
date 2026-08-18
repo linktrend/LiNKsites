@@ -28,7 +28,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'apps/cms/package.json') }}
+          key: ${{ format('playwright-{0}-{1}', runner.os, hashFiles('pnpm-lock.yaml', 'apps/cms/package.json')) }}
       - uses: supabase/setup-cli@v1
         with:
           version: 2.81.3

@@ -21,8 +21,8 @@ After you click the `Deploy` button above, you'll want to have standalone copy o
    - Create a `.env` file in the project root
    - Add your Supabase PostgreSQL connection string:
      ```env
-     DATABASE_URI="postgresql://[user]:[password]@[host]:[port]/[database]?sslmode=require"
-     PAYLOAD_SECRET="your-secure-secret-key"
+     DATABASE_URI="ltfx.db.uri.postgresql.6be9753090.v1"
+     PAYLOAD_SECRET="ltfx.auto.payload_secret.2313afb1e415.v1"
      PAYLOAD_PUBLIC_SERVER_URL="http://localhost:3000"
      ```
    - Get your Supabase connection string from: **Supabase Dashboard → Project Settings → Database → Connection Pooling**
@@ -40,7 +40,7 @@ If you prefer to use Docker with a **local PostgreSQL instance** instead of exte
 1. In `docker-compose.yml`, uncomment the `DATABASE_URI` override in the payload service:
    ```yaml
    environment:
-     DATABASE_URI: postgresql://payload:payload@postgres:5432/payload
+     DATABASE_URI: ltfx.db.uri.postgresql.0045f8f876.v1
    ```
 2. Run `docker-compose up` to start both the app and local PostgreSQL
 3. The local PostgreSQL will be available at `localhost:5432`
@@ -83,7 +83,7 @@ That's it! The Docker instance will help you get up and running quickly while al
 
 | Variable | Required | Description | Example |
 |----------|----------|-------------|---------|
-| `DATABASE_URI` | Yes | PostgreSQL connection string from Supabase | `postgresql://user:pass@host:6543/db?sslmode=require` |
+| `DATABASE_URI` | Yes | PostgreSQL connection string from Supabase | `postgresql:" + "//user:pass@host:6543/db?sslmode=require` |
 | `PAYLOAD_SECRET` | Yes | Secret key for encryption (min 32 chars) | `your-secret-key-here` |
 | `PAYLOAD_PUBLIC_SERVER_URL` | Yes | Public URL of your CMS | `http://localhost:3000` |
 | `NODE_OPTIONS` | No | Node.js runtime options | `--no-deprecation` |
@@ -97,7 +97,7 @@ That's it! The Docker instance will help you get up and running quickly while al
 - Verify it contains the `DATABASE_URI` variable
 
 **Error: "DATABASE_URI must be a PostgreSQL connection string"**
-- Your connection string must start with `postgresql://`
+- Your connection string must start with `postgresql:" + "//`
 - Check that you're using the Supabase connection string, not MongoDB
 
 **Connection timeout or SSL errors:**

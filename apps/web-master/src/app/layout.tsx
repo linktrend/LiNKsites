@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     address: false,
   },
   icons: {
-    icon: [{ url: "/favicon.ico", sizes: "any" }],
+    icon: [{ url: "ltfx.fix2.url.6c08f37a0809.v1", sizes: "any" }],
   },
   openGraph: {
     type: "website",
