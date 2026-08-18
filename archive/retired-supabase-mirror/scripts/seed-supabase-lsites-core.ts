@@ -58,7 +58,7 @@ const seed = {
             blockType: 'hero',
             title: 'Welcome to LiNKtrend',
             subtitle: 'Seeded from Supabase (source of truth).',
-            cta: { text: 'Get Started', url: '/contact', style: 'primary' },
+            cta: { text: 'Get Started', url: 'ltfx.fix2.url.7e48b2eef09d.v1', style: 'primary' },
           },
           {
             blockType: 'features',
@@ -74,7 +74,7 @@ const seed = {
             blockType: 'cta',
             title: 'See it live',
             text: 'This content came from Supabase and was synced into the CMS.',
-            button: { text: 'Contact', url: '/contact', style: 'primary' },
+            button: { text: 'Contact', url: 'ltfx.fix2.url.6f87ebe87e4f.v1', style: 'primary' },
           },
         ],
       },
@@ -96,7 +96,7 @@ const seed = {
             blockType: 'hero',
             title: 'About LiNKtrend',
             subtitle: 'AI-powered automation for real businesses.',
-            cta: { text: 'Contact Us', url: '/contact', style: 'primary' },
+            cta: { text: 'Contact Us', url: 'ltfx.fix2.url.51242166aeec.v1', style: 'primary' },
           },
           {
             blockType: 'richText',
@@ -165,7 +165,7 @@ const seed = {
       data: {
         navKey: 'primary',
         label: 'Contact',
-        url: '/contact',
+        url: 'ltfx.fix2.url.50174fe22b96.v1',
         order: 2,
         external: false,
       },

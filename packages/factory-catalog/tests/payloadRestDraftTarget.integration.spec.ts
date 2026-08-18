@@ -52,8 +52,8 @@ import { PromotionService } from '../src/promotionService.js'
 // ---------------------------------------------------------------------------
 
 const PAYLOAD_URL = process.env['PAYLOAD_INTEGRATION_TEST_URL']
-const JWT_TOKEN = process.env['PAYLOAD_INTEGRATION_TEST_JWT']
-const API_KEY = process.env['PAYLOAD_INTEGRATION_TEST_API_KEY']
+const JWT_TOKEN = ltfx.entropy.e2f599f25f30.v1]
+const API_KEY = ltfx.entropy.d9b4346de038.v1]
 const SITE_ID = process.env['PAYLOAD_INTEGRATION_TEST_SITE_ID']
 
 const SKIP_REASON =

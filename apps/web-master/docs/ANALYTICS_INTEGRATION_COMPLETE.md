@@ -41,7 +41,7 @@ The Master Template includes a **privacy-compliant, consent-gated analytics syst
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                 localStorage Storage                         │
-│  Key: "cookiePreferences"                                    │
+│  Key: "ltfx.auto.key.2d36b5568cad.v1"                                    │
 │  Value: { necessary, functional, analytics, marketing }      │
 └────────────────────────┬────────────────────────────────────┘
                          │

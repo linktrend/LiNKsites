@@ -21,7 +21,7 @@ export default async function HomePage() {
         <picture>
           <Image
             alt="LinkTrend Logo"
-            src="/branding/logo-full-dark.png"
+            src="/branding/logo-full-dark.svg"
             width={300}
             height={80}
             style={{ height: 'auto', marginBottom: '20px' }}

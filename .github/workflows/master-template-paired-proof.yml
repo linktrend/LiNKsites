@@ -1,0 +1,108 @@
+name: LiNKlibraries master-template paired proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      consumer_commit:
+        description: Exact LiNKsites consumer commit to prove
+        required: true
+        type: string
+      consumer_tree:
+        description: Exact LiNKsites consumer tree to prove
+        required: true
+        type: string
+      provider_commit:
+        description: Exact LiNKlibraries candidate commit
+        required: true
+        type: string
+      provider_tree:
+        description: Exact LiNKlibraries candidate tree
+        required: true
+        type: string
+      dependency_lock_sha256:
+        description: Exact provider dependency-lock SHA-256
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  paired-proof:
+    name: disposable Payload/browser paired proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact LiNKsites consumer head
+        uses: actions/checkout@v4
+        with:
+          repository: linktrend/LiNKsites
+          ref: ${{ inputs.consumer_commit }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify exact LiNKsites consumer identity
+        env:
+          EXPECTED_COMMIT: ${{ inputs.consumer_commit }}
+          EXPECTED_TREE: ${{ inputs.consumer_tree }}
+        run: |
+          set -euo pipefail
+          actual_commit="$(git rev-parse HEAD)"
+          actual_tree="$(git rev-parse 'HEAD^{tree}')"
+          test "${actual_commit}" = "${EXPECTED_COMMIT}"
+          test "${actual_tree}" = "${EXPECTED_TREE}"
+          printf 'consumer_commit=%s\nconsumer_tree=%s\n' "${actual_commit}" "${actual_tree}"
+
+      - name: Checkout exact LiNKlibraries candidate
+        uses: actions/checkout@v4
+        with:
+          repository: linktrend/LiNKlibraries
+          ref: ${{ inputs.provider_commit }}
+          path: .ci/linklibraries
+          token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
+          persist-credentials: false
+
+      - name: Setup pnpm and Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup disposable Supabase service
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.81.3
+
+      - name: Install Chromium for browser proof
+        run: |
+          pnpm --filter @linksites/cms exec playwright install --with-deps chromium
+          browser_path="$(pnpm --filter @linksites/cms exec node -e "process.stdout.write(require('playwright').chromium.executablePath())")"
+          test -x "${browser_path}"
+          echo "W2_04_CHROMIUM_EXECUTABLE=${browser_path}" >> "${GITHUB_ENV}"
+
+      - name: Run exact candidate and disposable Payload/browser proof
+        env:
+          LINKSITES_LINKLIBRARIES_ROOT: ${{ github.workspace }}/.ci/linklibraries
+          LINKSITES_LINKLIBRARIES_COMMIT_SHA: ${{ inputs.provider_commit }}
+          LINKSITES_LINKLIBRARIES_TREE_SHA: ${{ inputs.provider_tree }}
+          LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: ${{ inputs.dependency_lock_sha256 }}
+          LINKSITES_KEEP_LOCAL_REHEARSAL: "1"
+        run: bash scripts/master-template-paired-proof.sh
+
+      - name: Upload paired-proof evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: master-template-paired-proof-${{ github.run_id }}
+          path: |
+            docs/production-roadmap/evidence/w2-04/browser/
+            /tmp/linksites-w2-04-local.*/
+          if-no-files-found: warn
+          retention-days: 30

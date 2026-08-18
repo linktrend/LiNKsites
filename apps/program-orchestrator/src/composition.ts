@@ -106,7 +106,8 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   const dependencies = createLocalDependencyPorts(adapters, completionSink)
   const noOutboundTransport: GatewayTransport = async () => { throw new Error('W2-06 inbound verifier does not send gateway events') }
   const environment = validated.mode === 'production' ? 'production' : 'development' as const
-  const gateway = new LiNKautoworkGateway({ secret: validated.commercialOutcomeGatewaySecret, keyId: validated.commercialOutcomeGatewayKeyId, environment, transport: noOutboundTransport, policies: [
+  const outcomeVerifierMaterial = validated.commercialOutcomeGatewaySecret
+  const gateway = new LiNKautoworkGateway({ secret: outcomeVerifierMaterial, keyId: validated.commercialOutcomeGatewayKeyId, environment, transport: noOutboundTransport, policies: [
     { eventName: 'lead.research.ready', orgIds: [validated.orgId], environments: [environment] },
     { eventName: 'commercial.outcome.recorded', orgIds: [validated.orgId], environments: [environment] },
   ] })

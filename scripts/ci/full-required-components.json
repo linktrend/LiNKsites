@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "alwaysRequired": [
+    "install",
+    "fast-receipt",
+    "program-build",
+    "cms-production-build",
+    "runtime-preflight",
+    "supabase-rls",
+    "cms-browser-tests",
+    "non-cms-tests",
+    "docker-build",
+    "deployment-contract",
+    "active-surface-clean"
+  ],
+  "recoveryRequired": "restore-rehearsal"
+}

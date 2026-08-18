@@ -6,7 +6,7 @@ const input = JSON.parse(process.env.LINKSITES_TEST_OUTBOX_CRASH_INPUT ?? '') as
 }
 
 const outbox = new FileOutbox(input.path, {
-  integritySecret: 'queue-integrity-test',
+  integritySecret: 'ltfx.auto.integritysecret.9d5b5587c360.v1',
   leaseMs: 30,
   lockStaleMs: 1,
   resigner: (request, attempt) => ({ ...request, envelope: { ...request.envelope, delivery_attempt: attempt } }),

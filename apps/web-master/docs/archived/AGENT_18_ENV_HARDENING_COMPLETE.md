@@ -325,13 +325,13 @@ NEXT_PUBLIC_SITE_NAME=Acme Corp
 NEXT_PUBLIC_SITE_URL=https://acme.com
 NEXT_PUBLIC_CMS_PROVIDER=payload
 NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.acme.com
-PAYLOAD_API_KEY=prod-secret-key
+PAYLOAD_API_KEY=ltfx.auto.payload_api_key.a34c11717d53.v1
 
 # Recommended
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-ABC123XYZ
 NEXT_PUBLIC_GTM_ID=GTM-ABC123
 CONTACT_WEBHOOK_URL=https://n8n.acme.com/webhook/contact
-CONTACT_WEBHOOK_SECRET=prod-webhook-secret
+CONTACT_WEBHOOK_SECRET=ltfx.auto.contact_webhook_secret.6b21fc751d64.v1
 
 # Optional
 NEXT_PUBLIC_TWITTER_HANDLE=@acmecorp

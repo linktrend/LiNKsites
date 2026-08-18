@@ -164,7 +164,7 @@ Never put secrets into Markdown, prompts, screenshots, logs, or issue descriptio
 evidence_id: id
 evidence_type: file|commit|workflow-run|test-result|deployment|database-schema|screenshot|provider-state
 source:
-  repository: optional-url
+  repository: ltfx.fix2.url.406f2d7f5cc7.v1
   commit: optional-sha
   path: optional-path
   environment: optional-name
@@ -217,7 +217,7 @@ programs: []
 declared_role: text
 observed_role: text
 upstream:
-  url: optional-url
+  url: ltfx.fix2.url.optional_url.v1
   fork_point: optional-sha
 languages: []
 package_managers: []

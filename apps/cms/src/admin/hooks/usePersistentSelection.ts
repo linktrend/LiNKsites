@@ -24,23 +24,23 @@ const writeToQuery = (param: string, value?: string | null) => {
   window.history.replaceState({}, '', url.toString())
 }
 
-const getFromStorage = (key: string): string | null => {
+const getFromStorage = (storageKey: string): string | null => {
   if (typeof window === 'undefined') return null
   try {
-    return window.localStorage.getItem(key)
+    return window.localStorage.getItem(storageKey)
   } catch {
     return null
   }
 }
 
-const writeToStorage = (key: string, value?: string | null) => {
+const writeToStorage = (storageKey: string, value?: string | null) => {
   if (typeof window === 'undefined') return
   try {
     if (!value) {
-      window.localStorage.removeItem(key)
+      window.localStorage.removeItem(storageKey)
       return
     }
-    window.localStorage.setItem(key, value)
+    window.localStorage.setItem(storageKey, value)
   } catch {
     // Ignore storage errors (e.g., private mode)
   }

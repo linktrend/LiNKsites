@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "schemaRevision": 2,
+  "receiptType": "provider_release_candidate",
+  "release": {
+    "entryId": "master-template-type-1",
+    "version": "1.0.0",
+    "manifestPath": "registry/v2/entries/master-template-type-1/versions/1.0.0/manifest.json",
+    "manifestSha256": "2d0a5f443ca3976478bbf883c091c26f7dc84f6e0fa44045746ea6f22048c35b",
+    "artifactTreeSha1": "a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d",
+    "payloadSha256": "35fff23cc28a52ed0066521636855e8d5bf6d40115561bf273aa15bc29a35934",
+    "inventoryFileSha256": "bb749fbe4c4c11b50c6a5c96ea2bdfbdd343352bcf527f77cd9170b0e076ecbf",
+    "inventoryProjectionSha256": "35fff23cc28a52ed0066521636855e8d5bf6d40115561bf273aa15bc29a35934",
+    "dependencyLockSha256": "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
+    "dependencyProjectionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "source": {
+    "repository": "LiNKsites",
+    "handoffCommit": "0a980e7871f847360e17b6c77e4a33e6db9839b3",
+    "handoffTree": "9d446ad47d59e7b187a1bcec9c897f33fef8c28b",
+    "sourceCommit": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+    "sourceTree": "873c4acc582050b416fb5a8bc59990345711df46",
+    "visualInventoryEntries": 114
+  },
+  "catalogue": {
+    "path": "indexes/v2/catalog.json",
+    "fileSha256": "ab9dde0af419613e4a5a091b13a207d973242ad0546240452b7eb2924b56f05a",
+    "recordsSha256": "03b52875dd3c2fcf5c8fa056560fd77e0986aca04ba69bd11ebf28c866b97f2c"
+  },
+  "provider": {
+    "repository": "LiNKlibraries",
+    "packagingFoundationCommitSha": "64da437a8f43b17e97f0cda9c7d11dcf31fadf0e",
+    "packagingFoundationTreeSha1": "f86a5dbd49d1ebcf7351c0985bc4b8f7f3f9d9c5"
+  },
+  "governance": {
+    "lifecycle": "draft",
+    "selectability": "non_selectable",
+    "compatibility": "unknown",
+    "visualMasterClaimed": false,
+    "pairedProofRequired": true,
+    "independentQualificationRequired": true,
+    "assetRights": "candidate_rights_cleared_no_bundled_media",
+    "assetRightsReview": {
+      "assetRecordCount": 13,
+      "bundledAssetCount": 0,
+      "founderDecisionRequired": false,
+      "thirdPartyRedistribution": "not_authorized"
+    },
+    "admission": "not_performed"
+  }
+}

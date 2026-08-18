@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 2,
+  "schemaRevision": 2,
+  "catalogueType": "catalogue",
+  "recordsSha256": "03b52875dd3c2fcf5c8fa056560fd77e0986aca04ba69bd11ebf28c866b97f2c",
+  "records": [
+    {
+      "schemaVersion": 2,
+      "schemaRevision": 2,
+      "recordType": "catalogue_record",
+      "entryId": "linkapps-fullstack",
+      "version": "1.1.0",
+      "artifactType": "starter_kit",
+      "name": "linkapps-fullstack-1.1.0",
+      "summary": "Immutable starter_kit release linkapps-fullstack@1.1.0",
+      "releaseManifestSha256": "641d620b867a6d8f8aececcac20573b70ae40353e19db8bd46fa0c632d6590f0",
+      "releaseSource": {
+        "releaseSourceCommitSha": "9c6d8d7ac32434b146288c450375528ce9d911cd",
+        "releaseSourceRepositoryTreeSha1": "b682ab1da886123b95990c6ab41558377928f5b0"
+      },
+      "artifactTreeSha1": "cdedea1faef8ff73c930d3b4c33604540678b073",
+      "inventorySha256": "2c73fe6519a6f339df11bd8c10761eb719bc2e8f405e3e052799afeead87913b",
+      "lifecycle": "selectable",
+      "selectability": "selectable",
+      "compatibility": "compatible",
+      "bundlePath": "registry/v2/entries/linkapps-fullstack/versions/1.1.0",
+      "tags": [],
+      "governance": {
+        "qualification": {
+          "status": "failed",
+          "receiptId": "qualification-linkapps-fullstack-1.1.0",
+          "independentPass": false,
+          "evidencePath": "docs/evidence/registry-v2/linkapps-fullstack/1.1.0/qualification/qualification-linkapps-fullstack-1.1.0.json",
+          "evidenceSha256": "7fb024d89e9d808880c91631fb3de74a6ac0f072e9ed2b6b745e0ee3b51672a0"
+        },
+        "admission": {
+          "status": "admitted",
+          "receiptId": "admission-linkapps-fullstack-1.1.0",
+          "evidencePath": "docs/evidence/registry-v2/linkapps-fullstack/1.1.0/publication/admission-linkapps-fullstack-1.1.0.json",
+          "evidenceSha256": "c0f9d771e24a54c4168b6bd0ec73ee6a1ac3d3720d08e657ed855fed5912ee1f"
+        },
+        "founderException": {
+          "receiptId": "founder-exception-linkapps-fullstack-1.1.0",
+          "evidencePath": "docs/evidence/registry-v2/linkapps-fullstack/1.1.0/qualification/founder-exception-linkapps-fullstack-1.1.0.json",
+          "evidenceSha256": "8baa8ec4a9bab0c0b73d8d8eeea50cbd52d30bbe6d8bbe33bbe6fc436e81981b",
+          "scope": {
+            "entryId": "linkapps-fullstack",
+            "version": "1.1.0",
+            "candidateCommitSha": "6c0413faf773e2e971c489bf1edc9db7bbfc2bcc",
+            "candidateTreeSha1": "6c079517d892365284a2395e0869a39a19c69ec7",
+            "sourceCommitSha": "9c6d8d7ac32434b146288c450375528ce9d911cd",
+            "sourceRepositoryTreeSha1": "b682ab1da886123b95990c6ab41558377928f5b0",
+            "artifactTreeSha1": "cdedea1faef8ff73c930d3b4c33604540678b073",
+            "releaseManifestSha256": "641d620b867a6d8f8aececcac20573b70ae40353e19db8bd46fa0c632d6590f0",
+            "inventorySha256": "2c73fe6519a6f339df11bd8c10761eb719bc2e8f405e3e052799afeead87913b",
+            "dependencyLockSha256": "67a108ffb7d95f8bd8f10d800e42040234ba9785dea4cfa7edab6734195bde61",
+            "findingCount": 414,
+            "findingSha256": "7cb9db848cf6004b63b8ee4d5edd91bf49ed2aa7760f3342f5d3ebd1e4ac0ae8"
+          }
+        },
+        "governancePath": "docs/evidence/registry-v2/linkapps-fullstack/1.1.0/publication/governance-linkapps-fullstack-1.1.0.json",
+        "governanceSha256": "043c873ad0c3661459333639d72880af104143ee280399c73f8fadb72214704e"
+      },
+      "controlledMetadata": {
+        "domain": "software",
+        "venues": [
+          "mobile",
+          "server",
+          "web"
+        ],
+        "platforms": [
+          "android",
+          "browser",
+          "ios",
+          "linux",
+          "macos",
+          "node"
+        ],
+        "channels": [
+          "api",
+          "mobile_app",
+          "web_app"
+        ],
+        "dataSensitivity": "public",
+        "commercialUseRights": "allowed",
+        "humanReviewRequired": true,
+        "sideEffectRiskClass": "moderate"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "schemaRevision": 2,
+      "recordType": "catalogue_record",
+      "entryId": "master-template-type-1",
+      "version": "1.0.0",
+      "artifactType": "website_template",
+      "name": "master-template-type-1-1.0.0",
+      "summary": "Immutable website_template release master-template-type-1@1.0.0",
+      "releaseManifestSha256": "2d0a5f443ca3976478bbf883c091c26f7dc84f6e0fa44045746ea6f22048c35b",
+      "releaseSource": {
+        "releaseSourceCommitSha": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+        "releaseSourceRepositoryTreeSha1": "873c4acc582050b416fb5a8bc59990345711df46"
+      },
+      "artifactTreeSha1": "a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d",
+      "inventorySha256": "bb749fbe4c4c11b50c6a5c96ea2bdfbdd343352bcf527f77cd9170b0e076ecbf",
+      "lifecycle": "draft",
+      "selectability": "non_selectable",
+      "compatibility": "unknown",
+      "bundlePath": "registry/v2/entries/master-template-type-1/versions/1.0.0",
+      "tags": []
+    },
+    {
+      "schemaVersion": 2,
+      "schemaRevision": 2,
+      "recordType": "catalogue_record",
+      "entryId": "synthetic-component",
+      "version": "1.0.0",
+      "artifactType": "component",
+      "name": "synthetic-component-1.0.0",
+      "summary": "Immutable component release synthetic-component@1.0.0",
+      "releaseManifestSha256": "6b9979777561d1771294ff4ddd10159b543c3b3cdd699c82ad759ab04ea67212",
+      "releaseSource": {
+        "releaseSourceCommitSha": "96d6972b836e8ccb51ea6fe1377ed6440ab7e1d9",
+        "releaseSourceRepositoryTreeSha1": "f8f20316b62492b9b1d0363f1c7983fc64de58ec"
+      },
+      "artifactTreeSha1": "2107a410b1308048a138f2dcb80c9cc7d8b7867a",
+      "inventorySha256": "deea48fd4fd547513f12216cd71191128eb8c3a78820d08862617d14498247a0",
+      "lifecycle": "selectable",
+      "selectability": "selectable",
+      "compatibility": "compatible",
+      "bundlePath": "registry/v2/entries/synthetic-component/versions/1.0.0",
+      "tags": [],
+      "governance": {
+        "qualification": {
+          "status": "qualified",
+          "receiptId": "qualification-synthetic-component-1.0.0",
+          "independentPass": true
+        },
+        "admission": {
+          "status": "admitted",
+          "receiptId": "admission-synthetic-component-1.0.0"
+        }
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "schemaRevision": 2,
+      "recordType": "catalogue_record",
+      "entryId": "synthetic-starter-kit",
+      "version": "1.0.0",
+      "artifactType": "starter_kit",
+      "name": "synthetic-starter-kit-1.0.0",
+      "summary": "Immutable starter_kit release synthetic-starter-kit@1.0.0",
+      "releaseManifestSha256": "1ac2ebbc3506c848f8c01d182b50cea8d327873b2347df6fa210ff68f45b40d7",
+      "releaseSource": {
+        "releaseSourceCommitSha": "94d9d79bc7d5c06936b9a810803dff251c3c000a",
+        "releaseSourceRepositoryTreeSha1": "24dbbea220c396cf513ee3058b0f3a0095c82278"
+      },
+      "artifactTreeSha1": "1a3fb264e443d121f274681e5cf17f6e1fc3af15",
+      "inventorySha256": "0cb4156b7161716c4524994fcc24fec075c58f26248e72b8142d2fb95f420c27",
+      "lifecycle": "draft",
+      "selectability": "non_selectable",
+      "compatibility": "unknown",
+      "bundlePath": "registry/v2/entries/synthetic-starter-kit/versions/1.0.0",
+      "tags": []
+    },
+    {
+      "schemaVersion": 2,
+      "schemaRevision": 2,
+      "recordType": "catalogue_record",
+      "entryId": "synthetic-website-template",
+      "version": "1.0.0",
+      "artifactType": "website_template",
+      "name": "synthetic-website-template-1.0.0",
+      "summary": "Immutable website_template release synthetic-website-template@1.0.0",
+      "releaseManifestSha256": "701cc9bfb8062693aa75acf33aa64df9030115b09cab8a26f4a024f32420176f",
+      "releaseSource": {
+        "releaseSourceCommitSha": "2888456d2269f1f2355422400938d2e0a424819e",
+        "releaseSourceRepositoryTreeSha1": "57bfb9b10412229e9692fdc0eee5c737a82e20cb"
+      },
+      "artifactTreeSha1": "acd0a0bb53f27933e2d2857e079a50aa57466283",
+      "inventorySha256": "d7131ec7cb6c8e4362d09f06f0d6eabd0a760a48c6376691d1ed311be362cc19",
+      "lifecycle": "draft",
+      "selectability": "non_selectable",
+      "compatibility": "unknown",
+      "bundlePath": "registry/v2/entries/synthetic-website-template/versions/1.0.0",
+      "tags": []
+    }
+  ]
+}

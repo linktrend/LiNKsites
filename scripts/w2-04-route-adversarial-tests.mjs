@@ -44,7 +44,7 @@ const server = spawn("pnpm", ["--filter", "@linksites/web-master", "dev", "--hos
     ...process.env,
     NEXT_PUBLIC_CMS_PROVIDER: "fixture",
     CMS_FIXTURE_PATH: fixturePath,
-    AI_ACTIONS_SECRET: "w2-04-test-secret",
+    AI_ACTIONS_SECRET: "ltfx.auto.ai_actions_secret.6159af24f66e.v1",
     NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${port}`,
   },
   stdio: ["ignore", "pipe", "pipe"],
@@ -123,7 +123,7 @@ try {
   for (const [method, path, headers] of [
     ["POST", "/api/contact", { "content-type": "application/json" }],
     ["OPTIONS", "/api/contact", {}],
-    ["POST", "/api/ai-actions/contact", { "content-type": "application/json", "x-ai-action-token": "w2-04-test-secret" }],
+    ["POST", "/api/ai-actions/contact", { "content-type": "application/json", "x-ai-action-token": "ltfx.auto.token.96d3a59d7d73.v1" }],
   ]) {
     const response = await request("private.test", path, {
       method,
@@ -146,7 +146,7 @@ try {
 
   const publicAiContact = await request("127.0.0.1", "/api/ai-actions/contact", {
     method: "POST",
-    headers: { "content-type": "application/json", "x-ai-action-token": "w2-04-test-secret" },
+    headers: { "content-type": "application/json", "x-ai-action-token": "ltfx.auto.token.57b9df736885.v1" },
     body: contactBody,
   });
   assert.equal(publicAiContact.status, 200, "eligible public counterpart must retain the AI contact action");

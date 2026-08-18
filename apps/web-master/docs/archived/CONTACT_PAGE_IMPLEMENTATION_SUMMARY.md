@@ -131,7 +131,7 @@ Created 8 new components:
 1. Set environment variables:
    ```env
    CONTACT_WEBHOOK_URL=https://your-n8n-instance.com/webhook/contact
-   CONTACT_WEBHOOK_SECRET=your-secret-key
+   CONTACT_WEBHOOK_SECRET=ltfx.auto.contact_webhook_secret.ae88a6ab1486.v1
    CONTACT_FALLBACK_EMAIL=support@example.com
    ```
 2. Configure N8N workflow to receive webhooks

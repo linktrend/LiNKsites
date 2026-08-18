@@ -107,7 +107,7 @@ const runtimeValues = {
   LINKSITES_CONFIG_SCHEMA_VERSION: '1.1.0',
   LINKSITES_RELEASE_SHA: sourceRevision,
   LINKSITES_ORG_ID: 'local-proof-org',
-  DATABASE_URI: 'postgresql://postgres:local-proof-only@local-postgres:5432/postgres',
+  DATABASE_URI: 'ltfx.db.uri.postgresql.8ecb343762.v1',
   PAYLOAD_SECRET: payloadSecret,
   PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
   LINKAUTOWORK_GATEWAY_URL: 'https://gateway.localtest',
@@ -133,7 +133,7 @@ const runtimeValues = {
   // template-admission contract.
   LINKSITES_ADMITTED_TEMPLATE_SHA: '1'.repeat(40),
   W2_02_MODE: 'local',
-  W2_02_DATABASE_URI: 'postgresql://postgres:local-proof-only@local-postgres:5432/postgres',
+  W2_02_DATABASE_URI: 'ltfx.db.uri.postgresql.8ecb343762.v1',
   W2_02_ORG_ID: 'local-proof-org',
   W2_02_SITE_ID: '00000000-0000-4000-8000-000000000002',
   W2_02_DATABASE_ROLE: 'svc_linksites_runtime',

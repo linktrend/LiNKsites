@@ -69,9 +69,9 @@ The infrastructure is complete and working. The CMS is like a **fully furnished 
   - Home (url: "/")
   - About (url: "/about")
   - Services/Offers (url: "/offers")
-  - Case Studies (url: "/case-studies")
-  - Blog/Articles (url: "/articles")
-  - Contact (url: "/contact")
+  - Case Studies (url: "ltfx.fix2.url.03dc4a5de6e7.v1")
+  - Blog/Articles (url: "ltfx.fix2.url.6dc64cb3b761.v1")
+  - Contact (url: "ltfx.fix2.url.52f53f014c9e.v1")
 □ Set site: "default", locale: "en", status: "published"
 □ Add "key" field: "primary" for main nav, "footer" for footer nav
 ```

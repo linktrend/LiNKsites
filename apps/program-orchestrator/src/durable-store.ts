@@ -173,7 +173,7 @@ export class DurableLedger {
 
   /** Must be checked immediately before and after an external mutation.
    * A reclaimed worker cannot attach a receipt or completion to a newer lease. */
-  async assertLeaseActive(runId: string, fencingToken: number): Promise<void> {
+  async assertLeaseActive(runId: string, fencingToken: number ): Promise<void> {
     const state = await this.snapshot()
     const run = state.runs.find((candidate) => candidate.runId === runId)
     if (!run || run.state !== 'running' || !run.lease || run.lease.fencingToken !== fencingToken || run.lease.expiresAt <= new Date().toISOString()) throw new Error('run external mutation rejected by stale lease fencing token')
@@ -184,7 +184,7 @@ export class DurableLedger {
     return clone(state.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation && (!runId || receipt.runId === runId)) ?? null)
   }
 
-  async saveReceipt(issueId: string, operation: string, value: unknown, runId: string, fencingToken: number): Promise<Receipt> {
+  async saveReceipt(issueId: string, operation: string, value: unknown, runId: string, fencingToken: number ): Promise<Receipt> {
     return this.mutate(async (current) => {
       if (!current) throw new Error('program has not been created')
       const prior = current.receipts.find((receipt) => receipt.issueId === issueId && receipt.operation === operation && receipt.runId === runId)

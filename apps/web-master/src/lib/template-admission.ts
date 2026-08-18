@@ -2,9 +2,15 @@ import {
   assertLibraryConsumptionEvidence,
   assertLibraryConsumptionReceipt,
   canonicalJsonStringify,
+  LINKSITES_LIBRARY_CONSUMER,
   type LibraryConsumptionEvidence,
   type LibraryConsumptionReceipt,
 } from "@linksites/factory-catalog/library-consumer";
+import { MASTER_TEMPLATE_PIN } from "@linksites/factory-catalog/master-template-pin";
+import {
+  isMasterTemplateLookAndFeelProofHarnessEnabled,
+  runMasterTemplateCandidatePreview,
+} from "@linksites/factory-catalog/master-template-preview-seam";
 
 const GIT_SHA_PATTERN = /^[a-f0-9]{40}$/;
 
@@ -25,7 +31,44 @@ const parseJson = (raw: string, label: string): unknown => {
   }
 };
 
+const admitMasterTemplateCandidatePreview = (templateId: string): AdmittedTemplateReceipt => {
+  if (templateId !== MASTER_TEMPLATE_PIN.entryId) {
+    throw new TemplateAdmissionError(
+      "look-and-feel proof harness only inspects pinned master-template-type-1; it does not admit any other template",
+    );
+  }
+  const preview = runMasterTemplateCandidatePreview();
+  if (preview.productionSelectable !== false || preview.probe.verified.selectability !== "non_selectable") {
+    throw new TemplateAdmissionError("look-and-feel proof harness refused a production-selectable result");
+  }
+  return {
+    schemaVersion: 1,
+    receiptId: `proof-only-not-admitted:${MASTER_TEMPLATE_PIN.commitSha}`,
+    consumer: LINKSITES_LIBRARY_CONSUMER,
+    entryId: MASTER_TEMPLATE_PIN.entryId,
+    catalogCommitSha: MASTER_TEMPLATE_PIN.commitSha,
+    libraryCommitSha: MASTER_TEMPLATE_PIN.commitSha,
+    verificationId: `candidate-probe:${MASTER_TEMPLATE_PIN.artifactTreeSha1}`,
+    entryChecksum: MASTER_TEMPLATE_PIN.releaseManifestSha256,
+    assetChecksums: {},
+    entrypoint: "candidate-probe",
+    testFiles: [],
+    compatibility: {
+      compatible: true,
+      consumer: LINKSITES_LIBRARY_CONSUMER,
+      nodeMajor: 22,
+      runtimes: ["node", "browser"],
+    },
+    recordedAt: "2026-08-18T00:00:00.000Z",
+  };
+};
+
 const loadAdmittedEvidence = (): LibraryConsumptionEvidence => {
+  if (isMasterTemplateLookAndFeelProofHarnessEnabled()) {
+    throw new TemplateAdmissionError(
+      "look-and-feel proof harness does not emit production admission evidence; draft remains non_selectable",
+    );
+  }
   const receiptRaw = process.env.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON;
   const evidenceRaw = process.env.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON;
   const expectedSha = process.env.LINKSITES_ADMITTED_TEMPLATE_SHA;
@@ -80,6 +123,12 @@ export const assertTemplateAdmission = (
   templateId: string,
   materializedAssetBytes?: Record<string, string>,
 ): AdmittedTemplateReceipt => {
+  if (isMasterTemplateLookAndFeelProofHarnessEnabled()) {
+    if (materializedAssetBytes !== undefined) {
+      throw new TemplateAdmissionError("look-and-feel proof harness does not admit materialized production assets");
+    }
+    return admitMasterTemplateCandidatePreview(templateId);
+  }
   const evidence = loadAdmittedEvidence();
   const receipt = evidence.receipt;
 

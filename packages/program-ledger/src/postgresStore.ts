@@ -559,9 +559,9 @@ export class PostgresLedgerStore implements LedgerStore {
     }
   }
 
-  async getIdempotencyRecord(key: string): Promise<IdempotencyRecord | null> {
+  async getIdempotencyRecord(idempotencyKey: string): Promise<IdempotencyRecord | null> {
     const { rows } = await this.db.query('select * from lsites_ledger.idempotency_records where idempotency_key = $1', [
-      key,
+      idempotencyKey,
     ])
     return rows[0] ? toIdempotency(rows[0]) : null
   }

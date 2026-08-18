@@ -14,9 +14,9 @@ const parseArgs = (): ArgMap => {
   return out
 }
 
-const requireArg = (args: ArgMap, key: string): string => {
-  const value = args[key]
-  if (!value) throw new Error(`Missing required arg --${key}=...`)
+const requireArg = (args: ArgMap, argName: string): string => {
+  const value = args[argName]
+  if (!value) throw new Error(`Missing required arg --${argName}=...`)
   return value
 }
 

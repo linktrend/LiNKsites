@@ -4,7 +4,7 @@ import Image from 'next/image'
 export const Logo: React.FC = () => (
   <div className="logo-container">
     <Image
-      src="/branding/logo-full-light.png"
+      src="/branding/logo-full-light.svg"
       alt="LinkTrend Logo"
       width={180}
       height={48}
@@ -12,7 +12,7 @@ export const Logo: React.FC = () => (
       priority
     />
     <Image
-      src="/branding/logo-full-dark.png"
+      src="/branding/logo-full-dark.svg"
       alt="LinkTrend Logo"
       width={180}
       height={48}
