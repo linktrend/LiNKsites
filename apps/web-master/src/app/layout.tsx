@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { SITE_CONFIG, SEO_CONFIG, getSiteUrl } from "@/config";
 import { SiteStructuredData } from "@/components/seo/SiteStructuredData";
+import { ThemeContractStyle } from "@/components/master-template/ThemeContractStyle";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -63,8 +64,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="default">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap"
+        />
+      </head>
       <body>
+        <ThemeContractStyle />
         <SiteStructuredData />
         {children}
       </body>

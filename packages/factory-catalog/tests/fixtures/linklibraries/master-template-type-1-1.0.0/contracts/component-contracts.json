@@ -1,0 +1,370 @@
+{
+  "contractType": "portable_component_contracts",
+  "schemaVersion": 2,
+  "role": "library_component_vocabulary",
+  "canonicalFor": ["slot-contracts"],
+  "slotAuthority": {
+    "canonicalDocument": "component-contracts.json",
+    "alias": "slot-contracts",
+    "note": "Typed slots live on each component. Do not add a sibling slot-contracts.json."
+  },
+  "capabilityHooks": {
+    "role": "adapter_capability_hooks",
+    "moduleManifests": true,
+    "note": "Hooks stay adapter-owned. Optional default-off catalogs live in modules/manifest.json.",
+    "hooks": [
+      {
+        "id": "newsletter",
+        "surfaces": ["newsletter-capture"],
+        "adapterOwns": ["subscribe", "consent", "submission", "privacy"]
+      },
+      {
+        "id": "pricing",
+        "surfaces": ["pricing-table", "pricing-preview"],
+        "adapterOwns": ["plan_data", "localized_content", "routing"]
+      },
+      {
+        "id": "forms",
+        "surfaces": ["contact-form"],
+        "adapterOwns": ["validation", "submission", "privacy"]
+      },
+      {
+        "id": "privacy",
+        "surfaces": ["newsletter-capture", "contact-form"],
+        "adapterOwns": ["consent", "cookie_consent", "privacy"]
+      },
+      {
+        "id": "analytics",
+        "surfaces": ["action"],
+        "adapterOwns": ["analytics", "browser_events"]
+      }
+    ]
+  },
+  "providerOwned": [
+    "stable Library component ids",
+    "typed slots and visual states",
+    "token references and responsive behavior",
+    "deterministic fallback states"
+  ],
+  "adapterOwned": [
+    "React and Payload symbols",
+    "tenant/site/locale/publication",
+    "routing and destination policy",
+    "media URL resolution",
+    "form validation, consent, submission and privacy",
+    "analytics, browser events, deployment and runtime configuration"
+  ],
+  "$defs": {
+    "plainString": { "type": "string" },
+    "requiredString": { "type": "string", "minLength": 1 },
+    "action": {
+      "type": "object",
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "targetPageSlug": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+      }
+    },
+    "mediaRef": {
+      "type": "object",
+      "properties": {
+        "slotId": { "type": "string" },
+        "alt": { "type": "string" }
+      }
+    }
+  },
+  "components": [
+    {
+      "id": "action",
+      "role": "action",
+      "requiredSlots": ["label"],
+      "slots": {
+        "label": { "type": "string", "minLength": 1 },
+        "targetPageSlug": { "type": "string" },
+        "variant": { "type": "string", "enum": ["default", "primary", "secondary", "ghost"] },
+        "size": { "type": "string", "enum": ["sm", "md", "lg"] }
+      },
+      "visualContract": {
+        "regions": ["label", "fallback_state"],
+        "states": ["default", "hover", "focus_visible", "disabled"],
+        "tokens": ["primary", "primaryForeground", "radius.md", "motion.duration.fast"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["href_policy", "navigation", "analytics"]
+    },
+    {
+      "id": "newsletter-capture",
+      "role": "newsletter_capture_surface",
+      "slots": {
+        "heading": { "type": "string" },
+        "description": { "type": "string" },
+        "emailLabel": { "type": "string" },
+        "submitLabel": { "type": "string" },
+        "privacyText": { "type": "string" },
+        "status": { "type": "string", "enum": ["idle", "loading", "success", "error", "invalid"] }
+      },
+      "visualContract": {
+        "regions": ["content", "actions_or_controls", "fallback_state"],
+        "states": ["idle", "loading", "success", "error", "invalid"],
+        "tokens": ["card", "border", "spacing.2xl", "radius.lg"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["validation", "consent", "submission", "privacy", "success_message"]
+    },
+    {
+      "id": "article-collection",
+      "role": "resource_collection",
+      "slots": {
+        "heading": { "type": "string" },
+        "items": { "type": "array", "items": { "type": "object", "properties": { "title": { "type": "string" }, "summary": { "type": "string" }, "targetPageSlug": { "type": "string" } } } },
+        "columns": { "type": "integer", "minimum": 1, "maximum": 3 }
+      },
+      "visualContract": {
+        "regions": ["content", "empty_state"],
+        "states": ["empty", "populated", "missing_media"],
+        "tokens": ["card", "shadow.sm", "spacing.lg", "radius.lg"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["article_records", "media_resolution", "routing"]
+    },
+    {
+      "id": "cta-section",
+      "role": "call_to_action_section",
+      "requiredSlots": ["heading"],
+      "slots": {
+        "eyebrow": { "type": "string" },
+        "heading": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "primary": { "$ref": "#/$defs/action" },
+        "secondary": { "$ref": "#/$defs/action" },
+        "background": { "type": "string", "enum": ["surface", "primary", "accent"] }
+      },
+      "visualContract": {
+        "regions": ["content", "actions_or_controls"],
+        "states": ["left", "center", "surface", "primary", "accent"],
+        "tokens": ["primary", "accent", "gradients.primary", "spacing.4xl"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["destination_policy", "localized_content"]
+    },
+    {
+      "id": "case-collection",
+      "role": "case_study_collection",
+      "slots": {
+        "heading": { "type": "string" },
+        "items": { "type": "array", "items": { "type": "object", "properties": { "title": { "type": "string" }, "summary": { "type": "string" }, "targetPageSlug": { "type": "string" } } } }
+      },
+      "visualContract": {
+        "regions": ["content", "empty_state"],
+        "states": ["empty", "populated", "missing_media"],
+        "tokens": ["card", "shadow.md", "spacing.xl", "radius.lg"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["case_study_records", "media_resolution", "routing"]
+    },
+    {
+      "id": "media-background",
+      "role": "media_background_wrapper",
+      "slots": {
+        "children": { "type": "slot-children" },
+        "background": { "$ref": "#/$defs/mediaRef" },
+        "overlay": { "type": "string", "enum": ["none", "light", "dark"] }
+      },
+      "visualContract": {
+        "regions": ["media", "overlay", "content", "fallback_state"],
+        "states": ["media", "missing_media", "light_overlay", "dark_overlay"],
+        "tokens": ["gradients.hero", "foreground", "motion.duration.normal"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["media_url_resolution", "image_loading", "renderer"]
+    },
+    {
+      "id": "offer-collection",
+      "role": "offer_collection",
+      "slots": {
+        "heading": { "type": "string" },
+        "items": { "type": "array" },
+        "mode": { "type": "string", "enum": ["grid", "list"] }
+      },
+      "visualContract": {
+        "regions": ["content", "empty_state"],
+        "states": ["empty", "populated"],
+        "tokens": ["card", "primary", "spacing.xl"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["offer_records", "routing"]
+    },
+    {
+      "id": "feature-list",
+      "role": "feature_grid",
+      "slots": {
+        "heading": { "type": "string" },
+        "description": { "type": "string" },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title"],
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      },
+      "visualContract": {
+        "regions": ["content", "empty_state"],
+        "states": ["empty", "one_column", "two_column", "three_column"],
+        "tokens": ["primary", "card", "spacing.2xl"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["feature_data"]
+    },
+    {
+      "id": "pricing-table",
+      "role": "pricing_surface",
+      "slots": {
+        "heading": { "type": "string" },
+        "subheading": { "type": "string" },
+        "plans": { "type": "array" },
+        "billing": { "type": "string", "enum": ["monthly", "yearly"] },
+        "monthlyLabel": { "type": "string" },
+        "yearlyLabel": { "type": "string" }
+      },
+      "visualContract": {
+        "regions": ["content", "actions_or_controls", "empty_state"],
+        "states": ["monthly", "yearly", "popular_plan", "empty"],
+        "tokens": ["primary", "accent", "shadow.lg", "radius.xl"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["plan_data", "localized_content", "routing"]
+    },
+    {
+      "id": "pricing-preview",
+      "role": "pricing_preview",
+      "slots": {
+        "heading": { "type": "string" },
+        "plans": { "type": "array" },
+        "limit": { "type": "integer", "minimum": 1 }
+      },
+      "visualContract": {
+        "regions": ["content", "empty_state"],
+        "states": ["empty", "populated", "popular_plan"],
+        "tokens": ["card", "primary", "spacing.xl"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["plan_data", "localized_content", "routing"]
+    },
+    {
+      "id": "scroll-hint",
+      "role": "scroll_affordance",
+      "slots": {
+        "targetId": { "type": "string" },
+        "label": { "type": "string" }
+      },
+      "visualContract": {
+        "regions": ["label"],
+        "states": ["default", "focus_visible"],
+        "tokens": ["foreground", "motion.duration.normal"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["scroll_target", "browser_events"]
+    },
+    {
+      "id": "hero-banner",
+      "role": "hero",
+      "requiredSlots": ["heading"],
+      "slots": {
+        "eyebrow": { "type": "string" },
+        "heading": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "primaryAction": { "$ref": "#/$defs/action" },
+        "background": { "$ref": "#/$defs/mediaRef" }
+      },
+      "visualContract": {
+        "regions": ["content", "actions_or_controls", "fallback_state"],
+        "states": ["default", "missing_media"],
+        "tokens": ["gradients.hero", "primary", "spacing.5xl"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["media_resolution", "navigation"]
+    },
+    {
+      "id": "social-proof",
+      "role": "social_proof",
+      "slots": {
+        "items": { "type": "array" },
+        "autoplay": { "type": "boolean" },
+        "label": { "type": "string" }
+      },
+      "visualContract": {
+        "regions": ["content", "empty_state"],
+        "states": ["empty", "single", "multiple"],
+        "tokens": ["card", "shadow.md", "motion.duration.slow"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["testimonial_records", "media_records", "animation_runtime"]
+    },
+    {
+      "id": "solution-overview",
+      "role": "solution_collection",
+      "slots": {
+        "heading": { "type": "string" },
+        "description": { "type": "string" },
+        "items": { "type": "array" }
+      },
+      "visualContract": {
+        "regions": ["content", "empty_state"],
+        "states": ["empty", "one_column", "two_column", "three_column"],
+        "tokens": ["primary", "accent", "card"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["solution_data"]
+    },
+    {
+      "id": "token-background",
+      "role": "token_background_wrapper",
+      "slots": {
+        "children": { "type": "slot-children" },
+        "surface": { "type": "string", "enum": ["background", "muted", "card", "primary", "accent"] }
+      },
+      "visualContract": {
+        "regions": ["surface", "content"],
+        "states": ["default", "high_contrast"],
+        "tokens": ["background", "muted", "card", "primary", "accent"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["renderer"]
+    },
+    {
+      "id": "rich-text",
+      "role": "portable_document_body",
+      "slots": {
+        "heading": { "type": "string" },
+        "body": { "type": "string" }
+      },
+      "visualContract": {
+        "regions": ["heading", "body"],
+        "states": ["empty", "populated"],
+        "tokens": ["foreground", "muted", "spacing.lg"],
+        "responsive": { "base": "mobile", "sm": "small", "md": "medium", "lg": "large" }
+      },
+      "adapterBoundary": ["localized_content"]
+    }
+  ],
+  "supportingSemantics": {
+    "site-header": { "role": "navigation_chrome" },
+    "site-footer": { "role": "navigation_chrome" },
+    "contact-form": { "role": "form_slot", "adapterOwned": ["validation", "submission", "privacy"] },
+    "location-list": { "role": "location_collection" },
+    "map-embed": { "role": "map_surface", "adapterOwned": ["embed_runtime"] }
+  },
+  "provenance": {
+    "role": "extraction_origin",
+    "normative": false,
+    "sourceRepository": "LiNKsites",
+    "sourceCommit": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+    "sourceTree": "873c4acc582050b416fb5a8bc59990345711df46",
+    "note": "Extraction origin only. Consumer source paths and framework symbols are not this contract."
+  }
+}

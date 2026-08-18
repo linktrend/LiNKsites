@@ -12,7 +12,10 @@ interface DynamicBgSectionProps {
 
 export function DynamicBgSection({ children, className, backgroundImage }: DynamicBgSectionProps) {
   return (
-    <section className={cn("relative overflow-hidden bg-slate-900", className)}>
+    <section
+      className={cn("relative overflow-hidden", className)}
+      style={{ background: "var(--gradient-hero, var(--gradient-surface-hero, #0f172a))" }}
+    >
       {/* Background Image using next/image for optimization */}
       {backgroundImage ? (
         <Image

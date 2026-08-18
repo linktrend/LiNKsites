@@ -12,7 +12,10 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./library-consumer": "./src/libraryConsumer.ts"
+    "./library-consumer": "./src/libraryConsumer.ts",
+    "./master-template-tokens": "./src/masterTemplateTokens.ts",
+    "./master-template-look-and-feel": "./src/masterTemplateLookAndFeel.ts",
+    "./master-template-preview-seam": "./src/masterTemplatePreviewSeam.ts"
   },
   "dependencies": {
     "@linksites/program-ledger": "workspace:*",
