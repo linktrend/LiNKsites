@@ -13,12 +13,12 @@ import {
 describe('LiNKlibraries compatibility seam', () => {
   it('pins the current LiNKlibraries identity without owning the PR 180 client', () => {
     const baseline = currentLibrariesBaseline()
-    expect(baseline.commit).toBe('368d869e92a6056540092cf18ba6c7e32954dad1')
-    expect(baseline.tree).toBe('185d7cf714777d60a2d01a4881bf1a11bc5018d9')
+    expect(baseline.commit).toBe('4cbe7fb174aba4b159d6c37ba1ef65fd3221510f')
+    expect(baseline.tree).toBe('60e582fbd1ce988538b650c99878e700c6cfa0d2')
     expect(baseline.schemaVersion).toBe(2)
     expect(baseline.schemaRevision).toBe(2)
     expect(baseline.catalogueRecordsSha256).toBe(
-      'dcabdfa363fe419d5b1ec04266efb65bd835ea5bc916c770d587404a2abe97a5',
+      '03b52875dd3c2fcf5c8fa056560fd77e0986aca04ba69bd11ebf28c866b97f2c',
     )
     const handoff = libraryLaneHandoff()
     expect(handoff.status).toBe('pending_pr_180_integration')

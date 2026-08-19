@@ -17,7 +17,7 @@ export type LibrariesBaseline = ProviderCommitTree & {
   readonly schemaRevision: 2
   readonly cataloguePath: 'indexes/v2/catalog.json'
   readonly schemaPath: 'schemas/v2'
-  readonly catalogueRecordsSha256: 'dcabdfa363fe419d5b1ec04266efb65bd835ea5bc916c770d587404a2abe97a5'
+  readonly catalogueRecordsSha256: '03b52875dd3c2fcf5c8fa056560fd77e0986aca04ba69bd11ebf28c866b97f2c'
 }
 export type BrainBaseline = ProviderCommitTree & {
   readonly provider: 'brain'
@@ -44,39 +44,39 @@ export type ProviderBaseline =
 const values: { readonly [P in ProviderName]: ProviderBaseline } = {
   platform: {
     provider: 'platform',
-    commit: '5452f90a35ed690698a9161117a9d92c69985582',
-    tree: '90b51726f7a77e4620151a463a10cfc3d2007c88',
+    commit: 'adbabf7d399cbfe5c1056d275c3d98eb480397cc',
+    tree: 'b76993f458b6dbed5d2c3e09c2c5e8ad87c6a45d',
     authClaimsSchema: 'platform.auth-claims/1.1.0',
     providerTrustContract: 'platform.provider-trust/1.0.0',
   },
   libraries: {
     provider: 'libraries',
-    commit: '368d869e92a6056540092cf18ba6c7e32954dad1',
-    tree: '185d7cf714777d60a2d01a4881bf1a11bc5018d9',
+    commit: '4cbe7fb174aba4b159d6c37ba1ef65fd3221510f',
+    tree: '60e582fbd1ce988538b650c99878e700c6cfa0d2',
     schemaVersion: 2,
     schemaRevision: 2,
     cataloguePath: 'indexes/v2/catalog.json',
     schemaPath: 'schemas/v2',
-    catalogueRecordsSha256: 'dcabdfa363fe419d5b1ec04266efb65bd835ea5bc916c770d587404a2abe97a5',
+    catalogueRecordsSha256: '03b52875dd3c2fcf5c8fa056560fd77e0986aca04ba69bd11ebf28c866b97f2c',
   },
   brain: {
     provider: 'brain',
-    commit: '8ce1d737f8870a479f07b1741c58d6681cd07aa1',
-    tree: '0cae42d612342f5e52c7e2e0e76cb6fc2f6d81f3',
+    commit: '9042e668dd0c7cef232cb427ffc9c76f06a7a446',
+    tree: '303a15936932fb5a54b208c934a6d511045cc8e4',
     contractVersion: '2.0.0',
     profile: 'linksites.oversight',
     profileVersion: '1.0.0',
   },
   skills: {
     provider: 'skills',
-    commit: '6269cb173a7c9e0170b29f35c539343c29eab795',
-    tree: '6c36e6c98f90e55d957fba781327b1b0ef90860a',
+    commit: 'e3d80fd22a05a4f68207e130c50b772b5acffda4',
+    tree: '69a131b46a73a4ef724694bfe240b1a11652bcc9',
     contractVersion: 'skills.api.v0.2',
   },
   autowork: {
     provider: 'autowork',
-    commit: '4eb29203766b1ccf200a2dc10b39cc58d175c90c',
-    tree: '5f306d674780a5a26048017f916da6048d71e7a5',
+    commit: '79ee98eb3bd1ae0cce9d34872e90fe7101a9f353',
+    tree: 'deb37e4f3a29339b35613ee799d461c74bb7b585',
     contractVersion: '2026-08-13.v1',
   },
 }

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 
-export const FROZEN_CANDIDATE_SHA = "b2d2bbb035c6e6a3f859480ce57f12e0882dd3f0";
-export const FROZEN_TREE_SHA = "2701e6a190468f437102946425a64e890eed6690";
+export const FROZEN_CANDIDATE_SHA = "4cbe7fb174aba4b159d6c37ba1ef65fd3221510f";
+export const FROZEN_TREE_SHA = "60e582fbd1ce988538b650c99878e700c6cfa0d2";
 export const FROZEN_DEPENDENCY_LOCK_SHA256 =
   "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23";
 
