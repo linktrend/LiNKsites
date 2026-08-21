@@ -111,6 +111,8 @@ begin
   if not exists (select 1 from pg_roles where rolname = 'svc_linksites_ledger') then
     create role svc_linksites_ledger nologin;
   end if;
+  grant svc_linksites_runtime to postgres;
+  grant svc_linksites_ledger to postgres;
 end $$;
 create schema if not exists auth;
 create schema if not exists lbrain;
