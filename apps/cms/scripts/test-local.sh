@@ -33,7 +33,11 @@ local_db_host="127.0.0.1"
 local_db_port="54322"
 local_db_scheme="postgresql:"
 local_db_slashes="//"
-export DATABASE_URI="${DATABASE_URI:-${local_db_scheme}${local_db_slashes}${local_db_user}:${local_db_password}@${local_db_host}:${local_db_port}/postgres}"
+export DATABASE_URI="${local_db_scheme}${local_db_slashes}${local_db_user}:${local_db_password}@${local_db_host}:${local_db_port}/postgres"
+[[ "$DATABASE_URI" == "postgresql://postgres:postgres@127.0.0.1:54322/postgres" ]] || {
+  echo "CMS local test harness must use the disposable Supabase URI" >&2
+  exit 1
+}
 export PAYLOAD_SECRET="ltfx.auto.payload_secret.2b7cc4fe3e1b.v1"
 export PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:3000"
 
