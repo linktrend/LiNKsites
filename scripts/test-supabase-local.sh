@@ -66,7 +66,6 @@ db_container="supabase_db_w1-02-supabase-gate"
 db_admin_user="postgres"
 # Supabase CLI's disposable local database uses this default only inside Docker.
 # No external credential is read, stored, or contacted by this harness.
-db_admin_password="postgres"
 
 normalize_migration_name() {
   local migration_name="$1"
@@ -96,7 +95,7 @@ copy_platform_migration() {
 supabase --workdir "$local_root" start \
   --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
-docker exec -e "PGPASSWORD=$db_admin_password" -i "$db_container" psql --username "$db_admin_user" --dbname postgres --set ON_ERROR_STOP=1 <<'SQL'
+docker exec -i "$db_container" psql --username "$db_admin_user" --dbname postgres --set ON_ERROR_STOP=1 <<'SQL'
 do $$
 begin
   if not exists (select 1 from pg_roles where rolname = 'authenticated') then
@@ -131,7 +130,7 @@ done < <(git -C "$platform_repo" ls-tree -r --name-only "$expected_platform_comm
 while IFS= read -r platform_migration; do
   migration_name="$(normalize_migration_name "$(basename "$platform_migration")")"
   echo "Applying exact Platform migration $migration_name"
-  docker exec -e "PGPASSWORD=$db_admin_password" -i "$db_container" psql --username "$db_admin_user" --dbname postgres --set ON_ERROR_STOP=1 \
+  docker exec -i "$db_container" psql --username "$db_admin_user" --dbname postgres --set ON_ERROR_STOP=1 \
     < "$local_root/platform-migrations/$migration_name"
 done < <(git -C "$platform_repo" ls-tree -r --name-only "$expected_platform_commit" supabase/migrations | LC_ALL=C sort)
 
@@ -142,14 +141,14 @@ done
 for migration in "$repo_root"/supabase/migrations/*.sql; do
   migration_name="$(normalize_migration_name "$(basename "$migration")")"
   echo "Applying LiNKsites migration $migration_name"
-  docker exec -e "PGPASSWORD=$db_admin_password" -i "$db_container" psql \
+  docker exec -i "$db_container" psql \
     --username "$db_admin_user" --dbname postgres --set ON_ERROR_STOP=1 \
     < "$local_root/linksites-migrations/$migration_name"
 done
 
-docker exec -e "PGPASSWORD=$db_admin_password" -i "$db_container" psql --username "$db_admin_user" --dbname postgres --set ON_ERROR_STOP=1 < "$local_root/supabase/seed.sql"
+docker exec -i "$db_container" psql --username "$db_admin_user" --dbname postgres --set ON_ERROR_STOP=1 < "$local_root/supabase/seed.sql"
 test_output="$local_root/w1-02-tenant-isolation.tap"
-docker exec -e "PGPASSWORD=$db_admin_password" -i "$db_container" psql --username "$db_admin_user" --dbname postgres \
+docker exec -i "$db_container" psql --username "$db_admin_user" --dbname postgres \
   --set ON_ERROR_STOP=1 --no-align --tuples-only --quiet \
   < "$local_root/supabase/tests/w1_02_tenant_isolation.sql" \
   | tee "$test_output"
