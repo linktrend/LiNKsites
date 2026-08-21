@@ -51,6 +51,15 @@ accessibility, performance, admission, hosted, deployment or production proof.
 LS-01–11 require exact rebaselined manifest amendments at the Harness, A1,
 A2/A3 and final conformance gates described above.
 
+Authenticated read-only `cursor-agent` status and model listing confirm the
+LS-00 non-Fast default model `claude-sonnet-5-thinking-medium`; no agent was
+created. The CLI is the approved Cursor API client/executor and does not require
+separate REST bearer credentials. The companion authority requires governed
+branch/worktree preparation, durable PREPARED intent, explicit
+model/workspace/worktree/sandbox, returned chat/agent identity and same-turn
+Git/manifest readback at a future approved dispatch. Missing local Cursor
+Desktop Task files are not treated as Cloud API blockers.
+
 ## Final planning-candidate results
 
 - canonical IDE 2.5.1 manifest and PLAN lifecycle validation: **PASS**;

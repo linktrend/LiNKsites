@@ -7,7 +7,7 @@
     {"id":"LS-00","title":"Exact baseline and authority map","issues":["ISS-01","ISS-02","ISS-03"],"ownedPaths":["docs/evidence/profile-v2-baseline/**","scripts/validate-profile-v2-baseline.mjs"],"prohibitedPaths":["packages/**","apps/**","supabase/migrations/**"],"verificationCommands":[["git","diff","--check"],["node","scripts/validate-profile-v2-baseline.mjs"]],"executionState":"PLAN"}
   ],
   "issues":[
-    {"id":"ISS-01","packetId":"LS-00","title":"Refresh exact baseline and create its deterministic validator"},{"id":"ISS-02","packetId":"LS-00","title":"Inventory shared versus domain authorities"},{"id":"ISS-03","packetId":"LS-00","title":"Map requirements and external configuration"}
+    {"id":"ISS-01","packetId":"LS-00","title":"Refresh exact baseline and create its fail-closed deterministic validator"},{"id":"ISS-02","packetId":"LS-00","title":"Inventory shared versus domain authorities"},{"id":"ISS-03","packetId":"LS-00","title":"Map requirements and external configuration"}
   ],
   "controls":{
     "exactCandidateInvalidation":{"enabled":true,"identityFields":["repository","commit","tree","profileDigest"]},

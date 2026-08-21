@@ -12,16 +12,23 @@ dependent evidence. Provider bytes are never edited here.
 
 - **ISS-01:** Refresh the 2.5.1 baseline, open work, dirty worktrees, current
   Library pins, database/runtime state and baseline tests; create the
-  deterministic `scripts/validate-profile-v2-baseline.mjs` evidence validator.
+  fail-closed deterministic `scripts/validate-profile-v2-baseline.mjs`
+  evidence validator.
 - **ISS-02:** Inventory Ledger/orchestrator/retry/gate/evidence versus website
   domain authorities; classify preserve/refactor/replace/retire.
 - **ISS-03:** Map LS-FR-01–25 to current exact code paths and snapshot external
-  CMS/web-master/hosting/provider configuration.
+  CMS/web-master/hosting/provider configuration; record authenticated
+  `cursor-agent` status, exact default-model listing and the companion
+  PREPARED-intent/dispatch/readback authority without creating an agent.
 
 Owns `docs/evidence/profile-v2-baseline/**` and
-`scripts/validate-profile-v2-baseline.mjs`; no product code. Acceptance: exact
-machine-readable truth, deterministic validation, no hidden overlap and no
-claim that old audit paths are current without verification.
+`scripts/validate-profile-v2-baseline.mjs`; no product code. The validator must
+exit nonzero and emit no PASS for absent, unreadable, malformed,
+stale/mismatched or unknown baseline evidence. Acceptance also requires exact
+machine-readable truth, no hidden overlap and no claim that old audit paths are
+current without verification. LS-00 routing is the non-Fast default route only;
+planning integration/rebaseline is the first approved action and agent dispatch
+remains unauthorized.
 
 ## LS-01 — Harness pin and LiNKsites Profile
 

@@ -72,6 +72,26 @@ Existing `packages/program-ledger`, `apps/program-orchestrator` and `execution/`
 generic machinery must delegate to or be replaced by LiNKharness. Domain
 catalogue, CMS, web-master and site lifecycle remain local.
 
+### Cursor Cloud dispatch companion authority
+
+The installed model-routing skill supplies route IDs, criteria and pinned model
+policy. The currently executable LS-00 baseline/documentation packet selects
+only `default=claude-sonnet-5-thinking-medium`, non-Fast. It does not select
+bulk or evaluation routes. Authenticated `cursor-agent` is the approved Cursor
+API client/executor; missing local Cursor Desktop `.cursor/agents/route-*.md`
+files are not a Cloud API blocker and separate REST bearer credentials are not
+required.
+
+Before any future approved dispatch, create the governed Issue branch and
+isolated worktree, then durably persist a PREPARED intent binding route ID,
+exact model, repository/ref, packet, candidate identity and deterministic
+idempotency key. Dispatch must pass the explicit non-Fast model, workspace,
+worktree and sandbox, capture the returned chat/agent ID, and read back exact
+Git/manifest state in the same controller turn. Authenticated status and exact
+model listing are read-only readiness evidence only; no agent was created and
+no dispatch is authorized here. Normal planning integration/rebaseline is the
+first approved action.
+
 ## 4. Deterministic site identity
 
 Every site assembly binds:
