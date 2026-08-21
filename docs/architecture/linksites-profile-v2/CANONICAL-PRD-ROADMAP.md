@@ -72,25 +72,27 @@ Existing `packages/program-ledger`, `apps/program-orchestrator` and `execution/`
 generic machinery must delegate to or be replaced by LiNKharness. Domain
 catalogue, CMS, web-master and site lifecycle remain local.
 
-### Cursor Cloud dispatch companion authority
+### Coding-execution routing authority
 
-The installed model-routing skill supplies route IDs, criteria and pinned model
-policy. The currently executable LS-00 baseline/documentation packet selects
-only `default=claude-sonnet-5-thinking-medium`, non-Fast. It does not select
-bulk or evaluation routes. Authenticated `cursor-agent` is the approved Cursor
-API client/executor; missing local Cursor Desktop `.cursor/agents/route-*.md`
-files are not a Cloud API blocker and separate REST bearer credentials are not
-required.
+Every current manifest packet/Issue uses its exact `[routing:*]` record in
+`MODEL-ROUTING-AUTHORITY.json`. Auto means only SDK selector `auto-smart` with
+`optimize_for=cost`; generic Auto, Balance, Intelligence, omission-based or
+unverifiable Auto is forbidden. Composer 2.5 is limited to fully bounded,
+simple/repetitive, objectively verified and reversible work. Cursor Grok 4.6
+Medium non-Fast handles explicit complex or long-running work. A third-party
+model requires a recorded capability, context, bulk-modality, independent-
+review, Terra-verification or quality-recovery need and cost-pool reason.
 
-Before any future approved dispatch, create the governed Issue branch and
-isolated worktree, then durably persist a PREPARED intent binding route ID,
-exact model, repository/ref, packet, candidate identity and deterministic
-idempotency key. Dispatch must pass the explicit non-Fast model, workspace,
-worktree and sandbox, capture the returned chat/agent ID, and read back exact
-Git/manifest state in the same controller turn. Authenticated status and exact
-model listing are read-only readiness evidence only; no agent was created and
-no dispatch is authorized here. Normal planning integration/rebaseline is the
-first approved action.
+Before dispatch, live discovery must prove each exact selector and parameter.
+A governed `issue/*` branch/isolated worktree and PREPARED route/mode/repository/
+ref/packet/candidate/workspace/worktree/sandbox/idempotency identity are
+mandatory. Request/readback must prove effective optimization mode, serving
+model, non-Fast state, returned agent/run identity and same-turn Git/manifest.
+One different-family fallback is allowed only after logged model-quality
+failure and recomputes PREPARED/idempotency; infrastructure failure keeps the
+same model. Independent review is a separate worker and Terra High checkpoint
+verification remains distinct. The current shell is unauthenticated, so
+dispatch remains HOLD and no agent is created here.
 
 ## 4. Deterministic site identity
 

@@ -10,8 +10,9 @@ is a clean internal rebuild with selective reuse, additive data migration,
 exact provider pins and rollback—not a new Profile repository.
 
 Documents: `CANONICAL-PRD-ROADMAP.md`, `REMAINING-WORK-BASELINE.md`,
-`WORK-PACKETS-AND-ISSUES.md`, `EXECUTION-MANIFEST.json`, and
-`PLANNING-VALIDATION.md`. The initial manifest dispatches only LS-00. Later
+`WORK-PACKETS-AND-ISSUES.md`, `EXECUTION-MANIFEST.json`,
+`MODEL-ROUTING-AUTHORITY.json`, and `PLANNING-VALIDATION.md`. The initial
+manifest dispatches only LS-00. Later
 tranches require rebaselined amendments binding exact LiNKharness and Master
 Template checkpoints; A2/A3 remains separately gated after A1 proof.
 

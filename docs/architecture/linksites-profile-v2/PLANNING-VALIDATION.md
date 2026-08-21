@@ -51,14 +51,18 @@ accessibility, performance, admission, hosted, deployment or production proof.
 LS-01–11 require exact rebaselined manifest amendments at the Harness, A1,
 A2/A3 and final conformance gates described above.
 
-Authenticated read-only `cursor-agent` status and model listing confirm the
-LS-00 non-Fast default model `claude-sonnet-5-thinking-medium`; no agent was
-created. The CLI is the approved Cursor API client/executor and does not require
-separate REST bearer credentials. The companion authority requires governed
-branch/worktree preparation, durable PREPARED intent, explicit
-model/workspace/worktree/sandbox, returned chat/agent identity and same-turn
-Git/manifest readback at a future approved dispatch. Missing local Cursor
-Desktop Task files are not treated as Cloud API blockers.
+Official Cursor documentation confirms Auto Cost is SDK selector `auto-smart`
+with `optimize_for=cost`, and identifies Composer 2.5 and Cursor Grok 4.6 as
+Cursor Models. The current read-only shell has Cursor Agent
+`2026.08.11-e8db854` but reports `Not logged in`; therefore exact live selector,
+parameter, effective optimization-mode/model and non-Fast readback are unproved.
+No agent was created and every Cursor dispatch remains HOLD.
+
+`MODEL-ROUTING-AUTHORITY.json` binds 1/1 manifest packet and 3/3 Issues to
+primary route, deterministic one-hop quality fallback, separate independent
+reviewer and distinct Terra High checkpoint verifier. Its SHA-256 digest is
+`sha256:fca37a8a69e5628853e51899466a683db615afe9b2876cc3bcaf92174e16c6c8`.
+Any byte change invalidates affected PREPARED intents and idempotency identities.
 
 ## Final planning-candidate results
 
@@ -71,6 +75,9 @@ Desktop Task files are not treated as Cloud API blockers.
 - independent Terra review of all three current planning candidates: **ACCEPT**,
   no P0–P3 planning defects;
 - whitespace and documentation-specific credential-pattern checks: **PASS**;
+- current implementation route binding: **PASS**, 1/1 packet and 3/3 Issues;
+- live Cursor selector/mode/effective-model readiness: **HOLD**, current shell
+  unauthenticated; agent creation/acceptance/readback: **NOT RUN**;
 - repository-wide IDE secret scan: **HOLD**, because the existing fixture
   declaration is bound to the prior candidate tree (219 stale fixture
   declarations after staging this documentation-only tree); refresh must use
