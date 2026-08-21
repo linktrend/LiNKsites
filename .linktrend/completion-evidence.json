@@ -1,29 +1,52 @@
 {
   "schemaVersion": 1,
-  "headSha": "5d1cfa82bc328d067c3d385d667cbf63bd2d82f8",
+  "headSha": "1c2d5149083e6bd0c4e07e05667144484e20babb",
   "classification": "tests",
-  "acceptance": "LiNKsites consumes a pinned LiNKlibraries Revision 2 master template, verifies release identity and file digests, and fails closed for missing or non-selectable provider releases.",
+  "acceptance": "Baseline admission checks pass after deterministic repair; no product packet execution.",
   "commands": [
+    {
+      "cmd": "pnpm lint",
+      "exitCode": 0
+    },
+    {
+      "cmd": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "cmd": "node --test deploy/tests/runtime-contract.test.mjs",
+      "exitCode": 0
+    },
+    {
+      "cmd": "python3 -m unittest scripts.tests.test_ci_full_suite_receipt",
+      "exitCode": 0
+    },
+    {
+      "cmd": "python3 scripts/gitops/secret_scan.py",
+      "exitCode": 0
+    },
+    {
+      "cmd": "scripts/assert-active-surface-clean.sh",
+      "exitCode": 0
+    },
+    {
+      "cmd": "python3 -m py_compile scripts/gitops/run_delivery_profile.py scripts/gitops/gate_receipt.py scripts/gitops/secret_scan.py scripts/gitops/repository_ci_contract.py scripts/gitops/receipt_seal.py",
+      "exitCode": 0
+    },
     {
       "cmd": "git diff --check",
       "exitCode": 0
-    },
-    {
-      "cmd": "pnpm --filter @linksites/factory-catalog test",
-      "exitCode": 0
-    },
-    {
-      "cmd": "pnpm --filter @linksites/factory-catalog typecheck",
-      "exitCode": 0
-    },
-    {
-      "cmd": "pnpm --filter @linksites/program-orchestrator typecheck",
-      "exitCode": 0
-    },
-    {
-      "cmd": "pnpm --filter @linksites/web-master typecheck",
-      "exitCode": 0
     }
   ],
-  "at": "2026-08-14T10:44:12Z"
+  "at": "2026-08-21T11:48:16Z",
+  "kind": "v25-issue-checkpoint",
+  "amendment": "V25_BOOTSTRAP_LEAN",
+  "gitTree": "b832f6bbb2abcb959df48be997bcad8d7bb32370",
+  "pushed": true,
+  "scopedDiff": true,
+  "focusedTests": {
+    "passed": true
+  },
+  "independentTerraVerification": true,
+  "manifestEvidence": true,
+  "proofClass": "local"
 }
