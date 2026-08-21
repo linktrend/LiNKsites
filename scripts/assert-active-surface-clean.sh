@@ -10,9 +10,9 @@ active=(deploy scripts .github package.json pnpm-workspace.yaml turbo.json)
 while IFS= read -r -d '' directory; do active+=("$directory"); done < <(find apps packages -type d -name src -print0)
 pattern='(N8N_WEBHOOK_URL|CONTACT_WEBHOOK_URL|sync-supabase-to-cms|seed-supabase-lsites-core|apps/web-company)'
 if command -v rg >/dev/null 2>&1; then
-  matches=$(rg -n -I -g '!deploy/tests/**' -g '!scripts/assert-active-surface-clean.sh' -e "$pattern" "${active[@]}" || true)
+  matches=$(rg -n -I -g '!deploy/tests/**' -g '!scripts/assert-active-surface-clean.sh' -g '!.github/linktrend-secret-scan-fixtures.json' -e "$pattern" "${active[@]}" || true)
 else
-  matches=$(grep -R -n -I -E --exclude='assert-active-surface-clean.sh' --exclude-dir=tests -- "$pattern" "${active[@]}" || true)
+  matches=$(grep -R -n -I -E --exclude='assert-active-surface-clean.sh' --exclude='linktrend-secret-scan-fixtures.json' --exclude-dir=tests -- "$pattern" "${active[@]}" || true)
 fi
 if test -n "$matches"; then
   printf '%s\n' "$matches"
