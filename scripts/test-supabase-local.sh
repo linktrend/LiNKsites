@@ -149,6 +149,7 @@ for migration in "$repo_root"/supabase/migrations/*.sql; do
 done
 
 docker exec -i "$db_container" psql --username "$db_admin_user" --dbname postgres --set ON_ERROR_STOP=1 < "$local_root/supabase/seed.sql"
+docker exec -i "$db_container" psql --username postgres --dbname postgres --command "grant svc_observer to postgres"
 test_output="$local_root/w1-02-tenant-isolation.tap"
 docker exec -i "$db_container" psql --username "$db_admin_user" --dbname postgres \
   --set ON_ERROR_STOP=1 --no-align --tuples-only --quiet \
