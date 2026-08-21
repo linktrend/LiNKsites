@@ -15,12 +15,12 @@ const gatewayAndQueue = (): { gateway: LiNKautoworkGateway; outbox: FileOutbox }
   const environment = process.env.LINKAUTOWORK_ENVIRONMENT as GatewayEnvironment
   const queuePath = process.env.LINKAUTOWORK_OUTBOX_PATH
   const integrityMaterial = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET
-  if (!gatewayUrl || !secret || !keyId || !environmentNames.has(environment) || !queuePath || !integritySecret) throw new Error('LiNKautowork durable delivery configuration is incomplete')
+  if (!gatewayUrl || !secret || !keyId || !environmentNames.has(environment) || !queuePath || !integrityMaterial) throw new Error('LiNKautowork durable delivery configuration is incomplete')
   const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: parseGatewayEventPolicies(process.env.LINKAUTOWORK_EVENT_GRANTS!), transport: async (request) => {
     const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 3_000)
     try { const response = await fetch(gatewayUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request), signal: controller.signal }); const acknowledgedAt = response.headers.get('x-linkautowork-acknowledged-at') ?? new Date().toISOString(); return { status: response.status, receiptId: response.headers.get('x-linkautowork-receipt') ?? 'missing', receiptSignature: response.headers.get('x-linkautowork-receipt-signature') ?? 'missing', acknowledgedAt } } finally { clearTimeout(timer) }
   } })
-  return { gateway, outbox: new FileOutbox(queuePath, { maxAttempts: 5, metrics: gateway.metrics, integritySecret, resigner: (request, attempt) => gateway.resignRequest(request, attempt), validator: (request) => gateway.verifyStored(request) }) }
+  return { gateway, outbox: new FileOutbox(queuePath, { maxAttempts: 5, metrics: gateway.metrics, integritySecret: integrityMaterial, resigner: (request, attempt) => gateway.resignRequest(request, attempt), validator: (request) => gateway.verifyStored(request) }) }
 }
 
 export const triggerLiNKautowork = async (event: AutoworkEvent, dependencies: { readProgramPass?: ProgramPassReader } = {}): Promise<void> => {

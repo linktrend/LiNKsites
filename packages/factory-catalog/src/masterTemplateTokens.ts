@@ -191,7 +191,7 @@ export function renderThemeContractCss(theme: unknown): string {
   assertThemeJsonIsCanonical(theme)
   const mapping = isRecord(theme.cssVariableMapping) ? theme.cssVariableMapping : {}
   const ids = assertIndustryPresets(theme)
-  const base = theme.theme
+  const base = theme.theme as Record<string, unknown>
   const dark = isRecord(theme.darkTheme) ? theme.darkTheme : {}
   const presets = theme.industryPresets as Record<string, unknown>
   const blocks = [
@@ -202,10 +202,11 @@ export function renderThemeContractCss(theme: unknown): string {
     formatBlock(':root[data-theme="dark"]', collectPatchDeclarations(base, dark, mapping)),
   ]
   for (const id of ids) {
-    if (!isRecord(presets[id])) {
+    const preset = presets[id]
+    if (!isRecord(preset)) {
       throw new MasterTemplateConsumerError(`industry preset "${id}" is missing.`)
     }
-    blocks.push(formatBlock(`:root[data-theme="${id}"]`, collectPatchDeclarations(base, presets[id], mapping)))
+    blocks.push(formatBlock(`:root[data-theme="${id}"]`, collectPatchDeclarations(base, preset, mapping)))
   }
   return [
     '/* In-memory CSS from authored theme.json. Do not treat as a tokens.css overlay. */',
