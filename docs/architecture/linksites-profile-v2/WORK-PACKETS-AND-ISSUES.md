@@ -11,15 +11,17 @@ dependent evidence. Provider bytes are never edited here.
 ## LS-00 — Exact baseline and authority map
 
 - **ISS-01:** Refresh the 2.5.1 baseline, open work, dirty worktrees, current
-  Library pins, database/runtime state and baseline tests.
+  Library pins, database/runtime state and baseline tests; create the
+  deterministic `scripts/validate-profile-v2-baseline.mjs` evidence validator.
 - **ISS-02:** Inventory Ledger/orchestrator/retry/gate/evidence versus website
   domain authorities; classify preserve/refactor/replace/retire.
 - **ISS-03:** Map LS-FR-01–25 to current exact code paths and snapshot external
   CMS/web-master/hosting/provider configuration.
 
-Owns `docs/evidence/profile-v2-baseline/**`; no product code. Acceptance: exact
-machine-readable truth, no hidden overlap and no claim that old audit paths are
-current without verification.
+Owns `docs/evidence/profile-v2-baseline/**` and
+`scripts/validate-profile-v2-baseline.mjs`; no product code. Acceptance: exact
+machine-readable truth, deterministic validation, no hidden overlap and no
+claim that old audit paths are current without verification.
 
 ## LS-01 — Harness pin and LiNKsites Profile
 
