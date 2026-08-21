@@ -320,8 +320,8 @@ export class InMemoryLedgerStore implements LedgerStore {
     return { record, created: true }
   }
 
-  async getIdempotencyRecord(idempotencyKey: string): Promise<IdempotencyRecord | null> {
-    return this.idempotency.get(key) ?? null
+  async getIdempotencyRecord(idempotencyIdentifier: string): Promise<IdempotencyRecord | null> {
+    return this.idempotency.get(idempotencyIdentifier) ?? null
   }
 
   async updateIdempotencyRecord(record: IdempotencyRecord): Promise<void> {
