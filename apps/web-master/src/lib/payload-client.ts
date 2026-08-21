@@ -242,7 +242,7 @@ const appendWhereParams = (
   }
 
   // Reduce over a (string | number)[] path but ensure the final key is a string.
-  const key = ltfx.auto.key.f154c32fb8da.v1, part) => `${acc}[${part}]`, "where");
+  const key = path.reduce((acc: string, part) => `${acc}[${part}]`, "where");
   searchParams.append(key, String(value));
 };
 

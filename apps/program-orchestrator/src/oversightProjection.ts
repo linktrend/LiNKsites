@@ -5,6 +5,7 @@ export const LINKsites_OVERSIGHT_PROFILE = 'linksites.oversight' as const
 export const LINKSITES_OVERSIGHT_PROFILE = LINKsites_OVERSIGHT_PROFILE
 export const LINKsites_OVERSIGHT_PROFILE_VERSION = '1.0.0' as const
 export const BRAIN_V2_CONTRACT_VERSION = '2.0.0' as const
+const PROJECTION_MARKER = 'linksites' as const
 
 export type ProjectionClassification = 'verified' | 'stale' | 'conflicted' | 'incomplete' | 'unavailable' | 'inferred'
 export type ProjectionFreshness = 'fresh' | 'stale' | 'expired' | 'unknown'
@@ -21,7 +22,7 @@ export type LinksitesOversightProjection = {
   profile: typeof LINKsites_OVERSIGHT_PROFILE
   projectionKind: 'projection'
   metadata: {
-    tenantId: string; domain: 'ltfx.auto.domaintoken.4abf94f4164d.v1'; domainToken: 'ltfx.fix.domaintoken.4abf94f4164d.v1'; contextKind: 'site' | 'program' | 'project'
+    tenantId: string; domain: 'linksites'; domainToken: typeof PROJECTION_MARKER; contextKind: 'site' | 'program' | 'project'
     contextReference: string; ownerReference: string; confidence: number; retentionClass: 'operational' | 'governed' | 'archival'
     purpose: string; region: string; shareabilityState: 'private' | 'tenant_only' | 'cross_tenant_approved' | 'public'
     sourcePrivacy: 'tenant_internal' | 'confidential' | 'redacted'; destinationPrivacy: 'tenant_internal' | 'confidential' | 'redacted'
@@ -48,7 +49,7 @@ export type LinksitesOversightProjection = {
   publication: { status: 'not_requested' | 'pending' | 'published' | 'failed' | 'retracted' | 'unavailable'; reference?: string }
   hosting: { status: 'not_configured' | 'ready' | 'active' | 'failed' | 'stale' | 'unavailable'; reference?: string }
   autoworkReferences: StatusReference[]; brainReferences: StatusReference[]
-  authoritativeLinksitesEvidence: { authority: 'ltfx.fix.domaintoken.54695b9bf6f7.v1'; status: ProjectionClassification | 'unavailable'; evidenceReferences: StatusReference[]; observedAt: string }
+  authoritativeLinksitesEvidence: { authority: 'linksites'; status: ProjectionClassification | 'unavailable'; evidenceReferences: StatusReference[]; observedAt: string }
 }
 
 export type LinksitesOversightInput = {
@@ -175,7 +176,7 @@ export function buildLinksitesOversightProjection(input: LinksitesOversightInput
   const projection: LinksitesOversightProjection = {
     providerBaseline,
     contractVersion: BRAIN_V2_CONTRACT_VERSION, projectionId: ref(input.projectionId, 'projectionId'), profile: LINKsites_OVERSIGHT_PROFILE, projectionKind: 'projection',
-    metadata: { tenantId: ref(input.tenantId, 'tenantId'), domain: 'ltfx.auto.domaintoken.54695b9bf6f7.v1', domainToken: 'ltfx.fix2.domaintoken.3d29219fd0ec.v1', contextKind: 'site', contextReference: ref(input.contextReference, 'contextReference'), ownerReference: ref(input.ownerReference, 'ownerReference'), confidence, retentionClass: 'governed', purpose: 'projection_exchange', region: text(input.region ?? 'global', 'region', 40).toLowerCase(), shareabilityState: 'tenant_only', sourcePrivacy: 'tenant_internal', destinationPrivacy: 'tenant_internal', authority: 'advisory', verticalAuthority: 'none' },
+    metadata: { tenantId: ref(input.tenantId, 'tenantId'), domain: 'linksites', domainToken: PROJECTION_MARKER, contextKind: 'site', contextReference: ref(input.contextReference, 'contextReference'), ownerReference: ref(input.ownerReference, 'ownerReference'), confidence, retentionClass: 'governed', purpose: 'projection_exchange', region: text(input.region ?? 'global', 'region', 40).toLowerCase(), shareabilityState: 'tenant_only', sourcePrivacy: 'tenant_internal', destinationPrivacy: 'tenant_internal', authority: 'advisory', verticalAuthority: 'none' },
     privacy: { privacyClassification: 'tenant_internal', noExistenceDisclosure: false, existenceDisclosure: 'tenant_only' },
     title: text(input.title, 'title', 240), summary: text(input.summary, 'summary', 2000), tags: ['linksites', 'oversight'], externalArtifactReferences: [],
     createdAt: producerTimestamp, updatedAt: observationTimestamp, schemaVersion: BRAIN_V2_CONTRACT_VERSION, profileVersion: LINKsites_OVERSIGHT_PROFILE_VERSION,
