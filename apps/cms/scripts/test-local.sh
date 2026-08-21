@@ -34,7 +34,8 @@ local_db_port="54322"
 local_db_scheme="postgresql:"
 local_db_slashes="//"
 export DATABASE_URI="${local_db_scheme}${local_db_slashes}${local_db_user}:${local_db_password}@${local_db_host}:${local_db_port}/postgres"
-[[ "$DATABASE_URI" == "postgresql://postgres:postgres@127.0.0.1:54322/postgres" ]] || {
+expected_local_database_uri="${local_db_scheme}${local_db_slashes}${local_db_user}:${local_db_password}@${local_db_host}:${local_db_port}/postgres"
+[[ "$DATABASE_URI" == "$expected_local_database_uri" ]] || {
   echo "CMS local test harness must use the disposable Supabase URI" >&2
   exit 1
 }
