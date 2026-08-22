@@ -151,14 +151,6 @@ jobs:
           path: .turbo
           key: ${{ steps.cache-keys.outputs.turbo }}
 
-      - name: Restore Docker BuildKit layers (advisory)
-        id: buildx-restore
-        continue-on-error: true
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cache/linksites-buildx
-          key: ${{ steps.cache-keys.outputs.buildx }}
-
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -186,7 +178,9 @@ jobs:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
           W2_02_LIBRARY_REPOSITORY_PATH: ${{ github.workspace }}/.ci/linklibraries
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          DOCKER_BUILDKIT_CACHE: ${{ github.workspace }}/.cache/linksites-buildx
+          # The hosted runner already proves the image build and recovery
+          # profile. Do not export the multi-GB local layer cache on this gate.
+          DOCKER_BUILDKIT_CACHE: disabled
         run: bash scripts/ci-required.sh
 
       - name: Bind successful suite to exact Phase source and file tree
@@ -228,14 +222,6 @@ jobs:
         with:
           path: .turbo
           key: ${{ steps.cache-keys.outputs.turbo }}
-
-      - name: Save Docker BuildKit layers (advisory)
-        if: ${{ success() && steps.buildx-restore.outputs.cache-hit != 'true' }}
-        continue-on-error: true
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cache/linksites-buildx
-          key: ${{ steps.cache-keys.outputs.buildx }}
 
   promotion-receipt:
     name: LiNKsites Promotion Receipt
