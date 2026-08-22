@@ -12,12 +12,12 @@
 import {
   assertOrgCapabilityGrant,
   type CapabilityGrantLookup,
-} from './capability-lookup.js'
-import type { SideEffectClass } from './types.js'
+} from './capability-lookup.ts'
+import type { SideEffectClass } from './types.ts'
 import {
   type PlatformClaimVerifier,
   type VerifiedPlatformCapability,
-} from './platform-client.js'
+} from './platform-client.ts'
 import { bindProviderBaseline } from '@linksites/types'
 
 /** Side-effect classes that touch an irreversible / external system. */

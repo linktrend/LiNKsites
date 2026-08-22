@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict'
-import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -12,11 +12,19 @@ const bin = join(temp, 'bin')
 const docker = join(bin, 'docker')
 try {
   execFileSync('mkdir', ['-p', bin])
-  writeFileSync(docker, '#!/usr/bin/env bash\nif [[ "$1" == image && "$2" == inspect ]]; then echo sha256:contract; else exit 0; fi\n')
+  writeFileSync(docker, '#!/usr/bin/env bash\nif [[ "$1" == image && "$2" == inspect ]]; then echo sha256:contract; else printf "%s\\n" "$*" >> "' + join(temp, 'docker-args.log') + '"; fi\n')
   chmodSync(docker, 0o755)
   const env = { ...process.env, BASE_SHA: 'HEAD', DOCKER_BUILDKIT_CACHE: join(temp, 'cache'), PATH: `${bin}:${process.env.PATH}` }
   const passed = execFileSync('bash', [script], { cwd: root, env, encoding: 'utf8' })
   assert.match(passed, /W2-07 local Docker build verification passed\./)
+  const cachedArgs = readFileSync(join(temp, 'docker-args.log'), 'utf8')
+  assert.match(cachedArgs, /--cache-from/)
+
+  rmSync(join(temp, 'docker-args.log'), { force: true })
+  const hosted = execFileSync('bash', [script], { cwd: root, env: { ...env, DOCKER_BUILDKIT_CACHE: 'disabled' }, encoding: 'utf8' })
+  assert.match(hosted, /W2-07 local Docker build verification passed\./)
+  const hostedArgs = readFileSync(join(temp, 'docker-args.log'), 'utf8')
+  assert.doesNotMatch(hostedArgs, /--cache-(from|to)/)
 
   const failed = spawnSync('bash', [script], { cwd: root, env: { ...env, DOCKER_CLASSIFICATION_OUTPUT: '/dev/null' }, encoding: 'utf8' })
   assert.notEqual(failed.status, 0)
