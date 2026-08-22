@@ -5,12 +5,12 @@
  * never flatten everything to hero. Unknown semantic IDs fail closed.
  * This is inspectable draft presentation, not production admission.
  */
-import { MasterTemplateConsumerError } from './masterTemplatePin.js'
+import { MasterTemplateConsumerError } from './masterTemplatePin.ts'
 import {
   SEMANTIC_COMPONENT_MAP,
   type ProjectedMasterTemplatePage,
   type ProjectedPayloadBlock,
-} from './masterTemplateSemanticProjection.js'
+} from './masterTemplateSemanticProjection.ts'
 
 export const LOOK_AND_FEEL_REGIONS = [
   'hero',

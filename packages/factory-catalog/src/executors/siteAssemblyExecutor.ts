@@ -19,11 +19,11 @@
  */
 
 import type { ExecutorAdapter, ExecutorResult, Issue, Run } from '@linksites/program-ledger'
-import { assembleSiteManifest, SiteAssemblyError, type PagePlanEntry, type SiteClass } from '../siteAssemblyManifest.js'
-import { VerticalKitError, type VerticalKit } from '../verticalKit.js'
-import type { SiteSpecification } from '../siteSpecification.js'
-import type { ProspectAdaptation } from '../prospectAdaptation.js'
-import { ComponentRegistryError, type ComponentRegistry } from '../componentRegistry.js'
+import { assembleSiteManifest, SiteAssemblyError, type PagePlanEntry, type SiteClass } from '../siteAssemblyManifest.ts'
+import { VerticalKitError, type VerticalKit } from '../verticalKit.ts'
+import type { SiteSpecification } from '../siteSpecification.ts'
+import type { ProspectAdaptation } from '../prospectAdaptation.ts'
+import { ComponentRegistryError, type ComponentRegistry } from '../componentRegistry.ts'
 
 export const SITE_ASSEMBLY_ISSUE_TYPE = 'linksites.factory.assemble_site_manifest'
 

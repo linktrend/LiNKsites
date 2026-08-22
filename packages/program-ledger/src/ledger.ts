@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { createHash } from 'node:crypto'
-import type { CapabilityGrantLookup } from './capability-lookup.js'
-import type { LedgerStore } from './store.js'
-import type { HierarchyRegistry } from './hierarchy.js'
-import { assertDispatchCapabilityGrant, CapabilityGateError } from './capability-gate.js'
+import type { CapabilityGrantLookup } from './capability-lookup.ts'
+import type { LedgerStore } from './store.ts'
+import type { HierarchyRegistry } from './hierarchy.ts'
+import { assertDispatchCapabilityGrant, CapabilityGateError } from './capability-gate.ts'
 import {
   SCHEMA_VERSION,
   DEFAULT_ORG_ID,
@@ -27,8 +27,8 @@ import {
   type Run,
   type SideEffectClass,
   type WorkState,
-} from './types.js'
-import { LINKSITES_PROGRAM, type ProgramDefinition } from './hierarchy.js'
+} from './types.ts'
+import { LINKSITES_PROGRAM, type ProgramDefinition } from './hierarchy.ts'
 import type { PlatformBaseline } from '@linksites/types'
 
 export class LedgerError extends Error {

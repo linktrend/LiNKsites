@@ -39,10 +39,10 @@
  * is separate, still-open future work.
  */
 
-import type { SiteSpecification } from './siteSpecification.js'
-import type { SiteAssemblyExecutorInput } from './executors/siteAssemblyExecutor.js'
-import type { PagePlanEntry, SiteAssemblyManifest, SiteClass } from './siteAssemblyManifest.js'
-import type { PromotionRequest, WorkingPackage } from './promotionService.js'
+import type { SiteSpecification } from './siteSpecification.ts'
+import type { SiteAssemblyExecutorInput } from './executors/siteAssemblyExecutor.ts'
+import type { PagePlanEntry, SiteAssemblyManifest, SiteClass } from './siteAssemblyManifest.ts'
+import type { PromotionRequest, WorkingPackage } from './promotionService.ts'
 import type { SchemaVersion } from '@linksites/types'
 
 export class PipelineChainingError extends Error {}
