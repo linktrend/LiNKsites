@@ -8,6 +8,11 @@ LiNKharness, LiNKlibraries and LiNKsites identities are exact pins. Any provider
 semantic, Harness contract, adapter or Profile digest change invalidates the
 dependent evidence. Provider bytes are never edited here.
 
+The Principal binds this Program to the one portfolio Cursor account and its
+capability receipt. Auto Cost is unavailable, so current assignments are
+Composer or Grok; do not repeat account preflight unless the portfolio identity
+changes. Old PREPARED identities remain invalid and execution is not authorized.
+
 ## LS-00 — Exact baseline and authority map
 
 - **ISS-01:** Refresh the 2.5.1 baseline, open work, dirty worktrees, current

@@ -4,7 +4,7 @@
   "program":{"id":"linksites-profile-v2","name":"LiNKsites Profile v2","targetRelease":"2.0.0"},
   "baseline":{"repository":"linktrend/LiNKsites","commit":"e46ce0c657a7445bfb898ac208f6f5d889b550f2","tree":"3e98a86abbdc753933e9c7238d9c29f47b03022e","ref":"refs/heads/main"},
   "packets":[
-    {"id":"LS-00","title":"Exact baseline and authority map [routing:LS-P-LS00]","issues":["ISS-01","ISS-02","ISS-03"],"ownedPaths":["docs/evidence/profile-v2-baseline/**","scripts/validate-profile-v2-baseline.mjs"],"prohibitedPaths":["packages/**","apps/**","supabase/migrations/**"],"verificationCommands":[["git","diff","--check"],["node","scripts/validate-profile-v2-baseline.mjs"]],"executionState":"PLAN"}
+    {"id":"LS-00","title":"Exact baseline and authority map [routing:LS2-P-LS00]","issues":["ISS-01","ISS-02","ISS-03"],"ownedPaths":["docs/evidence/profile-v2-baseline/**","scripts/validate-profile-v2-baseline.mjs"],"prohibitedPaths":["packages/**","apps/**","supabase/migrations/**"],"verificationCommands":[["git","diff","--check"],["node","scripts/validate-profile-v2-baseline.mjs"]],"executionState":"PLAN"}
   ],
   "issues":[
     {"id":"ISS-01","packetId":"LS-00","title":"Refresh exact baseline and create its fail-closed deterministic validator [routing:LS-I-ISS01]"},{"id":"ISS-02","packetId":"LS-00","title":"Inventory shared versus domain authorities [routing:LS-I-ISS02]"},{"id":"ISS-03","packetId":"LS-00","title":"Map requirements and external configuration [routing:LS-I-ISS03]"}

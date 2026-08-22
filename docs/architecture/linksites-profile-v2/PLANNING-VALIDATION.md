@@ -51,18 +51,23 @@ accessibility, performance, admission, hosted, deployment or production proof.
 LS-01–11 require exact rebaselined manifest amendments at the Harness, A1,
 A2/A3 and final conformance gates described above.
 
-Official Cursor documentation confirms Auto Cost is SDK selector `auto-smart`
-with `optimize_for=cost`, and identifies Composer 2.5 and Cursor Grok 4.6 as
-Cursor Models. The current read-only shell has Cursor Agent
-`2026.08.11-e8db854` but reports `Not logged in`; therefore exact live selector,
-parameter, effective optimization-mode/model and non-Fast readback are unproved.
-No agent was created and every Cursor dispatch remains HOLD.
+The Principal binds this Program to the single portfolio Cursor account and
+receipt `sha256:23a0173dc24e67a86a87aacd7aee8b8ec93719371070a7e26fe7045b33267aeb`.
+Auto Cost is unavailable, so all current work is Composer or Grok. The same
+account preflight is not repeated unless the Principal changes that identity.
 
 `MODEL-ROUTING-AUTHORITY.json` binds 1/1 manifest packet and 3/3 Issues to
 primary route, deterministic one-hop quality fallback, separate independent
 reviewer and distinct Terra High checkpoint verifier. Its SHA-256 digest is
-`sha256:fca37a8a69e5628853e51899466a683db615afe9b2876cc3bcaf92174e16c6c8`.
-Any byte change invalidates affected PREPARED intents and idempotency identities.
+`sha256:8ee161e801560811c74012375a30904223796b05e86c25bc9af1a68902b9c4c2`;
+the successor manifest digest is
+`sha256:80b046ca6e6236744a673e4a05505fc829701c047e6f6996b9142a06a268fc05`.
+The portfolio identity gate source is LiNKharness commit
+`3f8bb465dbbc69cccb213e4ad1cada8644d0320a`, path
+`docs/architecture/linkharness-v1/PORTFOLIO-MODEL-ROUTING-IDENTITY-GATE.json`;
+its digest is
+`sha256:d7634cd1db0695570f044d7c8a65bbd4f4a7407ebd31c782cf8f896fff453345`.
+Every PREPARED intent derived from the superseded authority is invalid.
 
 ## Final planning-candidate results
 
@@ -76,8 +81,8 @@ Any byte change invalidates affected PREPARED intents and idempotency identities
   no P0–P3 planning defects;
 - whitespace and documentation-specific credential-pattern checks: **PASS**;
 - current implementation route binding: **PASS**, 1/1 packet and 3/3 Issues;
-- live Cursor selector/mode/effective-model readiness: **HOLD**, current shell
-  unauthenticated; agent creation/acceptance/readback: **NOT RUN**;
+- portfolio account binding and zero-Auto route classification: **PASS**;
+  execution approval and dispatch/readback: **NOT RUN**;
 - repository-wide IDE secret scan: **HOLD**, because the existing fixture
   declaration is bound to the prior candidate tree (219 stale fixture
   declarations after staging this documentation-only tree); refresh must use
