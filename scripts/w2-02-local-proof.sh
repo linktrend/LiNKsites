@@ -49,7 +49,8 @@ record_phase() {
   node -e 'const fs=require("node:fs"); fs.appendFileSync(process.argv[1], JSON.stringify({schemaVersion:1,phase:process.argv[2],result:Number(process.argv[3])===0?"passed":"failed",exitCode:Number(process.argv[3]),stdout:process.argv[4],stderr:process.argv[5]})+"\n")' "$diagnostic_root/recovery-phases.jsonl" "$phase" "$rc" "$stdout_file" "$stderr_file"
 }
 run_phase() {
-  local phase="$1" stdout_file="$diagnostic_root/$phase.stdout.log" stderr_file="$diagnostic_root/$phase.stderr.log" stdout_raw="$diagnostic_root/.$phase.stdout.raw" stderr_raw="$diagnostic_root/.$phase.stderr.raw" rc=0
+  local phase="$1" rc=0
+  local stdout_file="$diagnostic_root/$phase.stdout.log" stderr_file="$diagnostic_root/$phase.stderr.log" stdout_raw="$diagnostic_root/.$phase.stdout.raw" stderr_raw="$diagnostic_root/.$phase.stderr.raw"
   shift
   if "$@" >"$stdout_raw" 2>"$stderr_raw"; then rc=0; else rc=$?; fi
   sanitize_file "$stdout_raw" "$stdout_file"

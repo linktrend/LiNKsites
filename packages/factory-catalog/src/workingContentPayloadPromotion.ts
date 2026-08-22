@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
-import { PromotionService, type PayloadDraftTarget, type PromotionReceipt, type PromotionRequest } from './promotionService.js'
-import type { WorkingContentPromotionInput, WorkingContentRepository } from './workingContent.js'
+import { PromotionService, type PayloadDraftTarget, type PromotionReceipt, type PromotionRequest } from './promotionService.ts'
+import type { WorkingContentPromotionInput, WorkingContentRepository } from './workingContent.ts'
 
 /** Accepted W2-03 adapter: only prepared immutable working content may reach PromotionService. */
 export function buildPromotionRequestFromPreparedWorkingContent(input: WorkingContentPromotionInput, targetSiteId: string, promotionRequestId: string, assemblyManifestId: string, promotionRunMarker?: string): PromotionRequest {
