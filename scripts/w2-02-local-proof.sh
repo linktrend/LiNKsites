@@ -108,6 +108,9 @@ run_phase real-service env W2_02_STATE_DIR="$local_root/state" W2_02_PAYLOAD_BAS
 
 if [[ -n "${LINKSITES_LOCAL_PROOF_POSTHOOK:-}" ]]; then
   test -x "$LINKSITES_LOCAL_PROOF_POSTHOOK" || { echo "LINKSITES_LOCAL_PROOF_POSTHOOK must be executable" >&2; exit 64; }
+  # The recovery readback reuses the runtime-generated W2-04 API key so
+  # Payload's private-preview access filter can return the restored marker
+  # rows; a synthetic placeholder would fall back to anonymous public reads.
   run_phase posthook env LINKSITES_LOCAL_PROOF_ROOT="$local_root" \
   LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT="$diagnostic_root" \
   LINKSITES_LOCAL_PROOF_CMS_PORT="$cms_port" \
@@ -117,7 +120,7 @@ if [[ -n "${LINKSITES_LOCAL_PROOF_POSTHOOK:-}" ]]; then
   LINKSITES_LOCAL_PROOF_DATABASE_URI="$DATABASE_URI" \
   LINKSITES_LOCAL_PROOF_PROJECT_ID="$local_project_id" \
   LINKSITES_LOCAL_PROOF_SITE_ID="$site_id" \
-  LINKSITES_LOCAL_PROOF_API_KEY="ltfx.auto.linksites_local_proof_api_key.f0663706ec95.v1" \
+  LINKSITES_LOCAL_PROOF_API_KEY="$api_key" \
   LINKSITES_LOCAL_PROOF_PREVIEW_TOKEN="ltfx.auto.linksites_local_proof_preview_token.7fa9165e2b61.v1" \
   LINKSITES_LOCAL_PROOF_RUN_MARKER="$run_marker" \
   "$LINKSITES_LOCAL_PROOF_POSTHOOK"
