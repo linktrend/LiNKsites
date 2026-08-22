@@ -72,6 +72,7 @@ test('W2-05 cryptographically verified commercial outcomes enter the W2-02 durab
 async function composition(id = 'lead-local-001') {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-w2-02-'))
   const docs = new Map<string, Record<string, unknown>>()
+  const payloadApiKey = 'ltfx.auto.payloadapikey.c68b74172574.v1'
   const payload = createServer(async (request, response) => {
     const url = new URL(request.url ?? '/', 'http://127.0.0.1')
     const parts = url.pathname.split('/').filter(Boolean)
@@ -79,7 +80,7 @@ async function composition(id = 'lead-local-001') {
     const chunks: Buffer[] = []
     for await (const chunk of request) chunks.push(Buffer.from(chunk))
     const send = (status: number, value: unknown) => { response.writeHead(status, { 'content-type': 'application/json' }); response.end(JSON.stringify(value)) }
-    if (['POST', 'PATCH'].includes(request.method ?? '') && request.headers.authorization !== 'users API-Key test-api-key') return send(401, { error: 'authenticated Payload mutation required' })
+    if (['POST', 'PATCH'].includes(request.method ?? '') && request.headers.authorization !== `users API-Key ${payloadApiKey}`) return send(401, { error: 'authenticated Payload mutation required' })
     if (request.method === 'GET' && !id) {
       const slug = url.searchParams.get('where[slug][equals]')
       const values = slug ? [...docs.values()].filter((doc) => doc.slug === slug) : [...docs.values()]
@@ -99,7 +100,7 @@ async function composition(id = 'lead-local-001') {
   const web = createServer((_request, response) => { response.writeHead(200, { 'content-type': 'text/html', 'x-robots-tag': 'noindex, nofollow', 'cache-control': 'private, no-store' }); response.end('<main data-private-preview="true" data-route="/"><h1>Private preview</h1></main>') })
   await new Promise<void>((resolve) => web.listen(0, '127.0.0.1', resolve))
   const webPort = (web.address() as import('node:net').AddressInfo).port
-  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey: 'ltfx.auto.payloadapikey.c68b74172574.v1', payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'ltfx.auto.previewaccesstoken.78ad93431f1d.v1' }
+  const config = { ...createLocalConfig(directory), ...outcomeGatewayFixture, payloadBaseUrl: `http://127.0.0.1:${payloadPort}`, payloadApiKey, payloadSiteId: 'test-site', webMasterBaseUrl: `http://127.0.0.1:${webPort}`, previewAccessToken: 'ltfx.auto.previewaccesstoken.78ad93431f1d.v1' }
   await writeFile(config.approvedFactsPath, JSON.stringify(approvedFacts(id)))
   const value = await createProductionComposition(config, { outcomeAuthorization: { verify: async () => true } })
   const close = value.close
@@ -113,7 +114,7 @@ test('production composition boots with complete approved local configuration', 
     await value.runtime.runLead(lead())
     const state = await value.runtime.exportState() as { program: { state: string }; issues: Array<{ issueId: string; state: string; gate: string }>; runs: Array<{ issueId: string; failure: unknown }> }
     assert.equal(state.program.state, 'completed', programFailureDiagnostic(state))
-    const gateway = new LiNKautoworkGateway({ secret: 'ltfx.entropy.a8de14a9d6f3.v1', keyId: value.config.commercialOutcomeGatewayKeyId, environment: 'development', transport: async () => { throw new Error('not used') }, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [value.config.orgId], environments: ['development'] }] })
+    const gateway = new LiNKautoworkGateway({ secret: value.config.commercialOutcomeGatewaySecret, keyId: value.config.commercialOutcomeGatewayKeyId, environment: 'development', transport: async () => { throw new Error('not used') }, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [value.config.orgId], environments: ['development'] }] })
     const request = gateway.buildRequest('commercial.outcome.recorded', value.config.orgId, 'composed-outcome', 'composed-outcome:001', { lead_id: 'lead-composed', site_id: 'site-composed', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-composed', outcome_event_id: 'commercial-outcome-composed', outcome_nonce: 'outcome-nonce-composed', recorded_at: '2026-08-06T00:00:00.000Z' } })
     assert.equal((await value.runtime.acceptCommercialOutcome(request)).status, 'outcome_recorded')
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
