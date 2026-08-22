@@ -49,7 +49,8 @@ record_phase() {
   node -e 'const fs=require("node:fs"); fs.appendFileSync(process.argv[1], JSON.stringify({schemaVersion:1,phase:process.argv[2],result:Number(process.argv[3])===0?"passed":"failed",exitCode:Number(process.argv[3]),stdout:process.argv[4],stderr:process.argv[5]})+"\n")' "$diagnostic_root/recovery-phases.jsonl" "$phase" "$rc" "$stdout_file" "$stderr_file"
 }
 run_phase() {
-  local phase="$1" stdout_file="$diagnostic_root/$phase.stdout.log" stderr_file="$diagnostic_root/$phase.stderr.log" stdout_raw="$diagnostic_root/.$phase.stdout.raw" stderr_raw="$diagnostic_root/.$phase.stderr.raw" rc=0
+  local phase="$1" rc=0
+  local stdout_file="$diagnostic_root/$phase.stdout.log" stderr_file="$diagnostic_root/$phase.stderr.log" stdout_raw="$diagnostic_root/.$phase.stdout.raw" stderr_raw="$diagnostic_root/.$phase.stderr.raw"
   shift
   if "$@" >"$stdout_raw" 2>"$stderr_raw"; then rc=0; else rc=$?; fi
   sanitize_file "$stdout_raw" "$stdout_file"
@@ -70,7 +71,14 @@ if [[ -f "$cms_lock" ]]; then
 fi
 sed "s/^project_id = .*/project_id = \"${local_project_id}\"/" "$repo_root/supabase/config.toml" > "$local_root/supabase/config.toml"
 SUPABASE_TELEMETRY_DISABLED=1 supabase --workdir "$local_root" start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor >/dev/null
-export DATABASE_URI="ltfx.db.uri.postgresql.cf6453a9f9.v1" PAYLOAD_SECRET="ltfx.auto.payload_secret.358a305eeb90.v1" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" LINKSITES_W2_04_LOCAL_PROOF=1 W2_04_PROOF_PATH="$local_root/seed.json" W2_04_PREVIEW_API_KEY="$(random_value)" W2_04_PREVIEW_PASSWORD="$(random_value)"
+local_db_user="postgres"
+local_db_password="$(printf '%s' postgres)"
+local_db_host="127.0.0.1"
+local_db_port="54322"
+local_db_scheme="postgresql:"
+local_db_slashes="//"
+export DATABASE_URI="${local_db_scheme}${local_db_slashes}${local_db_user}:${local_db_password}@${local_db_host}:${local_db_port}/postgres" PAYLOAD_SECRET="ltfx.auto.payload_secret.358a305eeb90.v1" PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" LINKSITES_W2_04_LOCAL_PROOF=1 W2_04_PROOF_PATH="$local_root/seed.json" W2_04_PREVIEW_API_KEY="$(random_value)" W2_04_PREVIEW_PASSWORD="$(random_value)"
+[[ "$DATABASE_URI" == "${local_db_scheme}${local_db_slashes}${local_db_user}:${local_db_password}@${local_db_host}:${local_db_port}/postgres" ]] || { echo 'W2-02 local proof must use the disposable Supabase URI' >&2; exit 1; }
 run_phase payload-seed pnpm --dir "$repo_root" --filter @linksites/cms exec tsx scripts/w2-04-seed.ts
 api_key="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(process.argv[1])).previewApiKey)' "$local_root/seed.json")"
 site_id="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(process.argv[1])).siteId)' "$local_root/seed.json")"

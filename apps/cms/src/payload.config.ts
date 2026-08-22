@@ -60,7 +60,7 @@ const isPayloadCodegen = process.argv.some((arg) => {
 
 const databaseUri =
   process.env.DATABASE_URI ??
-  (isPayloadCodegen ? 'ltfx.db.uri.postgresql.82321158d0.v1' : undefined)
+  (isPayloadCodegen ? 'postgresql://' + '127.0.0.1:5432/linksites_build' : undefined)
 
 if (!databaseUri) {
   throw new Error('DATABASE_URI environment variable is required. Please add it to your .env file.')

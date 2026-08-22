@@ -34,8 +34,8 @@
  * timestamps that do not exist here yet.
  */
 
-import type { FoundationReservationManager, ReusableSiteFoundation } from './reusableFoundation.js'
-import type { ProspectAdaptation, ProspectAdaptationStatus } from './prospectAdaptation.js'
+import type { FoundationReservationManager, ReusableSiteFoundation } from './reusableFoundation.ts'
+import type { ProspectAdaptation, ProspectAdaptationStatus } from './prospectAdaptation.ts'
 
 export interface FoundationCountsByStatus {
   candidate: number
