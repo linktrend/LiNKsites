@@ -8,10 +8,10 @@ import {
   type Revision2Selection,
   type WebsiteTemplateMaterializationReference,
   validateExactRelease,
-} from './libraryProviderClient.js'
-import { MASTER_TEMPLATE_SOURCE_COMMIT_SHA, MASTER_TEMPLATE_SOURCE_TREE_SHA } from './templateIdentity.js'
+} from './libraryProviderClient.ts'
+import { MASTER_TEMPLATE_SOURCE_COMMIT_SHA, MASTER_TEMPLATE_SOURCE_TREE_SHA } from './templateIdentity.ts'
 
-export type { Revision2ProviderPin } from './libraryProviderClient.js'
+export type { Revision2ProviderPin } from './libraryProviderClient.ts'
 
 export type Revision2MaterializedWebsiteTemplate = Readonly<{
   reference: WebsiteTemplateMaterializationReference

@@ -35,12 +35,21 @@ while IFS= read -r image; do
   [[ -n "$image" ]] && selected_images+=("$image")
 done <<<"$classification_images"
 (( ${#selected_images[@]} > 0 )) || { echo 'Docker classification selected no images' >&2; exit 78; }
-mkdir -p "$buildkit_cache"
+use_buildkit_cache=1
+if [[ "$buildkit_cache" == "disabled" ]]; then
+  use_buildkit_cache=0
+else
+  mkdir -p "$buildkit_cache"
+fi
 
 docker_build() {
-  docker buildx build --load --pull=false \
-    --cache-from "type=local,src=$buildkit_cache" \
-    --cache-to "type=local,dest=$buildkit_cache,mode=max" "$@"
+  if (( use_buildkit_cache )); then
+    docker buildx build --load --pull=false \
+      --cache-from "type=local,src=$buildkit_cache" \
+      --cache-to "type=local,dest=$buildkit_cache,mode=max" "$@"
+  else
+    docker buildx build --load --pull=false "$@"
+  fi
 }
 
 build() {

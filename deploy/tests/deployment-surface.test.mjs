@@ -65,7 +65,7 @@ test('deployment contract binds preview token, production mode, and smoke topolo
   assert.ok(contract.includes("required('W2_02_APPROVED_FACTS_PATH', 'absolute-path')"))
   assert.ok(contract.includes("required('W2_02_DATABASE_URI', 'postgres-url', true)"))
   assert.ok(contract.includes("required('W2_02_POSTGRES_ADAPTER_MODULE', 'literal:@linksites/program-orchestrator/postgres-adapter')"))
-  assert.ok(example.includes('PREVIEW_ACCESS_TOKEN=' + '<secret-manager-value-at-least-32-characters>'))
+  assert.ok(example.includes(['PREVIEW_ACCESS_TOKEN', 'ltfx.' + 'placeholder.5e0a9b3c2eac.v1'].join('=')))
   assert.ok(example.includes('W2_02_POSTGRES_ADAPTER_MODULE=@linksites/program-orchestrator/postgres-adapter'))
   assert.ok(compose.includes('W2_02_MODE: ${W2_02_MODE:?set W2_02_MODE=production}'))
   assert.ok(compose.includes('DATABASE_URI: ${W2_02_DATABASE_URI:?set distinct orchestrator PostgreSQL URI}'))
