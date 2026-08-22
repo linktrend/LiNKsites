@@ -41,12 +41,12 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import type { SiteSpecification } from './siteSpecification.js'
-import type { ProspectAdaptation } from './prospectAdaptation.js'
-import { assertKitIsProductionReady, type VerticalKit } from './verticalKit.js'
-import type { ComponentRegistry } from './componentRegistry.js'
-import { TIER_SPECIFICATIONS } from './tierSpecification.js'
-import { assertLibraryConsumptionEvidence, canonicalJsonStringify, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.js'
+import type { SiteSpecification } from './siteSpecification.ts'
+import type { ProspectAdaptation } from './prospectAdaptation.ts'
+import { assertKitIsProductionReady, type VerticalKit } from './verticalKit.ts'
+import type { ComponentRegistry } from './componentRegistry.ts'
+import { TIER_SPECIFICATIONS } from './tierSpecification.ts'
+import { assertLibraryConsumptionEvidence, canonicalJsonStringify, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.ts'
 
 export type SiteClass = 'foundation' | 'preview' | 'customer'
 
