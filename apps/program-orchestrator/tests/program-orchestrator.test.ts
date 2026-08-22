@@ -113,7 +113,7 @@ test('production composition boots with complete approved local configuration', 
     await value.runtime.runLead(lead())
     const state = await value.runtime.exportState() as { program: { state: string }; issues: Array<{ issueId: string; state: string; gate: string }>; runs: Array<{ issueId: string; failure: unknown }> }
     assert.equal(state.program.state, 'completed', programFailureDiagnostic(state))
-    const gateway = new LiNKautoworkGateway({ secret: 'ltfx.entropy.a8de14a9d6f3.v1', keyId: value.config.commercialOutcomeGatewayKeyId, environment: 'development', transport: async () => { throw new Error('not used') }, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [value.config.orgId], environments: ['development'] }] })
+    const gateway = new LiNKautoworkGateway({ secret: value.config.commercialOutcomeGatewaySecret, keyId: value.config.commercialOutcomeGatewayKeyId, environment: 'development', transport: async () => { throw new Error('not used') }, policies: [{ eventName: 'commercial.outcome.recorded', orgIds: [value.config.orgId], environments: ['development'] }] })
     const request = gateway.buildRequest('commercial.outcome.recorded', value.config.orgId, 'composed-outcome', 'composed-outcome:001', { lead_id: 'lead-composed', site_id: 'site-composed', submission: { outcome: 'no_sale', reach_authorization_reference: 'reach-auth-composed', outcome_event_id: 'commercial-outcome-composed', outcome_nonce: 'outcome-nonce-composed', recorded_at: '2026-08-06T00:00:00.000Z' } })
     assert.equal((await value.runtime.acceptCommercialOutcome(request)).status, 'outcome_recorded')
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
