@@ -7,8 +7,8 @@
 import type { SchemaVersion } from '@linksites/types'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { SiteAssemblyManifest } from './siteAssemblyManifest.js'
-import type { SiteSpecification } from './siteSpecification.js'
+import type { SiteAssemblyManifest } from './siteAssemblyManifest.ts'
+import type { SiteSpecification } from './siteSpecification.ts'
 import {
   assertLibraryConsumptionEvidence,
   assertLibraryConsumptionReceipt,
@@ -18,7 +18,7 @@ import {
   type LibraryConsumption,
   type LibraryConsumptionReceipt,
   type LibraryVerificationRecord,
-} from './libraryConsumer.js'
+} from './libraryConsumer.ts'
 
 export interface PersistedLibraryBackedSite {
   schemaVersion: SchemaVersion
