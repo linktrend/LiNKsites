@@ -112,6 +112,7 @@ if [[ -n "${LINKSITES_LOCAL_PROOF_POSTHOOK:-}" ]]; then
   # Payload's private-preview access filter can return the restored marker
   # rows; a synthetic placeholder would fall back to anonymous public reads.
   local_proof_api_key_env='LINKSITES_LOCAL_PROOF_API_KEY'
+  local_proof_preview_token_env='LINKSITES_LOCAL_PROOF_PREVIEW_TOKEN'
   run_phase posthook env LINKSITES_LOCAL_PROOF_ROOT="$local_root" \
   LINKSITES_LOCAL_PROOF_DIAGNOSTIC_ROOT="$diagnostic_root" \
   LINKSITES_LOCAL_PROOF_CMS_PORT="$cms_port" \
@@ -122,7 +123,7 @@ if [[ -n "${LINKSITES_LOCAL_PROOF_POSTHOOK:-}" ]]; then
   LINKSITES_LOCAL_PROOF_PROJECT_ID="$local_project_id" \
   LINKSITES_LOCAL_PROOF_SITE_ID="$site_id" \
   "${local_proof_api_key_env}=$api_key" \
-  LINKSITES_LOCAL_PROOF_PREVIEW_TOKEN="ltfx.auto.linksites_local_proof_preview_token.7fa9165e2b61.v1" \
+  "${local_proof_preview_token_env}=$preview_token" \
   LINKSITES_LOCAL_PROOF_RUN_MARKER="$run_marker" \
   "$LINKSITES_LOCAL_PROOF_POSTHOOK"
 fi
