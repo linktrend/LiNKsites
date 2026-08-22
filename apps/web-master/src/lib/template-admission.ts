@@ -7,6 +7,7 @@ import {
   type LibraryConsumptionReceipt,
 } from "@linksites/factory-catalog/library-consumer";
 import { MASTER_TEMPLATE_PIN } from "@linksites/factory-catalog/master-template-pin";
+import { FROZEN_PROVIDER_PIN, materializeRevision2WebsiteTemplate } from "@linksites/factory-catalog";
 import {
   isMasterTemplateLookAndFeelProofHarnessEnabled,
   runMasterTemplateCandidatePreview,
@@ -42,7 +43,7 @@ const admitMasterTemplateCandidatePreview = (templateId: string): AdmittedTempla
     throw new TemplateAdmissionError("look-and-feel proof harness refused a production-selectable result");
   }
   return {
-    schemaVersion: 1,
+    schemaVersion: { major: 1, minor: 0 },
     receiptId: `proof-only-not-admitted:${MASTER_TEMPLATE_PIN.commitSha}`,
     consumer: LINKSITES_LIBRARY_CONSUMER,
     entryId: MASTER_TEMPLATE_PIN.entryId,
@@ -113,6 +114,24 @@ const loadAdmittedEvidence = (): LibraryConsumptionEvidence => {
 export const getAdmittedTemplateEvidence = (): LibraryConsumptionEvidence => loadAdmittedEvidence();
 
 export const getAdmittedTemplateReceipt = (): AdmittedTemplateReceipt => loadAdmittedEvidence().receipt;
+
+export const getAdmittedRevision2Template = () => {
+  const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT ?? process.env.LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH;
+  if (!providerRoot) throw new TemplateAdmissionError("Revision 2 provider root is not configured");
+  const result = materializeRevision2WebsiteTemplate({
+    providerRoot,
+    entryId: process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_PIN.entryId,
+    version: process.env.LINKSITES_TEMPLATE_VERSION ?? MASTER_TEMPLATE_PIN.version,
+    pin: {
+      sourceCommitSha: process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA ?? FROZEN_PROVIDER_PIN.sourceCommitSha,
+      sourceTreeSha: process.env.LINKSITES_LINKLIBRARIES_TREE_SHA ?? FROZEN_PROVIDER_PIN.sourceTreeSha,
+      dependencyLockSha256: process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256 ?? FROZEN_PROVIDER_PIN.dependencyLockSha256,
+    },
+    receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH,
+  });
+  if (!result.ok) throw new TemplateAdmissionError(`Revision 2 release rejected: ${result.errors.join("|")}`);
+  return result.value;
+};
 
 /**
  * Proves that the selected template is the approved catalog entry and, when

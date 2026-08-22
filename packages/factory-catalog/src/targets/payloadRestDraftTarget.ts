@@ -37,7 +37,7 @@
  * merged data (so a caller that forgets it in `data` still works).
  */
 
-import type { PayloadDraftTarget } from '../promotionService.js'
+import type { PayloadDraftTarget } from '../promotionService.ts'
 
 export interface PayloadRestDraftTargetConfig {
   /** Base URL of the Payload CMS instance, e.g. `http://localhost:3000`. Trailing slash is stripped. */
