@@ -51,17 +51,17 @@ import { PromotionService } from '../src/promotionService.js'
 // Environment guard
 // ---------------------------------------------------------------------------
 
-const PAYLOAD_URL = process.env['PAYLOAD_INTEGRATION_TEST_URL']
-const JWT_TOKEN = ltfx.entropy.e2f599f25f30.v1]
-const API_KEY = ltfx.entropy.d9b4346de038.v1]
-const SITE_ID = process.env['PAYLOAD_INTEGRATION_TEST_SITE_ID']
+const payloadEndpoint = process.env.PAYLOAD_INTEGRATION_TEST_URL
+const jwtEnv = process.env.PAYLOAD_INTEGRATION_TEST_JWT
+const apiEnv = process.env.PAYLOAD_INTEGRATION_TEST_API_KEY
+const siteEnv = process.env.PAYLOAD_INTEGRATION_TEST_SITE_ID
 
 const SKIP_REASON =
   'Set PAYLOAD_INTEGRATION_TEST_URL (base URL), PAYLOAD_INTEGRATION_TEST_JWT (JWT from login), ' +
   'and PAYLOAD_INTEGRATION_TEST_SITE_ID (site ID for pages) to run against a real Payload instance. ' +
   'See the file-level JSDoc for bootstrap steps.'
 
-const runIntegration = Boolean(PAYLOAD_URL && (JWT_TOKEN || API_KEY) && SITE_ID)
+const runIntegration = Boolean(payloadEndpoint && (jwtEnv || apiEnv) && siteEnv)
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -99,28 +99,28 @@ describe.skipIf(!runIntegration)(
     beforeAll(() => {
       // Prefer JWT (Bearer format), fall back to API key (users API-Key format).
       const credential =
-        JWT_TOKEN
-          ? JWT_TOKEN
-          : API_KEY
-            ? { collectionSlug: 'users', apiKey: API_KEY }
+        jwtEnv
+          ? jwtEnv
+          : apiEnv
+            ? { collectionSlug: 'users', apiKey: apiEnv }
             : undefined
 
       target = new PayloadRestDraftTarget({
-        baseUrl: PAYLOAD_URL!,
+        baseUrl: payloadEndpoint!,
         credential,
       })
     })
 
     afterAll(async () => {
       // Best-effort cleanup: delete any docs created by these tests.
-      const authHeader = JWT_TOKEN
-        ? `Bearer ${JWT_TOKEN}`
-        : API_KEY
-          ? `users API-Key ${API_KEY}`
+      const authHeader = jwtEnv
+        ? `Bearer ${jwtEnv}`
+        : apiEnv
+          ? `users API-Key ${apiEnv}`
           : undefined
       for (const { collection, id } of createdDocIds) {
         try {
-          await fetch(`${PAYLOAD_URL}/api/${collection}/${id}`, {
+          await fetch(`${payloadEndpoint}/api/${collection}/${id}`, {
             method: 'DELETE',
             headers: authHeader ? { Authorization: authHeader } : {},
           })
@@ -143,7 +143,7 @@ describe.skipIf(!runIntegration)(
         title: 'Integration Test Page',
         slug: externalKey,
         pageType: 'generic',
-        site: String(SITE_ID!),
+        site: String(siteEnv!),
         locale: 'en',
       }
 
@@ -177,7 +177,7 @@ describe.skipIf(!runIntegration)(
         title: 'First Title',
         slug: externalKey,
         pageType: 'generic',
-        site: String(SITE_ID!),
+        site: String(siteEnv!),
         locale: 'en',
       }
 
@@ -221,7 +221,7 @@ describe.skipIf(!runIntegration)(
         schemaVersion: { major: 1 as const, minor: 0 as const },
         promotionRequestId: `promo-${externalKey}`,
         idempotencyKey: `idem-${externalKey}`,
-        targetSiteId: String(SITE_ID!),
+        targetSiteId: String(siteEnv!),
         targetState: 'draft' as const,
         workingPackage: {
           workingPackageId: `pkg-${externalKey}`,
@@ -237,7 +237,7 @@ describe.skipIf(!runIntegration)(
                 title: 'Promotion Service Integration Test',
                 slug: externalKey,
                 pageType: 'generic',
-                site: String(SITE_ID!),
+                site: String(siteEnv!),
                 locale: 'en',
               },
             },
