@@ -4,21 +4,21 @@
  * This path may inspect a draft / non_selectable master template. It does not
  * admit, activate, or make the release production-selectable.
  */
-import { MASTER_TEMPLATE_PIN } from './masterTemplatePin.js'
+import { MASTER_TEMPLATE_PIN } from './masterTemplatePin.ts'
 import {
   type MasterTemplateBundle,
   type VerifiedMasterTemplatePin,
   verifyMasterTemplateBundle,
-} from './masterTemplateConsumer.js'
+} from './masterTemplateConsumer.ts'
 import {
   ALLOWED_OVERRIDE_PATHS,
   FORBIDDEN_GENERATED_TOKEN_PATHS,
-} from './masterTemplateOverridePolicy.js'
+} from './masterTemplateOverridePolicy.ts'
 import {
   projectMasterTemplatePage,
   type LinksitesOwnedSiteCoordinates,
   type ProjectedMasterTemplatePage,
-} from './masterTemplateSemanticProjection.js'
+} from './masterTemplateSemanticProjection.ts'
 
 export interface MasterTemplateCandidateProbe {
   mode: 'candidate_probe'

@@ -15,7 +15,7 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import { checkEntitlement, type TierId, type TierSpecification } from './tierSpecification.js'
+import { checkEntitlement, type TierId, type TierSpecification } from './tierSpecification.ts'
 
 export type ComponentAssetStatus = 'candidate' | 'active' | 'deprecated' | 'retired'
 

@@ -24,7 +24,7 @@
  */
 
 import type { ExecutorAdapter, ExecutorResult, Issue, Run } from '@linksites/program-ledger'
-import { PromotionService, PromotionServiceError, type PromotionRequest } from '../promotionService.js'
+import { PromotionService, PromotionServiceError, type PromotionRequest } from '../promotionService.ts'
 
 export const PROMOTE_WORKING_PACKAGE_ISSUE_TYPE = 'linksites.factory.promote_working_package'
 
