@@ -17,13 +17,13 @@ const enqueueContact = async (payload: { intent: string; submission: Record<stri
   const outboxPath = process.env.LINKAUTOWORK_OUTBOX_PATH;
   const integrityMaterial = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET;
   const grants = process.env.LINKAUTOWORK_EVENT_GRANTS;
-  if (!url || !secret || !keyId || !environment || !orgId || !siteId || !outboxPath || !integritySecret || !grants) throw new Error('governed LiNKautowork contact configuration is incomplete');
+  if (!url || !secret || !keyId || !environment || !orgId || !siteId || !outboxPath || !integrityMaterial || !grants) throw new Error('governed LiNKautowork contact configuration is incomplete');
   const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: parseGatewayEventPolicies(grants), transport: async (request) => {
     const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) });
     const acknowledgedAt = response.headers.get('x-linkautowork-acknowledged-at') ?? new Date().toISOString();
     return { status: response.status, receiptId: response.headers.get('x-linkautowork-receipt') ?? 'missing', receiptSignature: response.headers.get('x-linkautowork-receipt-signature') ?? 'missing', acknowledgedAt };
   }});
-  const outbox = new FileOutbox(outboxPath, { maxAttempts: 5, metrics: gateway.metrics, integritySecret, resigner: (request, attempt) => gateway.resignRequest(request, attempt), validator: (request) => gateway.verifyStored(request) });
+  const outbox = new FileOutbox(outboxPath, { maxAttempts: 5, metrics: gateway.metrics, integritySecret: integrityMaterial, resigner: (request, attempt) => gateway.resignRequest(request, attempt), validator: (request) => gateway.verifyStored(request) });
   await outbox.enqueue(gateway.buildRequest('contact.submitted', orgId, `web:${siteId}`, `contact:${siteId}:${payload.metadata.timestamp}:${payload.intent}`, { lead_id: `contact:${siteId}`, site_id: siteId, submission: payload.submission }));
 };
 

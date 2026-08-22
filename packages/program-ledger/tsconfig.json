@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "rootDir": ".",
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"]
