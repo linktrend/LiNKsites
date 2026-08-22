@@ -3,7 +3,7 @@
  * derivation/policy.json. Allowed overlays stay on authored sources.
  * Generated token projections fail closed.
  */
-import { MasterTemplateConsumerError } from './masterTemplatePin.js'
+import { MasterTemplateConsumerError } from './masterTemplatePin.ts'
 
 export const ALLOWED_OVERRIDE_PATHS = [
   'artifact/content/default-content.json',

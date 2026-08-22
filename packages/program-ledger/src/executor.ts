@@ -15,8 +15,8 @@
  * accepted output" language), not a production executor framework.
  */
 
-import type { FailureClass, Issue, Run } from './types.js'
-import type { ProgramLedger } from './ledger.js'
+import type { FailureClass, Issue, Run } from './types.ts'
+import type { ProgramLedger } from './ledger.ts'
 
 export type ExecutorResult = { kind: 'success'; output: unknown } | { kind: 'failure'; failureClass: FailureClass; message: string }
 
@@ -73,7 +73,7 @@ export async function runIssueOnce(
   }
 
   const claimed = await ledger.claim(run.runId, adapter.executorId)
-  const fencingToken = ltfx.auto.fencingtoken.27e1e56fe34f.v1
+  const fencingToken = (claimed.lease!.fencingToken)
 
   const result = await adapter.execute(issue, claimed)
 

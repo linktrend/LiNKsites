@@ -9,12 +9,12 @@ import {
   MASTER_TEMPLATE_PIN,
   MasterTemplateConsumerError,
   assertAdmissibleProviderSha,
-} from './masterTemplatePin.js'
-import { assertDerivationPolicy } from './masterTemplateOverridePolicy.js'
+} from './masterTemplatePin.ts'
+import { assertDerivationPolicy } from './masterTemplateOverridePolicy.ts'
 import {
   MASTER_TEMPLATE_ARCHETYPES,
   type MasterTemplateArchetype,
-} from './masterTemplateSemanticProjection.js'
+} from './masterTemplateSemanticProjection.ts'
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/
 const GIT_SHA_PATTERN = /^[a-f0-9]{40}$/
