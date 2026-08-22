@@ -9,13 +9,13 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { probeMasterTemplateCandidate, type MasterTemplateCandidateProbe } from './masterTemplateCandidateProbe.js'
+import { probeMasterTemplateCandidate, type MasterTemplateCandidateProbe } from './masterTemplateCandidateProbe.ts'
 import {
   type MasterTemplateBundle,
   selectMasterTemplateForProduction,
   verifyMasterTemplateBundle,
-} from './masterTemplateConsumer.js'
-import { MASTER_TEMPLATE_PIN, MasterTemplateConsumerError } from './masterTemplatePin.js'
+} from './masterTemplateConsumer.ts'
+import { MASTER_TEMPLATE_PIN, MasterTemplateConsumerError } from './masterTemplatePin.ts'
 
 export const MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF_FLAG =
   'LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF' as const

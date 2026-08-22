@@ -4,8 +4,8 @@
  * theme.json is canonical. Generated Library files (tokens.css, tokens.json,
  * variants.json) are never overlaid or written here. Dentist presets fail closed.
  */
-import { MasterTemplateConsumerError } from './masterTemplatePin.js'
-import { FORBIDDEN_GENERATED_TOKEN_PATHS } from './masterTemplateOverridePolicy.js'
+import { MasterTemplateConsumerError } from './masterTemplatePin.ts'
+import { FORBIDDEN_GENERATED_TOKEN_PATHS } from './masterTemplateOverridePolicy.ts'
 
 export const INDUSTRY_PRESET_IDS = [
   'saas',

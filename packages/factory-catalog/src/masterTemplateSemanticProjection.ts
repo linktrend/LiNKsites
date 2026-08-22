@@ -6,7 +6,7 @@
  * fail closed. Distinct sections keep distinct identities — never collapse
  * every section to hero.
  */
-import { MasterTemplateConsumerError } from './masterTemplatePin.js'
+import { MasterTemplateConsumerError } from './masterTemplatePin.ts'
 
 export const MASTER_TEMPLATE_ARCHETYPES = [
   'home',
