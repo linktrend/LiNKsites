@@ -2,10 +2,15 @@
   "schemaVersion": 1,
   "packet": "LS-03",
   "issues": ["ISS-10", "ISS-11", "ISS-12"],
-  "githubIssue": 274,
-  "idempotency": "cursor-cloud-dispatch-v1:linksites-ls03-274-base9da7197e",
+  "githubIssue": 275,
+  "repairOf": {
+    "githubIssue": 274,
+    "rejectedCommit": "906f5b0d913acfdc59b7147103224dbefad8bc92",
+    "rejectedTree": "143daf3dd1663c124cf857393685f585cb74e20c"
+  },
+  "idempotency": "cursor-cloud-dispatch-v1:linksites-ls03-275-repair-base9da7197e",
   "repository": "https://github.com/linktrend/LiNKsites",
-  "branch": "issue/274-ls-03-payload-semantic-models-and-migrations",
+  "branch": "issue/275-ls-03-repair-add-rls-policies-complete-additive",
   "base": {
     "commit": "9da7197ef8b0f953508c2361c609fae5a643c746",
     "tree": "1f9eb7cb8d569c78dd50a482d6b7ce985c2cff90"
@@ -16,19 +21,27 @@
   },
   "credits": { "A": 30, "B": 15, "C": 6, "L": 0 },
   "checkpoint": {
-    "commit": "25528a75a0e7e425ca5bdc3723399baff599da4a",
-    "tree": "42ca528cc72e8e83f6e527af1f15722562f7333c",
-    "note": "implementation commit; this attestation file is recorded in a follow-up checkpoint commit"
+    "commit": "1d3323e1319c8ccd95a64aa71e1a31c0fd7407e5",
+    "tree": "964b8e0d20fb2e3ee52278cacab71686866132d7",
+    "note": "repair implementation commit; this attestation file is recorded in a follow-up evidence commit"
   },
   "runtime": {
     "namedEnvironment": "IDE Development 2.5.1",
     "environmentPublicId": "1937ddb1-9d3e-11f1-a7d1-d6b4613131ce",
     "environmentVersionPublicId": "cac43460-9d4b-11f1-a7d1-d6b4613131ce",
-    "buildId": "bld-20260824-e5da20dc-4098-4bc1-b0fe-c3423523113d",
-    "cloudRun": "bc-34e6ad01-bbf9-4681-bba2-7305af2e93f4",
+    "buildId": "bld-20260824-7a62ac81-e0fc-4b0c-bd5d-6229f93a21de",
+    "cloudRun": "bc-c4033f99-d6e0-4e3f-9f2c-f863eaca5752",
     "originalModelName": "cursor-grok-4.6-medium",
     "semanticModel": "grok-4.6",
     "effort": "medium",
     "fast": false
+  },
+  "postgres": {
+    "available": false,
+    "psql": false,
+    "pg_isready": false,
+    "DATABASE_URL": false,
+    "DATABASE_URI": false,
+    "tcp5432": "connection refused on 127.0.0.1:5432"
   }
 }
