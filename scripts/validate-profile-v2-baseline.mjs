@@ -35,6 +35,10 @@ const OWNED_PREFIXES = [
   "scripts/validate-profile-v2-baseline.mjs",
 ];
 const PROHIBITED_PREFIXES = ["packages/", "apps/", "supabase/migrations/"];
+const GENERATED_OUTPUT_CLOSURE_CANDIDATES = [
+  ".ide-development/config/generated-output-closure.json",
+  "core/managed-core/config/generated-output-closure.json",
+];
 
 const failures = [];
 
@@ -111,6 +115,89 @@ function isProhibited(relPath) {
   return PROHIBITED_PREFIXES.some((prefix) => relPath === prefix || relPath.startsWith(prefix));
 }
 
+function isSafeRepoRelative(value) {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    !value.includes("\\") &&
+    !path.isAbsolute(value) &&
+    !value.split("/").includes("..")
+  );
+}
+
+function loadDeclaredGeneratedOutputs(root) {
+  let closurePath = "";
+  let raw = "";
+  for (const candidate of GENERATED_OUTPUT_CLOSURE_CANDIDATES) {
+    const abs = path.join(root, candidate);
+    if (!fs.existsSync(abs)) continue;
+    closurePath = candidate;
+    try {
+      raw = fs.readFileSync(abs, "utf8");
+    } catch (error) {
+      fail(`unreadable generated-output closure at ${candidate}: ${error.message}`);
+      return new Set();
+    }
+    break;
+  }
+  if (!closurePath) {
+    fail(
+      `generated-output closure missing; looked for ${GENERATED_OUTPUT_CLOSURE_CANDIDATES.join(", ")}`,
+    );
+    return new Set();
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    fail(`malformed generated-output closure at ${closurePath}: ${error.message}`);
+    return new Set();
+  }
+  if (
+    parsed === null ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    parsed.schemaVersion !== 1 ||
+    parsed.kind !== "generated-output-closure"
+  ) {
+    fail(`generated-output closure identity is invalid at ${closurePath}`);
+    return new Set();
+  }
+  if (!Array.isArray(parsed.outputs) || parsed.outputs.length < 1) {
+    fail(`generated-output closure outputs must be a non-empty array at ${closurePath}`);
+    return new Set();
+  }
+  const declared = new Set();
+  parsed.outputs.forEach((entry, index) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      fail(`generated-output closure outputs[${index}] must be an object`);
+      return;
+    }
+    const paths = [entry.output];
+    if (entry.additionalOutputs !== undefined) {
+      if (!Array.isArray(entry.additionalOutputs)) {
+        fail(`generated-output closure outputs[${index}].additionalOutputs must be an array`);
+        return;
+      }
+      paths.push(...entry.additionalOutputs);
+    }
+    for (const outputPath of paths) {
+      if (!isSafeRepoRelative(outputPath)) {
+        fail(
+          `generated-output closure outputs[${index}] has an unsafe output path ${JSON.stringify(outputPath)}`,
+        );
+        continue;
+      }
+      declared.add(outputPath);
+    }
+  });
+  return declared;
+}
+
+function isDeclaredGeneratedOutput(relPath, declared) {
+  return declared.has(relPath);
+}
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 const evidenceDir = path.join(repoRoot, "docs/evidence/profile-v2-baseline");
@@ -173,13 +260,20 @@ if (branch && branch !== EXPECTED_ISSUE_BRANCH) {
   fail(`current branch is ${branch}, expected ${EXPECTED_ISSUE_BRANCH}`);
 }
 
+const declaredGeneratedOutputs = loadDeclaredGeneratedOutputs(repoRoot);
 const changed = [
   ...git(repoRoot, ["diff", "--name-only", EXPECTED_BASELINE_COMMIT]).split("\n"),
   ...git(repoRoot, ["ls-files", "--others", "--exclude-standard"]).split("\n"),
 ].filter(Boolean);
 for (const relPath of changed) {
-  if (isProhibited(relPath)) fail(`prohibited path changed: ${relPath}`);
-  if (!isOwned(relPath)) fail(`out-of-scope path changed: ${relPath}`);
+  if (isProhibited(relPath)) {
+    fail(`prohibited path changed: ${relPath}`);
+    continue;
+  }
+  if (isOwned(relPath) || isDeclaredGeneratedOutput(relPath, declaredGeneratedOutputs)) {
+    continue;
+  }
+  fail(`out-of-scope path changed: ${relPath}`);
 }
 
 const requirements = evidence["requirements-map.json"];
