@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-02",
+  "issues": ["ISS-07", "ISS-08", "ISS-09"],
+  "githubIssue": 272,
+  "idempotency": "cursor-cloud-dispatch-v1:linksites-ls02-272-base627d6d2",
+  "repository": "https://github.com/linktrend/LiNKsites",
+  "branch": "issue/272-ls-02-adoption-entitlement-and-deterministic-assembly",
+  "base": {
+    "commit": "627d6d2ae46dadcf3f8c51d2c8681cba01efc754",
+    "tree": "a2601a98bd63fff5e358d8f585ff459969a2cbce"
+  },
+  "dependencies": {
+    "mwt02ProviderCandidateTree": "0178894d6ce718bb7dff3c141892f82144e2d18c",
+    "h09Commit": "ad8560b242da0d15c0d65a6c8d4d17a0171e2d2b",
+    "h09Tree": "6cab53da19ba390d392157dbcc38979f1a6c86b5"
+  },
+  "credits": { "A": 30, "B": 15, "C": 6, "L": 0 },
+  "zeroCostPageClasses": ["core", "legal", "system"]
+}
