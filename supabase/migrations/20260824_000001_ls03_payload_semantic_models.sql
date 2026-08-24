@@ -166,7 +166,34 @@ alter table lsites_sites.template_adoptions enable row level security;
 alter table lsites_sites.legacy_template_id_projections enable row level security;
 alter table lsites_sites.offer_case_compatibility enable row level security;
 
+grant execute on function platform.has_org_access(uuid, platform.member_role) to svc_linksites_runtime;
 grant select, insert on lsites_sites.entitlement_snapshots to svc_linksites_runtime;
 grant select, insert on lsites_sites.template_adoptions to svc_linksites_runtime;
 grant select, insert, update on lsites_sites.legacy_template_id_projections to svc_linksites_runtime;
 grant select, insert, update on lsites_sites.offer_case_compatibility to svc_linksites_runtime;
+
+-- Dedicated runtime role only. Match working-content RLS: membership via
+-- platform.has_org_access(org_id, 'client_viewer'). No public/authenticated policy.
+drop policy if exists entitlement_snapshots_runtime_org_access on lsites_sites.entitlement_snapshots;
+create policy entitlement_snapshots_runtime_org_access
+  on lsites_sites.entitlement_snapshots for all to svc_linksites_runtime
+  using (platform.has_org_access(org_id, 'client_viewer'))
+  with check (platform.has_org_access(org_id, 'client_viewer'));
+
+drop policy if exists template_adoptions_runtime_org_access on lsites_sites.template_adoptions;
+create policy template_adoptions_runtime_org_access
+  on lsites_sites.template_adoptions for all to svc_linksites_runtime
+  using (platform.has_org_access(org_id, 'client_viewer'))
+  with check (platform.has_org_access(org_id, 'client_viewer'));
+
+drop policy if exists legacy_template_id_projections_runtime_org_access on lsites_sites.legacy_template_id_projections;
+create policy legacy_template_id_projections_runtime_org_access
+  on lsites_sites.legacy_template_id_projections for all to svc_linksites_runtime
+  using (platform.has_org_access(org_id, 'client_viewer'))
+  with check (platform.has_org_access(org_id, 'client_viewer'));
+
+drop policy if exists offer_case_compatibility_runtime_org_access on lsites_sites.offer_case_compatibility;
+create policy offer_case_compatibility_runtime_org_access
+  on lsites_sites.offer_case_compatibility for all to svc_linksites_runtime
+  using (platform.has_org_access(org_id, 'client_viewer'))
+  with check (platform.has_org_access(org_id, 'client_viewer'));
