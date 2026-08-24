@@ -43,10 +43,12 @@
 import type { SchemaVersion } from '@linksites/types'
 import type { SiteSpecification } from './siteSpecification.ts'
 import type { ProspectAdaptation } from './prospectAdaptation.ts'
-import { assertKitIsProductionReady, type VerticalKit } from './verticalKit.ts'
+import { assertKitIsProductionReady, classifyPageCost, type VerticalKit } from './verticalKit.ts'
 import type { ComponentRegistry } from './componentRegistry.ts'
 import { TIER_SPECIFICATIONS } from './tierSpecification.ts'
-import { assertLibraryConsumptionEvidence, canonicalJsonStringify, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.ts'
+import { assertLibraryConsumptionEvidence, canonicalJsonChecksum, canonicalJsonStringify, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.ts'
+import { assertSiteAdoptionIdentities } from './adoptionIdentities.ts'
+import { dispositionCreditsForPages, type CreditDispositionRecord } from './capabilityCredits.ts'
 
 export type SiteClass = 'foundation' | 'preview' | 'customer'
 
@@ -90,6 +92,35 @@ export interface SiteAssemblyManifest {
   libraryReceipt?: LibraryConsumptionReceipt
   /** Carried forward from the Site Specification as materialized provenance. */
   libraryConsumption?: LibraryConsumption
+  /** LS-02 deterministic shell slots (header/nav/footer). */
+  shellPlan?: SiteAssemblyShellPlan
+  /** LS-02 ordered route activation/navigation plan. */
+  routePlan?: SiteAssemblyRoutePlanEntry[]
+  /** LS-02 content-schema plan keyed by route. */
+  schemaPlan?: SiteAssemblySchemaPlanEntry[]
+  /** LS-02 per-route capability-credit dispositions. */
+  creditDispositions?: CreditDispositionRecord[]
+  /** LS-02 stable digest over reconstructable assembly facts (never includes resolvedAt). */
+  digest?: string
+}
+
+export interface SiteAssemblyShellPlan {
+  headerSlot: 'site-header'
+  footerSlot: 'site-footer'
+  navigationRoutes: string[]
+}
+
+export interface SiteAssemblyRoutePlanEntry {
+  route: string
+  pageType: string
+  activationAllowed: boolean
+  includeInNavigation: boolean
+}
+
+export interface SiteAssemblySchemaPlanEntry {
+  route: string
+  pageType: string
+  schemaRef: string
 }
 
 export class SiteAssemblyError extends Error {
@@ -195,6 +226,61 @@ export function assembleSiteManifest(input: AssembleSiteManifestInput): SiteAsse
     }
   })
 
+  const hasAdoption = Boolean(siteSpec.adoptionIdentities || siteSpec.capabilityPlanId || siteSpec.entitlementSnapshot)
+  let ls02: Pick<SiteAssemblyManifest, 'shellPlan' | 'routePlan' | 'schemaPlan' | 'creditDispositions' | 'digest'> = {}
+  if (hasAdoption) {
+    if (!siteSpec.adoptionIdentities || !siteSpec.capabilityPlanId || !siteSpec.entitlementSnapshot) {
+      throw new SiteAssemblyError('LS-02 assembly requires Site Specification identities, capability plan, and immutable entitlement snapshot together.')
+    }
+    const identities = assertSiteAdoptionIdentities(siteSpec.adoptionIdentities)
+    if (siteSpec.capabilityPlanId !== siteSpec.entitlementSnapshot.planId) {
+      throw new SiteAssemblyError('LS-02 capability plan does not match the frozen entitlement snapshot.')
+    }
+    const routes = new Set<string>()
+    for (const page of pagePlan) {
+      if (routes.has(page.route)) throw new SiteAssemblyError(`LS-02 assembly rejected duplicate route "${page.route}".`)
+      routes.add(page.route)
+    }
+    const creditDispositions = dispositionCreditsForPages(siteSpec.entitlementSnapshot, pagePlan)
+    const routePlan: SiteAssemblyRoutePlanEntry[] = creditDispositions.map((record) => ({
+      route: record.route,
+      pageType: record.pageType,
+      activationAllowed: record.activationAllowed,
+      includeInNavigation: record.includeInNavigation,
+    }))
+    const schemaPlan: SiteAssemblySchemaPlanEntry[] = pagePlan.map((page) => ({
+      route: page.route,
+      pageType: page.pageType,
+      schemaRef: `schema:${identities.content}:${classifyPageCost(page.pageType)}:${page.route}`,
+    }))
+    const shellPlan: SiteAssemblyShellPlan = {
+      headerSlot: 'site-header',
+      footerSlot: 'site-footer',
+      navigationRoutes: routePlan.filter((entry) => entry.includeInNavigation).map((entry) => entry.route),
+    }
+    const digest = canonicalJsonChecksum({
+      manifestId,
+      manifestVersion,
+      siteId,
+      siteClass,
+      kitId: kit.kitId,
+      tierId: siteSpec.tierId,
+      platformReleaseRef,
+      designProfileRef: siteSpec.designProfileRef,
+      contentReleaseRef: adaptation ? `adaptation:${adaptation.adaptationId}` : `foundation-neutral:${kit.kitId}`,
+      pages,
+      lineage: lineage ?? {},
+      adoptionIdentities: identities,
+      capabilityPlanId: siteSpec.capabilityPlanId,
+      entitlementSnapshot: siteSpec.entitlementSnapshot,
+      shellPlan,
+      routePlan,
+      schemaPlan,
+      creditDispositions,
+    })
+    ls02 = { shellPlan, routePlan, schemaPlan, creditDispositions, digest }
+  }
+
   return {
     schemaVersion: { major: 1, minor: 0 },
     manifestId,
@@ -210,5 +296,6 @@ export function assembleSiteManifest(input: AssembleSiteManifestInput): SiteAsse
     lineage: lineage ?? {},
     resolvedAt: new Date().toISOString(),
     ...(siteSpec.libraryConsumption ? { libraryEntryId: siteSpec.libraryConsumption.receipt.entryId, libraryReceipt: siteSpec.libraryConsumption.receipt, libraryConsumption: siteSpec.libraryConsumption } : {}),
+    ...ls02,
   }
 }
