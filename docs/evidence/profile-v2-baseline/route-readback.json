@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "status": "recorded",
+  "packet": "LS-00",
+  "authorityFile": "docs/architecture/linksites-profile-v2/MODEL-ROUTING-AUTHORITY.json",
+  "packetBinding": {
+    "recordId": "LS2-P-LS00",
+    "primaryRoute": "grok_complex",
+    "selectorId": "grok-4.6",
+    "effort": "medium",
+    "fast": false,
+    "executionMode": "agent",
+    "displayModel": "Cursor Grok 4.6 Medium non-Fast"
+  },
+  "issueBindings": {
+    "ISS-01": {"recordId": "LS-I-ISS01", "primaryRoute": "composer_bounded", "implementedInThisPacket": true, "note": "ISS-01 is bundled in LS-00 whose packet primary is grok_complex."},
+    "ISS-02": {"recordId": "LS-I-ISS02", "primaryRoute": "grok_complex"},
+    "ISS-03": {"recordId": "LS-I-ISS03", "primaryRoute": "grok_complex"}
+  },
+  "requested": {
+    "semanticRoute": "grok-4.6",
+    "effort": "medium",
+    "fast": false
+  },
+  "apiReadback": {
+    "source": "cursor-cloud/run-info",
+    "bcId": "bc-b3de788b-7e2b-4478-a259-bb0cdb55757b",
+    "originalModelName": "cursor-grok-4-6-medium",
+    "effectiveModel": "cursor-grok-4-6-medium",
+    "mode": "agent",
+    "effort": "medium",
+    "fast": false,
+    "liveModelCatalogue": "hold_not_available_in_session"
+  },
+  "prepared": {
+    "claimed": false,
+    "status": "invalid_legacy_prepared",
+    "note": "MODEL-ROUTING-AUTHORITY.json status is ROUTES_BOUND_DISPATCH_NOT_AUTHORIZED for old PREPARED identities. This worker does not mint a new PREPARED intent artifact. Implementation proceeds under the explicit LS-00 follow-up instruction."
+  },
+  "environmentProvenance": {
+    "name": "IDE Development 2.5.1",
+    "publicId": "1937ddb1-9d3e-11f1-a7d1-d6b4613131ce",
+    "requiredBuild": "bld-20260821-6bd9a399-9bc2-4443-b5af-3db13a2ae508",
+    "observedBootBuild": "bld-20260824-e1f18bd0-50c5-45cc-b864-2378bf4d7286",
+    "buildEquality": "provenance_only_accepted"
+  }
+}

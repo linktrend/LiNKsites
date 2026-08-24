@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "status": "hold_live_runtime",
+  "reason": "This cloud-agent session has no authenticated live Payload/Supabase/host runtime. Snapshot is committed configuration only.",
+  "committedSupabase": {
+    "configPath": "supabase/config.toml",
+    "projectId": "w1-02-supabase-gate",
+    "apiPort": 54321,
+    "dbPort": 54322,
+    "dbMajorVersion": 17
+  },
+  "committedCms": {
+    "package": "@linksites/cms",
+    "payload": "3.87.1",
+    "dbAdapter": "@payloadcms/db-postgres",
+    "collectionsDir": "apps/cms/src/collections"
+  },
+  "deployCompose": [
+    "deploy/docker-compose.deploy.yml",
+    "deploy/docker-compose.local-proof.yml"
+  ],
+  "liveProbe": {
+    "payloadAdmin": "not_attempted",
+    "supabaseApi": "not_attempted",
+    "webMaster": "not_attempted",
+    "productionHost": "not_attempted"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "status": "recorded",
+  "sourceCommit": "75ef17776e66cc8f0237089d45ff9bcf52820ce7",
+  "packageManager": "pnpm@10.0.0",
+  "workspace": {
+    "name": "linksites-monorepo",
+    "packages": ["apps/*", "packages/*"]
+  },
+  "internalWorkspacePackages": [
+    "@linksites/types",
+    "@linksites/program-ledger",
+    "@linksites/factory-catalog",
+    "@linksites/autowork-boundary",
+    "@linksites/cms",
+    "@linksites/web-master",
+    "@linksites/program-orchestrator",
+    "@linksites/intake-orchestrator"
+  ],
+  "masterTemplatePin": {
+    "source": "packages/factory-catalog/src/masterTemplatePin.ts",
+    "repositoryUrl": "https://github.com/linktrend/LiNKlibraries.git",
+    "branch": "issue/134-master-template-look-and-feel",
+    "commitSha": "6b87993ddaf403aebe7bef97bd268a543a1d14eb",
+    "entryId": "master-template-type-1",
+    "version": "1.0.0",
+    "artifactTreeSha1": "a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d",
+    "lifecycle": "draft",
+    "selectability": "non_selectable",
+    "compatibility": "unknown_declared_on_pin",
+    "note": "Pin field compatibility is the string unknown_declared_on_pin in source; LS-00 does not treat that as validator unknown-evidence. Production selectability remains non_selectable."
+  },
+  "providerPlanningSource": {
+    "repository": "linktrend/LiNKlibraries",
+    "commit": "f25b385c1e34d958834ce4b7e085ab454a956918",
+    "tree": "626828346c8a4841c8ae95ac6b4fa9af4941f1fb",
+    "requirementsPath": "docs/architecture/master-website-template-v2/LINKSITES-DETAILED-REQUIREMENTS.md"
+  },
+  "cmsRuntimePins": {
+    "payload": "3.87.1",
+    "next": "16.2.10"
+  },
+  "rejectedProviderShaPrefixes": ["d7997b6e", "9bdee5dd", "b2d2bbb0", "3bf53b8b"]
+}
