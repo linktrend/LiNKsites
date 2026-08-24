@@ -16,5 +16,18 @@
     "h09Tree": "6cab53da19ba390d392157dbcc38979f1a6c86b5"
   },
   "credits": { "A": 30, "B": 15, "C": 6, "L": 0 },
-  "zeroCostPageClasses": ["core", "legal", "system"]
+  "zeroCostPageClasses": ["core", "legal", "system"],
+  "checkpoint": {
+    "commit": "5aacf70496d19d03da9d87d430da9648c44e0a9d",
+    "tree": "b557f09af4b32d76392921feb31137031cd2ba8b",
+    "note": "implementation commit; this attestation file is recorded in a follow-up checkpoint commit"
+  },
+  "runtime": {
+    "namedEnvironment": "IDE Development 2.5.1",
+    "environmentPublicId": "1937ddb1-9d3e-11f1-a7d1-d6b4613131ce",
+    "originalModelName": "cursor-grok-4.6-medium",
+    "semanticModel": "grok-4.6",
+    "effort": "medium",
+    "fast": false
+  }
 }

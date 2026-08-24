@@ -32,3 +32,10 @@ Existing `resolveSiteSpecification` / `assembleSiteManifest` callers without LS-
 - Selector / originalModelName: `cursor-grok-4.6-medium`
 - Semantic model: grok-4.6, effort=medium, Fast not asserted true (`fast=false`)
 - Environment build is provenance-only and is not product validation.
+
+## Implementation checkpoint
+
+- SHA: `5aacf70496d19d03da9d87d430da9648c44e0a9d`
+- Tree: `b557f09af4b32d76392921feb31137031cd2ba8b`
+- Focused tests: 69 passed (`ls02AdoptionAssembly`, `siteSpecification`, `siteAssemblyManifest`, `tierSpecification`, `verticalKit`)
+- Typecheck: `tsc -p tsconfig.json` passed
