@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "hold_live_external",
+  "reason": "No live CMS, web-master, hosting control-plane or provider catalogue credentials were used in this packet. External configuration is snapshotted from committed files only.",
+  "cms": {
+    "app": "apps/cms",
+    "package": "@linksites/cms",
+    "payload": "3.87.1",
+    "liveAdminUrl": "hold_live_external"
+  },
+  "webMaster": {
+    "app": "apps/web-master",
+    "package": "@linksites/web-master",
+    "next": "16.2.10",
+    "livePublicUrl": "hold_live_external"
+  },
+  "hosting": {
+    "compose": ["deploy/docker-compose.deploy.yml", "deploy/docker-compose.local-proof.yml"],
+    "liveHost": "hold_live_external"
+  },
+  "provider": {
+    "declaredPin": "packages/factory-catalog/src/masterTemplatePin.ts",
+    "selectability": "non_selectable",
+    "liveCatalogueProbe": "hold_live_external"
+  }
+}

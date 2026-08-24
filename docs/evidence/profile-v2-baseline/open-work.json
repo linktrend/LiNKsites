@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "status": "recorded",
+  "capturedAt": "2026-08-24T03:55:00Z",
+  "primaryCheckout": {
+    "path": "/agent/repos/LiNKsites",
+    "branch": "main",
+    "head": "e46ce0c657a7445bfb898ac208f6f5d889b550f2",
+    "dirty": false,
+    "note": "Environment primary checkout was not mutated. LS-00 work lives only on the isolated issue worktree."
+  },
+  "worktrees": [
+    {
+      "path": "/agent/repos/LiNKsites",
+      "head": "e46ce0c657a7445bfb898ac208f6f5d889b550f2",
+      "branch": "refs/heads/main",
+      "role": "primary_checkout"
+    },
+    {
+      "path": "/agent/repos/LiNKsites/.git/linktrend-worktrees/issue-266-execute-ls-00-exact-baseline-and-authority-map-p",
+      "headAtCaptureBeforePacketFiles": "75ef17776e66cc8f0237089d45ff9bcf52820ce7",
+      "treeAtCaptureBeforePacketFiles": "67b1a23655d5b4ce9fc02da291dea906b9ecab94",
+      "branch": "refs/heads/issue/266-execute-ls-00-exact-baseline-and-authority-map-p",
+      "role": "ls00_isolated_issue_worktree"
+    }
+  ],
+  "githubOpenIssuesSample": [
+    {"number": 266, "title": "Execute LS-00 exact baseline and authority map packet", "state": "OPEN"},
+    {"number": 264, "title": "Apply principal routing amendment: Grok High review and Luna High checkpoint verification", "state": "OPEN"},
+    {"number": 261, "title": "Reuse runtime credentials when restarting recovery web service", "state": "OPEN"},
+    {"number": 259, "title": "Fix recovery hook to reuse runtime Payload API key", "state": "OPEN"},
+    {"number": 257, "title": "Investigate Payload restore readback response", "state": "OPEN"}
+  ],
+  "dirtyWorktreesAtBaselineCapture": [],
+  "notes": [
+    "ISS-01 records open GitHub work and worktree inventory; it does not close those issues.",
+    "Pre-existing OPEN issues remain outside LS-00 owned paths."
+  ]
+}
