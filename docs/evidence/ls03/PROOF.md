@@ -43,4 +43,5 @@ Idempotency: `cursor-cloud-dispatch-v1:linksites-ls03-274-base9da7197e`
 
 ## Implementation checkpoint
 
-Filled in the follow-up evidence commit after the implementation SHA exists.
+- SHA: `25528a75a0e7e425ca5bdc3723399baff599da4a`
+- Tree: `42ca528cc72e8e83f6e527af1f15722562f7333c`

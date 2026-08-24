@@ -16,9 +16,9 @@
   },
   "credits": { "A": 30, "B": 15, "C": 6, "L": 0 },
   "checkpoint": {
-    "commit": null,
-    "tree": null,
-    "note": "implementation commit SHA recorded in the follow-up evidence commit"
+    "commit": "25528a75a0e7e425ca5bdc3723399baff599da4a",
+    "tree": "42ca528cc72e8e83f6e527af1f15722562f7333c",
+    "note": "implementation commit; this attestation file is recorded in a follow-up checkpoint commit"
   },
   "runtime": {
     "namedEnvironment": "IDE Development 2.5.1",
