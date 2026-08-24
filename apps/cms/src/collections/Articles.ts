@@ -10,6 +10,7 @@ import { seoFields } from '@/fields/seoFields'
 import { siteField } from '@/fields/siteField'
 import { createSlugField } from '@/fields/slugField'
 import { workflowFields } from '@/fields/workflowFields'
+import { provenanceFields } from '@/fields/provenanceFields'
 import { calculateReadTime } from '@/hooks/calculateReadTime'
 import { injectDefaultSEO } from '@/hooks/injectDefaultSEO'
 import { triggerRebuild } from '@/hooks/triggerRebuild'
@@ -95,5 +96,6 @@ export const Articles: CollectionConfig<'articles'> = {
     siteField,
     localeField,
     ...workflowFields,
+    ...provenanceFields,
   ] satisfies Field[],
 }
