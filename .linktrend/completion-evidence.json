@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "headSha": "1c2d5149083e6bd0c4e07e05667144484e20babb",
+  "headSha": "ed3673469433b8090cdc90e524ea1e56171e7b26",
   "classification": "tests",
   "acceptance": "Baseline admission checks pass after deterministic repair; no product packet execution.",
   "commands": [
@@ -40,7 +40,7 @@
   "at": "2026-08-21T11:48:16Z",
   "kind": "v25-issue-checkpoint",
   "amendment": "V25_BOOTSTRAP_LEAN",
-  "gitTree": "b832f6bbb2abcb959df48be997bcad8d7bb32370",
+  "gitTree": "ce4d2c0a38550b90616df67d4d10f0d0dc876bac",
   "pushed": true,
   "scopedDiff": true,
   "focusedTests": {
