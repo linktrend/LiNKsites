@@ -390,9 +390,9 @@ def _is_code_expression(value: str) -> bool:
 def _is_typescript_string_literal_type(line: str, value_end: int) -> bool:
     """Quoted value is a TypeScript string-literal type, not a credential assignment.
 
-    Distinguishes `key: 'products' | 'services'` parameter types from
-    `key: "secretvalue"` / `key = "secretvalue"` assignments. Removing this
-    check re-flags typed function parameters as assignment.secret.
+    A union bar or function-return marker after the quote means a type
+    annotation. Ordinary quoted assignments remain assignment.secret.
+    Removing this check re-flags typed function parameters.
     """
     cursor = _skip_ws(line, value_end)
     if cursor >= len(line):
