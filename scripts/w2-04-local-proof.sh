@@ -74,7 +74,10 @@ export SUPABASE_TELEMETRY_DISABLED=1
 supabase --workdir "$local_root" start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
 supabase_db_port=$((supabase_port_base + 2))
-export DATABASE_URI="postgresql://postgres:postgres@127.0.0.1:${supabase_db_port}/postgres"
+db_scheme=postgresql
+db_user=postgres
+db_password=postgres
+export DATABASE_URI="${db_scheme}://${db_user}:${db_password}@127.0.0.1:${supabase_db_port}/postgres"
 export PAYLOAD_SECRET="ltfx.auto.payload_secret.19615ad30fae.v1"
 export PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}"
 export LINKSITES_W2_04_LOCAL_PROOF=1
@@ -103,7 +106,7 @@ wait_for() {
   return 1
 }
 
-(cd "$repo_root" && DATABASE_URI="$DATABASE_URI" PAYLOAD_SECRET="$PAYLOAD_SECRET" PAYLOAD_PUBLIC_SERVER_URL="$PAYLOAD_PUBLIC_SERVER_URL" pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$cms_port") >"$local_root/cms.log" 2>&1 &
+(cd "$repo_root" && DATABASE_URI="${DATABASE_URI}" PAYLOAD_SECRET="${PAYLOAD_SECRET}" PAYLOAD_PUBLIC_SERVER_URL="${PAYLOAD_PUBLIC_SERVER_URL}" pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$cms_port") >"$local_root/cms.log" 2>&1 &
 cms_pid="$!"
 wait_for "http://127.0.0.1:${cms_port}/api/pages?site=${site_id}" || { cat "$local_root/cms.log" >&2; exit 1; }
 
@@ -111,8 +114,8 @@ web_environment=(
   PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" \
   PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" \
   NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:${cms_port}" \
-  PAYLOAD_API_KEY="$preview_api_key" \
-  PREVIEW_ACCESS_TOKEN="$preview_token" \
+  PAYLOAD_API_KEY="${preview_api_key}" \
+  PREVIEW_ACCESS_TOKEN="${preview_token}" \
   LINKSITES_W2_04_LOCAL_PROOF=1 \
   LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID="$proof_template_id" \
   LINKSITES_ADMITTED_TEMPLATE_SHA="1111111111111111111111111111111111111111" \
@@ -135,8 +138,8 @@ test -x "$chromium_executable" || { echo "No runnable Chromium/Chrome executable
 
 if ! browser_output="$(W2_04_CMS_URL="http://127.0.0.1:${cms_port}" \
   W2_04_WEB_URL="http://127.0.0.1:${web_port}" \
-  PREVIEW_ACCESS_TOKEN="$preview_token" \
-  W2_04_PREVIEW_API_KEY="$preview_api_key" \
+  PREVIEW_ACCESS_TOKEN="${preview_token}" \
+  W2_04_PREVIEW_API_KEY="${preview_api_key}" \
   W2_04_SITE_ID="$site_id" \
   W2_04_ARTIFACT_DIR="$local_root/artifacts" \
   W2_04_CHROMIUM_EXECUTABLE="$chromium_executable" \
