@@ -1,35 +1,35 @@
 {
   "schemaVersion": 1,
-  "headSha": "ed3673469433b8090cdc90e524ea1e56171e7b26",
+  "headSha": "28e7d3dc4fcdb46f37eec39e93a7297b76f991da",
   "classification": "tests",
-  "acceptance": "Baseline admission checks pass after deterministic repair; no product packet execution.",
+  "acceptance": "LS-05 bounded repair: cache receipt/pointer integrity, safe receipt paths, explicit draft-candidate policy, and unauthorized fixture rollback.",
   "commands": [
     {
-      "cmd": "pnpm lint",
+      "cmd": "pnpm --filter @linksites/factory-catalog exec vitest run tests/revision2Materialization.spec.ts tests/ls05CanonicalImplementation.spec.ts",
       "exitCode": 0
     },
     {
-      "cmd": "pnpm typecheck",
+      "cmd": "pnpm --filter @linksites/factory-catalog test",
       "exitCode": 0
     },
     {
-      "cmd": "node --test deploy/tests/runtime-contract.test.mjs",
+      "cmd": "pnpm --filter @linksites/factory-catalog typecheck",
       "exitCode": 0
     },
     {
-      "cmd": "python3 -m unittest scripts.tests.test_ci_full_suite_receipt",
+      "cmd": "pnpm --filter @linksites/program-orchestrator test",
       "exitCode": 0
     },
     {
-      "cmd": "python3 scripts/gitops/secret_scan.py",
+      "cmd": "pnpm --filter @linksites/program-orchestrator typecheck",
       "exitCode": 0
     },
     {
-      "cmd": "scripts/assert-active-surface-clean.sh",
+      "cmd": "node scripts/profile-v2-quality/ls05/tests/harness.test.mjs",
       "exitCode": 0
     },
     {
-      "cmd": "python3 -m py_compile scripts/gitops/run_delivery_profile.py scripts/gitops/gate_receipt.py scripts/gitops/secret_scan.py scripts/gitops/repository_ci_contract.py scripts/gitops/receipt_seal.py",
+      "cmd": "python3 scripts/gitops/secret_scan.py --repo .",
       "exitCode": 0
     },
     {
@@ -37,16 +37,16 @@
       "exitCode": 0
     }
   ],
-  "at": "2026-08-21T11:48:16Z",
+  "at": "2026-08-25T14:04:43Z",
   "kind": "v25-issue-checkpoint",
   "amendment": "V25_BOOTSTRAP_LEAN",
-  "gitTree": "ce4d2c0a38550b90616df67d4d10f0d0dc876bac",
+  "gitTree": "4eb89aba66e5b824a5fc3401495dac71f626170d",
   "pushed": true,
   "scopedDiff": true,
   "focusedTests": {
     "passed": true
   },
-  "independentTerraVerification": true,
-  "manifestEvidence": true,
+  "independentTerraVerification": false,
+  "manifestEvidence": false,
   "proofClass": "local"
 }
