@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "headSha": "31633fa318b288f42992963e203152a56217e75d",
+  "headSha": "2d90dc2d12623f9deb6884753eed05a6206ef01c",
   "classification": "tests",
   "acceptance": "LS-05 second bounded repair: fail-closed cache symlink containment, complete receipt verdict validation, canonical adapter mapping digest, product rollback regression, and generated secret-scan evidence.",
   "commands": [
@@ -44,7 +44,7 @@
   "at": "2026-08-25T14:27:00Z",
   "kind": "v25-issue-checkpoint",
   "amendment": "V25_BOOTSTRAP_LEAN",
-  "gitTree": "18b666b1d69513f13a7a771885d0c2b565b83a4c",
+  "gitTree": "f7829112f0e0d406b7ff39a740deffa09e6666ab",
   "pushed": true,
   "scopedDiff": true,
   "focusedTests": {
