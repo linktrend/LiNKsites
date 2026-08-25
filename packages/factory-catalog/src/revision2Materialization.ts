@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
 import {
   admitWebsiteTemplateMaterialization,
@@ -10,6 +10,11 @@ import {
   validateExactRelease,
 } from './libraryProviderClient.ts'
 import { MASTER_TEMPLATE_SOURCE_COMMIT_SHA, MASTER_TEMPLATE_SOURCE_TREE_SHA } from './templateIdentity.ts'
+import {
+  MASTER_TEMPLATE_ADAPTER_ID,
+  MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST,
+  MASTER_TEMPLATE_ADAPTER_VERSION,
+} from './masterTemplateVersionedAdapter.ts'
 
 export type { Revision2ProviderPin } from './libraryProviderClient.ts'
 
@@ -69,6 +74,11 @@ const canonical = (value: unknown): string => value === null || typeof value !==
 const identity = (value: unknown): string => createHash('sha1').update(canonical(value), 'utf8').digest('hex')
 const SHA1 = /^[a-f0-9]{40}$/
 const SHA256 = /^[a-f0-9]{64}$/
+const EXPECTED_RECEIPT_VERDICTS: Revision2MaterializationReceipt['verdicts'] = Object.freeze({
+  materialization: 'candidate_materialized',
+  compatibility: 'adapter_compatible',
+  projection: 'payload_projection_pending',
+})
 const confined = (root: string, candidate: string): boolean => {
   const rootWithSeparator = root.endsWith(sep) ? root : `${root}${sep}`
   return candidate === root || candidate.startsWith(rootWithSeparator)
@@ -179,15 +189,15 @@ function buildMaterializationReceipt(input: Revision2MaterializationInput, refer
   const inventory = Object.entries(files).sort(([left], [right]) => left.localeCompare(right)).map(([path, bytes]) => ({ path, sha256: sha256(bytes), byteLength: Buffer.byteLength(bytes) }))
   const candidate = identity({ provider: input.pin.providerCommitSha ?? input.pin.sourceCommitSha, tree: input.pin.providerTreeSha ?? input.pin.sourceTreeSha, entryId: reference.entryId, version: reference.version, artifactTreeSha1: reference.artifactTreeSha1 })
   const materialization = identity({ candidate, inventory })
-  const adapter = identity({ id: 'linksites.master-template.revision2', version: '2.0.0-a1.1', mappingDigest: identity('revision2-a1-semantic-mapping-v1') })
+  const adapter = identity({ id: MASTER_TEMPLATE_ADAPTER_ID, version: MASTER_TEMPLATE_ADAPTER_VERSION, mappingDigest: MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST })
   const effective = identity({ candidate, materialization, adapter, payload: null })
   return Object.freeze({
     schemaVersion: 1,
     packet: 'LS-05',
-    verdicts: { materialization: 'candidate_materialized' as const, compatibility: 'adapter_compatible' as const, projection: 'payload_projection_pending' as const },
+    verdicts: EXPECTED_RECEIPT_VERDICTS,
     provider: { repository: 'https://github.com/linktrend/LiNKlibraries.git', commitSha: input.pin.providerCommitSha ?? input.pin.sourceCommitSha, treeSha: input.pin.providerTreeSha ?? input.pin.sourceTreeSha, sourceReleaseCommitSha: input.pin.sourceCommitSha, sourceReleaseTreeSha: input.pin.sourceTreeSha },
     release: { entryId: reference.entryId, version: reference.version, artifactTreeSha1: reference.artifactTreeSha1, releaseManifestSha256: reference.releaseManifestSha256, inventorySha256: reference.inventorySha256, payloadSha256: reference.payloadSha256, dependencyLockSha256: reference.dependencyLockSha256, releaseSourceCommitSha: reference.releaseSourceCommitSha, releaseSourceTreeSha: reference.releaseSourceTreeSha },
-    adapter: { id: 'linksites.master-template.revision2', version: '2.0.0-a1.1', mappingDigest: identity('revision2-a1-semantic-mapping-v1') },
+    adapter: { id: MASTER_TEMPLATE_ADAPTER_ID, version: MASTER_TEMPLATE_ADAPTER_VERSION, mappingDigest: MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST },
     cache: { entryDirectory: cacheRoot ? `entries/${reference.artifactTreeSha1}` : '', providerCheckoutRequired: false as const, inventory },
     identities: { candidate, materialization, adapter, payload: null, effective },
   })
@@ -205,12 +215,55 @@ function writeJsonAtomic(path: string, value: unknown): void {
 }
 function readJson(path: string): any | null {
   if (!existsSync(path)) return null
-  try { return json(path) } catch { throw new Error(`consumer cache JSON is invalid: ${path}`) }
+  try {
+    const stat = lstatSync(path)
+    if (stat.isSymbolicLink() || !stat.isFile()) throw new Error('not a regular file')
+    return json(path)
+  } catch (error) {
+    if (error instanceof Error && error.message === 'not a regular file') throw new Error(`consumer cache JSON path is not a regular file: ${path}`)
+    throw new Error(`consumer cache JSON is invalid: ${path}`)
+  }
 }
 function safeCachePath(root: string, candidate: string): boolean {
   const resolved = resolve(candidate)
-  const prefix = root.endsWith(sep) ? root : `${root}${sep}`
-  return resolved.startsWith(prefix) && !resolved.includes(`${sep}.${sep}`)
+  const lexicalRoot = resolve(root)
+  const prefix = lexicalRoot.endsWith(sep) ? lexicalRoot : `${lexicalRoot}${sep}`
+  if (resolved !== lexicalRoot && !resolved.startsWith(prefix)) return false
+
+  // Lexical containment is insufficient when an existing path component is a
+  // symlink. Refuse every existing symlinked ancestor and compare the
+  // physical paths before callers read or write the cache entry.
+  try {
+    const rootStat = lstatSync(lexicalRoot)
+    if (rootStat.isSymbolicLink() || !rootStat.isDirectory()) return false
+    const realRoot = resolve(realpathSync(lexicalRoot))
+    let existing = lexicalRoot
+    for (const part of relative(lexicalRoot, resolved).split(sep).filter(Boolean)) {
+      const next = join(existing, part)
+      try {
+        const stat = lstatSync(next)
+        if (stat.isSymbolicLink()) return false
+        existing = next
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') return false
+        break
+      }
+    }
+    const realExisting = resolve(realpathSync(existing))
+    const realPrefix = realRoot.endsWith(sep) ? realRoot : `${realRoot}${sep}`
+    return realExisting === realRoot || realExisting.startsWith(realPrefix)
+  } catch {
+    return false
+  }
+}
+
+function receiptVerdictsAreExpected(value: unknown): value is Revision2MaterializationReceipt['verdicts'] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const verdicts = value as Record<string, unknown>
+  return Object.keys(verdicts).length === Object.keys(EXPECTED_RECEIPT_VERDICTS).length
+    && verdicts.materialization === EXPECTED_RECEIPT_VERDICTS.materialization
+    && verdicts.compatibility === EXPECTED_RECEIPT_VERDICTS.compatibility
+    && verdicts.projection === EXPECTED_RECEIPT_VERDICTS.projection
 }
 
 function recomputeReceiptIdentities(receipt: Revision2MaterializationReceipt): Revision2MaterializationReceipt['identities'] | null {
@@ -231,10 +284,12 @@ function sameIdentities(left: Revision2MaterializationReceipt['identities'], rig
 
 function writeCache(cacheRoot: string, receipt: Revision2MaterializationReceipt, files: Record<string, string>): void {
   const dirs = cachePaths(cacheRoot)
+  if (existsSync(dirs.root) && (!safeCachePath(dirs.root, dirs.root) || !safeCachePath(dirs.root, dirs.entries) || !safeCachePath(dirs.root, dirs.staging))) throw new Error('consumer cache root contains a symlinked path component')
   mkdirSync(dirs.root, { recursive: true }); mkdirSync(dirs.entries, { recursive: true }); mkdirSync(dirs.staging, { recursive: true })
   const prior = readJson(dirs.active)
   const entryDir = join(dirs.entries, receipt.release.artifactTreeSha1)
   const stagingDir = join(dirs.staging, `${receipt.release.artifactTreeSha1}.${process.pid}`)
+  if (!safeCachePath(dirs.entries, entryDir) || !safeCachePath(dirs.staging, stagingDir)) throw new Error('consumer cache entry path contains a symlinked path component')
   rmSync(stagingDir, { recursive: true, force: true }); mkdirSync(stagingDir, { recursive: true })
   try {
     for (const [path, bytes] of Object.entries(files)) {
@@ -259,7 +314,8 @@ function verifyCachedEntry(cacheRoot: string, active: any): Revision2Result<Revi
   if (receiptPath !== resolve(entryDir, 'materialization-receipt.json')) return failure(['consumer cache receipt path is not bound to the active entry'])
   let receipt: Revision2MaterializationReceipt
   try { receipt = readJson(receiptPath) as Revision2MaterializationReceipt } catch (error) { return failure([error instanceof Error ? error.message : 'consumer cache receipt is absent']) }
-  if (!receipt || receipt.packet !== 'LS-05' || receipt.verdicts?.materialization !== 'candidate_materialized' || receipt.cache?.entryDirectory !== active.entryDirectory || receipt.release?.entryId !== active.entryId || receipt.release?.version !== active.version || receipt.identities?.effective !== active.identity) return failure(['consumer cache materialization receipt is not bound to the active pointer'])
+  if (!receipt || receipt.packet !== 'LS-05' || !receiptVerdictsAreExpected(receipt.verdicts) || receipt.cache?.entryDirectory !== active.entryDirectory || receipt.release?.entryId !== active.entryId || receipt.release?.version !== active.version || receipt.identities?.effective !== active.identity) return failure(['consumer cache materialization receipt is not bound to the active pointer'])
+  if (receipt.adapter?.id !== MASTER_TEMPLATE_ADAPTER_ID || receipt.adapter?.version !== MASTER_TEMPLATE_ADAPTER_VERSION || receipt.adapter?.mappingDigest !== MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST) return failure(['consumer cache materialization receipt adapter mapping is not canonical'])
   const recomputed = recomputeReceiptIdentities(receipt)
   if (!recomputed || !sameIdentities(receipt.identities, recomputed)) return failure(['consumer cache materialization receipt identities are invalid'])
   if (!Array.isArray(receipt.cache.inventory)) return failure(['consumer cache materialization receipt inventory is invalid'])
