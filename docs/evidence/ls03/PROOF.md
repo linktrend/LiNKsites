@@ -30,6 +30,9 @@ expanded.
    and asserts fail-closed / rollback rows plus RLS policy presence.
 4. Exact-tip ATTESTATION/PROOF and secret-scan `candidateTree` refresh for
    this repair candidate only.
+5. Dispatch idempotency in `semanticContract.ts` is the Issue-275 repair
+   identity, not stale `ls03-274-base9da7197e`. Evidence binds the identity
+   successor HEAD, not implementation `1d3323e1` / tree `964b8e0d`.
 
 ## Dependency evidence (pins only; no copied provider/Harness source)
 
@@ -41,10 +44,10 @@ expanded.
 
 - Named environment: `IDE Development 2.5.1` (`1937ddb1-9d3e-11f1-a7d1-d6b4613131ce`)
 - Environment version: `cac43460-9d4b-11f1-a7d1-d6b4613131ce`
-- Cloud run: `bc-c4033f99-d6e0-4e3f-9f2c-f863eaca5752`
+- Cloud run: `bc-5730e6fc-3950-4e61-9505-17f59cbb4f4f`
 - Selector / originalModelName: `cursor-grok-4.6-medium`
 - Semantic model: grok-4.6, effort=medium, Fast not asserted true (`fast=false`)
-- Environment build `bld-20260824-7a62ac81-e0fc-4b0c-bd5d-6229f93a21de` is provenance-only and is not product validation.
+- Environment build `bld-20260824-205a97ec-502c-49a8-b61a-28bd3e9ed1a8` is provenance-only and is not product validation.
 
 ## Validation
 
@@ -62,14 +65,14 @@ expanded.
 - SHA: `1d3323e1319c8ccd95a64aa71e1a31c0fd7407e5`
 - Tree: `964b8e0d20fb2e3ee52278cacab71686866132d7`
 
-## Prior successor HEAD (before identity correction)
+## Attested start tip (dispatch expected `issue/275` SHA)
 
 - SHA: `bd0bbabaff413d90ebc6abe492790cca8e77b5d4`
 - Tree: `30d8f3c09e0c339e454affc0c49943893628a560`
 
 ## Successor HEAD bound by this packet
 
-- SHA: `aeea40e5b82710e8702491bfe7cc46a168cd6578`
-- Tree: `dcc4b02b62be163388b4a04bd4bf89663fa591ac`
+- SHA: `50997ba8baceaaf54860144a578e9ecfd6991805`
+- Tree: `12a35c37dd4c2c1790043149b5248446b07b3497`
 - Dispatch idempotency is the governed Issue-275 repair identity
   `cursor-cloud-dispatch-v1:linksites-ls03-275-repair-base9da7197e`.

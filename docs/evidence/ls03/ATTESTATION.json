@@ -25,21 +25,21 @@
     "tree": "964b8e0d20fb2e3ee52278cacab71686866132d7",
     "note": "repair implementation only; not the reviewed successor HEAD"
   },
-  "priorSuccessorHead": {
+  "attestedStartTip": {
     "commit": "bd0bbabaff413d90ebc6abe492790cca8e77b5d4",
     "tree": "30d8f3c09e0c339e454affc0c49943893628a560"
   },
   "checkpoint": {
-    "commit": "aeea40e5b82710e8702491bfe7cc46a168cd6578",
-    "tree": "dcc4b02b62be163388b4a04bd4bf89663fa591ac",
-    "note": "identity-corrected successor HEAD (Issue-275 idempotency + successor binding)"
+    "commit": "50997ba8baceaaf54860144a578e9ecfd6991805",
+    "tree": "12a35c37dd4c2c1790043149b5248446b07b3497",
+    "note": "final successor HEAD (Issue-275 identity pin); this attestation is recorded in a follow-up evidence commit"
   },
   "runtime": {
     "namedEnvironment": "IDE Development 2.5.1",
     "environmentPublicId": "1937ddb1-9d3e-11f1-a7d1-d6b4613131ce",
     "environmentVersionPublicId": "cac43460-9d4b-11f1-a7d1-d6b4613131ce",
-    "buildId": "bld-20260824-7a62ac81-e0fc-4b0c-bd5d-6229f93a21de",
-    "cloudRun": "bc-c4033f99-d6e0-4e3f-9f2c-f863eaca5752",
+    "buildId": "bld-20260824-205a97ec-502c-49a8-b61a-28bd3e9ed1a8",
+    "cloudRun": "bc-5730e6fc-3950-4e61-9505-17f59cbb4f4f",
     "originalModelName": "cursor-grok-4.6-medium",
     "semanticModel": "grok-4.6",
     "effort": "medium",
