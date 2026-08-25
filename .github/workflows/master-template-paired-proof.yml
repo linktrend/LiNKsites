@@ -23,6 +23,26 @@ on:
         description: Exact provider dependency-lock SHA-256
         required: true
         type: string
+      provider_manifest_sha256:
+        description: Exact A1 provider manifest SHA-256
+        required: true
+        type: string
+      provider_inventory_sha256:
+        description: Exact A1 provider inventory SHA-256
+        required: true
+        type: string
+      provider_payload_sha256:
+        description: Exact A1 provider payload SHA-256
+        required: true
+        type: string
+      provider_release_receipt_sha256:
+        description: Exact A1 provider release receipt SHA-256
+        required: true
+        type: string
+      provider_artifact_tree_sha1:
+        description: Exact A1 provider artifact tree SHA-1
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -93,6 +113,11 @@ jobs:
           LINKSITES_LINKLIBRARIES_COMMIT_SHA: ${{ inputs.provider_commit }}
           LINKSITES_LINKLIBRARIES_TREE_SHA: ${{ inputs.provider_tree }}
           LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: ${{ inputs.dependency_lock_sha256 }}
+          LINKSITES_LINKLIBRARIES_MANIFEST_SHA256: ${{ inputs.provider_manifest_sha256 }}
+          LINKSITES_LINKLIBRARIES_INVENTORY_SHA256: ${{ inputs.provider_inventory_sha256 }}
+          LINKSITES_LINKLIBRARIES_PAYLOAD_SHA256: ${{ inputs.provider_payload_sha256 }}
+          LINKSITES_LINKLIBRARIES_RELEASE_RECEIPT_SHA256: ${{ inputs.provider_release_receipt_sha256 }}
+          LINKSITES_LINKLIBRARIES_ARTIFACT_TREE_SHA1: ${{ inputs.provider_artifact_tree_sha1 }}
           LINKSITES_KEEP_LOCAL_REHEARSAL: "1"
         run: bash scripts/master-template-paired-proof.sh
 
