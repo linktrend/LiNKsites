@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-preparation-status",
+  "packetId": "LS-08",
+  "issueNumber": 291,
+  "preparationScope": "receipt-bundle-schema-validator",
+  "packetCompletion": false,
+  "a1BytesPresent": false,
+  "providerReceiptPresent": false,
+  "consumerProofPresent": false,
+  "pairedProofRun": false,
+  "dependencyIndependent": true,
+  "ownedPaths": [
+    "docs/evidence/ls08/preparation/**",
+    "scripts/profile-v2-quality/ls08/**"
+  ],
+  "notes": [
+    "Schema and fail-closed identity checks only.",
+    "Synthetic fixture identities are not provider A1 or consumer proof."
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-mwt-handoff-status",
+  "githubIssue": 299,
+  "gateId": "EXT-LS-01",
+  "preparationComplete": true,
+  "packetCompletion": false,
+  "consumerProofPresent": false,
+  "providerBytesPresent": false,
+  "a1Accepted": false,
+  "protectedIntegrated": false,
+  "amendmentApproved": false,
+  "ownedPaths": [
+    "docs/evidence/ext-ls-01/mwt-input/**",
+    "docs/evidence/mwt-handoff/**"
+  ],
+  "nextRequired": [
+    "Integrate bound candidate through protected delivery, then read back exact origin/development commit/tree.",
+    "Produce an independent EXT-LS-01 receipt. Do not treat this input as that receipt."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "ls06-renderer-configuration/v1",
+  "mode": "offline",
+  "source": "injected",
+  "layoutPackId": "A1",
+  "planId": "B",
+  "shellId": "marketing-shell",
+  "noPlaceholders": false,
+  "typeLIsolation": true,
+  "typeLShellMode": "not-applicable",
+  "families": [
+    "home",
+    "about",
+    "contact",
+    "legal",
+    "collection",
+    "detail"
+  ]
+}

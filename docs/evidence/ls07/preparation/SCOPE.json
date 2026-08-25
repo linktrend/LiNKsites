@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls07-preparation-scope",
+  "packet": "LS-07",
+  "issues": ["ISS-22", "ISS-23", "ISS-24"],
+  "githubIssue": 292,
+  "packetComplete": false,
+  "ls06CompleteClaimed": false,
+  "copiedProviderBytes": false,
+  "ownedPaths": [
+    "scripts/profile-v2-quality/ls07/**",
+    "docs/evidence/ls07/preparation/**"
+  ],
+  "prohibitedPaths": [
+    "apps/**",
+    "packages/**",
+    "supabase/migrations/**"
+  ],
+  "harness": {
+    "accepts": "injected renderer outputs",
+    "dimensions": ["accessibility", "performance", "seo"],
+    "failClosed": ["missing_provider_identity", "missing_runtime_identity", "missing_renderer_output"]
+  }
+}

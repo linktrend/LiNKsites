@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "ls06-preparation-packet/v1",
+  "preparationOnly": true,
+  "notCompletionOf": [
+    "LS-06"
+  ],
+  "identities": {
+    "ls04": {
+      "workingContentIdentity": "ls04:working-content:injected:v1",
+      "promotionReceiptIdentity": "ls04:promotion-receipt:injected:v1",
+      "source": "injected"
+    },
+    "ls05": {
+      "adapterIdentity": "ls05:adapter:injected:v1",
+      "materializationReceiptIdentity": "ls05:materialization:injected:v1",
+      "source": "injected"
+    },
+    "provider": {
+      "providerId": "master-template-type-1",
+      "semver": "2.0.0-a1.1",
+      "layoutPackId": "A1",
+      "candidateIdentity": "provider:injected:layout-A1",
+      "source": "injected",
+      "providerBytes": "not-allowed"
+    },
+    "layout": {
+      "layoutPackId": "A1",
+      "planId": "B",
+      "shellId": "marketing-shell",
+      "source": "injected"
+    }
+  },
+  "contract": "contract.json",
+  "configuration": "configuration.json",
+  "rollback": "rollback.json"
+}
