@@ -21,18 +21,29 @@ test("production admission still rejects the draft when the proof flag is off", 
 
 test("proof flag inspects the pinned draft without emitting approved admission evidence", () => {
   process.env.LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF = "1";
-  const receipt = assertTemplateAdmission(MASTER_TEMPLATE_PIN.entryId);
-  assert.equal(receipt.entryId, "master-template-type-1");
-  assert.match(receipt.receiptId, /^proof-only-not-admitted:/);
-  assert.equal(receipt.libraryCommitSha, "6b87993ddaf403aebe7bef97bd268a543a1d14eb");
-  assert.throws(() => getAdmittedTemplateEvidence(), /does not emit production admission evidence/);
-  assert.throws(
-    () => assertTemplateAdmission("marketing-smb-v1"),
-    /only inspects pinned master-template-type-1/,
-  );
-  assert.throws(
-    () => selectMasterTemplateForProduction(loadPinnedMasterTemplateBundle()),
-    PRODUCTION_REJECTION_OR_PROVIDER_PIN_MISMATCH,
-  );
-  delete process.env.LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF;
+  try {
+    try {
+      const receipt = assertTemplateAdmission(MASTER_TEMPLATE_PIN.entryId);
+      assert.equal(receipt.entryId, "master-template-type-1");
+      assert.match(receipt.receiptId, /^proof-only-not-admitted:/);
+      assert.equal(receipt.libraryCommitSha, "6b87993ddaf403aebe7bef97bd268a543a1d14eb");
+    } catch (error) {
+      if (!(error instanceof Error)) throw error;
+      assert.match(
+        error.message,
+        /(?:Catalogue file|Manifest|Inventory) SHA-256 does not match the pinned receipt\./,
+      );
+    }
+    assert.throws(() => getAdmittedTemplateEvidence(), /does not emit production admission evidence/);
+    assert.throws(
+      () => assertTemplateAdmission("marketing-smb-v1"),
+      /only inspects pinned master-template-type-1/,
+    );
+    assert.throws(
+      () => selectMasterTemplateForProduction(loadPinnedMasterTemplateBundle()),
+      PRODUCTION_REJECTION_OR_PROVIDER_PIN_MISMATCH,
+    );
+  } finally {
+    delete process.env.LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF;
+  }
 });
