@@ -21,18 +21,18 @@
   },
   "credits": { "A": 30, "B": 15, "C": 6, "L": 0 },
   "implementationCheckpoint": {
-    "commit": "1d3323e1319c8ccd95a64aa71e1a31c0fd7407e5",
-    "tree": "964b8e0d20fb2e3ee52278cacab71686866132d7",
-    "note": "repair implementation only; not the reviewed successor HEAD"
+    "commit": "7bb017e7285c325767f70042081966adabed1cc7",
+    "tree": "93027d6baaeefdff2f99792138e18c5a0d070fb1",
+    "note": "final attested Issue-275 branch tip; not parent 50997ba8"
   },
   "attestedStartTip": {
-    "commit": "bd0bbabaff413d90ebc6abe492790cca8e77b5d4",
-    "tree": "30d8f3c09e0c339e454affc0c49943893628a560"
+    "commit": "7bb017e7285c325767f70042081966adabed1cc7",
+    "tree": "93027d6baaeefdff2f99792138e18c5a0d070fb1"
   },
   "checkpoint": {
-    "commit": "50997ba8baceaaf54860144a578e9ecfd6991805",
-    "tree": "12a35c37dd4c2c1790043149b5248446b07b3497",
-    "note": "final successor HEAD (Issue-275 identity pin); this attestation is recorded in a follow-up evidence commit"
+    "commit": "7bb017e7285c325767f70042081966adabed1cc7",
+    "tree": "93027d6baaeefdff2f99792138e18c5a0d070fb1",
+    "note": "final branch tip / final-head (Issue-275 identity preserved); this evidence correction records that tip instead of parent 50997ba8"
   },
   "runtime": {
     "namedEnvironment": "IDE Development 2.5.1",

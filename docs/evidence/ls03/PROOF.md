@@ -31,8 +31,9 @@ expanded.
 4. Exact-tip ATTESTATION/PROOF and secret-scan `candidateTree` refresh for
    this repair candidate only.
 5. Dispatch idempotency in `semanticContract.ts` is the Issue-275 repair
-   identity, not stale `ls03-274-base9da7197e`. Evidence binds the identity
-   successor HEAD, not implementation `1d3323e1` / tree `964b8e0d`.
+   identity, not stale `ls03-274-base9da7197e`. Evidence binds the actual
+   final branch tip `7bb017e7285c325767f70042081966adabed1cc7` / tree
+   `93027d6baaeefdff2f99792138e18c5a0d070fb1`, not parent `50997ba8`.
 
 ## Dependency evidence (pins only; no copied provider/Harness source)
 
@@ -60,19 +61,19 @@ expanded.
   refused. Fixtures and Payload `down()` rollback were proven by contract
   tests. Additive SQL was not applied to a live database in this environment.
 
-## Repair implementation checkpoint (not the successor HEAD)
+## Repair implementation checkpoint
 
-- SHA: `1d3323e1319c8ccd95a64aa71e1a31c0fd7407e5`
-- Tree: `964b8e0d20fb2e3ee52278cacab71686866132d7`
+- SHA: `7bb017e7285c325767f70042081966adabed1cc7`
+- Tree: `93027d6baaeefdff2f99792138e18c5a0d070fb1`
 
 ## Attested start tip (dispatch expected `issue/275` SHA)
 
-- SHA: `bd0bbabaff413d90ebc6abe492790cca8e77b5d4`
-- Tree: `30d8f3c09e0c339e454affc0c49943893628a560`
+- SHA: `7bb017e7285c325767f70042081966adabed1cc7`
+- Tree: `93027d6baaeefdff2f99792138e18c5a0d070fb1`
 
-## Successor HEAD bound by this packet
+## Successor HEAD / final-head bound by this packet
 
-- SHA: `50997ba8baceaaf54860144a578e9ecfd6991805`
-- Tree: `12a35c37dd4c2c1790043149b5248446b07b3497`
+- SHA: `7bb017e7285c325767f70042081966adabed1cc7`
+- Tree: `93027d6baaeefdff2f99792138e18c5a0d070fb1`
 - Dispatch idempotency is the governed Issue-275 repair identity
   `cursor-cloud-dispatch-v1:linksites-ls03-275-repair-base9da7197e`.
