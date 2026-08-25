@@ -4,6 +4,7 @@ import { createSiteFilteredAccess } from '@/admin/utils/siteFilterOptions'
 import { localeField } from '@/fields/localeField'
 import { siteField } from '@/fields/siteField'
 import { workflowFields } from '@/fields/workflowFields'
+import { provenanceFields } from '@/fields/provenanceFields'
 import { triggerRebuild } from '@/hooks/triggerRebuild'
 import { createSlugField } from '@/fields/slugField'
 
@@ -73,6 +74,7 @@ export const TeamMembers: CollectionConfig<'team-members'> = {
     siteField,
     localeField,
     ...workflowFields,
+    ...provenanceFields,
   ] satisfies Field[],
 }
 

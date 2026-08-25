@@ -18,6 +18,8 @@ export const OfferPage: CollectionConfig<'offer-pages'> = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'site', 'status', 'updatedAt'],
+    description:
+      'DEPRECATED Offer projection. Canonical Product and Service collections are distinct; do not treat this as either.',
   },
   access: {
     read: createSiteFilteredAccess(),

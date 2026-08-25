@@ -37,6 +37,14 @@ import { Pages } from '@/collections/Pages'
 import { SiteDomains } from '@/collections/SiteDomains'
 import { Locations } from '@/collections/Locations'
 import { TeamMembers } from '@/collections/TeamMembers'
+import { TemplateAdoptions } from '@/collections/TemplateAdoptions'
+import { EntitlementSnapshots } from '@/collections/EntitlementSnapshots'
+import { Products } from '@/collections/Products'
+import { Services } from '@/collections/Services'
+import { ResultsWork } from '@/collections/ResultsWork'
+import { ServiceAreas } from '@/collections/ServiceAreas'
+import { Policies } from '@/collections/Policies'
+import { CoreSettings } from '@/collections/CoreSettings'
 
 // Globals
 import { ContactInfoGlobal } from '@/globals/ContactInfoGlobal'
@@ -157,6 +165,10 @@ export default buildConfig({
     Testimonials,
     Locations,
     TeamMembers,
+    ServiceAreas,
+    TemplateAdoptions,
+    EntitlementSnapshots,
+    CoreSettings,
 
     // Taxonomy Collections
     ArticleCategories,
@@ -169,6 +181,10 @@ export default buildConfig({
     Articles,
     HelpArticles,
     Videos,
+    Products,
+    Services,
+    ResultsWork,
+    Policies,
 
     // Page Collections
     Pages,

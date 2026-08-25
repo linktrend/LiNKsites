@@ -5,6 +5,7 @@ import { createSlugField } from '@/fields/slugField'
 import { localeField } from '@/fields/localeField'
 import { siteField } from '@/fields/siteField'
 import { workflowFields } from '@/fields/workflowFields'
+import { provenanceFields } from '@/fields/provenanceFields'
 import { triggerRebuild } from '@/hooks/triggerRebuild'
 
 export const Locations: CollectionConfig<'locations'> = {
@@ -85,6 +86,7 @@ export const Locations: CollectionConfig<'locations'> = {
     siteField,
     localeField,
     ...workflowFields,
+    ...provenanceFields,
   ] satisfies Field[],
 }
 
