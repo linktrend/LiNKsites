@@ -12,6 +12,8 @@ bytes.
 - Base tree `24e5b46566a45a58de3df243b45e7918d419cb2c`
 - Named environment: `IDE Development 2.5.1`
   (`1937ddb1-9d3e-11f1-a7d1-d6b4613131ce`)
+- Implementation checkpoint SHA `ceb64e793627dc217d67f59036ffdbde92e2675c`
+- Implementation checkpoint tree `907433aed28a9eef653d3c1553f888d25c990a3d`
 
 ## What was prepared
 

@@ -14,6 +14,11 @@
     "tree": "24e5b46566a45a58de3df243b45e7918d419cb2c",
     "ref": "origin/development"
   },
+  "implementationCheckpoint": {
+    "commit": "ceb64e793627dc217d67f59036ffdbde92e2675c",
+    "tree": "907433aed28a9eef653d3c1553f888d25c990a3d",
+    "note": "harness and tests; evidence bind is a descendant tip"
+  },
   "scope": [
     "scripts/profile-v2-quality/ls06/**",
     "docs/evidence/ls06/preparation/**"
