@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-06",
+  "lane": "preparation-only",
+  "preparationOnly": true,
+  "ls06Complete": false,
+  "githubIssue": 295,
+  "issuesPreparedNotImplemented": ["ISS-19", "ISS-20", "ISS-21"],
+  "repository": "https://github.com/linktrend/LiNKsites",
+  "branch": "issue/295-prepare-ls-06-layout-renderer-contract-and-rollb",
+  "origin": "https://github.com/linktrend/LiNKsites.git",
+  "base": {
+    "commit": "6169548ddbf6bff99a3eb8de3716e9fd3a843b11",
+    "tree": "24e5b46566a45a58de3df243b45e7918d419cb2c",
+    "ref": "origin/development"
+  },
+  "implementationCheckpoint": {
+    "commit": "ceb64e793627dc217d67f59036ffdbde92e2675c",
+    "tree": "907433aed28a9eef653d3c1553f888d25c990a3d",
+    "note": "harness and tests; evidence bind is a descendant tip"
+  },
+  "scope": [
+    "scripts/profile-v2-quality/ls06/**",
+    "docs/evidence/ls06/preparation/**"
+  ],
+  "forbiddenWrites": ["apps/**", "packages/**", "provider-bytes"],
+  "identities": {
+    "mode": "injected",
+    "failClosedWhenAbsent": ["LS-04", "LS-05", "provider", "layout"]
+  },
+  "runtime": {
+    "namedEnvironment": "IDE Development 2.5.1",
+    "environmentPublicId": "1937ddb1-9d3e-11f1-a7d1-d6b4613131ce",
+    "environmentVersionPublicId": "cac43460-9d4b-11f1-a7d1-d6b4613131ce",
+    "buildId": "bld-20260825-3c024383-44d6-469e-8d64-333e23bf5367",
+    "cloudRun": "bc-d8154ef0-9023-4eb5-849b-bda46cb0431e",
+    "originalModelName": "cursor-grok-4.6-medium",
+    "semanticModel": "grok-4.6",
+    "effort": "medium",
+    "fast": false
+  },
+  "validation": {
+    "nodeTest": "node --test scripts/profile-v2-quality/ls06/tests/*.test.mjs",
+    "nodeTestResult": "16 passed",
+    "harnessPassFixture": "scripts/profile-v2-quality/ls06/fixtures/pass-injected-identities",
+    "gitDiffCheck": "pass"
+  }
+}

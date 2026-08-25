@@ -1,0 +1,4 @@
+factory-catalog focused tests: 5 files, 62 passed
+files: ls04WorkingContentPromotion, workingContent, promotionService, promotionExecutor, ls02AdoptionAssembly
+typecheck: pnpm --filter @linksites/factory-catalog typecheck (exit 0)
+git diff --check (exit 0)

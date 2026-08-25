@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-05",
+  "issues": ["ISS-16"],
+  "githubIssue": 293,
+  "preparationOnly": true,
+  "packetComplete": false,
+  "immutableA1BytesAsserted": false,
+  "providerBytesIncluded": false,
+  "ownedPaths": [
+    "scripts/profile-v2-quality/ls05/**",
+    "docs/evidence/ls05/preparation/**"
+  ],
+  "prohibitedPaths": [
+    "packages/**",
+    "apps/**",
+    "supabase/migrations/**"
+  ],
+  "adapter": {
+    "mode": "injected",
+    "requiredIdentityFields": [
+      "repository",
+      "entryId",
+      "version",
+      "commit",
+      "tree",
+      "artifactDigest"
+    ],
+    "absentIdentity": "fail-closed"
+  },
+  "harness": {
+    "materialize": true,
+    "cache": true,
+    "rollback": true,
+    "offlineRestart": true
+  },
+  "base": {
+    "repository": "https://github.com/linktrend/LiNKsites.git",
+    "ref": "origin/development",
+    "commit": "6169548ddbf6bff99a3eb8de3716e9fd3a843b11",
+    "tree": "24e5b46566a45a58de3df243b45e7918d419cb2c"
+  },
+  "runtime": {
+    "namedEnvironment": "IDE Development 2.5.1",
+    "environmentPublicId": "1937ddb1-9d3e-11f1-a7d1-d6b4613131ce",
+    "environmentVersionPublicId": "cac43460-9d4b-11f1-a7d1-d6b4613131ce"
+  }
+}

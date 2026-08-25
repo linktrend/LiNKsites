@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls02-handoff-rebind-contract",
+  "issue": 300,
+  "packet": "LS-02",
+  "repository": "linktrend/LiNKsites",
+  "candidateBinding": {
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681",
+    "bindingRule": "The candidate commit and tree must match together; either mismatch is stale input."
+  },
+  "requiredChecks": [
+    "repository_identity",
+    "issue_and_packet_identity",
+    "candidate_parent_identity",
+    "identity_only_scope",
+    "h09_rebind_required",
+    "h10_blocked_until_h09",
+    "provider_pin_only",
+    "owned_path_confinement",
+    "manifest_checksum_integrity"
+  ],
+  "failClosedReasons": [
+    "STALE_CANDIDATE",
+    "FOREIGN_INPUT",
+    "FORBIDDEN_CLAIM",
+    "PROVIDER_BYTES_PRESENT",
+    "OWNED_PATH_ESCAPE",
+    "CHECKSUM_MISMATCH"
+  ],
+  "nonClaims": [
+    "H-09 conformance acceptance",
+    "H-10 independent review acceptance",
+    "provider conformance",
+    "production or hosted proof"
+  ]
+}
