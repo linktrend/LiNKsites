@@ -1,0 +1,13 @@
+{
+  "candidate": {
+    "repository": "linktrend/LiNKsites",
+    "issue": 301,
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "consumerReceipt": {
+    "entryId": "master-template-type-1",
+    "version": "2.0.0-a1.1",
+    "verdict": "ACCEPT"
+  }
+}

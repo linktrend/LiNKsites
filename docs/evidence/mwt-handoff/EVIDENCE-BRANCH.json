@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-evidence-branch-checkpoint",
+  "githubIssue": 299,
+  "issueBranch": "issue/299-prepare-mwt-ext-ls-01-immutable-receipt-amendmen",
+  "evidenceCommit": "49e3dfc0c8ba0acd6d87a4cfb44305672aa60067",
+  "evidenceTree": "e184d410ea3aef73a441dedc1feac203c05bb2f2",
+  "baseDevelopment": {
+    "commit": "6169548ddbf6bff99a3eb8de3716e9fd3a843b11",
+    "tree": "24e5b46566a45a58de3df243b45e7918d419cb2c"
+  },
+  "boundCandidate": {
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "equalsBoundCandidate": false,
+  "protectedIntegrated": false,
+  "note": "This issue-branch identity is evidence-only. It is not the bound candidate and is not protected development."
+}

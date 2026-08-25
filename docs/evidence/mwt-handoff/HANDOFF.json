@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-mwt-handoff",
+  "githubIssue": 299,
+  "gateId": "EXT-LS-01",
+  "from": {
+    "repository": "linktrend/LiNKsites",
+    "issueBranch": "issue/299-prepare-mwt-ext-ls-01-immutable-receipt-amendmen"
+  },
+  "to": {
+    "owners": [
+      "MWT EXT-LS-01 independent receipt reviewer",
+      "LiNKlibraries post-proof manifest amendment owner"
+    ],
+    "notOwners": [
+      "this issue for product source",
+      "this issue for H-09 paths",
+      "this issue for validator implementation"
+    ]
+  },
+  "boundCandidate": {
+    "repository": "linktrend/LiNKsites",
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "inputPaths": [
+    "docs/evidence/ext-ls-01/mwt-input/CANDIDATE-IDENTITY.json",
+    "docs/evidence/ext-ls-01/mwt-input/DEPENDENCIES.json",
+    "docs/evidence/ext-ls-01/mwt-input/IMMUTABLE-RECEIPT-INPUT.json",
+    "docs/evidence/ext-ls-01/mwt-input/MANIFEST-AMENDMENT-INPUT.json",
+    "docs/evidence/ext-ls-01/mwt-input/CHECKSUMS.json"
+  ],
+  "ownedPaths": [
+    "docs/evidence/ext-ls-01/mwt-input/**",
+    "docs/evidence/mwt-handoff/**"
+  ],
+  "h09PathsModified": false,
+  "phaseEdited": false,
+  "claims": {
+    "accept": false,
+    "protectedIntegrated": false,
+    "providerConformance": false,
+    "productionProof": false,
+    "consumerProof": false
+  }
+}

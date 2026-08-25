@@ -62,6 +62,28 @@ export interface WorkingPackage {
   items: WorkingPackageItem[]
 }
 
+export interface Ls04PromotionMapping {
+  semanticId: string
+  sourceItemId: string
+  workingSectionId?: string
+  providerComponentId: string
+  pageFamily?: string
+  payloadCollection: string
+  payloadBlockType?: string
+  reactSymbol: string
+  targetExternalKey: string
+}
+
+/** LS-04 / LS-FR-12 receipt bindings. Optional so W2-03 callers remain valid. */
+export interface Ls04PromotionBindings {
+  workingPackageId: string
+  workingPackageChecksum: string
+  assemblyManifestId: string
+  entitlementSnapshotId?: string
+  templateAdoptionId?: string
+  mappings: Ls04PromotionMapping[]
+}
+
 export interface PromotionRequest {
   schemaVersion: SchemaVersion
   promotionRequestId: string
@@ -73,6 +95,7 @@ export interface PromotionRequest {
   assemblyManifestId: string
   /** Opaque IDs of Gate receipts the caller asserts are satisfied. This module does NOT validate these against any real Gate store (out of scope, no Gate-receipt registry exists yet) -- it only records them on the resulting receipt for audit. */
   requiredGateReceiptIds: string[]
+  bindings?: Ls04PromotionBindings
 }
 
 export type PromotionItemStatus = 'succeeded' | 'failed'
@@ -98,6 +121,10 @@ export interface PromotionReceipt {
   startedAt: string
   completedAt: string
   requiredGateReceiptIds: string[]
+  bindings?: Ls04PromotionBindings & {
+    payloadDocumentIds: string[]
+    readbackChecksums: string[]
+  }
 }
 
 export class PromotionServiceError extends Error {}
@@ -172,6 +199,19 @@ export class PromotionService {
       startedAt,
       completedAt,
       requiredGateReceiptIds: request.requiredGateReceiptIds,
+      ...(request.bindings
+        ? {
+            bindings: {
+              ...request.bindings,
+              payloadDocumentIds: itemResults
+                .map((item) => item.payloadDocumentId)
+                .filter((id): id is string => Boolean(id)),
+              readbackChecksums: itemResults
+                .map((item) => item.resultChecksum)
+                .filter((checksum): checksum is string => Boolean(checksum)),
+            },
+          }
+        : {}),
     }
 
     this.receiptsByIdempotencyKey.set(request.idempotencyKey, {
