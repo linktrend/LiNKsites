@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "kind": "cross_repository_handoff",
+  "packet": "LS-02",
+  "issues": ["ISS-07", "ISS-08", "ISS-09"],
+  "handoff": "LiNKharness H-09 / downstream H-10 identity refresh",
+  "identityRefreshOnly": true,
+  "sites": {
+    "repository": "linktrend/LiNKsites",
+    "protectedDevelopment": {"commit": "1b3785b3c4b79026b48b578fb2c3a65a50759b77", "tree": "c447a78f530c2b1610d809dd4f15112fc83baa3a"},
+    "ls02Phase": {"pr": 273, "head": "d83d80d17837fd36b5810af9d48e03dd9a0e7ded", "tree": "1f9eb7cb8d569c78dd50a482d6b7ce985c2cff90"},
+    "profilePackage": "@linksites/profile"
+  },
+  "harness": {
+    "repository": "linktrend/LiNKharness",
+    "h09Baseline": {"commit": "ad8560b242da0d15c0d65a6c8d4d17a0171e2d2b", "tree": "6cab53da19ba390d392157dbcc38979f1a6c86ce"},
+    "currentDevelopment": {"commit": "655bd906cf9c58e71d38694d3545112b421a3bb0", "tree": "e5ece767bd39b54c346f041a7dc1e59cf48f4a40"}
+  },
+  "provider": {
+    "repository": "linktrend/LiNKlibraries",
+    "a1Authority": {"commit": "f28fd53d454cbc33d97951d8e62826dae5a83e40", "tree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b"}
+  },
+  "claims": {
+    "h09ConformanceAccepted": false,
+    "h10ReviewAccepted": false,
+    "ls03DependencyClaimed": false,
+    "copiedHarnessOrProviderBytes": false,
+    "consumerActionRequired": "Rebind H-09 consumer receipt to this exact sites development identity and rerun conformance before H-10 review admission."
+  },
+  "scope": "identity and receipt binding only; no product/runtime/provider mutation"
+}
