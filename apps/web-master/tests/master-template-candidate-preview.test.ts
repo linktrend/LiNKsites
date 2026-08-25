@@ -6,11 +6,14 @@ import { MASTER_TEMPLATE_PIN } from "../../../packages/factory-catalog/src/maste
 import { loadPinnedMasterTemplateBundle } from "../../../packages/factory-catalog/src/masterTemplatePreviewSeam.ts";
 import { TemplateAdmissionError, assertTemplateAdmission, getAdmittedTemplateEvidence } from "../src/lib/template-admission.ts";
 
+const PRODUCTION_REJECTION_OR_PROVIDER_PIN_MISMATCH =
+  /Production path rejects|(?:Catalogue file|Manifest|Inventory) SHA-256 does not match the pinned receipt\./;
+
 test("production admission still rejects the draft when the proof flag is off", () => {
   delete process.env.LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF;
   assert.throws(
     () => selectMasterTemplateForProduction(loadPinnedMasterTemplateBundle()),
-    /Production path rejects/,
+    PRODUCTION_REJECTION_OR_PROVIDER_PIN_MISMATCH,
   );
   assert.throws(() => getAdmittedTemplateEvidence(), TemplateAdmissionError);
   assert.throws(() => assertTemplateAdmission(MASTER_TEMPLATE_PIN.entryId), TemplateAdmissionError);
@@ -29,7 +32,7 @@ test("proof flag inspects the pinned draft without emitting approved admission e
   );
   assert.throws(
     () => selectMasterTemplateForProduction(loadPinnedMasterTemplateBundle()),
-    /Production path rejects/,
+    PRODUCTION_REJECTION_OR_PROVIDER_PIN_MISMATCH,
   );
   delete process.env.LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF;
 });
