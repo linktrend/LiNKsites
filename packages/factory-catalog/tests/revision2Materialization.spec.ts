@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { materializeRevision2WebsiteTemplate } from '../src/revision2Materialization.js'
+import { isProviderCandidateReceiptType } from '../src/libraryProviderClient.js'
 
 describe('Revision 2 website-template materialization', () => {
   it('fails closed when the provider root is absent', () => {
@@ -15,5 +16,11 @@ describe('Revision 2 website-template materialization', () => {
     })
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.errors.join(' ')).toMatch(/could not be read|receipt found|no such file/i)
+  })
+
+  it('recognizes the canonical prerelease candidate receipt type', () => {
+    expect(isProviderCandidateReceiptType('provider_prerelease_candidate')).toBe(true)
+    expect(isProviderCandidateReceiptType('provider_release_candidate')).toBe(true)
+    expect(isProviderCandidateReceiptType('consumption')).toBe(false)
   })
 })

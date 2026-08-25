@@ -75,7 +75,12 @@ export function materializeRevision2WebsiteTemplate(
     return failure([error instanceof Error ? error.message : 'provider release files could not be read'])
   }
 
-  const validated = validateExactRelease(bundle, input.pin)
+  // A draft/non-selectable candidate is allowed only for the disposable
+  // paired-proof lane. Production/runtime admission keeps the strict native
+  // receipt requirement and therefore remains fail-closed.
+  const validated = validateExactRelease(bundle, input.pin, {
+    allowDraftCandidate: process.env.LINKSITES_PAIRED_PROOF === '1',
+  })
   if (!validated.ok) return validated
   const admitted = admitWebsiteTemplateMaterialization(validated)
   if (!admitted.ok) return admitted
@@ -103,8 +108,17 @@ export function materializeRevision2WebsiteTemplate(
   const sourceInventoryPath = Object.keys(files).find((path) => path === 'source-inventory.json' || path.endsWith('/source-inventory.json'))
   if (sourceInventoryPath) {
     try {
-      const sourceInventory = JSON.parse(files[sourceInventoryPath]) as { sourceRepository?: unknown; sourceCommit?: unknown; sourceTree?: unknown }
-      if (sourceInventory.sourceRepository !== 'LiNKsites' || sourceInventory.sourceCommit !== MASTER_TEMPLATE_SOURCE_COMMIT_SHA || sourceInventory.sourceTree !== MASTER_TEMPLATE_SOURCE_TREE_SHA) {
+      const sourceInventory = JSON.parse(files[sourceInventoryPath]) as {
+        sourceRepository?: unknown
+        sourceCommit?: unknown
+        sourceTree?: unknown
+        template?: { sourceRepository?: unknown }
+        source?: { commitSha?: unknown; treeSha?: unknown }
+      }
+      const sourceRepository = sourceInventory.sourceRepository ?? (sourceInventory.template as { sourceRepository?: unknown } | undefined)?.sourceRepository
+      const sourceCommit = sourceInventory.sourceCommit ?? (sourceInventory.source as { commitSha?: unknown } | undefined)?.commitSha
+      const sourceTree = sourceInventory.sourceTree ?? (sourceInventory.source as { treeSha?: unknown } | undefined)?.treeSha
+      if (sourceRepository !== 'LiNKsites' || sourceCommit !== MASTER_TEMPLATE_SOURCE_COMMIT_SHA || sourceTree !== MASTER_TEMPLATE_SOURCE_TREE_SHA) {
         return failure(['provider source inventory is not bound to the preserved LiNKsites visual handoff'])
       }
     } catch {
