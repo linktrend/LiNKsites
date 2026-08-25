@@ -79,6 +79,10 @@ export interface Config {
     testimonials: Testimonial;
     locations: Location;
     'team-members': TeamMember;
+    'service-areas': ServiceArea;
+    'template-adoptions': TemplateAdoption;
+    'entitlement-snapshots': EntitlementSnapshot;
+    'core-settings': CoreSetting;
     'article-categories': ArticleCategory;
     'case-study-categories': CaseStudyCategory;
     'offer-categories': OfferCategory;
@@ -87,6 +91,10 @@ export interface Config {
     articles: Article;
     'help-articles': HelpArticle;
     videos: Video;
+    products: Product;
+    services: Service;
+    'results-work': ResultsWork;
+    policies: Policy;
     pages: Page;
     'offer-pages': OfferPage;
     'case-study-pages': CaseStudyPage;
@@ -115,6 +123,10 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     locations: LocationsSelect<false> | LocationsSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    'service-areas': ServiceAreasSelect<false> | ServiceAreasSelect<true>;
+    'template-adoptions': TemplateAdoptionsSelect<false> | TemplateAdoptionsSelect<true>;
+    'entitlement-snapshots': EntitlementSnapshotsSelect<false> | EntitlementSnapshotsSelect<true>;
+    'core-settings': CoreSettingsSelect<false> | CoreSettingsSelect<true>;
     'article-categories': ArticleCategoriesSelect<false> | ArticleCategoriesSelect<true>;
     'case-study-categories': CaseStudyCategoriesSelect<false> | CaseStudyCategoriesSelect<true>;
     'offer-categories': OfferCategoriesSelect<false> | OfferCategoriesSelect<true>;
@@ -123,6 +135,10 @@ export interface Config {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'help-articles': HelpArticlesSelect<false> | HelpArticlesSelect<true>;
     videos: VideosSelect<false> | VideosSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
+    'results-work': ResultsWorkSelect<false> | ResultsWorkSelect<true>;
+    policies: PoliciesSelect<false> | PoliciesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'offer-pages': OfferPagesSelect<false> | OfferPagesSelect<true>;
     'case-study-pages': CaseStudyPagesSelect<false> | CaseStudyPagesSelect<true>;
@@ -472,9 +488,21 @@ export interface SiteSetting {
    */
   locale: string;
   /**
-   * Which frontend template module should render this site
+   * DEPRECATED projection of a free-text template ID. Canonical adoption identity lives on template-adoptions.
    */
   templateId: string;
+  /**
+   * Marks templateId as a deprecated projection only (LS-FR-08).
+   */
+  deprecatedTemplateIdProjection?: boolean | null;
+  /**
+   * Canonical immutable template adoption record
+   */
+  templateAdoption?: (number | null) | TemplateAdoption;
+  /**
+   * Canonical immutable entitlement snapshot
+   */
+  entitlementSnapshot?: (number | null) | EntitlementSnapshot;
   theme?: {
     primaryColor?: string | null;
     secondaryColor?: string | null;
@@ -501,6 +529,167 @@ export interface SiteSetting {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Immutable template adoption records. Free-text template IDs are deprecated projections only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "template-adoptions".
+ */
+export interface TemplateAdoption {
+  id: number;
+  adoptionId: string;
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  adoptionState: 'linked' | 'adopted' | 'replaced' | 'rolled_back';
+  identities: {
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    provider: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    layout: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    plan: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    overlay: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    config: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    content: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    adapter: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    effective: string;
+  };
+  entitlementSnapshot: number | EntitlementSnapshot;
+  /**
+   * Linked before-state for replace/rollback proof
+   */
+  beforeRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Linked after-state for replace/rollback proof
+   */
+  afterRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Rollback target recorded at adoption time
+   */
+  rollbackRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  actorId: string;
+  evidenceDigest: string;
+  /**
+   * Deprecated free-text template ID projection. Canonical identity is identities.effective.
+   */
+  deprecatedTemplateIdProjection?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Immutable A/B/C/L entitlement snapshots. Mutation is rejected and rolled back to the original snapshot.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entitlement-snapshots".
+ */
+export interface EntitlementSnapshot {
+  id: number;
+  snapshotId: string;
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  siteRef: string;
+  planId: 'A' | 'B' | 'C' | 'L';
+  grantedCredits: number;
+  budgets: {
+    A: number;
+    B: number;
+    C: number;
+    L: number;
+  };
+  schemaVersion: {
+    major: number;
+    minor: number;
+  };
+  digest: string;
+  beforeRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  afterRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  rollbackRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  actorId: string;
+  evidenceDigest: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -711,6 +900,28 @@ export interface Location {
   reviewedAt?: string | null;
   autoApproved?: boolean | null;
   publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -768,6 +979,155 @@ export interface TeamMember {
   reviewedAt?: string | null;
   autoApproved?: boolean | null;
   publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Tenant/locale-safe geographic service areas. Distinct from Locations.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-areas".
+ */
+export interface ServiceArea {
+  id: number;
+  name: string;
+  /**
+   * URL-friendly identifier generated per locale and site
+   */
+  slug: string;
+  region?: string | null;
+  coverageSummary?: string | null;
+  servedLocations?: (number | Location)[] | null;
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  /**
+   * Content workflow state
+   */
+  status: 'draft' | 'pending' | 'approved' | 'published';
+  submittedBy?: (number | null) | User;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  autoApproved?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Typed per-site core settings. Free-text template IDs are deprecated projections only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "core-settings".
+ */
+export interface CoreSetting {
+  id: number;
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  /**
+   * Product/service/hybrid/neither production mode. Products and Services collections stay distinct.
+   */
+  contentMode: 'product' | 'service' | 'hybrid' | 'neither';
+  capabilityPlanId: 'A' | 'B' | 'C' | 'L';
+  templateAdoption?: (number | null) | TemplateAdoption;
+  entitlementSnapshot?: (number | null) | EntitlementSnapshot;
+  /**
+   * Deprecated free-text template ID projection. Do not treat as canonical adoption identity.
+   */
+  deprecatedTemplateIdProjection?: string | null;
+  brand: {
+    legalName: string;
+    shortName?: string | null;
+    primaryActionLabel?: string | null;
+    primaryActionHref?: string | null;
+  };
+  /**
+   * Content workflow state
+   */
+  status: 'draft' | 'pending' | 'approved' | 'published';
+  submittedBy?: (number | null) | User;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  autoApproved?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1087,11 +1447,35 @@ export interface Article {
   reviewedAt?: string | null;
   autoApproved?: boolean | null;
   publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * DEPRECATED Case projection. Canonical Results/Work is the results-work collection.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "case-study-pages".
  */
@@ -1441,6 +1825,28 @@ export interface Video {
   reviewedAt?: string | null;
   autoApproved?: boolean | null;
   publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1763,6 +2169,427 @@ export interface HelpArticle {
   reviewedAt?: string | null;
   autoApproved?: boolean | null;
   publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Canonical sellable products. Semantically distinct from Services. Offers are a deprecated projection.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  title: string;
+  /**
+   * URL-friendly identifier generated per locale and site
+   */
+  slug: string;
+  /**
+   * Fixed product kind; never a service
+   */
+  semanticKind: 'product';
+  sku?: string | null;
+  summary: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  featuredImage?: (number | null) | Media;
+  seo?: {
+    /**
+     * Override the page title for search engines (leave empty to use page title)
+     */
+    title?: string | null;
+    /**
+     * Brief description for search engine results (max 160 characters)
+     */
+    description?: string | null;
+    /**
+     * Comma-separated keywords for SEO
+     */
+    keywords?: string | null;
+    /**
+     * Image for social media sharing (1200x630px recommended)
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Prevent search engines from indexing this page
+     */
+    noIndex?: boolean | null;
+  };
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  /**
+   * Content workflow state
+   */
+  status: 'draft' | 'pending' | 'approved' | 'published';
+  submittedBy?: (number | null) | User;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  autoApproved?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Canonical offered services. Semantically distinct from Products. Offers are a deprecated projection.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  title: string;
+  /**
+   * URL-friendly identifier generated per locale and site
+   */
+  slug: string;
+  /**
+   * Fixed service kind; never a product
+   */
+  semanticKind: 'service';
+  serviceCode?: string | null;
+  summary: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  featuredImage?: (number | null) | Media;
+  seo?: {
+    /**
+     * Override the page title for search engines (leave empty to use page title)
+     */
+    title?: string | null;
+    /**
+     * Brief description for search engine results (max 160 characters)
+     */
+    description?: string | null;
+    /**
+     * Comma-separated keywords for SEO
+     */
+    keywords?: string | null;
+    /**
+     * Image for social media sharing (1200x630px recommended)
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Prevent search engines from indexing this page
+     */
+    noIndex?: boolean | null;
+  };
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  /**
+   * Content workflow state
+   */
+  status: 'draft' | 'pending' | 'approved' | 'published';
+  submittedBy?: (number | null) | User;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  autoApproved?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Canonical Results/Work records. Case study pages remain a deprecated compatibility projection.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "results-work".
+ */
+export interface ResultsWork {
+  id: number;
+  title: string;
+  /**
+   * URL-friendly identifier generated per locale and site
+   */
+  slug: string;
+  client: string;
+  industry?: string | null;
+  summary?: string | null;
+  outcome?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  featuredImage?: (number | null) | Media;
+  metrics?:
+    | {
+        metric: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  seo?: {
+    /**
+     * Override the page title for search engines (leave empty to use page title)
+     */
+    title?: string | null;
+    /**
+     * Brief description for search engine results (max 160 characters)
+     */
+    description?: string | null;
+    /**
+     * Comma-separated keywords for SEO
+     */
+    keywords?: string | null;
+    /**
+     * Image for social media sharing (1200x630px recommended)
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Prevent search engines from indexing this page
+     */
+    noIndex?: boolean | null;
+  };
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  /**
+   * Content workflow state
+   */
+  status: 'draft' | 'pending' | 'approved' | 'published';
+  submittedBy?: (number | null) | User;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  autoApproved?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Canonical policy records. Privacy/Terms/Cookie page collections remain compatibility projections.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "policies".
+ */
+export interface Policy {
+  id: number;
+  title: string;
+  /**
+   * URL-friendly identifier generated per locale and site
+   */
+  slug: string;
+  policyKind: 'privacy' | 'terms' | 'cookie' | 'other';
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  lastReviewedAt?: string | null;
+  seo?: {
+    /**
+     * Override the page title for search engines (leave empty to use page title)
+     */
+    title?: string | null;
+    /**
+     * Brief description for search engine results (max 160 characters)
+     */
+    description?: string | null;
+    /**
+     * Comma-separated keywords for SEO
+     */
+    keywords?: string | null;
+    /**
+     * Image for social media sharing (1200x630px recommended)
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Prevent search engines from indexing this page
+     */
+    noIndex?: boolean | null;
+  };
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  /**
+   * Content workflow state
+   */
+  status: 'draft' | 'pending' | 'approved' | 'published';
+  submittedBy?: (number | null) | User;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  autoApproved?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2161,7 +2988,7 @@ export interface Page {
    */
   promotionRunMarker?: string | null;
   /**
-   * Whether this record has activated a public customer site.
+   * Private preview publication never activates a public customer site.
    */
   publicActivation?: boolean | null;
   /**
@@ -2178,6 +3005,8 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * DEPRECATED Offer projection. Canonical Product and Service collections are distinct; do not treat this as either.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "offer-pages".
  */
@@ -2436,6 +3265,28 @@ export interface FaqPage {
   reviewedAt?: string | null;
   autoApproved?: boolean | null;
   publishedAt?: string | null;
+  /**
+   * Tenant/locale-bound source, actor, and evidence identity
+   */
+  provenance?: {
+    /**
+     * Exact source identity (SHA-1 or content checksum)
+     */
+    sourceIdentity?: string | null;
+    /**
+     * Evidence digest for the recorded fact
+     */
+    evidenceDigest?: string | null;
+    /**
+     * Actor that recorded this document
+     */
+    actorId?: string | null;
+    recordedAt?: string | null;
+    /**
+     * When set, this record is bound to its locale and must not leak across locales
+     */
+    localeBound?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2775,6 +3626,22 @@ export interface PayloadLockedDocument {
         value: number | TeamMember;
       } | null)
     | ({
+        relationTo: 'service-areas';
+        value: number | ServiceArea;
+      } | null)
+    | ({
+        relationTo: 'template-adoptions';
+        value: number | TemplateAdoption;
+      } | null)
+    | ({
+        relationTo: 'entitlement-snapshots';
+        value: number | EntitlementSnapshot;
+      } | null)
+    | ({
+        relationTo: 'core-settings';
+        value: number | CoreSetting;
+      } | null)
+    | ({
         relationTo: 'article-categories';
         value: number | ArticleCategory;
       } | null)
@@ -2805,6 +3672,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'videos';
         value: number | Video;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'results-work';
+        value: number | ResultsWork;
+      } | null)
+    | ({
+        relationTo: 'policies';
+        value: number | Policy;
       } | null)
     | ({
         relationTo: 'pages';
@@ -3019,6 +3902,9 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   site?: T;
   locale?: T;
   templateId?: T;
+  deprecatedTemplateIdProjection?: T;
+  templateAdoption?: T;
+  entitlementSnapshot?: T;
   theme?:
     | T
     | {
@@ -3190,6 +4076,15 @@ export interface LocationsSelect<T extends boolean = true> {
   reviewedAt?: T;
   autoApproved?: T;
   publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3222,6 +4117,150 @@ export interface TeamMembersSelect<T extends boolean = true> {
   reviewedAt?: T;
   autoApproved?: T;
   publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-areas_select".
+ */
+export interface ServiceAreasSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  region?: T;
+  coverageSummary?: T;
+  servedLocations?: T;
+  site?: T;
+  locale?: T;
+  status?: T;
+  submittedBy?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  autoApproved?: T;
+  publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "template-adoptions_select".
+ */
+export interface TemplateAdoptionsSelect<T extends boolean = true> {
+  adoptionId?: T;
+  site?: T;
+  locale?: T;
+  adoptionState?: T;
+  identities?:
+    | T
+    | {
+        provider?: T;
+        layout?: T;
+        plan?: T;
+        overlay?: T;
+        config?: T;
+        content?: T;
+        adapter?: T;
+        effective?: T;
+      };
+  entitlementSnapshot?: T;
+  beforeRecord?: T;
+  afterRecord?: T;
+  rollbackRecord?: T;
+  actorId?: T;
+  evidenceDigest?: T;
+  deprecatedTemplateIdProjection?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entitlement-snapshots_select".
+ */
+export interface EntitlementSnapshotsSelect<T extends boolean = true> {
+  snapshotId?: T;
+  site?: T;
+  locale?: T;
+  siteRef?: T;
+  planId?: T;
+  grantedCredits?: T;
+  budgets?:
+    | T
+    | {
+        A?: T;
+        B?: T;
+        C?: T;
+        L?: T;
+      };
+  schemaVersion?:
+    | T
+    | {
+        major?: T;
+        minor?: T;
+      };
+  digest?: T;
+  beforeRecord?: T;
+  afterRecord?: T;
+  rollbackRecord?: T;
+  actorId?: T;
+  evidenceDigest?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "core-settings_select".
+ */
+export interface CoreSettingsSelect<T extends boolean = true> {
+  site?: T;
+  locale?: T;
+  contentMode?: T;
+  capabilityPlanId?: T;
+  templateAdoption?: T;
+  entitlementSnapshot?: T;
+  deprecatedTemplateIdProjection?: T;
+  brand?:
+    | T
+    | {
+        legalName?: T;
+        shortName?: T;
+        primaryActionLabel?: T;
+        primaryActionHref?: T;
+      };
+  status?: T;
+  submittedBy?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  autoApproved?: T;
+  publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3410,6 +4449,15 @@ export interface ArticlesSelect<T extends boolean = true> {
   reviewedAt?: T;
   autoApproved?: T;
   publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3498,6 +4546,15 @@ export interface HelpArticlesSelect<T extends boolean = true> {
   reviewedAt?: T;
   autoApproved?: T;
   publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3562,6 +4619,188 @@ export interface VideosSelect<T extends boolean = true> {
   reviewedAt?: T;
   autoApproved?: T;
   publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  semanticKind?: T;
+  sku?: T;
+  summary?: T;
+  description?: T;
+  featuredImage?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
+  site?: T;
+  locale?: T;
+  status?: T;
+  submittedBy?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  autoApproved?: T;
+  publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  semanticKind?: T;
+  serviceCode?: T;
+  summary?: T;
+  description?: T;
+  featuredImage?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
+  site?: T;
+  locale?: T;
+  status?: T;
+  submittedBy?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  autoApproved?: T;
+  publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "results-work_select".
+ */
+export interface ResultsWorkSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  client?: T;
+  industry?: T;
+  summary?: T;
+  outcome?: T;
+  featuredImage?: T;
+  metrics?:
+    | T
+    | {
+        metric?: T;
+        value?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
+  site?: T;
+  locale?: T;
+  status?: T;
+  submittedBy?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  autoApproved?: T;
+  publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "policies_select".
+ */
+export interface PoliciesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  policyKind?: T;
+  body?: T;
+  lastReviewedAt?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
+  site?: T;
+  locale?: T;
+  status?: T;
+  submittedBy?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  autoApproved?: T;
+  publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -4166,6 +5405,15 @@ export interface FaqPagesSelect<T extends boolean = true> {
   reviewedAt?: T;
   autoApproved?: T;
   publishedAt?: T;
+  provenance?:
+    | T
+    | {
+        sourceIdentity?: T;
+        evidenceDigest?: T;
+        actorId?: T;
+        recordedAt?: T;
+        localeBound?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
