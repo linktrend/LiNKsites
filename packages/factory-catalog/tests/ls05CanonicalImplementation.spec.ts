@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { FROZEN_PROVIDER_PIN } from '../src/libraryProviderClient.js'
+import { FROZEN_PROVIDER_PIN, validateExactRelease } from '../src/libraryProviderClient.js'
 import {
   A1_PROVIDER_SEMANTIC_MAP,
   MASTER_TEMPLATE_ADAPTER_ID,
@@ -66,5 +66,11 @@ describe('LS-05 canonical A1 adapter and identity bindings', () => {
       adoption: { siteId: 'site-ls05', locale: 'en-US', payloadStatus: 'published' },
       payload: { siteId: 'site-ls05', locale: 'en-US', documentIds: [] },
     })).toThrow(/must remain draft/)
+  })
+
+  it('requires an explicit draft-candidate probe policy', () => {
+    const result = validateExactRelease({}, FROZEN_PROVIDER_PIN, { allowDraftCandidate: true })
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.errors.join(' ')).toMatch(/explicit.*draft_candidate_probe/i)
   })
 })

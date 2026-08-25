@@ -5,6 +5,7 @@ import {
   admitWebsiteTemplateMaterialization,
   type Revision2ProviderPin,
   type Revision2Result,
+  type Revision2SelectionPolicy,
   type WebsiteTemplateMaterializationReference,
   validateExactRelease,
 } from './libraryProviderClient.ts'
@@ -28,6 +29,8 @@ export type Revision2MaterializationInput = Readonly<{
   entryId: string
   version: string
   pin: Revision2ProviderPin
+  /** Candidate materialization is probe-only and must be explicitly selected. */
+  selectionPolicy?: Revision2SelectionPolicy
   receiptPath?: string
   /** Optional consumer-owned cache. Provider bytes are copied only here. */
   cacheRoot?: string
@@ -64,6 +67,8 @@ const canonical = (value: unknown): string => value === null || typeof value !==
     ? `[${value.map(canonical).join(',')}]`
     : `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`).join(',')}}`
 const identity = (value: unknown): string => createHash('sha1').update(canonical(value), 'utf8').digest('hex')
+const SHA1 = /^[a-f0-9]{40}$/
+const SHA256 = /^[a-f0-9]{64}$/
 const confined = (root: string, candidate: string): boolean => {
   const rootWithSeparator = root.endsWith(sep) ? root : `${root}${sep}`
   return candidate === root || candidate.startsWith(rootWithSeparator)
@@ -132,9 +137,9 @@ export function materializeRevision2WebsiteTemplate(input: Revision2Materializat
   } catch (error) {
     return failure([error instanceof Error ? error.message : 'provider release files could not be read'])
   }
-  const validated = validateExactRelease(bundle, input.pin, { allowDraftCandidate: true })
+  const validated = validateExactRelease(bundle, input.pin, { selectionPolicy: input.selectionPolicy })
   if (!validated.ok) return validated
-  const admitted = admitWebsiteTemplateMaterialization(validated)
+  const admitted = admitWebsiteTemplateMaterialization(validated, { selectionPolicy: input.selectionPolicy })
   if (!admitted.ok) return admitted
   const inventory = (bundle as { inventory: { entries?: unknown[] } }).inventory
   const files: Record<string, string> = {}
@@ -207,6 +212,23 @@ function safeCachePath(root: string, candidate: string): boolean {
   const prefix = root.endsWith(sep) ? root : `${root}${sep}`
   return resolved.startsWith(prefix) && !resolved.includes(`${sep}.${sep}`)
 }
+
+function recomputeReceiptIdentities(receipt: Revision2MaterializationReceipt): Revision2MaterializationReceipt['identities'] | null {
+  if (!receipt || !receipt.provider || !receipt.release || !receipt.cache || !Array.isArray(receipt.cache.inventory) || !receipt.adapter || !receipt.identities) return null
+  if (!SHA1.test(receipt.provider.commitSha) || !SHA1.test(receipt.provider.treeSha) || typeof receipt.release.entryId !== 'string' || typeof receipt.release.version !== 'string' || !SHA1.test(receipt.release.artifactTreeSha1) || !SHA1.test(receipt.release.releaseSourceCommitSha) || !SHA1.test(receipt.release.releaseSourceTreeSha) || !SHA256.test(receipt.release.releaseManifestSha256) || !SHA256.test(receipt.release.inventorySha256) || !SHA256.test(receipt.release.payloadSha256) || !SHA256.test(receipt.release.dependencyLockSha256) || typeof receipt.adapter.id !== 'string' || typeof receipt.adapter.version !== 'string' || !SHA1.test(receipt.adapter.mappingDigest) || typeof receipt.cache.entryDirectory !== 'string') return null
+  if (!receipt.cache.inventory.every((item) => item && typeof item.path === 'string' && SHA256.test(item.sha256) && Number.isSafeInteger(item.byteLength) && item.byteLength >= 0)) return null
+  if ((receipt.identities.payload !== null && !SHA1.test(receipt.identities.payload)) || !SHA1.test(receipt.identities.candidate) || !SHA1.test(receipt.identities.materialization) || !SHA1.test(receipt.identities.adapter) || !SHA1.test(receipt.identities.effective)) return null
+  const candidate = identity({ provider: receipt.provider.commitSha, tree: receipt.provider.treeSha, entryId: receipt.release.entryId, version: receipt.release.version, artifactTreeSha1: receipt.release.artifactTreeSha1 })
+  const materialization = identity({ candidate, inventory: receipt.cache.inventory })
+  const adapter = identity({ id: receipt.adapter.id, version: receipt.adapter.version, mappingDigest: receipt.adapter.mappingDigest })
+  const effective = identity({ candidate, materialization, adapter, payload: receipt.identities.payload ?? null })
+  return { candidate, materialization, adapter, payload: receipt.identities.payload ?? null, effective }
+}
+
+function sameIdentities(left: Revision2MaterializationReceipt['identities'], right: Revision2MaterializationReceipt['identities']): boolean {
+  return left.candidate === right.candidate && left.materialization === right.materialization && left.adapter === right.adapter && left.payload === right.payload && left.effective === right.effective
+}
+
 function writeCache(cacheRoot: string, receipt: Revision2MaterializationReceipt, files: Record<string, string>): void {
   const dirs = cachePaths(cacheRoot)
   mkdirSync(dirs.root, { recursive: true }); mkdirSync(dirs.entries, { recursive: true }); mkdirSync(dirs.staging, { recursive: true })
@@ -229,14 +251,21 @@ function writeCache(cacheRoot: string, receipt: Revision2MaterializationReceipt,
 
 function verifyCachedEntry(cacheRoot: string, active: any): Revision2Result<Revision2MaterializedWebsiteTemplate> {
   const dirs = cachePaths(cacheRoot)
-  if (!active || typeof active.entryDirectory !== 'string') return failure(['consumer cache active pointer is absent'])
+  if (!active || typeof active.entryDirectory !== 'string' || typeof active.receiptPath !== 'string' || typeof active.identity !== 'string' || typeof active.entryId !== 'string' || typeof active.version !== 'string') return failure(['consumer cache active pointer is absent or invalid'])
   const entryDir = resolve(dirs.root, active.entryDirectory)
   if (!safeCachePath(dirs.root, entryDir)) return failure(['consumer cache entry path escapes cache root'])
+  const receiptPath = resolve(dirs.root, active.receiptPath)
+  if (!safeCachePath(dirs.root, receiptPath)) return failure(['consumer cache receipt path escapes cache root'])
+  if (receiptPath !== resolve(entryDir, 'materialization-receipt.json')) return failure(['consumer cache receipt path is not bound to the active entry'])
   let receipt: Revision2MaterializationReceipt
-  try { receipt = readJson(resolve(dirs.root, active.receiptPath)) as Revision2MaterializationReceipt } catch (error) { return failure([error instanceof Error ? error.message : 'consumer cache receipt is absent']) }
-  if (!receipt || receipt.packet !== 'LS-05' || receipt.verdicts.materialization !== 'candidate_materialized') return failure(['consumer cache materialization receipt is invalid'])
+  try { receipt = readJson(receiptPath) as Revision2MaterializationReceipt } catch (error) { return failure([error instanceof Error ? error.message : 'consumer cache receipt is absent']) }
+  if (!receipt || receipt.packet !== 'LS-05' || receipt.verdicts?.materialization !== 'candidate_materialized' || receipt.cache?.entryDirectory !== active.entryDirectory || receipt.release?.entryId !== active.entryId || receipt.release?.version !== active.version || receipt.identities?.effective !== active.identity) return failure(['consumer cache materialization receipt is not bound to the active pointer'])
+  const recomputed = recomputeReceiptIdentities(receipt)
+  if (!recomputed || !sameIdentities(receipt.identities, recomputed)) return failure(['consumer cache materialization receipt identities are invalid'])
+  if (!Array.isArray(receipt.cache.inventory)) return failure(['consumer cache materialization receipt inventory is invalid'])
   const files: Record<string, string> = {}
   for (const item of receipt.cache.inventory) {
+    if (!item || typeof item.path !== 'string') return failure(['consumer cache inventory path is invalid'])
     const path = resolve(entryDir, item.path)
     if (!safeCachePath(entryDir, path)) return failure([`consumer cache inventory path escapes entry: ${item.path}`])
     try { const stat = lstatSync(path); if (!stat.isFile()) return failure([`consumer cache path is not a regular file: ${item.path}`]); const bytes = readFileSync(path); if (bytes.byteLength !== item.byteLength || sha256(bytes) !== item.sha256) return failure([`consumer cache digest mismatch: ${item.path}`]); files[item.path] = bytes.toString('utf8') } catch { return failure([`consumer cache file is missing: ${item.path}`]) }
@@ -247,7 +276,8 @@ function verifyCachedEntry(cacheRoot: string, active: any): Revision2Result<Revi
 
 /** Rehydrate only from the consumer-owned cache; no provider checkout is read. */
 export function offlineRestartRevision2WebsiteTemplate(input: Revision2OfflineRestartInput): Revision2Result<Revision2MaterializedWebsiteTemplate> {
-  const active = readJson(cachePaths(input.cacheRoot).active)
+  let active: any
+  try { active = readJson(cachePaths(input.cacheRoot).active) } catch (error) { return failure([error instanceof Error ? error.message : 'consumer cache active pointer is invalid']) }
   const result = verifyCachedEntry(input.cacheRoot, active)
   if (!result.ok || !input.expected) return result
   if (result.value.reference.entryId !== input.expected.entryId || result.value.reference.version !== input.expected.version || result.value.reference.sourceCommitSha !== input.expected.pin.sourceCommitSha || result.value.reference.sourceTreeSha !== input.expected.pin.sourceTreeSha) return failure(['consumer cache identity does not match the requested provider release pin'])

@@ -42,6 +42,7 @@ type JsonRecord = Record<string, unknown>;
 export type Revision2Result<T> =
   | Readonly<{ ok: true; value: T }>
   | Readonly<{ ok: false; errors: readonly string[] }>;
+export type Revision2SelectionPolicy = "selectable" | "draft_candidate_probe";
 export type Revision2Cursor = Readonly<{
   sourceCommitSha: string;
   sourceTreeSha: string;
@@ -374,8 +375,11 @@ export function pageCatalogue(input: unknown, limit = 25, cursor: Revision2Curso
   const nextOffset = Math.min(offset + limit, records.length);
   return { ok: true, value: { authority: "library_reference_only", sourceCommitSha: identity!.commitSha as string, sourceTreeSha: identity!.treeSha as string, records: visible, recordsSha256: catalog!.recordsSha256 as string, nextCursor: nextOffset < records.length ? { sourceCommitSha: identity!.commitSha as string, sourceTreeSha: identity!.treeSha as string, recordsSha256: catalog!.recordsSha256 as string, offset: nextOffset } : null } };
 }
-export function validateExactRelease(input: unknown, pin: Revision2ProviderPin = FROZEN_PROVIDER_PIN, options: Readonly<{ allowDraftCandidate?: boolean }> = {}): Revision2Result<Revision2Selection> {
+export function validateExactRelease(input: unknown, pin: Revision2ProviderPin = FROZEN_PROVIDER_PIN, options: Readonly<{ selectionPolicy?: Revision2SelectionPolicy; allowDraftCandidate?: boolean }> = {}): Revision2Result<Revision2Selection> {
   const errors: string[] = [];
+  const draftCandidateProbe = options.selectionPolicy === "draft_candidate_probe";
+  if (options.allowDraftCandidate === true && !draftCandidateProbe) errors.push("draft candidate validation requires an explicit draft_candidate_probe selection policy");
+  if (options.selectionPolicy !== undefined && options.selectionPolicy !== "selectable" && !draftCandidateProbe) errors.push("selection policy is invalid");
   if (!closed(input, "bundle", ["source", "catalogue", "record", "manifest", "inventory", "dependencyLock", "receipt"], ["catalogueFileSha256"], errors)) return { ok: false, errors };
   const bundle = input as JsonRecord;
   const identity = source(bundle.source, errors, pin);
@@ -383,7 +387,7 @@ export function validateExactRelease(input: unknown, pin: Revision2ProviderPin =
   if (pin.catalogueFileSha256 !== undefined && bundle.catalogueFileSha256 !== pin.catalogueFileSha256) errors.push("catalogue file digest does not match the pinned provider checkout");
   if (pin.catalogueRecordsSha256 !== undefined && catalog?.recordsSha256 !== pin.catalogueRecordsSha256) errors.push("catalogue records digest does not match the pinned provider checkout");
   const candidateReceiptInput = bundle.receipt;
-  const isUncataloguedCandidate = options.allowDraftCandidate && object(candidateReceiptInput) && isProviderCandidateReceiptType(candidateReceiptInput.receiptType) && bundle.record === undefined;
+  const isUncataloguedCandidate = draftCandidateProbe && object(candidateReceiptInput) && isProviderCandidateReceiptType(candidateReceiptInput.receiptType) && bundle.record === undefined;
   const candidateRecord = isUncataloguedCandidate && object(bundle.manifest)
     ? {
         schemaVersion: 2,
@@ -406,12 +410,12 @@ export function validateExactRelease(input: unknown, pin: Revision2ProviderPin =
   const release = manifest(bundle.manifest, errors);
   const tree = inventory(bundle.inventory, errors);
   const lock = dependencyLock(bundle.dependencyLock, errors);
-  const receiptValue = options.allowDraftCandidate ? candidateReceipt(bundle.receipt, errors) : receipt(bundle.receipt, errors);
+  const receiptValue = draftCandidateProbe ? candidateReceipt(bundle.receipt, errors) : receipt(bundle.receipt, errors);
   if (!identity || !catalog || !item || !release || !tree || !lock || !receiptValue) return { ok: false, errors };
   const releaseIdentity = release.releaseSource as JsonRecord;
   const itemReleaseIdentity = item.releaseSource as JsonRecord;
   if (!isUncataloguedCandidate && (!Array.isArray(catalog.records) || !catalog.records.some((entry) => canonical(entry) === canonical(item)))) errors.push("record is not in the catalogue snapshot");
-  if (options.allowDraftCandidate) {
+  if (draftCandidateProbe) {
     if (item.lifecycle !== "draft" || item.selectability !== "non_selectable" || item.compatibility !== "unknown") errors.push("candidate record is not draft/non_selectable/unknown");
     const candidateRelease = receiptValue?.release as JsonRecord | undefined;
     if (!candidateRelease || item.entryId !== candidateRelease.entryId || item.version !== candidateRelease.version || item.releaseManifestSha256 !== candidateRelease.manifestSha256 || release.inventorySha256 !== candidateRelease.inventoryFileSha256 || release.payloadSha256 !== candidateRelease.payloadSha256 || release.dependencyLockSha256 !== candidateRelease.dependencyLockSha256 || tree.artifactTreeSha1 !== candidateRelease.artifactTreeSha1) errors.push("candidate receipt digest or artifact identity mismatch");
@@ -422,7 +426,7 @@ export function validateExactRelease(input: unknown, pin: Revision2ProviderPin =
   if (item.entryId !== release.entryId || item.version !== release.version || item.artifactType !== release.artifactType) errors.push("release identity mismatch");
   if (releaseIdentity.releaseSourceCommitSha !== itemReleaseIdentity.releaseSourceCommitSha || releaseIdentity.releaseSourceRepositoryTreeSha1 !== itemReleaseIdentity.releaseSourceRepositoryTreeSha1) errors.push("release source identity mismatch");
   projectionMatches(item.controlledMetadata, release.controlledMetadata, errors);
-  if (options.allowDraftCandidate) {
+  if (draftCandidateProbe) {
     // Candidate receipts are validated against the immutable manifest above.
   } else if (receiptValue.receiptType === "verified_cache") {
     const cacheReleaseIdentity = receiptValue.releaseSource as JsonRecord;
@@ -430,8 +434,8 @@ export function validateExactRelease(input: unknown, pin: Revision2ProviderPin =
     if (cacheReleaseIdentity.releaseSourceCommitSha !== releaseIdentity.releaseSourceCommitSha || cacheReleaseIdentity.releaseSourceRepositoryTreeSha1 !== releaseIdentity.releaseSourceRepositoryTreeSha1 || sourceEvidence.selectedRepositoryCommitSha !== releaseIdentity.releaseSourceCommitSha || sourceEvidence.selectedRepositoryTreeSha1 !== releaseIdentity.releaseSourceRepositoryTreeSha1 || receiptValue.catalogueRecordsSha256 !== catalog.recordsSha256 || receiptValue.releaseManifestSha256 !== item.releaseManifestSha256 || receiptValue.inventorySha256 !== release.inventorySha256 || receiptValue.payloadSha256 !== release.payloadSha256 || receiptValue.artifactTreeSha1 !== tree.artifactTreeSha1 || receiptValue.entryId !== item.entryId || receiptValue.version !== item.version) errors.push("verified cache receipt mismatch");
   } else if (receiptValue.releaseManifestSha256 !== item.releaseManifestSha256 || receiptValue.artifactTreeSha1 !== tree.artifactTreeSha1 || receiptValue.releaseSourceCommitSha !== releaseIdentity.releaseSourceCommitSha || receiptValue.releaseSourceRepositoryTreeSha1 !== releaseIdentity.releaseSourceRepositoryTreeSha1 || receiptValue.entryId !== item.entryId || receiptValue.version !== item.version || receiptValue.result !== "pass") errors.push("consumption receipt mismatch");
   if (errors.length) return { ok: false, errors };
-  const receiptId = options.allowDraftCandidate ? `candidate:${String((receiptValue.source as JsonRecord).handoffCommit)}` : receiptValue.receiptType === "verified_cache" ? String((receiptValue.sourceEvidence as JsonRecord).receiptId) : String(receiptValue.receiptId);
-  const selection = Object.freeze({ authority: "library_reference_only" as const, sourceCommitSha: identity.commitSha as string, sourceTreeSha: identity.treeSha as string, releaseSourceCommitSha: releaseIdentity.releaseSourceCommitSha as string, releaseSourceTreeSha: releaseIdentity.releaseSourceRepositoryTreeSha1 as string, artifactTreeSha1: release.artifactTreeSha1 as string, entryId: item.entryId as string, version: item.version as string, artifactType: item.artifactType as "component" | "starter_kit" | "website_template", releaseManifestSha256: item.releaseManifestSha256 as string, inventorySha256: release.inventorySha256 as string, payloadSha256: release.payloadSha256 as string, dependencyLockSha256: release.dependencyLockSha256 as string, receiptType: options.allowDraftCandidate ? "candidate" as const : receiptValue.receiptType as "verified_cache" | "consumption", receiptId });
+  const receiptId = draftCandidateProbe ? `candidate:${String((receiptValue.source as JsonRecord).handoffCommit)}` : receiptValue.receiptType === "verified_cache" ? String((receiptValue.sourceEvidence as JsonRecord).receiptId) : String(receiptValue.receiptId);
+  const selection = Object.freeze({ authority: "library_reference_only" as const, sourceCommitSha: identity.commitSha as string, sourceTreeSha: identity.treeSha as string, releaseSourceCommitSha: releaseIdentity.releaseSourceCommitSha as string, releaseSourceTreeSha: releaseIdentity.releaseSourceRepositoryTreeSha1 as string, artifactTreeSha1: release.artifactTreeSha1 as string, entryId: item.entryId as string, version: item.version as string, artifactType: item.artifactType as "component" | "starter_kit" | "website_template", releaseManifestSha256: item.releaseManifestSha256 as string, inventorySha256: release.inventorySha256 as string, payloadSha256: release.payloadSha256 as string, dependencyLockSha256: release.dependencyLockSha256 as string, receiptType: draftCandidateProbe ? "candidate" as const : receiptValue.receiptType as "verified_cache" | "consumption", receiptId });
   validatedSelections.add(selection);
   return { ok: true, value: selection };
 }
@@ -470,8 +474,9 @@ export function validateLiNKsitesContributionReceipt(input: unknown): Revision2R
 }
 
 /** Produces a local reference only; no files, CMS records, deployment, or Library state are changed. */
-export function admitWebsiteTemplateMaterialization(input: Revision2Result<Revision2Selection>): Revision2Result<WebsiteTemplateMaterializationReference> {
+export function admitWebsiteTemplateMaterialization(input: Revision2Result<Revision2Selection>, options: Readonly<{ selectionPolicy?: Revision2SelectionPolicy }> = {}): Revision2Result<WebsiteTemplateMaterializationReference> {
   if (!input || input.ok !== true || !object(input.value) || !validatedSelections.has(input.value) || input.value.artifactType !== "website_template") return { ok: false, errors: ["website template materialization requires a validated selectable native website_template selection"] };
   const selection = input.value;
+  if (selection.receiptType === "candidate" && options.selectionPolicy !== "draft_candidate_probe") return { ok: false, errors: ["draft candidate materialization requires an explicit draft_candidate_probe selection policy"] };
   return { ok: true, value: Object.freeze({ ...selection, artifactType: "website_template" as const, authority: "linksites_local" as const, libraryAuthority: "reference_only" as const, materialization: "input_reference_only" as const }) };
 }
