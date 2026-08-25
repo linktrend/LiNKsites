@@ -1,19 +1,37 @@
 import { createHash } from "node:crypto";
 
-export const FROZEN_CANDIDATE_SHA = "b2d2bbb035c6e6a3f859480ce57f12e0882dd3f0";
-export const FROZEN_TREE_SHA = "2701e6a190468f437102946425a64e890eed6690";
+/** Protected LiNKlibraries development identity supplied for the A1 consumer. */
+export const FROZEN_CANDIDATE_SHA = "dbf749cb48ffa03bf2e702d37b608f14c63e0520";
+export const FROZEN_TREE_SHA = "a968c801f0fa7cbeac40edc788a4f081617e2759";
+/** Immutable provider release identity for master-template-type-1@2.0.0-a1.1. */
+export const FROZEN_SOURCE_RELEASE_SHA = "f28fd53d454cbc33d97951d8e62826dae5a83e40";
+export const FROZEN_SOURCE_RELEASE_TREE_SHA = "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b";
+export const FROZEN_CATALOGUE_FILE_SHA256 = "da2178f497593c858611a29e40c53fa7798e31fa3cc3700bcf4e1c4a1f309543";
+export const FROZEN_CATALOGUE_RECORDS_SHA256 = "66a8971e38cc9bfb06836d8427534ca96de68065d0fca3b28f992e83584c7674";
 export const FROZEN_DEPENDENCY_LOCK_SHA256 =
   "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23";
 
 export type Revision2ProviderPin = Readonly<{
   sourceCommitSha: string;
   sourceTreeSha: string;
+  providerCommitSha?: string;
+  providerTreeSha?: string;
+  releaseCommitSha?: string;
+  releaseTreeSha?: string;
+  catalogueFileSha256?: string;
+  catalogueRecordsSha256?: string;
   dependencyLockSha256: string;
 }>;
 
 export const FROZEN_PROVIDER_PIN: Revision2ProviderPin = Object.freeze({
-  sourceCommitSha: FROZEN_CANDIDATE_SHA,
-  sourceTreeSha: FROZEN_TREE_SHA,
+  sourceCommitSha: FROZEN_SOURCE_RELEASE_SHA,
+  sourceTreeSha: FROZEN_SOURCE_RELEASE_TREE_SHA,
+  providerCommitSha: FROZEN_CANDIDATE_SHA,
+  providerTreeSha: FROZEN_TREE_SHA,
+  releaseCommitSha: FROZEN_SOURCE_RELEASE_SHA,
+  releaseTreeSha: FROZEN_SOURCE_RELEASE_TREE_SHA,
+  catalogueFileSha256: FROZEN_CATALOGUE_FILE_SHA256,
+  catalogueRecordsSha256: FROZEN_CATALOGUE_RECORDS_SHA256,
   dependencyLockSha256: FROZEN_DEPENDENCY_LOCK_SHA256,
 });
 
@@ -358,11 +376,33 @@ export function pageCatalogue(input: unknown, limit = 25, cursor: Revision2Curso
 }
 export function validateExactRelease(input: unknown, pin: Revision2ProviderPin = FROZEN_PROVIDER_PIN, options: Readonly<{ allowDraftCandidate?: boolean }> = {}): Revision2Result<Revision2Selection> {
   const errors: string[] = [];
-  if (!closed(input, "bundle", ["source", "catalogue", "record", "manifest", "inventory", "dependencyLock", "receipt"], [], errors)) return { ok: false, errors };
+  if (!closed(input, "bundle", ["source", "catalogue", "record", "manifest", "inventory", "dependencyLock", "receipt"], ["catalogueFileSha256"], errors)) return { ok: false, errors };
   const bundle = input as JsonRecord;
   const identity = source(bundle.source, errors, pin);
   const catalog = catalogue(bundle.catalogue, errors);
-  const item = catalogueRecord(bundle.record, "record", errors);
+  if (pin.catalogueFileSha256 !== undefined && bundle.catalogueFileSha256 !== pin.catalogueFileSha256) errors.push("catalogue file digest does not match the pinned provider checkout");
+  if (pin.catalogueRecordsSha256 !== undefined && catalog?.recordsSha256 !== pin.catalogueRecordsSha256) errors.push("catalogue records digest does not match the pinned provider checkout");
+  const candidateReceiptInput = bundle.receipt;
+  const isUncataloguedCandidate = options.allowDraftCandidate && object(candidateReceiptInput) && isProviderCandidateReceiptType(candidateReceiptInput.receiptType) && bundle.record === undefined;
+  const candidateRecord = isUncataloguedCandidate && object(bundle.manifest)
+    ? {
+        schemaVersion: 2,
+        schemaRevision: 2,
+        recordType: "catalogue_record",
+        entryId: bundle.manifest.entryId,
+        version: bundle.manifest.version,
+        artifactType: bundle.manifest.artifactType,
+        releaseManifestSha256: (candidateReceiptInput as JsonRecord).release && object((candidateReceiptInput as JsonRecord).release) ? ((candidateReceiptInput as JsonRecord).release as JsonRecord).manifestSha256 : undefined,
+        releaseSource: bundle.manifest.releaseSource,
+        artifactTreeSha1: bundle.manifest.artifactTreeSha1,
+        inventorySha256: bundle.manifest.inventorySha256,
+        lifecycle: "draft",
+        selectability: "non_selectable",
+        compatibility: "unknown",
+        bundlePath: `registry/v2/entries/${String(bundle.manifest.entryId)}/versions/${String(bundle.manifest.version)}`,
+      }
+    : bundle.record;
+  const item = catalogueRecord(candidateRecord, "record", errors);
   const release = manifest(bundle.manifest, errors);
   const tree = inventory(bundle.inventory, errors);
   const lock = dependencyLock(bundle.dependencyLock, errors);
@@ -370,7 +410,7 @@ export function validateExactRelease(input: unknown, pin: Revision2ProviderPin =
   if (!identity || !catalog || !item || !release || !tree || !lock || !receiptValue) return { ok: false, errors };
   const releaseIdentity = release.releaseSource as JsonRecord;
   const itemReleaseIdentity = item.releaseSource as JsonRecord;
-  if (!Array.isArray(catalog.records) || !catalog.records.some((entry) => canonical(entry) === canonical(item))) errors.push("record is not in the catalogue snapshot");
+  if (!isUncataloguedCandidate && (!Array.isArray(catalog.records) || !catalog.records.some((entry) => canonical(entry) === canonical(item)))) errors.push("record is not in the catalogue snapshot");
   if (options.allowDraftCandidate) {
     if (item.lifecycle !== "draft" || item.selectability !== "non_selectable" || item.compatibility !== "unknown") errors.push("candidate record is not draft/non_selectable/unknown");
     const candidateRelease = receiptValue?.release as JsonRecord | undefined;
