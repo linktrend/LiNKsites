@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-mwt-input-checksums",
+  "githubIssue": 299,
+  "boundCandidate": {
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681",
+    "commitObjectSha256": "a0f91ca39e3babd35f7891645a40d4abe75e22e89c81cef5863ee8746e749e83",
+    "treeObjectSha256": "093293f92fa40859bbbd594cf75d1396333902e8178f4bff2ffc1d90b399b19f"
+  },
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": "docs/evidence/ext-ls-01/mwt-input/CANDIDATE-IDENTITY.json",
+      "sha256": "4a770173eb0ad99364c854b0c2f6f35056b9864fe755325fb8a569145e1c32b2",
+      "bytes": 2286
+    },
+    {
+      "path": "docs/evidence/ext-ls-01/mwt-input/DEPENDENCIES.json",
+      "sha256": "f8a0eb620961f12de68548bd04968ec0bb120b4bbbf57ec5445d347c9b18fdff",
+      "bytes": 4227
+    },
+    {
+      "path": "docs/evidence/ext-ls-01/mwt-input/IMMUTABLE-RECEIPT-INPUT.json",
+      "sha256": "2b6d7efa15d5f8fe44f2d3d5134212147ecc32de8322d4cb8a63942cbc24010b",
+      "bytes": 2232
+    },
+    {
+      "path": "docs/evidence/ext-ls-01/mwt-input/MANIFEST-AMENDMENT-INPUT.json",
+      "sha256": "62966c598b3547728afe54323ea7e2b379cd57253905f2a06066df8add533ad4",
+      "bytes": 1519
+    },
+    {
+      "path": "docs/evidence/ext-ls-01/mwt-input/README.md",
+      "sha256": "14fc2d6b9d49cee2524f9ea31b84de66e9b5c0e90212af9d91d69fd2524862b2",
+      "bytes": 1593
+    },
+    {
+      "path": "docs/evidence/ext-ls-01/mwt-input/VALIDATION.json",
+      "sha256": "5d512dc110d52df0d86cfdf94268cac0c6bb5f69f6f6799db75e82f4f50d71e5",
+      "bytes": 715
+    },
+    {
+      "path": "docs/evidence/ext-ls-01/mwt-input/validate_mwt_input.py",
+      "sha256": "d288b38a789c1323b99a6f9fa1b3513dc93c2efb4848b01e329f343d0f5b11d0",
+      "bytes": 5997
+    },
+    {
+      "path": "docs/evidence/mwt-handoff/HANDOFF.json",
+      "sha256": "5c6670f893cb6df5c666916153b727312915db6bf4549b2b06d905172ddac910",
+      "bytes": 1384
+    },
+    {
+      "path": "docs/evidence/mwt-handoff/README.md",
+      "sha256": "e29717e636408139d37c59aa2d79bffac1418cabe4fdfa4c269c76de29dd9b2e",
+      "bytes": 553
+    },
+    {
+      "path": "docs/evidence/mwt-handoff/STATUS.json",
+      "sha256": "488e269052238a1e3b3517058314a66b5dfc1cd8eae7c252135bf4b41ba64582",
+      "bytes": 655
+    }
+  ],
+  "note": "Checksums cover evidence files in this tree. They are not provider wrapper bytes and not an accepted receipt digest."
+}

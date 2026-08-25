@@ -1,0 +1,55 @@
+{
+  "candidate": {
+    "repository": "linktrend/LiNKsites",
+    "issue": 301,
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "a1Receipt": {
+    "entryId": "master-template-type-1",
+    "version": "2.0.0-a1.1",
+    "providerPin": {
+      "protectedDevelopmentCommit": "1c3eb99b640483e1a66421ab6c118a17309c4568",
+      "protectedDevelopmentTree": "2e75c3350939d1a66876dd61c57b0dc09f652dce",
+      "artifactTreeSha1": "a8c6c23fd41a5f0eb9221276998f96862a50119f",
+      "manifestSha256": "d681e5305b611aa5247a0fa1711ce75e0a1734e121e6790e50c802b26c1c9697",
+      "inventorySha256": "ad743168022139e7e70bd38ae19c56503cdfc2c4fcc912ece154f4f17b70cc98",
+      "dependencyLockSha256": "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
+      "payloadProjectionSha256": "b096c013b53edf6fbb30e7794830ec462a5ff47c5b085d43218e91541e0af84a",
+      "releaseReceiptSha256": "2668e0df4d317c4a0d4c9fbd1be7fe5f70f7024195bb310c8644849bf949de57"
+    },
+    "providerCheckoutRemoved": true,
+    "liveProviderFetch": false,
+    "consumerCacheTree": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "resolver": {
+      "layoutId": "a1",
+      "allHeroFlattening": false,
+      "hiddenFallback": false,
+      "plans": {
+        "a": { "capacity": 30, "deterministic": true },
+        "b": { "capacity": 15, "deterministic": true },
+        "c": { "capacity": 6, "deterministic": true },
+        "l": { "capacity": 0, "deterministic": true, "globalNavigation": false, "minimalShell": true }
+      }
+    },
+    "payloadProjection": {
+      "productsDistinctFromServices": true,
+      "preservesProviderSemanticIds": true,
+      "readback": true,
+      "sha256": "b096c013b53edf6fbb30e7794830ec462a5ff47c5b085d43218e91541e0af84a"
+    },
+    "surfaces": {
+      "serverHtml": { "status": "pass" },
+      "browser": { "status": "pass" },
+      "accessibility": { "status": "pass" },
+      "visual": { "status": "pass" },
+      "link": { "status": "pass" },
+      "seo": { "status": "pass" },
+      "privacy": { "status": "pass" }
+    },
+    "rollback": {
+      "existingSitePinned": true,
+      "simulatedRollback": true
+    }
+  }
+}
