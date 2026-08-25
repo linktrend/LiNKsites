@@ -347,6 +347,10 @@ describe('LS-04 ISS-14 typed promotion', () => {
     const blockTypes = pageItems.flatMap((item) => (item.data.content as Array<{ blockType: string }>).map((block) => block.blockType))
     expect(blockTypes).toEqual(['hero', 'cta', 'offerShowcase', 'articles'])
     expect(blockTypes.every((type) => type === 'hero')).toBe(false)
+    const ctaBlock = pageItems
+      .flatMap((item) => item.data.content as Array<Record<string, unknown>>)
+      .find((block) => block.blockType === 'cta')
+    expect(ctaBlock).toMatchObject({ button: { text: 'About Northwind Services', url: '/about' } })
     expect(request.workingPackage.items.some((item) => item.payloadCollection === 'products')).toBe(true)
     expect(request.workingPackage.items.some((item) => item.payloadCollection === 'services')).toBe(true)
     expect(request.workingPackage.items.some((item) => item.payloadCollection === 'core-settings')).toBe(true)

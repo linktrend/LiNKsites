@@ -66,7 +66,12 @@ export function mapWorkingSectionToPayloadBlock(page: WorkingContentPage, sectio
     semanticId,
     workingSectionId: section.sectionId,
   }
-  if (projection.payloadBlockType === 'cta') return { ...shared, title, text }
+  if (projection.payloadBlockType === 'cta') {
+    // Payload's CTA block requires both button fields at publication time.
+    // Working-content baselines provide the page route and headline, so bind
+    // those existing values instead of emitting an invalid partial block.
+    return { ...shared, title, text, button: { text: title, url: page.route } }
+  }
   if (projection.payloadBlockType === 'offerShowcase') {
     return { ...shared, title, subtitle: text, offers: Array.isArray(section.content.offers) ? section.content.offers : [] }
   }
