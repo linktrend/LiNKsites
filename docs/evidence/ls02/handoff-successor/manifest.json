@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls02-handoff-successor-manifest",
+  "issue": 300,
+  "packet": "LS-02",
+  "repository": "linktrend/LiNKsites",
+  "candidateParent": {
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "identityOnly": true,
+  "artifacts": [
+    "docs/evidence/ls02/handoff-successor/HANDOFF.schema.json",
+    "docs/evidence/ls02/handoff-successor/handoff-successor.json",
+    "docs/evidence/ls02/handoff-successor/rebind-contract.json",
+    "docs/evidence/ls02/handoff-successor/PROOF.md",
+    "scripts/profile-v2-quality/ls02-handoff/constants.mjs",
+    "scripts/profile-v2-quality/ls02-handoff/rebind-validator.mjs",
+    "scripts/profile-v2-quality/ls02-handoff/tests/rebind-validator.test.mjs",
+    "scripts/profile-v2-quality/ls02-handoff/fixtures/stale-candidate.json",
+    "scripts/profile-v2-quality/ls02-handoff/fixtures/foreign-repository.json"
+  ],
+  "checksumsFile": "docs/evidence/ls02/handoff-successor/SHA256SUMS.json",
+  "generatedBy": "node scripts/profile-v2-quality/ls02-handoff/rebind-validator.mjs --write-checksums"
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls07-preparation-identity",
+  "packet": "LS-07",
+  "packetComplete": false,
+  "ls06CompleteClaimed": false,
+  "repository": "https://github.com/linktrend/LiNKsites.git",
+  "branch": "issue/292-ls-07-quality-harness-scaffolding-dependency-ind",
+  "githubIssue": 292,
+  "base": {
+    "commit": "6169548ddbf6bff99a3eb8de3716e9fd3a843b11",
+    "tree": "24e5b46566a45a58de3df243b45e7918d419cb2c"
+  },
+  "environment": {
+    "namedEnvironment": "IDE Development 2.5.1",
+    "environmentPublicId": "1937ddb1-9d3e-11f1-a7d1-d6b4613131ce",
+    "environmentVersionPublicId": "cac43460-9d4b-11f1-a7d1-d6b4613131ce",
+    "buildId": "bld-20260825-ca083273-607a-40b8-a1cc-38bb83f031d9",
+    "note": "provenance only; not product validation"
+  },
+  "identityPolicy": {
+    "providerIdentity": "required injected repository/commit/tree; fail closed when absent",
+    "runtimeIdentity": "required injected LS-06 repository/commit/tree; fail closed when absent; pin is not LS-06 completion",
+    "rendererOutput": "required injected document; harness does not boot web-master"
+  }
+}

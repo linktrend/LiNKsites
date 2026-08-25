@@ -21,6 +21,7 @@ describe('LS-03 ISS-12 additive migrations and rollback proof', () => {
       '20251213_locked_docs',
       '20260810_000003_pages_public_activation',
       LS03_PAYLOAD_MIGRATION,
+      '20260825_000001_ls04_payload_semantic_fields',
     ])
   })
 

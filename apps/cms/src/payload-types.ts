@@ -1531,6 +1531,10 @@ export interface CaseStudyPage {
   content?:
     | (
         | {
+            reactSymbol?: string | null;
+            libraryComponentId?: string | null;
+            semanticId?: string | null;
+            workingSectionId?: string | null;
             /**
              * Optional small label shown above the hero title
              */
@@ -2625,6 +2629,10 @@ export interface Page {
   content?:
     | (
         | {
+            reactSymbol?: string | null;
+            libraryComponentId?: string | null;
+            semanticId?: string | null;
+            workingSectionId?: string | null;
             /**
              * Optional small label shown above the hero title
              */
@@ -2741,6 +2749,10 @@ export interface Page {
             blockType: 'testimonials';
           }
         | {
+            reactSymbol?: string | null;
+            libraryComponentId?: string | null;
+            semanticId?: string | null;
+            workingSectionId?: string | null;
             title: string;
             text?: string | null;
             button: {
@@ -2816,6 +2828,10 @@ export interface Page {
             blockType: 'media';
           }
         | {
+            reactSymbol?: string | null;
+            libraryComponentId?: string | null;
+            semanticId?: string | null;
+            workingSectionId?: string | null;
             title: string;
             subtitle?: string | null;
             /**
@@ -2838,12 +2854,16 @@ export interface Page {
             blockType: 'caseStudies';
           }
         | {
+            reactSymbol?: string | null;
+            libraryComponentId?: string | null;
+            semanticId?: string | null;
+            workingSectionId?: string | null;
             title: string;
             subtitle?: string | null;
             /**
-             * Select offers to display in this showcase
+             * Approved offer labels to display in this showcase
              */
-            offers: (number | OfferPage)[];
+            offers: string[];
             id?: string | null;
             blockName?: string | null;
             blockType: 'offerShowcase';
@@ -3026,6 +3046,10 @@ export interface OfferPage {
   content?:
     | (
         | {
+            reactSymbol?: string | null;
+            libraryComponentId?: string | null;
+            semanticId?: string | null;
+            workingSectionId?: string | null;
             /**
              * Optional small label shown above the hero title
              */
@@ -3096,6 +3120,10 @@ export interface OfferPage {
             blockType: 'media';
           }
         | {
+            reactSymbol?: string | null;
+            libraryComponentId?: string | null;
+            semanticId?: string | null;
+            workingSectionId?: string | null;
             title: string;
             text?: string | null;
             button: {
@@ -3167,6 +3195,10 @@ export interface FaqPage {
   content?:
     | (
         | {
+            reactSymbol?: string | null;
+            libraryComponentId?: string | null;
+            semanticId?: string | null;
+            workingSectionId?: string | null;
             /**
              * Optional small label shown above the hero title
              */
@@ -4821,6 +4853,10 @@ export interface PagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              reactSymbol?: T;
+              libraryComponentId?: T;
+              semanticId?: T;
+              workingSectionId?: T;
               badge?: T;
               title?: T;
               subtitle?: T;
@@ -4919,6 +4955,10 @@ export interface PagesSelect<T extends boolean = true> {
         cta?:
           | T
           | {
+              reactSymbol?: T;
+              libraryComponentId?: T;
+              semanticId?: T;
+              workingSectionId?: T;
               title?: T;
               text?: T;
               button?:
@@ -4965,6 +5005,10 @@ export interface PagesSelect<T extends boolean = true> {
         articles?:
           | T
           | {
+              reactSymbol?: T;
+              libraryComponentId?: T;
+              semanticId?: T;
+              workingSectionId?: T;
               title?: T;
               subtitle?: T;
               items?: T;
@@ -4983,6 +5027,10 @@ export interface PagesSelect<T extends boolean = true> {
         offerShowcase?:
           | T
           | {
+              reactSymbol?: T;
+              libraryComponentId?: T;
+              semanticId?: T;
+              workingSectionId?: T;
               title?: T;
               subtitle?: T;
               offers?: T;
@@ -5102,6 +5150,10 @@ export interface OfferPagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              reactSymbol?: T;
+              libraryComponentId?: T;
+              semanticId?: T;
+              workingSectionId?: T;
               badge?: T;
               title?: T;
               subtitle?: T;
@@ -5145,6 +5197,10 @@ export interface OfferPagesSelect<T extends boolean = true> {
         cta?:
           | T
           | {
+              reactSymbol?: T;
+              libraryComponentId?: T;
+              semanticId?: T;
+              workingSectionId?: T;
               title?: T;
               text?: T;
               button?:
@@ -5207,6 +5263,10 @@ export interface CaseStudyPagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              reactSymbol?: T;
+              libraryComponentId?: T;
+              semanticId?: T;
+              workingSectionId?: T;
               badge?: T;
               title?: T;
               subtitle?: T;
@@ -5349,6 +5409,10 @@ export interface FaqPagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              reactSymbol?: T;
+              libraryComponentId?: T;
+              semanticId?: T;
+              workingSectionId?: T;
               badge?: T;
               title?: T;
               subtitle?: T;

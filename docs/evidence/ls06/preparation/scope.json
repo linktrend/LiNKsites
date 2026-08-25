@@ -1,0 +1,13 @@
+{
+  "preparationOnly": true,
+  "ls06Complete": false,
+  "writable": [
+    "scripts/profile-v2-quality/ls06/**",
+    "docs/evidence/ls06/preparation/**"
+  ],
+  "untouched": [
+    "apps/**",
+    "packages/**",
+    "provider-bytes"
+  ]
+}

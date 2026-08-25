@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-immutable-receipt-input",
+  "gateId": "EXT-LS-01",
+  "packetId": "EXT-LS-01",
+  "githubIssue": 299,
+  "status": "CANDIDATE_BOUND_INPUT_NOT_ACCEPTED",
+  "verdict": "NOT_ACCEPTED",
+  "packetCompletion": false,
+  "evidenceClass": "mwt-input",
+  "layoutPack": "a1",
+  "plansRequired": ["a", "b", "c", "l"],
+  "surfacesRequired": ["server", "browser"],
+  "consumerIdentity": {
+    "repository": "linktrend/LiNKsites",
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "providerIdentityDeclared": {
+    "repository": "linktrend/LiNKlibraries",
+    "releaseEntryVersion": "master-template-type-1@2.0.0-a1.1",
+    "mwt06ProtectedDevelopmentCommit": "1c3eb99b640483e1a66421ab6c118a17309c4568",
+    "mwt06ProtectedDevelopmentTree": "2e75c3350939d1a66876dd61c57b0dc09f652dce",
+    "releaseArtifactTree": "a8c6c23fd41a5f0eb9221276998f96862a50119f",
+    "bytesEmbedded": false,
+    "locallyRehashed": false,
+    "conformanceClaimed": false
+  },
+  "requiredReceiptBindings": {
+    "exactProviderAndConsumerCommitTree": "DECLARED_CONSUMER_ONLY",
+    "wrapperAndArtifactDigests": "DECLARED_FROM_PROVIDER_ADDENDUM_NOT_COPIED",
+    "adapterCompatibility": "ABSENT",
+    "a1AbclResolver": "ABSENT",
+    "payloadProjection": "ABSENT",
+    "serverHtmlAndBrowserProof": "ABSENT",
+    "rollback": "ABSENT",
+    "materializationWithoutProviderCheckout": "ABSENT",
+    "consumerCacheTree": "ABSENT"
+  },
+  "cellMatrix": {
+    "requiredCellCount": 8,
+    "suppliedCellCount": 0,
+    "anyPassVerdict": false,
+    "note": "No synthetic PASS/FAIL cells. Absence fails closed."
+  },
+  "prohibitedClaims": {
+    "accept": false,
+    "protectedIntegration": false,
+    "providerConformance": false,
+    "productionProof": false,
+    "a1Acceptance": false,
+    "selectability": false,
+    "mwt08Through11Authorized": false
+  },
+  "scope": {
+    "ownedPaths": [
+      "docs/evidence/ext-ls-01/mwt-input/**",
+      "docs/evidence/mwt-handoff/**"
+    ],
+    "prohibitedWrites": [
+      "apps/**",
+      "packages/**",
+      "scripts/profile-v2-quality/**",
+      "docs/evidence/ls02/**",
+      "H-09 paths",
+      "validator implementation"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-mwt-input-validation",
+  "githubIssue": 299,
+  "namedEnvironment": "IDE Development 2.5.1",
+  "commands": [
+    "python3 docs/evidence/ext-ls-01/mwt-input/validate_mwt_input.py",
+    "git diff --check"
+  ],
+  "results": {
+    "validate_mwt_input": "pass",
+    "gitDiffCheck": "pass"
+  },
+  "boundCandidate": {
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "claims": {
+    "accept": false,
+    "protectedIntegrated": false,
+    "providerConformance": false,
+    "productionProof": false
+  },
+  "scopeChecked": [
+    "docs/evidence/ext-ls-01/mwt-input/**",
+    "docs/evidence/mwt-handoff/**"
+  ]
+}
