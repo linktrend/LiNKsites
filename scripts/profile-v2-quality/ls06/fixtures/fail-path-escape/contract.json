@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "ls06-layout-renderer-contract/v1",
+  "preparationOnly": true,
+  "notCompletionOf": ["LS-06"],
+  "requirements": ["LS-FR-14", "LS-FR-15", "LS-FR-16"],
+  "unknownRequiredId": "fail_closed",
+  "noPlaceholders": true,
+  "typeLIsolation": true,
+  "noPublicTemplateErrorAsContent": true,
+  "compositions": {
+    "A1": {
+      "pageRenderer": "composition-a1-linear-shell",
+      "regions": ["site-header", "main", "site-footer"],
+      "architectureReady": false
+    },
+    "A2": {
+      "pageRenderer": "composition-a2-split-shell",
+      "regions": ["site-header", "aside", "main", "site-footer"],
+      "architectureReady": true
+    },
+    "A3": {
+      "pageRenderer": "composition-a3-stacked-shell",
+      "regions": ["site-header", "main", "secondary", "site-footer"],
+      "architectureReady": true
+    }
+  },
+  "resolvedShell": {
+    "header": "injected:header:brand-nav-locale",
+    "footer": "injected:footer:five-zone",
+    "mobile": "injected:mobile:accessible",
+    "locale": "en",
+    "actions": ["contact", "primary-cta"]
+  },
+  "families": [
+    "home",
+    "about",
+    "contact",
+    "legal",
+    "collection",
+    "detail"
+  ],
+  "collisionRules": ["reserved-slug", "locale-prefix", "stale-redirect"],
+  "retirementRules": ["explicit-retirement-only"]
+}

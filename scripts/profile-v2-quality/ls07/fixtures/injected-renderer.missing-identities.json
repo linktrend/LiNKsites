@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls07-injected-renderer-fixture",
+  "fixtureOnly": true,
+  "copiedProviderBytes": false,
+  "packetComplete": false,
+  "ls06CompleteClaimed": false,
+  "rendererOutput": {
+    "html": "<!doctype html><html lang=\"en\"><body><main><h1>Missing identities</h1></main></body></html>"
+  }
+}

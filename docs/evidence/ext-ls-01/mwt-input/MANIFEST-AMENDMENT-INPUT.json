@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "mwt-post-proof-manifest-amendment-input",
+  "githubIssue": 299,
+  "gateId": "EXT-LS-01",
+  "amendmentStatus": "DRAFT_INPUT_NOT_APPROVED",
+  "approved": false,
+  "dispatchable": false,
+  "currentExecutableManifestEndsAt": "MWT-07",
+  "blockedUntil": [
+    "protected integration of bound LiNKsites candidate with exact development readback",
+    "independently accepted EXT-LS-01 receipt binding exact provider and consumer identities"
+  ],
+  "boundCandidate": {
+    "repository": "linktrend/LiNKsites",
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "proposedPackets": [
+    {
+      "packet": "MWT-08",
+      "issue": "ISS-25",
+      "status": "blocked",
+      "reason": "Requires accepted EXT-LS-01 receipt and approved amendment. Input only."
+    },
+    {
+      "packet": "MWT-09",
+      "issue": "ISS-26",
+      "status": "blocked",
+      "reason": "Depends on MWT-08 in a post-proof manifest."
+    },
+    {
+      "packet": "MWT-10",
+      "issue": "ISS-27",
+      "status": "blocked",
+      "reason": "Depends on MWT-08 in a post-proof manifest."
+    },
+    {
+      "packet": "MWT-11",
+      "status": "blocked",
+      "reason": "Post-proof only. Not authorized by this input."
+    }
+  ],
+  "authorizedPackets": [],
+  "selectabilityChange": "none",
+  "productionPointerChange": "none",
+  "narrativeApprovalInsufficient": true,
+  "mwt07CompletionInsufficient": true,
+  "editsArchitectureOrRegistry": false
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-focused-validation",
+  "gateId": "EXT-LS-01",
+  "issue": 301,
+  "inputCandidate": {
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "commands": {
+    "nodeTest": "node --test scripts/profile-v2-quality/ext-ls-01/tests/consumer-proof-validator.test.mjs",
+    "nodeTestResult": "10/10 pass",
+    "cli": "node scripts/profile-v2-quality/ext-ls-01/consumer-proof-validator.mjs --input scripts/profile-v2-quality/ext-ls-01/fixtures/absent-receipt.input.json --candidate-commit 2ba3bd70244061985a3896e748fb75e92dfb6c69 --candidate-tree 606fcb986b8eb9af476aea369d94990357ff9681",
+    "cliOverall": "HOLD",
+    "diffCheck": "pass"
+  },
+  "claims": {
+    "accept": false,
+    "protectedIntegration": false,
+    "providerConformance": false,
+    "productionProof": false
+  }
+}
