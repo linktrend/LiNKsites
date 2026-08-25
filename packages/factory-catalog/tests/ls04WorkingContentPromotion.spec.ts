@@ -243,10 +243,40 @@ describe('LS-04 ISS-15 rejection controls', () => {
     expect(() => produce('service', { credentials: ['mystery badge'] })).toThrow(/credential/)
   })
 
-  it('rejects unverifiable quantified claims', () => {
-    expect(() => produce('service', { legalClaims: ['Guaranteed 100% results'] }, {
+  it.each([
+    ['percentages', '100% results'],
+    ['currency', '$ 9 introductory price'],
+    ['guaranteed', 'Guaranteed results'],
+    ['number one', 'We are #1 locally'],
+    ['always wins', 'Our approach always wins'],
+    ['Unicode whitespace percentage', '100\u00a0% results'],
+  ])('rejects unverifiable quantified claims: %s', (_label, claim) => {
+    expect(() => produce('service', { legalClaims: [claim] }, {
       research: { summary: 'No sources', sources: [] },
     })).toThrow(/quantified claim/)
+  })
+
+  it('preserves safe text and Unicode distinctions', () => {
+    const safeClaims = [
+      'Up to one hundred percent customer satisfaction',
+      'EUR 100 is listed in the public price guide',
+      'Guaranteedness is not a promise',
+      'We ranked #10 last year',
+      'Our approach wins awards',
+      '保証 100％の結果',
+    ]
+    for (const claim of safeClaims) {
+      expect(() => produce('service', { legalClaims: [claim] }, {
+        research: { summary: 'No sources', sources: [] },
+      })).not.toThrow()
+    }
+  })
+
+  it('handles adversarial long digit input without backtracking', () => {
+    const longClaim = `${'9'.repeat(100_000)}x`
+    expect(() => produce('service', { legalClaims: [longClaim] }, {
+      research: { summary: 'No sources', sources: [] },
+    })).not.toThrow()
   })
 
   it('rejects placeholders', () => {

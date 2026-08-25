@@ -54,8 +54,46 @@ function containsPlaceholderToken(value: string): boolean {
   }
   return false
 }
-const QUANTIFIED_CLAIM = /(?:\d+\s*%|\$\s*\d|\bguaranteed\b|\b#1\b|\balways wins\b)/i
+const QUANTIFIED_CLAIM_TERMS = ['guaranteed', '#1', 'always wins'] as const
 const FAKE_ATTRIBUTION = /^(?:john doe|jane doe|happy customer|anonymous|placeholder|n\/a)$/i
+
+function isAsciiDigit(value: string, index: number): boolean {
+  const code = value.charCodeAt(index)
+  return code >= 0x30 && code <= 0x39
+}
+
+function isClaimWhitespace(value: string): boolean {
+  return value !== '' && value.trim().length === 0
+}
+
+function containsQuantifiedClaim(value: string): boolean {
+  const haystack = foldAsciiCase(value)
+  for (let index = 0; index < haystack.length; index += 1) {
+    if (isAsciiDigit(haystack, index)) {
+      let end = index + 1
+      while (isAsciiDigit(haystack, end)) end += 1
+      while (end < haystack.length && isClaimWhitespace(haystack.charAt(end))) end += 1
+      if (haystack.charAt(end) === '%') return true
+      index = end - 1
+      continue
+    }
+    if (haystack.charAt(index) === '$') {
+      let next = index + 1
+      while (next < haystack.length && isClaimWhitespace(haystack.charAt(next))) next += 1
+      if (isAsciiDigit(haystack, next)) return true
+    }
+  }
+  for (const term of QUANTIFIED_CLAIM_TERMS) {
+    let from = 0
+    while (from <= haystack.length - term.length) {
+      const index = haystack.indexOf(term, from)
+      if (index === -1) break
+      if (hasAsciiWordBoundary(haystack, index, index + term.length)) return true
+      from = index + 1
+    }
+  }
+  return false
+}
 
 const WORKING_COMPONENT_TO_LIBRARY: Readonly<Record<string, string>> = Object.freeze({
   SignupHero: 'hero-banner',
@@ -173,7 +211,7 @@ function assertLs04Claims(facts: ApprovedLeadResearchFacts, lead: LeadResearchPa
     if (sources.length === 0 || !sources.every(nonEmpty)) throw new ContentProductionError(`credential "${credentialName(credential)}" is missing evidence`, 'false_claim')
   }
   for (const claim of facts.legalClaims) {
-    if (QUANTIFIED_CLAIM.test(claim) && lead.research.sources.length === 0) throw new ContentProductionError('unverifiable quantified claim is rejected', 'false_claim')
+    if (containsQuantifiedClaim(claim) && lead.research.sources.length === 0) throw new ContentProductionError('unverifiable quantified claim is rejected', 'false_claim')
   }
 }
 
