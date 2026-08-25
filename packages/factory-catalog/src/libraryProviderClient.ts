@@ -88,6 +88,10 @@ export type WebsiteTemplateMaterializationReference = Readonly<{
 
 const validatedSelections = new WeakSet<object>();
 
+export function isProviderCandidateReceiptType(value: unknown): boolean {
+  return value === 'provider_release_candidate' || value === 'provider_prerelease_candidate'
+}
+
 function object(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -323,13 +327,17 @@ function receipt(value: unknown, errors: string[]): JsonRecord | undefined {
 }
 
 function candidateReceipt(value: unknown, errors: string[]): JsonRecord | undefined {
-  if (!object(value) || value.receiptType !== "provider_release_candidate" || !closed(value, "receipt", ["schemaVersion", "schemaRevision", "receiptType", "release", "source", "catalogue", "governance"], [], errors)) return undefined;
+  // LiNKlibraries uses the explicit prerelease lifecycle name for candidate
+  // receipts. Keep accepting the historical provider_release_candidate label
+  // for older fixtures, but never reject the canonical prerelease label before
+  // validating the rest of the receipt.
+  if (!object(value) || !isProviderCandidateReceiptType(value.receiptType) || !closed(value, "receipt", ["schemaVersion", "schemaRevision", "receiptType", "release", "source", "catalogue", "governance"], ["staging", "provider"], errors)) return undefined;
   if (value.schemaVersion !== 2 || value.schemaRevision !== 2) errors.push("candidate receipt schema is invalid");
   if (!closed(value.release, "receipt.release", ["entryId", "version", "manifestSha256", "artifactTreeSha1", "payloadSha256", "inventoryFileSha256", "dependencyLockSha256"], ["manifestPath", "inventoryProjectionSha256", "dependencyProjectionSha256"], errors)) errors.push("candidate receipt release is invalid");
   if (object(value.release) && (!semver(value.release.version) || !digest(value.release.manifestSha256) || !digest(value.release.payloadSha256) || !digest(value.release.inventoryFileSha256) || !digest(value.release.dependencyLockSha256) || !sha1(value.release.artifactTreeSha1))) errors.push("candidate receipt release digests are invalid");
-  if (!closed(value.source, "receipt.source", ["repository", "sourceCommit", "sourceTree"], ["handoffCommit", "handoffTree", "visualInventoryEntries"], errors) || value.source.repository !== "LiNKsites" || !sha1(value.source.sourceCommit) || !sha1(value.source.sourceTree)) errors.push("candidate receipt source is invalid");
-  if (!closed(value.catalogue, "receipt.catalogue", ["fileSha256", "recordsSha256"], ["path"], errors) || !digest(value.catalogue.fileSha256) || !digest(value.catalogue.recordsSha256)) errors.push("candidate receipt catalogue is invalid");
-  if (!closed(value.governance, "receipt.governance", ["lifecycle", "selectability", "compatibility"], ["visualMasterClaimed", "pairedProofRequired", "independentQualificationRequired", "assetRights", "assetRightsReview", "admission"], errors) || value.governance.lifecycle !== "draft" || value.governance.selectability !== "non_selectable" || value.governance.compatibility !== "unknown") errors.push("candidate receipt governance is invalid");
+  if (!closed(value.source, "receipt.source", ["repository", "sourceCommit", "sourceTree"], ["handoffCommit", "handoffTree", "sourceRoots", "sourcePathsAreProviderCode", "visualInventoryEntries"], errors) || value.source.repository !== "LiNKsites" || !sha1(value.source.sourceCommit) || !sha1(value.source.sourceTree)) errors.push("candidate receipt source is invalid");
+  if (!closed(value.catalogue, "receipt.catalogue", ["fileSha256", "recordsSha256"], ["path", "bound", "productionPointer"], errors) || !digest(value.catalogue.fileSha256) || !digest(value.catalogue.recordsSha256)) errors.push("candidate receipt catalogue is invalid");
+  if (!closed(value.governance, "receipt.governance", ["lifecycle", "selectability", "compatibility"], ["visualMasterClaimed", "pairedProofRequired", "independentQualificationRequired", "candidateProbeOnly", "assetRights", "assetRightsReview", "admission"], errors) || value.governance.lifecycle !== "draft" || value.governance.selectability !== "non_selectable" || value.governance.compatibility !== "unknown") errors.push("candidate receipt governance is invalid");
   return value;
 }
 export function pageCatalogue(input: unknown, limit = 25, cursor: Revision2Cursor | null = null, pin: Revision2ProviderPin = FROZEN_PROVIDER_PIN): Revision2Result<Revision2Page> {

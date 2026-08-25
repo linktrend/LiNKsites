@@ -79,6 +79,7 @@ export PAYLOAD_SECRET="ltfx.auto.payload_secret.19615ad30fae.v1"
 export PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}"
 export LINKSITES_W2_04_LOCAL_PROOF=1
 export W2_04_PROOF_PATH="$local_root/proof.json"
+proof_template_id="${W2_04_TEMPLATE_ID:-marketing-smb-v1}"
 export W2_04_PREVIEW_API_KEY="$(random_value)"
 export W2_04_PREVIEW_PASSWORD="$(random_value)"
 if ! seed_output="$(cd "$repo_root" && pnpm --filter @linksites/cms exec tsx scripts/w2-04-seed.ts)"; then
@@ -113,7 +114,7 @@ web_environment=(
   PAYLOAD_API_KEY="$preview_api_key" \
   PREVIEW_ACCESS_TOKEN="$preview_token" \
   LINKSITES_W2_04_LOCAL_PROOF=1 \
-  LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID="marketing-smb-v1" \
+  LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID="$proof_template_id" \
   LINKSITES_ADMITTED_TEMPLATE_SHA="1111111111111111111111111111111111111111" \
   LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON="$(node -e 'const x=JSON.parse(process.argv[1]); process.stdout.write(JSON.stringify(x.receipt))' "$proof_json")" \
   LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON="$(node -e 'const x=JSON.parse(process.argv[1]); process.stdout.write(JSON.stringify(x.evidence))' "$proof_json")"
