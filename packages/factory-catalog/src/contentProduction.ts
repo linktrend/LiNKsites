@@ -31,9 +31,18 @@ function hasAsciiWordBoundary(text: string, start: number, end: number): boolean
   return (start === 0 || !ASCII_WORD_CHAR.test(before)) && (end >= text.length || !ASCII_WORD_CHAR.test(after))
 }
 
+function foldAsciiCase(value: string): string {
+  const folded = new Array<string>(value.length)
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index)
+    folded[index] = code >= 0x41 && code <= 0x5a ? String.fromCharCode(code + 0x20) : value.charAt(index)
+  }
+  return folded.join('')
+}
+
 function containsPlaceholderToken(value: string): boolean {
   for (const marker of PLACEHOLDER_MARKERS) if (value.includes(marker)) return true
-  const haystack = value.toLowerCase()
+  const haystack = foldAsciiCase(value)
   for (const term of PLACEHOLDER_TERMS) {
     let from = 0
     while (from <= haystack.length - term.length) {
