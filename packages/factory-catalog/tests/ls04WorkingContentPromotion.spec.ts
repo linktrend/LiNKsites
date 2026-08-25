@@ -29,6 +29,7 @@ import {
 } from '../src/workingContentPayloadPromotion.js'
 import type { Revision2MaterializedWebsiteTemplate } from '../src/revision2Materialization.js'
 import { workingContentFixture } from './fixtures/working-content-fixtures.js'
+import { PayloadRestDraftTarget } from '../src/targets/payloadRestDraftTarget.js'
 
 const PIN = (label: string): string => createHash('sha1').update(`ls04-test:${label}`).digest('hex')
 const sha256 = (value: string): string => createHash('sha256').update(value, 'utf8').digest('hex')
@@ -353,6 +354,24 @@ describe('LS-04 ISS-14 typed promotion', () => {
     expect(request.bindings?.templateAdoptionId).toBe('adoption-ls04')
     expect(request.bindings?.mappings.some((mapping) => mapping.reactSymbol === 'SignupHero')).toBe(true)
     expect(request.bindings?.mappings.some((mapping) => mapping.reactSymbol === 'CTASection')).toBe(true)
+  })
+
+  it('keeps semantic projection fields strict for Payload readback', () => {
+    const produced = produce('service')
+    const request = buildPromotionRequestFromPreparedWorkingContent(
+      promotionInput(produced.contentPackage),
+      SITE,
+      'promo-ls04-readback-parity',
+      'manifest-ls04',
+    )
+    const firstPage = request.workingPackage.items.find((item) => item.payloadCollection === 'pages')
+    const firstBlock = (firstPage?.data.content as Array<Record<string, unknown>>)[0]
+    const target = new PayloadRestDraftTarget({ baseUrl: 'http://payload.test' })
+
+    expect(target.verifyParity(firstBlock, { id: 'page-1', ...firstBlock })).toBe(true)
+    expect(() => target.verifyParity(firstBlock, { id: 'page-1' })).toThrow(
+      /reactSymbol.*libraryComponentId.*semanticId.*workingSectionId/,
+    )
   })
 
   it('promotes with readback-bound receipts and typed document IDs', async () => {

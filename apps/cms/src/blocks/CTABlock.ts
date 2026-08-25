@@ -6,6 +6,7 @@ import type {
   TextareaField,
   TextField,
 } from 'payload'
+import { ls04SemanticFields } from './ls04SemanticFields'
 
 const ctaStyleOptions = [
   { label: 'Primary', value: 'primary' },
@@ -26,6 +27,7 @@ export const CTABlock = {
     plural: 'CTA Blocks',
   },
   fields: [
+    ...ls04SemanticFields,
     {
       name: 'title',
       type: 'text',

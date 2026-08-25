@@ -8,6 +8,7 @@ import type {
   TextField,
   UploadField,
 } from 'payload'
+import { ls04SemanticFields } from './ls04SemanticFields'
 
 const heroCTAStyleOptions = [
   { label: 'Primary', value: 'primary' },
@@ -22,6 +23,7 @@ export const HeroBlock = {
     plural: 'Hero Blocks',
   },
   fields: [
+    ...ls04SemanticFields,
     {
       name: 'badge',
       type: 'text',
