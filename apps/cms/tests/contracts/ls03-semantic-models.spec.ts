@@ -44,6 +44,9 @@ describe('LS-03 ISS-10 template adoption and entitlement snapshots', () => {
   })
 
   it('pins the governed LS-03 dispatch idempotency key', () => {
+    expect(LS03_DISPATCH_IDEMPOTENCY).not.toBe(
+      'cursor-cloud-dispatch-v1:linksites-ls03-274-base9da7197e',
+    )
     expect(LS03_DISPATCH_IDEMPOTENCY).toBe(
       'cursor-cloud-dispatch-v1:linksites-ls03-275-repair-base9da7197e',
     )

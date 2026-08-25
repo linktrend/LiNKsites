@@ -5,6 +5,7 @@
  * surfaces remain compatibility projections only.
  */
 
+/** Governed Issue #275 repair identity; replaces stale `ls03-274-base9da7197e`. */
 export const LS03_DISPATCH_IDEMPOTENCY =
   'cursor-cloud-dispatch-v1:linksites-ls03-275-repair-base9da7197e' as const
 
