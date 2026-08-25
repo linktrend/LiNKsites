@@ -38,7 +38,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "parent_id" integer NOT NULL,
       "path" varchar NOT NULL,
       "text" varchar,
-      "locale" "__locales"
+      "locale" "public"."_locales"
     );
     CREATE INDEX IF NOT EXISTS "pages_texts_order_parent" ON "pages_texts" USING btree ("order", "parent_id");
     CREATE INDEX IF NOT EXISTS "pages_texts_locale_parent" ON "pages_texts" USING btree ("locale", "parent_id");
@@ -53,7 +53,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "parent_id" integer NOT NULL,
       "path" varchar NOT NULL,
       "text" varchar,
-      "locale" "__locales"
+      "locale" "public"."_locales"
     );
     CREATE INDEX IF NOT EXISTS "_pages_v_texts_order_parent" ON "_pages_v_texts" USING btree ("order", "parent_id");
     CREATE INDEX IF NOT EXISTS "_pages_v_texts_locale_parent" ON "_pages_v_texts" USING btree ("locale", "parent_id");
