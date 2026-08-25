@@ -1,0 +1,147 @@
+{
+  "harnessId": "profile-v2-quality-ls06-preparation",
+  "harnessVersion": "0.1.0",
+  "status": "PASS",
+  "preparationOnly": true,
+  "ls06Complete": false,
+  "scope": "ls06-preparation-only",
+  "notCompletionOf": [
+    "LS-06"
+  ],
+  "independentOf": [
+    "apps/**",
+    "packages/**",
+    "provider-bytes",
+    "LS-04-implementation",
+    "LS-05-implementation"
+  ],
+  "evidenceBoundaries": {
+    "evaluated": [
+      "injected-ls04-identity",
+      "injected-ls05-identity",
+      "injected-provider-identity",
+      "injected-layout-identity",
+      "layout-renderer-contract",
+      "offline-renderer-configuration",
+      "offline-rollback-plan"
+    ],
+    "notEvaluated": [
+      "apps/web-master",
+      "packages",
+      "provider-bytes",
+      "live-runtime",
+      "LS-06-completion",
+      "LS-04-product-code",
+      "LS-05-product-code"
+    ]
+  },
+  "inputDigests": {
+    "packet.json": "sha256:ced791c249175a8286b959d0e2f122a185bb63499ab5aedb46410f859b7a48d0",
+    "contract.json": "sha256:39c5bab8481b5eeb6d18bc0743d37b695deda45ae0d8a47e886520cfeb6e1b95",
+    "configuration.json": "sha256:c3fd492625402f6aadf2ebef72f07481c73d89a92cc8df8ac355752ed673e13f",
+    "rollback.json": "sha256:8c157a589a72266fb4ea4ae4b0c6660e35348870632680e588f39c2324102bf0"
+  },
+  "loadError": null,
+  "checks": [
+    {
+      "id": "packet.schema",
+      "status": "PASS",
+      "detail": "ls06-preparation-packet/v1"
+    },
+    {
+      "id": "packet.preparation_only",
+      "status": "PASS",
+      "detail": "preparationOnly=true and notCompletionOf includes LS-06"
+    },
+    {
+      "id": "identities.ls04",
+      "status": "PASS",
+      "detail": "injected LS-04 working-content and promotion identities present"
+    },
+    {
+      "id": "identities.ls05",
+      "status": "PASS",
+      "detail": "injected LS-05 adapter and materialization identities present"
+    },
+    {
+      "id": "identities.provider",
+      "status": "PASS",
+      "detail": "injected provider identity present"
+    },
+    {
+      "id": "identities.layout",
+      "status": "PASS",
+      "detail": "injected layout identity present"
+    },
+    {
+      "id": "identities.injected_only",
+      "status": "PASS",
+      "detail": "all identity sources are injected"
+    },
+    {
+      "id": "identities.layout_provider_match",
+      "status": "PASS",
+      "detail": "layoutPackId A1 matches provider"
+    },
+    {
+      "id": "contract.structurally_distinct",
+      "status": "PASS",
+      "detail": "A1/A2/A3 PageRenderer compositions are structurally distinct"
+    },
+    {
+      "id": "contract.shell_header_footer",
+      "status": "PASS",
+      "detail": "header/footer/mobile/locale/action shell is resolved in contract"
+    },
+    {
+      "id": "contract.type_l_isolation",
+      "status": "PASS",
+      "detail": "Type L shell isolation is declared"
+    },
+    {
+      "id": "contract.no_placeholders",
+      "status": "PASS",
+      "detail": "contract and configuration forbid placeholders"
+    },
+    {
+      "id": "configuration.offline",
+      "status": "PASS",
+      "detail": "configuration is offline, injected, and enumerates family routes"
+    },
+    {
+      "id": "configuration.identity_bind",
+      "status": "PASS",
+      "detail": "configuration is bound to injected layout identity"
+    },
+    {
+      "id": "rollback.previous_present",
+      "status": "PASS",
+      "detail": "previous adoption and renderer configuration identities are present"
+    },
+    {
+      "id": "rollback.readback",
+      "status": "PASS",
+      "detail": "rollback requires readback and does not mutate runtime"
+    },
+    {
+      "id": "rollback.offline",
+      "status": "PASS",
+      "detail": "rollback is offline and does not require a provider checkout"
+    },
+    {
+      "id": "rollback.configuration_digest",
+      "status": "PASS",
+      "detail": "rollback current digest matches configuration.json"
+    },
+    {
+      "id": "integrity.no_provider_bytes",
+      "status": "PASS",
+      "detail": "no provider bytes or product-path keys"
+    },
+    {
+      "id": "integrity.no_completion_claim",
+      "status": "PASS",
+      "detail": "no LS-06 completion claim"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls07-injected-renderer-fixture",
+  "fixtureOnly": true,
+  "copiedProviderBytes": false,
+  "packetComplete": false,
+  "ls06CompleteClaimed": false,
+  "providerIdentity": {
+    "repository": "linktrend/LiNKlibraries",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "runtimeIdentity": {
+    "packet": "LS-06",
+    "repository": "linktrend/LiNKsites",
+    "commit": "cccccccccccccccccccccccccccccccccccccccc",
+    "tree": "dddddddddddddddddddddddddddddddddddddddd"
+  },
+  "rendererOutput": {
+    "html": "<!doctype html><html lang=\"en\"><head><title>Fixture shop</title></head><body><main><h1>Fixture shop</h1><img alt=\"Storefront\" src=\"/fixture.png\"></main></body></html>",
+    "document": {
+      "title": "Fixture shop",
+      "canonical": "https://fixture.example/en",
+      "robots": "index,follow",
+      "hreflang": [{ "lang": "en", "href": "https://fixture.example/en" }],
+      "visibleFacts": {
+        "name": "Fixture shop",
+        "url": "https://fixture.example/en"
+      },
+      "jsonLd": {
+        "@type": "LocalBusiness",
+        "name": "Fixture shop",
+        "url": "https://fixture.example/en"
+      }
+    },
+    "performance": {
+      "lcpMs": 1200,
+      "cls": 0.01,
+      "inpMs": 80,
+      "transferBytes": 120000
+    },
+    "accessibility": {
+      "violations": []
+    }
+  }
+}
