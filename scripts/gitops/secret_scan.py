@@ -387,6 +387,29 @@ def _is_code_expression(value: str) -> bool:
     return False
 
 
+def _is_typescript_string_literal_type(line: str, value_end: int) -> bool:
+    """Quoted value is a TypeScript string-literal type, not a credential assignment.
+
+    Distinguishes `key: 'products' | 'services'` parameter types from
+    `key: "secretvalue"` / `key = "secretvalue"` assignments. Removing this
+    check re-flags typed function parameters as assignment.secret.
+    """
+    cursor = _skip_ws(line, value_end)
+    if cursor >= len(line):
+        return False
+    if line[cursor] == "|":
+        nxt = _skip_ws(line, cursor + 1)
+        if nxt >= len(line):
+            return False
+        return line[nxt] in {"'", '"', "("} or line[nxt].isalpha()
+    if line[cursor] != ")":
+        return False
+    nxt = _skip_ws(line, cursor + 1)
+    if nxt < len(line) and line[nxt] in {":", "{"}:
+        return True
+    return nxt + 1 < len(line) and line[nxt : nxt + 2] == "=>"
+
+
 def extract_assignments(line: str) -> list[tuple[str, str]]:
     found: list[tuple[str, str]] = []
     for match in ANY_FIELD_RE.finditer(line):
@@ -418,9 +441,9 @@ def extract_assignments(line: str) -> list[tuple[str, str]]:
             read = _read_concat_quoted(line, index)
             if read is None:
                 continue
-            value, _ = read
+            value, value_end = read
         else:
-            value, _ = _read_unquoted(line, index)
+            value, value_end = _read_unquoted(line, index)
             if not value:
                 continue
         if not _is_credential_field(raw_field) and not is_synthetic_value(value):
@@ -430,6 +453,13 @@ def extract_assignments(line: str) -> list[tuple[str, str]]:
         if (
             not quoted
             and _is_code_expression(value)
+            and not is_realistic_value(value)
+            and not is_synthetic_value(value)
+        ):
+            continue
+        if (
+            quoted
+            and _is_typescript_string_literal_type(line, value_end)
             and not is_realistic_value(value)
             and not is_synthetic_value(value)
         ):
