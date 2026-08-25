@@ -25,10 +25,14 @@
     "tree": "964b8e0d20fb2e3ee52278cacab71686866132d7",
     "note": "repair implementation only; not the reviewed successor HEAD"
   },
-  "checkpoint": {
+  "priorSuccessorHead": {
     "commit": "bd0bbabaff413d90ebc6abe492790cca8e77b5d4",
-    "tree": "30d8f3c09e0c339e454affc0c49943893628a560",
-    "note": "final successor HEAD before identity correction; this attestation is rewritten onto the identity-corrected successor"
+    "tree": "30d8f3c09e0c339e454affc0c49943893628a560"
+  },
+  "checkpoint": {
+    "commit": "aeea40e5b82710e8702491bfe7cc46a168cd6578",
+    "tree": "dcc4b02b62be163388b4a04bd4bf89663fa591ac",
+    "note": "identity-corrected successor HEAD (Issue-275 idempotency + successor binding)"
   },
   "runtime": {
     "namedEnvironment": "IDE Development 2.5.1",

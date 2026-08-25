@@ -62,9 +62,14 @@ expanded.
 - SHA: `1d3323e1319c8ccd95a64aa71e1a31c0fd7407e5`
 - Tree: `964b8e0d20fb2e3ee52278cacab71686866132d7`
 
-## Successor HEAD bound by this packet
+## Prior successor HEAD (before identity correction)
 
 - SHA: `bd0bbabaff413d90ebc6abe492790cca8e77b5d4`
 - Tree: `30d8f3c09e0c339e454affc0c49943893628a560`
-- This identity correction keeps that successor as the bound repair HEAD
-  and updates LS-03 dispatch idempotency from issue 274 to issue 275.
+
+## Successor HEAD bound by this packet
+
+- SHA: `aeea40e5b82710e8702491bfe7cc46a168cd6578`
+- Tree: `dcc4b02b62be163388b4a04bd4bf89663fa591ac`
+- Dispatch idempotency is the governed Issue-275 repair identity
+  `cursor-cloud-dispatch-v1:linksites-ls03-275-repair-base9da7197e`.
