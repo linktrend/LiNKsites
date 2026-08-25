@@ -3,33 +3,30 @@ import { getOfferIndex, getOfferPage } from "@/lib/pageService";
 import { OfferIndexLayout } from "@/layouts/OfferIndexLayout";
 import { OfferPageLayout } from "@/layouts/OfferPageLayout";
 import { buildMetadata } from "@/lib/seo";
-import { getSiteIdFromRequest } from "@/lib/site-context";
-import { normalizeLocale } from "@/lib/locale-context";
+import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 
-type Props = { params: { lang: string } };
+type Props = { params: Promise<{ lang: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  const locale = normalizeLocale(params.lang);
-  return buildMetadata(locale, "/offers", { title: "Offers" });
+  const { lang } = await params;
+  try {
+    const { locale } = await requirePublicFamilyPage({ lang, pathname: `/${lang}/offers` });
+    return buildMetadata(locale, "/offers", { title: "Offers" });
+  } catch {
+    return { title: "Page unavailable", robots: { index: false, follow: false } };
+  }
 }
 
 export default async function OfferIndexPage({ params }: Props) {
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const { lang } = await params;
+  const { siteId, locale } = await requirePublicFamilyPage({ lang, pathname: `/${lang}/offers` });
   const page = await getOfferIndex(locale, siteId);
-  const publishedOffers = page.data.offers.filter((o: any) => o.status === "published");
-
+  const publishedOffers = page.data.offers.filter((o: { status?: string }) => o.status === "published");
   if (publishedOffers.length === 0) return notFound();
-
-  // SEO RULE: If only 1 offer exists, render it directly at /offers
   if (publishedOffers.length === 1) {
-    const singleOffer = publishedOffers[0];
+    const singleOffer = publishedOffers[0] as { slug: string };
     const offerPageData = await getOfferPage(locale, siteId, singleOffer.slug);
-    return (
-      <OfferPageLayout lang={locale} page={offerPageData as any} />
-    );
+    return <OfferPageLayout lang={locale} page={offerPageData as never} />;
   }
-
-  // Otherwise, show grid layout
   return <OfferIndexLayout lang={locale} page={page} />;
 }

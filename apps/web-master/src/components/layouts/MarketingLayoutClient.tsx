@@ -1,12 +1,13 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { ReactNode } from "react";
 import { Header } from "@/components/navigation/Header";
 import { Footer } from "@/components/navigation/Footer";
 import { CookieConsentBanner } from "@/components/common/CookieConsentBanner";
 import { NewsletterSection } from "@/components/common/NewsletterSection";
 import { CmsNavigation } from "@/lib/repository/navigation";
+import type { PlanId } from "@/components/page-renderer/layout-packs";
+import { resolveShell } from "@/components/shell/resolved-shell";
 
 type Props = {
   lang: string;
@@ -14,28 +15,35 @@ type Props = {
   footerNav?: CmsNavigation | null;
   children: ReactNode;
   trafficSource?: string;
+  planId?: PlanId;
 };
 
-export function MarketingLayoutClient({ lang, primaryNav, footerNav, children, trafficSource }: Props) {
-  const pathname = usePathname();
-  
-  const isHomepage = useMemo(() => 
-    pathname === `/${lang}` || pathname === `/${lang}/`, 
-    [pathname, lang]
-  );
-  
-  const isPricingPage = useMemo(() => 
-    pathname === `/${lang}/pricing` || pathname === `/${lang}/pricing/`, 
-    [pathname, lang]
-  );
+export function MarketingLayoutClient({
+  lang,
+  primaryNav,
+  footerNav,
+  children,
+  trafficSource,
+  planId = "A",
+}: Props) {
+  const shell = resolveShell({ locale: lang, planId });
+  const isolated = shell.typeLShellMode === "isolated";
 
   return (
-    <div className="flex min-h-screen flex-col" data-traffic-source={trafficSource ?? "direct"}>
-      <Header lang={lang} navigation={primaryNav} />
-      <main className="flex-1">{children}</main>
-      {!isHomepage && !isPricingPage && <NewsletterSection lang={lang} />}
-      <Footer lang={lang} navigation={footerNav} />
-      <CookieConsentBanner lang={lang} />
+    <div
+      className="flex min-h-screen flex-col"
+      data-traffic-source={trafficSource ?? "direct"}
+      data-plan-id={planId}
+      data-type-l-shell={shell.typeLShellMode}
+      data-no-placeholders="true"
+    >
+      <Header lang={lang} navigation={primaryNav} planId={planId} />
+      <main data-shell-region="main" className="flex-1">
+        {children}
+      </main>
+      {!isolated ? <NewsletterSection lang={lang} /> : null}
+      <Footer lang={lang} navigation={footerNav} planId={planId} />
+      {!isolated ? <CookieConsentBanner lang={lang} /> : null}
     </div>
   );
 }

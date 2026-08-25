@@ -3,11 +3,14 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
-import { SUPPORTED_LANGUAGES, getThemeFromRequest } from "@/config";
+import { notFound } from "next/navigation";
+import { getThemeFromRequest } from "@/config";
 import { getNavigation } from "@/lib/repository/navigation";
+import { getSiteSettings } from "@/lib/repository/siteSettings";
 import { normalizeLocale } from "@/lib/locale-context";
-import { getSiteIdFromRequest } from "@/lib/site-context";
+import { getPublicSiteIdOrNull } from "@/lib/public-route-guard";
 import { MarketingLayoutClient } from "@/components/layouts/MarketingLayoutClient";
+import { resolveLayoutRuntime } from "@/components/page-renderer/layout-packs";
 
 // Multi-tenant websites must render per-request (hostname determines tenant).
 export const dynamic = "force-dynamic";
@@ -35,15 +38,21 @@ export default async function LangLayout({
   params: Promise<{ lang: string }>;
 }) {
   const theme = await getThemeFromRequest();
-  const siteId = await getSiteIdFromRequest();
+  const siteId = await getPublicSiteIdOrNull();
+  if (!siteId) notFound();
   const { lang } = await params;
   const locale = normalizeLocale(lang);
-  const [primaryNav, footerNav] = await Promise.all([
+  const [primaryNav, footerNav, settings] = await Promise.all([
     getNavigation({ siteId, locale, key: "primary" }),
     getNavigation({ siteId, locale, key: "footer" }),
+    getSiteSettings({ siteId, locale }).catch(() => null),
   ]);
   const messages = await getMessages();
   const trafficSource = (await cookies()).get("lsites_source")?.value;
+  const runtime = resolveLayoutRuntime({
+    layoutPackId: (settings as { layoutPackId?: unknown } | null)?.layoutPackId,
+    planId: (settings as { planId?: unknown } | null)?.planId,
+  });
 
   return (
     <div data-theme={theme.id} data-lang={locale}>
@@ -53,6 +62,7 @@ export default async function LangLayout({
           primaryNav={primaryNav}
           footerNav={footerNav}
           trafficSource={trafficSource}
+          planId={runtime.planId}
         >
           {children}
         </MarketingLayoutClient>
