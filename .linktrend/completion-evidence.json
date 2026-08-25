@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "headSha": "28e7d3dc4fcdb46f37eec39e93a7297b76f991da",
+  "headSha": "31633fa318b288f42992963e203152a56217e75d",
   "classification": "tests",
-  "acceptance": "LS-05 bounded repair: cache receipt/pointer integrity, safe receipt paths, explicit draft-candidate policy, and unauthorized fixture rollback.",
+  "acceptance": "LS-05 second bounded repair: fail-closed cache symlink containment, complete receipt verdict validation, canonical adapter mapping digest, product rollback regression, and generated secret-scan evidence.",
   "commands": [
     {
       "cmd": "pnpm --filter @linksites/factory-catalog exec vitest run tests/revision2Materialization.spec.ts tests/ls05CanonicalImplementation.spec.ts",
@@ -29,6 +29,10 @@
       "exitCode": 0
     },
     {
+      "cmd": "python3 scripts/gitops/generated_output_closure.py --generate-fixtures",
+      "exitCode": 0
+    },
+    {
       "cmd": "python3 scripts/gitops/secret_scan.py --repo .",
       "exitCode": 0
     },
@@ -37,10 +41,10 @@
       "exitCode": 0
     }
   ],
-  "at": "2026-08-25T14:04:43Z",
+  "at": "2026-08-25T14:27:00Z",
   "kind": "v25-issue-checkpoint",
   "amendment": "V25_BOOTSTRAP_LEAN",
-  "gitTree": "4eb89aba66e5b824a5fc3401495dac71f626170d",
+  "gitTree": "18b666b1d69513f13a7a771885d0c2b565b83a4c",
   "pushed": true,
   "scopedDiff": true,
   "focusedTests": {
@@ -48,5 +52,16 @@
   },
   "independentTerraVerification": false,
   "manifestEvidence": false,
-  "proofClass": "local"
+  "proofClass": "local",
+  "secretScan": {
+    "command": "python3 scripts/gitops/secret_scan.py --repo . --json-output /tmp/ls05-secret-scan-repair2.json",
+    "exitCode": 0,
+    "ok": true,
+    "candidateTreeBoundInGeneratedFixture": true,
+    "findingCount": 177,
+    "findingsByKind": {
+      "approved_synthetic_fixture": 177
+    },
+    "blockingFindingCount": 0
+  }
 }
