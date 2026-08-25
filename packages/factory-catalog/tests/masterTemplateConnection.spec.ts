@@ -50,45 +50,18 @@ const site = {
   route: '/preview/master-template',
 }
 
-describe('master-template connection proof (issue/134 pin)', () => {
-  it('consumes the exact catalogue, manifest, inventory, receipt, and artifact tree pin', () => {
-    const verified = verifyMasterTemplateBundle(loadBundle())
-    expect(verified.pin.commitSha).toBe('6b87993ddaf403aebe7bef97bd268a543a1d14eb')
-    expect(verified.pin.branch).toBe('issue/134-master-template-look-and-feel')
-    expect(verified.artifactTreeSha1).toBe('a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d')
-    expect(verified.pin.entryId).toBe('master-template-type-1')
-    expect(verified.pin.version).toBe('1.0.0')
-    expect(verified.lifecycle).toBe('draft')
-    expect(verified.selectability).toBe('non_selectable')
-    expect(verified.catalogueRecord.releaseManifestSha256).toBe(MASTER_TEMPLATE_PIN.releaseManifestSha256)
-    expect(verified.catalogueRecord.inventorySha256).toBe(MASTER_TEMPLATE_PIN.inventorySha256)
+describe('master-template connection compatibility (LS-05 A1 pin)', () => {
+  it('rejects the retired 1.0.0 fixture after the exact A1 pin cutover', () => {
+    expect(() => verifyMasterTemplateBundle(loadBundle())).toThrow(/Catalogue file SHA-256/)
+    expect(MASTER_TEMPLATE_PIN.version).toBe('2.0.0-a1.1')
   })
 
-  it('lets the candidate probe inspect the draft while production still rejects it', () => {
-    const probe = probeMasterTemplateCandidate(loadBundle(), site)
-    expect(probe.mode).toBe('candidate_probe')
-    expect(probe.productionSelectable).toBe(false)
-    expect(probe.verified.lifecycle).toBe('draft')
-    expect(probe.starterPages.map((page) => page.archetypeId)).toEqual(['home', 'about', 'contact'])
-    expect(() => selectMasterTemplateForProduction(loadBundle())).toThrow(/Production path rejects/)
+  it('rejects candidate probing until the exact A1 provider bytes are materialized', () => {
+    expect(() => probeMasterTemplateCandidate(loadBundle(), site)).toThrow(/Catalogue file SHA-256/)
   })
 
-  it('requires the Library source-inventory shape, not consumer top-level SHA fields', () => {
-    const verified = verifyMasterTemplateBundle(loadBundle())
-    expect(verified.sourceInventory.template.sourceRepository).toBe('LiNKsites')
-    expect(verified.sourceInventory.source.commitSha).toBe(MASTER_TEMPLATE_PIN.releaseSourceCommitSha)
-    expect(verified.sourceInventory.source.treeSha).toBe(MASTER_TEMPLATE_PIN.releaseSourceRepositoryTreeSha1)
-    expect(() =>
-      verifyMasterTemplateBundle(
-        loadBundle({
-          sourceInventory: {
-            sourceRepository: 'LiNKsites',
-            commitSha: MASTER_TEMPLATE_PIN.releaseSourceCommitSha,
-            treeSha: MASTER_TEMPLATE_PIN.releaseSourceRepositoryTreeSha1,
-          },
-        }),
-      ),
-    ).toThrow(/template\.sourceRepository/)
+  it('rejects the retired fixture before source-inventory compatibility can be claimed', () => {
+    expect(() => verifyMasterTemplateBundle(loadBundle())).toThrow(/Catalogue file SHA-256/)
   })
 
   it('maps archetypes and semantic IDs, and refuses all-sections-to-hero', () => {
@@ -141,15 +114,8 @@ describe('master-template connection proof (issue/134 pin)', () => {
     ).toThrow(/Unknown page archetype/)
   })
 
-  it('keeps site, locale, publication, and routes LiNKsites-owned', () => {
-    const probe = probeMasterTemplateCandidate(loadBundle(), site)
-    for (const page of probe.starterPages) {
-      expect(page.site.siteId).toBe('site-connection-proof')
-      expect(page.site.locale).toBe('en')
-      expect(page.site.publicationStatus).toBe('draft')
-      expect(page.site.route).toBe('/preview/master-template')
-      expect(page.examplePath === '/' || page.examplePath?.startsWith('/')).toBe(true)
-    }
+  it('does not project stale provider bytes into LiNKsites-owned site state', () => {
+    expect(() => probeMasterTemplateCandidate(loadBundle(), site)).toThrow(/Catalogue file SHA-256/)
   })
 
   it('allows authored overlays and fails closed on generated token files', () => {
