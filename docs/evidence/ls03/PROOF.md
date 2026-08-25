@@ -57,7 +57,14 @@ expanded.
   refused. Fixtures and Payload `down()` rollback were proven by contract
   tests. Additive SQL was not applied to a live database in this environment.
 
-## Repair implementation checkpoint
+## Repair implementation checkpoint (not the successor HEAD)
 
 - SHA: `1d3323e1319c8ccd95a64aa71e1a31c0fd7407e5`
 - Tree: `964b8e0d20fb2e3ee52278cacab71686866132d7`
+
+## Successor HEAD bound by this packet
+
+- SHA: `bd0bbabaff413d90ebc6abe492790cca8e77b5d4`
+- Tree: `30d8f3c09e0c339e454affc0c49943893628a560`
+- This identity correction keeps that successor as the bound repair HEAD
+  and updates LS-03 dispatch idempotency from issue 274 to issue 275.

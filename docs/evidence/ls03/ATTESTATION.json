@@ -20,10 +20,15 @@
     "h09Tree": "6cab53da19ba390d392157dbcc38979f1a6c86b5"
   },
   "credits": { "A": 30, "B": 15, "C": 6, "L": 0 },
-  "checkpoint": {
+  "implementationCheckpoint": {
     "commit": "1d3323e1319c8ccd95a64aa71e1a31c0fd7407e5",
     "tree": "964b8e0d20fb2e3ee52278cacab71686866132d7",
-    "note": "repair implementation commit; this attestation file is recorded in a follow-up evidence commit"
+    "note": "repair implementation only; not the reviewed successor HEAD"
+  },
+  "checkpoint": {
+    "commit": "bd0bbabaff413d90ebc6abe492790cca8e77b5d4",
+    "tree": "30d8f3c09e0c339e454affc0c49943893628a560",
+    "note": "final successor HEAD before identity correction; this attestation is rewritten onto the identity-corrected successor"
   },
   "runtime": {
     "namedEnvironment": "IDE Development 2.5.1",
