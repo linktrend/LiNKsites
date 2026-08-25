@@ -21,7 +21,30 @@ export const CONTENT_PRODUCTION_SCHEMA_VERSION = { major: 1, minor: 0 } as const
 export const CONTENT_PRODUCTION_EXECUTOR_VERSION = 'w2-01-deterministic-adapter.v1' as const
 export const LS04_CONTENT_PRODUCTION_EXECUTOR_VERSION = 'ls04-working-content.v1' as const
 const SHA256 = /^[a-f0-9]{64}$/
-const PLACEHOLDER = /(?:\{\{|\}\}|\b(?:lorem|ipsum|example(?:\.com)?|demo(?:-?data)?|your business|TODO|TBD)\b)/i
+const ASCII_WORD_CHAR = /[A-Za-z0-9_]/
+const PLACEHOLDER_MARKERS = ['{{', '}}'] as const
+const PLACEHOLDER_TERMS = ['lorem', 'ipsum', 'example.com', 'example', 'demo-data', 'demodata', 'demo', 'your business', 'todo', 'tbd'] as const
+
+function hasAsciiWordBoundary(text: string, start: number, end: number): boolean {
+  const before = start === 0 ? '' : text.charAt(start - 1)
+  const after = end >= text.length ? '' : text.charAt(end)
+  return (start === 0 || !ASCII_WORD_CHAR.test(before)) && (end >= text.length || !ASCII_WORD_CHAR.test(after))
+}
+
+function containsPlaceholderToken(value: string): boolean {
+  for (const marker of PLACEHOLDER_MARKERS) if (value.includes(marker)) return true
+  const haystack = value.toLowerCase()
+  for (const term of PLACEHOLDER_TERMS) {
+    let from = 0
+    while (from <= haystack.length - term.length) {
+      const index = haystack.indexOf(term, from)
+      if (index === -1) break
+      if (hasAsciiWordBoundary(haystack, index, index + term.length)) return true
+      from = index + 1
+    }
+  }
+  return false
+}
 const QUANTIFIED_CLAIM = /(?:\d+\s*%|\$\s*\d|\bguaranteed\b|\b#1\b|\balways wins\b)/i
 const FAKE_ATTRIBUTION = /^(?:john doe|jane doe|happy customer|anonymous|placeholder|n\/a)$/i
 
@@ -80,7 +103,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 const nonEmpty = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0
 const stable = (value: unknown): string => value === null || typeof value !== 'object' ? JSON.stringify(value) : Array.isArray(value) ? `[${value.map(stable).join(',')}]` : `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${stable((value as Record<string, unknown>)[key])}`).join(',')}}`
 const sha256 = (value: string): string => createHash('sha256').update(value, 'utf8').digest('hex')
-const containsForbiddenToken = (value: unknown): boolean => typeof value === 'string' ? PLACEHOLDER.test(value) : Array.isArray(value) ? value.some(containsForbiddenToken) : isRecord(value) && Object.values(value).some(containsForbiddenToken)
+const containsForbiddenToken = (value: unknown): boolean => typeof value === 'string' ? containsPlaceholderToken(value) : Array.isArray(value) ? value.some(containsForbiddenToken) : isRecord(value) && Object.values(value).some(containsForbiddenToken)
 
 function credentialName(value: string | ApprovedLeadCredential): string {
   return typeof value === 'string' ? value : value.name
