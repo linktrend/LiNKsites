@@ -357,17 +357,25 @@ describe('LS-04 ISS-14 typed promotion', () => {
   })
 
   it('keeps semantic projection fields strict for Payload readback', () => {
-    const produced = produce('service')
+    const produced = produce('hybrid')
     const request = buildPromotionRequestFromPreparedWorkingContent(
       promotionInput(produced.contentPackage),
       SITE,
       'promo-ls04-readback-parity',
       'manifest-ls04',
     )
+    const pageItems = request.workingPackage.items.filter((item) => item.payloadCollection === 'pages')
     const firstPage = request.workingPackage.items.find((item) => item.payloadCollection === 'pages')
     const firstBlock = (firstPage?.data.content as Array<Record<string, unknown>>)[0]
+    const offerBlock = pageItems
+      .flatMap((item) => (item.data.content as Array<Record<string, unknown>>))
+      .find(
+        (block) => block.blockType === 'offerShowcase',
+      )
     const target = new PayloadRestDraftTarget({ baseUrl: 'http://payload.test' })
 
+    expect(offerBlock?.offers).toEqual(['Approved catalog items'])
+    expect((offerBlock?.offers as unknown[]).every((offer) => typeof offer === 'string')).toBe(true)
     expect(target.verifyParity(firstBlock, { id: 'page-1', ...firstBlock })).toBe(true)
     expect(() => target.verifyParity(firstBlock, { id: 'page-1' })).toThrow(
       /reactSymbol.*libraryComponentId.*semanticId.*workingSectionId/,

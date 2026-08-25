@@ -26,6 +26,43 @@ const blockTables = [
  * Existing content remains valid because all four fields are optional.
  */
 export async function up({ db }: MigrateUpArgs): Promise<void> {
+  // OfferShowcaseBlock stores approved working-content labels rather than
+  // OfferPage IDs. Payload's localized hasMany text storage is owned by the
+  // parent collection, so add the forward/versions text tables alongside the
+  // semantic block columns. The legacy pages_rels offer_pages_id column is
+  // intentionally retained for additive compatibility with existing records.
+  await db.execute(sql.raw(`
+    CREATE TABLE IF NOT EXISTS "pages_texts" (
+      "id" serial PRIMARY KEY NOT NULL,
+      "order" integer NOT NULL,
+      "parent_id" integer NOT NULL,
+      "path" varchar NOT NULL,
+      "text" varchar,
+      "locale" "__locales"
+    );
+    CREATE INDEX IF NOT EXISTS "pages_texts_order_parent" ON "pages_texts" USING btree ("order", "parent_id");
+    CREATE INDEX IF NOT EXISTS "pages_texts_locale_parent" ON "pages_texts" USING btree ("locale", "parent_id");
+    DO $$ BEGIN
+      ALTER TABLE "pages_texts" ADD CONSTRAINT "pages_texts_parent_fk"
+        FOREIGN KEY ("parent_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+    CREATE TABLE IF NOT EXISTS "_pages_v_texts" (
+      "id" serial PRIMARY KEY NOT NULL,
+      "order" integer NOT NULL,
+      "parent_id" integer NOT NULL,
+      "path" varchar NOT NULL,
+      "text" varchar,
+      "locale" "__locales"
+    );
+    CREATE INDEX IF NOT EXISTS "_pages_v_texts_order_parent" ON "_pages_v_texts" USING btree ("order", "parent_id");
+    CREATE INDEX IF NOT EXISTS "_pages_v_texts_locale_parent" ON "_pages_v_texts" USING btree ("locale", "parent_id");
+    DO $$ BEGIN
+      ALTER TABLE "_pages_v_texts" ADD CONSTRAINT "_pages_v_texts_parent_fk"
+        FOREIGN KEY ("parent_id") REFERENCES "public"."_pages_v"("id") ON DELETE cascade ON UPDATE no action;
+    EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+  `))
+
   for (const table of blockTables) {
     await db.execute(sql.raw(`
       ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "react_symbol" varchar;
@@ -45,4 +82,9 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
       ALTER TABLE "${table}" DROP COLUMN IF EXISTS "react_symbol";
     `))
   }
+
+  await db.execute(sql.raw(`
+    DROP TABLE IF EXISTS "_pages_v_texts" CASCADE;
+    DROP TABLE IF EXISTS "pages_texts" CASCADE;
+  `))
 }

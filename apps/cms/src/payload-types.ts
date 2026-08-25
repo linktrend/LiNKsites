@@ -2861,9 +2861,9 @@ export interface Page {
             title: string;
             subtitle?: string | null;
             /**
-             * Select offers to display in this showcase
+             * Approved offer labels to display in this showcase
              */
-            offers: (number | OfferPage)[];
+            offers: string[];
             id?: string | null;
             blockName?: string | null;
             blockType: 'offerShowcase';
