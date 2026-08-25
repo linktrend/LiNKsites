@@ -1,4 +1,5 @@
 import type { Block, Field, RelationshipField, TextareaField, TextField } from 'payload'
+import { ls04SemanticFields } from './ls04SemanticFields'
 
 export const OfferShowcaseBlock = {
   slug: 'offerShowcase',
@@ -7,6 +8,7 @@ export const OfferShowcaseBlock = {
     plural: 'Offer Showcase Blocks',
   },
   fields: [
+    ...ls04SemanticFields,
     {
       name: 'title',
       type: 'text',

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-candidate-identity",
+  "gateId": "EXT-LS-01",
+  "issue": 301,
+  "branch": "issue/301-assemble-ext-ls-01-a1-consumer-proof-validator-s",
+  "repository": "linktrend/LiNKsites",
+  "preRepairCandidate": {
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "ownedPaths": [
+    "docs/evidence/ext-ls-01/**",
+    "scripts/profile-v2-quality/ext-ls-01/**"
+  ],
+  "prohibitedPaths": [
+    "packages/factory-catalog",
+    "registry/v2/entries/**",
+    "docs/handoffs/master-template-paired-proof-controller-handoff.md"
+  ],
+  "notes": [
+    "Identities are candidate-bound inputs to the consumer validator.",
+    "This file does not record ACCEPT, protected integration, provider conformance, or production proof."
+  ]
+}

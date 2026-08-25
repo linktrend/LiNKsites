@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "ls06-preparation-packet/v1",
+  "preparationOnly": true,
+  "notCompletionOf": [
+    "LS-06"
+  ],
+  "identities": {
+    "ls05": {
+      "adapterIdentity": "ls05:adapter:injected:v1",
+      "materializationReceiptIdentity": "ls05:materialization:injected:v1",
+      "source": "injected"
+    },
+    "provider": {
+      "providerId": "master-template-type-1",
+      "semver": "2.0.0-a1.1",
+      "layoutPackId": "A1",
+      "candidateIdentity": "provider:injected:layout-A1",
+      "source": "injected"
+    },
+    "layout": {
+      "layoutPackId": "A1",
+      "planId": "B",
+      "shellId": "marketing-shell",
+      "source": "injected"
+    }
+  },
+  "contract": "contract.json",
+  "configuration": "configuration.json",
+  "rollback": "rollback.json"
+}
