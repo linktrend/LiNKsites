@@ -10,9 +10,9 @@ import { routes } from "@/lib/routes";
 import type { PlanId } from "@/components/page-renderer/layout-packs";
 import { FOOTER_ZONES, resolveShell, resolvedSocialLinks } from "@/components/shell/resolved-shell";
 
-type Props = { lang: string; navigation?: CmsNavigation | null; planId?: PlanId };
+type Props = { lang: string; navigation?: CmsNavigation | null; planId: PlanId };
 
-export function Footer({ lang, navigation, planId = "A" }: Props) {
+export function Footer({ lang, navigation, planId }: Props) {
   const t = useTranslations();
   const tFooter = useTranslations("footer");
   const [cookieModalOpen, setCookieModalOpen] = useState(false);

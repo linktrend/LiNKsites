@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import { NewsletterSection } from "@/components/common/NewsletterSection";
 import { CTASection } from "@/components/marketing/CTASection";
+import { composeLayoutBody, pageRendererMountAttributes } from "@/components/page-renderer/compose-layout";
 import { resolveLayoutRuntime, type LayoutPackId, type PlanId } from "@/components/page-renderer/layout-packs";
 import { mapBlockToPayloadType, ProviderSemanticError } from "@/components/page-renderer/semantic-map";
 import { CaseStudiesGrid } from "@/components/marketing/CaseStudiesGrid";
@@ -77,45 +78,11 @@ export const PageRenderer = ({ page, siteKey, locale, layoutPackId, planId }: Pa
     </div>
   );
 
-  let body: ReactNode;
-  switch (runtime.layoutPackId) {
-    case "A1":
-      body = main;
-      break;
-    case "A2":
-      body = (
-        <div className="grid gap-8 lg:grid-cols-[minmax(12rem,18rem)_minmax(0,1fr)]">
-          <aside data-region="aside" className="hidden lg:block border-r border-border/60 px-4 py-8">
-            <p className="text-sm font-semibold">{page.title}</p>
-          </aside>
-          {main}
-        </div>
-      );
-      break;
-    case "A3":
-      body = (
-        <div className="flex flex-col">
-          {main}
-          <section data-region="secondary" className="border-t border-border/60 py-8">
-            <div className="container px-4 sm:px-6 text-sm text-muted-foreground">{page.title}</div>
-          </section>
-        </div>
-      );
-      break;
-    default: {
-      const exhaustive: never = runtime.layoutPackId;
-      throw new ProviderSemanticError(`Unknown required layout pack "${String(exhaustive)}"`);
-    }
-  }
+  const body = composeLayoutBody(runtime, main, page.title);
+  const mount = pageRendererMountAttributes(runtime);
 
   return (
-    <div
-      className="flex-1"
-      data-page-renderer={runtime.composition.pageRenderer}
-      data-layout-pack={runtime.layoutPackId}
-      data-architecture-ready={runtime.composition.architectureReady ? "true" : "false"}
-      data-plan-id={runtime.planId}
-    >
+    <div className="flex-1" {...mount}>
       {body}
     </div>
   );

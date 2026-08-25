@@ -22,11 +22,11 @@ import { resolveShell, type ShellAction } from "@/components/shell/resolved-shel
 type Props = {
   lang: string;
   navigation?: CmsNavigation | null;
-  planId?: PlanId;
+  planId: PlanId;
   actions?: readonly ShellAction[];
 };
 
-export function Header({ lang, navigation, planId = "A", actions }: Props) {
+export function Header({ lang, navigation, planId, actions }: Props) {
   const pathname = usePathname();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [navOpenStates, setNavOpenStates] = useState<Record<string, boolean>>({});

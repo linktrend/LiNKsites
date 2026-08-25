@@ -3,8 +3,7 @@ import { getPageBySlug } from "@/lib/repository/pages";
 import { getTemplateIdForSite } from "@/lib/template-context";
 import { getTemplateModule } from "@/templates/registry";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
-import { getSiteSettings } from "@/lib/repository/siteSettings";
-import { resolveLayoutRuntime } from "@/components/page-renderer/layout-packs";
+import { loadAcceptedLayoutRuntime } from "@/components/page-renderer/accepted-identities";
 
 export async function loadLegalFamilyPage(lang: string, slug: string) {
   const path = `legal/${slug}`;
@@ -13,10 +12,11 @@ export async function loadLegalFamilyPage(lang: string, slug: string) {
   if (!page) notFound();
   const templateId = await getTemplateIdForSite({ siteId, locale });
   const template = getTemplateModule(templateId);
-  const settings = await getSiteSettings({ siteId, locale }).catch(() => null);
-  const runtime = resolveLayoutRuntime({
-    layoutPackId: (settings as { layoutPackId?: unknown } | null)?.layoutPackId,
-    planId: (settings as { planId?: unknown } | null)?.planId,
-  });
+  let runtime;
+  try {
+    runtime = loadAcceptedLayoutRuntime();
+  } catch {
+    notFound();
+  }
   return { page, siteId, locale, template, runtime, path };
 }

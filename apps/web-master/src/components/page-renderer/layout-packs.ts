@@ -53,9 +53,15 @@ export type LayoutRuntime = Readonly<{
 export function resolveLayoutRuntime(input: {
   layoutPackId?: unknown;
   planId?: unknown;
-} = {}): LayoutRuntime {
-  const layoutPackId = input.layoutPackId == null || input.layoutPackId === "" ? "A1" : input.layoutPackId;
-  const planId = input.planId == null || input.planId === "" ? "A" : input.planId;
+}): LayoutRuntime {
+  if (input.layoutPackId == null || input.layoutPackId === "") {
+    throw new LayoutPackError("fail closed: accepted LS-05 layoutPackId is absent");
+  }
+  if (input.planId == null || input.planId === "") {
+    throw new LayoutPackError("fail closed: accepted LS-04 planId is absent");
+  }
+  const layoutPackId = input.layoutPackId;
+  const planId = input.planId;
   if (!isLayoutPackId(layoutPackId)) {
     throw new LayoutPackError(`Unknown required layout pack "${String(layoutPackId)}"`);
   }

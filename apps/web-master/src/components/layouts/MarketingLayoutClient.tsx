@@ -15,7 +15,7 @@ type Props = {
   footerNav?: CmsNavigation | null;
   children: ReactNode;
   trafficSource?: string;
-  planId?: PlanId;
+  planId: PlanId;
 };
 
 export function MarketingLayoutClient({
@@ -24,7 +24,7 @@ export function MarketingLayoutClient({
   footerNav,
   children,
   trafficSource,
-  planId = "A",
+  planId,
 }: Props) {
   const shell = resolveShell({ locale: lang, planId });
   const isolated = shell.typeLShellMode === "isolated";

@@ -7,8 +7,7 @@ import { getTemplateIdForSite } from "@/lib/template-context";
 import { getTemplateModule } from "@/templates/registry";
 import { PageTypeMarker } from "@/components/layouts/PageTypeMarker";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
-import { getSiteSettings } from "@/lib/repository/siteSettings";
-import { resolveLayoutRuntime } from "@/components/page-renderer/layout-packs";
+import { loadAcceptedLayoutRuntime } from "@/components/page-renderer/accepted-identities";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -52,20 +51,21 @@ export default async function CmsPage({ params }: PageProps) {
     pathname: publicPath(lang, slug),
   });
 
-  const [page, primaryNav, footerNav, templateId, settings] = await Promise.all([
+  const [page, primaryNav, footerNav, templateId] = await Promise.all([
     getPageBySlug({ siteId, locale, slugSegments: slug }),
     getNavigation({ siteId, locale, key: "primary" }).catch(() => null),
     getNavigation({ siteId, locale, key: "footer" }).catch(() => null),
     getTemplateIdForSite({ siteId, locale }),
-    getSiteSettings({ siteId, locale }).catch(() => null),
   ]);
 
   if (!page) return notFound();
   const template = getTemplateModule(templateId);
-  const runtime = resolveLayoutRuntime({
-    layoutPackId: (settings as { layoutPackId?: unknown } | null)?.layoutPackId,
-    planId: (settings as { planId?: unknown } | null)?.planId,
-  });
+  let runtime;
+  try {
+    runtime = loadAcceptedLayoutRuntime();
+  } catch {
+    return notFound();
+  }
 
   return (
     <>

@@ -4,8 +4,7 @@ import { getPageBySlug } from "@/lib/repository/pages";
 import { getTemplateIdForSite } from "@/lib/template-context";
 import { getTemplateModule } from "@/templates/registry";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
-import { getSiteSettings } from "@/lib/repository/siteSettings";
-import { resolveLayoutRuntime } from "@/components/page-renderer/layout-packs";
+import { loadAcceptedLayoutRuntime } from "@/components/page-renderer/accepted-identities";
 
 type Props = { params: Promise<{ lang: string }> };
 
@@ -27,17 +26,18 @@ export async function generateMetadata({ params }: Props) {
 export default async function ContactPage({ params }: Props) {
   const { lang } = await params;
   const { siteId, locale } = await requirePublicFamilyPage({ lang, pathname: `/${lang}/contact` });
-  const [page, templateId, settings] = await Promise.all([
+  const [page, templateId] = await Promise.all([
     getPageBySlug({ siteId, locale, slugSegments: ["contact"] }),
     getTemplateIdForSite({ siteId, locale }),
-    getSiteSettings({ siteId, locale }).catch(() => null),
   ]);
   if (!page) notFound();
   const template = getTemplateModule(templateId);
-  const runtime = resolveLayoutRuntime({
-    layoutPackId: (settings as { layoutPackId?: unknown } | null)?.layoutPackId,
-    planId: (settings as { planId?: unknown } | null)?.planId,
-  });
+  let runtime;
+  try {
+    runtime = loadAcceptedLayoutRuntime();
+  } catch {
+    notFound();
+  }
   return (
     <template.PageRenderer
       page={page}

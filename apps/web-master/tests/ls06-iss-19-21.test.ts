@@ -15,10 +15,49 @@ import {
   assertStructurallyDistinctCompositions,
   resolveLayoutRuntime,
 } from "../src/components/page-renderer/layout-packs.ts";
+import {
+  bindAcceptedLayoutIdentities,
+  loadAcceptedLayoutRuntime,
+} from "../src/components/page-renderer/accepted-identities.ts";
 import { mapBlockToPayloadType } from "../src/components/page-renderer/semantic-map.ts";
+import {
+  IMPLEMENTATION_ROLLBACK_SCHEMA,
+  buildImplementationRendererConfiguration,
+  buildImplementationRollbackPlan,
+  readbackRendererConfiguration,
+  rendererConfigurationDigest,
+} from "../src/components/page-renderer/renderer-rollback.ts";
+import { evaluateIss1921RuntimeProof } from "../src/components/page-renderer/runtime-proof.ts";
 import { FOOTER_ZONES, resolveShell, resolvedSocialLinks } from "../src/components/shell/resolved-shell.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
+
+const acceptedLs04 = {
+  source: "injected" as const,
+  workingContentIdentity: "ls04:working-content:injected:v1",
+  promotionReceiptIdentity: "ls04:promotion-receipt:injected:v1",
+};
+
+const acceptedLs05 = {
+  source: "injected" as const,
+  adapterIdentity: "ls05:adapter:injected:v1",
+  materializationReceiptIdentity: "ls05:materialization:injected:v1",
+};
+
+const acceptedProvider = {
+  source: "injected" as const,
+  providerId: "master-template-type-1",
+  semver: "2.0.0-a1.1",
+  layoutPackId: "A1" as const,
+  candidateIdentity: "provider:injected:layout-A1",
+};
+
+const acceptedLayout = {
+  source: "injected" as const,
+  layoutPackId: "A1" as const,
+  planId: "B" as const,
+  shellId: "marketing-shell",
+};
 
 test("ISS-19 A1/A2/A3 PageRenderer compositions are structurally distinct", () => {
   assertStructurallyDistinctCompositions();
@@ -31,7 +70,60 @@ test("ISS-19 A1/A2/A3 PageRenderer compositions are structurally distinct", () =
   const a3 = resolveLayoutRuntime({ layoutPackId: "A3", planId: "C" });
   assert.notEqual(a1.composition.regions.join("|"), a2.composition.regions.join("|"));
   assert.notEqual(a2.composition.regions.join("|"), a3.composition.regions.join("|"));
-  assert.throws(() => resolveLayoutRuntime({ layoutPackId: "A9" }), /Unknown required layout pack/);
+  assert.throws(() => resolveLayoutRuntime({ layoutPackId: "A9", planId: "A" }), /Unknown required layout pack/);
+});
+
+test("ISS-19 binds layoutPackId/planId from accepted LS-04/LS-05 identities and fails closed when absent", () => {
+  const bound = bindAcceptedLayoutIdentities({
+    ls04: acceptedLs04,
+    ls05: acceptedLs05,
+    provider: acceptedProvider,
+    layout: acceptedLayout,
+  });
+  assert.equal(bound.ls05.layoutPackId, "A1");
+  assert.equal(bound.ls04.capabilityPlanId, "B");
+  assert.throws(() => resolveLayoutRuntime({ planId: "A" }), /LS-05 layoutPackId is absent/);
+  assert.throws(() => resolveLayoutRuntime({ layoutPackId: "A1" }), /LS-04 planId is absent/);
+  assert.throws(() => bindAcceptedLayoutIdentities({}), /LS-04 identity is absent/);
+  assert.throws(
+    () => bindAcceptedLayoutIdentities({ ls04: acceptedLs04, ls05: acceptedLs05 }),
+    /layoutPackId is absent/,
+  );
+  assert.throws(
+    () =>
+      bindAcceptedLayoutIdentities({
+        ls04: acceptedLs04,
+        ls05: acceptedLs05,
+        provider: { ...acceptedProvider, layoutPackId: "" },
+        layout: { ...acceptedLayout, layoutPackId: "", planId: "B" },
+      }),
+    /layoutPackId is absent/,
+  );
+  assert.throws(
+    () =>
+      loadAcceptedLayoutRuntime({
+        LINKSITES_LS04_IDENTITY_JSON: JSON.stringify(acceptedLs04),
+      }),
+    /accepted LS-04\/LS-05 identities are absent/,
+  );
+  const fromEnv = loadAcceptedLayoutRuntime({
+    LINKSITES_LS06_ACCEPTED_IDENTITIES_JSON: JSON.stringify({
+      ls04: acceptedLs04,
+      ls05: acceptedLs05,
+      provider: acceptedProvider,
+      layout: acceptedLayout,
+    }),
+  });
+  assert.equal(fromEnv.layoutPackId, "A1");
+  assert.equal(fromEnv.planId, "B");
+  const layout = readFileSync(resolve(root, "../src/app/(public)/[lang]/layout.tsx"), "utf8");
+  const packs = readFileSync(resolve(root, "../src/components/page-renderer/layout-packs.ts"), "utf8");
+  const settings = readFileSync(resolve(root, "../src/lib/repository/siteSettings.ts"), "utf8");
+  assert.doesNotMatch(layout, /getSiteSettings/);
+  assert.doesNotMatch(packs, /\? "A1"/);
+  assert.doesNotMatch(packs, /\? "A"/);
+  assert.doesNotMatch(settings, /layoutPackId/);
+  assert.doesNotMatch(settings, /planId/);
 });
 
 test("ISS-19 provider semantics fail closed for unknown required ids", () => {
@@ -68,6 +160,8 @@ test("ISS-20 resolved shell has no placeholders and isolates Type L", () => {
   assert.doesNotMatch(footer, /placeholder/i);
   assert.match(header, /data-shell-header/);
   assert.match(footer, /data-footer-zones/);
+  assert.doesNotMatch(header, /planId = "A"/);
+  assert.doesNotMatch(footer, /planId = "A"/);
 });
 
 test("ISS-21 family route/locale/redirect/collision/retirement rules", () => {
@@ -92,8 +186,33 @@ test("ISS-21 family route/locale/redirect/collision/retirement rules", () => {
   assert.deepEqual(tenant, { siteId: "site-1", locale: "en" });
 });
 
-test("packet surfaces do not advertise LS-06 acceptance in product code", () => {
-  const renderer = readFileSync(resolve(root, "../src/components/page-renderer.tsx"), "utf8");
-  assert.doesNotMatch(renderer, /LS-06 complete/);
-  assert.match(renderer, /data-page-renderer/);
+test("implementation renderer-configuration rollback digest readback is distinct from preparation rollback.json", () => {
+  const configuration = buildImplementationRendererConfiguration({
+    layoutPackId: "A1",
+    planId: "B",
+    locale: "en",
+  });
+  const current = rendererConfigurationDigest(configuration);
+  const previous = rendererConfigurationDigest(
+    buildImplementationRendererConfiguration({ layoutPackId: "A3", planId: "L", locale: "es" }),
+  );
+  const plan = buildImplementationRollbackPlan({ previousDigest: previous, configuration });
+  assert.equal(plan.schemaVersion, IMPLEMENTATION_ROLLBACK_SCHEMA);
+  assert.equal(plan.distinctFromPreparationRollback, true);
+  assert.notEqual(plan.schemaVersion, "ls06-rollback-plan/v1");
+  assert.equal(readbackRendererConfiguration(configuration, current), current);
+  assert.throws(() => readbackRendererConfiguration(configuration, previous), /readback mismatch/);
+  const rollbackSource = readFileSync(resolve(root, "../src/components/page-renderer/renderer-rollback.ts"), "utf8");
+  assert.match(rollbackSource, /ls06-implementation-rollback\/v1/);
+  assert.doesNotMatch(rollbackSource, /scripts\/profile-v2-quality\/ls06\/fixtures/);
+});
+
+test("ISS-19..21 runtime proof harness passes without claiming packet acceptance", () => {
+  const report = evaluateIss1921RuntimeProof();
+  assert.equal(report.status, "PASS");
+  assert.equal(report.preparationOnly, false);
+  assert.equal(report.runtimeProof, true);
+  assert.equal(report.ls06Complete, false);
+  assert.equal(report.packetAcceptanceClaimed, false);
+  assert.ok(report.checks.every((item) => item.status === "PASS"), JSON.stringify(report.checks, null, 2));
 });
