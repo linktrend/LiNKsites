@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0.0",
+  "packet": "LS-10",
+  "issue": "ISS-33",
+  "portion": "dependency-safe-engineering-config",
+  "githubIssue": 370,
+  "branch": "issue/370-ls-10-iss-33-evidence-rebind-for-successor-ident",
+  "checkpoint": {
+    "commit": "fccd012e405ceb3168b3635f975ee4fd9a5a560d",
+    "tree": "287bd48d7085e5a1064315f88e90186debb9316c"
+  },
+  "protectedDevelopment": {
+    "commit": "7542cb3b1fa1d76cec40f59a522514a86e083038",
+    "tree": "284814fd2296b2825d8c92f10d9f7dc78ae08e38"
+  },
+  "ownedPaths": [
+    "deploy/**",
+    "docs/evidence/profile-v2-cutover/config/**",
+    ".github/linktrend-secret-scan-fixtures.json"
+  ],
+  "prohibitedPaths": [
+    "packages/program-ledger/**",
+    "apps/program-orchestrator/**",
+    "execution/**",
+    "docs/releases/**",
+    "docs/evidence/profile-v2-release/**",
+    "provider-bytes"
+  ],
+  "surfaces": [
+    "cms",
+    "web-master",
+    "provider",
+    "hosting",
+    "database",
+    "queue",
+    "secrets",
+    "monitoring",
+    "deployment"
+  ],
+  "liveCanary": "external_fail_closed",
+  "liveMutation": false,
+  "deferred": [
+    "packages/program-ledger replacement/delegation (ISS-32/LS-FR-25)",
+    "apps/program-orchestrator and execution Harness composition",
+    "non-customer production/VPS live canary",
+    "provider catalogue bytes and Harness bytes"
+  ]
+}

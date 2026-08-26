@@ -1,0 +1,805 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "iss33-offline-config-rehearsal",
+  "liveMutation": false,
+  "liveCanary": "external_fail_closed",
+  "publicActivation": false,
+  "credentialsPersisted": false,
+  "protectedDevelopment": {
+    "commit": "7542cb3b1fa1d76cec40f59a522514a86e083038",
+    "tree": "284814fd2296b2825d8c92f10d9f7dc78ae08e38"
+  },
+  "surfaces": [
+    "cms",
+    "web-master",
+    "provider",
+    "hosting",
+    "database",
+    "queue",
+    "secrets",
+    "monitoring",
+    "deployment"
+  ],
+  "readbackBefore": {
+    "schemaVersion": "1.0.0",
+    "kind": "iss33-config-readback",
+    "liveMutation": false,
+    "liveCanary": "external_fail_closed",
+    "surfaces": {
+      "cms": {
+        "surface": "cms",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "57616fe6eb722d9023c3c174c95f2cfb2967d672b82f457cfcc2e442e9ec304b",
+        "entries": {
+          "LINKSITES_DEPLOYMENT_ENV": {
+            "present": true,
+            "secret": false,
+            "format": "literal:production",
+            "generation": "legacy",
+            "value": "<LINKSITES_DEPLOYMENT_ENV>"
+          },
+          "LINKSITES_CONFIG_SCHEMA_VERSION": {
+            "present": true,
+            "secret": false,
+            "format": "literal:1.1.0",
+            "generation": "legacy",
+            "value": "<LINKSITES_CONFIG_SCHEMA_VERSION>"
+          },
+          "LINKSITES_RELEASE_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKSITES_RELEASE_SHA>"
+          },
+          "LINKSITES_ORG_ID": {
+            "present": true,
+            "secret": false,
+            "format": "slug",
+            "generation": "legacy",
+            "value": "<LINKSITES_ORG_ID>"
+          },
+          "DATABASE_URI": {
+            "present": true,
+            "secret": true,
+            "format": "postgres-url",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "PAYLOAD_SECRET": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "PAYLOAD_PUBLIC_SERVER_URL": {
+            "present": true,
+            "secret": false,
+            "format": "https-url",
+            "generation": "legacy",
+            "value": "<PAYLOAD_PUBLIC_SERVER_URL>"
+          },
+          "LINKAUTOWORK_GATEWAY_URL": {
+            "present": true,
+            "secret": false,
+            "format": "https-url",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_GATEWAY_URL>"
+          },
+          "LINKAUTOWORK_SIGNING_SECRET": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "LINKAUTOWORK_SIGNING_KEY_ID": {
+            "present": true,
+            "secret": false,
+            "format": "slug",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_SIGNING_KEY_ID>"
+          },
+          "LINKAUTOWORK_ENVIRONMENT": {
+            "present": true,
+            "secret": false,
+            "format": "literal:production",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_ENVIRONMENT>"
+          },
+          "LINKAUTOWORK_OUTBOX_PATH": {
+            "present": true,
+            "secret": false,
+            "format": "absolute-path",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_OUTBOX_PATH>"
+          },
+          "LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "LINKAUTOWORK_EVENT_GRANTS": {
+            "present": true,
+            "secret": false,
+            "format": "nonempty-json-array",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_EVENT_GRANTS>"
+          }
+        }
+      },
+      "web-master": {
+        "surface": "web-master",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "6f5c744e2359b9d562aa9962a24e0aef9c1a9aaad3fd24633c31d2f28af01ad2",
+        "entries": {
+          "LINKSITES_DEPLOYMENT_ENV": {
+            "present": true,
+            "secret": false,
+            "format": "literal:production",
+            "generation": "legacy",
+            "value": "<LINKSITES_DEPLOYMENT_ENV>"
+          },
+          "LINKSITES_RELEASE_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKSITES_RELEASE_SHA>"
+          },
+          "NEXT_PUBLIC_CMS_PROVIDER": {
+            "present": true,
+            "secret": false,
+            "format": "literal:payload",
+            "generation": "legacy",
+            "value": "<NEXT_PUBLIC_CMS_PROVIDER>"
+          },
+          "PAYLOAD_BASE_URL": {
+            "present": true,
+            "secret": false,
+            "format": "https-url",
+            "generation": "legacy",
+            "value": "<PAYLOAD_BASE_URL>"
+          },
+          "PAYLOAD_PUBLIC_SERVER_URL": {
+            "present": true,
+            "secret": false,
+            "format": "https-url",
+            "generation": "legacy",
+            "value": "<PAYLOAD_PUBLIC_SERVER_URL>"
+          },
+          "NEXT_PUBLIC_PAYLOAD_API_URL": {
+            "present": true,
+            "secret": false,
+            "format": "https-url",
+            "generation": "legacy",
+            "value": "<NEXT_PUBLIC_PAYLOAD_API_URL>"
+          },
+          "PAYLOAD_API_KEY": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "PREVIEW_ACCESS_TOKEN": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH": {
+            "present": true,
+            "secret": false,
+            "format": "absolute-path",
+            "generation": "legacy",
+            "value": "<LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH>"
+          },
+          "LINKSITES_ADMITTED_TEMPLATE_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKSITES_ADMITTED_TEMPLATE_SHA>"
+          },
+          "LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON": {
+            "present": true,
+            "secret": false,
+            "format": "nonempty-json-object",
+            "generation": "legacy",
+            "value": "<LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON>"
+          },
+          "LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON": {
+            "present": true,
+            "secret": false,
+            "format": "nonempty-json-object",
+            "generation": "legacy",
+            "value": "<LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON>"
+          }
+        }
+      },
+      "provider": {
+        "surface": "provider",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "1c169634fd631d5097ab10fef90bb3b55c2532739c17984d1504bd3ecd5df350",
+        "entries": {
+          "LINKLIBRARIES_ARTIFACT_PATH": {
+            "present": true,
+            "secret": false,
+            "format": "absolute-path",
+            "generation": "legacy",
+            "value": "<LINKLIBRARIES_ARTIFACT_PATH>"
+          },
+          "LINKLIBRARIES_CATALOG_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKLIBRARIES_CATALOG_SHA>"
+          },
+          "LINKLIBRARIES_ENTRY_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKLIBRARIES_ENTRY_SHA>"
+          },
+          "LINKLIBRARIES_CATALOG_CONTENT_SHA256": {
+            "present": true,
+            "secret": false,
+            "format": "sha-256",
+            "generation": "legacy",
+            "value": "<LINKLIBRARIES_CATALOG_CONTENT_SHA256>"
+          },
+          "LINKLIBRARIES_ENTRY_CONTENT_SHA256": {
+            "present": true,
+            "secret": false,
+            "format": "sha-256",
+            "generation": "legacy",
+            "value": "<LINKLIBRARIES_ENTRY_CONTENT_SHA256>"
+          },
+          "LINKSITES_ADMITTED_TEMPLATE_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKSITES_ADMITTED_TEMPLATE_SHA>"
+          },
+          "PROVIDER_SELECTABILITY": {
+            "present": true,
+            "secret": false,
+            "format": "literal:non_selectable",
+            "generation": "legacy",
+            "value": "<PROVIDER_SELECTABILITY>"
+          },
+          "PROVIDER_LIVE_CATALOGUE_PROBE": {
+            "present": true,
+            "secret": false,
+            "format": "literal:hold_live_external",
+            "generation": "legacy",
+            "value": "<PROVIDER_LIVE_CATALOGUE_PROBE>"
+          }
+        }
+      },
+      "hosting": {
+        "surface": "hosting",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "ebf7fa7758acb43063b6ecdf15d40413c89c42ec3a539ec35bff5d74670f2894",
+        "entries": {
+          "TRAEFIK_NETWORK": {
+            "present": true,
+            "secret": false,
+            "format": "slug",
+            "generation": "legacy",
+            "value": "<TRAEFIK_NETWORK>"
+          },
+          "TRAEFIK_ENTRYPOINT": {
+            "present": true,
+            "secret": false,
+            "format": "slug",
+            "generation": "legacy",
+            "value": "<TRAEFIK_ENTRYPOINT>"
+          },
+          "TRAEFIK_CMS_HOST": {
+            "present": true,
+            "secret": false,
+            "format": "hostname",
+            "generation": "legacy",
+            "value": "<TRAEFIK_CMS_HOST>"
+          },
+          "TRAEFIK_PREVIEW_HOST": {
+            "present": true,
+            "secret": false,
+            "format": "hostname",
+            "generation": "legacy",
+            "value": "<TRAEFIK_PREVIEW_HOST>"
+          },
+          "TRAEFIK_CMS_PRIVATE_MIDDLEWARE": {
+            "present": true,
+            "secret": false,
+            "format": "slug",
+            "generation": "legacy",
+            "value": "<TRAEFIK_CMS_PRIVATE_MIDDLEWARE>"
+          },
+          "TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE": {
+            "present": true,
+            "secret": false,
+            "format": "slug",
+            "generation": "legacy",
+            "value": "<TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE>"
+          },
+          "HOSTING_LIVE_HOST": {
+            "present": true,
+            "secret": false,
+            "format": "literal:hold_live_external",
+            "generation": "legacy",
+            "value": "<HOSTING_LIVE_HOST>"
+          }
+        }
+      },
+      "database": {
+        "surface": "database",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "ee9473b328462d114d3aed2a491d8e98f41930ef608c023c5da0ea95e2ca33aa",
+        "entries": {
+          "DATABASE_URI": {
+            "present": true,
+            "secret": true,
+            "format": "postgres-url",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "W2_02_DATABASE_URI": {
+            "present": true,
+            "secret": true,
+            "format": "postgres-url",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "W2_02_DATABASE_ROLE": {
+            "present": true,
+            "secret": false,
+            "format": "slug",
+            "generation": "legacy",
+            "value": "<W2_02_DATABASE_ROLE>"
+          },
+          "LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA>"
+          },
+          "DATABASE_CREDENTIAL_DISTINCTNESS": {
+            "present": true,
+            "secret": false,
+            "format": "literal:cms-orchestrator-distinct",
+            "generation": "legacy",
+            "value": "<DATABASE_CREDENTIAL_DISTINCTNESS>"
+          }
+        }
+      },
+      "queue": {
+        "surface": "queue",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "4bfb3b2c70cf5ac056b7f5a0e29f785ae3dd65f5eb4dc4ce1c4a9f233724b2f6",
+        "entries": {
+          "LINKAUTOWORK_OUTBOX_PATH": {
+            "present": true,
+            "secret": false,
+            "format": "absolute-path",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_OUTBOX_PATH>"
+          },
+          "LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "LINKAUTOWORK_GATEWAY_URL": {
+            "present": true,
+            "secret": false,
+            "format": "https-url",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_GATEWAY_URL>"
+          },
+          "LINKAUTOWORK_SIGNING_KEY_ID": {
+            "present": true,
+            "secret": false,
+            "format": "slug",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_SIGNING_KEY_ID>"
+          },
+          "LINKAUTOWORK_ENVIRONMENT": {
+            "present": true,
+            "secret": false,
+            "format": "literal:production",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_ENVIRONMENT>"
+          },
+          "LINKAUTOWORK_EVENT_GRANTS": {
+            "present": true,
+            "secret": false,
+            "format": "nonempty-json-array",
+            "generation": "legacy",
+            "value": "<LINKAUTOWORK_EVENT_GRANTS>"
+          }
+        }
+      },
+      "secrets": {
+        "surface": "secrets",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "340be1b6ce2b35dd17eef09699817c60400b16a40b577ea74ab5e6bae4be32db",
+        "entries": {
+          "DATABASE_URI": {
+            "present": true,
+            "secret": true,
+            "format": "postgres-url",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "W2_02_DATABASE_URI": {
+            "present": true,
+            "secret": true,
+            "format": "postgres-url",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "PAYLOAD_SECRET": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "PAYLOAD_API_KEY": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "W2_02_PAYLOAD_API_KEY": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "PREVIEW_ACCESS_TOKEN": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "W2_02_PREVIEW_ACCESS_TOKEN": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "LINKAUTOWORK_SIGNING_SECRET": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "W2_05_OUTCOME_GATEWAY_SECRET": {
+            "present": true,
+            "secret": true,
+            "format": "secret-min-32",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "LINKSITES_RUNTIME_ENV_FILE": {
+            "present": true,
+            "secret": true,
+            "format": "absolute-path",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          }
+        }
+      },
+      "monitoring": {
+        "surface": "monitoring",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "fa3f5f85c1533a287fe78dd8edf75ed1dc58a38ad4a5d2aa59e724cc20ed2fed",
+        "entries": {
+          "MONITORING_METRICS_PATH": {
+            "present": true,
+            "secret": false,
+            "format": "literal:/metrics",
+            "generation": "legacy",
+            "value": "<MONITORING_METRICS_PATH>"
+          },
+          "MONITORING_ALERT_DEAD_LETTER_NONZERO": {
+            "present": true,
+            "secret": false,
+            "format": "literal:enabled",
+            "generation": "legacy",
+            "value": "<MONITORING_ALERT_DEAD_LETTER_NONZERO>"
+          },
+          "MONITORING_ALERT_RETRY_GROWTH_MINUTES": {
+            "present": true,
+            "secret": false,
+            "format": "literal:15",
+            "generation": "legacy",
+            "value": "<MONITORING_ALERT_RETRY_GROWTH_MINUTES>"
+          },
+          "MONITORING_ALERT_READINESS_NON_200_MINUTES": {
+            "present": true,
+            "secret": false,
+            "format": "literal:5",
+            "generation": "legacy",
+            "value": "<MONITORING_ALERT_READINESS_NON_200_MINUTES>"
+          },
+          "MONITORING_ALERT_BACKUP_CHECKSUM_FAILURE": {
+            "present": true,
+            "secret": false,
+            "format": "literal:enabled",
+            "generation": "legacy",
+            "value": "<MONITORING_ALERT_BACKUP_CHECKSUM_FAILURE>"
+          },
+          "MONITORING_LOG_REDACTION": {
+            "present": true,
+            "secret": false,
+            "format": "literal:structured-json-no-secrets",
+            "generation": "legacy",
+            "value": "<MONITORING_LOG_REDACTION>"
+          },
+          "MONITORING_LIVE_SCRAPE": {
+            "present": true,
+            "secret": false,
+            "format": "literal:hold_live_external",
+            "generation": "legacy",
+            "value": "<MONITORING_LIVE_SCRAPE>"
+          }
+        }
+      },
+      "deployment": {
+        "surface": "deployment",
+        "generation": "legacy",
+        "liveMutation": false,
+        "fingerprint": "42f9c72cda05c192418fbec6b425f92b4d70f965d0c9f1a814c40270b4e4e76c",
+        "entries": {
+          "LINKSITES_RUNTIME_ENV_FILE": {
+            "present": true,
+            "secret": true,
+            "format": "absolute-path",
+            "generation": "legacy",
+            "value": "[REDACTED]"
+          },
+          "LINKSITES_CMS_IMAGE": {
+            "present": true,
+            "secret": false,
+            "format": "immutable-image",
+            "generation": "legacy",
+            "value": "<LINKSITES_CMS_IMAGE>"
+          },
+          "LINKSITES_WEB_MASTER_IMAGE": {
+            "present": true,
+            "secret": false,
+            "format": "immutable-image",
+            "generation": "legacy",
+            "value": "<LINKSITES_WEB_MASTER_IMAGE>"
+          },
+          "LINKSITES_WORKER_IMAGE": {
+            "present": true,
+            "secret": false,
+            "format": "immutable-image",
+            "generation": "legacy",
+            "value": "<LINKSITES_WORKER_IMAGE>"
+          },
+          "LINKSITES_ORCHESTRATOR_IMAGE": {
+            "present": true,
+            "secret": false,
+            "format": "immutable-image",
+            "generation": "legacy",
+            "value": "<LINKSITES_ORCHESTRATOR_IMAGE>"
+          },
+          "LINKSITES_MIGRATIONS_IMAGE": {
+            "present": true,
+            "secret": false,
+            "format": "immutable-image",
+            "generation": "legacy",
+            "value": "<LINKSITES_MIGRATIONS_IMAGE>"
+          },
+          "LINKSITES_RELEASE_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKSITES_RELEASE_SHA>"
+          },
+          "LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA": {
+            "present": true,
+            "secret": false,
+            "format": "git-sha-1",
+            "generation": "legacy",
+            "value": "<LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA>"
+          },
+          "DEPLOYMENT_LIVE_CANARY": {
+            "present": true,
+            "secret": false,
+            "format": "literal:external_fail_closed",
+            "generation": "legacy",
+            "value": "<DEPLOYMENT_LIVE_CANARY>"
+          }
+        }
+      }
+    }
+  },
+  "plan": {
+    "schemaVersion": "1.0.0",
+    "kind": "iss33-migration-plan",
+    "liveMutation": false,
+    "steps": [
+      {
+        "surface": "cms",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "57616fe6eb722d9023c3c174c95f2cfb2967d672b82f457cfcc2e442e9ec304b",
+        "toFingerprint": "b0e56a8cb18c865cc206bf80ea64bf595d2bca77241ce6a9c383d4e96b1d82a9",
+        "liveMutation": false
+      },
+      {
+        "surface": "web-master",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "6f5c744e2359b9d562aa9962a24e0aef9c1a9aaad3fd24633c31d2f28af01ad2",
+        "toFingerprint": "051539da51884305c054e9bbc6d25a9767dc58c7c9bbb62c06e1000793cfdccb",
+        "liveMutation": false
+      },
+      {
+        "surface": "provider",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "1c169634fd631d5097ab10fef90bb3b55c2532739c17984d1504bd3ecd5df350",
+        "toFingerprint": "5e9eb42dcfb759251f0442342d0664dd4399759f6e3592cc67317768ede578c1",
+        "liveMutation": false
+      },
+      {
+        "surface": "hosting",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "ebf7fa7758acb43063b6ecdf15d40413c89c42ec3a539ec35bff5d74670f2894",
+        "toFingerprint": "c50e9aaec695bc12c80596bee99d59b8a6013689fa893edce036a47244e2b2b1",
+        "liveMutation": false
+      },
+      {
+        "surface": "database",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "ee9473b328462d114d3aed2a491d8e98f41930ef608c023c5da0ea95e2ca33aa",
+        "toFingerprint": "90ac9ec39048f2fea21ba994d08dc3cdca2818dd20af2fbbe57f5d9a369aa367",
+        "liveMutation": false
+      },
+      {
+        "surface": "queue",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "4bfb3b2c70cf5ac056b7f5a0e29f785ae3dd65f5eb4dc4ce1c4a9f233724b2f6",
+        "toFingerprint": "09be57a330cf68b958d8aa9f839bae7db96bc5afa2c9e524bd8d9c0cedfc8da7",
+        "liveMutation": false
+      },
+      {
+        "surface": "secrets",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "340be1b6ce2b35dd17eef09699817c60400b16a40b577ea74ab5e6bae4be32db",
+        "toFingerprint": "a35036a21fe62ad7ea6f10f45935a2a94b3c89e01fe25c328213d3dd0292659d",
+        "liveMutation": false
+      },
+      {
+        "surface": "monitoring",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "fa3f5f85c1533a287fe78dd8edf75ed1dc58a38ad4a5d2aa59e724cc20ed2fed",
+        "toFingerprint": "0a0d4e0ce475da1252b8bf409f7bf2b358e91aae5483b8d78c2d4d220876657d",
+        "liveMutation": false
+      },
+      {
+        "surface": "deployment",
+        "action": "copy-desired-onto-observed",
+        "fromGeneration": "legacy",
+        "toGeneration": "profile-v2",
+        "fromFingerprint": "42f9c72cda05c192418fbec6b425f92b4d70f965d0c9f1a814c40270b4e4e76c",
+        "toFingerprint": "5502e9b8b6d755c0f382df4358101de7c8bd87d3d2814d64be9afc298487a6b4",
+        "liveMutation": false
+      }
+    ]
+  },
+  "applied": "applied_isolated",
+  "migrated": {
+    "ok": true,
+    "expectedGeneration": "profile-v2",
+    "mismatches": [],
+    "liveMutation": false
+  },
+  "drift": {
+    "afterApply": {
+      "schemaVersion": "1.0.0",
+      "kind": "iss33-permanent-drift-check",
+      "liveMutation": false,
+      "ok": true,
+      "expectedGeneration": "profile-v2",
+      "driftedSurfaces": [],
+      "mismatches": []
+    },
+    "afterInjectedMismatch": {
+      "schemaVersion": "1.0.0",
+      "kind": "iss33-permanent-drift-check",
+      "liveMutation": false,
+      "ok": false,
+      "expectedGeneration": "profile-v2",
+      "driftedSurfaces": [
+        "hosting"
+      ],
+      "mismatches": [
+        {
+          "surface": "hosting",
+          "observedGeneration": "profile-v2",
+          "expectedGeneration": "profile-v2",
+          "observedFingerprint": "01fbf7b5bbf672851b45b8a83ba1b0eb94cf1509bf43a57d3db88fcfbb1100f2",
+          "expectedFingerprint": "c50e9aaec695bc12c80596bee99d59b8a6013689fa893edce036a47244e2b2b1"
+        }
+      ]
+    },
+    "afterRestore": {
+      "schemaVersion": "1.0.0",
+      "kind": "iss33-permanent-drift-check",
+      "liveMutation": false,
+      "ok": true,
+      "expectedGeneration": "profile-v2",
+      "driftedSurfaces": [],
+      "mismatches": []
+    }
+  },
+  "rollback": "rolled_back_isolated",
+  "afterRollback": {
+    "ok": true,
+    "expectedGeneration": "legacy",
+    "mismatches": [],
+    "liveMutation": false
+  },
+  "canary": {
+    "ok": true,
+    "status": "offline_rehearsal_only",
+    "result": "fail_closed_live_path_unused",
+    "liveMutation": false
+  },
+  "ok": true,
+  "status": "offline_rehearsal_passed"
+}
