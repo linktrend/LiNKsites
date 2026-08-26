@@ -1,9 +1,9 @@
 /**
  * Analytics Integration Module
- * 
+ *
  * Privacy-compliant analytics system with consent gating.
  * Supports multiple analytics providers with pluggable architecture.
- * 
+ *
  * Features:
  * - Google Analytics 4 (GA4)
  * - Facebook Pixel
@@ -14,6 +14,7 @@
  */
 
 import { ANALYTICS_CONFIG } from '@/config';
+import { activateSideEffect, resolveConfiguredHook } from '@/lib/forms/side-effect-policy';
 
 // ============================================================================
 // TYPES
@@ -55,11 +56,11 @@ const loadedProviders = new Set<AnalyticsProvider>();
  */
 export function getConsentPreferences(): ConsentPreferences | null {
   if (typeof window === 'undefined') return null;
-  
+
   try {
     const stored = localStorage.getItem(CONSENT_KEY);
     if (!stored) return null;
-    
+
     return JSON.parse(stored) as ConsentPreferences;
   } catch (error) {
     console.error('[Analytics] Failed to parse consent preferences:', error);
@@ -139,7 +140,7 @@ export function loadGoogleTagManager(): void {
     script.onerror = () => {
       console.error('[Analytics] Failed to load GTM script');
     };
-    
+
     document.head.appendChild(script);
   } catch (error) {
     console.error('[Analytics] Error initializing GTM:', error);
@@ -172,14 +173,14 @@ export function loadGoogleAnalytics(): void {
   try {
     // Initialize dataLayer
     window.dataLayer = window.dataLayer || [];
-    
+
     // Define gtag function
     window.gtag = function gtag() {
       if (window.dataLayer) {
         window.dataLayer.push(arguments);
       }
     };
-    
+
     // Configure GA4 with consent
     if (window.gtag) {
       window.gtag('js', new Date());
@@ -200,7 +201,7 @@ export function loadGoogleAnalytics(): void {
     script.onerror = () => {
       console.error('[Analytics] Failed to load GA4 script');
     };
-    
+
     document.head.appendChild(script);
   } catch (error) {
     console.error('[Analytics] Error initializing GA4:', error);
@@ -275,7 +276,7 @@ export function loadFacebookPixel(): void {
         ? window.fbq.callMethod.apply(window.fbq, arguments)
         : window.fbq.queue.push(arguments);
     };
-    
+
     if (!window._fbq) window._fbq = window.fbq;
     window.fbq.push = window.fbq;
     window.fbq.loaded = true;
@@ -295,7 +296,7 @@ export function loadFacebookPixel(): void {
     script.onerror = () => {
       console.error('[Analytics] Failed to load Facebook Pixel script');
     };
-    
+
     document.head.appendChild(script);
   } catch (error) {
     console.error('[Analytics] Error initializing Facebook Pixel:', error);
@@ -357,7 +358,7 @@ export function loadLinkedInInsight(): void {
     script.onerror = () => {
       console.error('[Analytics] Failed to load LinkedIn Insight script');
     };
-    
+
     document.head.appendChild(script);
   } catch (error) {
     console.error('[Analytics] Error initializing LinkedIn Insight:', error);
@@ -383,7 +384,7 @@ export function loadHotjar(): void {
 
   const siteId = ANALYTICS_CONFIG.hotjar.siteId;
   const version = ANALYTICS_CONFIG.hotjar.version;
-  
+
   if (!siteId) {
     console.warn('[Analytics] Hotjar site ID not configured');
     return;
@@ -407,7 +408,7 @@ export function loadHotjar(): void {
     script.onerror = () => {
       console.error('[Analytics] Failed to load Hotjar script');
     };
-    
+
     document.head.appendChild(script);
   } catch (error) {
     console.error('[Analytics] Error initializing Hotjar:', error);
@@ -424,7 +425,19 @@ export function loadHotjar(): void {
  */
 export function initializeAnalytics(): void {
   if (typeof window === 'undefined') return;
-  
+
+  const decision = activateSideEffect({
+    kind: "analytics",
+    endpoint: "consent-gated-providers",
+    configured: resolveConfiguredHook("analytics") || isAnalyticsConfigured(),
+    requiresConsent: true,
+    consentGranted: hasAnalyticsConsent() || hasMarketingConsent(),
+  });
+  if (!decision.ok) {
+    console.log('[Analytics] blocked:', decision.code);
+    return;
+  }
+
   // Prevent double initialization
   if ((window as any)[ANALYTICS_LOADED_KEY]) {
     console.log('[Analytics] Already initialized');
@@ -432,7 +445,7 @@ export function initializeAnalytics(): void {
   }
 
   console.log('[Analytics] Initializing analytics...');
-  
+
   // Check if we have any consent
   const preferences = getConsentPreferences();
   if (!preferences) {

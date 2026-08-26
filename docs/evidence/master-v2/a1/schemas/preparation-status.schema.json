@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/master-v2/a1/preparation-status.schema.json",
+  "title": "LS-08 master-v2 A1 preparation status",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "preparationOnly",
+    "packetCompletion",
+    "pairedProofRun",
+    "ls07Checkpoint",
+    "providerA1"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls08-a1-preparation-status" },
+    "packetId": { "const": "LS-08" },
+    "githubIssue": { "const": 334 },
+    "preparationOnly": { "const": true },
+    "packetCompletion": { "const": false },
+    "packetComplete": { "const": false },
+    "pairedProofRun": { "const": false },
+    "consumerProofPresent": { "const": false },
+    "a1BytesPresent": { "const": false },
+    "freezeAcceptedA1": { "const": false },
+    "ls07Checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["present", "protectedIntegrated"],
+      "properties": {
+        "present": { "const": false },
+        "protectedIntegrated": { "const": false }
+      }
+    },
+    "providerA1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bound", "bytesPresent"],
+      "properties": {
+        "bound": { "const": false },
+        "bytesPresent": { "const": false }
+      }
+    }
+  }
+}

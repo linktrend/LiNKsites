@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/master-v2/a1/consumer-receipt.schema.json",
+  "title": "LS-08 ISS-27 consumer receipt (preparation hold only)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "packetCompletion",
+    "freezeAcceptedA1",
+    "overallVerdict",
+    "emitted",
+    "verdicts"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls08-consumer-receipt" },
+    "packetId": { "const": "LS-08" },
+    "githubIssue": { "type": "integer" },
+    "issues": {
+      "type": "array",
+      "items": { "enum": ["ISS-25", "ISS-26", "ISS-27"] }
+    },
+    "evidenceClass": { "enum": ["preparation-fixture", "schema-fixture"] },
+    "packetCompletion": { "const": false },
+    "freezeAcceptedA1": { "const": false },
+    "overallVerdict": { "enum": ["NOT_EMITTED", "HOLD"] },
+    "overallReason": { "type": "string" },
+    "emitted": { "const": false },
+    "verdicts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_materialized",
+        "adapter_compatible",
+        "payload_projection_valid",
+        "server_render_valid",
+        "browser_fixture_valid",
+        "migration_rollback_valid",
+        "tamper_rejected",
+        "cache_restart_valid"
+      ],
+      "properties": {
+        "candidate_materialized": { "enum": ["NOT_RUN", "HOLD"] },
+        "adapter_compatible": { "enum": ["NOT_RUN", "HOLD"] },
+        "payload_projection_valid": { "enum": ["NOT_RUN", "HOLD"] },
+        "server_render_valid": { "enum": ["NOT_RUN", "HOLD"] },
+        "browser_fixture_valid": { "enum": ["NOT_RUN", "HOLD"] },
+        "migration_rollback_valid": { "enum": ["NOT_RUN", "HOLD"] },
+        "tamper_rejected": { "enum": ["NOT_RUN", "HOLD"] },
+        "cache_restart_valid": { "enum": ["NOT_RUN", "HOLD"] }
+      }
+    },
+    "pendingDependencies": { "type": "array" },
+    "checkId": { "type": "string" }
+  }
+}
