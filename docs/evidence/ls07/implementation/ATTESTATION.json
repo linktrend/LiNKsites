@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls07-implementation-evidence",
+  "packet": "LS-07",
+  "issues": ["ISS-22", "ISS-23", "ISS-24"],
+  "githubIssue": 333,
+  "branch": "issue/333-ls-07-ssr-discoverability-accessibility-and-side",
+  "legalCertificationClaimed": false,
+  "performanceSource": "lab",
+  "ownedPaths": [
+    "apps/web-master/src/lib/seo/ssr-metadata.ts",
+    "apps/web-master/src/lib/forms/newsletter-policy.ts",
+    "apps/web-master/src/lib/forms/**",
+    "apps/web-master/src/app/sitemap.ts",
+    "apps/web-master/src/app/robots.ts",
+    "apps/web-master/src/app/llms.txt/**",
+    "apps/web-master/src/app/api/newsletter/**",
+    "apps/web-master/src/app/api/booking/**",
+    "apps/web-master/src/app/api/ecommerce/**",
+    "apps/web-master/tests/ls07-iss-22-24.test.ts",
+    "scripts/profile-v2-quality/ls07/**",
+    "docs/evidence/ls07/implementation/**"
+  ],
+  "validation": {
+    "qualityHarness": { "command": "node --test scripts/profile-v2-quality/ls07/tests/test_ls07_quality_harness.mjs", "passed": 15 },
+    "iss2224": { "command": "npx tsx --test tests/ls07-iss-22-24.test.ts", "passed": 11 },
+    "ls06Regression": { "command": "npx tsx --test tests/ls06-iss-19-21.test.ts", "passed": 8 }
+  }
+}
