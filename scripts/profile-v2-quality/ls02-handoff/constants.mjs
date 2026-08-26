@@ -2,8 +2,8 @@ export const ISSUE = 300
 export const PACKET = 'LS-02'
 export const REPOSITORY = 'linktrend/LiNKsites'
 export const CANDIDATE_PARENT = Object.freeze({
-  commit: '2ba3bd70244061985a3896e748fb75e92dfb6c69',
-  tree: '606fcb986b8eb9af476aea369d94990357ff9681',
+  commit: 'fd36e3084ddbd26356e3c12883c8754003d671ce',
+  tree: 'b0772be140486124362ee9bba4eb7d4447ecd227',
 })
 export const OWNED_PATHS = Object.freeze([
   'docs/evidence/ls02/handoff-successor/**',
