@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls09-consumer-receipt",
+  "packetId": "LS-09",
+  "githubIssue": 353,
+  "issues": [
+    "ISS-28",
+    "ISS-29",
+    "ISS-30"
+  ],
+  "evidenceClass": "paired-proof",
+  "packetCompletion": true,
+  "freezeAcceptedA1": true,
+  "overallVerdict": "ALL_LAYOUT_ADAPTER_BROWSER_VERDICTS",
+  "overallReason": "ISS-28/29/30 A2/A3 additive mappings and paired fixtures passed on protected development. A1 semantics remain frozen. Final provider 2.0.0 identities are bound. Production selection remains gated. Provider bytes, VPS/live proof, and MWT outputs are not claimed.",
+  "emitted": true,
+  "admitted": false,
+  "providerSelectable": false,
+  "productionSelectable": false,
+  "productionSelectionGated": true,
+  "providerConformanceClaimed": false,
+  "vpsProofClaimed": false,
+  "liveProofClaimed": false,
+  "mwtOutputClaimed": false,
+  "providerBytesPresent": false,
+  "bindings": {
+    "providerPin": {
+      "repository": "linktrend/LiNKlibraries",
+      "ref": "main",
+      "commit": "9764638f0a17eeb65be8dd5880ed241a8d3b3fa3",
+      "tree": "57600ebd7362f107c421c61026ab0bf4c9b1c51c",
+      "releaseEntryVersion": "master-template-type-1@2.0.0",
+      "artifactTree": "b599c0f0ee6bc2aad3484aa42ef1fd9e86a05758",
+      "releaseManifestSha256": "f1ba6261aefd628672a4bae3333fc07827f82df1a39083e1c20ae881c2cc9916",
+      "inventorySha256": "9d94ab2d18d1c77b1a709739c38ad8ca95f1d0ef571092dd2c710573ab31cb20",
+      "payloadSha256": "fc6ed2e8748960c6cd53ac69e678a1fca8bd572105ea747941ceb9e2225c4489",
+      "releaseReceiptSha256": "f0a9ec65459e79edee1ca3867ca929dbd649c0ed261ca003be9d73fda1b1c42b",
+      "a2LayoutSha256": "4bf209397a048f9177b082d7141a1efe453f3b9456e27c54beb2a02478ad0c3e",
+      "a3LayoutSha256": "6c59252601be7e199615c63e2929f40a818cca282981d365f71abb191df71c88"
+    },
+    "postA1Amendment": {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "e71598781266199cd4fde0c14e6501102a3147a2",
+      "tree": "076bc0bebdce20af6bb92e7a608eae7e2d93492e",
+      "bytesEmbedded": false
+    },
+    "providerHandoff": {
+      "path": "/Users/linktrend/Projects/LiNKlibraries/.git/execution-evidence/mwt-ls09-provider-handoff-20260826.json",
+      "sha256": "0b5ffe70f47fea9cec24cf0dc86ef33720bed2edad350623b2e418cc8da5a0a6",
+      "bytesEmbedded": false
+    },
+    "consumerProtected": {
+      "repository": "linktrend/LiNKsites",
+      "ref": "development",
+      "commit": "fd36e3084ddbd26356e3c12883c8754003d671ce",
+      "tree": "b0772be140486124362ee9bba4eb7d4447ecd227"
+    }
+  },
+  "verdicts": {
+    "candidate_materialized": "PASS",
+    "adapter_compatible": "PASS",
+    "payload_projection_valid": "PASS",
+    "server_render_valid": "PASS",
+    "browser_fixture_valid": "PASS",
+    "migration_rollback_valid": "PASS",
+    "tamper_rejected": "PASS",
+    "cache_restart_valid": "PASS"
+  },
+  "allLayoutVerdicts": {
+    "a1_adapter_compatible": "PASS",
+    "a1_browser_fixture_valid": "PASS",
+    "a2_adapter_compatible": "PASS",
+    "a2_browser_fixture_valid": "PASS",
+    "a3_adapter_compatible": "PASS",
+    "a3_browser_fixture_valid": "PASS"
+  },
+  "satisfiedDependencies": [
+    {
+      "id": "ls08-protected-integration",
+      "required": true,
+      "satisfied": true
+    },
+    {
+      "id": "exact-provider-final-2.0.0-binding",
+      "required": true,
+      "satisfied": true
+    },
+    {
+      "id": "post-a1-amendment-ancestor",
+      "required": true,
+      "satisfied": true
+    },
+    {
+      "id": "mwt-ls09-provider-handoff",
+      "required": true,
+      "satisfied": true
+    }
+  ],
+  "checkId": "iss30.all_layout_adapter_browser_verdicts"
+}
