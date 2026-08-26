@@ -186,6 +186,49 @@ test("ISS-21 family route/locale/redirect/collision/retirement rules", () => {
   assert.deepEqual(tenant, { siteId: "site-1", locale: "en" });
 });
 
+test("ISS-21 path-level docs and FAQ article family authority", () => {
+  assert.equal(resolveFamilyRoute("/en/resources/faq").kind, "ok");
+  assert.equal(resolveFamilyRoute("/en/resources/faq/billing").kind, "ok");
+  const docsEn = resolveFamilyRoute("/en/resources/docs");
+  assert.equal(docsEn.kind, "redirect");
+  if (docsEn.kind === "redirect") {
+    assert.equal(docsEn.to, "/en/resources");
+    assert.equal(docsEn.locale, "en");
+  }
+  const docsNested = resolveFamilyRoute("/es/resources/docs/guide");
+  assert.equal(docsNested.kind, "redirect");
+  if (docsNested.kind === "redirect") {
+    assert.equal(docsNested.to, "/es/resources");
+    assert.equal(docsNested.locale, "es");
+  }
+  const faqArticle = resolveFamilyRoute("/en/resources/faq/billing/why-invoice");
+  assert.equal(faqArticle.kind, "redirect");
+  if (faqArticle.kind === "redirect") {
+    assert.equal(faqArticle.to, "/en/resources/faq/billing");
+    assert.equal(faqArticle.locale, "en");
+  }
+  const faqArticleZh = resolveFamilyRoute("/zh-tw/resources/faq/payments/receipt");
+  assert.equal(faqArticleZh.kind, "redirect");
+  if (faqArticleZh.kind === "redirect") {
+    assert.equal(faqArticleZh.to, "/zh-tw/resources/faq/payments");
+    assert.equal(faqArticleZh.locale, "zh-tw");
+  }
+  assert.equal(resolveFamilyRoute("/en/resources/faq/billing/why-invoice/extra").kind, "collision");
+  const pageService = readFileSync(resolve(root, "../src/lib/pageService.ts"), "utf8");
+  const docsPage = readFileSync(resolve(root, "../src/app/(public)/[lang]/resources/docs/page.tsx"), "utf8");
+  const faqIndex = readFileSync(resolve(root, "../src/app/(public)/[lang]/resources/faq/page.tsx"), "utf8");
+  const faqCategory = readFileSync(
+    resolve(root, "../src/app/(public)/[lang]/resources/faq/[categorySlug]/page.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(pageService, /getDocsPage/);
+  assert.doesNotMatch(docsPage, /getDocsPage/);
+  assert.match(faqIndex, /tenantSafeWhere/);
+  assert.match(faqCategory, /tenantSafeWhere/);
+  assert.match(faqIndex, /page\.data\.faqs\.length === 0/);
+  assert.match(faqCategory, /faqs\.length === 0/);
+});
+
 test("implementation renderer-configuration rollback digest readback is distinct from preparation rollback.json", () => {
   const configuration = buildImplementationRendererConfiguration({
     layoutPackId: "A1",

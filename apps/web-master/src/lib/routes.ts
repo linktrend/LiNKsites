@@ -340,8 +340,11 @@ export const RESERVED_PUBLIC_SLUGS = Object.freeze([
   "_next",
 ]);
 
+export type RetirementMatch = "exact" | "prefix" | "glob";
+
 export type RetirementRule = Readonly<{
   from: string;
+  match?: RetirementMatch;
   redirectTo?: string;
   reason: "explicit-retirement-only";
 }>;
@@ -350,6 +353,8 @@ export type RetirementRule = Readonly<{
 export const EXPLICIT_RETIREMENTS: readonly RetirementRule[] = Object.freeze([
   { from: "home", redirectTo: "", reason: "explicit-retirement-only" },
   { from: "index", reason: "explicit-retirement-only" },
+  { from: "resources/docs", match: "prefix", redirectTo: "resources", reason: "explicit-retirement-only" },
+  { from: "resources/faq/*/*", match: "glob", redirectTo: "resources/faq/*", reason: "explicit-retirement-only" },
 ]);
 
 export class FamilyRouteError extends Error {
@@ -409,6 +414,47 @@ const COLLECTION_ROOTS = new Set(["offers", "resources", "legal"]);
 const RESOURCE_COLLECTIONS = new Set(["articles", "cases", "videos", "faq", "docs"]);
 const LEGAL_DETAILS = new Set(["privacy-policy", "terms-of-use", "cookie-policy"]);
 
+function pathSegments(value: string): string[] {
+  return value.split("/").filter(Boolean);
+}
+
+function matchesRetirement(rule: RetirementRule, rest: string[]): boolean {
+  const mode: RetirementMatch = rule.match ?? "exact";
+  const fromParts = pathSegments(rule.from);
+  switch (mode) {
+    case "exact":
+      return rule.from === rest.join("/");
+    case "prefix":
+      return rest.length >= fromParts.length && fromParts.every((part, index) => rest[index] === part);
+    case "glob":
+      return fromParts.length === rest.length && fromParts.every((part, index) => part === "*" || part === rest[index]);
+    default: {
+      const exhaustive: never = mode;
+      throw new FamilyRouteError(`Unknown retirement match "${String(exhaustive)}"`);
+    }
+  }
+}
+
+function fillRetirementTarget(rule: RetirementRule, rest: string[]): string {
+  const target = rule.redirectTo ?? "";
+  if (!target.includes("*")) return target;
+  const fromParts = pathSegments(rule.from);
+  const captured = fromParts.flatMap((part, index) => (part === "*" ? [rest[index] ?? ""] : []));
+  let filled = target;
+  for (const value of captured) {
+    filled = filled.replace("*", value);
+  }
+  return filled;
+}
+
+function retirementFamily(target: string): FamilyId {
+  if (!target || target === "home") return "home";
+  if (target === "about") return "about";
+  if (target === "contact") return "contact";
+  if (target === "legal" || target.startsWith("legal/")) return target.split("/").length === 2 ? "legal" : "collection";
+  return "collection";
+}
+
 export function resolveFamilyRoute(pathname: string): FamilyRouteDecision {
   const normalized = normalizePath(pathname);
   const parsed = parseLocalePrefix(normalized);
@@ -422,11 +468,12 @@ export function resolveFamilyRoute(pathname: string): FamilyRouteDecision {
     return { kind: "collision", reason: "reserved-slug" };
   }
 
-  const retirement = EXPLICIT_RETIREMENTS.find((rule) => rule.from === rest.join("/"));
+  const retirement = EXPLICIT_RETIREMENTS.find((rule) => matchesRetirement(rule, rest));
   if (retirement) {
     if (typeof retirement.redirectTo === "string") {
-      const to = retirement.redirectTo ? `/${locale}/${retirement.redirectTo}` : `/${locale}`;
-      return { kind: "redirect", to, family: "home", locale };
+      const filled = fillRetirementTarget(retirement, rest);
+      const to = filled ? `/${locale}/${filled}` : `/${locale}`;
+      return { kind: "redirect", to, family: retirementFamily(filled), locale };
     }
     return { kind: "not_found", reason: "explicit-retirement-only" };
   }
@@ -461,6 +508,9 @@ export function resolveFamilyRoute(pathname: string): FamilyRouteDecision {
 
   if (rest[0] === "resources") {
     if (rest.length === 1) return { kind: "ok", family: "collection", locale, pathname: routes.resources(locale) };
+    if (rest[1] === "faq" && rest.length > 4) {
+      return { kind: "collision", reason: "faq-article-depth" };
+    }
     if (rest.length === 2 && RESOURCE_COLLECTIONS.has(rest[1])) {
       return { kind: "ok", family: "collection", locale, pathname: buildRoute(locale, `/resources/${rest[1]}`) };
     }

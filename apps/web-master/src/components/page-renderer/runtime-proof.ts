@@ -215,6 +215,33 @@ export function evaluateIss1921RuntimeProof(rootDir = resolve(dirname(fileURLToP
     ),
   );
 
+  const docsEn = resolveFamilyRoute("/en/resources/docs");
+  const docsEs = resolveFamilyRoute("/es/resources/docs/intro");
+  const faqArticle = resolveFamilyRoute("/en/resources/faq/billing/why-invoice");
+  const faqCategory = resolveFamilyRoute("/en/resources/faq/billing");
+  const docsPage = readFileSync(resolve(rootDir, "src/app/(public)/[lang]/resources/docs/page.tsx"), "utf8");
+  const pageService = readFileSync(resolve(rootDir, "src/lib/pageService.ts"), "utf8");
+  const docsFaqOk =
+    docsEn.kind === "redirect" &&
+    docsEn.to === "/en/resources" &&
+    docsEs.kind === "redirect" &&
+    docsEs.to === "/es/resources" &&
+    faqArticle.kind === "redirect" &&
+    faqArticle.to === "/en/resources/faq/billing" &&
+    faqCategory.kind === "ok" &&
+    resolveFamilyRoute("/zh-tw/resources/faq/a/b").kind === "redirect" &&
+    resolveFamilyRoute("/en/resources/faq/a/b/c").kind === "collision" &&
+    !pageService.includes("getDocsPage") &&
+    !docsPage.includes("getDocsPage");
+  checks.push(
+    check(
+      "iss21.docs_faq_paths",
+      docsFaqOk,
+      "unimplemented docs and FAQ article paths retire or locale-safe redirect",
+      "docs/FAQ article family authority does not match pages",
+    ),
+  );
+
   checks.push(
     safe("iss21.rollback_readback", () => {
       const configuration = buildImplementationRendererConfiguration({

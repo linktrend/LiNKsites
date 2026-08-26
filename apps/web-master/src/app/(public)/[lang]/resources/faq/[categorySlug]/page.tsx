@@ -3,6 +3,7 @@ import { CmsFaqList } from "@/components/resources/CmsFaqList";
 import { buildMetadata } from "@/lib/seo";
 import { listFaq } from "@/lib/repository/faq";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
+import { tenantSafeWhere } from "@/lib/routes";
 
 type Props = { params: Promise<{ lang: string; categorySlug: string }> };
 
@@ -25,7 +26,8 @@ export default async function FaqCategoryPage({ params }: Props) {
     lang,
     pathname: `/${lang}/resources/faq/${categorySlug}`,
   });
-  const faqs = (await listFaq({ siteId, locale })).filter((faq) => faq.slug === categorySlug);
+  const tenant = tenantSafeWhere(siteId, locale);
+  const faqs = (await listFaq(tenant)).filter((faq) => faq.slug === categorySlug);
   if (faqs.length === 0) return notFound();
   return <CmsFaqList faqs={faqs} />;
 }
