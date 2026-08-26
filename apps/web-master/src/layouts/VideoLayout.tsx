@@ -16,9 +16,9 @@ export function VideoLayout({ lang, page }: Props) {
       ? (video as any).reviewedBy
       : (video as any).reviewedBy?.name;
   const schema = buildVideoJsonLd({
-    title: video.title || "Video",
+    title: video.title || "",
     description: video.description || "",
-    url: `https://www.youtube.com/embed/${video.youtubeId ?? ""}`,
+    url: video.youtubeId ? `https://www.youtube.com/embed/${video.youtubeId}` : "",
     thumbnailUrl: thumb,
     reviewedBy,
     verificationDate: (video as any).reviewedAt ?? undefined,

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls07-accessibility-matrix",
+  "target": "WCAG 2.2 AA",
+  "legalCertificationClaimed": false,
+  "rows": [
+    { "id": "a11y.lang", "mode": "automated", "criterion": "document language" },
+    { "id": "a11y.main", "mode": "automated", "criterion": "main landmark" },
+    { "id": "a11y.h1", "mode": "automated", "criterion": "exactly one h1" },
+    { "id": "a11y.alt", "mode": "automated", "criterion": "img alt" },
+    { "id": "a11y.keyboard", "mode": "manual", "criterion": "keyboard and focus", "proof": "lab/manual" },
+    { "id": "a11y.contrast", "mode": "manual", "criterion": "contrast", "proof": "lab/manual" },
+    { "id": "a11y.legal", "mode": "legal", "criterion": "WCAG certification", "proof": "not-claimed" }
+  ]
+}

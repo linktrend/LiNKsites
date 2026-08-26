@@ -1,0 +1,5 @@
+node --test tests/master-template-v2/a1/harness.test.mjs
+# 12 passed, 0 failed (2026-08-26)
+
+node tests/master-template-v2/a1/scripts/validate.mjs --evidence docs/evidence/master-v2/a1
+# LS-08 ISS-25..27 preparation: PREPARATION_OK packetCompletion=false overallVerdict=NOT_EMITTED

@@ -8,6 +8,7 @@ import { getPreviewSiteIdFromRequest } from "@/lib/site-context";
 import { normalizeLocale } from "@/lib/locale-context";
 import { getTemplateIdForSite } from "@/lib/template-context";
 import { getTemplateModule } from "@/templates/registry";
+import { loadPrivatePreviewLayoutRuntime } from "@/lib/private-preview-layout";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -42,8 +43,14 @@ export default async function PrivateDemoPage({ params }: Props) {
     getTemplateIdForSite({ siteId, locale }),
   ]);
   if (!page) notFound();
-
   const template = getTemplateModule(templateId);
+  let runtime;
+  try {
+    runtime = loadPrivatePreviewLayoutRuntime();
+  } catch {
+    notFound();
+  }
+
   return (
     <div data-private-preview="true" data-cms-revision={page.revision ?? "unknown"}>
       <template.PageRenderer
@@ -52,6 +59,8 @@ export default async function PrivateDemoPage({ params }: Props) {
         footerNav={footerNav}
         siteKey={siteId}
         locale={locale}
+        layoutPackId={runtime.layoutPackId}
+        planId={runtime.planId}
       />
     </div>
   );

@@ -31,7 +31,7 @@ export async function submitForm(
     },
   };
 
-  const response = await fetch(endpoint, {
+    const response = await fetch(endpoint, {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -39,9 +39,14 @@ export async function submitForm(
     body: JSON.stringify(payload),
   });
 
-  const result: FormSubmissionResponse = await response.json();
+  let result: FormSubmissionResponse;
+  try {
+    result = (await response.json()) as FormSubmissionResponse;
+  } catch {
+    throw new Error("The server returned an unreadable response");
+  }
 
-  if (!response.ok) {
+  if (!response.ok || result.success !== true) {
     throw new Error(result.error || result.message || "Failed to submit form");
   }
 

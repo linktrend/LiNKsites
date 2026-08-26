@@ -1,4 +1,4 @@
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
 import { notFound } from "next/navigation";
 import { getPageBySlug } from "@/lib/repository/pages";
 import { getTemplateIdForSite } from "@/lib/template-context";

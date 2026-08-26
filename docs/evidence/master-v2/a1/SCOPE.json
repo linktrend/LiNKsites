@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-a1-preparation-scope",
+  "packetId": "LS-08",
+  "githubIssue": 334,
+  "issues": ["ISS-25", "ISS-26", "ISS-27"],
+  "preparationOnly": true,
+  "packetComplete": false,
+  "ownedPaths": [
+    "tests/master-template-v2/a1/**",
+    "docs/evidence/master-v2/a1/**"
+  ],
+  "prohibitedPaths": [
+    "apps/**",
+    "packages/**",
+    "supabase/migrations/**",
+    "provider-bytes"
+  ],
+  "independentOf": [
+    "LS-07-protected-checkpoint",
+    "exact-provider-a1-bytes"
+  ]
+}
