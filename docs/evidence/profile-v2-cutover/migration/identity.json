@@ -4,11 +4,11 @@
   "issue": "ISS-31",
   "repository": "linktrend/LiNKsites",
   "protectedDevelopment": {
-    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
-    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+    "commit": "7542cb3b1fa1d76cec40f59a522514a86e083038",
+    "tree": "284814fd2296b2825d8c92f10d9f7dc78ae08e38"
   },
-  "workBranch": "issue/360-ls-10-iss-31-dependency-safe-existing-site-migra",
-  "githubIssue": 360,
+  "workBranch": "issue/368-ls-10-iss-31-evidence-rebind-for-successor-ident",
+  "githubIssue": 368,
   "ls10Acceptance": "HOLD",
   "h09ConsumerConformanceAccepted": false
 }

@@ -1,7 +1,7 @@
 # LS-10 ISS-31 migration evidence
 
-Issue: GitHub `#360`
-Branch: `issue/360-ls-10-iss-31-dependency-safe-existing-site-migra`
+Issue: GitHub `#368`
+Branch: `issue/368-ls-10-iss-31-evidence-rebind-for-successor-ident`
 Packet: `LS-10` / `ISS-31`
 
 This issue owns copied existing-site migration engineering in
@@ -11,8 +11,8 @@ Harness or provider bytes, and does **not** accept LS-10.
 
 ## Protected development base
 
-- Commit `02ebf5d8710c50c1f2c390989239f0baf916ba97`
-- Tree `fb427d30ea7c3e7060fc9cc1a63a1110266dd755`
+- Commit `7542cb3b1fa1d76cec40f59a522514a86e083038`
+- Tree `284814fd2296b2825d8c92f10d9f7dc78ae08e38`
 
 ## Scope
 
