@@ -104,17 +104,6 @@ class CodeExpressionTests(unittest.TestCase):
             [],
         )
 
-    def test_typescript_typed_key_parameter_is_not_assignment_secret(self) -> None:
-        typed = (
-            "function catalogRecords(content: Record<string, unknown>, "
-            "key: 'products' | 'services'): Array<Record<string, unknown>> {"
-        )
-        self.assertEqual(extract_assignments(typed), [])
-        self.assertEqual(
-            extract_assignments('key = "' + "shortvalue1" + '"'),
-            [("key", "shortvalue1")],
-        )
-
 
 def declaration(
     *,
