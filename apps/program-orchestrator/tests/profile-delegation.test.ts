@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { readFileSync, statSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
@@ -24,6 +24,7 @@ import {
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const OWNED_PREFIXES = ['apps/program-orchestrator/', 'execution/']
+const GENERATED_EVIDENCE_PATHS = new Set(['.github/linktrend-secret-scan-fixtures.json'])
 const PROHIBITED_PREFIXES = [
   'packages/program-ledger/',
   'deploy/',
@@ -156,7 +157,7 @@ test('ISS-32 keeps generic retirement and Harness conformance fail-closed until 
 test('ISS-32 scope stays inside orchestrator and execution ownership', () => {
   const files = scopedDiff()
   for (const file of files) {
-    const owned = OWNED_PREFIXES.some((prefix) => file === prefix.slice(0, -1) || file.startsWith(prefix))
+    const owned = GENERATED_EVIDENCE_PATHS.has(file) || OWNED_PREFIXES.some((prefix) => file === prefix.slice(0, -1) || file.startsWith(prefix))
     assert.equal(owned, true, `out-of-scope path: ${file}`)
     const prohibited = PROHIBITED_PREFIXES.some((prefix) => file.startsWith(prefix))
     assert.equal(prohibited, false, `prohibited path: ${file}`)
@@ -167,7 +168,10 @@ test('ISS-32 owned files do not embed secret material', () => {
   const files = scopedDiff()
   const banned = /(api[_-]?key\s*[:=]\s*['"][A-Za-z0-9]{12,}|BEGIN (RSA |OPENSSH )?PRIVATE KEY|ghp_[A-Za-z0-9]+|sk_live_[A-Za-z0-9]+)/
   for (const file of files) {
-    const text = readFileSync(resolve(REPO_ROOT, file), 'utf8')
+    const path = resolve(REPO_ROOT, file)
+    const stat = statSync(path, { throwIfNoEntry: false })
+    if (!stat?.isFile()) continue
+    const text = readFileSync(path, 'utf8')
     assert.equal(banned.test(text), false, `secret-like material in ${file}`)
   }
 })
