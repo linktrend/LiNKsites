@@ -1,9 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://linktrend.local/linksites/master-v2/a1/consumer-receipt.schema.json",
-  "title": "LS-08 ISS-27 consumer receipt (preparation hold only)",
+  "title": "LS-08 ISS-27 consumer receipt",
   "type": "object",
-  "additionalProperties": true,
   "required": [
     "schemaVersion",
     "kind",
@@ -18,17 +17,15 @@
     "schemaVersion": { "const": 1 },
     "kind": { "const": "ls08-consumer-receipt" },
     "packetId": { "const": "LS-08" },
-    "githubIssue": { "type": "integer" },
-    "issues": {
-      "type": "array",
-      "items": { "enum": ["ISS-25", "ISS-26", "ISS-27"] }
-    },
-    "evidenceClass": { "enum": ["preparation-fixture", "schema-fixture"] },
-    "packetCompletion": { "const": false },
-    "freezeAcceptedA1": { "const": false },
-    "overallVerdict": { "enum": ["NOT_EMITTED", "HOLD"] },
-    "overallReason": { "type": "string" },
-    "emitted": { "const": false },
+    "evidenceClass": { "const": "paired-proof" },
+    "packetCompletion": { "const": true },
+    "freezeAcceptedA1": { "const": true },
+    "overallVerdict": { "const": "A1_SEMANTICS_FROZEN" },
+    "emitted": { "const": true },
+    "providerSelectable": { "const": false },
+    "providerConformanceClaimed": { "const": false },
+    "mwt08Claimed": { "const": false },
+    "providerBytesPresent": { "const": false },
     "verdicts": {
       "type": "object",
       "additionalProperties": false,
@@ -43,17 +40,15 @@
         "cache_restart_valid"
       ],
       "properties": {
-        "candidate_materialized": { "enum": ["NOT_RUN", "HOLD"] },
-        "adapter_compatible": { "enum": ["NOT_RUN", "HOLD"] },
-        "payload_projection_valid": { "enum": ["NOT_RUN", "HOLD"] },
-        "server_render_valid": { "enum": ["NOT_RUN", "HOLD"] },
-        "browser_fixture_valid": { "enum": ["NOT_RUN", "HOLD"] },
-        "migration_rollback_valid": { "enum": ["NOT_RUN", "HOLD"] },
-        "tamper_rejected": { "enum": ["NOT_RUN", "HOLD"] },
-        "cache_restart_valid": { "enum": ["NOT_RUN", "HOLD"] }
+        "candidate_materialized": { "const": "PASS" },
+        "adapter_compatible": { "const": "PASS" },
+        "payload_projection_valid": { "const": "PASS" },
+        "server_render_valid": { "const": "PASS" },
+        "browser_fixture_valid": { "const": "PASS" },
+        "migration_rollback_valid": { "const": "PASS" },
+        "tamper_rejected": { "const": "PASS" },
+        "cache_restart_valid": { "const": "PASS" }
       }
-    },
-    "pendingDependencies": { "type": "array" },
-    "checkId": { "type": "string" }
+    }
   }
 }

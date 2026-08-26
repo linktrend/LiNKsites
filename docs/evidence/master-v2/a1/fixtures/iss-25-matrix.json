@@ -3,524 +3,1229 @@
   "kind": "ls08-iss25-fixture-matrix",
   "packetId": "LS-08",
   "layoutPack": "a1",
-  "evidenceClass": "preparation-fixture",
-  "packetCompletion": false,
-  "pairedProofRun": false,
+  "evidenceClass": "paired-proof",
+  "packetCompletion": true,
+  "pairedProofRun": true,
   "a1BytesPresent": false,
-  "ls07ProtectedIntegrated": false,
-  "providerA1Bound": false,
+  "ls07ProtectedIntegrated": true,
+  "providerA1Bound": true,
+  "providerBytesPresent": false,
   "slots": [
     {
       "surface": "server",
       "planId": "a",
       "scenario": "product",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "cfc660b4441ed04b340f007159cb73a6d873d8b51fdb9acf68c95880e7561187",
+      "evidence": "fixtures/slots/server-a-product.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "a",
       "scenario": "service",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "bb3e10d9dced399faef428fa4b071487ba5092468a23b98733566b14defe70d8",
+      "evidence": "fixtures/slots/server-a-service.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "a",
       "scenario": "hybrid",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "de4acc8ed64240166348bcca7269adcbfa92c95e151f8f6d054e4e10ac6c5477",
+      "evidence": "fixtures/slots/server-a-hybrid.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "a",
       "scenario": "local",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "956e06e150042f383dacdac347b3175e6d9904e1ce38b8cfd7c02a62996b2f2d",
+      "evidence": "fixtures/slots/server-a-local.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "a",
       "scenario": "resources",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "0a750d702ad1b4e693ae8ac00b0dffa536a84ddfdb4ed29024bbe8cb7d9ff9b0",
+      "evidence": "fixtures/slots/server-a-resources.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "a",
       "scenario": "trust",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "22880b402ee05e870a45ef7d1409e1f66ee64d0b936f44d4710540c271f3f225",
+      "evidence": "fixtures/slots/server-a-trust.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "a",
       "scenario": "failure",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "6e4172a5742b1ea22c9c985a91a3bbbb4521d3ad326747c4fb2eaafe18ab2180",
+      "evidence": "fixtures/slots/server-a-failure.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "a",
       "scenario": "lifecycle",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "7d5b7c7529c24fda85261705e587f3d6db3320367aa13f733e18ebc31765695e",
+      "evidence": "fixtures/slots/server-a-lifecycle.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "PASS",
+        "tamper_rejected": "PASS",
+        "cache_restart_valid": "PASS"
+      }
     },
     {
       "surface": "server",
       "planId": "b",
       "scenario": "product",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "73e3d0ca19ad7474d3e6e910a279d6a0c13381fe33b5b996e8335f57c7b597d6",
+      "evidence": "fixtures/slots/server-b-product.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "b",
       "scenario": "service",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "521d2251c29abea3932517741790b05ebe21c94ffdb7561e610d0b36481837e7",
+      "evidence": "fixtures/slots/server-b-service.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "b",
       "scenario": "hybrid",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "83e4716c9d22d75e0a133fd069611b6f28e2e9898cc2174b2705089070eb1945",
+      "evidence": "fixtures/slots/server-b-hybrid.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "b",
       "scenario": "local",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "3cde1d00e508c27d4315c467dc7323c29b9d84a97ff9cd158358603182b38903",
+      "evidence": "fixtures/slots/server-b-local.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "b",
       "scenario": "resources",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "77abaf4c665fa5c5e32355b11d8ead055d198f0af6606c0e966b4a3d15923829",
+      "evidence": "fixtures/slots/server-b-resources.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "b",
       "scenario": "trust",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "7eb0d0e1afd73cccf51b3b2623bcc7aef863916d48a3f4a9b6240b5e6e98c099",
+      "evidence": "fixtures/slots/server-b-trust.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "b",
       "scenario": "failure",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "877d81f438e062b81e23920dd90f4a8c860de8fe3cb7b1b3026cb5c8bd1593d4",
+      "evidence": "fixtures/slots/server-b-failure.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "b",
       "scenario": "lifecycle",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "4d07863c0e70c303f1ab990f03c757fb42715b36f3e5f3a44f313edb823d1bc7",
+      "evidence": "fixtures/slots/server-b-lifecycle.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "PASS",
+        "tamper_rejected": "PASS",
+        "cache_restart_valid": "PASS"
+      }
     },
     {
       "surface": "server",
       "planId": "c",
       "scenario": "product",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "f5406b4e495fa59286793ba855bb526f164c0a986e7760d4a9b0cb1c0db0153d",
+      "evidence": "fixtures/slots/server-c-product.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "c",
       "scenario": "service",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "fd9c97f081acde3a487ebd08d418a712c09ef00196bc61a9c73869bae7ec55c1",
+      "evidence": "fixtures/slots/server-c-service.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "c",
       "scenario": "hybrid",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "d02914b223db13c5c4e3018517ebc4188ad0f06baf5aa821341fbaaad86b11a8",
+      "evidence": "fixtures/slots/server-c-hybrid.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "c",
       "scenario": "local",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "6dc213ad70c39d267ac9a2ab794c23df8d00a8223bb413fe67038dc70388858f",
+      "evidence": "fixtures/slots/server-c-local.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "c",
       "scenario": "resources",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "d1785af7fd41ba6e4ec3e7d42723606ec6592be0b8beaee95b9ef667396223b9",
+      "evidence": "fixtures/slots/server-c-resources.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "c",
       "scenario": "trust",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "d4350bc6f3f6b494c5c0bbaff731927a9b5b67d1a0147a7e0e3f0e7eab5f8a64",
+      "evidence": "fixtures/slots/server-c-trust.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "c",
       "scenario": "failure",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "61f16fdc98e5ef1f3dc1fba46dc3f91c1d7d44e09ac4a9369b61f8094bc3804d",
+      "evidence": "fixtures/slots/server-c-failure.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "c",
       "scenario": "lifecycle",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "f1983a3014ded8433dd40c6619c1bd740fadccc85680666035ce7192963e29ff",
+      "evidence": "fixtures/slots/server-c-lifecycle.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "PASS",
+        "tamper_rejected": "PASS",
+        "cache_restart_valid": "PASS"
+      }
     },
     {
       "surface": "server",
       "planId": "l",
       "scenario": "product",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "9ab82266ceb2649ef3f283f3c3b71f9578ee42fd282e72e544f54c5ecbb5fefb",
+      "evidence": "fixtures/slots/server-l-product.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "l",
       "scenario": "service",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "b15f3104c7b898d5876eef3063f1c99b11a2d732249e23d6fa8dbce103442ebe",
+      "evidence": "fixtures/slots/server-l-service.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "l",
       "scenario": "hybrid",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "f634b52b45f99c6edbfc08c61ba5ec556b3499caa2bbae45c171ca5a24aad96b",
+      "evidence": "fixtures/slots/server-l-hybrid.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "l",
       "scenario": "local",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "5449fb6a34e52050f3f48da123ae0db8932571067a636fa3ee39e27f436ac6cc",
+      "evidence": "fixtures/slots/server-l-local.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "l",
       "scenario": "resources",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "b28bf4ee5a135e2cc045426696f8afa1f79fbaf311272e2fa822829f6acef15f",
+      "evidence": "fixtures/slots/server-l-resources.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "l",
       "scenario": "trust",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "5cd81b67122d742df3b40ee8fd26b0256d0c8cbb8b6ad5d2731dd420370e9230",
+      "evidence": "fixtures/slots/server-l-trust.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "l",
       "scenario": "failure",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "3319a82f20b97b86911f8d7f5ebf43d03a3b215668cf18dccc21f7d88f464add",
+      "evidence": "fixtures/slots/server-l-failure.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "server",
       "planId": "l",
       "scenario": "lifecycle",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "38ecd9127749adb0a2d5b00013cd047dbeaf02384a0a28fea601f97c73233ccf",
+      "evidence": "fixtures/slots/server-l-lifecycle.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "PASS",
+        "browser_fixture_valid": "HOLD",
+        "migration_rollback_valid": "PASS",
+        "tamper_rejected": "PASS",
+        "cache_restart_valid": "PASS"
+      }
     },
     {
       "surface": "browser",
       "planId": "a",
       "scenario": "product",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "6b93fd9952c20b908a5e5f13f1965b2ffddd6e8e4efde1ae6216fb692d8de5b8",
+      "evidence": "fixtures/slots/browser-a-product.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "a",
       "scenario": "service",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "3e14df3d4a113ddc6f7f48f3cde664f44f3f692f8cdc672b7c47b31de6e42a0a",
+      "evidence": "fixtures/slots/browser-a-service.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "a",
       "scenario": "hybrid",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "0d163cdf92f6e85dc79c0973e91955658a931cb06979e4aa8d0e2ab81fd3d087",
+      "evidence": "fixtures/slots/browser-a-hybrid.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "a",
       "scenario": "local",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "17c713fe439f78ac46e33c5f60856391473542b66e997d8dd21599b7e3d7e372",
+      "evidence": "fixtures/slots/browser-a-local.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "a",
       "scenario": "resources",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "e7017fb0ba1951309236c06cccb815a831be671b7fa4ef76b03d2dc12dd3e0d2",
+      "evidence": "fixtures/slots/browser-a-resources.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "a",
       "scenario": "trust",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "adf01ce8374d5fbe31430bc1800288b6c9de6b850f0de444befbf4d9a2a06037",
+      "evidence": "fixtures/slots/browser-a-trust.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "a",
       "scenario": "failure",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "aeb1dec438818b24d7e1c9b4b83435edba9c0dce9af929ee7204392089873da1",
+      "evidence": "fixtures/slots/browser-a-failure.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "a",
       "scenario": "lifecycle",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "6275f5c1139284d2aac99575fefe3329b746a4076306bd00c79633f339277856",
+      "evidence": "fixtures/slots/browser-a-lifecycle.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "PASS",
+        "tamper_rejected": "PASS",
+        "cache_restart_valid": "PASS"
+      }
     },
     {
       "surface": "browser",
       "planId": "b",
       "scenario": "product",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "f25ffa337df7e5b26280f2384de093b3d724a1784a62bab5e53fac240f6d5b53",
+      "evidence": "fixtures/slots/browser-b-product.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "b",
       "scenario": "service",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "e5e1a0eb9f0b87bf49e2719739601cebc95b86444d91e0b17212b8136ec413c8",
+      "evidence": "fixtures/slots/browser-b-service.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "b",
       "scenario": "hybrid",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "ef5d31d5b96e4b60aa339f2492834a6cb0f85a939ce89c6d2a922a3a37456b02",
+      "evidence": "fixtures/slots/browser-b-hybrid.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "b",
       "scenario": "local",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "c9d3c55909c495be7545e3baf14630e08cf965edb797430684e8444be3f1c48f",
+      "evidence": "fixtures/slots/browser-b-local.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "b",
       "scenario": "resources",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "d9d2e1e3e76432eb03e9325fad3021d874d17192c52f41009983c57aeba1b002",
+      "evidence": "fixtures/slots/browser-b-resources.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "b",
       "scenario": "trust",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "a6c2dbcc84cd736a3624a2f206c442e82782cba43135b16292f69d206e7d75a1",
+      "evidence": "fixtures/slots/browser-b-trust.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "b",
       "scenario": "failure",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "9394983b94740a1fa2e3df376f2493f80e13c4ee49b192d227cbc3e20785f8d8",
+      "evidence": "fixtures/slots/browser-b-failure.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "b",
       "scenario": "lifecycle",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "a2ec2c97cdb2d383f254cac9aebd44d81be4fc4a781409ced63d332e0d760e74",
+      "evidence": "fixtures/slots/browser-b-lifecycle.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "PASS",
+        "tamper_rejected": "PASS",
+        "cache_restart_valid": "PASS"
+      }
     },
     {
       "surface": "browser",
       "planId": "c",
       "scenario": "product",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "14d981c59ef99e8660fdece9edc2f876bc882aae3b09bb73cde8f8b502f5c314",
+      "evidence": "fixtures/slots/browser-c-product.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "c",
       "scenario": "service",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "d20345859cce8c636bc7930ee3db84e32397018bb8cfded08bcdeea32babfc7a",
+      "evidence": "fixtures/slots/browser-c-service.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "c",
       "scenario": "hybrid",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "63f092717ede85280644e9f835103bd9c8f787240ac806277528891bffd13bf8",
+      "evidence": "fixtures/slots/browser-c-hybrid.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "c",
       "scenario": "local",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "5e6c66604b9b616b6804c97d9c0b6e20b26b4d975e2ec3a5a399fa7ad9bd8747",
+      "evidence": "fixtures/slots/browser-c-local.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "c",
       "scenario": "resources",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "d958efcf3d717d9123da67dc925e0411c87220fdd79694e017763aa73171ebbc",
+      "evidence": "fixtures/slots/browser-c-resources.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "c",
       "scenario": "trust",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "e3cec3ec555a4bb3744e6e6576fe9562a9977727d1670de573cb4ca8216247bf",
+      "evidence": "fixtures/slots/browser-c-trust.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "c",
       "scenario": "failure",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "2f7fff9274275d71151a1514c11503be8903e29162141e25e0bf2e082acda119",
+      "evidence": "fixtures/slots/browser-c-failure.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "c",
       "scenario": "lifecycle",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "a0bffbdb15886257ad75604059c954db6e913920573a4ee39e4040abbfb647fa",
+      "evidence": "fixtures/slots/browser-c-lifecycle.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "PASS",
+        "tamper_rejected": "PASS",
+        "cache_restart_valid": "PASS"
+      }
     },
     {
       "surface": "browser",
       "planId": "l",
       "scenario": "product",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "8b64efd077d85155d43aa00a6c7f4702abae9bc2873bc651f7796e7c59b6ce16",
+      "evidence": "fixtures/slots/browser-l-product.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "l",
       "scenario": "service",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "3893c7a0ef5997cbf6c2332081a8f6c8853a0062d935eaed8eee1e5b7084198c",
+      "evidence": "fixtures/slots/browser-l-service.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "l",
       "scenario": "hybrid",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "0c1069e70230b9bca9220a6c33525ced29b5d2e6fda37cfdc6fc25a0d9b46b6c",
+      "evidence": "fixtures/slots/browser-l-hybrid.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "l",
       "scenario": "local",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "091651e6dda328cb7e292ec6b5ca51f3a5e21dfe9295760eee9371fa17b6e116",
+      "evidence": "fixtures/slots/browser-l-local.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "l",
       "scenario": "resources",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "ebf51d4fc722f5d622a972c7f9d2607d726193a10f6408ccedf348b2157be693",
+      "evidence": "fixtures/slots/browser-l-resources.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "l",
       "scenario": "trust",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "0d0a17747b2f4939906bd5a4d4745ce8d2a1dd08bfec5b83898f03e5812a05aa",
+      "evidence": "fixtures/slots/browser-l-trust.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "l",
       "scenario": "failure",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "a451f9b8fbae49718311e4920953d0e74e3a376b90cf0e8a77b39862b8050f82",
+      "evidence": "fixtures/slots/browser-l-failure.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "HOLD",
+        "tamper_rejected": "HOLD",
+        "cache_restart_valid": "HOLD"
+      }
     },
     {
       "surface": "browser",
       "planId": "l",
       "scenario": "lifecycle",
-      "status": "NOT_RUN",
-      "pairedProofRun": false,
-      "evidence": "unbound-preparation-slot"
+      "status": "PASS",
+      "pairedProofRun": true,
+      "htmlSha256": "f8caf2aad1a682547fbfad83138a7dab482af5e991b46b637c1a84c32a810e79",
+      "evidence": "fixtures/slots/browser-l-lifecycle.html",
+      "verdicts": {
+        "candidate_materialized": "PASS",
+        "adapter_compatible": "PASS",
+        "payload_projection_valid": "PASS",
+        "server_render_valid": "HOLD",
+        "browser_fixture_valid": "PASS",
+        "migration_rollback_valid": "PASS",
+        "tamper_rejected": "PASS",
+        "cache_restart_valid": "PASS"
+      }
     }
   ]
 }

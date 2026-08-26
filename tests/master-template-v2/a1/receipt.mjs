@@ -1,52 +1,57 @@
 /**
- * ISS-27 consumer receipt emitter for LS-08 preparation.
- * Never emits an accepted receipt. Freeze of A1 semantics is forbidden.
+ * ISS-27 consumer receipt emitter for LS-08 paired proof.
+ * Freezes accepted A1 semantics. Does not claim selectability, conformance, or MWT-08.
  */
 
 import {
   CHECK_IDS,
   CONSUMER_VERDICTS,
+  EXT_LS_01_RECEIPT,
   GITHUB_ISSUE,
   ISSUES,
   PACKET_ID,
-  PENDING_DEPENDENCIES,
+  PROTECTED_DEVELOPMENT,
+  PROVIDER_PIN,
+  SATISFIED_DEPENDENCIES,
 } from "./constants.mjs";
 import {
   ClosedFailure,
-  forbiddenReceiptClaims,
+  assertNoSelectabilityOrMwt08,
   isRecord,
-  requireUnboundLs07Checkpoint,
-  requireUnboundProviderA1,
 } from "./identities.mjs";
 
-const HOLD_VERDICTS = Object.fromEntries(CONSUMER_VERDICTS.map((key) => [key, "NOT_RUN"]));
-
 /**
- * @param {unknown} request
- * @returns {object}
+ * @param {object} input
  */
-export function emitConsumerReceipt(request = {}) {
-  if (request != null && !isRecord(request)) {
+export function emitConsumerReceipt(input = {}) {
+  if (input != null && !isRecord(input)) {
     throw new ClosedFailure("receipt_invalid", "receipt request must be an object");
   }
-  const payload = isRecord(request) ? request : {};
+  const payload = isRecord(input) ? input : {};
+  assertNoSelectabilityOrMwt08(payload);
 
-  if (payload.accept === true || payload.overallVerdict === "ACCEPT" || payload.freezeAcceptedA1 === true) {
-    throw new ClosedFailure(
-      "forbidden_accepted_receipt",
-      "accepted consumer receipt is forbidden until LS-07 is protected-integrated and exact provider A1 is bound",
-    );
+  if (payload.selectable === true || payload.productionSelectable === true || payload.providerConformance === true) {
+    throw new ClosedFailure("forbidden_claim", "selectability and provider conformance cannot be emitted");
   }
-  if (payload.packetCompletion === true || payload.packetComplete === true) {
-    throw new ClosedFailure("forbidden_completion_claim", "LS-08 packetCompletion is forbidden in preparation");
+  if (payload.mwt08 === true || payload.mwt08Claimed === true) {
+    throw new ClosedFailure("forbidden_claim", "MWT-08 cannot be claimed from LS-08");
+  }
+  if (payload.providerBytes != null && payload.providerBytes !== false) {
+    throw new ClosedFailure("provider_bytes", "consumer receipt must not carry provider bytes");
   }
 
-  requireUnboundLs07Checkpoint(payload.ls07Checkpoint);
-  requireUnboundProviderA1(payload.providerA1);
+  const verdicts = isRecord(payload.verdicts) ? payload.verdicts : null;
+  if (!verdicts) {
+    throw new ClosedFailure("receipt_incomplete", "ISS-27 requires exact consumer verdicts from ISS-25/ISS-26");
+  }
+  for (const key of CONSUMER_VERDICTS) {
+    if (verdicts[key] !== "PASS") {
+      throw new ClosedFailure("receipt_incomplete", `verdict ${key} must be PASS before freeze (got ${String(verdicts[key])})`);
+    }
+  }
 
-  const claims = forbiddenReceiptClaims(payload);
-  if (claims.length) {
-    throw new ClosedFailure("forbidden_accepted_receipt", `forbidden receipt claim: ${claims.join(", ")}`);
+  if (payload.freezeAcceptedA1 === false) {
+    throw new ClosedFailure("receipt_incomplete", "ISS-27 must freeze accepted A1 semantics after paired proof");
   }
 
   return {
@@ -55,40 +60,81 @@ export function emitConsumerReceipt(request = {}) {
     packetId: PACKET_ID,
     githubIssue: GITHUB_ISSUE,
     issues: [...ISSUES],
-    evidenceClass: "preparation-fixture",
-    packetCompletion: false,
-    freezeAcceptedA1: false,
-    overallVerdict: "NOT_EMITTED",
+    evidenceClass: "paired-proof",
+    packetCompletion: true,
+    freezeAcceptedA1: true,
+    overallVerdict: "A1_SEMANTICS_FROZEN",
     overallReason:
-      "ISS-27 cannot return an accepted consumer receipt before LS-07 protected integration and exact provider A1 binding.",
-    verdicts: { ...HOLD_VERDICTS },
-    pendingDependencies: PENDING_DEPENDENCIES.map((item) => ({ ...item })),
-    checkId: CHECK_IDS.RECEIPT_HOLD,
-    emitted: false,
+      "ISS-25/26/27 paired consumer proof passed on protected development. A1 semantics are frozen for this consumer. Provider remains draft/non-selectable. Later library packets are not claimed.",
+    emitted: true,
+    providerSelectable: false,
+    providerConformanceClaimed: false,
+    mwt08Claimed: false,
+    providerBytesPresent: false,
+    frozenSemantics: {
+      layoutPack: "a1",
+      plans: ["a", "b", "c", "l"],
+      releaseEntryVersion: PROVIDER_PIN.releaseEntryVersion,
+      providerCommit: PROVIDER_PIN.commit,
+      providerTree: PROVIDER_PIN.tree,
+      providerLifecycle: "draft",
+      providerSelectability: "non_selectable",
+      consumerProtectedCommit: PROTECTED_DEVELOPMENT.commit,
+      consumerProtectedTree: PROTECTED_DEVELOPMENT.tree,
+    },
+    bindings: {
+      providerPin: {
+        repository: PROVIDER_PIN.repository,
+        packet: PROVIDER_PIN.packet,
+        commit: PROVIDER_PIN.commit,
+        tree: PROVIDER_PIN.tree,
+        releaseEntryVersion: PROVIDER_PIN.releaseEntryVersion,
+      },
+      extLs01Receipt: {
+        path: EXT_LS_01_RECEIPT.path,
+        sha256: EXT_LS_01_RECEIPT.sha256,
+        consumerCommit: EXT_LS_01_RECEIPT.consumerCommit,
+        consumerTree: EXT_LS_01_RECEIPT.consumerTree,
+        bytesEmbedded: false,
+      },
+    },
+    verdicts: { ...verdicts },
+    satisfiedDependencies: SATISFIED_DEPENDENCIES.map((item) => ({
+      id: item.id,
+      required: item.required,
+      satisfied: item.satisfied,
+    })),
+    checkId: CHECK_IDS.RECEIPT_EMITTED,
   };
 }
 
 /**
  * @param {unknown} receipt
  */
-export function assertReceiptNotAccepted(receipt) {
+export function assertReceiptAcceptedSemantics(receipt) {
   if (!isRecord(receipt)) {
     throw new ClosedFailure("receipt_invalid", "receipt must be an object");
   }
-  if (receipt.emitted === true) {
-    throw new ClosedFailure("forbidden_accepted_receipt", "preparation receipt must set emitted=false");
+  assertNoSelectabilityOrMwt08(receipt);
+  if (receipt.emitted !== true) {
+    throw new ClosedFailure("receipt_incomplete", "ISS-27 receipt must set emitted=true");
   }
-  if (receipt.packetCompletion === true || receipt.freezeAcceptedA1 === true) {
-    throw new ClosedFailure("forbidden_accepted_receipt", "accepted or completed receipt is forbidden");
+  if (receipt.packetCompletion !== true || receipt.freezeAcceptedA1 !== true) {
+    throw new ClosedFailure("receipt_incomplete", "ISS-27 must complete the packet and freeze A1 semantics");
   }
-  if (receipt.overallVerdict !== "NOT_EMITTED" && receipt.overallVerdict !== "HOLD") {
-    throw new ClosedFailure(
-      "forbidden_accepted_receipt",
-      `overallVerdict must be NOT_EMITTED or HOLD (got ${String(receipt.overallVerdict)})`,
-    );
+  if (receipt.overallVerdict !== "A1_SEMANTICS_FROZEN") {
+    throw new ClosedFailure("receipt_incomplete", `overallVerdict must be A1_SEMANTICS_FROZEN (got ${String(receipt.overallVerdict)})`);
   }
-  const claims = forbiddenReceiptClaims(receipt);
-  if (claims.length) {
-    throw new ClosedFailure("forbidden_accepted_receipt", `forbidden receipt claim: ${claims.join(", ")}`);
+  if (receipt.providerSelectable === true || receipt.providerConformanceClaimed === true || receipt.mwt08Claimed === true) {
+    throw new ClosedFailure("forbidden_claim", "receipt claimed selectability, conformance, or MWT-08");
+  }
+  if (receipt.providerBytesPresent === true) {
+    throw new ClosedFailure("provider_bytes", "receipt must not present provider bytes");
+  }
+  const verdicts = isRecord(receipt.verdicts) ? receipt.verdicts : {};
+  for (const key of CONSUMER_VERDICTS) {
+    if (verdicts[key] !== "PASS") {
+      throw new ClosedFailure("receipt_incomplete", `receipt verdict ${key} is not PASS`);
+    }
   }
 }

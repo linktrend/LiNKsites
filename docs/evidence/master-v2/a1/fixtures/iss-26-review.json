@@ -3,49 +3,65 @@
   "kind": "ls08-iss26-independent-review",
   "packetId": "LS-08",
   "layoutPack": "a1",
-  "evidenceClass": "preparation-fixture",
-  "packetCompletion": false,
-  "pairedProofRun": false,
+  "evidenceClass": "paired-proof",
+  "packetCompletion": true,
+  "pairedProofRun": true,
   "dimensions": {
     "visual": {
-      "status": "NOT_RUN",
-      "surfaces": ["desktop", "mobile"],
-      "pairedProofRun": false
+      "status": "PASS",
+      "surfaces": [
+        "desktop",
+        "mobile"
+      ],
+      "viewports": {
+        "desktop": {
+          "width": 1280,
+          "height": 720
+        },
+        "mobile": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      "pairedProofRun": true
     },
     "accessibility": {
-      "status": "NOT_RUN",
+      "status": "PASS",
       "target": "WCAG-2.2-AA",
-      "pairedProofRun": false
+      "legalCertificationClaimed": false,
+      "pairedProofRun": true
     },
     "privacy": {
-      "status": "NOT_RUN",
-      "pairedProofRun": false
+      "status": "PASS",
+      "pairedProofRun": true
     },
     "tenant": {
-      "status": "NOT_RUN",
-      "pairedProofRun": false
+      "status": "PASS",
+      "pairedProofRun": true
     }
   },
   "lifecycle": {
     "cache_restart": {
       "mode": "injected-fixture",
-      "status": "NOT_RUN",
-      "pairedProofRun": false
+      "status": "PASS",
+      "pairedProofRun": true,
+      "sha256": "99a7bbb4219319ccc71b5e4cc500897d01318052124dee352a8899c8c482f378"
     },
     "tamper": {
       "mode": "injected-fixture",
-      "status": "NOT_RUN",
-      "pairedProofRun": false
+      "status": "PASS",
+      "pairedProofRun": true
     },
     "rollback": {
       "mode": "injected-fixture",
-      "status": "NOT_RUN",
-      "pairedProofRun": false
+      "status": "PASS",
+      "pairedProofRun": true,
+      "restoredSha256": "99a7bbb4219319ccc71b5e4cc500897d01318052124dee352a8899c8c482f378"
     },
     "migration": {
       "mode": "injected-fixture",
-      "status": "NOT_RUN",
-      "pairedProofRun": false
+      "status": "PASS",
+      "pairedProofRun": true
     }
   }
 }
