@@ -3,9 +3,15 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 
 import { MASTER_TEMPLATE_PIN } from "@linksites/factory-catalog/master-template-pin";
 
+import {
+  composeLayoutBody,
+  pageRendererMountAttributes,
+} from "../src/components/page-renderer/compose-layout.ts";
 import { resolveLayoutRuntime } from "../src/components/page-renderer/layout-packs.ts";
 import { loadPrivatePreviewLayoutRuntime } from "../src/lib/private-preview-layout.ts";
 
@@ -97,4 +103,17 @@ test("injected LS-06 identities take precedence over the W2-04 local-proof fallb
   });
   assert.equal(runtime.planId, "C");
   assert.equal(runtime.layoutPackId, "A1");
+});
+
+test("W2-04 private preview markup satisfies render-gate markers without omitting layout identity", () => {
+  const runtime = loadPrivatePreviewLayoutRuntime({ LINKSITES_W2_04_LOCAL_PROOF: "1" });
+  const main = createElement("div", { "data-region": "main" }, createElement("h1", null, "Private preview"));
+  const inner = renderToStaticMarkup(
+    createElement("div", pageRendererMountAttributes(runtime), composeLayoutBody(runtime, main, "Home")),
+  );
+  const html = `<div data-private-preview="true">${inner}</div>`;
+  assert.match(html, /data-private-preview="true"/);
+  assert.match(html, /<h1>Private preview<\/h1>/);
+  assert.match(html, /data-layout-pack="A1"/);
+  assert.match(html, /data-plan-id="B"/);
 });
