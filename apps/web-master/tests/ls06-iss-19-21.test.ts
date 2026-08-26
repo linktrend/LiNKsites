@@ -136,6 +136,28 @@ test("ISS-19 provider semantics fail closed for unknown required ids", () => {
   assert.throws(() => mapBlockToPayloadType({ blockType: "mystery" }), /Unknown required block type/);
 });
 
+test("ISS-19 LS-04 semanticId home:hero:hero-banner maps via library registry, not A1 roles", () => {
+  const fromIdentity = mapBlockToPayloadType({
+    semanticId: "home:hero:hero-banner",
+    libraryComponentId: "hero-banner",
+    blockType: "hero",
+  });
+  assert.equal(fromIdentity.payloadBlockType, "hero");
+  assert.equal(fromIdentity.reactSymbol, "SignupHero");
+  assert.equal(fromIdentity.providerRole, undefined);
+  const fromComposedIdOnly = mapBlockToPayloadType({ semanticId: "home:hero:hero-banner" });
+  assert.equal(fromComposedIdOnly.payloadBlockType, "hero");
+  assert.equal(fromComposedIdOnly.reactSymbol, "SignupHero");
+  assert.throws(
+    () => mapBlockToPayloadType({ providerRole: "home:hero:hero-banner" }),
+    /Unknown required provider semantic "home:hero:hero-banner"/,
+  );
+  assert.throws(
+    () => mapBlockToPayloadType({ libraryComponentId: "not-a-library-component" }),
+    /Unknown required Library component ID/,
+  );
+});
+
 test("ISS-20 resolved shell has no placeholders and isolates Type L", () => {
   const marketing = resolveShell({ locale: "en", planId: "A" });
   assert.equal(marketing.header, "brand-nav-locale");
