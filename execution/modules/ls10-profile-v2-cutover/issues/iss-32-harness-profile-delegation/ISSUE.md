@@ -21,8 +21,10 @@ out_of_scope:
   - "generic authority retirement"
   - "H-09/H-10 conformance admission"
 inputs:
-  - "protected development commit 02ebf5d8710c50c1f2c390989239f0baf916ba97"
-  - "protected development tree fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+  - "protected development commit 7542cb3b1fa1d76cec40f59a522514a86e083038"
+  - "protected development tree 284814fd2296b2825d8c92f10d9f7dc78ae08e38"
+  - "successor issue 369 branch issue/369-ls-10-iss-32-identity-bind-to-current-protected"
+  - "source checkpoint 940f7a35c95e4d186e3cf088701fd6c82fa49961 / 7611c86359f1221fbcfda14471701d3157d52c9b"
   - "packages/linkharness-profile @linksites/profile pin and ProfilePort"
 acceptance_criteria:
   - "Harness + @linksites/profile delegation adapter exists in program-orchestrator"

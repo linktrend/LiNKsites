@@ -19,8 +19,8 @@ export const ISS32_ISSUE = 'ISS-32' as const
 
 export const PROTECTED_DEVELOPMENT = Object.freeze({
   repository: 'linktrend/LiNKsites',
-  commit: '02ebf5d8710c50c1f2c390989239f0baf916ba97',
-  tree: 'fb427d30ea7c3e7060fc9cc1a63a1110266dd755',
+  commit: '7542cb3b1fa1d76cec40f59a522514a86e083038',
+  tree: '284814fd2296b2825d8c92f10d9f7dc78ae08e38',
 })
 
 export const GENERIC_RUNTIME = 'program-ledger+program-orchestrator+execution' as const

@@ -3,8 +3,8 @@ proof_id: "proof-ls10-iss-32-harness-profile-delegation"
 subject_type: "issue"
 subject_id: "iss-32-harness-profile-delegation"
 status: "local"
-parent_commit: "02ebf5d8710c50c1f2c390989239f0baf916ba97"
-parent_tree: "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+parent_commit: "7542cb3b1fa1d76cec40f59a522514a86e083038"
+parent_tree: "284814fd2296b2825d8c92f10d9f7dc78ae08e38"
 criteria_evidence:
   - criterion: "Harness + @linksites/profile delegation adapter exists"
     evidence: "apps/program-orchestrator/src/profile-delegation.ts and contract test"
@@ -24,7 +24,7 @@ optional_fields:
   commands_run:
     - "tsx --test tests/profile-delegation.test.ts"
     - "git diff --check"
-    - "git diff --name-only 02ebf5d8710c50c1f2c390989239f0baf916ba97"
+    - "git diff --name-only 7542cb3b1fa1d76cec40f59a522514a86e083038"
   notes:
     - "This is local ISS-32 composition engineering proof. It is not H-09, H-10, provider, deploy, or generic-authority retirement proof."
 ---
@@ -38,5 +38,8 @@ authority retirement and Harness conformance stay fail-closed until the current
 H-09 rebind and Harness handoff are accepted, and this issue still does not
 perform cutover.
 
-Protected parent: commit `02ebf5d8710c50c1f2c390989239f0baf916ba97`, tree
-`fb427d30ea7c3e7060fc9cc1a63a1110266dd755`.
+Protected parent: commit `7542cb3b1fa1d76cec40f59a522514a86e083038`, tree
+`284814fd2296b2825d8c92f10d9f7dc78ae08e38`. Successor work branch:
+`issue/369-ls-10-iss-32-identity-bind-to-current-protected` from checkpoint
+`940f7a35c95e4d186e3cf088701fd6c82fa49961` /
+`7611c86359f1221fbcfda14471701d3157d52c9b`.

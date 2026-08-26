@@ -36,7 +36,7 @@ const PROHIBITED_PREFIXES = [
 function scopedDiff(): string[] {
   const tracked = execFileSync(
     'git',
-    ['diff', '--name-only', '02ebf5d8710c50c1f2c390989239f0baf916ba97'],
+    ['diff', '--name-only', PROTECTED_DEVELOPMENT.commit],
     { cwd: REPO_ROOT, encoding: 'utf8' },
   )
   const untracked = execFileSync(
