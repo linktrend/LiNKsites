@@ -175,6 +175,47 @@ export function projectPublishedAuthority(input: {
   });
 }
 
+export function localePrefixedPath(locale: string, slug: string): string {
+  const normalized = normalizePath(slug);
+  if (normalized === "/" || normalized === `/${locale}`) return `/${locale}`;
+  if (normalized.startsWith(`/${locale}/`)) return normalized;
+  return `/${locale}${normalized}`;
+}
+
+export function canonicalForPath(authority: PublishedAuthority, locale: string, slug: string): string | undefined {
+  const path = localePrefixedPath(locale, slug);
+  return authority.urls.find((url) => url.locale === locale && url.path === path)?.canonical;
+}
+
+export function ssrPageAlternates(
+  authority: PublishedAuthority,
+  locale: string,
+  slug: string,
+): Readonly<{ canonical: string; languages: Readonly<Record<string, string>>; indexable: boolean }> {
+  const path = localePrefixedPath(locale, slug);
+  const published = canonicalForPath(authority, locale, slug);
+  const canonical = published ?? `${authority.baseUrl}${path}`;
+  const languages = hreflangForPath(authority, locale, path);
+  const indexable = Boolean(published && authority.robots.allowCrawling);
+  return Object.freeze({ canonical, languages, indexable });
+}
+
+export function publishedSitemap(authority: PublishedAuthority): PublishedAuthority["sitemap"] {
+  return authority.sitemap;
+}
+
+export function publishedRobots(authority: PublishedAuthority): PublishedAuthority["robots"] {
+  return authority.robots;
+}
+
+export function publishedLlmsTxt(authority: PublishedAuthority): string {
+  return authority.llmsTxt;
+}
+
+export function publishedAiProjection(authority: PublishedAuthority): PublishedAuthority["aiProjection"] {
+  return authority.aiProjection;
+}
+
 export function hreflangForPath(authority: PublishedAuthority, locale: string, path: string): Readonly<Record<string, string>> {
   const key = localeNeutralKey(locale, path);
   return authority.hreflang[key] ?? {};

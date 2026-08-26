@@ -8,7 +8,8 @@
   "legalCertificationClaimed": false,
   "performanceSource": "lab",
   "ownedPaths": [
-    "apps/web-master/src/lib/seo/**",
+    "apps/web-master/src/lib/seo/ssr-metadata.ts",
+    "apps/web-master/src/lib/forms/newsletter-policy.ts",
     "apps/web-master/src/lib/forms/**",
     "apps/web-master/src/app/sitemap.ts",
     "apps/web-master/src/app/robots.ts",
@@ -22,7 +23,7 @@
   ],
   "validation": {
     "qualityHarness": { "command": "node --test scripts/profile-v2-quality/ls07/tests/test_ls07_quality_harness.mjs", "passed": 15 },
-    "iss2224": { "command": "npx tsx --test tests/ls07-iss-22-24.test.ts", "passed": 10 },
+    "iss2224": { "command": "npx tsx --test tests/ls07-iss-22-24.test.ts", "passed": 11 },
     "ls06Regression": { "command": "npx tsx --test tests/ls06-iss-19-21.test.ts", "passed": 8 }
   }
 }

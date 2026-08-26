@@ -6,9 +6,21 @@ import test from "node:test";
 
 import {
   assertNoLeak,
+  canonicalForPath,
+  hreflangForPath,
+  localePrefixedPath,
   projectPublishedAuthority,
+  publishedAiProjection,
+  publishedLlmsTxt,
+  publishedRobots,
+  publishedSitemap,
   PublishedAuthorityError,
+  ssrPageAlternates,
 } from "../src/lib/seo/published-authority.ts";
+import {
+  evaluateNewsletterRequest,
+  newsletterSuccessAfterEnqueue,
+} from "../src/lib/forms/newsletter-policy.ts";
 import {
   assertJsonLdMatchesVisibleFacts,
   collectVisibleFacts,
@@ -67,6 +79,20 @@ test("ISS-22 published authority excludes drafts/private/redirects from sitemap 
   );
   assert.equal(authority.hreflang["/"]["x-default"], "https://example.test/en");
   assert.equal(authority.hreflang["/"]["es"], "https://example.test/es");
+  assert.equal(canonicalForPath(authority, "en", "/contact"), "https://example.test/en/contact");
+  assert.equal(hreflangForPath(authority, "en", localePrefixedPath("en", "/"))["es"], "https://example.test/es");
+  const page = ssrPageAlternates(authority, "en", "/contact");
+  assert.equal(page.canonical, "https://example.test/en/contact");
+  assert.equal(page.indexable, true);
+  assert.deepEqual(
+    publishedSitemap(authority).map((entry) => entry.url).sort(),
+    publishedAiProjection(authority).map((item) => item.canonical).sort(),
+  );
+  assert.equal(publishedRobots(authority).sitemap, "https://example.test/sitemap.xml");
+  assert.match(publishedLlmsTxt(authority), /https:\/\/example\.test\/en\/contact/);
+  const draftPage = ssrPageAlternates(authority, "en", "/draft-contact");
+  assert.equal(draftPage.indexable, false);
+  assert.equal(draftPage.canonical, "https://example.test/en/draft-contact");
 });
 
 test("ISS-22 non-production or ineligible sites omit sitemap and disallow robots", () => {
@@ -211,6 +237,39 @@ test("ISS-24 accessibility matrix performance budgets and visual fixtures exist 
   assert.ok(VISUAL_REGRESSION_FIXTURES.some((fixture) => fixture.planId === "L"));
 });
 
+test("ISS-23 newsletter consent is parsed from the body and fake success is rejected", () => {
+  const env = {
+    LINKAUTOWORK_GATEWAY_URL: "https://gateway.test",
+    LINKAUTOWORK_SIGNING_SECRET: "secret",
+    LINKAUTOWORK_SIGNING_KEY_ID: "key",
+    LINKAUTOWORK_ENVIRONMENT: "sandbox",
+    LINKSITES_ORG_ID: "org",
+    LINKSITES_SITE_ID: "site",
+    LINKAUTOWORK_OUTBOX_PATH: "/tmp/outbox",
+    LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: "integrity",
+    LINKAUTOWORK_EVENT_GRANTS: "grant",
+  };
+  const refused = evaluateNewsletterRequest(
+    { intentTag: "newsletter", formData: { email: "a@example.test", acceptedTerms: false } },
+    env,
+  );
+  assert.equal(refused.ok, false);
+  if (!refused.ok) {
+    assert.equal(refused.stage, "policy");
+    if (refused.stage === "policy") assert.equal(refused.decision.code, "consent_required");
+  }
+  const invalid = evaluateNewsletterRequest({ intentTag: "newsletter", formData: { email: "not-an-email", acceptedTerms: true } }, env);
+  assert.equal(invalid.ok, false);
+  if (!invalid.ok) assert.equal(invalid.stage, "parse");
+  const allowed = evaluateNewsletterRequest(
+    { intentTag: "newsletter", formData: { email: "a@example.test", acceptedTerms: true } },
+    env,
+  );
+  assert.equal(allowed.ok, true);
+  assert.equal(newsletterSuccessAfterEnqueue(false).success, false);
+  assert.equal(newsletterSuccessAfterEnqueue(true).success, true);
+});
+
 test("ISS-22/23/24 product files exist in owned surfaces", () => {
   const files = [
     "../src/lib/seo/published-authority.ts",
@@ -221,6 +280,8 @@ test("ISS-22/23/24 product files exist in owned surfaces", () => {
     "../src/app/api/newsletter/route.ts",
     "../src/app/api/booking/route.ts",
     "../src/app/api/ecommerce/route.ts",
+    "../src/lib/seo/ssr-metadata.ts",
+    "../src/lib/forms/newsletter-policy.ts",
     "../src/components/common/NewsletterSection.tsx",
   ];
   for (const file of files) {
@@ -230,4 +291,21 @@ test("ISS-22/23/24 product files exist in owned surfaces", () => {
   const newsletter = readFileSync(resolve(root, "../src/components/common/NewsletterSection.tsx"), "utf8");
   assert.doesNotMatch(newsletter, /Simulate API call/);
   assert.match(newsletter, /\/api\/newsletter/);
+  const seo = readFileSync(resolve(root, "../src/lib/seo/ssr-metadata.ts"), "utf8");
+  assert.match(seo, /ssrPageAlternates/);
+  assert.match(seo, /loadPublishedAuthority/);
+  const newsletterRoute = readFileSync(resolve(root, "../src/app/api/newsletter/route.ts"), "utf8");
+  assert.doesNotMatch(newsletterRoute, /consentGranted:\s*true/);
+  assert.match(newsletterRoute, /evaluateNewsletterRequest/);
+  const sitemap = readFileSync(resolve(root, "../src/app/sitemap.ts"), "utf8");
+  assert.match(sitemap, /publishedSitemap/);
+  const robots = readFileSync(resolve(root, "../src/app/robots.ts"), "utf8");
+  assert.match(robots, /publishedRobots/);
+  const llms = readFileSync(resolve(root, "../src/app/llms.txt/route.ts"), "utf8");
+  assert.match(llms, /publishedLlmsTxt/);
+  const aiActions = readFileSync(resolve(root, "../src/app/.well-known/ai-actions.json/route.ts"), "utf8");
+  assert.match(aiActions, /publishedAiProjection/);
+  const markdown = readFileSync(resolve(root, "../src/lib/ai/markdown.ts"), "utf8");
+  assert.match(markdown, /canonicalForPath/);
+  assert.match(markdown, /hreflangForPath/);
 });

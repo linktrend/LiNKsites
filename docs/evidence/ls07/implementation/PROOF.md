@@ -15,9 +15,11 @@ Manual keyboard/contrast/motion checks and WCAG legal certification are labeled 
 ## Validation
 
 - `node --test scripts/profile-v2-quality/ls07/tests/test_ls07_quality_harness.mjs` — 15 passed
-- `npx tsx --test tests/ls07-iss-22-24.test.ts` (apps/web-master) — 10 passed
+- `npx tsx --test tests/ls07-iss-22-24.test.ts` (apps/web-master) — 11 passed
 - `npx tsx --test tests/ls06-iss-19-21.test.ts` — 8 passed (no LS-06 regression)
 - `git diff --check` — pass
+
+Repair notes (bounded audit follow-up): sitemap/robots/`llms.txt`/AI projections and page canonical/hreflang share one published-authority SSR helper set (`publishedSitemap`, `publishedRobots`, `publishedLlmsTxt`, `publishedAiProjection`, `ssrPageAlternates`). Newsletter consent is parsed from the body before policy activation; fake success remains rejected.
 
 ## Rollback
 

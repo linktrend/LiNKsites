@@ -1,45 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 
 import { ENVIRONMENT } from "@/config";
 import { enforceAbuseLimit, abuseKeyFromRequest, enqueueGovernedSideEffect } from "@/lib/forms/governed-side-effect";
-import { SideEffectPolicyError, activateSideEffect, resolveConfiguredHook } from "@/lib/forms/side-effect-policy";
+import { evaluateNewsletterRequest, newsletterSuccessAfterEnqueue } from "@/lib/forms/newsletter-policy";
+import { SideEffectPolicyError } from "@/lib/forms/side-effect-policy";
 import { getPublicSiteIdOrNull, publicRouteNotFound } from "@/lib/public-route-guard";
 
 export const dynamic = "force-dynamic";
 
-const newsletterApiSchema = z.object({
-  intentTag: z.string().min(1).max(100).default("newsletter"),
-  formData: z.object({
-    email: z.string().email(),
-    acceptedTerms: z.literal(true),
-  }),
-  metadata: z
-    .object({
-      timestamp: z.string().optional(),
-      userAgent: z.string().optional(),
-      referrer: z.string().optional(),
-      language: z.string().optional(),
-    })
-    .optional(),
-});
-
 export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!(await getPublicSiteIdOrNull())) return publicRouteNotFound();
-
-  const decision = activateSideEffect({
-    kind: "newsletter",
-    endpoint: "/api/newsletter",
-    configured: resolveConfiguredHook("newsletter"),
-    requiresConsent: true,
-    consentGranted: true,
-  });
-  if (!decision.ok) {
-    return NextResponse.json(
-      { success: false, error: decision.code, message: decision.message },
-      { status: 503 },
-    );
-  }
 
   const abuse = enforceAbuseLimit(abuseKeyFromRequest(request.headers));
   if (!abuse.ok) {
@@ -59,32 +29,57 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  const evaluation = evaluateNewsletterRequest(body);
+  if (!evaluation.ok && evaluation.stage === "parse") {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "validation_failed",
+        message: "Please check your form inputs and try again",
+        ...(ENVIRONMENT.isProduction ? {} : { details: evaluation.error.issues }),
+      },
+      { status: 400 },
+    );
+  }
+  if (!evaluation.ok && evaluation.stage === "policy") {
+    const status = evaluation.decision.code === "consent_required" ? 400 : 503;
+    return NextResponse.json(
+      { success: false, error: evaluation.decision.code, message: evaluation.decision.message },
+      { status },
+    );
+  }
+  if (!evaluation.ok) {
+    const exhaustive: never = evaluation;
+    return NextResponse.json(
+      { success: false, error: "newsletter_rejected", message: String(exhaustive) },
+      { status: 400 },
+    );
+  }
+
   try {
-    const validated = newsletterApiSchema.parse(body);
     await enqueueGovernedSideEffect({
       kind: "newsletter",
-      intent: validated.intentTag,
-      submission: { email: validated.formData.email, acceptedTerms: true },
+      intent: evaluation.payload.intentTag,
+      submission: {
+        email: evaluation.payload.formData.email,
+        acceptedTerms: evaluation.payload.formData.acceptedTerms,
+      },
       metadata: {
-        timestamp: validated.metadata?.timestamp || new Date().toISOString(),
-        userAgent: validated.metadata?.userAgent || request.headers.get("user-agent") || "unknown",
-        referrer: validated.metadata?.referrer || request.headers.get("referer") || "direct",
-        language: validated.metadata?.language || "en",
+        timestamp: evaluation.payload.metadata?.timestamp || new Date().toISOString(),
+        userAgent: evaluation.payload.metadata?.userAgent || request.headers.get("user-agent") || "unknown",
+        referrer: evaluation.payload.metadata?.referrer || request.headers.get("referer") || "direct",
+        language: evaluation.payload.metadata?.language || "en",
       },
     });
-    return NextResponse.json({ success: true, message: "Newsletter subscription received" });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+    const outcome = newsletterSuccessAfterEnqueue(true);
+    if (!outcome.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "validation_failed",
-          message: "Please check your form inputs and try again",
-          ...(ENVIRONMENT.isProduction ? {} : { details: error.issues }),
-        },
-        { status: 400 },
+        { success: false, error: outcome.code, message: outcome.message },
+        { status: 500 },
       );
     }
+    return NextResponse.json({ success: true, message: "Newsletter subscription received" });
+  } catch (error) {
     if (error instanceof SideEffectPolicyError) {
       return NextResponse.json({ success: false, error: error.code, message: error.message }, { status: 503 });
     }
