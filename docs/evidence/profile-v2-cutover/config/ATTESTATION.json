@@ -4,20 +4,25 @@
   "packet": "LS-10",
   "issue": "ISS-33",
   "portion": "dependency-safe-engineering-config",
-  "githubIssue": 359,
-  "branch": "issue/359-ls-10-iss-33-dependency-safe-configuration-cutov",
+  "githubIssue": 370,
+  "branch": "issue/370-ls-10-iss-33-evidence-rebind-for-successor-ident",
   "liveMutation": false,
   "publicActivation": false,
   "credentialsPersisted": false,
   "liveCanary": "external_fail_closed",
+  "checkpoint": {
+    "commit": "fccd012e405ceb3168b3635f975ee4fd9a5a560d",
+    "tree": "287bd48d7085e5a1064315f88e90186debb9316c"
+  },
   "protectedDevelopment": {
     "repository": "linktrend/LiNKsites",
-    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
-    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+    "commit": "7542cb3b1fa1d76cec40f59a522514a86e083038",
+    "tree": "284814fd2296b2825d8c92f10d9f7dc78ae08e38"
   },
   "ownedPaths": [
     "deploy/**",
-    "docs/evidence/profile-v2-cutover/config/**"
+    "docs/evidence/profile-v2-cutover/config/**",
+    ".github/linktrend-secret-scan-fixtures.json"
   ],
   "validation": {
     "focusedTests": "node --test deploy/tests/iss33-config-cutover.test.mjs",

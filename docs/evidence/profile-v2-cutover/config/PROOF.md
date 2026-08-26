@@ -1,6 +1,12 @@
 # LS-10 ISS-33 configuration evidence (dependency-safe engineering)
 
-GitHub issue `#359`. Branch `issue/359-ls-10-iss-33-dependency-safe-configuration-cutov`.
+GitHub issue `#370`. Branch `issue/370-ls-10-iss-33-evidence-rebind-for-successor-ident`.
+
+This packet is an evidence-only identity rebind of the accepted ISS-33
+configuration slice. Functional templates, isolated migrate/rollback, and
+drift checks are unchanged from checkpoint
+`fccd012e405ceb3168b3635f975ee4fd9a5a560d` /
+tree `287bd48d7085e5a1064315f88e90186debb9316c`.
 
 This packet implements only the **configuration** slice of ISS-33:
 templates, redacted readback, isolated migrate/rollback, and permanent
@@ -14,13 +20,14 @@ canary. Production, VPS and live canary remains external and fail closed.
 ## Protected base
 
 - Repository: `linktrend/LiNKsites`
-- Commit: `02ebf5d8710c50c1f2c390989239f0baf916ba97`
-- Tree: `fb427d30ea7c3e7060fc9cc1a63a1110266dd755`
+- Commit: `7542cb3b1fa1d76cec40f59a522514a86e083038`
+- Tree: `284814fd2296b2825d8c92f10d9f7dc78ae08e38`
 
 ## Owned paths
 
 - `deploy/**`
 - `docs/evidence/profile-v2-cutover/config/**`
+- `.github/linktrend-secret-scan-fixtures.json`
 
 ## Out of scope
 
