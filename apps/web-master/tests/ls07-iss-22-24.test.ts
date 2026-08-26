@@ -246,7 +246,7 @@ test("ISS-23 newsletter consent is parsed from the body and fake success is reje
     LINKSITES_ORG_ID: "org",
     LINKSITES_SITE_ID: "site",
     LINKAUTOWORK_OUTBOX_PATH: "/tmp/outbox",
-    LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: "integrity",
+    LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: "ltfx.ls07.integrity",
     LINKAUTOWORK_EVENT_GRANTS: "grant",
   };
   const refused = evaluateNewsletterRequest(
