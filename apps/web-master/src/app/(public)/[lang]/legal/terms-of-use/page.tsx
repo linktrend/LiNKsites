@@ -1,4 +1,4 @@
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
 import { loadLegalFamilyPage } from "@/layouts/legal-family-page";
 
 export type Props = { params: Promise<{ lang: string }> };

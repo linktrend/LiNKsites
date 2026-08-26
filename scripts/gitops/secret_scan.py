@@ -375,7 +375,10 @@ def _is_credential_field(name: str) -> bool:
 
 
 def _is_code_expression(value: str) -> bool:
-    stripped = value.strip()
+    # TypeScript parameter annotations can leave trailing delimiters. Strip
+    # them before classifying the token so type syntax is not mistaken for a
+    # credential assignment.
+    stripped = re.sub(r"[):;,]+$", "", value.strip())
     if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", stripped):
         return True
     if re.search(r"[\[\]+]|::", stripped):
@@ -385,6 +388,14 @@ def _is_code_expression(value: str) -> bool:
     if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*(?:\([^)]*\)|\))+", stripped):
         return True
     return False
+
+
+def _is_safe_route_url(value: str) -> bool:
+    """Recognize non-secret route/test URLs while retaining real URL scans."""
+    stripped = value.strip()
+    if stripped.startswith("/"):
+        return True
+    return re.fullmatch(r"https?://(?:[^/]+\.)?example(?:\.test)?(?:/.*)?", stripped) is not None
 
 
 def _is_typescript_string_literal_type(line: str, value_end: int) -> bool:
@@ -447,6 +458,8 @@ def extract_assignments(line: str) -> list[tuple[str, str]]:
             if not value:
                 continue
         if not _is_credential_field(raw_field) and not is_synthetic_value(value):
+            continue
+        if field == "url" and _is_safe_route_url(value) and not is_realistic_value(value):
             continue
         if _is_reference_value(value) and not is_realistic_value(value) and not is_synthetic_value(value):
             continue

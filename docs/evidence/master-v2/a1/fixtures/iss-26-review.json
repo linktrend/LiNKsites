@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-iss26-independent-review",
+  "packetId": "LS-08",
+  "layoutPack": "a1",
+  "evidenceClass": "preparation-fixture",
+  "packetCompletion": false,
+  "pairedProofRun": false,
+  "dimensions": {
+    "visual": {
+      "status": "NOT_RUN",
+      "surfaces": ["desktop", "mobile"],
+      "pairedProofRun": false
+    },
+    "accessibility": {
+      "status": "NOT_RUN",
+      "target": "WCAG-2.2-AA",
+      "pairedProofRun": false
+    },
+    "privacy": {
+      "status": "NOT_RUN",
+      "pairedProofRun": false
+    },
+    "tenant": {
+      "status": "NOT_RUN",
+      "pairedProofRun": false
+    }
+  },
+  "lifecycle": {
+    "cache_restart": {
+      "mode": "injected-fixture",
+      "status": "NOT_RUN",
+      "pairedProofRun": false
+    },
+    "tamper": {
+      "mode": "injected-fixture",
+      "status": "NOT_RUN",
+      "pairedProofRun": false
+    },
+    "rollback": {
+      "mode": "injected-fixture",
+      "status": "NOT_RUN",
+      "pairedProofRun": false
+    },
+    "migration": {
+      "mode": "injected-fixture",
+      "status": "NOT_RUN",
+      "pairedProofRun": false
+    }
+  }
+}

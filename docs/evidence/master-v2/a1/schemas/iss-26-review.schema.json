@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/master-v2/a1/iss-26-review.schema.json",
+  "title": "LS-08 ISS-26 independent review and lifecycle fixtures (preparation)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "packetId", "dimensions", "lifecycle", "packetCompletion"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls08-iss26-independent-review" },
+    "packetId": { "const": "LS-08" },
+    "layoutPack": { "const": "a1" },
+    "evidenceClass": { "type": "string", "enum": ["preparation-fixture", "schema-fixture"] },
+    "packetCompletion": { "const": false },
+    "pairedProofRun": { "const": false },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["visual", "accessibility", "privacy", "tenant"],
+      "properties": {
+        "visual": { "$ref": "#/$defs/reviewSlot" },
+        "accessibility": { "$ref": "#/$defs/reviewSlot" },
+        "privacy": { "$ref": "#/$defs/reviewSlot" },
+        "tenant": { "$ref": "#/$defs/reviewSlot" }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cache_restart", "tamper", "rollback", "migration"],
+      "properties": {
+        "cache_restart": { "$ref": "#/$defs/lifecycleSlot" },
+        "tamper": { "$ref": "#/$defs/lifecycleSlot" },
+        "rollback": { "$ref": "#/$defs/lifecycleSlot" },
+        "migration": { "$ref": "#/$defs/lifecycleSlot" }
+      }
+    }
+  },
+  "$defs": {
+    "reviewSlot": {
+      "type": "object",
+      "required": ["status", "pairedProofRun"],
+      "properties": {
+        "status": { "enum": ["NOT_RUN", "HOLD"] },
+        "pairedProofRun": { "const": false },
+        "surfaces": { "type": "array", "items": { "type": "string" } },
+        "target": { "type": "string" }
+      }
+    },
+    "lifecycleSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "status", "pairedProofRun"],
+      "properties": {
+        "mode": { "const": "injected-fixture" },
+        "status": { "enum": ["NOT_RUN", "HOLD"] },
+        "pairedProofRun": { "const": false }
+      }
+    }
+  }
+}
