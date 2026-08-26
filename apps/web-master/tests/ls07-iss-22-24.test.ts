@@ -240,6 +240,19 @@ test("ISS-24 accessibility matrix performance budgets and visual fixtures exist 
   );
 });
 
+test("ISS-23 client form barrel does not import node:fs/promises enqueue", () => {
+  const barrel = readFileSync(resolve(root, "../src/lib/forms/index.ts"), "utf8");
+  const newsletter = readFileSync(resolve(root, "../src/components/common/NewsletterSection.tsx"), "utf8");
+  const contact = readFileSync(resolve(root, "../src/components/contact/ContactForm.tsx"), "utf8");
+  assert.doesNotMatch(barrel, /export \* from ['\"]\.\/governed-side-effect['\"]/);
+  assert.doesNotMatch(barrel, /autowork-boundary/);
+  assert.doesNotMatch(barrel, /node:fs\/promises/);
+  assert.match(newsletter, /from ["']@\/lib\/forms["']/);
+  assert.match(contact, /from ["']@\/lib\/forms["']/);
+  assert.doesNotMatch(newsletter, /governed-side-effect/);
+  assert.doesNotMatch(contact, /governed-side-effect/);
+});
+
 test("ISS-23 newsletter enqueue uses the canonical contact.submitted autowork event", () => {
   assert.equal(canonicalGovernedFormEventName("newsletter"), "contact.submitted");
   assert.equal(canonicalGovernedFormEventName("contact"), "contact.submitted");
