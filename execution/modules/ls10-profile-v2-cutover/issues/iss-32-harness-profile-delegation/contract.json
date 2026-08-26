@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls10-iss32-composition-contract",
+  "packet": "LS-10",
+  "issue": "ISS-32",
+  "repository": "linktrend/LiNKsites",
+  "candidateParent": {
+    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
+    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+  },
+  "profile": {
+    "package": "@linksites/profile",
+    "identityId": "linksites-profile"
+  },
+  "harness": {
+    "pinLabel": "HC1-A",
+    "copyPolicy": "do_not_copy_harness_source"
+  },
+  "liveAuthority": "generic-runtime",
+  "genericRuntime": "program-ledger+program-orchestrator+execution",
+  "shadowMode": true,
+  "h09": {
+    "receiptAction": "rebind-required",
+    "conformanceAccepted": false
+  },
+  "controls": {
+    "rollbackKeepsGenericRuntime": true,
+    "genericAuthorityRetirement": "fail-closed",
+    "harnessConformance": "fail-closed"
+  },
+  "scope": {
+    "ownedPaths": [
+      "apps/program-orchestrator/**",
+      "execution/**"
+    ],
+    "prohibitedPaths": [
+      "packages/program-ledger/**",
+      "deploy/**",
+      "docs/releases/**",
+      "packages/linkharness-profile/**",
+      "provider-checkout/**",
+      "harness-checkout/**"
+    ]
+  }
+}
