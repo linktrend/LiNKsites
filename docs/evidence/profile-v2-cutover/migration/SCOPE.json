@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-10",
+  "issue": "ISS-31",
+  "ownedPaths": [
+    "packages/program-ledger/**",
+    "docs/evidence/profile-v2-cutover/migration/**"
+  ],
+  "prohibitedPaths": [
+    "apps/program-orchestrator/**",
+    "execution/**",
+    "deploy/**",
+    "docs/releases/**",
+    "packages/linkharness-profile/**",
+    "packages/factory-catalog/**"
+  ],
+  "ls10Acceptance": "HOLD",
+  "h09ConsumerConformance": "not_accepted",
+  "genericRuntimeActive": true
+}
