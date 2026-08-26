@@ -15,12 +15,12 @@ export function CaseStudyLayout({ lang, page }: Props) {
       ? (caseStudy as any).reviewedBy
       : (caseStudy as any).reviewedBy?.name;
   const schema = buildArticleJsonLd({
-    title: caseStudy.title ?? "Case Study",
+    title: caseStudy.title ?? "",
     description: caseStudy.summary ?? "",
     url: `/${lang}/resources/cases/${caseStudy.slug}`,
     image: "",
-    datePublished: caseStudy.lastUpdated ?? new Date().toISOString(),
-    author: reviewedBy ?? "Case Study Team",
+    datePublished: caseStudy.lastUpdated ?? "",
+    author: reviewedBy ?? "",
     reviewedBy,
     verificationDate: (caseStudy as any).reviewedAt ?? undefined,
   });

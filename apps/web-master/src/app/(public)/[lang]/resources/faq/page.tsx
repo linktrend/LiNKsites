@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { CmsFaqList } from "@/components/resources/CmsFaqList";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
 import { getFaqPage } from "@/lib/pageService";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 import { tenantSafeWhere } from "@/lib/routes";
