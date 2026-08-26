@@ -5,9 +5,23 @@
   "packet": "LS-02",
   "repository": "linktrend/LiNKsites",
   "candidateBinding": {
-    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
-    "tree": "606fcb986b8eb9af476aea369d94990357ff9681",
+    "commit": "fd36e3084ddbd26356e3c12883c8754003d671ce",
+    "tree": "b0772be140486124362ee9bba4eb7d4447ecd227",
     "bindingRule": "The candidate commit and tree must match together; either mismatch is stale input."
+  },
+  "ls08A1Candidate": {
+    "commit": "7e9596ef009d509f0683b69e5df1d7fb2f156664",
+    "tree": "a67c3604ae15c07e4889ed2ebe718d726f0e5eab"
+  },
+  "providerPin": {
+    "repository": "linktrend/LiNKlibraries",
+    "packet": "MWT-07",
+    "commit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
+    "tree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b"
+  },
+  "ls08ReceiptDigests": {
+    "consumerReceiptSha256": "2373efd24a502dc04260217f4c90a9f088609f647bb468e01400ad34e5260646",
+    "evidenceChecksumsSha256": "33f4a1925a056602ebf4c0a5d79f876e660a79eb282311a303a5ad3d14e555ac"
   },
   "requiredChecks": [
     "repository_identity",
