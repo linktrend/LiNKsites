@@ -55,7 +55,7 @@ export default async function LangLayout({
   }
 
   return (
-    <div data-theme={theme.id} data-lang={locale}>
+    <div data-theme={theme.id} data-lang={locale} lang={locale}>
       <NextIntlClientProvider messages={messages}>
         <MarketingLayoutClient
           lang={locale}

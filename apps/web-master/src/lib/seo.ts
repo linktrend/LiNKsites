@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { 
   SUPPORTED_LANGUAGES, 
-  LANGUAGE_NAMES, 
+  DEFAULT_LANGUAGE,
   SITE_CONFIG, 
   SEO_CONFIG,
   getLocaleFromLanguage,
   getSiteUrl 
 } from "@/config";
+import { collectVisibleFacts, projectVisibleJsonLd } from "@/lib/seo/visible-facts";
 
 /**
  * SEO Metadata Builder
@@ -106,9 +107,12 @@ export function buildMetadata(
     // Alternates (canonical + hreflang)
     alternates: {
       canonical: canonicalUrl,
-      languages: Object.fromEntries(
-        buildHreflang(slug).map((h) => [h.hrefLang, `${getSiteUrl()}${h.href}`])
-      ),
+      languages: {
+        ...Object.fromEntries(
+          buildHreflang(slug).map((h) => [h.hrefLang, `${getSiteUrl()}${h.href}`])
+        ),
+        "x-default": `${getSiteUrl()}/${DEFAULT_LANGUAGE}${slug.startsWith("/") ? slug : `/${slug}`}`,
+      },
     },
 
     // OpenGraph
@@ -168,11 +172,13 @@ function getLocaleFromLang(lang: string): string {
  * Generate JSON-LD structured data
  */
 export function buildJsonLd(type: string, data: Record<string, any>) {
-  return {
-    "@context": "https://schema.org",
-    "@type": type,
-    ...data,
-  };
+  const facts = collectVisibleFacts(
+    Object.fromEntries(
+      Object.entries(data).filter(([, value]) => typeof value === "string") as Array<[string, string]>,
+    ),
+  );
+  const extra = Object.fromEntries(Object.entries(data).filter(([, value]) => typeof value !== "string"));
+  return projectVisibleJsonLd(type, facts, extra);
 }
 
 /**
@@ -182,11 +188,7 @@ export function buildOrganizationJsonLd() {
   return buildJsonLd("Organization", {
     name: SITE_CONFIG.siteName,
     url: getSiteUrl(),
-    logo: `${getSiteUrl()}/logo.png`,
     description: SITE_CONFIG.description,
-    sameAs: [
-      // Add social media URLs here when available
-    ],
   });
 }
 
@@ -246,17 +248,17 @@ export function buildArticleJsonLd(params: {
     image: params.image,
     datePublished: params.datePublished,
     dateModified: params.verificationDate || params.dateModified || params.datePublished,
-    author: {
-      "@type": "Person",
-      name: params.author,
-    },
+    ...(params.author
+      ? {
+          author: {
+            "@type": "Person",
+            name: params.author,
+          },
+        }
+      : {}),
     publisher: {
       "@type": "Organization",
       name: SITE_CONFIG.siteName,
-      logo: {
-        "@type": "ImageObject",
-        url: `${getSiteUrl()}/logo.png`,
-      },
     },
     ...(params.reviewedBy && {
       reviewedBy: {
@@ -290,10 +292,12 @@ export function buildProductJsonLd(params: {
     description: params.description,
     image: params.image,
     url: params.url,
-    brand: {
-      "@type": "Brand",
-      name: params.brand || SITE_CONFIG.siteName,
-    },
+    brand: params.brand
+      ? {
+          "@type": "Brand",
+          name: params.brand,
+        }
+      : undefined,
     ...(params.reviewedBy && {
       reviewedBy: {
         "@type": "Person",

@@ -1,5 +1,6 @@
 import { buildOrganizationJsonLd, buildWebSiteJsonLd } from "@/lib/seo";
-import { getAiActions } from "@/config";
+import { SITE_CONFIG, getAiActions, getSiteUrl } from "@/config";
+import { assertJsonLdMatchesVisibleFacts, collectVisibleFacts } from "@/lib/seo/visible-facts";
 
 export function SiteStructuredData() {
   const actions = getAiActions().actions.map((action) => ({
@@ -9,7 +10,15 @@ export function SiteStructuredData() {
     description: action.description,
   }));
 
+  const facts = collectVisibleFacts({
+    name: SITE_CONFIG.siteName,
+    url: getSiteUrl(),
+    description: SITE_CONFIG.description,
+  });
   const schemas = [buildOrganizationJsonLd(), buildWebSiteJsonLd(actions)];
+  for (const schema of schemas) {
+    assertJsonLdMatchesVisibleFacts(schema, facts, ["name", "url", "description"]);
+  }
 
   return (
     <>

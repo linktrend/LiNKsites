@@ -6,13 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { newsletterSchema, NewsletterFormData } from "@/lib/validation";
+import { handleFormSubmission } from "@/lib/forms";
 import { routes } from "@/lib/routes";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface Props {
   lang: string;
@@ -21,7 +22,8 @@ interface Props {
 export function NewsletterSection({ lang }: Props) {
   const t = useTranslations();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success">("idle");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     register,
@@ -42,24 +44,35 @@ export function NewsletterSection({ lang }: Props) {
 
   const onSubmit = async (data: NewsletterFormData) => {
     setIsSubmitting(true);
+    setSubmitStatus("idle");
+    setErrorMessage("");
 
-    try {
-      // Simulate API call - replace with actual newsletter subscription endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Newsletter signup:", data);
-      
-      setSubmitStatus("success");
-      reset();
-      
-      // Reset success message after 5 seconds
-      setTimeout(() => {
-        setSubmitStatus("idle");
-      }, 5000);
-    } catch (error) {
-      console.error("Newsletter subscription error:", error);
-    } finally {
-      setIsSubmitting(false);
+    const result = await handleFormSubmission(
+      data,
+      {
+        endpoint: "/api/newsletter",
+        method: "POST",
+        intentTag: "newsletter",
+        lang,
+      },
+      {
+        onSuccess: () => {
+          setSubmitStatus("success");
+          reset();
+        },
+        onError: (error) => {
+          setSubmitStatus("error");
+          setErrorMessage(error.message);
+        },
+      },
+    );
+
+    if (!result.success) {
+      setSubmitStatus("error");
+      setErrorMessage(result.error || "Subscription could not be completed.");
     }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -80,6 +93,12 @@ export function NewsletterSection({ lang }: Props) {
 
               {/* Right Side - Form */}
               <div className="space-y-4">
+                {submitStatus === "error" ? (
+                  <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                    <p className="text-sm font-medium text-red-900">{errorMessage}</p>
+                  </div>
+                ) : null}
                 {submitStatus === "success" ? (
                   <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
