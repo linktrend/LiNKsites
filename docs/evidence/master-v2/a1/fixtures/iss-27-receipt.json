@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-consumer-receipt",
+  "packetId": "LS-08",
+  "githubIssue": 350,
+  "issues": [
+    "ISS-25",
+    "ISS-26",
+    "ISS-27"
+  ],
+  "evidenceClass": "paired-proof",
+  "packetCompletion": true,
+  "freezeAcceptedA1": true,
+  "overallVerdict": "A1_SEMANTICS_FROZEN",
+  "overallReason": "ISS-25/26/27 paired consumer proof passed on protected development. A1 semantics are frozen for this consumer. Provider remains draft/non-selectable. Later library packets are not claimed.",
+  "emitted": true,
+  "providerSelectable": false,
+  "providerConformanceClaimed": false,
+  "mwt08Claimed": false,
+  "providerBytesPresent": false,
+  "frozenSemantics": {
+    "layoutPack": "a1",
+    "plans": [
+      "a",
+      "b",
+      "c",
+      "l"
+    ],
+    "releaseEntryVersion": "master-template-type-1@2.0.0-a1.1",
+    "providerCommit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
+    "providerTree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b",
+    "providerLifecycle": "draft",
+    "providerSelectability": "non_selectable",
+    "consumerProtectedCommit": "e89cfd49fafe7f1dc7b137f77c2ab481140a6cca",
+    "consumerProtectedTree": "27c5578ab1416b7a37ddf79168b91be1547eb127"
+  },
+  "bindings": {
+    "providerPin": {
+      "repository": "linktrend/LiNKlibraries",
+      "packet": "MWT-07",
+      "commit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
+      "tree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b",
+      "releaseEntryVersion": "master-template-type-1@2.0.0-a1.1"
+    },
+    "extLs01Receipt": {
+      "path": ".git/linktrend-evidence/execution-2026-08-25/ext-ls-01-issue321-966a4b0/consumer-proof-receipt.json",
+      "sha256": "5422616a2db650af44d3c87253066dfc5acd80054b4a6dcd35bd83ce6ca978e3",
+      "consumerCommit": "966a4b08c5fdb0fc9a9bb429a5916600b459cee9",
+      "consumerTree": "fa6f3fcbd737c9954214d79b733fe9b8f5d4f68f",
+      "bytesEmbedded": false
+    }
+  },
+  "verdicts": {
+    "candidate_materialized": "PASS",
+    "adapter_compatible": "PASS",
+    "payload_projection_valid": "PASS",
+    "server_render_valid": "PASS",
+    "browser_fixture_valid": "PASS",
+    "migration_rollback_valid": "PASS",
+    "tamper_rejected": "PASS",
+    "cache_restart_valid": "PASS"
+  },
+  "satisfiedDependencies": [
+    {
+      "id": "ls07-protected-integration",
+      "required": true,
+      "satisfied": true
+    },
+    {
+      "id": "exact-provider-a1-binding",
+      "required": true,
+      "satisfied": true
+    },
+    {
+      "id": "ext-ls-01-consumer-proof-receipt",
+      "required": true,
+      "satisfied": true
+    }
+  ],
+  "checkId": "iss27.receipt_emitted"
+}

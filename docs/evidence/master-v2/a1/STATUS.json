@@ -1,32 +1,55 @@
 {
   "schemaVersion": 1,
-  "kind": "ls08-a1-preparation-status",
+  "kind": "ls08-a1-paired-proof-status",
   "packetId": "LS-08",
-  "githubIssue": 334,
-  "issues": ["ISS-25", "ISS-26", "ISS-27"],
-  "preparationOnly": true,
-  "packetCompletion": false,
-  "packetComplete": false,
-  "pairedProofRun": false,
-  "consumerProofPresent": false,
+  "githubIssue": 350,
+  "issues": [
+    "ISS-25",
+    "ISS-26",
+    "ISS-27"
+  ],
+  "preparationOnly": false,
+  "packetCompletion": true,
+  "packetComplete": true,
+  "pairedProofRun": true,
+  "consumerProofPresent": true,
   "a1BytesPresent": false,
-  "freezeAcceptedA1": false,
+  "freezeAcceptedA1": true,
+  "providerSelectable": false,
+  "providerConformance": false,
+  "mwt08Claimed": false,
   "ls07Checkpoint": {
-    "present": false,
-    "protectedIntegrated": false
+    "present": true,
+    "protectedIntegrated": true,
+    "repository": "linktrend/LiNKsites",
+    "ref": "development",
+    "commit": "e89cfd49fafe7f1dc7b137f77c2ab481140a6cca",
+    "tree": "27c5578ab1416b7a37ddf79168b91be1547eb127"
   },
   "providerA1": {
-    "bound": false,
-    "bytesPresent": false
+    "bound": true,
+    "bytesPresent": false,
+    "commit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
+    "tree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b",
+    "releaseEntryVersion": "master-template-type-1@2.0.0-a1.1",
+    "lifecycle": "draft",
+    "selectability": "non_selectable",
+    "conformanceClaimed": false,
+    "selectableClaimed": false,
+    "mwt08Claimed": false
   },
-  "base": {
-    "repository": "linktrend/LiNKsites",
-    "ref": "issue/334-ls-08-a1-paired-consumer-proof-preparation-iss-2",
-    "fromCommit": "b23f3d6456df1953213000c2d75f5e808241580e",
-    "fromTree": "27f192d7083a99e842ddd0d072023c6fa93093c7"
+  "extLs01Receipt": {
+    "bound": true,
+    "gateId": "EXT-LS-01",
+    "path": ".git/linktrend-evidence/execution-2026-08-25/ext-ls-01-issue321-966a4b0/consumer-proof-receipt.json",
+    "sha256": "5422616a2db650af44d3c87253066dfc5acd80054b4a6dcd35bd83ce6ca978e3",
+    "consumerCommit": "966a4b08c5fdb0fc9a9bb429a5916600b459cee9",
+    "consumerTree": "fa6f3fcbd737c9954214d79b733fe9b8f5d4f68f",
+    "bytesEmbedded": false,
+    "acceptedBinding": true
   },
   "notes": [
-    "ISS-25..27 harnesses and schemas only.",
-    "Do not treat this STATUS as an accepted consumer receipt."
+    "LS-08 ISS-25..27 paired consumer proof on protected development.",
+    "Provider remains draft/non-selectable. Provider bytes were not copied."
   ]
 }
