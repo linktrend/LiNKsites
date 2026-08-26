@@ -6,15 +6,21 @@
   "handoff": "LiNKharness H-09 / downstream H-10 identity refresh",
   "identityRefreshOnly": true,
   "work": {
-    "githubIssue": 352,
-    "branch": "issue/352-ls-02-h-09-identity-refresh-for-ls-08-a1-develop",
+    "githubIssue": 358,
+    "branch": "issue/358-ls-02-h-09-identity-refresh-for-ls-09-protected",
     "successorPacketIssue": 300
   },
   "sites": {
     "repository": "linktrend/LiNKsites",
+    "previousProtectedDevelopment": {
+      "commit": "da83f57dc89468a1144735f76343ed19e563a36b",
+      "tree": "80f54db2219524b52f3388ccef95facb918d384a",
+      "note": "prior LS-02 H-09 identity refresh merge (PR 354 / issue 352)"
+    },
     "protectedDevelopment": {
-      "commit": "fd36e3084ddbd26356e3c12883c8754003d671ce",
-      "tree": "b0772be140486124362ee9bba4eb7d4447ecd227"
+      "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
+      "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755",
+      "includes": ["LS-09 protected integration", "LS-08 A1"]
     },
     "ls02Phase": {
       "pr": 273,
@@ -81,7 +87,8 @@
   },
   "rebindInstructions": {
     "h09": [
-      "Bind LiNKharness H-09 to LiNKsites protected development commit fd36e3084ddbd26356e3c12883c8754003d671ce tree b0772be140486124362ee9bba4eb7d4447ecd227.",
+      "Bind LiNKharness H-09 to LiNKsites protected development commit 02ebf5d8710c50c1f2c390989239f0baf916ba97 tree fb427d30ea7c3e7060fc9cc1a63a1110266dd755.",
+      "Treat prior consumer identity da83f57dc89468a1144735f76343ed19e563a36b tree 80f54db2219524b52f3388ccef95facb918d384a as stale input.",
       "Record the completed LS-08 A1 consumer checkpoint commit 7e9596ef009d509f0683b69e5df1d7fb2f156664 tree a67c3604ae15c07e4889ed2ebe718d726f0e5eab as the candidate identity on that development tree.",
       "Pin LiNKlibraries MWT-07 by identity only at commit f28fd53d454cbc33d97951d8e62826dae5a83e40 tree 34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b. Do not copy provider or Harness bytes.",
       "Bind LS-08 ISS-27 consumer receipt sha256 2373efd24a502dc04260217f4c90a9f088609f647bb468e01400ad34e5260646 and evidence CHECKSUMS.json sha256 33f4a1925a056602ebf4c0a5d79f876e660a79eb282311a303a5ad3d14e555ac.",
@@ -96,16 +103,17 @@
     "h09ConformanceAccepted": false,
     "h10ReviewAccepted": false,
     "ls03DependencyClaimed": false,
+    "ls09A2A3EvidenceMutated": false,
     "copiedHarnessOrProviderBytes": false,
     "productRuntimeMutated": false,
     "canonicalPacketBehaviorMutated": false,
     "identityRefreshOnly": true,
     "ls08A1CandidateBound": true,
     "ls08ReceiptDigestsBound": true,
-    "consumerActionRequired": "Rebind H-09 consumer receipt to this exact sites development identity and LS-08 A1 checkpoint, then rerun H-09 before H-10 review admission."
+    "consumerActionRequired": "Rebind H-09 consumer receipt to this exact sites development identity and LS-08 A1 checkpoint, then rerun H-09 before H-10 review admission. H-09/H-10 acceptance remains pending Harness rerun."
   },
   "remainingGates": [
-    "H-09 receipt rebind against fd36e3084ddbd26356e3c12883c8754003d671ce/b0772be140486124362ee9bba4eb7d4447ecd227",
+    "H-09 receipt rebind against 02ebf5d8710c50c1f2c390989239f0baf916ba97/fb427d30ea7c3e7060fc9cc1a63a1110266dd755",
     "H-09 rerun after rebind; H-09 remains unadmitted",
     "H-10 review remains blocked-until-h09-rebind",
     "MWT-07 provider remains draft/non-selectable; provider conformance unclaimed",

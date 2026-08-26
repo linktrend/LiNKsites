@@ -1,6 +1,6 @@
 # LS-02 H-09/H-10 provider handoff successor
 
-Issue: `#300` (packet identity). Work issue: `#352`.
+Issue: `#300` (packet identity). Work issue: `#358`.
 Owner paths: `docs/evidence/ls02/handoff-successor/**`,
 `scripts/profile-v2-quality/ls02-handoff/**`
 
@@ -10,10 +10,16 @@ H-09/H-10.
 
 ## Candidate binding
 
-The package is bound to the exact pre-change protected development parent:
+The package is bound to the exact pre-change protected development parent,
+which includes LS-09 protected integration and LS-08 A1:
 
-- commit: `fd36e3084ddbd26356e3c12883c8754003d671ce`
-- tree: `b0772be140486124362ee9bba4eb7d4447ecd227`
+- commit: `02ebf5d8710c50c1f2c390989239f0baf916ba97`
+- tree: `fb427d30ea7c3e7060fc9cc1a63a1110266dd755`
+
+Prior identity (superseded by this refresh, not the candidate parent):
+
+- commit: `da83f57dc89468a1144735f76343ed19e563a36b`
+- tree: `80f54db2219524b52f3388ccef95facb918d384a`
 
 The pair is checked together. A stale commit/tree or a foreign repository/issue
 is a hard failure. The resulting checkpoint identity is recorded separately by
@@ -40,8 +46,8 @@ the owner after commit; it must not replace this input binding.
 ## H-09 / H-10 rebind instructions
 
 1. Rebind the H-09 consumer receipt to LiNKsites
-   `fd36e3084ddbd26356e3c12883c8754003d671ce` /
-   `b0772be140486124362ee9bba4eb7d4447ecd227`.
+   `02ebf5d8710c50c1f2c390989239f0baf916ba97` /
+   `fb427d30ea7c3e7060fc9cc1a63a1110266dd755`.
 2. Keep the LS-08 A1 checkpoint and MWT-07 pin above as identity references.
 3. Rerun H-09. Fail closed on any other sites commit/tree.
 4. Keep H-10 blocked until that H-09 rebind completes.
