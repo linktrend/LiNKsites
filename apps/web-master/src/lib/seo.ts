@@ -1,12 +1,9 @@
-import type { Metadata } from "next";
 import { 
   SUPPORTED_LANGUAGES, 
-  LANGUAGE_NAMES, 
   SITE_CONFIG, 
-  SEO_CONFIG,
-  getLocaleFromLanguage,
   getSiteUrl 
 } from "@/config";
+import { collectVisibleFacts, projectVisibleJsonLd } from "@/lib/seo/visible-facts";
 
 /**
  * SEO Metadata Builder
@@ -45,134 +42,16 @@ export function buildAbsoluteUrl(lang: string, slug: string) {
 }
 
 /**
- * Enhanced metadata builder with full SEO support
- * Supports CMS-driven fields: title, description, ogImage
- */
-export function buildMetadata(
-  lang: string,
-  slug: string,
-  params?: SEOParams
-): Metadata {
-  const {
-    title,
-    description = SITE_CONFIG.description,
-    keywords = SEO_CONFIG.defaultKeywords,
-    ogImage = SEO_CONFIG.openGraph.images.default,
-    ogType = "website",
-    publishedTime,
-    modifiedTime,
-    author = SITE_CONFIG.author,
-    section,
-    noIndex = false,
-    noFollow = false,
-    canonicalUrl: canonicalOverride,
-  } = params || {};
-
-  const pageTitle = title ? `${title} | ${SITE_CONFIG.siteName}` : SITE_CONFIG.siteName;
-  const canonicalUrl = canonicalOverride
-    ? canonicalOverride.startsWith("http")
-      ? canonicalOverride
-      : `${getSiteUrl()}${canonicalOverride}`
-    : buildCanonical(lang, slug);
-  const absoluteOgImage = ogImage.startsWith("http")
-    ? ogImage
-    : `${getSiteUrl()}${ogImage}`;
-
-  const locale = getLocaleFromLang(lang);
-
-  const keywordsString: string | undefined = Array.isArray(keywords) ? [...keywords].join(", ") : (typeof keywords === 'string' ? keywords : undefined);
-  
-  const metadata: Metadata = {
-    title: pageTitle,
-    description,
-    keywords: keywordsString,
-    authors: [{ name: author }],
-    creator: author,
-    publisher: SITE_CONFIG.siteName,
-    
-    // Robots
-    robots: {
-      index: !noIndex,
-      follow: !noFollow,
-      googleBot: {
-        index: !noIndex,
-        follow: !noFollow,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
-
-    // Alternates (canonical + hreflang)
-    alternates: {
-      canonical: canonicalUrl,
-      languages: Object.fromEntries(
-        buildHreflang(slug).map((h) => [h.hrefLang, `${getSiteUrl()}${h.href}`])
-      ),
-    },
-
-    // OpenGraph
-    openGraph: {
-      type: ogType,
-      locale,
-      url: canonicalUrl,
-      title: title || SITE_CONFIG.siteName,
-      description,
-      siteName: SITE_CONFIG.siteName,
-      images: [
-        {
-          url: absoluteOgImage,
-          width: SEO_CONFIG.openGraph.images.width,
-          height: SEO_CONFIG.openGraph.images.height,
-          alt: title || SITE_CONFIG.siteName,
-        },
-      ],
-      ...(ogType === "article" && {
-        publishedTime,
-        modifiedTime,
-        authors: [author],
-        section,
-      }),
-    },
-
-    // Twitter
-    twitter: {
-      card: SEO_CONFIG.twitter.card,
-      site: SEO_CONFIG.twitter.site,
-      creator: SEO_CONFIG.twitter.creator,
-      title: title || SITE_CONFIG.siteName,
-      description,
-      images: [absoluteOgImage],
-    },
-
-    // Additional metadata
-    metadataBase: new URL(getSiteUrl()),
-    formatDetection: {
-      telephone: false,
-      email: false,
-      address: false,
-    },
-  };
-
-  return metadata;
-}
-
-/**
- * Get locale string from language code
- */
-function getLocaleFromLang(lang: string): string {
-  return getLocaleFromLanguage(lang);
-}
-
-/**
  * Generate JSON-LD structured data
  */
 export function buildJsonLd(type: string, data: Record<string, any>) {
-  return {
-    "@context": "https://schema.org",
-    "@type": type,
-    ...data,
-  };
+  const facts = collectVisibleFacts(
+    Object.fromEntries(
+      Object.entries(data).filter(([, value]) => typeof value === "string") as Array<[string, string]>,
+    ),
+  );
+  const extra = Object.fromEntries(Object.entries(data).filter(([, value]) => typeof value !== "string"));
+  return projectVisibleJsonLd(type, facts, extra);
 }
 
 /**
@@ -182,11 +61,7 @@ export function buildOrganizationJsonLd() {
   return buildJsonLd("Organization", {
     name: SITE_CONFIG.siteName,
     url: getSiteUrl(),
-    logo: `${getSiteUrl()}/logo.png`,
     description: SITE_CONFIG.description,
-    sameAs: [
-      // Add social media URLs here when available
-    ],
   });
 }
 
@@ -246,17 +121,17 @@ export function buildArticleJsonLd(params: {
     image: params.image,
     datePublished: params.datePublished,
     dateModified: params.verificationDate || params.dateModified || params.datePublished,
-    author: {
-      "@type": "Person",
-      name: params.author,
-    },
+    ...(params.author
+      ? {
+          author: {
+            "@type": "Person",
+            name: params.author,
+          },
+        }
+      : {}),
     publisher: {
       "@type": "Organization",
       name: SITE_CONFIG.siteName,
-      logo: {
-        "@type": "ImageObject",
-        url: `${getSiteUrl()}/logo.png`,
-      },
     },
     ...(params.reviewedBy && {
       reviewedBy: {
@@ -290,10 +165,12 @@ export function buildProductJsonLd(params: {
     description: params.description,
     image: params.image,
     url: params.url,
-    brand: {
-      "@type": "Brand",
-      name: params.brand || SITE_CONFIG.siteName,
-    },
+    brand: params.brand
+      ? {
+          "@type": "Brand",
+          name: params.brand,
+        }
+      : undefined,
     ...(params.reviewedBy && {
       reviewedBy: {
         "@type": "Person",

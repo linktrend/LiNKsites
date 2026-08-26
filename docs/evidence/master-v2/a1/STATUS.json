@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-a1-preparation-status",
+  "packetId": "LS-08",
+  "githubIssue": 334,
+  "issues": ["ISS-25", "ISS-26", "ISS-27"],
+  "preparationOnly": true,
+  "packetCompletion": false,
+  "packetComplete": false,
+  "pairedProofRun": false,
+  "consumerProofPresent": false,
+  "a1BytesPresent": false,
+  "freezeAcceptedA1": false,
+  "ls07Checkpoint": {
+    "present": false,
+    "protectedIntegrated": false
+  },
+  "providerA1": {
+    "bound": false,
+    "bytesPresent": false
+  },
+  "base": {
+    "repository": "linktrend/LiNKsites",
+    "ref": "issue/334-ls-08-a1-paired-consumer-proof-preparation-iss-2",
+    "fromCommit": "b23f3d6456df1953213000c2d75f5e808241580e",
+    "fromTree": "27f192d7083a99e842ddd0d072023c6fa93093c7"
+  },
+  "notes": [
+    "ISS-25..27 harnesses and schemas only.",
+    "Do not treat this STATUS as an accepted consumer receipt."
+  ]
+}

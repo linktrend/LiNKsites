@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getCaseStudyPage } from "@/lib/pageService";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 import { CaseStudyLayout } from "@/layouts/CaseStudyLayout";
 

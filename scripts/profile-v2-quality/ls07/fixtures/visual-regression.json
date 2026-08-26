@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls07-visual-regression-fixtures",
+  "source": "lab",
+  "legalCertificationClaimed": false,
+  "fixtures": [
+    { "id": "home-desktop", "family": "home", "viewport": { "width": 1280, "height": 720 }, "layoutPackId": "A1" },
+    { "id": "home-mobile", "family": "home", "viewport": { "width": 390, "height": 844 }, "layoutPackId": "A1" },
+    { "id": "offer-desktop", "family": "detail", "viewport": { "width": 1280, "height": 720 }, "layoutPackId": "A2" },
+    { "id": "type-l-isolated", "family": "home", "viewport": { "width": 1280, "height": 720 }, "layoutPackId": "A1", "planId": "L" }
+  ]
+}

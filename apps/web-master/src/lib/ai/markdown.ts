@@ -1,6 +1,5 @@
-import { buildCanonical, buildHreflang } from "@/lib/seo";
+import { canonicalForPath, hreflangForPath, localePrefixedPath, type PublishedAuthority } from "@/lib/seo/published-authority";
 import { normalizeLocale } from "@/lib/locale-context";
-import { getSiteUrl } from "@/config";
 import type { CmsPage, CmsPageBlock } from "@/lib/repository/pages";
 import type { CmsOffer } from "@/lib/repository/offers";
 import type { CmsArticle } from "@/lib/repository/articles";
@@ -139,10 +138,19 @@ const buildFrontMatter = (meta: {
     .join("\n");
 };
 
-export const markdownForPage = (page: CmsPage, lang: string): string => {
+const publishedCanonical = (authority: PublishedAuthority, locale: string, slug: string): string => {
+  return canonicalForPath(authority, locale, slug) ?? `${authority.baseUrl}${localePrefixedPath(locale, slug)}`;
+};
+
+const alternateLines = (authority: PublishedAuthority, locale: string, slug: string): string[] => {
+  const languages = hreflangForPath(authority, locale, localePrefixedPath(locale, slug));
+  return Object.entries(languages).map(([lang, href]) => `- ${lang}: ${href}`);
+};
+
+export const markdownForPage = (page: CmsPage, lang: string, authority: PublishedAuthority): string => {
   const locale = normalizeLocale(lang);
   const slug = page.slug === "home" ? "/" : `/${page.slug}`;
-  const canonical = page.seo?.canonicalUrl ?? buildCanonical(locale, slug);
+  const canonical = publishedCanonical(authority, locale, slug);
   const blocks = Array.isArray(page.content) ? page.content : [];
   const body = blocks.map(renderBlock).filter(Boolean).join("\n\n");
   return [
@@ -157,12 +165,12 @@ export const markdownForPage = (page: CmsPage, lang: string): string => {
     body || "Content unavailable.",
     "",
     "## Language Alternates",
-    ...buildHreflang(slug).map((h) => `- ${h.hrefLang}: ${getSiteUrl()}${h.href}`),
+    ...alternateLines(authority, locale, slug),
   ].join("\n");
 };
 
-export const markdownForOffer = (offer: CmsOffer, lang: string): string => {
-  const canonical = buildCanonical(lang, `/offers/${offer.slug}`);
+export const markdownForOffer = (offer: CmsOffer, lang: string, authority: PublishedAuthority): string => {
+  const canonical = publishedCanonical(authority, lang, `/offers/${offer.slug}`);
   return [
     buildFrontMatter({
       title: offer.title ?? "Offer",
@@ -180,8 +188,8 @@ export const markdownForOffer = (offer: CmsOffer, lang: string): string => {
     .join("\n\n");
 };
 
-export const markdownForArticle = (article: CmsArticle, lang: string): string => {
-  const canonical = buildCanonical(lang, `/resources/articles/${article.slug}`);
+export const markdownForArticle = (article: CmsArticle, lang: string, authority: PublishedAuthority): string => {
+  const canonical = publishedCanonical(authority, lang, `/resources/articles/${article.slug}`);
   return [
     buildFrontMatter({
       title: article.title ?? "Article",
@@ -199,8 +207,8 @@ export const markdownForArticle = (article: CmsArticle, lang: string): string =>
     .join("\n\n");
 };
 
-export const markdownForCaseStudy = (caseStudy: CmsCaseStudy, lang: string): string => {
-  const canonical = buildCanonical(lang, `/resources/cases/${caseStudy.slug}`);
+export const markdownForCaseStudy = (caseStudy: CmsCaseStudy, lang: string, authority: PublishedAuthority): string => {
+  const canonical = publishedCanonical(authority, lang, `/resources/cases/${caseStudy.slug}`);
   return [
     buildFrontMatter({
       title: caseStudy.title ?? "Case Study",
@@ -220,8 +228,8 @@ export const markdownForCaseStudy = (caseStudy: CmsCaseStudy, lang: string): str
     .join("\n\n");
 };
 
-export const markdownForVideo = (video: CmsVideo, lang: string): string => {
-  const canonical = buildCanonical(lang, `/resources/videos/${video.slug}`);
+export const markdownForVideo = (video: CmsVideo, lang: string, authority: PublishedAuthority): string => {
+  const canonical = publishedCanonical(authority, lang, `/resources/videos/${video.slug}`);
   return [
     buildFrontMatter({
       title: video.title ?? "Video",
@@ -239,8 +247,8 @@ export const markdownForVideo = (video: CmsVideo, lang: string): string => {
     .join("\n\n");
 };
 
-export const markdownForFaq = (faqs: CmsFaq[], lang: string): string => {
-  const canonical = buildCanonical(lang, "/resources/faq");
+export const markdownForFaq = (faqs: CmsFaq[], lang: string, authority: PublishedAuthority): string => {
+  const canonical = publishedCanonical(authority, lang, "/resources/faq");
   const items = faqs.map((faq) => `- **Q:** ${faq.question}\n  **A:** ${faq.answer ?? ""}`);
   return [
     buildFrontMatter({
@@ -256,8 +264,8 @@ export const markdownForFaq = (faqs: CmsFaq[], lang: string): string => {
     .join("\n\n");
 };
 
-export const markdownForAbout = (about: CmsAbout | null, lang: string): string => {
-  const canonical = buildCanonical(lang, "/about");
+export const markdownForAbout = (about: CmsAbout | null, lang: string, authority: PublishedAuthority): string => {
+  const canonical = publishedCanonical(authority, lang, "/about");
   const title = about?.heroTitle ?? "About";
   const subtitle = about?.heroSubtitle ?? "";
   const sections = Array.isArray(about?.sections)
@@ -278,8 +286,8 @@ export const markdownForAbout = (about: CmsAbout | null, lang: string): string =
     .join("\n\n");
 };
 
-export const markdownForContact = (contact: CmsContact | null, lang: string): string => {
-  const canonical = buildCanonical(lang, "/contact");
+export const markdownForContact = (contact: CmsContact | null, lang: string, authority: PublishedAuthority): string => {
+  const canonical = publishedCanonical(authority, lang, "/contact");
   const title = contact?.page?.title ?? "Contact";
   const subtitle = contact?.page?.subtitle ?? "";
   const channels = Array.isArray(contact?.channels)
@@ -300,8 +308,8 @@ export const markdownForContact = (contact: CmsContact | null, lang: string): st
     .join("\n\n");
 };
 
-export const markdownForLegal = (legal: CmsLegal | null, lang: string, slug: string): string => {
-  const canonical = buildCanonical(lang, `/legal/${slug}`);
+export const markdownForLegal = (legal: CmsLegal | null, lang: string, slug: string, authority: PublishedAuthority): string => {
+  const canonical = publishedCanonical(authority, lang, `/legal/${slug}`);
   return [
     buildFrontMatter({
       title: legal?.title ?? "Legal",

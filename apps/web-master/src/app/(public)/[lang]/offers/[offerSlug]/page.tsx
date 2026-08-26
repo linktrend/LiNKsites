@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getOfferPage } from "@/lib/pageService";
 import { OfferPageLayout } from "@/layouts/OfferPageLayout";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 import { listOffers } from "@/lib/repository/offers";
 
