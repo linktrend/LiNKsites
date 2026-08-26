@@ -6,8 +6,8 @@
   "issue": 300,
   "packet": "LS-02",
   "candidateParent": {
-    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
-    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+    "commit": "fd36e3084ddbd26356e3c12883c8754003d671ce",
+    "tree": "b0772be140486124362ee9bba4eb7d4447ecd227"
   },
   "files": [
     {
@@ -16,19 +16,19 @@
     },
     {
       "path": "docs/evidence/ls02/handoff-successor/handoff-successor.json",
-      "sha256": "5a75754c0dd8ab9e35e7a1fcc62b2a914324966aece9f1dfb0d631d2b565c98d"
+      "sha256": "6c2bf3509d6ff22a7d6483b324be87ca26c437ef4503b374928bc9d3ea656838"
     },
     {
       "path": "docs/evidence/ls02/handoff-successor/rebind-contract.json",
-      "sha256": "52839ead613c254669c9580fcea3b3af0116c72a652d1dc0dd953d1808a93735"
+      "sha256": "5dc9153dda13aa4875ef418c7567dcbf5d5871f4d62d6b5950e2b2ca31948cd1"
     },
     {
       "path": "docs/evidence/ls02/handoff-successor/PROOF.md",
-      "sha256": "d1194296f0f1368e642d8460be7e418b49666972e390af2dfa4d7433cb00aceb"
+      "sha256": "fc1276e69df09c67002ba6c4056fc4b16658da8e27f0c0a627e83307dc4051ad"
     },
     {
       "path": "scripts/profile-v2-quality/ls02-handoff/constants.mjs",
-      "sha256": "48db7613481a004cc56a2e6b430deb3bf5b6a2aaedd2da184c1c335e71136d5d"
+      "sha256": "1cce4fa4d63360892cc501def72c168e4537a86421f4a6392f46b4d23935922f"
     },
     {
       "path": "scripts/profile-v2-quality/ls02-handoff/rebind-validator.mjs",
