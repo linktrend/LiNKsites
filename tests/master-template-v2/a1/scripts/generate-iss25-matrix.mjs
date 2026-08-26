@@ -1,37 +1,15 @@
 #!/usr/bin/env node
 /**
- * Emit the ISS-25 A1 × A/B/C/L × scenario × surface fixture matrix.
- * Slots are NOT_RUN preparation stubs. No paired proof is claimed.
+ * Emit ISS-25 matrix JSON (paired-proof run).
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { LAYOUT_PACK, PACKET_ID, requiredMatrixSlots } from "../constants.mjs";
-
-export function buildIss25Matrix() {
-  return {
-    schemaVersion: 1,
-    kind: "ls08-iss25-fixture-matrix",
-    packetId: PACKET_ID,
-    layoutPack: LAYOUT_PACK,
-    evidenceClass: "preparation-fixture",
-    packetCompletion: false,
-    pairedProofRun: false,
-    a1BytesPresent: false,
-    ls07ProtectedIntegrated: false,
-    providerA1Bound: false,
-    slots: requiredMatrixSlots().map((slot) => ({
-      ...slot,
-      status: "NOT_RUN",
-      pairedProofRun: false,
-      evidence: "unbound-preparation-slot",
-    })),
-  };
-}
+import { runIss25Matrix } from "../harness.mjs";
 
 function main(argv = process.argv.slice(2)) {
   const outIdx = argv.indexOf("--out");
-  const matrix = buildIss25Matrix();
+  const matrix = runIss25Matrix();
   const text = `${JSON.stringify(matrix, null, 2)}\n`;
   if (outIdx !== -1 && argv[outIdx + 1]) {
     const dest = path.resolve(argv[outIdx + 1]);
