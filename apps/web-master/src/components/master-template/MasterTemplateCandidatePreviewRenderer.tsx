@@ -1,6 +1,7 @@
 import { composeMasterTemplateLookAndFeel } from "@linksites/factory-catalog/master-template-look-and-feel";
 import { runMasterTemplateCandidatePreview } from "@linksites/factory-catalog/master-template-preview-seam";
 import type { CmsPage } from "@/lib/repository/pages";
+import type { LayoutPackId, PlanId } from "@/components/page-renderer/layout-packs";
 import { MasterTemplateComposition } from "@/components/master-template/MasterTemplateComposition";
 
 type Props = {
@@ -9,6 +10,8 @@ type Props = {
   locale: string;
   primaryNav?: unknown;
   footerNav?: unknown;
+  layoutPackId?: LayoutPackId;
+  planId?: PlanId;
 };
 
 /**

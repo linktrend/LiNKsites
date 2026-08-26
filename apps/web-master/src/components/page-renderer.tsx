@@ -3,6 +3,9 @@ import Image from "next/image";
 
 import { NewsletterSection } from "@/components/common/NewsletterSection";
 import { CTASection } from "@/components/marketing/CTASection";
+import { composeLayoutBody, pageRendererMountAttributes } from "@/components/page-renderer/compose-layout";
+import { resolveLayoutRuntime, type LayoutPackId, type PlanId } from "@/components/page-renderer/layout-packs";
+import { mapBlockToPayloadType, ProviderSemanticError } from "@/components/page-renderer/semantic-map";
 import { CaseStudiesGrid } from "@/components/marketing/CaseStudiesGrid";
 import { DynamicBgSection } from "@/components/marketing/DynamicBgSection";
 import { OfferShowcase } from "@/components/marketing/OfferShowcase";
@@ -23,6 +26,8 @@ type PageRendererProps = {
   footerNav?: unknown;
   siteKey: string;
   locale: string;
+  layoutPackId?: LayoutPackId;
+  planId?: PlanId;
 };
 
 const getCmsImageUrl = (value: unknown): string | undefined => {
@@ -36,7 +41,8 @@ const getCmsImageUrl = (value: unknown): string | undefined => {
   return undefined;
 };
 
-export const PageRenderer = ({ page, siteKey, locale }: PageRendererProps) => {
+export const PageRenderer = ({ page, siteKey, locale, layoutPackId, planId }: PageRendererProps) => {
+  const runtime = resolveLayoutRuntime({ layoutPackId, planId });
   const layoutBlocks = Array.isArray(page.content) ? page.content : [];
   if (process.env.NODE_ENV !== "production") {
     const summary = layoutBlocks.map((block) => block?.blockType ?? "unknown");
@@ -44,31 +50,40 @@ export const PageRenderer = ({ page, siteKey, locale }: PageRendererProps) => {
       siteKey,
       locale,
       slug: page.slug,
+      layoutPackId: runtime.layoutPackId,
+      pageRenderer: runtime.composition.pageRenderer,
       content: summary,
     });
   }
 
   if (layoutBlocks.length === 0) {
-    console.warn("[PageRenderer] No layout blocks found for page", page.slug);
-    return (
-      <div className="container py-12 space-y-4">
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-lg font-semibold">No content available for this page.</p>
-            <p className="text-muted-foreground">Add blocks in Payload CMS to render this page.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    throw new ProviderSemanticError(`Public page "${page.slug}" has no semantic blocks`);
   }
 
+  const main = (
+    <div data-region="main" className="flex-1">
+      {layoutBlocks.map((block, index) => {
+        const mapped = mapBlockToPayloadType(block);
+        return (
+          <section
+            key={block.id ?? `${mapped.payloadBlockType}-${index}`}
+            className="scroll-mt-20"
+            data-react-symbol={mapped.reactSymbol}
+            data-provider-role={mapped.providerRole}
+          >
+            {renderBlock({ ...block, blockType: mapped.payloadBlockType } as CmsPageBlock, locale, page.slug, page.title)}
+          </section>
+        );
+      })}
+    </div>
+  );
+
+  const body = composeLayoutBody(runtime, main, page.title);
+  const mount = pageRendererMountAttributes(runtime);
+
   return (
-    <div className="flex-1">
-      {layoutBlocks.map((block, index) => (
-        <section key={block.id ?? `${block.blockType}-${index}`} className="scroll-mt-20">
-        {renderBlock(block, locale, page.slug, page.title)}
-        </section>
-      ))}
+    <div className="flex-1" {...mount}>
+      {body}
     </div>
   );
 };
@@ -138,20 +153,9 @@ const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string, pag
       );
     case "newsletter":
       return <NewsletterSection lang={locale} />;
-    default:
-      console.warn("[PageRenderer] Unknown block type", type, block);
-      return (
-        <div className="container px-4 sm:px-6 py-8">
-          <Card className="border border-dashed">
-            <CardContent className="py-6">
-              <p className="text-sm font-semibold">Unsupported block type</p>
-              <p className="text-muted-foreground text-sm">
-                Block type {type ?? "unknown"} is not mapped in the template.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      );
+    default: {
+      throw new ProviderSemanticError(`Unknown required block type "${String(type ?? "unknown")}"`);
+    }
   }
 };
 

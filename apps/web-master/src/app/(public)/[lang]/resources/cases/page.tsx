@@ -1,22 +1,25 @@
 import { CaseStudiesPageContent } from "@/components/resources/CaseStudiesPageContent";
 import { buildMetadata } from "@/lib/seo";
 import { getCasesPage } from "@/lib/pageService";
-import { getSiteIdFromRequest } from "@/lib/site-context";
-import { normalizeLocale } from "@/lib/locale-context";
+import { requirePublicFamilyPage } from "@/lib/public-route-guard";
+import { notFound } from "next/navigation";
 
-type Props = { params: { lang: string } };
+type Props = { params: Promise<{ lang: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  const locale = normalizeLocale(params.lang);
-  return buildMetadata(locale, "/resources/cases", {
-    title: "Case Studies",
-  });
+  const { lang } = await params;
+  try {
+    const { locale } = await requirePublicFamilyPage({ lang, pathname: `/${lang}/resources/cases` });
+    return buildMetadata(locale, "/resources/cases", { title: "Case Studies" });
+  } catch {
+    return { title: "Page unavailable", robots: { index: false, follow: false } };
+  }
 }
 
 export default async function CasesPage({ params }: Props) {
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const { lang } = await params;
+  const { siteId, locale } = await requirePublicFamilyPage({ lang, pathname: `/${lang}/resources/cases` });
   const page = await getCasesPage(locale, siteId);
-  if (page.data.cases.length === 0) return <CaseStudiesPageContent lang={locale} cases={[]} />;
+  if (!page.data.cases.length) notFound();
   return <CaseStudiesPageContent lang={locale} cases={page.data.cases} />;
 }

@@ -1,30 +1,25 @@
 import { ArticlesPageContent } from "@/components/resources/ArticlesPageContent";
 import { buildMetadata } from "@/lib/seo";
 import { getArticles } from "@/lib/pageService";
-import { getSiteIdFromRequest } from "@/lib/site-context";
-import { normalizeLocale } from "@/lib/locale-context";
+import { requirePublicFamilyPage } from "@/lib/public-route-guard";
+import { notFound } from "next/navigation";
 
-type Props = { params: { lang: string } };
+type Props = { params: Promise<{ lang: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  const locale = normalizeLocale(params.lang);
-  return buildMetadata(locale, "/resources/articles", {
-    title: "Articles",
-    description: "Read our latest articles on automation, business intelligence, and digital transformation. Expert insights and practical guides.",
-    keywords: [
-      "articles",
-      "blog",
-      "automation guides",
-      "business insights",
-      "best practices",
-      "tutorials",
-    ],
-  });
+  const { lang } = await params;
+  try {
+    const { locale } = await requirePublicFamilyPage({ lang, pathname: `/${lang}/resources/articles` });
+    return buildMetadata(locale, "/resources/articles", { title: "Articles" });
+  } catch {
+    return { title: "Page unavailable", robots: { index: false, follow: false } };
+  }
 }
 
 export default async function ArticlesPage({ params }: Props) {
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const { lang } = await params;
+  const { siteId, locale } = await requirePublicFamilyPage({ lang, pathname: `/${lang}/resources/articles` });
   const page = await getArticles(locale, siteId);
+  if (!page.data.articles.length) notFound();
   return <ArticlesPageContent lang={locale} articles={page.data.articles} />;
 }
