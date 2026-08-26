@@ -1,7 +1,22 @@
 import { FileOutbox, LiNKautoworkGateway, parseGatewayEventPolicies, type GatewayEnvironment } from "@linksites/autowork-boundary";
+import type { LiNKautoworkEventName } from "@linksites/types";
 
 import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { SideEffectPolicyError, resolveConfiguredHook, type SideEffectKind } from "@/lib/forms/side-effect-policy";
+
+type GovernedFormKind = Extract<SideEffectKind, "contact" | "newsletter">;
+
+export function canonicalGovernedFormEventName(kind: GovernedFormKind): LiNKautoworkEventName {
+  switch (kind) {
+    case "contact":
+    case "newsletter":
+      return "contact.submitted";
+    default: {
+      const exhaustive: never = kind;
+      throw new SideEffectPolicyError("unauthorized_event", `unsupported governed event ${String(exhaustive)}`);
+    }
+  }
+}
 
 const FORM_RATE_LIMIT_PER_MINUTE = 10;
 
@@ -16,7 +31,7 @@ export function enforceAbuseLimit(key: string): { ok: true } | { ok: false; retr
 }
 
 export async function enqueueGovernedSideEffect(input: {
-  kind: Extract<SideEffectKind, "contact" | "newsletter">;
+  kind: GovernedFormKind;
   intent: string;
   submission: Record<string, string | number | boolean>;
   metadata: Record<string, string>;
@@ -33,7 +48,7 @@ export async function enqueueGovernedSideEffect(input: {
   const outboxPath = process.env.LINKAUTOWORK_OUTBOX_PATH as string;
   const integrityMaterial = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET as string;
   const grants = process.env.LINKAUTOWORK_EVENT_GRANTS as string;
-  const eventName = input.kind === "newsletter" ? "newsletter.subscribed" : "contact.submitted";
+  const eventName = canonicalGovernedFormEventName(input.kind);
   const gateway = new LiNKautoworkGateway({
     secret,
     keyId,

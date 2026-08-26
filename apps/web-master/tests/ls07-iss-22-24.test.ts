@@ -45,6 +45,7 @@ import {
   VISUAL_REGRESSION_FIXTURES,
   WCAG_TARGET,
 } from "../src/lib/seo/quality-matrix.ts";
+import { canonicalGovernedFormEventName } from "../src/lib/forms/governed-side-effect.ts";
 import { buildArticleJsonLd } from "../src/lib/seo.ts";
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -234,7 +235,17 @@ test("ISS-24 accessibility matrix performance budgets and visual fixtures exist 
   assert.ok(perf.every((row) => row.status === "PASS"));
   assert.equal(PERFORMANCE_BUDGETS.source, "lab");
   assert.ok(VISUAL_REGRESSION_FIXTURES.some((fixture) => fixture.id === "home-mobile"));
-  assert.ok(VISUAL_REGRESSION_FIXTURES.some((fixture) => fixture.planId === "L"));
+  assert.ok(
+    VISUAL_REGRESSION_FIXTURES.some((fixture) => "planId" in fixture && fixture.planId === "L"),
+  );
+});
+
+test("ISS-23 newsletter enqueue uses the canonical contact.submitted autowork event", () => {
+  assert.equal(canonicalGovernedFormEventName("newsletter"), "contact.submitted");
+  assert.equal(canonicalGovernedFormEventName("contact"), "contact.submitted");
+  const governed = readFileSync(resolve(root, "../src/lib/forms/governed-side-effect.ts"), "utf8");
+  assert.doesNotMatch(governed, /newsletter\.subscribed/);
+  assert.match(governed, /canonicalGovernedFormEventName/);
 });
 
 test("ISS-23 newsletter consent is parsed from the body and fake success is rejected", () => {
