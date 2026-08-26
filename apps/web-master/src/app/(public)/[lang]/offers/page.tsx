@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getOfferIndex, getOfferPage } from "@/lib/pageService";
 import { OfferIndexLayout } from "@/layouts/OfferIndexLayout";
 import { OfferPageLayout } from "@/layouts/OfferPageLayout";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 
 type Props = { params: Promise<{ lang: string }> };

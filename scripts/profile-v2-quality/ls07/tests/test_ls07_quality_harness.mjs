@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { evaluateInjectedQuality } from "../harness.mjs";
 import { requireProviderIdentity, requireRuntimeIdentity, IdentityClosedFailure } from "../identities.mjs";
+import { IMPLEMENTATION_A11Y_MATRIX } from "../implementation-matrix.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixtures = path.join(here, "..", "fixtures");
@@ -129,4 +130,12 @@ test("missing renderer output fails closed", () => {
   const result = evaluateInjectedQuality(payload);
   assert.equal(result.ok, false);
   assert.equal(result.closedFailures[0].code, "missing_renderer_output");
+});
+
+test("implementation matrix does not claim legal certification", () => {
+  assert.equal(IMPLEMENTATION_A11Y_MATRIX.legalCertificationClaimed, false);
+  assert.equal(IMPLEMENTATION_A11Y_MATRIX.target, "WCAG 2.2 AA");
+  const visual = JSON.parse(fs.readFileSync(path.join(fixtures, "visual-regression.json"), "utf8"));
+  assert.equal(visual.legalCertificationClaimed, false);
+  assert.ok(visual.fixtures.length >= 3);
 });

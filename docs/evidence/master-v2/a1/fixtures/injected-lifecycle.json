@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-injected-lifecycle-fixture",
+  "packetId": "LS-08",
+  "preparationOnly": true,
+  "providerA1Bound": false,
+  "ls07ProtectedIntegrated": false,
+  "relativePath": "fixture/site-copy.json",
+  "bytes": "{\"kind\":\"injected-not-a1\",\"planId\":\"a\",\"scenario\":\"lifecycle\"}\n",
+  "note": "Fixture-owned bytes for migration/rollback/tamper/cache-restart tests. Not provider A1."
+}
