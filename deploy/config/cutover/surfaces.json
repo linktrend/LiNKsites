@@ -1,0 +1,161 @@
+{
+  "schemaVersion": "1.0.0",
+  "packet": "LS-10",
+  "issue": "ISS-33",
+  "portion": "dependency-safe-engineering-config",
+  "liveCanary": "external_fail_closed",
+  "liveMutation": false,
+  "protectedDevelopment": {
+    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
+    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+  },
+  "surfaces": [
+    {
+      "id": "cms",
+      "owner": "LiNKsites CMS operations",
+      "runtimeServices": ["cms", "autowork-worker"],
+      "keys": [
+        { "name": "LINKSITES_DEPLOYMENT_ENV", "secret": false, "format": "literal:production" },
+        { "name": "LINKSITES_CONFIG_SCHEMA_VERSION", "secret": false, "format": "literal:1.1.0" },
+        { "name": "LINKSITES_RELEASE_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "LINKSITES_ORG_ID", "secret": false, "format": "slug" },
+        { "name": "DATABASE_URI", "secret": true, "format": "postgres-url" },
+        { "name": "PAYLOAD_SECRET", "secret": true, "format": "secret-min-32" },
+        { "name": "PAYLOAD_PUBLIC_SERVER_URL", "secret": false, "format": "https-url" },
+        { "name": "LINKAUTOWORK_GATEWAY_URL", "secret": false, "format": "https-url" },
+        { "name": "LINKAUTOWORK_SIGNING_SECRET", "secret": true, "format": "secret-min-32" },
+        { "name": "LINKAUTOWORK_SIGNING_KEY_ID", "secret": false, "format": "slug" },
+        { "name": "LINKAUTOWORK_ENVIRONMENT", "secret": false, "format": "literal:production" },
+        { "name": "LINKAUTOWORK_OUTBOX_PATH", "secret": false, "format": "absolute-path" },
+        { "name": "LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET", "secret": true, "format": "secret-min-32" },
+        { "name": "LINKAUTOWORK_EVENT_GRANTS", "secret": false, "format": "nonempty-json-array" }
+      ]
+    },
+    {
+      "id": "web-master",
+      "owner": "LiNKsites web-master operations",
+      "runtimeServices": ["web-master"],
+      "keys": [
+        { "name": "LINKSITES_DEPLOYMENT_ENV", "secret": false, "format": "literal:production" },
+        { "name": "LINKSITES_RELEASE_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "NEXT_PUBLIC_CMS_PROVIDER", "secret": false, "format": "literal:payload" },
+        { "name": "PAYLOAD_BASE_URL", "secret": false, "format": "https-url" },
+        { "name": "PAYLOAD_PUBLIC_SERVER_URL", "secret": false, "format": "https-url" },
+        { "name": "NEXT_PUBLIC_PAYLOAD_API_URL", "secret": false, "format": "https-url" },
+        { "name": "PAYLOAD_API_KEY", "secret": true, "format": "secret-min-32" },
+        { "name": "PREVIEW_ACCESS_TOKEN", "secret": true, "format": "secret-min-32" },
+        { "name": "LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH", "secret": false, "format": "absolute-path" },
+        { "name": "LINKSITES_ADMITTED_TEMPLATE_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON", "secret": false, "format": "nonempty-json-object" },
+        { "name": "LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON", "secret": false, "format": "nonempty-json-object" }
+      ]
+    },
+    {
+      "id": "provider",
+      "owner": "LiNKlibraries release process; LiNKsites consumes pins only",
+      "runtimeServices": [],
+      "note": "Name and identity pins only. Provider catalogue bytes remain external and are never copied or mutated here.",
+      "keys": [
+        { "name": "LINKLIBRARIES_ARTIFACT_PATH", "secret": false, "format": "absolute-path" },
+        { "name": "LINKLIBRARIES_CATALOG_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "LINKLIBRARIES_ENTRY_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "LINKLIBRARIES_CATALOG_CONTENT_SHA256", "secret": false, "format": "sha-256" },
+        { "name": "LINKLIBRARIES_ENTRY_CONTENT_SHA256", "secret": false, "format": "sha-256" },
+        { "name": "LINKSITES_ADMITTED_TEMPLATE_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "PROVIDER_SELECTABILITY", "secret": false, "format": "literal:non_selectable" },
+        { "name": "PROVIDER_LIVE_CATALOGUE_PROBE", "secret": false, "format": "literal:hold_live_external" }
+      ]
+    },
+    {
+      "id": "hosting",
+      "owner": "infrastructure operator; Phase 2 DNS/TLS remains external",
+      "runtimeServices": [],
+      "note": "Private topology names only. No DNS, Traefik, Cloudflare, VPS or public-domain mutation.",
+      "keys": [
+        { "name": "TRAEFIK_NETWORK", "secret": false, "format": "slug" },
+        { "name": "TRAEFIK_ENTRYPOINT", "secret": false, "format": "slug" },
+        { "name": "TRAEFIK_CMS_HOST", "secret": false, "format": "hostname" },
+        { "name": "TRAEFIK_PREVIEW_HOST", "secret": false, "format": "hostname" },
+        { "name": "TRAEFIK_CMS_PRIVATE_MIDDLEWARE", "secret": false, "format": "slug" },
+        { "name": "TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE", "secret": false, "format": "slug" },
+        { "name": "HOSTING_LIVE_HOST", "secret": false, "format": "literal:hold_live_external" }
+      ]
+    },
+    {
+      "id": "database",
+      "owner": "database owner",
+      "runtimeServices": ["cms", "program-orchestrator"],
+      "keys": [
+        { "name": "DATABASE_URI", "secret": true, "format": "postgres-url" },
+        { "name": "W2_02_DATABASE_URI", "secret": true, "format": "postgres-url" },
+        { "name": "W2_02_DATABASE_ROLE", "secret": false, "format": "slug" },
+        { "name": "LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "DATABASE_CREDENTIAL_DISTINCTNESS", "secret": false, "format": "literal:cms-orchestrator-distinct" }
+      ]
+    },
+    {
+      "id": "queue",
+      "owner": "LiNKsites operations / LiNKautowork",
+      "runtimeServices": ["cms", "autowork-worker"],
+      "keys": [
+        { "name": "LINKAUTOWORK_OUTBOX_PATH", "secret": false, "format": "absolute-path" },
+        { "name": "LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET", "secret": true, "format": "secret-min-32" },
+        { "name": "LINKAUTOWORK_GATEWAY_URL", "secret": false, "format": "https-url" },
+        { "name": "LINKAUTOWORK_SIGNING_KEY_ID", "secret": false, "format": "slug" },
+        { "name": "LINKAUTOWORK_ENVIRONMENT", "secret": false, "format": "literal:production" },
+        { "name": "LINKAUTOWORK_EVENT_GRANTS", "secret": false, "format": "nonempty-json-array" }
+      ]
+    },
+    {
+      "id": "secrets",
+      "owner": "LiNKsites operations; values remain in the protected runtime file / secret manager",
+      "runtimeServices": [],
+      "note": "Inventory of secret names and rotation effects only. Values are never stored, logged or templated.",
+      "keys": [
+        { "name": "DATABASE_URI", "secret": true, "format": "postgres-url" },
+        { "name": "W2_02_DATABASE_URI", "secret": true, "format": "postgres-url" },
+        { "name": "PAYLOAD_SECRET", "secret": true, "format": "secret-min-32" },
+        { "name": "PAYLOAD_API_KEY", "secret": true, "format": "secret-min-32" },
+        { "name": "W2_02_PAYLOAD_API_KEY", "secret": true, "format": "secret-min-32" },
+        { "name": "PREVIEW_ACCESS_TOKEN", "secret": true, "format": "secret-min-32" },
+        { "name": "W2_02_PREVIEW_ACCESS_TOKEN", "secret": true, "format": "secret-min-32" },
+        { "name": "LINKAUTOWORK_SIGNING_SECRET", "secret": true, "format": "secret-min-32" },
+        { "name": "LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET", "secret": true, "format": "secret-min-32" },
+        { "name": "W2_05_OUTCOME_GATEWAY_SECRET", "secret": true, "format": "secret-min-32" },
+        { "name": "LINKSITES_RUNTIME_ENV_FILE", "secret": true, "format": "absolute-path" }
+      ]
+    },
+    {
+      "id": "monitoring",
+      "owner": "LiNKsites operations",
+      "runtimeServices": ["program-orchestrator"],
+      "note": "Alert and metric names from deploy/OPERATIONS.md. No live probe, pager or metrics scrape is performed.",
+      "keys": [
+        { "name": "MONITORING_METRICS_PATH", "secret": false, "format": "literal:/metrics" },
+        { "name": "MONITORING_ALERT_DEAD_LETTER_NONZERO", "secret": false, "format": "literal:enabled" },
+        { "name": "MONITORING_ALERT_RETRY_GROWTH_MINUTES", "secret": false, "format": "literal:15" },
+        { "name": "MONITORING_ALERT_READINESS_NON_200_MINUTES", "secret": false, "format": "literal:5" },
+        { "name": "MONITORING_ALERT_BACKUP_CHECKSUM_FAILURE", "secret": false, "format": "literal:enabled" },
+        { "name": "MONITORING_LOG_REDACTION", "secret": false, "format": "literal:structured-json-no-secrets" },
+        { "name": "MONITORING_LIVE_SCRAPE", "secret": false, "format": "literal:hold_live_external" }
+      ]
+    },
+    {
+      "id": "deployment",
+      "owner": "release process / LiNKsites operations",
+      "runtimeServices": [],
+      "note": "Immutable image digest names and fail-closed Compose inputs. This packet does not deploy.",
+      "keys": [
+        { "name": "LINKSITES_RUNTIME_ENV_FILE", "secret": true, "format": "absolute-path" },
+        { "name": "LINKSITES_CMS_IMAGE", "secret": false, "format": "immutable-image" },
+        { "name": "LINKSITES_WEB_MASTER_IMAGE", "secret": false, "format": "immutable-image" },
+        { "name": "LINKSITES_WORKER_IMAGE", "secret": false, "format": "immutable-image" },
+        { "name": "LINKSITES_ORCHESTRATOR_IMAGE", "secret": false, "format": "immutable-image" },
+        { "name": "LINKSITES_MIGRATIONS_IMAGE", "secret": false, "format": "immutable-image" },
+        { "name": "LINKSITES_RELEASE_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA", "secret": false, "format": "git-sha-1" },
+        { "name": "DEPLOYMENT_LIVE_CANARY", "secret": false, "format": "literal:external_fail_closed" }
+      ]
+    }
+  ]
+}

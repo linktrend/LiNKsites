@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "iss33-offline-config-rehearsal.schema.json",
+  "title": "ISS-33 offline configuration rehearsal receipt",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "ok",
+    "liveMutation",
+    "liveCanary",
+    "publicActivation",
+    "credentialsPersisted",
+    "surfaces"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "kind": { "const": "iss33-offline-config-rehearsal" },
+    "ok": { "const": true },
+    "liveMutation": { "const": false },
+    "liveCanary": { "const": "external_fail_closed" },
+    "publicActivation": { "const": false },
+    "credentialsPersisted": { "const": false },
+    "surfaces": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9
+    }
+  },
+  "additionalProperties": true
+}
