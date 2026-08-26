@@ -1,17 +1,26 @@
 import { notFound } from "next/navigation";
-import { buildMetadata } from "@/lib/seo";
-import { getSiteIdFromRequest } from "@/lib/site-context";
+import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 
-type Props = { params: { lang: string; categorySlug: string; articleSlug: string } };
+type Props = { params: Promise<{ lang: string; categorySlug: string; articleSlug: string }> };
 
 export async function generateMetadata({ params }: Props) {
+  const { lang, categorySlug, articleSlug } = await params;
+  try {
+    await requirePublicFamilyPage({
+      lang,
+      pathname: `/${lang}/resources/faq/${categorySlug}/${articleSlug}`,
+    });
+  } catch {
+    return { title: "FAQ unavailable", robots: { index: false, follow: false } };
+  }
   return { title: "FAQ unavailable", robots: { index: false, follow: false } };
 }
 
-export default async function FaqArticlePage() {
-  // The current CMS FAQ contract has questions embedded in a published page;
-  // it has no article-level slug. Do not substitute the retired mock help
-  // corpus for that missing CMS identity.
-  await getSiteIdFromRequest();
+export default async function FaqArticlePage({ params }: Props) {
+  const { lang, categorySlug, articleSlug } = await params;
+  await requirePublicFamilyPage({
+    lang,
+    pathname: `/${lang}/resources/faq/${categorySlug}/${articleSlug}`,
+  });
   return notFound();
 }

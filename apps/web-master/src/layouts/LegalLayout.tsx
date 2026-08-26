@@ -1,16 +1,15 @@
 import { CmsLegal } from "@/lib/repository/legal";
 
-type Props = { lang: string; page: { data: { legal?: CmsLegal } } };
+type Props = { page: { data: { legal?: CmsLegal } } };
 
-export function LegalLayout({ lang, page }: Props) {
+export function LegalLayout({ page }: Props) {
   const legal = page.data.legal;
-  if (!legal) return <div className="container py-12">Legal page not found.</div>;
+  if (!legal) return null;
   const body =
     typeof legal.body === "string"
       ? legal.body
-      : legal.body
-        ? JSON.stringify(legal.body, null, 2)
-        : "Content unavailable.";
+      : null;
+  if (!body) return null;
   return (
     <article className="container space-y-6 py-12">
       <header>
