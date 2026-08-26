@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls09-iss30-all-layout-verdicts",
+  "packetId": "LS-09",
+  "evidenceClass": "paired-proof",
+  "packetCompletion": true,
+  "a1Frozen": true,
+  "a1PageRenderer": "composition-a1-linear-shell",
+  "a2PageRenderer": "composition-a2-split-shell",
+  "a3PageRenderer": "composition-a3-stacked-shell",
+  "providerBytesPresent": false,
+  "productionSelectable": false,
+  "verdicts": {
+    "a1_adapter_compatible": "PASS",
+    "a1_browser_fixture_valid": "PASS",
+    "a2_adapter_compatible": "PASS",
+    "a2_browser_fixture_valid": "PASS",
+    "a3_adapter_compatible": "PASS",
+    "a3_browser_fixture_valid": "PASS"
+  }
+}
