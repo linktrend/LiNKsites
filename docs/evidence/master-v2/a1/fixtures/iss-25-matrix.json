@@ -1,0 +1,526 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-iss25-fixture-matrix",
+  "packetId": "LS-08",
+  "layoutPack": "a1",
+  "evidenceClass": "preparation-fixture",
+  "packetCompletion": false,
+  "pairedProofRun": false,
+  "a1BytesPresent": false,
+  "ls07ProtectedIntegrated": false,
+  "providerA1Bound": false,
+  "slots": [
+    {
+      "surface": "server",
+      "planId": "a",
+      "scenario": "product",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "a",
+      "scenario": "service",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "a",
+      "scenario": "hybrid",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "a",
+      "scenario": "local",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "a",
+      "scenario": "resources",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "a",
+      "scenario": "trust",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "a",
+      "scenario": "failure",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "a",
+      "scenario": "lifecycle",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "scenario": "product",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "scenario": "service",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "scenario": "hybrid",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "scenario": "local",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "scenario": "resources",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "scenario": "trust",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "scenario": "failure",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "scenario": "lifecycle",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "scenario": "product",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "scenario": "service",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "scenario": "hybrid",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "scenario": "local",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "scenario": "resources",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "scenario": "trust",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "scenario": "failure",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "scenario": "lifecycle",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "scenario": "product",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "scenario": "service",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "scenario": "hybrid",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "scenario": "local",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "scenario": "resources",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "scenario": "trust",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "scenario": "failure",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "scenario": "lifecycle",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "scenario": "product",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "scenario": "service",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "scenario": "hybrid",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "scenario": "local",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "scenario": "resources",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "scenario": "trust",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "scenario": "failure",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "scenario": "lifecycle",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "scenario": "product",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "scenario": "service",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "scenario": "hybrid",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "scenario": "local",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "scenario": "resources",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "scenario": "trust",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "scenario": "failure",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "scenario": "lifecycle",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "scenario": "product",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "scenario": "service",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "scenario": "hybrid",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "scenario": "local",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "scenario": "resources",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "scenario": "trust",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "scenario": "failure",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "scenario": "lifecycle",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "scenario": "product",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "scenario": "service",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "scenario": "hybrid",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "scenario": "local",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "scenario": "resources",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "scenario": "trust",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "scenario": "failure",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "scenario": "lifecycle",
+      "status": "NOT_RUN",
+      "pairedProofRun": false,
+      "evidence": "unbound-preparation-slot"
+    }
+  ]
+}

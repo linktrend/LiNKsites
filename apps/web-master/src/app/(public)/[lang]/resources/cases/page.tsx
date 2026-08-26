@@ -1,5 +1,5 @@
 import { CaseStudiesPageContent } from "@/components/resources/CaseStudiesPageContent";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
 import { getCasesPage } from "@/lib/pageService";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 import { notFound } from "next/navigation";

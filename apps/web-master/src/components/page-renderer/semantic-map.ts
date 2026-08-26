@@ -1,4 +1,4 @@
-import { mapProviderSemantic } from "@linksites/factory-catalog";
+import { mapProviderSemantic, SEMANTIC_COMPONENT_MAP } from "@linksites/factory-catalog";
 
 export class ProviderSemanticError extends Error {
   constructor(message: string) {
@@ -36,6 +36,16 @@ export type MappedBlock = Readonly<{
   providerRole?: string;
 }>;
 
+function nonEmpty(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+/** LS-04 identity is `pageId:sectionId:libraryComponentId`, not an A1 provider role. */
+function libraryComponentFromSemanticId(semanticId: string): string | undefined {
+  const parts = semanticId.split(":").filter(Boolean);
+  return parts.length >= 3 ? parts[parts.length - 1] : undefined;
+}
+
 /**
  * Resolve a CMS/provider block to a consumer-owned payload type.
  * Unknown required provider roles fail closed and must not become public copy.
@@ -44,13 +54,9 @@ export function mapBlockToPayloadType(block: {
   blockType?: unknown;
   providerRole?: unknown;
   semanticId?: unknown;
+  libraryComponentId?: unknown;
 }): MappedBlock {
-  const providerRole =
-    typeof block.providerRole === "string" && block.providerRole.trim()
-      ? block.providerRole
-      : typeof block.semanticId === "string" && block.semanticId.trim()
-        ? block.semanticId
-        : undefined;
+  const providerRole = nonEmpty(block.providerRole);
 
   if (providerRole) {
     const mapped = mapProviderSemantic(providerRole);
@@ -61,6 +67,22 @@ export function mapBlockToPayloadType(block: {
       payloadBlockType: mapped.mapping.payloadBlockType,
       reactSymbol: mapped.mapping.reactSymbol,
       providerRole,
+    };
+  }
+
+  const semanticId = nonEmpty(block.semanticId);
+  const libraryComponentId =
+    nonEmpty(block.libraryComponentId) ??
+    (semanticId ? libraryComponentFromSemanticId(semanticId) : undefined);
+
+  if (libraryComponentId) {
+    const projection = SEMANTIC_COMPONENT_MAP[libraryComponentId];
+    if (!projection) {
+      throw new ProviderSemanticError(`Unknown required Library component ID "${libraryComponentId}"`);
+    }
+    return {
+      payloadBlockType: projection.payloadBlockType,
+      reactSymbol: projection.reactSymbol,
     };
   }
 

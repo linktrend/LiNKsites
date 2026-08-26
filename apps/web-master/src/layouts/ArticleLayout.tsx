@@ -28,8 +28,8 @@ export function ArticleLayout({ lang, page }: Props) {
     description: article.excerpt ?? "",
     url: `/${lang}/resources/articles/${article.slug}`,
     image: imageUrl ?? "",
-    datePublished: article.publishedAt ?? article.date ?? new Date().toISOString(),
-    author: reviewedBy ?? "Editorial Team",
+    datePublished: article.publishedAt ?? article.date ?? "",
+    author: reviewedBy ?? "",
     reviewedBy,
     verificationDate: (article as any).reviewedAt ?? undefined,
   });
