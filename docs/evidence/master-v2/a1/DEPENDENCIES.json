@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-a1-fail-closed-dependencies",
+  "packetId": "LS-08",
+  "githubIssue": 334,
+  "policy": "fail-closed",
+  "dependencies": [
+    {
+      "id": "ls07-protected-integration",
+      "required": true,
+      "satisfied": false,
+      "reason": "LS-07 is not a protected-integrated checkpoint on origin/development. Preparation must not invent commit/tree pins."
+    },
+    {
+      "id": "exact-provider-a1-binding",
+      "required": true,
+      "satisfied": false,
+      "reason": "Exact LiNKlibraries A1 candidate is not bound. Preparation must not fetch or fabricate provider bytes."
+    }
+  ]
+}
