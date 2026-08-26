@@ -3,6 +3,7 @@ name: Linktrend Branch Source Policy
 on:
   pull_request:
     branches: [main, staging, development]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   workflow_call:
     inputs:
       source_branch:
