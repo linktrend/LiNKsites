@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-receipt-binding",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "issueId": "ISS-35",
+  "evidenceClass": "scaffolding",
+  "packetCompletion": false,
+  "receiptsBound": false,
+  "bindings": [
+    {
+      "id": "harness",
+      "placeholderId": "FUTURE_HARNESS_H09_CONFORMANCE_IDENTITY",
+      "bound": false,
+      "bindingState": "future-placeholder",
+      "repository": "linktrend/LiNKharness",
+      "commit": null,
+      "tree": null
+    },
+    {
+      "id": "profile",
+      "placeholderId": "FUTURE_LS10_CUTOVER_IDENTITY",
+      "bound": false,
+      "bindingState": "future-placeholder",
+      "repository": "linktrend/LiNKsites",
+      "commit": null,
+      "tree": null
+    },
+    {
+      "id": "provider",
+      "placeholderId": "FUTURE_PROVIDER_RECEIPT_IDENTITY",
+      "bound": false,
+      "bindingState": "future-placeholder",
+      "repository": "linktrend/LiNKlibraries",
+      "commit": null,
+      "tree": null
+    },
+    {
+      "id": "consumer",
+      "placeholderId": "FUTURE_CONSUMER_RECEIPT_IDENTITY",
+      "bound": false,
+      "bindingState": "future-placeholder",
+      "repository": "linktrend/LiNKsites",
+      "commit": null,
+      "tree": null
+    },
+    {
+      "id": "configuration",
+      "placeholderId": "FUTURE_CONFIGURATION_RECEIPT_IDENTITY",
+      "bound": false,
+      "bindingState": "future-placeholder",
+      "repository": "linktrend/LiNKsites",
+      "commit": null,
+      "tree": null
+    }
+  ]
+}

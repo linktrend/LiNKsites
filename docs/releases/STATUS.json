@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-releases-status",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "releasePublished": false,
+  "packetCompletion": false,
+  "ls11Complete": false,
+  "promoted": false,
+  "founderAuthorized": false,
+  "mainPublished": false,
+  "productionDeployed": false,
+  "notes": [
+    "Release notes are scaffolding only.",
+    "Founder-reserved main/publish/deploy remain unauthorized."
+  ]
+}

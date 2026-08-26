@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/admission-release-handoff.schema.json",
+  "title": "LS-11 admission, release and handoff template",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "githubIssue",
+    "issueId",
+    "evidenceClass",
+    "packetCompletion",
+    "admission",
+    "release",
+    "handoff",
+    "lowerProofPromotion"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-admission-release-handoff" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "issueId": { "const": "ISS-36" },
+    "evidenceClass": { "const": "scaffolding" },
+    "packetCompletion": { "const": false },
+    "admission": { "$ref": "#/$defs/holdGate" },
+    "release": { "$ref": "#/$defs/holdGate" },
+    "handoff": { "$ref": "#/$defs/holdGate" },
+    "lowerProofPromotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempted", "forbidden"],
+      "properties": {
+        "attempted": { "const": false },
+        "forbidden": { "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "holdGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["granted", "verdict"],
+      "properties": {
+        "granted": { "const": false },
+        "verdict": { "const": "HOLD" }
+      }
+    }
+  }
+}

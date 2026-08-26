@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-founder-reserved-decisions",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "issueId": "ISS-36",
+  "evidenceClass": "scaffolding",
+  "packetCompletion": false,
+  "founderAuthorized": false,
+  "decisions": {
+    "main": {
+      "reservedTo": "founder",
+      "authorized": false,
+      "executed": false,
+      "identity": null
+    },
+    "publish": {
+      "reservedTo": "founder",
+      "authorized": false,
+      "executed": false,
+      "identity": null
+    },
+    "deploy": {
+      "reservedTo": "founder",
+      "authorized": false,
+      "executed": false,
+      "identity": null
+    }
+  }
+}

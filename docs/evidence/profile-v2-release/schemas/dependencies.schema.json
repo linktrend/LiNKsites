@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/dependencies.schema.json",
+  "title": "LS-11 release dependencies",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "githubIssue",
+    "policy",
+    "packetCompletion",
+    "dependencies"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-release-dependencies" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "policy": { "const": "fail-closed" },
+    "packetCompletion": { "const": false },
+    "dependencies": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/futureDependency" }
+    }
+  },
+  "$defs": {
+    "futureDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "required",
+        "satisfied",
+        "bindingState",
+        "placeholderId",
+        "repository",
+        "commit",
+        "tree",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": ["ls10-cutover", "harness-h09-conformance"]
+        },
+        "required": { "const": true },
+        "satisfied": { "const": false },
+        "bindingState": { "const": "future-placeholder" },
+        "placeholderId": {
+          "type": "string",
+          "enum": [
+            "FUTURE_LS10_CUTOVER_IDENTITY",
+            "FUTURE_HARNESS_H09_CONFORMANCE_IDENTITY"
+          ]
+        },
+        "repository": {
+          "type": "string",
+          "enum": ["linktrend/LiNKsites", "linktrend/LiNKharness"]
+        },
+        "commit": { "type": "null" },
+        "tree": { "type": "null" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

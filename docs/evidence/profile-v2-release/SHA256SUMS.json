@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-checksums",
+  "algorithm": "sha256",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "protectedDevelopment": {
+    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
+    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+  },
+  "packageDigest": "sha256:f595af2026c582baf694c641ca93ef4b3a4d87cc34238f85af5ca65089d7d135",
+  "files": [
+    {
+      "path": "docs/evidence/profile-v2-release/checklists/ISS-34-independent-exact-tree-review.md",
+      "sha256": "1f3ebf1a764768102778f730971f6a194058aec9e9129aec203061e2bc181d81"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/checklists/ISS-35-full-rollback-receipt-binding.md",
+      "sha256": "f610fd9a92f7ec50b1aa1a089a301e1507a0b8275c713d1c44d7f7c03c26df06"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/checklists/ISS-36-admission-release-handoff.md",
+      "sha256": "73520413edd31fcc45791d4cde49c322a1f1da9b95efa40b5dc30c34fc6ae1fd"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/DEPENDENCIES.json",
+      "sha256": "04c678f99e04c164e7043c40235427c136d2e95f340a1014f2793faa3c1a9d86"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/identity.json",
+      "sha256": "47aea48934bdb82023b8e28528b2c94506c1e34234f0f57acc875621904b72ac"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/PROOF.md",
+      "sha256": "9a900a73f90617ebe7078f790bd11e3a3571a89682b2e7b0ac2f0d4645296306"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/README.md",
+      "sha256": "f46a669588dad8e069adfb6d5dbb8a09412df762ae75ba7a85675af7d2d7198b"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/admission-release-handoff.schema.json",
+      "sha256": "425d15784bbd8aa28be68828bf1ca3812e74bbf024f6d27ff9a8e225d1095d24"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/checksums.schema.json",
+      "sha256": "8d58e205e6675a1ca17ea211d7b9b2983d8467eb05688dfd66554ec24294a43f"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/dependencies.schema.json",
+      "sha256": "974060b0084d62184a625d931a29732ecf7182302bd4ad83880ecc62e89c5b3c"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/exact-tree-review.schema.json",
+      "sha256": "34d1b929d97a2ba45ea7a1edc47aa91fb602731e9fc924cd073e0610b6e9e552"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/founder-reserved-decisions.schema.json",
+      "sha256": "4c867e94e9526ede38006efa3491cbeaa1212345c1c0212e331d3c76be7b923c"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/full-rollback-rehearsal.schema.json",
+      "sha256": "7d9c73a857e3a6b3a909cf72390ee89d3d4d003904ba39d650d900e6f675942a"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/identity.schema.json",
+      "sha256": "7115ec3d791283550e2cbdca3d2b83d1fd1e9afb6c6835807aae16860c8f0a34"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/receipt-binding.schema.json",
+      "sha256": "15ec6bd214a5df54de397fdfd0681d53b6a74a7ee596838a7cc10eed968e4d6e"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/releases-status.schema.json",
+      "sha256": "d160a0f9ba44aeea69470d3b2deb6d05ea18c9d003b2ef4a30a1067628e7f89c"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/scope.schema.json",
+      "sha256": "ca0d9f32bcbbe7d326acc050e2a8ed3030c0fdbb94d01fbf48576d8110364236"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/status.schema.json",
+      "sha256": "80f894a084e0862400e6d35070a50286a535afcd83024114f9849265161862fa"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/SCOPE.json",
+      "sha256": "2c364ceded1bf485859ad5f589d7b66d841dafb35b4f7bb6ed95e88a5d1a9ce2"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/STATUS.json",
+      "sha256": "a980f2f657b43e703103199d9ac2b1c6ab587be306d257193c38bc66fa26085a"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/admission-release-handoff.json",
+      "sha256": "bbbc17f05795f77519572322badd383df67ab753948320afad48ff371452592b"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/exact-tree-review.json",
+      "sha256": "a9736b2a2b01c30ab6c8ec5b3995f4647556ffd9daac94e8b27cb594d73e52d3"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/founder-reserved-decisions.json",
+      "sha256": "06913c08205d3dac53c3d77bd635c5339a01831d01fd75ebfc1f6e70860f6ef6"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/full-rollback-rehearsal.json",
+      "sha256": "7891e2192f31de0b8f3eed5799eed41686be0c138faa2f3260bdf778a0a8380d"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/receipt-binding.json",
+      "sha256": "96e1656593eb20288e846e7583b490f9623f04161b42e0ee7ad94864cde1d580"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.mjs",
+      "sha256": "cfb23d1bf3573c769d9badf3bed05fa1c5c355ee82bab3574b6cad9ddac5c21e"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.test.mjs",
+      "sha256": "94a73aab3d3e550df21e7f0ca0fc3db0a768ae48255d1e87a6e4d43e80586ff4"
+    },
+    {
+      "path": "docs/releases/profile-v2-ls11-release.md",
+      "sha256": "2a9f6a7d4a48b7a1d272df03af0a8a7609c596fd2747f5d0287e4b3fd78b2040"
+    },
+    {
+      "path": "docs/releases/README.md",
+      "sha256": "5ff5d6111ca7c6a3a82dbfa1abe2d42c0421924266f92a8b52167d6951ed70bc"
+    },
+    {
+      "path": "docs/releases/STATUS.json",
+      "sha256": "592d43b0a9915953957af86473b8fcd729c609ba9b4847aa276530b384cc8d0b"
+    }
+  ]
+}

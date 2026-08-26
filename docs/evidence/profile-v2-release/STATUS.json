@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-scaffolding-status",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "issues": ["ISS-34", "ISS-35", "ISS-36"],
+  "evidenceClass": "scaffolding",
+  "dependencySafe": true,
+  "packetCompletion": false,
+  "ls11Complete": false,
+  "exactTreeReviewComplete": false,
+  "fullSuiteRun": false,
+  "rollbackRehearsalRun": false,
+  "receiptsBound": false,
+  "admitted": false,
+  "released": false,
+  "handedOff": false,
+  "promoted": false,
+  "productionProof": false,
+  "hostedProof": false,
+  "founderAuthorized": false,
+  "mainPublished": false,
+  "productionDeployed": false,
+  "ownedPaths": [
+    "docs/evidence/profile-v2-release/**",
+    "docs/releases/**"
+  ],
+  "notes": [
+    "Fail-closed templates, checklists and validators only.",
+    "LS-10 and Harness conformance identities remain future placeholders.",
+    "This status is not LS-11 completion and does not authorize promotion."
+  ]
+}

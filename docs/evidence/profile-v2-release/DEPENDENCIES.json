@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-dependencies",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "policy": "fail-closed",
+  "packetCompletion": false,
+  "dependencies": [
+    {
+      "id": "ls10-cutover",
+      "required": true,
+      "satisfied": false,
+      "bindingState": "future-placeholder",
+      "placeholderId": "FUTURE_LS10_CUTOVER_IDENTITY",
+      "repository": "linktrend/LiNKsites",
+      "commit": null,
+      "tree": null,
+      "reason": "LS-10 existing-site migration, operations and cutover identity is not present on this protected development tree."
+    },
+    {
+      "id": "harness-h09-conformance",
+      "required": true,
+      "satisfied": false,
+      "bindingState": "future-placeholder",
+      "placeholderId": "FUTURE_HARNESS_H09_CONFORMANCE_IDENTITY",
+      "repository": "linktrend/LiNKharness",
+      "commit": null,
+      "tree": null,
+      "reason": "LiNKharness H-09 conformance identity is reserved and unbound. Narrative external dependencies do not unlock LS-11."
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/founder-reserved-decisions.schema.json",
+  "title": "LS-11 founder-reserved main, publish and deploy decisions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "githubIssue",
+    "issueId",
+    "evidenceClass",
+    "packetCompletion",
+    "founderAuthorized",
+    "decisions"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-founder-reserved-decisions" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "issueId": { "const": "ISS-36" },
+    "evidenceClass": { "const": "scaffolding" },
+    "packetCompletion": { "const": false },
+    "founderAuthorized": { "const": false },
+    "decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["main", "publish", "deploy"],
+      "properties": {
+        "main": { "$ref": "#/$defs/reservedDecision" },
+        "publish": { "$ref": "#/$defs/reservedDecision" },
+        "deploy": { "$ref": "#/$defs/reservedDecision" }
+      }
+    }
+  },
+  "$defs": {
+    "reservedDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reservedTo", "authorized", "executed", "identity"],
+      "properties": {
+        "reservedTo": { "const": "founder" },
+        "authorized": { "const": false },
+        "executed": { "const": false },
+        "identity": { "type": "null" }
+      }
+    }
+  }
+}

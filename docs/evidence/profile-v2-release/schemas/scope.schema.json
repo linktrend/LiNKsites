@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/scope.schema.json",
+  "title": "LS-11 release scope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "githubIssue",
+    "base",
+    "ownedPaths",
+    "prohibitedPrefixes",
+    "productRuntimeConfigProviderHarnessEdits",
+    "promotion"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-release-scope" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "ref", "commit", "tree"],
+      "properties": {
+        "repository": { "const": "linktrend/LiNKsites" },
+        "ref": { "const": "development" },
+        "commit": { "const": "02ebf5d8710c50c1f2c390989239f0baf916ba97" },
+        "tree": { "const": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755" }
+      }
+    },
+    "ownedPaths": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "enum": [
+          "docs/evidence/profile-v2-release/**",
+          "docs/releases/**"
+        ]
+      }
+    },
+    "prohibitedPrefixes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "productRuntimeConfigProviderHarnessEdits": { "const": false },
+    "promotion": { "const": false }
+  }
+}
