@@ -1,7 +1,7 @@
 # LS-10 ISS-31 migration evidence
 
-Issue: GitHub `#360`  
-Branch: `issue/360-ls-10-iss-31-dependency-safe-existing-site-migra`  
+Issue: GitHub `#360`
+Branch: `issue/360-ls-10-iss-31-dependency-safe-existing-site-migra`
 Packet: `LS-10` / `ISS-31`
 
 This issue owns copied existing-site migration engineering in
