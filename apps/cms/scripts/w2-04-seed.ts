@@ -15,6 +15,7 @@ const root = resolve(import.meta.dirname, '../../..')
 console.error('W2-04 seed: loading Payload configuration')
 const { default: config } = await import('../src/payload.config.ts')
 console.error('W2-04 seed: Payload configuration loaded')
+const proofTemplateId = process.env.W2_04_TEMPLATE_ID ?? 'marketing-smb-v1'
 const fixtureRoot = resolve(root, 'packages/factory-catalog/tests/fixtures/linklibraries/marketing-smb-v1')
 const readFixture = (path: string) => readFile(resolve(fixtureRoot, path), 'utf8')
 const commitSha = '1'.repeat(40)
@@ -86,7 +87,7 @@ const site = await within('creating site', payload.create({
   // The current canonical Sites contract requires the Program ownership tuple
   // even for this disposable local proof.  These are non-customer fixture
   // identifiers and are used only to exercise the same shape as production.
-  data: { name: 'W2-04 local proof site', domain: proofHostname, status: 'published', templateId: 'marketing-smb-v1', orgId: 'local-org', programId: 'w2-04-local-proof', leadId: 'w2-04-local-proof', defaultLanguage: language.id, languages: [language.id] },
+  data: { name: 'W2-04 local proof site', domain: proofHostname, status: 'published', templateId: proofTemplateId, orgId: 'local-org', programId: 'w2-04-local-proof', leadId: 'w2-04-local-proof', defaultLanguage: language.id, languages: [language.id] },
   ...options,
 }))
 console.error('W2-04 seed: site created')
@@ -133,7 +134,7 @@ await client.connect()
 await client.query(
   `insert into public.site_settings (site_id, locale, template_id, status, _status, created_at, updated_at)
    values ($1, $2, $3, 'published', 'published', now(), now())`,
-  [site.id, 'en', 'marketing-smb-v1'],
+  [site.id, 'en', proofTemplateId],
 )
 console.error('W2-04 seed: site settings inserted directly into disposable database')
 await within('creating navigation', payload.create({

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-founder-reserved-decisions",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "issueId": "ISS-36",
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "founderAuthorized": true,
+  "decisions": {
+    "main": {
+      "reservedTo": "founder",
+      "authorized": true,
+      "executed": false,
+      "identity": null
+    },
+    "publish": {
+      "reservedTo": "founder",
+      "authorized": false,
+      "executed": false,
+      "identity": null
+    },
+    "deploy": {
+      "reservedTo": "founder",
+      "authorized": false,
+      "executed": false,
+      "identity": null
+    }
+  }
+}

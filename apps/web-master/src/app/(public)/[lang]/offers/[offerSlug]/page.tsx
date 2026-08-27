@@ -1,52 +1,46 @@
 import { notFound, redirect } from "next/navigation";
 import { getOfferPage } from "@/lib/pageService";
 import { OfferPageLayout } from "@/layouts/OfferPageLayout";
-import { buildMetadata } from "@/lib/seo";
-import { getSiteIdFromRequest } from "@/lib/site-context";
-import { normalizeLocale } from "@/lib/locale-context";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
+import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 import { listOffers } from "@/lib/repository/offers";
 
-type Props = { params: { lang: string; offerSlug: string } };
+type Props = { params: Promise<{ lang: string; offerSlug: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const { lang, offerSlug } = await params;
   try {
-    const page = await getOfferPage(locale, siteId, params.offerSlug);
+    const { siteId, locale } = await requirePublicFamilyPage({
+      lang,
+      pathname: `/${lang}/offers/${offerSlug}`,
+    });
+    const page = await getOfferPage(locale, siteId, offerSlug);
     const offer = page.data.offer;
-    
-    if (!offer) {
-      return buildMetadata(locale, `/offers/${params.offerSlug}`);
-    }
-
-    const seo = (offer as any).seo ?? {};
-
-    return buildMetadata(locale, `/offers/${params.offerSlug}`, {
+    if (!offer) return { title: "Page unavailable", robots: { index: false, follow: false } };
+    const seo = (offer as { seo?: { title?: string; description?: string; canonicalUrl?: string } }).seo ?? {};
+    return buildMetadata(locale, `/offers/${offerSlug}`, {
       title: seo.title ?? offer.title,
-      description: seo.description ?? offer.short_description ?? offer.description,
-      keywords: seo.keywords,
+      description: seo.description,
       canonicalUrl: seo.canonicalUrl,
     });
-  } catch (error) {
-    return buildMetadata(locale, `/offers/${params.offerSlug}`);
+  } catch {
+    return { title: "Page unavailable", robots: { index: false, follow: false } };
   }
 }
 
 export default async function OfferPage({ params }: Props) {
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const { lang, offerSlug } = await params;
+  const { siteId, locale } = await requirePublicFamilyPage({
+    lang,
+    pathname: `/${lang}/offers/${offerSlug}`,
+  });
   const publishedOffers = (await listOffers({ siteId, locale })).filter(
-    (o: any) => o.status === "published",
+    (o: { status?: string }) => o.status === "published",
   );
-
-  // SEO RULE: If only 1 offer exists, redirect to /offers
   if (publishedOffers.length === 1) {
     redirect(`/${locale}/offers`);
   }
-
-  const page = await getOfferPage(locale, siteId, params.offerSlug);
+  const page = await getOfferPage(locale, siteId, offerSlug);
   if (!page.data.offer) return notFound();
-  
-  const offer = page.data.offer;
-  return <OfferPageLayout lang={locale} page={page as any} />;
+  return <OfferPageLayout lang={locale} page={page as never} />;
 }

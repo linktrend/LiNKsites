@@ -1,0 +1,21 @@
+node --test tests/master-template-v2/a1/harness.test.mjs
+# 14 passed, 0 failed (2026-08-26)
+
+node tests/master-template-v2/a1/scripts/validate.mjs --evidence docs/evidence/master-v2/a1
+# LS-08 ISS-25..27 paired proof: PROOF_OK packetCompletion=true overallVerdict=A1_SEMANTICS_FROZEN
+
+node tests/master-template-v2/a1/scripts/run.mjs --evidence docs/evidence/master-v2/a1
+# status=PASS overallVerdict=A1_SEMANTICS_FROZEN providerSelectable=false
+
+python3 - <<'PY'
+# HTTP fetch of 64 fixtures vs matrix digests: allMatched=true
+PY
+
+git diff --check
+# pass
+
+python3 scripts/gitops/secret_scan.py --repo .
+# ok=true (approved synthetic fixtures only)
+
+node --check tests/master-template-v2/a1/*.mjs tests/master-template-v2/a1/scripts/*.mjs
+# pass

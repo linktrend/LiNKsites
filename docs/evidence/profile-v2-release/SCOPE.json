@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-scope",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "base": {
+    "repository": "linktrend/LiNKsites",
+    "ref": "development",
+    "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
+  },
+  "ownedPaths": [
+    "docs/evidence/profile-v2-release/**",
+    "docs/releases/**"
+  ],
+  "prohibitedPrefixes": [
+    "packages/",
+    "apps/",
+    "deploy/",
+    "execution/",
+    "config/",
+    "supabase/",
+    "infra/",
+    "tests/",
+    "scripts/",
+    ".github/"
+  ],
+  "productRuntimeConfigProviderHarnessEdits": false,
+  "promotion": false
+}

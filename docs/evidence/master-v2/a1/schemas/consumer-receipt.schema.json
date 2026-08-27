@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/master-v2/a1/consumer-receipt.schema.json",
+  "title": "LS-08 ISS-27 consumer receipt",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "packetCompletion",
+    "freezeAcceptedA1",
+    "overallVerdict",
+    "emitted",
+    "verdicts"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls08-consumer-receipt" },
+    "packetId": { "const": "LS-08" },
+    "evidenceClass": { "const": "paired-proof" },
+    "packetCompletion": { "const": true },
+    "freezeAcceptedA1": { "const": true },
+    "overallVerdict": { "const": "A1_SEMANTICS_FROZEN" },
+    "emitted": { "const": true },
+    "providerSelectable": { "const": false },
+    "providerConformanceClaimed": { "const": false },
+    "mwt08Claimed": { "const": false },
+    "providerBytesPresent": { "const": false },
+    "verdicts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_materialized",
+        "adapter_compatible",
+        "payload_projection_valid",
+        "server_render_valid",
+        "browser_fixture_valid",
+        "migration_rollback_valid",
+        "tamper_rejected",
+        "cache_restart_valid"
+      ],
+      "properties": {
+        "candidate_materialized": { "const": "PASS" },
+        "adapter_compatible": { "const": "PASS" },
+        "payload_projection_valid": { "const": "PASS" },
+        "server_render_valid": { "const": "PASS" },
+        "browser_fixture_valid": { "const": "PASS" },
+        "migration_rollback_valid": { "const": "PASS" },
+        "tamper_rejected": { "const": "PASS" },
+        "cache_restart_valid": { "const": "PASS" }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-a1-paired-proof-scope",
+  "packetId": "LS-08",
+  "githubIssue": 350,
+  "issues": [
+    "ISS-25",
+    "ISS-26",
+    "ISS-27"
+  ],
+  "preparationOnly": false,
+  "packetComplete": true,
+  "ownedPaths": [
+    "tests/master-template-v2/a1/**",
+    "docs/evidence/master-v2/a1/**"
+  ],
+  "prohibitedPaths": [
+    "apps/**",
+    "packages/**",
+    "supabase/migrations/**",
+    "provider-bytes"
+  ],
+  "independentOf": []
+}

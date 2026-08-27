@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls09-a2-a3-complete-proof-scope",
+  "packetId": "LS-09",
+  "githubIssue": 353,
+  "issues": [
+    "ISS-28",
+    "ISS-29",
+    "ISS-30"
+  ],
+  "preparationOnly": false,
+  "packetComplete": true,
+  "ownedPaths": [
+    "tests/master-template-v2/a2-a3/**",
+    "docs/evidence/master-v2/a2-a3/**",
+    "tests/master-template-v2/a2-a3/layout-adapters/a1-frozen.mjs",
+    "tests/master-template-v2/a2-a3/layout-adapters/a2-additive.mjs",
+    "tests/master-template-v2/a2-a3/layout-adapters/a3-additive.mjs",
+    "tests/master-template-v2/a2-a3/layout-adapters/index.mjs"
+  ],
+  "prohibitedPaths": [
+    "apps/**",
+    "packages/**",
+    "supabase/migrations/**",
+    "tests/master-template-v2/a1/**",
+    "docs/evidence/master-v2/a1/**",
+    "provider-bytes"
+  ],
+  "independentOf": []
+}

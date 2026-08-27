@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AI_FEATURES, DEFAULT_LANGUAGE, isLanguageSupported } from "@/config";
 import { normalizeLocale } from "@/lib/locale-context";
 import { getPublicSiteIdOrNull, publicRouteNotFound } from "@/lib/public-route-guard";
+import { loadPublishedAuthority } from "@/lib/seo/published-catalog";
 import { getPageBySlug } from "@/lib/repository/pages";
 import {
   getOfferIndex,
@@ -52,12 +53,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const locale = normalizeLocale(lang);
   const siteId = await getPublicSiteIdOrNull();
   if (!siteId) return publicRouteNotFound();
+  const authority = await loadPublishedAuthority();
 
   let markdown = "";
 
   if (slugSegments.length === 0) {
     const page = await getPageBySlug({ siteId, locale, slugSegments });
-    markdown = page ? markdownForPage(page, locale) : "# Home\nContent unavailable.";
+    markdown = page ? markdownForPage(page, locale, authority) : "# Home\nContent unavailable.";
   } else if (slugSegments[0] === "offers") {
     if (slugSegments.length === 1) {
       const page = await getOfferIndex(locale, siteId);
@@ -67,7 +69,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const page = await getOfferPage(locale, siteId, offerSlug);
       const offer = page.data.offer;
       if (!offer) return new NextResponse("Not Found", { status: 404 });
-      markdown = markdownForOffer(offer, locale);
+      markdown = markdownForOffer(offer, locale, authority);
     }
   } else if (slugSegments[0] === "resources") {
     const resourceType = slugSegments[1] ?? "";
@@ -78,17 +80,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const page = await getResourceArticle(locale, siteId, slugSegments[2]);
       const article = page.data.article;
       if (!article) return new NextResponse("Not Found", { status: 404 });
-      markdown = markdownForArticle(article, locale);
+      markdown = markdownForArticle(article, locale, authority);
     } else if (resourceType === "videos" && slugSegments[2]) {
       const page = await getVideoResource(locale, siteId, slugSegments[2]);
       const video = page.data.video;
       if (!video) return new NextResponse("Not Found", { status: 404 });
-      markdown = markdownForVideo(video, locale);
+      markdown = markdownForVideo(video, locale, authority);
     } else if (resourceType === "cases" && slugSegments[2]) {
       const page = await getCaseStudyPage(locale, siteId, slugSegments[2]);
       const caseStudy = page.data.case;
       if (!caseStudy) return new NextResponse("Not Found", { status: 404 });
-      markdown = markdownForCaseStudy(caseStudy, locale);
+      markdown = markdownForCaseStudy(caseStudy, locale, authority);
     } else if (resourceType === "videos" && !slugSegments[2]) {
       const page = await getVideosPage(locale, siteId);
       markdown = buildIndexMarkdown("Videos", page.data.videos, `/${lang}/resources/videos`);
@@ -97,25 +99,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       markdown = buildIndexMarkdown("Case Studies", page.data.cases, `/${lang}/resources/cases`);
     } else if (resourceType === "faq") {
       const page = await getFaqPage(locale, siteId);
-      markdown = markdownForFaq(page.data.faqs, locale);
+      markdown = markdownForFaq(page.data.faqs, locale, authority);
     } else {
       markdown = "# Resources\nContent unavailable.";
     }
   } else if (slugSegments[0] === "about") {
     const page = await getAboutIndex(locale, siteId);
-    markdown = markdownForAbout(page.data.about ?? null, locale);
+    markdown = markdownForAbout(page.data.about ?? null, locale, authority);
   } else if (slugSegments[0] === "contact") {
     const page = await getContactPage(locale, siteId);
-    markdown = markdownForContact(page.data.contact ?? null, locale);
+    markdown = markdownForContact(page.data.contact ?? null, locale, authority);
   } else if (slugSegments[0] === "legal") {
     const slug = slugSegments[1] ?? "terms-of-use";
     const page = await getPageBySlug({ siteId, locale, slugSegments: ["legal", slug] });
     if (!page) return new NextResponse("Not Found", { status: 404 });
-    markdown = markdownForPage(page, locale);
+    markdown = markdownForPage(page, locale, authority);
   } else {
     const page = await getPageBySlug({ siteId, locale, slugSegments });
     if (!page) return new NextResponse("Not Found", { status: 404 });
-    markdown = markdownForPage(page, locale);
+    markdown = markdownForPage(page, locale, authority);
   }
 
   return new NextResponse(markdown, {

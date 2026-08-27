@@ -293,3 +293,10 @@ export function checkEntitlement(tier: TierSpecification, capability: Requestabl
 export function resolveMostRestrictive(tierLimit: number, kitVariantLimit: number): number {
   return Math.min(tierLimit, kitVariantLimit)
 }
+
+/**
+ * LS-02 A/B/C/L capability-credit budgets live in capabilityCredits.ts
+ * (A=30, B=15, C=6, L=0) and do not replace this Tier Specification.
+ * Adopted sites bind an immutable credit snapshot instead of enlarging
+ * these provisional maxPages values.
+ */

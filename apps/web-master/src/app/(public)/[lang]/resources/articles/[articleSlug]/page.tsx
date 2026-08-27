@@ -1,47 +1,42 @@
 import { notFound } from "next/navigation";
 import { getResourceArticle } from "@/lib/pageService";
-import { buildMetadata } from "@/lib/seo";
-import { getSiteIdFromRequest } from "@/lib/site-context";
-import { normalizeLocale } from "@/lib/locale-context";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
+import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 import { ArticleLayout } from "@/layouts/ArticleLayout";
 import { resolveImage } from "@/lib/resolveImage";
 
-export type Props = { params: { lang: string; articleSlug: string } };
+export type Props = { params: Promise<{ lang: string; articleSlug: string }> };
 
 export async function generateMetadata({ params }: Props) {
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
+  const { lang, articleSlug } = await params;
   try {
-    const page = await getResourceArticle(locale, siteId, params.articleSlug);
+    const { siteId, locale } = await requirePublicFamilyPage({
+      lang,
+      pathname: `/${lang}/resources/articles/${articleSlug}`,
+    });
+    const page = await getResourceArticle(locale, siteId, articleSlug);
     const article = page?.data?.article;
-
-    if (!article) {
-      return buildMetadata(locale, `/resources/articles/${params.articleSlug}`);
-    }
-
-    const seo = (article as any).seo ?? {};
-    const ogImage =
-      (seo?.ogImage as any)?.url ??
-      resolveImage(article.image ?? undefined) ??
-      undefined;
-
-    return buildMetadata(locale, `/resources/articles/${params.articleSlug}`, {
+    if (!article) return { title: "Page unavailable", robots: { index: false, follow: false } };
+    const seo = (article as { seo?: { title?: string; description?: string; ogImage?: { url?: string }; canonicalUrl?: string } }).seo ?? {};
+    return buildMetadata(locale, `/resources/articles/${articleSlug}`, {
       title: seo.title ?? article.title ?? "Article",
       description: seo.description ?? article.excerpt ?? "",
-      keywords: seo.keywords,
       ogType: "article",
-      ogImage,
+      ogImage: seo.ogImage?.url ?? resolveImage(article.image ?? undefined) ?? undefined,
       canonicalUrl: seo.canonicalUrl,
     });
-  } catch (error) {
-    return buildMetadata(locale, `/resources/articles/${params.articleSlug}`);
+  } catch {
+    return { title: "Page unavailable", robots: { index: false, follow: false } };
   }
 }
 
 export default async function ResourceArticlePage({ params }: Props) {
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(params.lang);
-  const page = await getResourceArticle(locale, siteId, params.articleSlug);
+  const { lang, articleSlug } = await params;
+  const { siteId, locale } = await requirePublicFamilyPage({
+    lang,
+    pathname: `/${lang}/resources/articles/${articleSlug}`,
+  });
+  const page = await getResourceArticle(locale, siteId, articleSlug);
   if (!page?.data?.article) return notFound();
-  return <ArticleLayout lang={locale} page={page as any} />;
+  return <ArticleLayout lang={locale} page={page as never} />;
 }

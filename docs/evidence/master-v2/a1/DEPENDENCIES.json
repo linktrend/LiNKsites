@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-a1-bound-dependencies",
+  "packetId": "LS-08",
+  "githubIssue": 350,
+  "policy": "fail-closed",
+  "dependencies": [
+    {
+      "id": "ls07-protected-integration",
+      "required": true,
+      "satisfied": true,
+      "reason": "LS-07 is present on protected origin/development at the exact bound commit/tree.",
+      "identity": {
+        "repository": "linktrend/LiNKsites",
+        "ref": "development",
+        "commit": "e89cfd49fafe7f1dc7b137f77c2ab481140a6cca",
+        "tree": "27c5578ab1416b7a37ddf79168b91be1547eb127"
+      }
+    },
+    {
+      "id": "exact-provider-a1-binding",
+      "required": true,
+      "satisfied": true,
+      "reason": "MWT-07 A1 pin is bound by identity only. Provider bytes are not copied.",
+      "identity": {
+        "repository": "linktrend/LiNKlibraries",
+        "commit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
+        "tree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b",
+        "releaseEntryVersion": "master-template-type-1@2.0.0-a1.1",
+        "lifecycle": "draft",
+        "selectability": "non_selectable"
+      }
+    },
+    {
+      "id": "ext-ls-01-consumer-proof-receipt",
+      "required": true,
+      "satisfied": true,
+      "reason": "EXT-LS-01 receipt is bound by exact path and SHA-256. Receipt bytes are not fabricated.",
+      "identity": {
+        "gateId": "EXT-LS-01",
+        "path": ".git/linktrend-evidence/execution-2026-08-25/ext-ls-01-issue321-966a4b0/consumer-proof-receipt.json",
+        "sha256": "5422616a2db650af44d3c87253066dfc5acd80054b4a6dcd35bd83ce6ca978e3",
+        "consumerCommit": "966a4b08c5fdb0fc9a9bb429a5916600b459cee9",
+        "consumerTree": "fa6f3fcbd737c9954214d79b733fe9b8f5d4f68f",
+        "bytesEmbedded": false,
+        "acceptedBinding": true
+      }
+    }
+  ]
+}

@@ -50,7 +50,36 @@ export const SiteSettings: CollectionConfig<'site-settings'> = {
       type: 'text',
       required: true,
       admin: {
-        description: 'Which frontend template module should render this site',
+        description:
+          'DEPRECATED projection of a free-text template ID. Canonical adoption identity lives on template-adoptions.',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'deprecatedTemplateIdProjection',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        description: 'Marks templateId as a deprecated projection only (LS-FR-08).',
+        position: 'sidebar',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'templateAdoption',
+      type: 'relationship',
+      relationTo: 'template-adoptions',
+      admin: {
+        description: 'Canonical immutable template adoption record',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'entitlementSnapshot',
+      type: 'relationship',
+      relationTo: 'entitlement-snapshots',
+      admin: {
+        description: 'Canonical immutable entitlement snapshot',
         position: 'sidebar',
       },
     },

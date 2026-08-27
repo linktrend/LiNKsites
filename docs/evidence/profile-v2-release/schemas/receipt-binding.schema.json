@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/receipt-binding.schema.json",
+  "title": "LS-11 receipt binding template",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "githubIssue",
+    "issueId",
+    "evidenceClass",
+    "packetCompletion",
+    "receiptsBound",
+    "bindings"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-receipt-binding" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "issueId": { "const": "ISS-35" },
+    "evidenceClass": { "const": "completion" },
+    "packetCompletion": { "const": true },
+    "receiptsBound": { "const": true },
+    "bindings": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/boundBinding" }
+    }
+  },
+  "$defs": {
+    "boundBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "placeholderId",
+        "bound",
+        "bindingState",
+        "repository",
+        "commit",
+        "tree"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": ["harness", "profile", "provider", "consumer", "configuration"]
+        },
+        "placeholderId": {
+          "type": "string",
+          "enum": [
+            "FUTURE_HARNESS_H09_CONFORMANCE_IDENTITY",
+            "FUTURE_LS10_CUTOVER_IDENTITY",
+            "FUTURE_PROVIDER_RECEIPT_IDENTITY",
+            "FUTURE_CONSUMER_RECEIPT_IDENTITY",
+            "FUTURE_CONFIGURATION_RECEIPT_IDENTITY"
+          ]
+        },
+        "bound": { "const": true },
+        "bindingState": { "const": "bound" },
+        "repository": {
+          "type": "string",
+          "enum": [
+            "linktrend/LiNKharness",
+            "linktrend/LiNKsites",
+            "linktrend/LiNKlibraries"
+          ]
+        },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "tree": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    }
+  }
+}

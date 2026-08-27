@@ -1,8 +1,14 @@
 import { createHash } from 'node:crypto'
 import type { SchemaVersion } from '@linksites/types'
-import type { TemplateId } from './templateIdentity.js'
+import type { TemplateId } from './templateIdentity.ts'
 
 export const WORKING_CONTENT_SCHEMA_VERSION = { major: 1, minor: 0 } as const satisfies SchemaVersion
+
+/** LS-04 / LS-FR-11 content modes. Matches LS-03 CoreSettings without importing CMS. */
+export const LS04_CONTENT_MODES = ['product', 'service', 'hybrid', 'neither'] as const
+export type Ls04ContentMode = (typeof LS04_CONTENT_MODES)[number]
+
+export const LS04_DISPATCH_IDEMPOTENCY = 'cursor-cloud-dispatch-v1:linksites-ls04-285-base6169548' as const
 
 const WORKING_CONTENT_COMPONENT_CONTRACT = {
   SignupHero: { requiredContent: ['lang'] },
@@ -10,6 +16,65 @@ const WORKING_CONTENT_COMPONENT_CONTRACT = {
   OfferShowcase: { requiredContent: ['lang', 'offers'] },
   ArticlesGrid: { requiredContent: ['lang', 'articles'] },
 } as const
+
+export type WorkingContentComponentId = keyof typeof WORKING_CONTENT_COMPONENT_CONTRACT
+
+export interface Ls04CatalogRecord {
+  slug: string
+  title: string
+  summary: string
+  code?: string
+}
+
+export interface Ls04SemanticRetention {
+  semanticId: string
+  providerComponentId: string
+  pageFamily: string
+  targetRecord: { collection: string; family: string; contentRef: string }
+}
+
+export interface Ls04ClaimRetention {
+  claimId: string
+  kind: 'review' | 'credential' | 'result' | 'legal' | 'business'
+  evidenceRefs: string[]
+  confidence: number
+  statement: string
+}
+
+export interface Ls04LayeredIdentities {
+  orgId: string
+  siteId: string
+  locale: string
+  contentMode: Ls04ContentMode
+  capabilityPlanId: 'A' | 'B' | 'C' | 'L'
+  verticalKitId: string
+  entitlementSnapshotId: string
+  templateAdoptionId: string
+  adoptionIdentities: {
+    provider: string
+    layout: string
+    plan: string
+    overlay: string
+    config: string
+    content: string
+    adapter: string
+    effective: string
+  }
+}
+
+export function isLs04ContentMode(value: unknown): value is Ls04ContentMode {
+  return typeof value === 'string' && (LS04_CONTENT_MODES as readonly string[]).includes(value)
+}
+
+export function readLs04LayeredIdentities(contentPackage: WorkingContentPackage): Ls04LayeredIdentities | null {
+  const first = contentPackage.content.pages[0]?.sections[0]?.content.ls04
+  if (!isRecord(first)) return null
+  const identities = first.identities
+  if (!isRecord(identities) || !isLs04ContentMode(identities.contentMode)) return null
+  const adoption = identities.adoptionIdentities
+  if (!isRecord(adoption)) return null
+  return identities as unknown as Ls04LayeredIdentities
+}
 
 export type WorkingContentState =
   | 'working'
@@ -155,6 +220,39 @@ const isUniqueViolation = (value: unknown): boolean =>
 const hasExactKeys = (value: unknown, required: readonly string[]): value is Record<string, unknown> =>
   isRecord(value) && required.every((key) => Object.prototype.hasOwnProperty.call(value, key)) && Object.keys(value).every((key) => required.includes(key))
 
+function assertOptionalLs04SectionContent(content: Record<string, unknown>): void {
+  if (!Object.prototype.hasOwnProperty.call(content, 'ls04')) return
+  const ls04 = content.ls04
+  if (!isRecord(ls04)) throw new WorkingContentError('working content LS-04 retention must be an object', 'invalid_input')
+  const semantic = ls04.semantic
+  if (!isRecord(semantic) || !isNonEmptyString(semantic.semanticId) || !isNonEmptyString(semantic.providerComponentId) || !isNonEmptyString(semantic.pageFamily) || !isRecord(semantic.targetRecord) || !isNonEmptyString(semantic.targetRecord.collection) || !isNonEmptyString(semantic.targetRecord.family) || !isNonEmptyString(semantic.targetRecord.contentRef)) {
+    throw new WorkingContentError('working content LS-04 semantic retention is incomplete', 'invalid_input')
+  }
+  const identities = ls04.identities
+  if (!isRecord(identities) || !isNonEmptyString(identities.orgId) || !isNonEmptyString(identities.siteId) || !isNonEmptyString(identities.locale) || !isLs04ContentMode(identities.contentMode) || !isNonEmptyString(identities.entitlementSnapshotId) || !isNonEmptyString(identities.templateAdoptionId) || !isNonEmptyString(identities.verticalKitId) || !isNonEmptyString(identities.capabilityPlanId) || !isRecord(identities.adoptionIdentities)) {
+    throw new WorkingContentError('working content LS-04 layered identities are incomplete', 'invalid_input')
+  }
+  if (Object.prototype.hasOwnProperty.call(ls04, 'claims')) {
+    if (!Array.isArray(ls04.claims) || !ls04.claims.every((claim) => isRecord(claim) && isNonEmptyString(claim.claimId) && isNonEmptyString(claim.kind) && isNonEmptyString(claim.statement) && Array.isArray(claim.evidenceRefs) && claim.evidenceRefs.every(isNonEmptyString) && typeof claim.confidence === 'number' && claim.confidence >= 0 && claim.confidence <= 1)) {
+      throw new WorkingContentError('working content LS-04 claim/evidence retention is invalid', 'invalid_input')
+    }
+  }
+}
+
+function assertOptionalLs04PackageConsistency(pages: WorkingContentPage[]): void {
+  const identities = pages.flatMap((page) => page.sections.map((section) => section.content.ls04))
+    .filter(isRecord)
+    .map((ls04) => ls04.identities)
+    .filter(isRecord)
+  if (identities.length === 0) return
+  const first = identities[0]
+  for (const identitiesRecord of identities) {
+    if (identitiesRecord.orgId !== first.orgId || identitiesRecord.siteId !== first.siteId || identitiesRecord.contentMode !== first.contentMode) {
+      throw new WorkingContentError('working content LS-04 identities must be tenant-consistent across sections', 'invalid_input')
+    }
+  }
+}
+
 function assertContentPackage(value: unknown): asserts value is WorkingContentPackage {
   if (!isRecord(value) || !hasExactKeys(value, ['schemaVersion', 'templateId', 'content', 'assetRefs', 'libraryRefs', 'provenance'])) {
     throw new WorkingContentError('working content package has an incompatible top-level shape', 'invalid_input')
@@ -196,7 +294,9 @@ function assertContentPackage(value: unknown): asserts value is WorkingContentPa
       if (requiredContent.includes('articles') && !Array.isArray(section.content.articles)) {
         throw new WorkingContentError(`working content component ${section.componentId} requires an articles array`, 'invalid_input')
       }
+      assertOptionalLs04SectionContent(section.content)
     }
+    assertOptionalLs04PackageConsistency(content.pages)
   }
 
   if (!Array.isArray(value.assetRefs) || !value.assetRefs.every((asset) => isRecord(asset) && hasExactKeys(asset, ['assetId', 'sha256', 'source']) && isNonEmptyString(asset.assetId) && isSha256(asset.sha256) && isNonEmptyString(asset.source))) {

@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "kind": "cross_repository_handoff",
+  "packet": "LS-02",
+  "issues": ["ISS-07", "ISS-08", "ISS-09"],
+  "handoff": "LiNKharness H-09 / downstream H-10 identity refresh",
+  "identityRefreshOnly": true,
+  "work": {
+    "githubIssue": 358,
+    "branch": "issue/358-ls-02-h-09-identity-refresh-for-ls-09-protected",
+    "successorPacketIssue": 300
+  },
+  "sites": {
+    "repository": "linktrend/LiNKsites",
+    "previousProtectedDevelopment": {
+      "commit": "da83f57dc89468a1144735f76343ed19e563a36b",
+      "tree": "80f54db2219524b52f3388ccef95facb918d384a",
+      "note": "prior LS-02 H-09 identity refresh merge (PR 354 / issue 352)"
+    },
+    "protectedDevelopment": {
+      "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
+      "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755",
+      "includes": ["LS-09 protected integration", "LS-08 A1"]
+    },
+    "ls02Phase": {
+      "pr": 273,
+      "head": "d83d80d17837fd36b5810af9d48e03dd9a0e7ded",
+      "tree": "1f9eb7cb8d569c78dd50a482d6b7ce985c2cff90"
+    },
+    "ls08A1Candidate": {
+      "githubIssue": 350,
+      "phasePr": 351,
+      "commit": "7e9596ef009d509f0683b69e5df1d7fb2f156664",
+      "tree": "a67c3604ae15c07e4889ed2ebe718d726f0e5eab"
+    },
+    "profilePackage": "@linksites/profile"
+  },
+  "harness": {
+    "repository": "linktrend/LiNKharness",
+    "h09Baseline": {
+      "commit": "ad8560b242da0d15c0d65a6c8d4d17a0171e2d2b",
+      "tree": "6cab53da19ba390d392157dbcc38979f1a6c86ce"
+    },
+    "currentDevelopment": {
+      "commit": "655bd906cf9c58e71d38694d3545112b421a3bb0",
+      "tree": "e5ece767bd39b54c346f041a7dc1e59cf48f4a40"
+    }
+  },
+  "provider": {
+    "repository": "linktrend/LiNKlibraries",
+    "packet": "MWT-07",
+    "pinOnly": true,
+    "bytesCopied": false,
+    "a1Authority": {
+      "commit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
+      "tree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b"
+    }
+  },
+  "ls08Receipts": {
+    "consumerReceipt": {
+      "path": "docs/evidence/master-v2/a1/fixtures/iss-27-receipt.json",
+      "sha256": "2373efd24a502dc04260217f4c90a9f088609f647bb468e01400ad34e5260646",
+      "kind": "ls08-consumer-receipt"
+    },
+    "evidenceChecksums": {
+      "path": "docs/evidence/master-v2/a1/CHECKSUMS.json",
+      "sha256": "33f4a1925a056602ebf4c0a5d79f876e660a79eb282311a303a5ad3d14e555ac"
+    },
+    "providerPinBinding": {
+      "path": "docs/evidence/master-v2/a1/bindings/provider-pin.json",
+      "sha256": "2b1a10b05b61b9a02c49520c6fdb277667aec140249a4c4e0e7c29ccfc743d37"
+    },
+    "extLs01ReceiptBinding": {
+      "path": "docs/evidence/master-v2/a1/bindings/ext-ls-01-receipt.json",
+      "sha256": "4cc9abdf18840c8ae7f212fba89b6e951d638142e9e8ceea4d5d1aa6bf3b22e5",
+      "boundReceiptSha256": "5422616a2db650af44d3c87253066dfc5acd80054b4a6dcd35bd83ce6ca978e3"
+    },
+    "status": {
+      "path": "docs/evidence/master-v2/a1/STATUS.json",
+      "sha256": "3a2dc9dc115557c4c8ff34a2f509639cf363149dd21718d31ef10af3cb28209a"
+    },
+    "dependencies": {
+      "path": "docs/evidence/master-v2/a1/DEPENDENCIES.json",
+      "sha256": "d74f2a38e267efe8788c66d12d51c17725674e547549e189cb421f04363bb4d7"
+    },
+    "bytesEmbedded": false
+  },
+  "rebindInstructions": {
+    "h09": [
+      "Bind LiNKharness H-09 to LiNKsites protected development commit 02ebf5d8710c50c1f2c390989239f0baf916ba97 tree fb427d30ea7c3e7060fc9cc1a63a1110266dd755.",
+      "Treat prior consumer identity da83f57dc89468a1144735f76343ed19e563a36b tree 80f54db2219524b52f3388ccef95facb918d384a as stale input.",
+      "Record the completed LS-08 A1 consumer checkpoint commit 7e9596ef009d509f0683b69e5df1d7fb2f156664 tree a67c3604ae15c07e4889ed2ebe718d726f0e5eab as the candidate identity on that development tree.",
+      "Pin LiNKlibraries MWT-07 by identity only at commit f28fd53d454cbc33d97951d8e62826dae5a83e40 tree 34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b. Do not copy provider or Harness bytes.",
+      "Bind LS-08 ISS-27 consumer receipt sha256 2373efd24a502dc04260217f4c90a9f088609f647bb468e01400ad34e5260646 and evidence CHECKSUMS.json sha256 33f4a1925a056602ebf4c0a5d79f876e660a79eb282311a303a5ad3d14e555ac.",
+      "Rebuild the H-09 consumer receipt against those exact identities and rerun H-09. Treat any other sites commit/tree as stale input and fail closed."
+    ],
+    "h10": [
+      "Do not admit H-10 review until the H-09 receipt is rebound to the identities above and H-09 completes without a stale or foreign consumer pin.",
+      "H-10 remains blocked-until-h09-rebind for this refresh."
+    ]
+  },
+  "claims": {
+    "h09ConformanceAccepted": false,
+    "h10ReviewAccepted": false,
+    "ls03DependencyClaimed": false,
+    "ls09A2A3EvidenceMutated": false,
+    "copiedHarnessOrProviderBytes": false,
+    "productRuntimeMutated": false,
+    "canonicalPacketBehaviorMutated": false,
+    "identityRefreshOnly": true,
+    "ls08A1CandidateBound": true,
+    "ls08ReceiptDigestsBound": true,
+    "consumerActionRequired": "Rebind H-09 consumer receipt to this exact sites development identity and LS-08 A1 checkpoint, then rerun H-09 before H-10 review admission. H-09/H-10 acceptance remains pending Harness rerun."
+  },
+  "remainingGates": [
+    "H-09 receipt rebind against 02ebf5d8710c50c1f2c390989239f0baf916ba97/fb427d30ea7c3e7060fc9cc1a63a1110266dd755",
+    "H-09 rerun after rebind; H-09 remains unadmitted",
+    "H-10 review remains blocked-until-h09-rebind",
+    "MWT-07 provider remains draft/non-selectable; provider conformance unclaimed",
+    "MWT-08 unclaimed",
+    "LS-03 dependency unclaimed by this refresh"
+  ],
+  "scope": "identity and receipt binding only; no product/runtime/provider mutation"
+}

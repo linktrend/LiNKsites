@@ -1,0 +1,19 @@
+node --test tests/master-template-v2/a2-a3/harness.test.mjs
+# 15 passed, 0 failed
+
+node tests/master-template-v2/a2-a3/scripts/validate.mjs --evidence docs/evidence/master-v2/a2-a3
+# LS-09 ISS-28..30 complete proof: PROOF_OK packetCompletion=true overallVerdict=ALL_LAYOUT_ADAPTER_BROWSER_VERDICTS productionSelectionGated=true
+
+node tests/master-template-v2/a2-a3/scripts/run.mjs --evidence docs/evidence/master-v2/a2-a3
+# status=PASS overallVerdict=ALL_LAYOUT_ADAPTER_BROWSER_VERDICTS productionSelectable=false
+
+# HTTP fetch of 80 fixtures vs matrix digests: allMatched=true (fixtures/http-proof.json)
+
+git diff --check
+# pass
+
+python3 scripts/gitops/secret_scan.py --repo .
+# ok=true (approved synthetic fixtures only)
+
+node --check tests/master-template-v2/a2-a3/*.mjs tests/master-template-v2/a2-a3/scripts/*.mjs tests/master-template-v2/a2-a3/layout-adapters/*.mjs
+# pass

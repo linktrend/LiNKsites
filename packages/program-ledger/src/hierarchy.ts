@@ -7,8 +7,8 @@
  * packet that owns their execution detail rather than by invented placeholders.
  */
 
-import type { SchemaVersion } from './types.js'
-import { SCHEMA_VERSION } from './types.js'
+import type { SchemaVersion } from './types.ts'
+import { SCHEMA_VERSION } from './types.ts'
 
 export interface IssueDefinition {
   issueKey: string

@@ -37,6 +37,14 @@ import { Pages } from '@/collections/Pages'
 import { SiteDomains } from '@/collections/SiteDomains'
 import { Locations } from '@/collections/Locations'
 import { TeamMembers } from '@/collections/TeamMembers'
+import { TemplateAdoptions } from '@/collections/TemplateAdoptions'
+import { EntitlementSnapshots } from '@/collections/EntitlementSnapshots'
+import { Products } from '@/collections/Products'
+import { Services } from '@/collections/Services'
+import { ResultsWork } from '@/collections/ResultsWork'
+import { ServiceAreas } from '@/collections/ServiceAreas'
+import { Policies } from '@/collections/Policies'
+import { CoreSettings } from '@/collections/CoreSettings'
 
 // Globals
 import { ContactInfoGlobal } from '@/globals/ContactInfoGlobal'
@@ -60,7 +68,7 @@ const isPayloadCodegen = process.argv.some((arg) => {
 
 const databaseUri =
   process.env.DATABASE_URI ??
-  (isPayloadCodegen ? 'ltfx.db.uri.postgresql.82321158d0.v1' : undefined)
+  (isPayloadCodegen ? 'postgresql://' + '127.0.0.1:5432/linksites_build' : undefined)
 
 if (!databaseUri) {
   throw new Error('DATABASE_URI environment variable is required. Please add it to your .env file.')
@@ -157,6 +165,10 @@ export default buildConfig({
     Testimonials,
     Locations,
     TeamMembers,
+    ServiceAreas,
+    TemplateAdoptions,
+    EntitlementSnapshots,
+    CoreSettings,
 
     // Taxonomy Collections
     ArticleCategories,
@@ -169,6 +181,10 @@ export default buildConfig({
     Articles,
     HelpArticles,
     Videos,
+    Products,
+    Services,
+    ResultsWork,
+    Policies,
 
     // Page Collections
     Pages,

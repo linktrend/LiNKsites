@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-receipt-bundle",
+  "packetId": "LS-08",
+  "packetCompletion": false,
+  "evidenceClass": "schema-fixture",
+  "layoutPack": "a1",
+  "surfaces": ["server", "browser"],
+  "plans": ["a", "b", "c", "l"],
+  "providerIdentity": {
+    "repository": "linktrend/LiNKlibraries",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "tree": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "releaseEntryVersion": "master-template-type-1@schema-fixture",
+    "releaseArtifactTree": "cccccccccccccccccccccccccccccccccccccccc"
+  },
+  "consumerIdentity": {
+    "repository": "linktrend/LiNKsites",
+    "commit": "dddddddddddddddddddddddddddddddddddddddd",
+    "tree": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "cells": [
+    {
+      "surface": "server",
+      "planId": "a",
+      "verdicts": {
+        "candidate_materialized": "NOT_RUN",
+        "adapter_compatible": "NOT_RUN",
+        "payload_projection_valid": "NOT_RUN",
+        "server_render_valid": "NOT_RUN",
+        "browser_fixture_valid": "NOT_RUN",
+        "migration_rollback_valid": "NOT_RUN",
+        "tamper_rejected": "NOT_RUN",
+        "cache_restart_valid": "NOT_RUN"
+      }
+    },
+    {
+      "surface": "server",
+      "planId": "b",
+      "verdicts": {
+        "candidate_materialized": "NOT_RUN",
+        "adapter_compatible": "NOT_RUN",
+        "payload_projection_valid": "NOT_RUN",
+        "server_render_valid": "NOT_RUN",
+        "browser_fixture_valid": "NOT_RUN",
+        "migration_rollback_valid": "NOT_RUN",
+        "tamper_rejected": "NOT_RUN",
+        "cache_restart_valid": "NOT_RUN"
+      }
+    },
+    {
+      "surface": "server",
+      "planId": "c",
+      "verdicts": {
+        "candidate_materialized": "NOT_RUN",
+        "adapter_compatible": "NOT_RUN",
+        "payload_projection_valid": "NOT_RUN",
+        "server_render_valid": "NOT_RUN",
+        "browser_fixture_valid": "NOT_RUN",
+        "migration_rollback_valid": "NOT_RUN",
+        "tamper_rejected": "NOT_RUN",
+        "cache_restart_valid": "NOT_RUN"
+      }
+    },
+    {
+      "surface": "server",
+      "planId": "l",
+      "verdicts": {
+        "candidate_materialized": "NOT_RUN",
+        "adapter_compatible": "NOT_RUN",
+        "payload_projection_valid": "NOT_RUN",
+        "server_render_valid": "NOT_RUN",
+        "browser_fixture_valid": "NOT_RUN",
+        "migration_rollback_valid": "NOT_RUN",
+        "tamper_rejected": "NOT_RUN",
+        "cache_restart_valid": "NOT_RUN"
+      }
+    },
+    {
+      "surface": "browser",
+      "planId": "a",
+      "verdicts": {
+        "candidate_materialized": "NOT_RUN",
+        "adapter_compatible": "NOT_RUN",
+        "payload_projection_valid": "NOT_RUN",
+        "server_render_valid": "NOT_RUN",
+        "browser_fixture_valid": "NOT_RUN",
+        "migration_rollback_valid": "NOT_RUN",
+        "tamper_rejected": "NOT_RUN",
+        "cache_restart_valid": "NOT_RUN"
+      }
+    },
+    {
+      "surface": "browser",
+      "planId": "b",
+      "verdicts": {
+        "candidate_materialized": "NOT_RUN",
+        "adapter_compatible": "NOT_RUN",
+        "payload_projection_valid": "NOT_RUN",
+        "server_render_valid": "NOT_RUN",
+        "browser_fixture_valid": "NOT_RUN",
+        "migration_rollback_valid": "NOT_RUN",
+        "tamper_rejected": "NOT_RUN",
+        "cache_restart_valid": "NOT_RUN"
+      }
+    },
+    {
+      "surface": "browser",
+      "planId": "c",
+      "verdicts": {
+        "candidate_materialized": "NOT_RUN",
+        "adapter_compatible": "NOT_RUN",
+        "payload_projection_valid": "NOT_RUN",
+        "server_render_valid": "NOT_RUN",
+        "browser_fixture_valid": "NOT_RUN",
+        "migration_rollback_valid": "NOT_RUN",
+        "tamper_rejected": "NOT_RUN",
+        "cache_restart_valid": "NOT_RUN"
+      }
+    },
+    {
+      "surface": "browser",
+      "planId": "l",
+      "verdicts": {
+        "candidate_materialized": "NOT_RUN",
+        "adapter_compatible": "NOT_RUN",
+        "payload_projection_valid": "NOT_RUN",
+        "server_render_valid": "NOT_RUN",
+        "browser_fixture_valid": "NOT_RUN",
+        "migration_rollback_valid": "NOT_RUN",
+        "tamper_rejected": "NOT_RUN",
+        "cache_restart_valid": "NOT_RUN"
+      }
+    }
+  ]
+}

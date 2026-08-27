@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "status": "recorded",
+  "rule": "After Profile v2 cutover, LiNKsites must not keep a parallel generic Ledger, orchestrator, retry controller, gate engine, write lock, cost controller or generic evidence store. Website-domain adapters and verdicts remain LiNKsites-owned.",
+  "sharedOrHarnessCandidate": [
+    {
+      "id": "LS-RWB-01",
+      "surface": "packages/program-ledger, apps/program-orchestrator, execution/",
+      "currentRole": "program hierarchy, issue dispatch, capability gate, retries, evidence receipts",
+      "disposition": "preserve_domain_history_replace_or_delegate_generic_machinery",
+      "targetOwner": "LiNKharness generic + LiNKsites domain adapters/verdicts"
+    },
+    {
+      "id": "LS-FR-25-shared",
+      "surface": "generic evidence transport / retry / gate / lock / cost",
+      "currentRole": "local program-ledger GateResult, LedgerEvidenceReceipt, retry/backoff fields",
+      "disposition": "retire_parallel_generic_after_harness_cutover",
+      "targetOwner": "LiNKharness"
+    }
+  ],
+  "websiteDomain": [
+    {
+      "id": "LS-RWB-02",
+      "surface": "packages/factory-catalog/src/masterTemplatePin.ts and library consumer/probe",
+      "disposition": "reuse_and_extend",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-03",
+      "surface": "packages/factory-catalog/src/siteSpecification.ts",
+      "disposition": "expand",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-04",
+      "surface": "packages/factory-catalog/src/tierSpecification.ts",
+      "disposition": "replace_compatibly",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-05",
+      "surface": "caller-authored pagePlan / siteAssemblyManifest.ts",
+      "disposition": "replace",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-06",
+      "surface": "hard-coded archetype/component maps",
+      "disposition": "replace",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-07",
+      "surface": "apps/cms Offers vs Products/Services",
+      "disposition": "replace_with_compatibility",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-08",
+      "surface": "apps/cms collections Sites, SiteSettings, Pages, Navigation, Articles, Cases, Videos, Team, Locations, policies",
+      "disposition": "reuse_foundations_extend",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-09",
+      "surface": "adoption and entitlement authority records",
+      "disposition": "add",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-10",
+      "surface": "packages/factory-catalog working content and Payload promotion",
+      "disposition": "replace_all_hero_projection",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-11",
+      "surface": "apps/web-master components/layouts/PageRenderer",
+      "disposition": "selectively_reuse",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-12",
+      "surface": "Header/Footer placeholders",
+      "disposition": "replace",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-13",
+      "surface": "apps/web-master routes",
+      "disposition": "implement_every_active_family",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-14",
+      "surface": "SEO/sitemap/AI helpers",
+      "disposition": "project_from_one_authority",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-15",
+      "surface": "preview/hostname/tenant renderer",
+      "disposition": "reuse_and_extend",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-16",
+      "surface": "forms/integrations",
+      "disposition": "fail_closed_without_hooks_consent_privacy_failure_behavior",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-17",
+      "surface": "free-text template IDs",
+      "disposition": "migrate_deliberately",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-18",
+      "surface": "provider-reference parity proof",
+      "disposition": "add",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-19",
+      "surface": "@linksites/profile package",
+      "disposition": "add",
+      "targetOwner": "LiNKsites"
+    },
+    {
+      "id": "LS-RWB-20",
+      "surface": "provider A1/A2/A3 candidates",
+      "disposition": "external_dependency_never_fabricate",
+      "targetOwner": "LiNKlibraries"
+    }
+  ]
+}

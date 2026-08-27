@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-candidate-identity",
+  "gateId": "EXT-LS-01",
+  "githubIssue": 299,
+  "repository": "linktrend/LiNKsites",
+  "origin": "https://github.com/linktrend/LiNKsites.git",
+  "namedEnvironment": "IDE Development 2.5.1",
+  "boundCandidate": {
+    "label": "current-candidate-before-repair-integration",
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681",
+    "parentCommit": "e03180b952259ed29ad731b7c9d829202264b636",
+    "parentTree": "3f4c425a8e94791ce9a69e582442306be636c59d",
+    "branchWhereHead": "issue/297-repair-ls-04-content-production-polynomial-regex",
+    "subject": "fix(ls04): replace content-production polynomial placeholder regex",
+    "authorDateUtc": "2026-08-25T04:47:23Z",
+    "tipPaths": [
+      "packages/factory-catalog/src/contentProduction.ts"
+    ],
+    "commitObjectSha256": "a0f91ca39e3babd35f7891645a40d4abe75e22e89c81cef5863ee8746e749e83",
+    "treeObjectSha256": "093293f92fa40859bbbd594cf75d1396333902e8178f4bff2ffc1d90b399b19f",
+    "tipBlob": {
+      "path": "packages/factory-catalog/src/contentProduction.ts",
+      "gitBlobSha1": "9332d1fa8b8a3c3f2a896b2a6cff013b00e15cda",
+      "sha256": "27b68fe1c45c63909977ec31325795781bc055df2325cc288d9076a99af99be3",
+      "note": "identity checksum only; product bytes are not copied into this evidence tree"
+    },
+    "parentTipBlob": {
+      "path": "packages/factory-catalog/src/contentProduction.ts",
+      "gitBlobSha1": "1e203fa06ae6578e54c44844f0e49c42b6a89314",
+      "sha256": "4ecca84ddc1210442dedd55657b27d7fcecbe6b74eb903004823203ca0d1b7ef"
+    }
+  },
+  "protectedDevelopmentReadback": {
+    "ref": "origin/development",
+    "commit": "6169548ddbf6bff99a3eb8de3716e9fd3a843b11",
+    "tree": "24e5b46566a45a58de3df243b45e7918d419cb2c",
+    "equalsBoundCandidate": false,
+    "containsBoundCandidate": false,
+    "boundCandidateIsDescendant": true,
+    "mergeBaseWithCandidate": "6169548ddbf6bff99a3eb8de3716e9fd3a843b11",
+    "contentProductionBlobSha1": "bf9a811549c64bf14c5d1d74d69b16227a65d6ae"
+  },
+  "claims": {
+    "protectedIntegrated": false,
+    "accept": false,
+    "providerConformance": false,
+    "productionProof": false,
+    "consumerProof": false,
+    "a1Accepted": false
+  }
+}

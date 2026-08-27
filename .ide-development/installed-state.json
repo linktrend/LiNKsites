@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packageName": "ide-development-managed-core",
   "packageVersion": "2.5.1",
-  "installedAt": "2026-08-21T07:17:01Z",
+  "installedAt": "2026-08-26T05:10:02Z",
   "files": {
     ".agents/skills-loader.mjs": {
       "id": "codex-non-skill-skills-loader-mjs",

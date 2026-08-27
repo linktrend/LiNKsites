@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/completion.schema.json",
+  "type": "object",
+  "required": ["schemaVersion", "kind", "packetId", "githubIssue", "implementationIssue", "evidenceClass", "packetCompletion", "exactProduct", "harnessAcceptance", "exactTreeReview", "fullSuite", "rollbackRehearsal", "receiptsBound", "admission", "release", "handoff", "founderAuthority", "claims"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-release-completion" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "implementationIssue": { "const": 391 },
+    "evidenceClass": { "const": "completion" },
+    "packetCompletion": { "const": true },
+    "receiptsBound": { "const": true },
+    "admission": { "const": "PASS" },
+    "release": { "const": "PASS" },
+    "handoff": { "const": "PASS" },
+    "exactProduct": { "type": "object" },
+    "harnessAcceptance": { "type": "object" },
+    "exactTreeReview": { "type": "object" },
+    "fullSuite": { "type": "object" },
+    "rollbackRehearsal": { "type": "object" },
+    "founderAuthority": { "type": "object" },
+    "claims": { "type": "object" },
+    "issues": { "type": "array" }
+  }
+}

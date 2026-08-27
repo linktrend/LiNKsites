@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls08-iss26-independent-review",
+  "packetId": "LS-08",
+  "layoutPack": "a1",
+  "evidenceClass": "paired-proof",
+  "packetCompletion": true,
+  "pairedProofRun": true,
+  "dimensions": {
+    "visual": {
+      "status": "PASS",
+      "surfaces": [
+        "desktop",
+        "mobile"
+      ],
+      "viewports": {
+        "desktop": {
+          "width": 1280,
+          "height": 720
+        },
+        "mobile": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      "pairedProofRun": true
+    },
+    "accessibility": {
+      "status": "PASS",
+      "target": "WCAG-2.2-AA",
+      "legalCertificationClaimed": false,
+      "pairedProofRun": true
+    },
+    "privacy": {
+      "status": "PASS",
+      "pairedProofRun": true
+    },
+    "tenant": {
+      "status": "PASS",
+      "pairedProofRun": true
+    }
+  },
+  "lifecycle": {
+    "cache_restart": {
+      "mode": "injected-fixture",
+      "status": "PASS",
+      "pairedProofRun": true,
+      "sha256": "99a7bbb4219319ccc71b5e4cc500897d01318052124dee352a8899c8c482f378"
+    },
+    "tamper": {
+      "mode": "injected-fixture",
+      "status": "PASS",
+      "pairedProofRun": true
+    },
+    "rollback": {
+      "mode": "injected-fixture",
+      "status": "PASS",
+      "pairedProofRun": true,
+      "restoredSha256": "99a7bbb4219319ccc71b5e4cc500897d01318052124dee352a8899c8c482f378"
+    },
+    "migration": {
+      "mode": "injected-fixture",
+      "status": "PASS",
+      "pairedProofRun": true
+    }
+  }
+}

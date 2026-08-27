@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-10",
+  "issue": "ISS-31",
+  "h09ConsumerConformanceAccepted": false,
+  "status": "HOLD",
+  "reason": "h09_consumer_conformance_not_accepted",
+  "note": "ISS-31 records copied-site migration engineering only. LS-10 packet acceptance waits for Harness H-09 consumer conformance and remaining LS-10 issues."
+}

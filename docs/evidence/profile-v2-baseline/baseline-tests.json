@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "status": "recorded",
+  "packetVerification": {
+    "commands": [
+      ["git", "diff", "--check"],
+      ["node", "scripts/validate-profile-v2-baseline.mjs"]
+    ],
+    "productSuiteInThisPacket": "not_run",
+    "reason": "LS-00 owns evidence and the fail-closed validator only. Root turbo test / ci:required exercise product packages and are prohibited as LS-00 mutations and out of packet ownership."
+  },
+  "declaredRootScripts": [
+    "build",
+    "lint",
+    "typecheck",
+    "test",
+    "ci:required",
+    "test:w2-04",
+    "test:master-template-candidate-preview"
+  ],
+  "packageTestCommands": {
+    "@linksites/factory-catalog": "vitest run",
+    "@linksites/program-ledger": "vitest run",
+    "@linksites/cms": "test:int and test:e2e",
+    "@linksites/web-master": "tsx --test tests/*.test.ts"
+  }
+}

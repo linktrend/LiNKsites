@@ -23,12 +23,14 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import { assertFoundationIsProductionReady, assertFoundationMatchesKitAndTier, type ReusableSiteFoundation } from './reusableFoundation.js'
-import { assertKitIsProductionReady, resolveEffectiveMaxPages, type VerticalKit } from './verticalKit.js'
-import { checkEntitlement, type TierId, type TierSpecification } from './tierSpecification.js'
-import type { SiteDesignProfile } from './designCatalog.js'
-import type { ComponentRegistry } from './componentRegistry.js'
-import { assertLibraryConsumptionEvidence, canonicalJsonStringify, isTrustedLibraryConsumption, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.js'
+import { assertFoundationIsProductionReady, assertFoundationMatchesKitAndTier, type ReusableSiteFoundation } from './reusableFoundation.ts'
+import { assertKitIsProductionReady, classifyPageCost, resolveEffectiveMaxPages, type VerticalKit } from './verticalKit.ts'
+import { checkEntitlement, type TierId, type TierSpecification } from './tierSpecification.ts'
+import type { SiteDesignProfile } from './designCatalog.ts'
+import type { ComponentRegistry } from './componentRegistry.ts'
+import { assertLibraryConsumptionEvidence, canonicalJsonStringify, isTrustedLibraryConsumption, type LibraryConsumption, type LibraryConsumptionReceipt } from './libraryConsumer.ts'
+import { assertSiteAdoptionIdentities, type SiteAdoptionIdentities } from './adoptionIdentities.ts'
+import { checkCapabilityCredits, freezeEntitlementSnapshot, type CapabilityCreditPlanId, type ImmutableEntitlementSnapshot } from './capabilityCredits.ts'
 
 export class SiteSpecificationError extends Error {
   constructor(message: string) {
@@ -56,6 +58,12 @@ export interface SiteSpecification {
   libraryReceipt?: LibraryConsumptionReceipt
   /** Materialized entry and file bodies from the trusted consumer boundary. */
   libraryConsumption?: LibraryConsumption
+  /** LS-02 exact provider/layout/plan/overlay/config/content/adapter/effective identities. */
+  adoptionIdentities?: SiteAdoptionIdentities
+  /** LS-02 A/B/C/L capability-credit plan. */
+  capabilityPlanId?: CapabilityCreditPlanId
+  /** LS-02 immutable entitlement snapshot issued at adoption. */
+  entitlementSnapshot?: ImmutableEntitlementSnapshot
 }
 
 export interface ResolveSiteSpecificationInput {
@@ -71,6 +79,9 @@ export interface ResolveSiteSpecificationInput {
   libraryEntryId?: string
   libraryReceipt?: LibraryConsumptionReceipt
   libraryConsumption?: LibraryConsumption
+  adoptionIdentities?: SiteAdoptionIdentities
+  capabilityPlanId?: CapabilityCreditPlanId
+  pageTypes?: string[]
 }
 
 /**
@@ -117,12 +128,39 @@ export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): 
     componentRegistry.assertComponentAvailableForTier(componentId, tier)
   }
 
-  const effectiveMaxPages = resolveEffectiveMaxPages(tier.dimensions.maxPages, kit, tier.tierId)
-  const pageCountCheck = checkEntitlement(tier, { kind: 'page_count', requested: pageCount })
-  if (pageCountCheck.disposition !== 'allowed' || pageCount > effectiveMaxPages) {
-    throw new SiteSpecificationError(
-      `Requested page count ${pageCount} exceeds the effective limit of ${effectiveMaxPages} for Kit "${kit.kitId}" + tier "${tier.tierId}" (${pageCountCheck.reason}).`,
-    )
+  const hasAdoption = Boolean(input.adoptionIdentities || input.capabilityPlanId || input.pageTypes)
+  let adoptionIdentities: SiteAdoptionIdentities | undefined
+  let capabilityPlanId: CapabilityCreditPlanId | undefined
+  let entitlementSnapshot: ImmutableEntitlementSnapshot | undefined
+  let effectiveMaxPages = resolveEffectiveMaxPages(tier.dimensions.maxPages, kit, tier.tierId)
+
+  if (hasAdoption) {
+    if (!input.adoptionIdentities || !input.capabilityPlanId || !input.pageTypes) {
+      throw new SiteSpecificationError('LS-02 adoption requires exact identities, a capability-credit plan, and pageTypes together.')
+    }
+    if (input.pageTypes.length !== pageCount) {
+      throw new SiteSpecificationError('LS-02 pageTypes length must equal pageCount.')
+    }
+    adoptionIdentities = assertSiteAdoptionIdentities(input.adoptionIdentities)
+    capabilityPlanId = input.capabilityPlanId
+    const capabilityPageCount = input.pageTypes.filter((pageType) => classifyPageCost(pageType) === 'capability').length
+    const creditCheck = checkCapabilityCredits(capabilityPlanId, capabilityPageCount)
+    if (creditCheck.disposition !== 'allowed') {
+      throw new SiteSpecificationError(`LS-02 capability-credit entitlement rejected (${creditCheck.reason}).`)
+    }
+    entitlementSnapshot = freezeEntitlementSnapshot({
+      snapshotId: `entitlement:${siteSpecId}:${capabilityPlanId}:${adoptionIdentities.effective}`,
+      siteRef,
+      planId: capabilityPlanId,
+    })
+    effectiveMaxPages = entitlementSnapshot.grantedCredits + (pageCount - capabilityPageCount)
+  } else {
+    const pageCountCheck = checkEntitlement(tier, { kind: 'page_count', requested: pageCount })
+    if (pageCountCheck.disposition !== 'allowed' || pageCount > effectiveMaxPages) {
+      throw new SiteSpecificationError(
+        `Requested page count ${pageCount} exceeds the effective limit of ${effectiveMaxPages} for Kit "${kit.kitId}" + tier "${tier.tierId}" (${pageCountCheck.reason}).`,
+      )
+    }
   }
 
   return {
@@ -138,5 +176,8 @@ export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): 
     effectiveMaxPages,
     resolvedAt: new Date().toISOString(),
     ...(input.libraryConsumption ? { libraryEntryId: input.libraryConsumption.receipt.entryId, libraryReceipt: input.libraryConsumption.receipt, libraryConsumption: input.libraryConsumption } : {}),
+    ...(adoptionIdentities && capabilityPlanId && entitlementSnapshot
+      ? { adoptionIdentities, capabilityPlanId, entitlementSnapshot }
+      : {}),
   }
 }

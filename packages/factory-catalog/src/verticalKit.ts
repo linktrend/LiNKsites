@@ -39,8 +39,8 @@
  */
 
 import type { SchemaVersion } from '@linksites/types'
-import type { TierId } from './tierSpecification.js'
-import { resolveMostRestrictive } from './tierSpecification.js'
+import type { TierId } from './tierSpecification.ts'
+import { resolveMostRestrictive } from './tierSpecification.ts'
 
 /** Manual §04's reusable-capability lifecycle, applied to Vertical Kits (manual §08.10). */
 export type VerticalKitStatus = 'candidate' | 'active' | 'deprecated' | 'retired'
@@ -105,6 +105,37 @@ export class VerticalKitError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'VerticalKitError'
+  }
+}
+
+/** LS-02 page cost class. Core, legal, and system pages are zero-cost. */
+export type PageCostClass = 'core' | 'legal' | 'system' | 'capability'
+
+const CORE_PAGE_TYPES = new Set(['home', 'about', 'contact'])
+const LEGAL_PAGE_TYPES = new Set(['privacy', 'terms', 'cookies', 'legal'])
+const SYSTEM_PAGE_TYPES = new Set(['system', 'status', 'robots', 'sitemap', 'error'])
+
+export function classifyPageCost(pageType: string): PageCostClass {
+  const key = pageType.trim().toLowerCase()
+  if (CORE_PAGE_TYPES.has(key)) return 'core'
+  if (LEGAL_PAGE_TYPES.has(key)) return 'legal'
+  if (SYSTEM_PAGE_TYPES.has(key)) return 'system'
+  return 'capability'
+}
+
+export function isZeroCostPage(pageType: string): boolean {
+  const costClass = classifyPageCost(pageType)
+  switch (costClass) {
+    case 'core':
+    case 'legal':
+    case 'system':
+      return true
+    case 'capability':
+      return false
+    default: {
+      const exhaustive: never = costClass
+      throw new VerticalKitError(`Unsupported page cost class "${String(exhaustive)}".`)
+    }
   }
 }
 
