@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "kind": "compatible-upgrade",
+  "targetPin": {
+    "repository": "https://github.com/linktrend/LiNKlibraries.git",
+    "commitSha": "c0ffee0000000000000000000000000000000001",
+    "treeSha": "c0ffee0000000000000000000000000000000002",
+    "entryId": "master-template-type-1",
+    "version": "2.0.1-a1.2",
+    "lifecycle": "draft",
+    "selectability": "non_selectable",
+    "contractName": "linksites.master-template",
+    "contractVersion": "2.0.0",
+    "compatibleRange": ">=2.0.0 <3.0.0"
+  },
+  "siteIds": ["site-published-a"],
+  "unselectedSiteIds": ["site-published-bystander", "site-invalid-legacy"],
+  "compatibility": "compatible",
+  "deliberate": false
+}
