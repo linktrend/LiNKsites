@@ -8,6 +8,7 @@ export * from './composition.ts'
 export * from './intake.ts'
 export * from './lead-research-ingress.ts'
 export * from './commercial-outcome-ingress.ts'
+export * from './profile-delegation.ts'
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const { configFromEnvironment, createProductionComposition } = await import('./composition.ts')
