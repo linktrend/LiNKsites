@@ -95,6 +95,18 @@ test("all required identities are bound", () => {
   assert.equal(receipts.bindings[0].bound, true);
 });
 
+test("validator rejects a cross-document completion mismatch", () => {
+  const { clonedEvidence, clonedReleases } = cloneEvidence();
+  const completionPath = path.join(clonedEvidence, "COMPLETION.json");
+  const completion = JSON.parse(fs.readFileSync(completionPath, "utf8"));
+  completion.exactProduct.tree = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  writeJson(completionPath, completion);
+  writeChecksums(clonedEvidence, clonedReleases);
+  const result = validateEvidenceDirs(clonedEvidence, clonedReleases, repoRoot);
+  assert.equal(result.ok, false);
+  assert.ok(result.failures.some((row) => /review tree|Full tree|dependency tree/i.test(row)));
+});
+
 test("completion binds the exact accepted protected development identity", () => {
   const identity = JSON.parse(fs.readFileSync(path.join(evidenceDir, "identity.json"), "utf8"));
   assert.equal(identity.protectedDevelopment.commit, PROTECTED_COMMIT);

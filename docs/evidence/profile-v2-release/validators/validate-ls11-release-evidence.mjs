@@ -67,7 +67,7 @@ const SECRET_PATTERNS = [
 ];
 
 export const LIVE_JSON = [
-  { file: "COMPLETION.json", schema: null },
+  { file: "COMPLETION.json", schema: "schemas/completion.schema.json" },
   { file: "STATUS.json", schema: "schemas/status.schema.json" },
   { file: "SCOPE.json", schema: "schemas/scope.schema.json" },
   { file: "DEPENDENCIES.json", schema: "schemas/dependencies.schema.json" },
@@ -98,6 +98,7 @@ export const REQUIRED_HEADINGS = {
 };
 
 const SCHEMA_FILES = [
+  "schemas/completion.schema.json",
   "schemas/status.schema.json",
   "schemas/scope.schema.json",
   "schemas/dependencies.schema.json",
@@ -428,6 +429,46 @@ function validateFuturePlaceholders(dependencies, bindings, failures) {
   }
 }
 
+function validateCompletionConsistency(documents, releasesStatus, failures) {
+  const completion = documents["COMPLETION.json"];
+  const status = documents["STATUS.json"];
+  const dependencies = documents["DEPENDENCIES.json"]?.dependencies || [];
+  const review = documents["templates/exact-tree-review.json"];
+  const full = documents["templates/full-rollback-rehearsal.json"];
+  const receipts = documents["templates/receipt-binding.json"];
+  const handoff = documents["templates/admission-release-handoff.json"];
+  const founder = documents["templates/founder-reserved-decisions.json"];
+  if (!completion || !status || !review || !full || !receipts || !handoff || !founder) {
+    failures.push("completion consistency inputs are missing");
+    return;
+  }
+  const requireEqual = (label, actual, expected) => {
+    if (actual !== expected) failures.push(`${label} mismatch: ${JSON.stringify(actual)} != ${JSON.stringify(expected)}`);
+  };
+  requireEqual("status packetCompletion", status.packetCompletion, completion.packetCompletion);
+  requireEqual("status receiptsBound", status.receiptsBound, completion.receiptsBound);
+  requireEqual("review commit", review.exactHead.commit, completion.exactProduct.phaseCommit);
+  requireEqual("review tree", review.exactHead.tree, completion.exactProduct.tree);
+  requireEqual("review verdict", review.reviewRun, completion.exactTreeReview.verdict === "PASS");
+  requireEqual("Full commit", full.exactTree.commit, completion.fullSuite.headCommit);
+  requireEqual("Full tree", full.exactTree.tree, completion.fullSuite.tree);
+  requireEqual("Full verdict", full.fullSuite.verdict, completion.fullSuite.verdict);
+  requireEqual("rollback verdict", full.rollbackRehearsal.verdict, completion.rollbackRehearsal.verdict);
+  requireEqual("receipt aggregate", receipts.receiptsBound, completion.receiptsBound);
+  requireEqual("admission", handoff.admission.verdict, completion.admission);
+  requireEqual("release", handoff.release.verdict, completion.release);
+  requireEqual("handoff", handoff.handoff.verdict, completion.handoff);
+  requireEqual("main authority", founder.decisions.main.authorized, completion.founderAuthority.mainPromotionAuthorized);
+  requireEqual("publish authority", founder.decisions.publish.authorized, completion.founderAuthority.publishAuthorized);
+  requireEqual("deploy authority", founder.decisions.deploy.authorized, completion.founderAuthority.deployAuthorized);
+  requireEqual("release status completion", releasesStatus?.packetCompletion, completion.packetCompletion);
+  const deps = new Map(dependencies.map((row) => [row.id, row]));
+  requireEqual("LS-10 dependency commit", deps.get("ls10-cutover")?.commit, completion.exactProduct.protectedDevelopmentCommit);
+  requireEqual("LS-10 dependency tree", deps.get("ls10-cutover")?.tree, completion.exactProduct.tree);
+  requireEqual("H-09 dependency commit", deps.get("harness-h09-conformance")?.commit, completion.harnessAcceptance.commit);
+  requireEqual("H-09 dependency tree", deps.get("harness-h09-conformance")?.tree, completion.harnessAcceptance.tree);
+}
+
 export function validateEvidenceDirs(evidenceDir, releasesDir, repoRoot) {
   const failures = failList();
   const required = [
@@ -492,13 +533,7 @@ export function validateEvidenceDirs(evidenceDir, releasesDir, repoRoot) {
     rejectForbiddenIdentities("releases", releasesStatus, failures);
   }
 
-  if (documents["STATUS.json"]?.packetCompletion !== true && documents["DEPENDENCIES.json"] && documents["templates/receipt-binding.json"]) {
-    validateFuturePlaceholders(
-      documents["DEPENDENCIES.json"].dependencies || [],
-      documents["templates/receipt-binding.json"].bindings || [],
-      failures,
-    );
-  }
+  validateCompletionConsistency(documents, releasesStatus, failures);
 
   for (const relative of LIVE_MD) {
     validateMarkdown(path.join(evidenceDir, relative), relative, failures);

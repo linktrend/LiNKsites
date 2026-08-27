@@ -8,7 +8,7 @@
     "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
     "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
   },
-  "packageDigest": "sha256:968938b255379d0c3b68b8fce201e9088ea96e03d7d7906d86d3ad303ccf0719",
+  "packageDigest": "sha256:729bf2ca7c843c635455e8f4dabe2efbb3bffd2531958c3ebb95254e8b7e9cbf",
   "files": [
     {
       "path": "docs/evidence/profile-v2-release/checklists/ISS-34-independent-exact-tree-review.md",
@@ -49,6 +49,10 @@
     {
       "path": "docs/evidence/profile-v2-release/schemas/checksums.schema.json",
       "sha256": "79d199fd0a37316a06a0130b41afb43899f38cc71f6d0b024f7dfe59de16fc46"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/completion.schema.json",
+      "sha256": "48446514f74445018ba9592be271e4bc69b4d0d0545f17977567be7604b9a506"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/dependencies.schema.json",
@@ -116,11 +120,11 @@
     },
     {
       "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.mjs",
-      "sha256": "e49b0188cc7b4d8a92ab8c3f88ae41e1c16ebc7850aa8384308f3c931c3aa787"
+      "sha256": "5abaecaf5de37593d076ff0cffbd8be6337e26d2c41bbe0a334c1d759db174f5"
     },
     {
       "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.test.mjs",
-      "sha256": "adc3e0b7bc7c169d270976038f242a487d0b23fb5048877275cb165c658dda7e"
+      "sha256": "367730c2ec10a72b710b7ce6059c4c8b481bc140204806ed8ed857989f542c89"
     },
     {
       "path": "docs/releases/profile-v2-ls11-release.md",
