@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-10",
+  "issue": "ISS-31",
+  "kind": "copied-existing-sites",
+  "clock": "2026-08-26T00:00:00.000Z",
+  "sites": [
+    {
+      "siteId": "site-published-a",
+      "orgId": "org-copied-a",
+      "adoptionId": "adopt:site-published-a",
+      "pin": {
+        "repository": "https://github.com/linktrend/LiNKlibraries.git",
+        "commitSha": "dbf749cb48ffa03bf2e702d37b608f14c63e0520",
+        "treeSha": "a968c801f0fa7cbeac40edc788a4f081617e2759",
+        "entryId": "master-template-type-1",
+        "version": "2.0.0-a1.1",
+        "lifecycle": "draft",
+        "selectability": "non_selectable",
+        "contractName": "linksites.master-template",
+        "contractVersion": "2.0.0",
+        "compatibleRange": ">=2.0.0 <3.0.0"
+      },
+      "identities": {
+        "provider": "a968c801f0fa7cbeac40edc788a4f081617e2759",
+        "layout": "1111111111111111111111111111111111111111",
+        "plan": "2222222222222222222222222222222222222222",
+        "overlay": "3333333333333333333333333333333333333333",
+        "config": "4444444444444444444444444444444444444444",
+        "content": "5555555555555555555555555555555555555555",
+        "adapter": "6666666666666666666666666666666666666666",
+        "effective": "7777777777777777777777777777777777777777"
+      },
+      "configuration": {
+        "locale": "en",
+        "templatePin": "dbf749cb48ffa03bf2e702d37b608f14c63e0520",
+        "displayName": "Copied published A"
+      },
+      "content": {
+        "schemaVersion": "2.0.0",
+        "homeTitle": "Copied Home A",
+        "body": "Customer copy for site A"
+      },
+      "lifecycle": "published",
+      "active": true
+    },
+    {
+      "siteId": "site-published-bystander",
+      "orgId": "org-copied-b",
+      "adoptionId": "adopt:site-published-bystander",
+      "pin": {
+        "repository": "https://github.com/linktrend/LiNKlibraries.git",
+        "commitSha": "dbf749cb48ffa03bf2e702d37b608f14c63e0520",
+        "treeSha": "a968c801f0fa7cbeac40edc788a4f081617e2759",
+        "entryId": "master-template-type-1",
+        "version": "2.0.0-a1.1",
+        "lifecycle": "draft",
+        "selectability": "non_selectable",
+        "contractName": "linksites.master-template",
+        "contractVersion": "2.0.0",
+        "compatibleRange": ">=2.0.0 <3.0.0"
+      },
+      "identities": {
+        "provider": "a968c801f0fa7cbeac40edc788a4f081617e2759",
+        "layout": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "plan": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "overlay": "cccccccccccccccccccccccccccccccccccccccc",
+        "config": "dddddddddddddddddddddddddddddddddddddddd",
+        "content": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "adapter": "ffffffffffffffffffffffffffffffffffffffff",
+        "effective": "abababababababababababababababababababab"
+      },
+      "configuration": {
+        "locale": "en",
+        "templatePin": "dbf749cb48ffa03bf2e702d37b608f14c63e0520",
+        "displayName": "Copied bystander"
+      },
+      "content": {
+        "schemaVersion": "2.0.0",
+        "homeTitle": "Copied Home Bystander",
+        "body": "Customer copy for bystander"
+      },
+      "lifecycle": "published",
+      "active": true
+    },
+    {
+      "siteId": "site-invalid-legacy",
+      "orgId": "org-copied-legacy",
+      "adoptionId": "adopt:site-invalid-legacy",
+      "pin": {
+        "repository": "https://github.com/linktrend/LiNKlibraries.git",
+        "commitSha": "d7997b6e00000000000000000000000000000001",
+        "treeSha": "d7997b6e00000000000000000000000000000002",
+        "entryId": "master-template-type-1",
+        "version": "1.9.0-legacy",
+        "lifecycle": "deprecated",
+        "selectability": "non_selectable",
+        "contractName": "linksites.master-template",
+        "contractVersion": "1.9.0",
+        "compatibleRange": ">=1.9.0 <2.0.0"
+      },
+      "identities": {
+        "provider": "d7997b6e00000000000000000000000000000002",
+        "layout": "1010101010101010101010101010101010101010",
+        "plan": "2020202020202020202020202020202020202020",
+        "overlay": "3030303030303030303030303030303030303030",
+        "config": "4040404040404040404040404040404040404040",
+        "content": "5050505050505050505050505050505050505050",
+        "adapter": "6060606060606060606060606060606060606060",
+        "effective": "7070707070707070707070707070707070707070"
+      },
+      "configuration": {
+        "locale": "en",
+        "templatePin": "d7997b6e00000000000000000000000000000001",
+        "displayName": "Copied invalid legacy"
+      },
+      "content": {
+        "schemaVersion": "1.9.0",
+        "homeTitle": "Copied Legacy Home",
+        "body": "Customer copy for legacy"
+      },
+      "lifecycle": "published",
+      "active": true
+    }
+  ]
+}

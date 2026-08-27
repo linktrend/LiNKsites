@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-10",
+  "issue": "ISS-31",
+  "ls10Acceptance": {
+    "packet": "LS-10",
+    "issue": "ISS-31",
+    "status": "HOLD",
+    "h09ConsumerConformanceAccepted": false,
+    "genericRuntimeActive": true,
+    "currentRuntime": "program-ledger+program-orchestrator+execution",
+    "reason": "h09_consumer_conformance_not_accepted"
+  },
+  "compatible": {
+    "beforeDigest": "4c0f290c6a8a0862316ac949ae8431704ab9a58fd747e80f1711a53cca053903",
+    "afterDigest": "994f9f216c971e30a6f6f76b33c1bf7a7ec82a7ff786fbd4cfcdab0791eec57f",
+    "verified": true,
+    "rollbackReadback": "4c0f290c6a8a0862316ac949ae8431704ab9a58fd747e80f1711a53cca053903",
+    "matchesBefore": true
+  },
+  "incompatible": {
+    "beforeDigest": "4c0f290c6a8a0862316ac949ae8431704ab9a58fd747e80f1711a53cca053903",
+    "afterDigest": "4c0f290c6a8a0862316ac949ae8431704ab9a58fd747e80f1711a53cca053903",
+    "preserved": true,
+    "verified": true
+  },
+  "retirement": {
+    "historicPin": "dbf749cb48ffa03bf2e702d37b608f14c63e0520",
+    "retiredLifecycle": "retired"
+  }
+}
