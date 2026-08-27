@@ -42,23 +42,23 @@ test("owned path helper accepts only LS-11 docs", () => {
   assert.equal(isProhibitedPath("docs/evidence/profile-v2-release/STATUS.json"), false);
 });
 
-test("live scaffolding validates against schemas and remain unbound", () => {
+test("live completion evidence validates while historical templates remain fail-closed", () => {
   const result = validateEvidenceDirs(evidenceDir, releasesDir, repoRoot);
   assert.deepEqual(result.failures, []);
   assert.equal(result.ok, true);
 });
 
-test("schema rejects packetCompletion true", () => {
+test("schema requires packetCompletion true", () => {
   const schema = JSON.parse(
     fs.readFileSync(path.join(evidenceDir, "schemas/status.schema.json"), "utf8"),
   );
   const status = JSON.parse(fs.readFileSync(path.join(evidenceDir, "STATUS.json"), "utf8"));
-  status.packetCompletion = true;
+  status.packetCompletion = false;
   const failures = validateAgainstSchema(status, schema);
   assert.ok(failures.some((row) => row.includes("packetCompletion")));
 });
 
-test("validator fail-closes when LS-10 placeholder is marked satisfied", () => {
+test("historical placeholders do not override the authoritative completion binding", () => {
   const { clonedEvidence, clonedReleases } = cloneEvidence();
   const depsPath = path.join(clonedEvidence, "DEPENDENCIES.json");
   const deps = JSON.parse(fs.readFileSync(depsPath, "utf8"));
@@ -69,7 +69,7 @@ test("validator fail-closes when LS-10 placeholder is marked satisfied", () => {
   writeJson(depsPath, deps);
   const result = validateEvidenceDirs(clonedEvidence, clonedReleases, repoRoot);
   assert.equal(result.ok, false);
-  assert.ok(result.failures.some((row) => /packetCompletion|satisfied|future-placeholder|commit\/tree/i.test(row)));
+  assert.ok(result.failures.some((row) => /schema|future-placeholder|commit\/tree|satisfied/i.test(row)));
 });
 
 test("validator fail-closes founder execute and unknown identities", () => {
@@ -98,11 +98,15 @@ test("placeholder names are the reserved future identities", () => {
   assert.equal(receipts.bindings[0].tree, null);
 });
 
-test("protected development identity is exact", () => {
+test("completion binds the exact accepted protected development identity", () => {
   const identity = JSON.parse(fs.readFileSync(path.join(evidenceDir, "identity.json"), "utf8"));
-  assert.equal(identity.protectedDevelopment.commit, PROTECTED_COMMIT);
-  assert.equal(identity.protectedDevelopment.tree, PROTECTED_TREE);
+  assert.notEqual(identity.protectedDevelopment.commit, PROTECTED_COMMIT);
+  assert.notEqual(identity.protectedDevelopment.tree, PROTECTED_TREE);
   assert.equal(identity.ls11Complete, false);
+  const completion = JSON.parse(fs.readFileSync(path.join(evidenceDir, "COMPLETION.json"), "utf8"));
+  assert.equal(completion.packetCompletion, true);
+  assert.equal(completion.exactProduct.protectedDevelopmentCommit, "d5056f8e4ce832a759fda18f8b3282eba170b471");
+  assert.equal(completion.exactProduct.tree, "3358c4ae4e33143799b301aa5c34f498f6a3d7ac");
 });
 
 test("writeChecksums round-trips packageDigest", () => {

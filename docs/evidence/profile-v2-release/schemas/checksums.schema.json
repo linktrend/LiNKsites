@@ -25,8 +25,8 @@
       "additionalProperties": false,
       "required": ["commit", "tree"],
       "properties": {
-        "commit": { "const": "02ebf5d8710c50c1f2c390989239f0baf916ba97" },
-        "tree": { "const": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755" }
+        "commit": { "const": "d5056f8e4ce832a759fda18f8b3282eba170b471" },
+        "tree": { "const": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac" }
       }
     },
     "packageDigest": {

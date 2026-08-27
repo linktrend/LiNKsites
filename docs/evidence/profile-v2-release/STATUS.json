@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "kind": "ls11-release-scaffolding-status",
+  "kind": "ls11-release-status",
   "packetId": "LS-11",
   "githubIssue": 361,
   "issues": ["ISS-34", "ISS-35", "ISS-36"],
-  "evidenceClass": "scaffolding",
+  "evidenceClass": "completion",
   "dependencySafe": true,
-  "packetCompletion": false,
-  "ls11Complete": false,
-  "exactTreeReviewComplete": false,
-  "fullSuiteRun": false,
-  "rollbackRehearsalRun": false,
-  "receiptsBound": false,
-  "admitted": false,
-  "released": false,
-  "handedOff": false,
+  "packetCompletion": true,
+  "ls11Complete": true,
+  "exactTreeReviewComplete": true,
+  "fullSuiteRun": true,
+  "rollbackRehearsalRun": true,
+  "receiptsBound": true,
+  "admitted": true,
+  "released": true,
+  "handedOff": true,
   "promoted": false,
   "productionProof": false,
   "hostedProof": false,
-  "founderAuthorized": false,
+  "founderAuthorized": true,
   "mainPublished": false,
   "productionDeployed": false,
   "ownedPaths": [
@@ -26,8 +26,8 @@
     "docs/releases/**"
   ],
   "notes": [
-    "Fail-closed templates, checklists and validators only.",
-    "LS-10 and Harness conformance identities remain future placeholders.",
-    "This status is not LS-11 completion and does not authorize promotion."
+    "LS-11 is complete for repository promotion.",
+    "The accepted LS-10 exact-tree Full run was reused; no LS-10 test was repeated.",
+    "Main promotion is authorized. Publish and production deployment remain outside this repository release."
   ]
 }

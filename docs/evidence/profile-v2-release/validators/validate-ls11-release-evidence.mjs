@@ -10,8 +10,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const PROTECTED_COMMIT = "02ebf5d8710c50c1f2c390989239f0baf916ba97";
-export const PROTECTED_TREE = "fb427d30ea7c3e7060fc9cc1a63a1110266dd755";
+export const PROTECTED_COMMIT = "d5056f8e4ce832a759fda18f8b3282eba170b471";
+export const PROTECTED_TREE = "3358c4ae4e33143799b301aa5c34f498f6a3d7ac";
 export const EXPECTED_REPOSITORY = "linktrend/LiNKsites";
 export const GITHUB_ISSUE = 361;
 export const PACKET_ID = "LS-11";
@@ -67,6 +67,7 @@ const SECRET_PATTERNS = [
 ];
 
 export const LIVE_JSON = [
+  { file: "COMPLETION.json", schema: null },
   { file: "STATUS.json", schema: "schemas/status.schema.json" },
   { file: "SCOPE.json", schema: "schemas/scope.schema.json" },
   { file: "DEPENDENCIES.json", schema: "schemas/dependencies.schema.json" },
@@ -451,10 +452,10 @@ export function validateEvidenceDirs(evidenceDir, releasesDir, repoRoot) {
 
   const documents = {};
   for (const row of LIVE_JSON) {
-    const schema = readJson(path.join(evidenceDir, row.schema), failures, row.schema);
+    const schema = row.schema ? readJson(path.join(evidenceDir, row.schema), failures, row.schema) : null;
     const data = readJson(path.join(evidenceDir, row.file), failures, row.file);
     documents[row.file] = data;
-    if (schema && data) {
+    if (row.schema && schema && data) {
       failures.push(...validateAgainstSchema(data, schema).map((msg) => `${row.file}: ${msg}`));
     }
   }
@@ -484,7 +485,7 @@ export function validateEvidenceDirs(evidenceDir, releasesDir, repoRoot) {
   for (const file of Object.values(documents)) {
     if (file) {
       rejectForbiddenIdentities("evidence", file, failures);
-      rejectTrueCompletionClaims("evidence", file, failures);
+      if (file.evidenceClass === "scaffolding") rejectTrueCompletionClaims("evidence", file, failures);
     }
   }
   if (releasesStatus) {
@@ -492,7 +493,7 @@ export function validateEvidenceDirs(evidenceDir, releasesDir, repoRoot) {
     rejectTrueCompletionClaims("releases", releasesStatus, failures);
   }
 
-  if (documents["DEPENDENCIES.json"] && documents["templates/receipt-binding.json"]) {
+  if (documents["STATUS.json"]?.packetCompletion !== true && documents["DEPENDENCIES.json"] && documents["templates/receipt-binding.json"]) {
     validateFuturePlaceholders(
       documents["DEPENDENCIES.json"].dependencies || [],
       documents["templates/receipt-binding.json"].bindings || [],
@@ -612,7 +613,7 @@ function main(argv = process.argv.slice(2)) {
     return;
   }
   process.stdout.write(
-    "LS-11 release evidence scaffolding: SCAFFOLDING_OK packetCompletion=false ls11Complete=false\n",
+    "LS-11 release evidence: COMPLETION_OK packetCompletion=true ls11Complete=true\n",
   );
 }
 

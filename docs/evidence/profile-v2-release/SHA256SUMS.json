@@ -5,10 +5,10 @@
   "packetId": "LS-11",
   "githubIssue": 361,
   "protectedDevelopment": {
-    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
-    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+    "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
   },
-  "packageDigest": "sha256:f595af2026c582baf694c641ca93ef4b3a4d87cc34238f85af5ca65089d7d135",
+  "packageDigest": "sha256:94f6e6d6950c2554f0da54e2c2f93f6346ce396923a7d7b50aaedd457dcbd107",
   "files": [
     {
       "path": "docs/evidence/profile-v2-release/checklists/ISS-34-independent-exact-tree-review.md",
@@ -21,6 +21,10 @@
     {
       "path": "docs/evidence/profile-v2-release/checklists/ISS-36-admission-release-handoff.md",
       "sha256": "73520413edd31fcc45791d4cde49c322a1f1da9b95efa40b5dc30c34fc6ae1fd"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/COMPLETION.json",
+      "sha256": "974881169d406ffde1dfdfd93d6c78a1960480ac56f99a4d808eb365c8c22812"
     },
     {
       "path": "docs/evidence/profile-v2-release/DEPENDENCIES.json",
@@ -44,7 +48,7 @@
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/checksums.schema.json",
-      "sha256": "8d58e205e6675a1ca17ea211d7b9b2983d8467eb05688dfd66554ec24294a43f"
+      "sha256": "79d199fd0a37316a06a0130b41afb43899f38cc71f6d0b024f7dfe59de16fc46"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/dependencies.schema.json",
@@ -80,7 +84,7 @@
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/status.schema.json",
-      "sha256": "80f894a084e0862400e6d35070a50286a535afcd83024114f9849265161862fa"
+      "sha256": "353bb086d687d53a1517a6ca94c22f51a1c2ac32e1d2b179bacaa4bf1f179541"
     },
     {
       "path": "docs/evidence/profile-v2-release/SCOPE.json",
@@ -88,7 +92,7 @@
     },
     {
       "path": "docs/evidence/profile-v2-release/STATUS.json",
-      "sha256": "a980f2f657b43e703103199d9ac2b1c6ab587be306d257193c38bc66fa26085a"
+      "sha256": "6fa55f9b40fbd67fafeede0154b1e16bed3a3dbb48b44b4cb32adefa209fb679"
     },
     {
       "path": "docs/evidence/profile-v2-release/templates/admission-release-handoff.json",
@@ -112,11 +116,11 @@
     },
     {
       "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.mjs",
-      "sha256": "cfb23d1bf3573c769d9badf3bed05fa1c5c355ee82bab3574b6cad9ddac5c21e"
+      "sha256": "23f04b358b4bace237224e1abd980dfab703caaacd3b639fe45b36e9f3c8cde7"
     },
     {
       "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.test.mjs",
-      "sha256": "94a73aab3d3e550df21e7f0ca0fc3db0a768ae48255d1e87a6e4d43e80586ff4"
+      "sha256": "b211ff7a2385fbd0f67d280ead28dbb0c092c7e1bb9ea4c907fb1102257b262e"
     },
     {
       "path": "docs/releases/profile-v2-ls11-release.md",
