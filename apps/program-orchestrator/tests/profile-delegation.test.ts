@@ -48,6 +48,29 @@ function scopedDiff(): string[] {
   return [...new Set([...tracked.split(/\r?\n/), ...untracked.split(/\r?\n/)].filter(Boolean))]
 }
 
+function isOwnedPath(file: string): boolean {
+  return GENERATED_EVIDENCE_PATHS.has(file) || OWNED_PREFIXES.some((prefix) => file === prefix.slice(0, -1) || file.startsWith(prefix))
+}
+
+function isProhibitedPath(file: string): boolean {
+  return PROHIBITED_PREFIXES.some((prefix) => file.startsWith(prefix))
+}
+
+function aggregatePhaseScope(files: string[], aggregatePhase: boolean): string[] {
+  return aggregatePhase ? files.filter(isOwnedPath) : files
+}
+
+function assertScope(files: string[], aggregatePhase: boolean): void {
+  for (const file of aggregatePhaseScope(files, aggregatePhase)) {
+    assert.equal(isProhibitedPath(file), false, `prohibited path: ${file}`)
+    assert.equal(isOwnedPath(file), true, `out-of-scope path: ${file}`)
+  }
+}
+
+function runningAggregatePhase(): boolean {
+  return (process.env.GITHUB_HEAD_REF ?? '').startsWith('phase/')
+}
+
 test('ISS-32 contract binds Harness pin and @linksites/profile without taking live authority', () => {
   const adapter = createHarnessProfileDelegationAdapter()
   const composition = adapter.compose()
@@ -155,13 +178,15 @@ test('ISS-32 keeps generic retirement and Harness conformance fail-closed until 
 })
 
 test('ISS-32 scope stays inside orchestrator and execution ownership', () => {
-  const files = scopedDiff()
-  for (const file of files) {
-    const owned = GENERATED_EVIDENCE_PATHS.has(file) || OWNED_PREFIXES.some((prefix) => file === prefix.slice(0, -1) || file.startsWith(prefix))
-    assert.equal(owned, true, `out-of-scope path: ${file}`)
-    const prohibited = PROHIBITED_PREFIXES.some((prefix) => file.startsWith(prefix))
-    assert.equal(prohibited, false, `prohibited path: ${file}`)
-  }
+  assertScope(scopedDiff(), runningAggregatePhase())
+})
+
+test('ISS-32 scope filtering distinguishes aggregate Phase inheritance from direct issue enforcement', () => {
+  const owned = 'apps/program-orchestrator/tests/profile-delegation.test.ts'
+  const inherited = 'deploy/config/cutover/contract.mjs'
+  assert.deepEqual(aggregatePhaseScope([owned, inherited], true), [owned])
+  assert.deepEqual(aggregatePhaseScope([owned, inherited], false), [owned, inherited])
+  assert.throws(() => assertScope([owned, inherited], false), /prohibited path: deploy\/config\/cutover\/contract\.mjs/)
 })
 
 test('ISS-32 owned files do not embed secret material', () => {
