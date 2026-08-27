@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-completion",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "implementationIssue": 391,
+  "issues": ["ISS-34", "ISS-35", "ISS-36"],
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "exactProduct": {
+    "repository": "linktrend/LiNKsites",
+    "phaseCommit": "797acec86656984e5aba0fd36ded29237669acf7",
+    "protectedDevelopmentCommit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
+  },
+  "harnessAcceptance": {
+    "repository": "linktrend/LiNKharness",
+    "commit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+    "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+    "issueComment": "https://github.com/linktrend/LiNKharness/issues/62#issuecomment-5433177332",
+    "accepted": true
+  },
+  "exactTreeReview": {
+    "independent": true,
+    "verdict": "PASS",
+    "dimensions": ["architecture", "security", "tenant", "migration", "accessibility", "visual", "evidence"],
+    "basis": "Accepted exact-head PR checks and the independent LS-10 checkpoint audits; LS-11 adds evidence documents only."
+  },
+  "fullSuite": {
+    "rerunForLs11": false,
+    "reusedAcceptedExactTreeRun": true,
+    "runId": 33029342696,
+    "jobId": 98377986309,
+    "url": "https://github.com/linktrend/LiNKsites/actions/runs/33029342696/job/98377986309",
+    "headCommit": "797acec86656984e5aba0fd36ded29237669acf7",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac",
+    "verdict": "PASS"
+  },
+  "rollbackRehearsal": {
+    "path": "docs/evidence/profile-v2-cutover/config/receipts/offline-rehearsal.json",
+    "sha256": "dde196631ff5c0901d861fe3cdf32f6945968917646dc10858e65391be911e01",
+    "status": "offline_rehearsal_passed",
+    "liveMutation": false,
+    "verdict": "PASS"
+  },
+  "receiptsBound": true,
+  "admission": "PASS",
+  "release": "PASS",
+  "handoff": "PASS",
+  "founderAuthority": {
+    "mainPromotionAuthorized": true,
+    "source": "Principal instruction in the governing Codex task on 2026-08-27",
+    "publishAuthorized": false,
+    "deployAuthorized": false
+  },
+  "claims": {
+    "repositoryReleaseReady": true,
+    "mainPublished": false,
+    "productionDeployed": false,
+    "hostedProof": false
+  }
+}

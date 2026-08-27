@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/identity.schema.json",
+  "title": "LS-11 release identity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "githubIssue",
+    "issues",
+    "repository",
+    "protectedDevelopment",
+    "evidenceClass",
+    "packetCompletion",
+    "ls11Complete",
+    "productionProof",
+    "hostedProof",
+    "promoted",
+    "boundIdentities"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-release-identity" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "issues": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "string", "enum": ["ISS-34", "ISS-35", "ISS-36"] }
+    },
+    "repository": { "const": "linktrend/LiNKsites" },
+    "protectedDevelopment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "commit", "tree"],
+      "properties": {
+        "ref": { "const": "development" },
+        "commit": { "const": "d5056f8e4ce832a759fda18f8b3282eba170b471" },
+        "tree": { "const": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac" }
+      }
+    },
+    "evidenceClass": { "const": "completion" },
+    "packetCompletion": { "const": true },
+    "ls11Complete": { "const": true },
+    "productionProof": { "const": false },
+    "hostedProof": { "const": false },
+    "promoted": { "const": false },
+    "boundIdentities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ls10Cutover", "harnessH09Conformance"],
+      "properties": {
+        "ls10Cutover": { "const": "d5056f8e4ce832a759fda18f8b3282eba170b471" },
+        "harnessH09Conformance": { "const": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf" }
+      }
+    }
+  }
+}

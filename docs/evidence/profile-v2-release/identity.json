@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-identity",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "issues": ["ISS-34", "ISS-35", "ISS-36"],
+  "repository": "linktrend/LiNKsites",
+  "protectedDevelopment": {
+    "ref": "development",
+    "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
+  },
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "ls11Complete": true,
+  "productionProof": false,
+  "hostedProof": false,
+  "promoted": false,
+  "boundIdentities": {
+    "ls10Cutover": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+    "harnessH09Conformance": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf"
+  }
+}

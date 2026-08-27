@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-status",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "issues": ["ISS-34", "ISS-35", "ISS-36"],
+  "evidenceClass": "completion",
+  "dependencySafe": true,
+  "packetCompletion": true,
+  "ls11Complete": true,
+  "exactTreeReviewComplete": true,
+  "fullSuiteRun": true,
+  "rollbackRehearsalRun": true,
+  "receiptsBound": true,
+  "admitted": true,
+  "released": true,
+  "handedOff": true,
+  "promoted": false,
+  "productionProof": false,
+  "hostedProof": false,
+  "founderAuthorized": true,
+  "mainPublished": false,
+  "productionDeployed": false,
+  "ownedPaths": [
+    "docs/evidence/profile-v2-release/**",
+    "docs/releases/**"
+  ],
+  "notes": [
+    "LS-11 is complete for repository promotion.",
+    "The accepted LS-10 exact-tree Full run was reused; no LS-10 test was repeated.",
+    "Main promotion is authorized. Publish and production deployment remain outside this repository release."
+  ]
+}

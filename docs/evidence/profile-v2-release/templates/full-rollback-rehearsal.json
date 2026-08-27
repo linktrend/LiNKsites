@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-full-rollback-rehearsal",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "issueId": "ISS-35",
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "exactTree": {
+    "repository": "linktrend/LiNKsites",
+    "commit": "797acec86656984e5aba0fd36ded29237669acf7",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
+  },
+  "fullSuite": {
+    "run": true,
+    "receiptPresent": true,
+    "treeBound": true,
+    "verdict": "PASS"
+  },
+  "rollbackRehearsal": {
+    "run": true,
+    "receiptPresent": true,
+    "treeBound": true,
+    "verdict": "PASS"
+  }
+}
