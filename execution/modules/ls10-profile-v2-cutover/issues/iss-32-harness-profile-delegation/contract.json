@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls10-iss32-composition-contract",
+  "packet": "LS-10",
+  "issue": "ISS-32",
+  "repository": "linktrend/LiNKsites",
+  "candidateParent": {
+    "commit": "7542cb3b1fa1d76cec40f59a522514a86e083038",
+    "tree": "284814fd2296b2825d8c92f10d9f7dc78ae08e38"
+  },
+  "successor": {
+    "githubIssue": 369,
+    "branch": "issue/369-ls-10-iss-32-identity-bind-to-current-protected",
+    "sourceCheckpoint": {
+      "commit": "940f7a35c95e4d186e3cf088701fd6c82fa49961",
+      "tree": "7611c86359f1221fbcfda14471701d3157d52c9b"
+    }
+  },
+  "profile": {
+    "package": "@linksites/profile",
+    "identityId": "linksites-profile"
+  },
+  "harness": {
+    "pinLabel": "HC1-A",
+    "copyPolicy": "do_not_copy_harness_source"
+  },
+  "liveAuthority": "generic-runtime",
+  "genericRuntime": "program-ledger+program-orchestrator+execution",
+  "shadowMode": true,
+  "h09": {
+    "receiptAction": "rebind-required",
+    "conformanceAccepted": false
+  },
+  "controls": {
+    "rollbackKeepsGenericRuntime": true,
+    "genericAuthorityRetirement": "fail-closed",
+    "harnessConformance": "fail-closed"
+  },
+  "scope": {
+    "ownedPaths": [
+      "apps/program-orchestrator/**",
+      "execution/**"
+    ],
+    "prohibitedPaths": [
+      "packages/program-ledger/**",
+      "deploy/**",
+      "docs/releases/**",
+      "packages/linkharness-profile/**",
+      "provider-checkout/**",
+      "harness-checkout/**"
+    ]
+  }
+}

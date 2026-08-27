@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/master-v2/a1/iss-26-review.schema.json",
+  "title": "LS-08 ISS-26 independent review and lifecycle proof",
+  "type": "object",
+  "required": ["schemaVersion", "kind", "packetId", "dimensions", "lifecycle", "packetCompletion"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls08-iss26-independent-review" },
+    "packetId": { "const": "LS-08" },
+    "evidenceClass": { "const": "paired-proof" },
+    "packetCompletion": { "const": true },
+    "pairedProofRun": { "const": true }
+  }
+}

@@ -10,6 +10,7 @@ import { getAbout, CmsAbout } from "@/lib/repository/about";
 import { getContact, CmsContact } from "@/lib/repository/contact";
 import { CmsLegal, getLegalBySlug, listLegal } from "@/lib/repository/legal";
 import { resolveCaseOffers, resolveRelatedVideos, resolveVideoArticles } from "./relationshipIntegrity";
+import { tenantSafeWhere } from "@/lib/routes";
 
 export type Page<T> = {
   lang: string;
@@ -157,12 +158,9 @@ export async function getCaseStudyPage(
 }
 
 export async function getFaqPage(lang: string, siteId: string): Promise<Page<{ faqs: CmsFaq[] }>> {
-  const faqs = await listFaq({ siteId, locale: normalizeLocale(lang) });
+  const tenant = tenantSafeWhere(siteId, normalizeLocale(lang));
+  const faqs = await listFaq(tenant);
   return { lang, slug: "/resources/faq", seo: {}, data: { faqs } };
-}
-
-export async function getDocsPage(lang: string): Promise<Page<{ docs: any[] }>> {
-  return { lang, slug: "/resources/docs", seo: {}, data: { docs: [] } };
 }
 
 export async function getAboutIndex(lang: string, siteId: string): Promise<Page<{ about: CmsAbout }>> {

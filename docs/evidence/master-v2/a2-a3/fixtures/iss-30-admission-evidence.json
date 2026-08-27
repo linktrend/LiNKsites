@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls09-iss30-final-provider-admission-evidence",
+  "packetId": "LS-09",
+  "coordinated": true,
+  "admitted": false,
+  "productionSelectable": false,
+  "productionSelectionGated": true,
+  "providerConformanceClaimed": false,
+  "vpsProofClaimed": false,
+  "liveProofClaimed": false,
+  "mwtOutputClaimed": false,
+  "providerBytesPresent": false,
+  "bytesEmbedded": false,
+  "reason": "ISS-30 coordinates final provider admission evidence identities for master-template-type-1@2.0.0. Production selection remains gated. Provider bytes, VPS/live proof, and MWT outputs are not claimed.",
+  "provider": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "main",
+    "commit": "9764638f0a17eeb65be8dd5880ed241a8d3b3fa3",
+    "tree": "57600ebd7362f107c421c61026ab0bf4c9b1c51c",
+    "releaseEntryVersion": "master-template-type-1@2.0.0",
+    "lifecycle": "draft",
+    "selectability": "non_selectable",
+    "artifactTree": "b599c0f0ee6bc2aad3484aa42ef1fd9e86a05758",
+    "releaseManifestSha256": "f1ba6261aefd628672a4bae3333fc07827f82df1a39083e1c20ae881c2cc9916",
+    "inventorySha256": "9d94ab2d18d1c77b1a709739c38ad8ca95f1d0ef571092dd2c710573ab31cb20",
+    "payloadSha256": "fc6ed2e8748960c6cd53ac69e678a1fca8bd572105ea747941ceb9e2225c4489",
+    "releaseReceiptSha256": "f0a9ec65459e79edee1ca3867ca929dbd649c0ed261ca003be9d73fda1b1c42b",
+    "a2LayoutSha256": "4bf209397a048f9177b082d7141a1efe453f3b9456e27c54beb2a02478ad0c3e",
+    "a3LayoutSha256": "6c59252601be7e199615c63e2929f40a818cca282981d365f71abb191df71c88"
+  },
+  "amendment": {
+    "repository": "linktrend/LiNKlibraries",
+    "commit": "e71598781266199cd4fde0c14e6501102a3147a2",
+    "tree": "076bc0bebdce20af6bb92e7a608eae7e2d93492e",
+    "bytesEmbedded": false
+  },
+  "handoff": {
+    "path": "/Users/linktrend/Projects/LiNKlibraries/.git/execution-evidence/mwt-ls09-provider-handoff-20260826.json",
+    "sha256": "0b5ffe70f47fea9cec24cf0dc86ef33720bed2edad350623b2e418cc8da5a0a6",
+    "bytesEmbedded": false,
+    "bound": true
+  },
+  "adapters": {
+    "a1": {
+      "adapterId": "linksites.master-template.layout.a1-frozen",
+      "frozen": true
+    },
+    "a2": {
+      "adapterId": "linksites.master-template.layout.a2-additive",
+      "additive": true
+    },
+    "a3": {
+      "adapterId": "linksites.master-template.layout.a3-additive",
+      "additive": true
+    }
+  }
+}

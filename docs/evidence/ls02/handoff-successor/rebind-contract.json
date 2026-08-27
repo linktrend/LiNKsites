@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls02-handoff-rebind-contract",
+  "issue": 300,
+  "packet": "LS-02",
+  "repository": "linktrend/LiNKsites",
+  "candidateBinding": {
+    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
+    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755",
+    "bindingRule": "The candidate commit and tree must match together; either mismatch is stale input."
+  },
+  "ls08A1Candidate": {
+    "commit": "7e9596ef009d509f0683b69e5df1d7fb2f156664",
+    "tree": "a67c3604ae15c07e4889ed2ebe718d726f0e5eab"
+  },
+  "providerPin": {
+    "repository": "linktrend/LiNKlibraries",
+    "packet": "MWT-07",
+    "commit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
+    "tree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b"
+  },
+  "ls08ReceiptDigests": {
+    "consumerReceiptSha256": "2373efd24a502dc04260217f4c90a9f088609f647bb468e01400ad34e5260646",
+    "evidenceChecksumsSha256": "33f4a1925a056602ebf4c0a5d79f876e660a79eb282311a303a5ad3d14e555ac"
+  },
+  "requiredChecks": [
+    "repository_identity",
+    "issue_and_packet_identity",
+    "candidate_parent_identity",
+    "identity_only_scope",
+    "h09_rebind_required",
+    "h10_blocked_until_h09",
+    "provider_pin_only",
+    "owned_path_confinement",
+    "manifest_checksum_integrity"
+  ],
+  "failClosedReasons": [
+    "STALE_CANDIDATE",
+    "FOREIGN_INPUT",
+    "FORBIDDEN_CLAIM",
+    "PROVIDER_BYTES_PRESENT",
+    "OWNED_PATH_ESCAPE",
+    "CHECKSUM_MISMATCH"
+  ],
+  "nonClaims": [
+    "H-09 conformance acceptance",
+    "H-10 independent review acceptance",
+    "provider conformance",
+    "production or hosted proof"
+  ]
+}

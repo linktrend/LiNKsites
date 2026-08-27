@@ -1,0 +1,110 @@
+{
+  "ok": true,
+  "overall": "HOLD",
+  "gateId": "EXT-LS-01",
+  "candidate": {
+    "repository": "linktrend/LiNKsites",
+    "issue": 301,
+    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  },
+  "lanes": [
+    {
+      "id": "materialization_without_provider_checkout",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "resolver_plan_a",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "resolver_plan_b",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "resolver_plan_c",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "resolver_plan_l",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "payload_projection",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "server_html",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "browser",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "accessibility",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "visual",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "link",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "seo",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "privacy",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    },
+    {
+      "id": "existing_site_pin_and_rollback",
+      "status": "HOLD",
+      "reason": "provider_or_a1_receipt_absent",
+      "details": {}
+    }
+  ],
+  "holds": [
+    "provider_or_a1_receipt_absent"
+  ],
+  "errors": [],
+  "claims": {
+    "accept": false,
+    "protectedIntegration": false,
+    "providerConformance": false,
+    "productionProof": false
+  },
+  "notes": [
+    "Provider/A1 receipt is absent. EXT-LS-01 remains HOLD. This is not ACCEPT, protected integration, provider conformance, or production proof."
+  ]
+}

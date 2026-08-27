@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls09-iss29-independent-review",
+  "packetId": "LS-09",
+  "layoutPacks": [
+    "a2",
+    "a3"
+  ],
+  "evidenceClass": "paired-proof",
+  "packetCompletion": true,
+  "pairedProofRun": true,
+  "dimensions": {
+    "visual": {
+      "status": "PASS",
+      "surfaces": [
+        "desktop",
+        "mobile"
+      ],
+      "viewports": {
+        "desktop": {
+          "width": 1280,
+          "height": 720
+        },
+        "mobile": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      "pairedProofRun": true
+    },
+    "accessibility": {
+      "status": "PASS",
+      "target": "WCAG-2.2-AA",
+      "legalCertificationClaimed": false,
+      "pairedProofRun": true
+    },
+    "privacy": {
+      "status": "PASS",
+      "pairedProofRun": true
+    },
+    "tenant": {
+      "status": "PASS",
+      "pairedProofRun": true
+    },
+    "performance": {
+      "status": "PASS",
+      "class": "lab",
+      "fieldData": false,
+      "vpsProof": false,
+      "liveProof": false,
+      "pairedProofRun": true
+    }
+  },
+  "lifecycle": {
+    "cache_restart": {
+      "mode": "injected-fixture",
+      "status": "PASS",
+      "pairedProofRun": true,
+      "sha256": "fb73e8721c790a3dace9a310db319498b07a6ba2e13478c6f55f020a834e1450"
+    },
+    "tamper": {
+      "mode": "injected-fixture",
+      "status": "PASS",
+      "pairedProofRun": true
+    },
+    "rollback": {
+      "mode": "injected-fixture",
+      "status": "PASS",
+      "pairedProofRun": true,
+      "restoredSha256": "fb73e8721c790a3dace9a310db319498b07a6ba2e13478c6f55f020a834e1450"
+    },
+    "migration": {
+      "mode": "injected-fixture",
+      "status": "PASS",
+      "pairedProofRun": true
+    }
+  }
+}

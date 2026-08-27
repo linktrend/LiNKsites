@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/master-v2/a1/iss-25-matrix.schema.json",
+  "title": "LS-08 ISS-25 A1 fixture matrix",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "layoutPack",
+    "evidenceClass",
+    "packetCompletion",
+    "pairedProofRun",
+    "slots"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls08-iss25-fixture-matrix" },
+    "packetId": { "const": "LS-08" },
+    "layoutPack": { "const": "a1" },
+    "evidenceClass": { "const": "paired-proof" },
+    "packetCompletion": { "const": true },
+    "pairedProofRun": { "const": true },
+    "a1BytesPresent": { "const": false },
+    "slots": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64
+    }
+  }
+}

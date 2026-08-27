@@ -12,8 +12,11 @@ for tool in pnpm node docker supabase; do command -v "$tool" >/dev/null || { ech
 
 export LINKSITES_PLATFORM_REPOSITORY
 export CI=1
-export DATABASE_URI="${DATABASE_URI:-ltfx.db.uri.postgresql.416b87f569.v1"
-export PAYLOAD_SECRET="${PAYLOAD_SECRET:ltfx.placeholder.dd42c5ce8df2.v1}"
+export DATABASE_URI="${DATABASE_URI:-ltfx.db.uri.postgresql.416b87f569.v1}"
+if [[ "$DATABASE_URI" != *"://"* ]]; then
+  DATABASE_URI="${DB_SCHEME:=postgresql}://${DATABASE_URI}"
+fi
+export PAYLOAD_SECRET="${PAYLOAD_SECRET:-ltfx.placeholder.dd42c5ce8df2.v1}"
 export PAYLOAD_PUBLIC_SERVER_URL="${PAYLOAD_PUBLIC_SERVER_URL:-http://127.0.0.1:3000}"
 export NEXT_PUBLIC_CMS_PROVIDER=payload
 export PAYLOAD_BASE_URL="${PAYLOAD_BASE_URL:-http://127.0.0.1:3000}"

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "ls06-rollback-plan/v1",
+  "mode": "offline",
+  "restoreWithoutProviderCheckout": true,
+  "readbackRequired": true,
+  "mutatesRuntime": false,
+  "preparationOnly": true,
+  "previous": {
+    "adoptionIdentity": "ls02:adoption:injected:previous",
+    "rendererConfigurationDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "current": {
+    "rendererConfigurationDigest": "sha256:424d83400d63cbe6be34f19a3b09f6f216288df0c97e760337daf36f21a2c3e5"
+  }
+}

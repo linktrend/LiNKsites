@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "ext-ls-01-fail-closed-dependencies",
+  "gateId": "EXT-LS-01",
+  "githubIssue": 299,
+  "policy": "fail-closed",
+  "missingDependency": "block-amendment-and-acceptance",
+  "dependencies": [
+    {
+      "id": "protected-sites-integration-of-bound-candidate",
+      "required": true,
+      "satisfied": false,
+      "reason": "Bound candidate 2ba3bd70244061985a3896e748fb75e92dfb6c69 is not origin/development 6169548ddbf6bff99a3eb8de3716e9fd3a843b11. Exact protected development must be re-read after integration.",
+      "requiredIdentity": {
+        "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
+        "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+      },
+      "readback": {
+        "ref": "origin/development",
+        "commit": "6169548ddbf6bff99a3eb8de3716e9fd3a843b11",
+        "tree": "24e5b46566a45a58de3df243b45e7918d419cb2c"
+      }
+    },
+    {
+      "id": "mwt-07-provider-a1-tuple",
+      "required": true,
+      "satisfied": false,
+      "reason": "Provider identity is declared from LiNKlibraries MWT-07 addendum. This input does not embed provider bytes, does not re-hash release wrappers locally, and does not claim provider conformance.",
+      "declaredFrom": "linktrend/LiNKlibraries docs/evidence/master-website-template-v2/a1-linksites-handoff-addendum.md",
+      "declaredIdentity": {
+        "repository": "linktrend/LiNKlibraries",
+        "releaseEntryVersion": "master-template-type-1@2.0.0-a1.1",
+        "mwt06ProtectedDevelopmentCommit": "1c3eb99b640483e1a66421ab6c118a17309c4568",
+        "mwt06ProtectedDevelopmentTree": "2e75c3350939d1a66876dd61c57b0dc09f652dce",
+        "releaseArtifactTree": "a8c6c23fd41a5f0eb9221276998f96862a50119f",
+        "manifestSha256": "d681e5305b611aa5247a0fa1711ce75e0a1734e121e6790e50c802b26c1c9697",
+        "inventorySha256": "ad743168022139e7e70bd38ae19c56503cdfc2c4fcc912ece154f4f17b70cc98",
+        "dependencyLockSha256": "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
+        "payloadProjectionSha256": "b096c013b53edf6fbb30e7794830ec462a5ff47c5b085d43218e91541e0af84a",
+        "releaseReceiptSha256": "2668e0df4d317c4a0d4c9fbd1be7fe5f70f7024195bb310c8644849bf949de57",
+        "providerSourceCommit": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+        "providerSourceTree": "873c4acc582050b416fb5a8bc59990345711df46",
+        "lifecycle": "draft",
+        "selectability": "non_selectable"
+      },
+      "librariesDevelopmentReadback": {
+        "ref": "origin/development",
+        "commit": "662546968d9000667e271f3f83f677665126037d",
+        "tree": "137698db744cd56fbf6b9989be689a228aaccfd2",
+        "equalsDeclaredMwt06Protected": false,
+        "declaredMwt06IsAncestor": true,
+        "note": "Later libraries development is recorded only. It is not a substitute for the frozen A1 tuple."
+      }
+    },
+    {
+      "id": "h09-consumer-receipt-rebind",
+      "required": true,
+      "satisfied": false,
+      "reason": "H-09 paths are out of scope for issue 299. No H-09 conformance is claimed. Existing LS-02 identity refresh remains identity-only.",
+      "sitesProtectedAtLs02Refresh": {
+        "commit": "1b3785b3c4b79026b48b578fb2c3a65a50759b77",
+        "tree": "c447a78f530c2b1610d809dd4f15112fc83baa3a"
+      },
+      "h09PathsModified": false
+    },
+    {
+      "id": "ls08-paired-consumer-receipt",
+      "required": true,
+      "satisfied": false,
+      "reason": "No server/browser A/B/C/L paired-proof bundle is supplied. Schema-only LS-08 preparation on other issue branches is not consumer proof."
+    },
+    {
+      "id": "a1-materialization-without-provider-checkout",
+      "required": true,
+      "satisfied": false,
+      "reason": "No cache tree, materialization receipt, or offline-restart proof is recorded here."
+    },
+    {
+      "id": "adapter-payload-renderer-browser-proof",
+      "required": true,
+      "satisfied": false,
+      "reason": "Resolver, Payload projection, React mapping, server HTML, and desktop/mobile/a11y/visual/SEO proof are absent."
+    },
+    {
+      "id": "existing-site-pin-and-simulated-rollback",
+      "required": true,
+      "satisfied": false,
+      "reason": "No pin or rollback receipt is recorded."
+    }
+  ]
+}

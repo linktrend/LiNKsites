@@ -9,13 +9,13 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { probeMasterTemplateCandidate, type MasterTemplateCandidateProbe } from './masterTemplateCandidateProbe.js'
+import { probeMasterTemplateCandidate, type MasterTemplateCandidateProbe } from './masterTemplateCandidateProbe.ts'
 import {
   type MasterTemplateBundle,
   selectMasterTemplateForProduction,
   verifyMasterTemplateBundle,
-} from './masterTemplateConsumer.js'
-import { MASTER_TEMPLATE_PIN, MasterTemplateConsumerError } from './masterTemplatePin.js'
+} from './masterTemplateConsumer.ts'
+import { MASTER_TEMPLATE_PIN, MasterTemplateConsumerError } from './masterTemplatePin.ts'
 
 export const MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF_FLAG =
   'LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF' as const
@@ -97,12 +97,12 @@ export function describeMasterTemplatePreviewSeam(): MasterTemplatePreviewSeam {
 }
 
 export function isMasterTemplateLookAndFeelProofHarnessEnabled(
-  env: NodeJS.ProcessEnv = process.env,
+  env: Record<string, string | undefined> = process.env,
 ): boolean {
   return env[MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF_FLAG] === '1'
 }
 
-export function resolveMasterTemplateFixtureRoot(env: NodeJS.ProcessEnv = process.env): string {
+export function resolveMasterTemplateFixtureRoot(env: Record<string, string | undefined> = process.env): string {
   const configured = env.LINKSITES_MASTER_TEMPLATE_FIXTURE_ROOT
   return configured && configured.trim() ? configured : DEFAULT_FIXTURE_ROOT
 }

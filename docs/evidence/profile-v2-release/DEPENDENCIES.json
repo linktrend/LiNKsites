@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-dependencies",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "policy": "fail-closed",
+  "packetCompletion": true,
+  "dependencies": [
+    {
+      "id": "ls10-cutover",
+      "required": true,
+      "satisfied": true,
+      "bindingState": "bound",
+      "placeholderId": null,
+      "repository": "linktrend/LiNKsites",
+      "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+      "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac",
+      "reason": "LS-10 is accepted and integrated on protected development."
+    },
+    {
+      "id": "harness-h09-conformance",
+      "required": true,
+      "satisfied": true,
+      "bindingState": "bound",
+      "placeholderId": null,
+      "repository": "linktrend/LiNKharness",
+      "commit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+      "reason": "LiNKharness H-09 conformance is formally accepted."
+    }
+  ]
+}

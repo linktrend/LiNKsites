@@ -18,6 +18,7 @@ export const CaseStudyPage: CollectionConfig<'case-study-pages'> = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'client', 'category', 'site', 'status', 'updatedAt'],
+    description: 'DEPRECATED Case projection. Canonical Results/Work is the results-work collection.',
   },
   access: {
     read: createSiteFilteredAccess(),

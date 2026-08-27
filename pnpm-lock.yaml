@@ -409,6 +409,15 @@ importers:
         specifier: 3.2.6
         version: 3.2.6(@types/debug@4.1.13)(@types/node@22.19.15)(happy-dom@20.11.2)(jiti@1.21.7)(jsdom@26.1.0)(lightningcss@1.32.0)(sass@1.77.4)(tsx@4.23.9)
 
+  packages/linkharness-profile:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.5.4
+        version: 22.19.15
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+
   packages/program-ledger:
     dependencies:
       '@linksites/types':
@@ -8433,7 +8442,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.58.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.58.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -8455,7 +8464,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.58.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.58.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3

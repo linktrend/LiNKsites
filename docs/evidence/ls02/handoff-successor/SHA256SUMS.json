@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls02-handoff-successor-checksums",
+  "algorithm": "sha256",
+  "repository": "linktrend/LiNKsites",
+  "issue": 300,
+  "packet": "LS-02",
+  "candidateParent": {
+    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
+    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+  },
+  "files": [
+    {
+      "path": "docs/evidence/ls02/handoff-successor/HANDOFF.schema.json",
+      "sha256": "7a5435b717035902b7f18e48cc347f1f841729cf0745645d5df59f01211639c7"
+    },
+    {
+      "path": "docs/evidence/ls02/handoff-successor/handoff-successor.json",
+      "sha256": "d845fcabb3bfbf9c5a5d1efd9766efe2cbe46017b215a3e4665aea39a381f04b"
+    },
+    {
+      "path": "docs/evidence/ls02/handoff-successor/rebind-contract.json",
+      "sha256": "8485ba67ac2b5dd2b8a6b38d0d38623115e5e221a6120b9a3abd3d01ffeb533f"
+    },
+    {
+      "path": "docs/evidence/ls02/handoff-successor/PROOF.md",
+      "sha256": "a1c6b2df4598de279d2c84ce1b035cdbebab80a4030e0b8a96071866ca48bbb3"
+    },
+    {
+      "path": "scripts/profile-v2-quality/ls02-handoff/constants.mjs",
+      "sha256": "ae3b3aff960103919c1db8991f1bcab661d68e057dd299526e8fca8e4a431c93"
+    },
+    {
+      "path": "scripts/profile-v2-quality/ls02-handoff/rebind-validator.mjs",
+      "sha256": "258ce92f9f00d3f75c28de9e09782ce405c1cd9bec13356100f37e02de67abfe"
+    },
+    {
+      "path": "scripts/profile-v2-quality/ls02-handoff/tests/rebind-validator.test.mjs",
+      "sha256": "255c4916870eedc7d9b30115566775fe1e10c04af410298f01d717bca203938f"
+    },
+    {
+      "path": "scripts/profile-v2-quality/ls02-handoff/fixtures/stale-candidate.json",
+      "sha256": "b7fba40d42160dd83a2752784d9b1195ffa3c8b5d106f499b7c3510ba11d67ab"
+    },
+    {
+      "path": "scripts/profile-v2-quality/ls02-handoff/fixtures/foreign-repository.json",
+      "sha256": "b8f66c6ac4634efd6100bb53043ff040dc814501949122ba9db4b731fb1e96a7"
+    }
+  ]
+}

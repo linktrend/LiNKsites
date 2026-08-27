@@ -41,15 +41,48 @@ if lsof -tiTCP:"$cms_port" -sTCP:LISTEN >/dev/null 2>&1 || lsof -tiTCP:"$web_por
 fi
 
 mkdir -p "$local_root/supabase" "$local_root/artifacts"
-sed "s/^project_id = .*/project_id = \"${local_project_id}\"/" "$repo_root/supabase/config.toml" > "$local_root/supabase/config.toml"
+# Use a private contiguous port range so an unrelated local Supabase project
+# cannot make this disposable proof fail before any consumer assertion runs.
+supabase_port_base=""
+for candidate_base in $(seq 54000 54100); do
+  candidate_free=1
+  for candidate_offset in 0 1 2 3 4 5 6 7 8 9; do
+    candidate_port=$((candidate_base + candidate_offset))
+    if lsof -tiTCP:"$candidate_port" -sTCP:LISTEN >/dev/null 2>&1; then
+      candidate_free=0
+      break
+    fi
+  done
+  if [[ "$candidate_free" == "1" ]]; then
+    supabase_port_base="$candidate_base"
+    break
+  fi
+done
+if [[ -z "$supabase_port_base" ]]; then
+  echo 'No free contiguous Supabase port range was available' >&2
+  exit 1
+fi
+supabase_config="$local_root/supabase/config.toml"
+sed "s/^project_id = .*/project_id = \"${local_project_id}\"/" "$repo_root/supabase/config.toml" > "$supabase_config"
+for original_port in $(seq 54320 54329); do
+  offset=$((original_port - 54320))
+  replacement_port=$((supabase_port_base + offset))
+  sed -i.bak "s/port = ${original_port}/port = ${replacement_port}/g; s/shadow_port = ${original_port}/shadow_port = ${replacement_port}/g" "$supabase_config"
+done
+rm -f "$supabase_config.bak"
 export SUPABASE_TELEMETRY_DISABLED=1
 supabase --workdir "$local_root" start --exclude gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
-export DATABASE_URI="ltfx.db.uri.postgresql.cf6453a9f9.v1"
+supabase_db_port=$((supabase_port_base + 2))
+db_scheme=postgresql
+db_user=postgres
+db_password=postgres
+export DATABASE_URI="${db_scheme}://${db_user}:${db_password}@127.0.0.1:${supabase_db_port}/postgres"
 export PAYLOAD_SECRET="ltfx.auto.payload_secret.19615ad30fae.v1"
 export PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}"
 export LINKSITES_W2_04_LOCAL_PROOF=1
 export W2_04_PROOF_PATH="$local_root/proof.json"
+proof_template_id="${W2_04_TEMPLATE_ID:-marketing-smb-v1}"
 export W2_04_PREVIEW_API_KEY="$(random_value)"
 export W2_04_PREVIEW_PASSWORD="$(random_value)"
 if ! seed_output="$(cd "$repo_root" && pnpm --filter @linksites/cms exec tsx scripts/w2-04-seed.ts)"; then
@@ -73,7 +106,7 @@ wait_for() {
   return 1
 }
 
-(cd "$repo_root" && DATABASE_URI="$DATABASE_URI" PAYLOAD_SECRET="ltfx.auto.payload_secret.77338b049470.v1" PAYLOAD_PUBLIC_SERVER_URL="$PAYLOAD_PUBLIC_SERVER_URL" pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$cms_port") >"$local_root/cms.log" 2>&1 &
+(cd "$repo_root" && DATABASE_URI="${DATABASE_URI}" PAYLOAD_SECRET="${PAYLOAD_SECRET}" PAYLOAD_PUBLIC_SERVER_URL="${PAYLOAD_PUBLIC_SERVER_URL}" pnpm --filter @linksites/cms dev --hostname 127.0.0.1 --port "$cms_port") >"$local_root/cms.log" 2>&1 &
 cms_pid="$!"
 wait_for "http://127.0.0.1:${cms_port}/api/pages?site=${site_id}" || { cat "$local_root/cms.log" >&2; exit 1; }
 
@@ -81,10 +114,10 @@ web_environment=(
   PAYLOAD_BASE_URL="http://127.0.0.1:${cms_port}" \
   PAYLOAD_PUBLIC_SERVER_URL="http://127.0.0.1:${cms_port}" \
   NEXT_PUBLIC_PAYLOAD_API_URL="http://127.0.0.1:${cms_port}" \
-  PAYLOAD_API_KEY="ltfx.auto.payload_api_key.7f593b0a7bac.v1" \
-  PREVIEW_ACCESS_TOKEN="ltfx.auto.preview_access_token.04b9e6fd3eca.v1" \
+  PAYLOAD_API_KEY="${preview_api_key}" \
+  PREVIEW_ACCESS_TOKEN="${preview_token}" \
   LINKSITES_W2_04_LOCAL_PROOF=1 \
-  LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID="marketing-smb-v1" \
+  LINKSITES_W2_04_LOCAL_PROOF_TEMPLATE_ID="$proof_template_id" \
   LINKSITES_ADMITTED_TEMPLATE_SHA="1111111111111111111111111111111111111111" \
   LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON="$(node -e 'const x=JSON.parse(process.argv[1]); process.stdout.write(JSON.stringify(x.receipt))' "$proof_json")" \
   LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON="$(node -e 'const x=JSON.parse(process.argv[1]); process.stdout.write(JSON.stringify(x.evidence))' "$proof_json")"
@@ -105,8 +138,8 @@ test -x "$chromium_executable" || { echo "No runnable Chromium/Chrome executable
 
 if ! browser_output="$(W2_04_CMS_URL="http://127.0.0.1:${cms_port}" \
   W2_04_WEB_URL="http://127.0.0.1:${web_port}" \
-  PREVIEW_ACCESS_TOKEN="ltfx.auto.preview_access_token.fbce2970de1b.v1" \
-  W2_04_PREVIEW_API_KEY="ltfx.auto.w2_04_preview_api_key.f593f9d84b1b.v1" \
+  PREVIEW_ACCESS_TOKEN="${preview_token}" \
+  W2_04_PREVIEW_API_KEY="${preview_api_key}" \
   W2_04_SITE_ID="$site_id" \
   W2_04_ARTIFACT_DIR="$local_root/artifacts" \
   W2_04_CHROMIUM_EXECUTABLE="$chromium_executable" \

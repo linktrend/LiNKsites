@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+/**
+ * Fail-closed validator for docs/evidence/master-v2/a2-a3 paired-proof artifacts.
+ */
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { evaluatePairedProof } from "../harness.mjs";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(here, "../../../../");
+const defaultEvidence = path.join(repoRoot, "docs/evidence/master-v2/a2-a3");
+
+const evidence = process.argv.includes("--evidence")
+  ? path.resolve(process.argv[process.argv.indexOf("--evidence") + 1])
+  : defaultEvidence;
+
+const report = await evaluatePairedProof(evidence, { repoRoot });
+for (const item of report.checks) {
+  const prefix = item.status === "PASS" ? "PASS" : "FAIL";
+  process.stderr.write(`${prefix}: ${item.id}: ${item.message}\n`);
+}
+if (!report.ok) {
+  process.stderr.write("LS-09 ISS-28..30 complete proof: FAIL\n");
+  process.exit(1);
+}
+process.stdout.write("LS-09 ISS-28..30 complete proof: PROOF_OK packetCompletion=true overallVerdict=ALL_LAYOUT_ADAPTER_BROWSER_VERDICTS productionSelectionGated=true\n");
+process.exit(0);

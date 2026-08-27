@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "recorded",
+  "repository": "linktrend/LiNKsites",
+  "normalizedOrigin": "https://github.com/linktrend/LiNKsites",
+  "issue": 266,
+  "issueBranch": "issue/266-execute-ls-00-exact-baseline-and-authority-map-p",
+  "advertisedDevelopmentRef": "refs/remotes/origin/development",
+  "baselineCommit": "75ef17776e66cc8f0237089d45ff9bcf52820ce7",
+  "baselineTree": "67b1a23655d5b4ce9fc02da291dea906b9ecab94",
+  "planningPin": {
+    "label": "2.5.1-main",
+    "ref": "refs/heads/main",
+    "commit": "e46ce0c657a7445bfb898ac208f6f5d889b550f2",
+    "tree": "3e98a86abbdc753933e9c7238d9c29f47b03022e"
+  },
+  "packet": "LS-00",
+  "issues": ["ISS-01", "ISS-02", "ISS-03"],
+  "ownedPaths": [
+    "docs/evidence/profile-v2-baseline/",
+    "scripts/validate-profile-v2-baseline.mjs"
+  ],
+  "prohibitedPaths": ["packages/", "apps/", "supabase/migrations/"],
+  "profileDigest": "sha256:1bcb94d32250a954c455188904e63d2e1a5066ccd4103864c8415c0152b5e7c1"
+}

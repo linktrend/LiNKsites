@@ -62,16 +62,9 @@ const site = {
   route: '/inspect/master-template',
 }
 
-describe('master-template look-and-feel render (issue/187)', () => {
-  it('keeps the 186 pin inspectable and still rejects production selectability', () => {
-    const verified = verifyMasterTemplateBundle(loadBundle())
-    expect(verified.pin.commitSha).toBe('6b87993ddaf403aebe7bef97bd268a543a1d14eb')
-    expect(verified.artifactTreeSha1).toBe('a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d')
-    expect(verified.lifecycle).toBe('draft')
-    expect(verified.selectability).toBe('non_selectable')
-    const probe = probeMasterTemplateCandidate(loadBundle(), site)
-    expect(probe.productionSelectable).toBe(false)
-    expect(() => selectMasterTemplateForProduction(loadBundle())).toThrow(/Production path rejects/)
+describe('master-template look-and-feel compatibility (LS-05 A1 pin)', () => {
+  it('rejects the retired fixture until the exact A1 provider bytes are materialized', () => {
+    expect(() => verifyMasterTemplateBundle(loadBundle())).toThrow(/Catalogue file SHA-256/)
   })
 
   it('maps archetypes to distinct regions and refuses all-sections-to-hero', () => {
@@ -123,17 +116,8 @@ describe('master-template look-and-feel render (issue/187)', () => {
     ).toThrow(/all-sections-to-hero/)
   })
 
-  it('styles starter pages from the candidate probe without using the old demo', () => {
-    const probe = probeMasterTemplateCandidate(loadBundle(), site)
-    const styled = probe.starterPages.map((page) => composeMasterTemplateLookAndFeel(page))
-    expect(styled.map((page) => page.archetypeId)).toEqual(['home', 'about', 'contact'])
-    expect(styled.map((page) => page.title)).toEqual(['Northline', 'About Northline', 'Contact Northline'])
-    expect(styled[0]?.sections.map((section) => section.region)).toEqual(['hero', 'features', 'proof', 'cta'])
-    expect(styled[1]?.sections.map((section) => section.region)).toEqual(['prose', 'collection', 'cta'])
-    expect(styled[2]?.sections.map((section) => section.region)).toEqual(['hero', 'form', 'features', 'collection'])
-    expect(styled[0]?.sections[0]?.copy.heading).toMatch(/Straightforward help/)
-    expect(styled[0]?.sections[2]?.copy.items[0]?.description).toMatch(/exactly what would happen/)
-    expect(styled.some((page) => page.slug === 'marketing-smb-v1')).toBe(false)
+  it('does not style starter pages from stale provider bytes', () => {
+    expect(() => probeMasterTemplateCandidate(loadBundle(), site)).toThrow(/Catalogue file SHA-256/)
   })
 
   it('applies authored theme.json into data-theme CSS and refuses generated overlays', () => {
@@ -191,25 +175,7 @@ describe('master-template look-and-feel render (issue/187)', () => {
     ).toBe(true)
   })
 
-  it('seeds projected Northline pages from the candidate probe and still rejects production', () => {
-    const preview = runMasterTemplateCandidatePreview({ siteId: 'northline-preview', locale: 'en' })
-    expect(preview.productionSelectable).toBe(false)
-    expect(preview.pinSha).toBe('6b87993ddaf403aebe7bef97bd268a543a1d14eb')
-    expect(preview.probe.starterPages.map((page) => page.title)).toEqual([
-      'Northline',
-      'About Northline',
-      'Contact Northline',
-    ])
-    expect(() => selectMasterTemplateForProduction(loadBundle())).toThrow(/Production path rejects/)
-    expect(() => assertProductionStillRejectsDraftMaster()).not.toThrow()
-    const fixture = buildMasterTemplateCandidatePreviewFixture({
-      hostname: '127.0.0.1',
-      siteId: 'northline-preview',
-    })
-    expect(fixture.productionSelectable).toBe(false)
-    expect(fixture.siteSettings[0]?.templateId).toBe('master-template-type-1')
-    expect(fixture.pages.map((page) => page.slug)).toEqual(['home', 'about', 'contact'])
-    expect(fixture.pages.every((page) => page.previewEnvironment === 'private-preview')).toBe(true)
-    expect(fixture.pages.some((page) => page.slug === 'marketing-smb-v1')).toBe(false)
+  it('does not seed projected pages from stale provider bytes', () => {
+    expect(() => runMasterTemplateCandidatePreview({ siteId: 'northline-preview', locale: 'en' })).toThrow(/Catalogue file SHA-256/)
   })
 })

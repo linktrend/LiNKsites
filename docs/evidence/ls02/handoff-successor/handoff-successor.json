@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls02-handoff-successor",
+  "issue": 300,
+  "packet": "LS-02",
+  "repository": "linktrend/LiNKsites",
+  "candidateParent": {
+    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
+    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+  },
+  "identityOnly": true,
+  "h09": {
+    "receiptAction": "rebind-required",
+    "conformanceAccepted": false
+  },
+  "h10": {
+    "reviewAction": "blocked-until-h09-rebind",
+    "reviewAccepted": false
+  },
+  "provider": {
+    "repository": "linktrend/LiNKlibraries",
+    "pinOnly": true,
+    "bytesCopied": false
+  },
+  "scope": {
+    "ownedPaths": [
+      "docs/evidence/ls02/handoff-successor/**",
+      "scripts/profile-v2-quality/ls02-handoff/**"
+    ],
+    "prohibitedPaths": [
+      "packages/factory-catalog/**",
+      "packages/**/src/**",
+      "apps/**",
+      "registry/**",
+      "provider-checkout/**",
+      "harness-checkout/**"
+    ],
+    "claims": [
+      "identity rebind package only",
+      "H-09 receipt must be rebound and rerun",
+      "H-10 remains blocked pending H-09",
+      "LS-08 A1 checkpoint and receipt digest bound by identity"
+    ]
+  }
+}

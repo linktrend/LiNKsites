@@ -1,4 +1,5 @@
 import type { Block, Field, RelationshipField, TextareaField, TextField } from 'payload'
+import { ls04SemanticFields } from './ls04SemanticFields'
 
 export const ArticlesBlock = {
   slug: 'articles',
@@ -7,6 +8,7 @@ export const ArticlesBlock = {
     plural: 'Articles Blocks',
   },
   fields: [
+    ...ls04SemanticFields,
     {
       name: 'title',
       type: 'text',

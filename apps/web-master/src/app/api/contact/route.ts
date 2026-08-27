@@ -2,35 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { ENVIRONMENT } from "@/config";
 import { getPublicSiteIdOrNull, publicRouteNotFound } from "@/lib/public-route-guard";
-import { FileOutbox, LiNKautoworkGateway, parseGatewayEventPolicies, type GatewayEnvironment } from "@linksites/autowork-boundary";
+import { abuseKeyFromRequest, enforceAbuseLimit, enqueueGovernedSideEffect } from "@/lib/forms/governed-side-effect";
+import { SideEffectPolicyError, activateSideEffect, resolveConfiguredHook } from "@/lib/forms/side-effect-policy";
 
 // Request size limit (1MB)
 const MAX_REQUEST_SIZE = 1024 * 1024;
 
-const enqueueContact = async (payload: { intent: string; submission: Record<string, string | number | boolean>; metadata: Record<string, string> }) => {
-  const url = process.env.LINKAUTOWORK_GATEWAY_URL;
-  const secret = process.env.LINKAUTOWORK_SIGNING_SECRET;
-  const keyId = process.env.LINKAUTOWORK_SIGNING_KEY_ID;
-  const environment = process.env.LINKAUTOWORK_ENVIRONMENT as GatewayEnvironment;
-  const orgId = process.env.LINKSITES_ORG_ID;
-  const siteId = process.env.LINKSITES_SITE_ID;
-  const outboxPath = process.env.LINKAUTOWORK_OUTBOX_PATH;
-  const integrityMaterial = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET;
-  const grants = process.env.LINKAUTOWORK_EVENT_GRANTS;
-  if (!url || !secret || !keyId || !environment || !orgId || !siteId || !outboxPath || !integritySecret || !grants) throw new Error('governed LiNKautowork contact configuration is incomplete');
-  const gateway = new LiNKautoworkGateway({ secret, keyId, environment, policies: parseGatewayEventPolicies(grants), transport: async (request) => {
-    const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) });
-    const acknowledgedAt = response.headers.get('x-linkautowork-acknowledged-at') ?? new Date().toISOString();
-    return { status: response.status, receiptId: response.headers.get('x-linkautowork-receipt') ?? 'missing', receiptSignature: response.headers.get('x-linkautowork-receipt-signature') ?? 'missing', acknowledgedAt };
-  }});
-  const outbox = new FileOutbox(outboxPath, { maxAttempts: 5, metrics: gateway.metrics, integritySecret, resigner: (request, attempt) => gateway.resignRequest(request, attempt), validator: (request) => gateway.verifyStored(request) });
-  await outbox.enqueue(gateway.buildRequest('contact.submitted', orgId, `web:${siteId}`, `contact:${siteId}:${payload.metadata.timestamp}:${payload.intent}`, { lead_id: `contact:${siteId}`, site_id: siteId, submission: payload.submission }));
-};
-
-/**
- * API Route Payload Schema
- * Validates the structure of contact form submissions
- */
 const contactApiSchema = z.object({
   intentTag: z.string().min(1).max(100),
   formData: z.record(z.string(), z.any()).refine(
@@ -61,6 +38,28 @@ type ContactApiPayload = z.infer<typeof contactApiSchema>;
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!(await getPublicSiteIdOrNull())) return publicRouteNotFound();
+
+  const decision = activateSideEffect({
+    kind: "contact",
+    endpoint: "/api/contact",
+    configured: resolveConfiguredHook("contact"),
+    requiresConsent: false,
+    consentGranted: true,
+  });
+  if (!decision.ok) {
+    return NextResponse.json(
+      { success: false, error: decision.code, message: decision.message },
+      { status: 503 },
+    );
+  }
+
+  const abuse = enforceAbuseLimit(abuseKeyFromRequest(request.headers));
+  if (!abuse.ok) {
+    return NextResponse.json(
+      { success: false, error: "rate_limited", message: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(abuse.retryAfterSeconds) } },
+    );
+  }
 
   try {
     // Check request size (prevent DoS attacks)
@@ -124,7 +123,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     };
 
-    await enqueueContact(payload);
+    await enqueueGovernedSideEffect({
+      kind: "contact",
+      intent: payload.intent,
+      submission: payload.submission,
+      metadata: payload.metadata,
+    });
 
     return NextResponse.json({
       success: true,
@@ -164,6 +168,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
         { status: 400 }
       );
+    }
+
+    if (error instanceof SideEffectPolicyError) {
+      return NextResponse.json({ success: false, error: error.code, message: error.message }, { status: 503 });
     }
 
     // Handle other errors - don't leak internal error details

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls09-injected-lifecycle-fixture",
+  "packetId": "LS-09",
+  "preparationOnly": true,
+  "providerBytesPresent": false,
+  "ls08ProtectedIntegrated": false,
+  "relativePath": "fixture/site-copy.json",
+  "bytes": "{\"kind\":\"injected-not-provider\",\"layoutPack\":\"a2\",\"dimension\":\"performance\"}\n",
+  "note": "Fixture-owned bytes for migration/rollback/tamper/cache-restart tests. Not provider A2/A3."
+}

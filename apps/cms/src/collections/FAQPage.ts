@@ -7,6 +7,7 @@ import { seoFields } from '@/fields/seoFields'
 import { siteField } from '@/fields/siteField'
 import { createSlugField } from '@/fields/slugField'
 import { workflowFields } from '@/fields/workflowFields'
+import { provenanceFields } from '@/fields/provenanceFields'
 import { injectDefaultSEO } from '@/hooks/injectDefaultSEO'
 import { triggerRebuild } from '@/hooks/triggerRebuild'
 import { createSiteFilteredAccess } from '@/admin/utils/siteFilterOptions'
@@ -48,5 +49,6 @@ export const FAQPage: CollectionConfig<'faq-pages'> = {
     siteField,
     localeField,
     ...workflowFields,
+    ...provenanceFields,
   ] satisfies Field[],
 }

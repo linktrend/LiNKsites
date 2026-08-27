@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-04",
+  "issues": ["ISS-13", "ISS-14", "ISS-15"],
+  "githubIssue": 285,
+  "idempotency": "cursor-cloud-dispatch-v1:linksites-ls04-285-base6169548",
+  "repository": "https://github.com/linktrend/LiNKsites",
+  "branch": "issue/285-implement-ls-04-working-content-and-typed-promot",
+  "base": {
+    "commit": "6169548ddbf6bff99a3eb8de3716e9fd3a843b11",
+    "tree": "24e5b46566a45a58de3df243b45e7918d419cb2c"
+  },
+  "dependencies": {
+    "mwt02ProviderCandidateTree": "0178894d6ce718bb7dff3c141892f82144e2d18c",
+    "h09Tree": "6cab53da19ba390d392157dbcc38979f1a6c86b5",
+    "note": "pins only; not H-09/H-10/EXT-LS-01 proof"
+  },
+  "notClaimed": ["H-09", "H-10", "EXT-LS-01"],
+  "implementation": {
+    "commit": "400f735d3782fb6532a8400098e8a1ad36f0f283",
+    "tree": "d12656ebaddf5d04439be87b05be4b5c47f4e2c8"
+  },
+  "validation": {
+    "focusedTests": {
+      "passed": 62,
+      "files": [
+        "packages/factory-catalog/tests/ls04WorkingContentPromotion.spec.ts",
+        "packages/factory-catalog/tests/workingContent.spec.ts",
+        "packages/factory-catalog/tests/promotionService.spec.ts",
+        "packages/factory-catalog/tests/promotionExecutor.spec.ts",
+        "packages/factory-catalog/tests/ls02AdoptionAssembly.spec.ts"
+      ]
+    },
+    "typecheck": "pnpm --filter @linksites/factory-catalog typecheck",
+    "diffCheck": "git diff --check"
+  },
+  "runtime": {
+    "namedEnvironment": "IDE Development 2.5.1",
+    "originalModelName": "cursor-grok-4.6-medium",
+    "semanticModel": "grok-4.6",
+    "effort": "medium",
+    "fast": false,
+    "proofClass": "local"
+  }
+}

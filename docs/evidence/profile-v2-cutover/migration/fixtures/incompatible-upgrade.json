@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "kind": "incompatible-upgrade",
+  "targetPin": {
+    "repository": "https://github.com/linktrend/LiNKlibraries.git",
+    "commitSha": "deadbeef00000000000000000000000000000001",
+    "treeSha": "deadbeef00000000000000000000000000000002",
+    "entryId": "master-template-type-1",
+    "version": "3.0.0",
+    "lifecycle": "draft",
+    "selectability": "non_selectable",
+    "contractName": "linksites.master-template",
+    "contractVersion": "3.0.0",
+    "compatibleRange": ">=3.0.0 <4.0.0"
+  },
+  "siteIds": ["site-published-a"],
+  "unselectedSiteIds": ["site-published-bystander"],
+  "compatibility": "incompatible",
+  "deliberate": false
+}

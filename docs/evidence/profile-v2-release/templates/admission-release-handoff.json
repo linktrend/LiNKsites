@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-admission-release-handoff",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "issueId": "ISS-36",
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "admission": {
+    "granted": true,
+    "verdict": "PASS"
+  },
+  "release": {
+    "granted": true,
+    "verdict": "PASS"
+  },
+  "handoff": {
+    "granted": true,
+    "verdict": "PASS"
+  },
+  "lowerProofPromotion": {
+    "attempted": false,
+    "forbidden": true
+  }
+}

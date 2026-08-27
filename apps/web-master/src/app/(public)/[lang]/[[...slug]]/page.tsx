@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 
-import { buildMetadata } from "@/lib/seo";
-import { normalizeLocale } from "@/lib/locale-context";
-import { getSiteIdFromRequest } from "@/lib/site-context";
+import { buildMetadata } from "@/lib/seo/ssr-metadata";
 import { getNavigation } from "@/lib/repository/navigation";
 import { getPageBySlug } from "@/lib/repository/pages";
 import { getTemplateIdForSite } from "@/lib/template-context";
 import { getTemplateModule } from "@/templates/registry";
 import { PageTypeMarker } from "@/components/layouts/PageTypeMarker";
+import { requirePublicFamilyPage } from "@/lib/public-route-guard";
+import { loadAcceptedLayoutRuntime } from "@/components/page-renderer/accepted-identities";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,37 +19,40 @@ type PageProps = {
   }>;
 };
 
+const publicPath = (lang: string, slug: string[] = []) =>
+  slug.length === 0 ? `/${lang}` : `/${lang}/${slug.join("/")}`;
+
 export async function generateMetadata({ params }: PageProps) {
   const { lang, slug = [] } = await params;
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(lang);
-  const slugSegments = slug;
-  const slugPath = slugSegments.length > 0 ? `/${slugSegments.join("/")}` : "/";
-
+  const slugPath = slug.length > 0 ? `/${slug.join("/")}` : "/";
   try {
-    const page = await getPageBySlug({ siteId, locale, slugSegments });
+    const { siteId, locale } = await requirePublicFamilyPage({
+      lang,
+      pathname: publicPath(lang, slug),
+    });
+    const page = await getPageBySlug({ siteId, locale, slugSegments: slug });
     if (!page) return { robots: { index: false, follow: false }, title: "Page unavailable" };
 
     return buildMetadata(locale, slugPath, {
       title: page.seo?.title ?? page.title,
       description: page.seo?.description,
-      ogImage: (page.seo?.ogImage as any)?.url ?? undefined,
+      ogImage: (page.seo?.ogImage as { url?: string } | undefined)?.url ?? undefined,
       canonicalUrl: page.seo?.canonicalUrl,
     });
-  } catch (error) {
-    console.error("[generateMetadata] Published CMS content unavailable", slugPath, error);
+  } catch {
     return { robots: { index: false, follow: false }, title: "Page unavailable" };
   }
 }
 
 export default async function CmsPage({ params }: PageProps) {
   const { lang, slug = [] } = await params;
-  const siteId = await getSiteIdFromRequest();
-  const locale = normalizeLocale(lang);
-  const slugSegments = slug;
+  const { siteId, locale } = await requirePublicFamilyPage({
+    lang,
+    pathname: publicPath(lang, slug),
+  });
 
   const [page, primaryNav, footerNav, templateId] = await Promise.all([
-    getPageBySlug({ siteId, locale, slugSegments }),
+    getPageBySlug({ siteId, locale, slugSegments: slug }),
     getNavigation({ siteId, locale, key: "primary" }).catch(() => null),
     getNavigation({ siteId, locale, key: "footer" }).catch(() => null),
     getTemplateIdForSite({ siteId, locale }),
@@ -57,6 +60,12 @@ export default async function CmsPage({ params }: PageProps) {
 
   if (!page) return notFound();
   const template = getTemplateModule(templateId);
+  let runtime;
+  try {
+    runtime = loadAcceptedLayoutRuntime();
+  } catch {
+    return notFound();
+  }
 
   return (
     <>
@@ -67,6 +76,8 @@ export default async function CmsPage({ params }: PageProps) {
         footerNav={footerNav}
         siteKey={siteId}
         locale={locale}
+        layoutPackId={runtime.layoutPackId}
+        planId={runtime.planId}
       />
     </>
   );

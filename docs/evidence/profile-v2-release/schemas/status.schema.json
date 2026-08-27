@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/status.schema.json",
+  "title": "LS-11 release scaffolding status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "githubIssue",
+    "issues",
+    "evidenceClass",
+    "dependencySafe",
+    "packetCompletion",
+    "ls11Complete",
+    "exactTreeReviewComplete",
+    "fullSuiteRun",
+    "rollbackRehearsalRun",
+    "receiptsBound",
+    "admitted",
+    "released",
+    "handedOff",
+    "promoted",
+    "productionProof",
+    "hostedProof",
+    "founderAuthorized",
+    "mainPublished",
+    "productionDeployed",
+    "ownedPaths",
+    "notes"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-release-status" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "issues": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "string", "enum": ["ISS-34", "ISS-35", "ISS-36"] }
+    },
+    "evidenceClass": { "const": "completion" },
+    "dependencySafe": { "const": true },
+    "packetCompletion": { "const": true },
+    "ls11Complete": { "const": true },
+    "exactTreeReviewComplete": { "const": true },
+    "fullSuiteRun": { "const": true },
+    "rollbackRehearsalRun": { "const": true },
+    "receiptsBound": { "const": true },
+    "admitted": { "const": true },
+    "released": { "const": true },
+    "handedOff": { "const": true },
+    "promoted": { "const": false },
+    "productionProof": { "const": false },
+    "hostedProof": { "const": false },
+    "founderAuthorized": { "const": true },
+    "mainPublished": { "const": false },
+    "productionDeployed": { "const": false },
+    "ownedPaths": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "enum": [
+          "docs/evidence/profile-v2-release/**",
+          "docs/releases/**"
+        ]
+      }
+    },
+    "notes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

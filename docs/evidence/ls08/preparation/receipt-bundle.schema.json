@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls08/receipt-bundle.schema.json",
+  "title": "LS-08 server/browser A-B-C-L receipt bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "packetCompletion",
+    "evidenceClass",
+    "layoutPack",
+    "surfaces",
+    "plans",
+    "providerIdentity",
+    "consumerIdentity",
+    "cells"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls08-receipt-bundle" },
+    "packetId": { "const": "LS-08" },
+    "packetCompletion": { "type": "boolean" },
+    "evidenceClass": {
+      "type": "string",
+      "enum": ["schema-fixture", "paired-proof"]
+    },
+    "layoutPack": {
+      "type": "string",
+      "enum": ["a1", "a2", "a3"]
+    },
+    "surfaces": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["server", "browser"] }
+    },
+    "plans": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["a", "b", "c", "l"] }
+    },
+    "providerIdentity": { "$ref": "#/$defs/providerIdentity" },
+    "consumerIdentity": { "$ref": "#/$defs/consumerIdentity" },
+    "cells": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/cell" }
+    }
+  },
+  "$defs": {
+    "gitSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "providerIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "commit",
+        "tree",
+        "releaseEntryVersion",
+        "releaseArtifactTree"
+      ],
+      "properties": {
+        "repository": { "const": "linktrend/LiNKlibraries" },
+        "commit": { "$ref": "#/$defs/gitSha" },
+        "tree": { "$ref": "#/$defs/gitSha" },
+        "releaseEntryVersion": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^master-template-type-1@.+"
+        },
+        "releaseArtifactTree": { "$ref": "#/$defs/gitSha" }
+      }
+    },
+    "consumerIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "tree"],
+      "properties": {
+        "repository": { "const": "linktrend/LiNKsites" },
+        "commit": { "$ref": "#/$defs/gitSha" },
+        "tree": { "$ref": "#/$defs/gitSha" }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["NOT_RUN", "FAIL", "HOLD", "UNAVAILABLE", "PASS"]
+    },
+    "cellVerdicts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_materialized",
+        "adapter_compatible",
+        "payload_projection_valid",
+        "server_render_valid",
+        "browser_fixture_valid",
+        "migration_rollback_valid",
+        "tamper_rejected",
+        "cache_restart_valid"
+      ],
+      "properties": {
+        "candidate_materialized": { "$ref": "#/$defs/verdict" },
+        "adapter_compatible": { "$ref": "#/$defs/verdict" },
+        "payload_projection_valid": { "$ref": "#/$defs/verdict" },
+        "server_render_valid": { "$ref": "#/$defs/verdict" },
+        "browser_fixture_valid": { "$ref": "#/$defs/verdict" },
+        "migration_rollback_valid": { "$ref": "#/$defs/verdict" },
+        "tamper_rejected": { "$ref": "#/$defs/verdict" },
+        "cache_restart_valid": { "$ref": "#/$defs/verdict" }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["surface", "planId", "verdicts"],
+      "properties": {
+        "surface": { "type": "string", "enum": ["server", "browser"] },
+        "planId": { "type": "string", "enum": ["a", "b", "c", "l"] },
+        "scenario": {
+          "type": "string",
+          "enum": [
+            "product",
+            "service",
+            "hybrid",
+            "local",
+            "resources",
+            "trust",
+            "failure",
+            "lifecycle"
+          ]
+        },
+        "verdicts": { "$ref": "#/$defs/cellVerdicts" }
+      }
+    }
+  }
+}
