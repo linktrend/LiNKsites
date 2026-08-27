@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-releases-status",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "releasePublished": false,
+  "packetCompletion": true,
+  "ls11Complete": true,
+  "promoted": false,
+  "founderAuthorized": true,
+  "mainPublished": false,
+  "productionDeployed": false,
+  "notes": [
+    "LS-11 repository release evidence is complete.",
+    "Main promotion is authorized; publish and production deployment remain unauthorized."
+  ]
+}

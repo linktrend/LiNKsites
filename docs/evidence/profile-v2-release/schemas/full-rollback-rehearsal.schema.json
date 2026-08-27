@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.local/linksites/ls11/full-rollback-rehearsal.schema.json",
+  "title": "LS-11 Full and rollback rehearsal template",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packetId",
+    "githubIssue",
+    "issueId",
+    "evidenceClass",
+    "packetCompletion",
+    "exactTree",
+    "fullSuite",
+    "rollbackRehearsal"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "ls11-full-rollback-rehearsal" },
+    "packetId": { "const": "LS-11" },
+    "githubIssue": { "const": 361 },
+    "issueId": { "const": "ISS-35" },
+    "evidenceClass": { "const": "completion" },
+    "packetCompletion": { "const": true },
+    "exactTree": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "tree"],
+      "properties": {
+        "repository": { "const": "linktrend/LiNKsites" },
+        "commit": { "const": "797acec86656984e5aba0fd36ded29237669acf7" },
+        "tree": { "const": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac" }
+      }
+    },
+    "fullSuite": { "$ref": "#/$defs/passGate" },
+    "rollbackRehearsal": { "$ref": "#/$defs/passGate" }
+  },
+  "$defs": {
+    "passGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run", "receiptPresent", "treeBound", "verdict"],
+      "properties": {
+        "run": { "const": true },
+        "receiptPresent": { "const": true },
+        "treeBound": { "const": true },
+        "verdict": { "const": "PASS" }
+      }
+    }
+  }
+}

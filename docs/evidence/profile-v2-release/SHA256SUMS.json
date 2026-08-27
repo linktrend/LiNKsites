@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls11-release-checksums",
+  "algorithm": "sha256",
+  "packetId": "LS-11",
+  "githubIssue": 361,
+  "protectedDevelopment": {
+    "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
+  },
+  "packageDigest": "sha256:729bf2ca7c843c635455e8f4dabe2efbb3bffd2531958c3ebb95254e8b7e9cbf",
+  "files": [
+    {
+      "path": "docs/evidence/profile-v2-release/checklists/ISS-34-independent-exact-tree-review.md",
+      "sha256": "fda23373e0547b7d7899ebd8fc41471cc246276a9659a25d11977e86bf9de411"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/checklists/ISS-35-full-rollback-receipt-binding.md",
+      "sha256": "73ebbccf41e0e5806088e89836c3dd6aa9386073a58c2d5c7172712a97862ac2"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/checklists/ISS-36-admission-release-handoff.md",
+      "sha256": "9a34accfc6be93024c7b0b9b85f3ec86bcc7db3f46e7da91393d84b46b8ea7c9"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/COMPLETION.json",
+      "sha256": "7c5936c382b257800cfe1f0981624905a5bacf63de83bbf096aa105222c9f01c"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/DEPENDENCIES.json",
+      "sha256": "e5e856c579e3e667750813b63a595388dac28e2f128d1b40feb0b0f397a583ad"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/identity.json",
+      "sha256": "277d450b0473a6753776d078dd065ac94cbd91893935d4ee37d5b3c8d7f6e118"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/PROOF.md",
+      "sha256": "ae4d80d417a471fadf119371fe6f92b1180610b86b7fbe69a98f5d7f63a8787a"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/README.md",
+      "sha256": "19a1137a5fe93f9408ffc8fd786afc2becac1f6c7f81226aec96f739073a9bed"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/admission-release-handoff.schema.json",
+      "sha256": "adf19724835eba00cdc82e222612f3e18b712a5454161398742c8fb00704e68b"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/checksums.schema.json",
+      "sha256": "79d199fd0a37316a06a0130b41afb43899f38cc71f6d0b024f7dfe59de16fc46"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/completion.schema.json",
+      "sha256": "48446514f74445018ba9592be271e4bc69b4d0d0545f17977567be7604b9a506"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/dependencies.schema.json",
+      "sha256": "251f6e9e6e3251ba315e03e368fb9be6590dabe7631cb118a68ac8a052d7e1a8"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/exact-tree-review.schema.json",
+      "sha256": "a9108be36c9a0cb485f94b79b45f14d5a168568791ba0d08eefeee8b65df745b"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/founder-reserved-decisions.schema.json",
+      "sha256": "0289dea75a174ff8b8861d1d11218b7e20346763eb018d2a4a455b9334133bb4"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/full-rollback-rehearsal.schema.json",
+      "sha256": "ee292a9c2f03e1c25f6514539c64a86ee2f6cfa8af5f8cae83efafcb1a125fed"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/identity.schema.json",
+      "sha256": "477757205a22f94392237fb264e7953375308c0cbfdd9afa973eef4dfed90092"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/receipt-binding.schema.json",
+      "sha256": "031c5b44b4e4bf4fdadeaf4f4bbabb7e279113338d21fea484d92422e6571109"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/releases-status.schema.json",
+      "sha256": "29ab659950e695a5a14c75f98e4c54bf6d2d5c9a86314b82db7e04381a37cad3"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/scope.schema.json",
+      "sha256": "9e9204c96296291a6871ed1600e45ce856242cefe3aa2ddb4a45f75a40506fea"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/schemas/status.schema.json",
+      "sha256": "353bb086d687d53a1517a6ca94c22f51a1c2ac32e1d2b179bacaa4bf1f179541"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/SCOPE.json",
+      "sha256": "c9a9e3a05bf6514051cf7e341d715a2cf02b1c60130548e85dedc29ad1077fdf"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/STATUS.json",
+      "sha256": "6fa55f9b40fbd67fafeede0154b1e16bed3a3dbb48b44b4cb32adefa209fb679"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/admission-release-handoff.json",
+      "sha256": "c2aa3590323c66189653db2ad4fd02f99273e9569d88ffdfe21eae483a37c6bd"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/exact-tree-review.json",
+      "sha256": "59609b5aaed516b009e235064628c4780d6c7c0f0045672a9a8407bf2a085320"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/founder-reserved-decisions.json",
+      "sha256": "efb192c1f908dd0c3d0ea6b0158a2893d8fc0b9b6b75a2fcbcc963dad1290755"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/full-rollback-rehearsal.json",
+      "sha256": "90d26cfcef101d6c0bfc0f57b254cc480a7ca7697f371be075dfd34aacf9c917"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/templates/receipt-binding.json",
+      "sha256": "0fbf341df31f4a6eff8cb4b8aa96567c59661a2cf3b90e28d1ce98d3af26a644"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.mjs",
+      "sha256": "5abaecaf5de37593d076ff0cffbd8be6337e26d2c41bbe0a334c1d759db174f5"
+    },
+    {
+      "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.test.mjs",
+      "sha256": "367730c2ec10a72b710b7ce6059c4c8b481bc140204806ed8ed857989f542c89"
+    },
+    {
+      "path": "docs/releases/profile-v2-ls11-release.md",
+      "sha256": "6822b992b0058c7ac6811cbf3edf9ef08b8d558015def48bb3f0d7dfe5df6de5"
+    },
+    {
+      "path": "docs/releases/README.md",
+      "sha256": "17ea7507c68f857a475d959ddd162427e7ff8d1e3be2e7ea1d69c6dfef257a07"
+    },
+    {
+      "path": "docs/releases/STATUS.json",
+      "sha256": "0aa0982b8b39abad038c97411799359c91a67a6f1545629591b147913642b9ee"
+    }
+  ]
+}
