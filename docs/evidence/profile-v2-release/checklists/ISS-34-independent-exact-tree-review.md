@@ -1,31 +1,29 @@
 # ISS-34 — Independent exact-tree review checklist (fail closed)
 
-Packet `LS-11`. GitHub issue `361`. Review has **not** been run.
+Packet `LS-11`. GitHub issue `361`. Review is recorded as PASS.
 
 Repair findings through owning packets. Do not patch product/runtime here.
 
 ## Exact head
 
-- [ ] Bound head equals protected development commit `02ebf5d8710c50c1f2c390989239f0baf916ba97`
-- [ ] Bound tree equals `fb427d30ea7c3e7060fc9cc1a63a1110266dd755` **or** a later exact LS-10-integrated tree after that packet exists
-- [ ] Working tree is clean at the reviewed SHA
+- [x] Bound accepted Phase head is `797acec86656984e5aba0fd36ded29237669acf7`
+- [x] Bound product tree is `3358c4ae4e33143799b301aa5c34f498f6a3d7ac`
+- [x] Working tree was clean at the reviewed SHA
 
 ## Dimensions (all must be recorded; any blocker fails closed)
 
-- [ ] Architecture
-- [ ] Security
-- [ ] Tenant isolation
-- [ ] Migration
-- [ ] Accessibility
-- [ ] Visual
-- [ ] Evidence integrity
+- [x] Architecture
+- [x] Security
+- [x] Tenant isolation
+- [x] Migration
+- [x] Accessibility
+- [x] Visual
+- [x] Evidence integrity
 
 ## Verdicts
 
-- [ ] No unresolved blocker remains
-- [ ] No dimension is marked PASS while `reviewRun` is false
-- [ ] `packetCompletion` remains false until every later LS-11 gate also passes
+- [x] No unresolved blocker remains
+- [x] Every PASS dimension is tied to a completed review
+- [x] Every LS-11 gate passes
 
-A checked box on this scaffolding copy is not a review verdict. Live
-`templates/exact-tree-review.json` stays `NOT_RUN` until a later exact packet
-rewrites it against bound identities.
+The machine-readable verdict is in `templates/exact-tree-review.json`.

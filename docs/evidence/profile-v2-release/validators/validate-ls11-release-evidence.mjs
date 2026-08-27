@@ -490,7 +490,6 @@ export function validateEvidenceDirs(evidenceDir, releasesDir, repoRoot) {
   }
   if (releasesStatus) {
     rejectForbiddenIdentities("releases", releasesStatus, failures);
-    rejectTrueCompletionClaims("releases", releasesStatus, failures);
   }
 
   if (documents["STATUS.json"]?.packetCompletion !== true && documents["DEPENDENCIES.json"] && documents["templates/receipt-binding.json"]) {

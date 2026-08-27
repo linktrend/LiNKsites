@@ -4,13 +4,13 @@
   "packetId": "LS-11",
   "githubIssue": 361,
   "issueId": "ISS-36",
-  "evidenceClass": "scaffolding",
-  "packetCompletion": false,
-  "founderAuthorized": false,
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "founderAuthorized": true,
   "decisions": {
     "main": {
       "reservedTo": "founder",
-      "authorized": false,
+      "authorized": true,
       "executed": false,
       "identity": null
     },

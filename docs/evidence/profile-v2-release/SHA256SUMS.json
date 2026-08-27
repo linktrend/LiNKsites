@@ -8,43 +8,43 @@
     "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
     "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
   },
-  "packageDigest": "sha256:94f6e6d6950c2554f0da54e2c2f93f6346ce396923a7d7b50aaedd457dcbd107",
+  "packageDigest": "sha256:968938b255379d0c3b68b8fce201e9088ea96e03d7d7906d86d3ad303ccf0719",
   "files": [
     {
       "path": "docs/evidence/profile-v2-release/checklists/ISS-34-independent-exact-tree-review.md",
-      "sha256": "1f3ebf1a764768102778f730971f6a194058aec9e9129aec203061e2bc181d81"
+      "sha256": "fda23373e0547b7d7899ebd8fc41471cc246276a9659a25d11977e86bf9de411"
     },
     {
       "path": "docs/evidence/profile-v2-release/checklists/ISS-35-full-rollback-receipt-binding.md",
-      "sha256": "f610fd9a92f7ec50b1aa1a089a301e1507a0b8275c713d1c44d7f7c03c26df06"
+      "sha256": "73ebbccf41e0e5806088e89836c3dd6aa9386073a58c2d5c7172712a97862ac2"
     },
     {
       "path": "docs/evidence/profile-v2-release/checklists/ISS-36-admission-release-handoff.md",
-      "sha256": "73520413edd31fcc45791d4cde49c322a1f1da9b95efa40b5dc30c34fc6ae1fd"
+      "sha256": "9a34accfc6be93024c7b0b9b85f3ec86bcc7db3f46e7da91393d84b46b8ea7c9"
     },
     {
       "path": "docs/evidence/profile-v2-release/COMPLETION.json",
-      "sha256": "974881169d406ffde1dfdfd93d6c78a1960480ac56f99a4d808eb365c8c22812"
+      "sha256": "7c5936c382b257800cfe1f0981624905a5bacf63de83bbf096aa105222c9f01c"
     },
     {
       "path": "docs/evidence/profile-v2-release/DEPENDENCIES.json",
-      "sha256": "04c678f99e04c164e7043c40235427c136d2e95f340a1014f2793faa3c1a9d86"
+      "sha256": "e5e856c579e3e667750813b63a595388dac28e2f128d1b40feb0b0f397a583ad"
     },
     {
       "path": "docs/evidence/profile-v2-release/identity.json",
-      "sha256": "47aea48934bdb82023b8e28528b2c94506c1e34234f0f57acc875621904b72ac"
+      "sha256": "277d450b0473a6753776d078dd065ac94cbd91893935d4ee37d5b3c8d7f6e118"
     },
     {
       "path": "docs/evidence/profile-v2-release/PROOF.md",
-      "sha256": "9a900a73f90617ebe7078f790bd11e3a3571a89682b2e7b0ac2f0d4645296306"
+      "sha256": "ae4d80d417a471fadf119371fe6f92b1180610b86b7fbe69a98f5d7f63a8787a"
     },
     {
       "path": "docs/evidence/profile-v2-release/README.md",
-      "sha256": "f46a669588dad8e069adfb6d5dbb8a09412df762ae75ba7a85675af7d2d7198b"
+      "sha256": "19a1137a5fe93f9408ffc8fd786afc2becac1f6c7f81226aec96f739073a9bed"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/admission-release-handoff.schema.json",
-      "sha256": "425d15784bbd8aa28be68828bf1ca3812e74bbf024f6d27ff9a8e225d1095d24"
+      "sha256": "adf19724835eba00cdc82e222612f3e18b712a5454161398742c8fb00704e68b"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/checksums.schema.json",
@@ -52,35 +52,35 @@
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/dependencies.schema.json",
-      "sha256": "974060b0084d62184a625d931a29732ecf7182302bd4ad83880ecc62e89c5b3c"
+      "sha256": "251f6e9e6e3251ba315e03e368fb9be6590dabe7631cb118a68ac8a052d7e1a8"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/exact-tree-review.schema.json",
-      "sha256": "34d1b929d97a2ba45ea7a1edc47aa91fb602731e9fc924cd073e0610b6e9e552"
+      "sha256": "a9108be36c9a0cb485f94b79b45f14d5a168568791ba0d08eefeee8b65df745b"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/founder-reserved-decisions.schema.json",
-      "sha256": "4c867e94e9526ede38006efa3491cbeaa1212345c1c0212e331d3c76be7b923c"
+      "sha256": "0289dea75a174ff8b8861d1d11218b7e20346763eb018d2a4a455b9334133bb4"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/full-rollback-rehearsal.schema.json",
-      "sha256": "7d9c73a857e3a6b3a909cf72390ee89d3d4d003904ba39d650d900e6f675942a"
+      "sha256": "ee292a9c2f03e1c25f6514539c64a86ee2f6cfa8af5f8cae83efafcb1a125fed"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/identity.schema.json",
-      "sha256": "7115ec3d791283550e2cbdca3d2b83d1fd1e9afb6c6835807aae16860c8f0a34"
+      "sha256": "477757205a22f94392237fb264e7953375308c0cbfdd9afa973eef4dfed90092"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/receipt-binding.schema.json",
-      "sha256": "15ec6bd214a5df54de397fdfd0681d53b6a74a7ee596838a7cc10eed968e4d6e"
+      "sha256": "031c5b44b4e4bf4fdadeaf4f4bbabb7e279113338d21fea484d92422e6571109"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/releases-status.schema.json",
-      "sha256": "d160a0f9ba44aeea69470d3b2deb6d05ea18c9d003b2ef4a30a1067628e7f89c"
+      "sha256": "29ab659950e695a5a14c75f98e4c54bf6d2d5c9a86314b82db7e04381a37cad3"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/scope.schema.json",
-      "sha256": "ca0d9f32bcbbe7d326acc050e2a8ed3030c0fdbb94d01fbf48576d8110364236"
+      "sha256": "9e9204c96296291a6871ed1600e45ce856242cefe3aa2ddb4a45f75a40506fea"
     },
     {
       "path": "docs/evidence/profile-v2-release/schemas/status.schema.json",
@@ -88,7 +88,7 @@
     },
     {
       "path": "docs/evidence/profile-v2-release/SCOPE.json",
-      "sha256": "2c364ceded1bf485859ad5f589d7b66d841dafb35b4f7bb6ed95e88a5d1a9ce2"
+      "sha256": "c9a9e3a05bf6514051cf7e341d715a2cf02b1c60130548e85dedc29ad1077fdf"
     },
     {
       "path": "docs/evidence/profile-v2-release/STATUS.json",
@@ -96,43 +96,43 @@
     },
     {
       "path": "docs/evidence/profile-v2-release/templates/admission-release-handoff.json",
-      "sha256": "bbbc17f05795f77519572322badd383df67ab753948320afad48ff371452592b"
+      "sha256": "c2aa3590323c66189653db2ad4fd02f99273e9569d88ffdfe21eae483a37c6bd"
     },
     {
       "path": "docs/evidence/profile-v2-release/templates/exact-tree-review.json",
-      "sha256": "a9736b2a2b01c30ab6c8ec5b3995f4647556ffd9daac94e8b27cb594d73e52d3"
+      "sha256": "59609b5aaed516b009e235064628c4780d6c7c0f0045672a9a8407bf2a085320"
     },
     {
       "path": "docs/evidence/profile-v2-release/templates/founder-reserved-decisions.json",
-      "sha256": "06913c08205d3dac53c3d77bd635c5339a01831d01fd75ebfc1f6e70860f6ef6"
+      "sha256": "efb192c1f908dd0c3d0ea6b0158a2893d8fc0b9b6b75a2fcbcc963dad1290755"
     },
     {
       "path": "docs/evidence/profile-v2-release/templates/full-rollback-rehearsal.json",
-      "sha256": "7891e2192f31de0b8f3eed5799eed41686be0c138faa2f3260bdf778a0a8380d"
+      "sha256": "90d26cfcef101d6c0bfc0f57b254cc480a7ca7697f371be075dfd34aacf9c917"
     },
     {
       "path": "docs/evidence/profile-v2-release/templates/receipt-binding.json",
-      "sha256": "96e1656593eb20288e846e7583b490f9623f04161b42e0ee7ad94864cde1d580"
+      "sha256": "0fbf341df31f4a6eff8cb4b8aa96567c59661a2cf3b90e28d1ce98d3af26a644"
     },
     {
       "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.mjs",
-      "sha256": "23f04b358b4bace237224e1abd980dfab703caaacd3b639fe45b36e9f3c8cde7"
+      "sha256": "e49b0188cc7b4d8a92ab8c3f88ae41e1c16ebc7850aa8384308f3c931c3aa787"
     },
     {
       "path": "docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.test.mjs",
-      "sha256": "b211ff7a2385fbd0f67d280ead28dbb0c092c7e1bb9ea4c907fb1102257b262e"
+      "sha256": "adc3e0b7bc7c169d270976038f242a487d0b23fb5048877275cb165c658dda7e"
     },
     {
       "path": "docs/releases/profile-v2-ls11-release.md",
-      "sha256": "2a9f6a7d4a48b7a1d272df03af0a8a7609c596fd2747f5d0287e4b3fd78b2040"
+      "sha256": "6822b992b0058c7ac6811cbf3edf9ef08b8d558015def48bb3f0d7dfe5df6de5"
     },
     {
       "path": "docs/releases/README.md",
-      "sha256": "5ff5d6111ca7c6a3a82dbfa1abe2d42c0421924266f92a8b52167d6951ed70bc"
+      "sha256": "17ea7507c68f857a475d959ddd162427e7ff8d1e3be2e7ea1d69c6dfef257a07"
     },
     {
       "path": "docs/releases/STATUS.json",
-      "sha256": "592d43b0a9915953957af86473b8fcd729c609ba9b4847aa276530b384cc8d0b"
+      "sha256": "0aa0982b8b39abad038c97411799359c91a67a6f1545629591b147913642b9ee"
     }
   ]
 }

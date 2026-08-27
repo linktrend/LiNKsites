@@ -25,9 +25,9 @@
     "packetId": { "const": "LS-11" },
     "githubIssue": { "const": 361 },
     "issueId": { "const": "ISS-34" },
-    "evidenceClass": { "const": "scaffolding" },
-    "packetCompletion": { "const": false },
-    "reviewRun": { "const": false },
+    "evidenceClass": { "const": "completion" },
+    "packetCompletion": { "const": true },
+    "reviewRun": { "const": true },
     "independent": { "const": true },
     "exactHead": {
       "type": "object",
@@ -35,9 +35,9 @@
       "required": ["repository", "ref", "commit", "tree"],
       "properties": {
         "repository": { "const": "linktrend/LiNKsites" },
-        "ref": { "const": "development" },
-        "commit": { "const": "02ebf5d8710c50c1f2c390989239f0baf916ba97" },
-        "tree": { "const": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755" }
+        "ref": { "const": "phase/ls11-release" },
+        "commit": { "const": "797acec86656984e5aba0fd36ded29237669acf7" },
+        "tree": { "const": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac" }
       }
     },
     "repairThroughOwningPackets": { "const": true },
@@ -63,7 +63,7 @@
               "evidence"
             ]
           },
-          "verdict": { "const": "NOT_RUN" }
+          "verdict": { "const": "PASS" }
         }
       }
     }

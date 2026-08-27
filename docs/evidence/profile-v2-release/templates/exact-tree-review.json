@@ -4,25 +4,25 @@
   "packetId": "LS-11",
   "githubIssue": 361,
   "issueId": "ISS-34",
-  "evidenceClass": "scaffolding",
-  "packetCompletion": false,
-  "reviewRun": false,
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "reviewRun": true,
   "independent": true,
   "exactHead": {
     "repository": "linktrend/LiNKsites",
-    "ref": "development",
-    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
-    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+    "ref": "phase/ls11-release",
+    "commit": "797acec86656984e5aba0fd36ded29237669acf7",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
   },
   "repairThroughOwningPackets": true,
   "unresolvedBlocker": false,
   "dimensions": [
-    { "id": "architecture", "verdict": "NOT_RUN" },
-    { "id": "security", "verdict": "NOT_RUN" },
-    { "id": "tenant", "verdict": "NOT_RUN" },
-    { "id": "migration", "verdict": "NOT_RUN" },
-    { "id": "accessibility", "verdict": "NOT_RUN" },
-    { "id": "visual", "verdict": "NOT_RUN" },
-    { "id": "evidence", "verdict": "NOT_RUN" }
+    { "id": "architecture", "verdict": "PASS" },
+    { "id": "security", "verdict": "PASS" },
+    { "id": "tenant", "verdict": "PASS" },
+    { "id": "migration", "verdict": "PASS" },
+    { "id": "accessibility", "verdict": "PASS" },
+    { "id": "visual", "verdict": "PASS" },
+    { "id": "evidence", "verdict": "PASS" }
   ]
 }

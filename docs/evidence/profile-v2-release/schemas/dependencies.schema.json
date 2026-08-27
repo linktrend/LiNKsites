@@ -19,16 +19,16 @@
     "packetId": { "const": "LS-11" },
     "githubIssue": { "const": 361 },
     "policy": { "const": "fail-closed" },
-    "packetCompletion": { "const": false },
+    "packetCompletion": { "const": true },
     "dependencies": {
       "type": "array",
       "minItems": 2,
       "maxItems": 2,
-      "items": { "$ref": "#/$defs/futureDependency" }
+      "items": { "$ref": "#/$defs/boundDependency" }
     }
   },
   "$defs": {
-    "futureDependency": {
+    "boundDependency": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -48,21 +48,15 @@
           "enum": ["ls10-cutover", "harness-h09-conformance"]
         },
         "required": { "const": true },
-        "satisfied": { "const": false },
-        "bindingState": { "const": "future-placeholder" },
-        "placeholderId": {
-          "type": "string",
-          "enum": [
-            "FUTURE_LS10_CUTOVER_IDENTITY",
-            "FUTURE_HARNESS_H09_CONFORMANCE_IDENTITY"
-          ]
-        },
+        "satisfied": { "const": true },
+        "bindingState": { "const": "bound" },
+        "placeholderId": { "type": "null" },
         "repository": {
           "type": "string",
           "enum": ["linktrend/LiNKsites", "linktrend/LiNKharness"]
         },
-        "commit": { "type": "null" },
-        "tree": { "type": "null" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "tree": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
         "reason": { "type": "string", "minLength": 1 }
       }
     }

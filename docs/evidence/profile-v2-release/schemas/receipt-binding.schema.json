@@ -21,18 +21,18 @@
     "packetId": { "const": "LS-11" },
     "githubIssue": { "const": 361 },
     "issueId": { "const": "ISS-35" },
-    "evidenceClass": { "const": "scaffolding" },
-    "packetCompletion": { "const": false },
-    "receiptsBound": { "const": false },
+    "evidenceClass": { "const": "completion" },
+    "packetCompletion": { "const": true },
+    "receiptsBound": { "const": true },
     "bindings": {
       "type": "array",
       "minItems": 5,
       "maxItems": 5,
-      "items": { "$ref": "#/$defs/futureBinding" }
+      "items": { "$ref": "#/$defs/boundBinding" }
     }
   },
   "$defs": {
-    "futureBinding": {
+    "boundBinding": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -59,8 +59,8 @@
             "FUTURE_CONFIGURATION_RECEIPT_IDENTITY"
           ]
         },
-        "bound": { "const": false },
-        "bindingState": { "const": "future-placeholder" },
+        "bound": { "const": true },
+        "bindingState": { "const": "bound" },
         "repository": {
           "type": "string",
           "enum": [
@@ -69,8 +69,8 @@
             "linktrend/LiNKlibraries"
           ]
         },
-        "commit": { "type": "null" },
-        "tree": { "type": "null" }
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "tree": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
       }
     }
   }

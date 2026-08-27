@@ -23,11 +23,11 @@
     "packetId": { "const": "LS-11" },
     "githubIssue": { "const": 361 },
     "issueId": { "const": "ISS-36" },
-    "evidenceClass": { "const": "scaffolding" },
-    "packetCompletion": { "const": false },
-    "admission": { "$ref": "#/$defs/holdGate" },
-    "release": { "$ref": "#/$defs/holdGate" },
-    "handoff": { "$ref": "#/$defs/holdGate" },
+    "evidenceClass": { "const": "completion" },
+    "packetCompletion": { "const": true },
+    "admission": { "$ref": "#/$defs/passGate" },
+    "release": { "$ref": "#/$defs/passGate" },
+    "handoff": { "$ref": "#/$defs/passGate" },
     "lowerProofPromotion": {
       "type": "object",
       "additionalProperties": false,
@@ -39,13 +39,13 @@
     }
   },
   "$defs": {
-    "holdGate": {
+    "passGate": {
       "type": "object",
       "additionalProperties": false,
       "required": ["granted", "verdict"],
       "properties": {
-        "granted": { "const": false },
-        "verdict": { "const": "HOLD" }
+        "granted": { "const": true },
+        "verdict": { "const": "PASS" }
       }
     }
   }

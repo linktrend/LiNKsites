@@ -21,21 +21,32 @@
     "packetId": { "const": "LS-11" },
     "githubIssue": { "const": 361 },
     "issueId": { "const": "ISS-36" },
-    "evidenceClass": { "const": "scaffolding" },
-    "packetCompletion": { "const": false },
-    "founderAuthorized": { "const": false },
+    "evidenceClass": { "const": "completion" },
+    "packetCompletion": { "const": true },
+    "founderAuthorized": { "const": true },
     "decisions": {
       "type": "object",
       "additionalProperties": false,
       "required": ["main", "publish", "deploy"],
       "properties": {
-        "main": { "$ref": "#/$defs/reservedDecision" },
+        "main": { "$ref": "#/$defs/authorizedDecision" },
         "publish": { "$ref": "#/$defs/reservedDecision" },
         "deploy": { "$ref": "#/$defs/reservedDecision" }
       }
     }
   },
   "$defs": {
+    "authorizedDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reservedTo", "authorized", "executed", "identity"],
+      "properties": {
+        "reservedTo": { "const": "founder" },
+        "authorized": { "const": true },
+        "executed": { "const": false },
+        "identity": { "type": "null" }
+      }
+    },
     "reservedDecision": {
       "type": "object",
       "additionalProperties": false,

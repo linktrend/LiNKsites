@@ -4,54 +4,54 @@
   "packetId": "LS-11",
   "githubIssue": 361,
   "issueId": "ISS-35",
-  "evidenceClass": "scaffolding",
-  "packetCompletion": false,
-  "receiptsBound": false,
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "receiptsBound": true,
   "bindings": [
     {
       "id": "harness",
       "placeholderId": "FUTURE_HARNESS_H09_CONFORMANCE_IDENTITY",
-      "bound": false,
-      "bindingState": "future-placeholder",
+      "bound": true,
+      "bindingState": "bound",
       "repository": "linktrend/LiNKharness",
-      "commit": null,
-      "tree": null
+      "commit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f"
     },
     {
       "id": "profile",
       "placeholderId": "FUTURE_LS10_CUTOVER_IDENTITY",
-      "bound": false,
-      "bindingState": "future-placeholder",
+      "bound": true,
+      "bindingState": "bound",
       "repository": "linktrend/LiNKsites",
-      "commit": null,
-      "tree": null
+      "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+      "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
     },
     {
       "id": "provider",
       "placeholderId": "FUTURE_PROVIDER_RECEIPT_IDENTITY",
-      "bound": false,
-      "bindingState": "future-placeholder",
+      "bound": true,
+      "bindingState": "bound",
       "repository": "linktrend/LiNKlibraries",
-      "commit": null,
-      "tree": null
+      "commit": "9764638f0a17eeb65be8dd5880ed241a8d3b3fa3",
+      "tree": "57600ebd7362f107c421c61026ab0bf4c9b1c51c"
     },
     {
       "id": "consumer",
       "placeholderId": "FUTURE_CONSUMER_RECEIPT_IDENTITY",
-      "bound": false,
-      "bindingState": "future-placeholder",
+      "bound": true,
+      "bindingState": "bound",
       "repository": "linktrend/LiNKsites",
-      "commit": null,
-      "tree": null
+      "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+      "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
     },
     {
       "id": "configuration",
       "placeholderId": "FUTURE_CONFIGURATION_RECEIPT_IDENTITY",
-      "bound": false,
-      "bindingState": "future-placeholder",
+      "bound": true,
+      "bindingState": "bound",
       "repository": "linktrend/LiNKsites",
-      "commit": null,
-      "tree": null
+      "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+      "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
     }
   ]
 }

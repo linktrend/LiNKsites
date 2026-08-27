@@ -7,17 +7,17 @@
   "repository": "linktrend/LiNKsites",
   "protectedDevelopment": {
     "ref": "development",
-    "commit": "02ebf5d8710c50c1f2c390989239f0baf916ba97",
-    "tree": "fb427d30ea7c3e7060fc9cc1a63a1110266dd755"
+    "commit": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+    "tree": "3358c4ae4e33143799b301aa5c34f498f6a3d7ac"
   },
-  "evidenceClass": "scaffolding",
-  "packetCompletion": false,
-  "ls11Complete": false,
+  "evidenceClass": "completion",
+  "packetCompletion": true,
+  "ls11Complete": true,
   "productionProof": false,
   "hostedProof": false,
   "promoted": false,
-  "futureIdentities": {
-    "ls10Cutover": "FUTURE_LS10_CUTOVER_IDENTITY",
-    "harnessH09Conformance": "FUTURE_HARNESS_H09_CONFORMANCE_IDENTITY"
+  "boundIdentities": {
+    "ls10Cutover": "d5056f8e4ce832a759fda18f8b3282eba170b471",
+    "harnessH09Conformance": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf"
   }
 }

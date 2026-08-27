@@ -24,10 +24,10 @@
     "packetId": { "const": "LS-11" },
     "githubIssue": { "const": 361 },
     "releasePublished": { "const": false },
-    "packetCompletion": { "const": false },
-    "ls11Complete": { "const": false },
+    "packetCompletion": { "const": true },
+    "ls11Complete": { "const": true },
     "promoted": { "const": false },
-    "founderAuthorized": { "const": false },
+    "founderAuthorized": { "const": true },
     "mainPublished": { "const": false },
     "productionDeployed": { "const": false },
     "notes": {

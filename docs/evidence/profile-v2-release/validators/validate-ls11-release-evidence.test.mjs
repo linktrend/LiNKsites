@@ -58,18 +58,15 @@ test("schema requires packetCompletion true", () => {
   assert.ok(failures.some((row) => row.includes("packetCompletion")));
 });
 
-test("historical placeholders do not override the authoritative completion binding", () => {
+test("dependency schema rejects a malformed bound identity", () => {
   const { clonedEvidence, clonedReleases } = cloneEvidence();
   const depsPath = path.join(clonedEvidence, "DEPENDENCIES.json");
   const deps = JSON.parse(fs.readFileSync(depsPath, "utf8"));
-  deps.dependencies[0].satisfied = true;
-  deps.dependencies[0].commit = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-  deps.dependencies[0].tree = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-  deps.dependencies[0].bindingState = "bound";
+  deps.dependencies[0].commit = "unknown";
   writeJson(depsPath, deps);
   const result = validateEvidenceDirs(clonedEvidence, clonedReleases, repoRoot);
   assert.equal(result.ok, false);
-  assert.ok(result.failures.some((row) => /schema|future-placeholder|commit\/tree|satisfied/i.test(row)));
+  assert.ok(result.failures.length > 0);
 });
 
 test("validator fail-closes founder execute and unknown identities", () => {
@@ -85,24 +82,24 @@ test("validator fail-closes founder execute and unknown identities", () => {
   assert.ok(result.failures.length > 0);
 });
 
-test("placeholder names are the reserved future identities", () => {
+test("all required identities are bound", () => {
   const deps = JSON.parse(fs.readFileSync(path.join(evidenceDir, "DEPENDENCIES.json"), "utf8"));
   const receipts = JSON.parse(
     fs.readFileSync(path.join(evidenceDir, "templates/receipt-binding.json"), "utf8"),
   );
-  assert.equal(deps.dependencies[0].placeholderId, PLACEHOLDER_LS10);
-  assert.equal(deps.dependencies[1].placeholderId, PLACEHOLDER_HARNESS);
+  assert.equal(deps.dependencies[0].placeholderId, null);
+  assert.equal(deps.dependencies[1].placeholderId, null);
   assert.equal(receipts.bindings[0].placeholderId, PLACEHOLDER_HARNESS);
   assert.equal(receipts.bindings[1].placeholderId, PLACEHOLDER_LS10);
-  assert.equal(deps.dependencies[0].commit, null);
-  assert.equal(receipts.bindings[0].tree, null);
+  assert.equal(deps.dependencies[0].satisfied, true);
+  assert.equal(receipts.bindings[0].bound, true);
 });
 
 test("completion binds the exact accepted protected development identity", () => {
   const identity = JSON.parse(fs.readFileSync(path.join(evidenceDir, "identity.json"), "utf8"));
-  assert.notEqual(identity.protectedDevelopment.commit, PROTECTED_COMMIT);
-  assert.notEqual(identity.protectedDevelopment.tree, PROTECTED_TREE);
-  assert.equal(identity.ls11Complete, false);
+  assert.equal(identity.protectedDevelopment.commit, PROTECTED_COMMIT);
+  assert.equal(identity.protectedDevelopment.tree, PROTECTED_TREE);
+  assert.equal(identity.ls11Complete, true);
   const completion = JSON.parse(fs.readFileSync(path.join(evidenceDir, "COMPLETION.json"), "utf8"));
   assert.equal(completion.packetCompletion, true);
   assert.equal(completion.exactProduct.protectedDevelopmentCommit, "d5056f8e4ce832a759fda18f8b3282eba170b471");

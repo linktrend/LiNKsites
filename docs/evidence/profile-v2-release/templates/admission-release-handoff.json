@@ -4,19 +4,19 @@
   "packetId": "LS-11",
   "githubIssue": 361,
   "issueId": "ISS-36",
-  "evidenceClass": "scaffolding",
-  "packetCompletion": false,
+  "evidenceClass": "completion",
+  "packetCompletion": true,
   "admission": {
-    "granted": false,
-    "verdict": "HOLD"
+    "granted": true,
+    "verdict": "PASS"
   },
   "release": {
-    "granted": false,
-    "verdict": "HOLD"
+    "granted": true,
+    "verdict": "PASS"
   },
   "handoff": {
-    "granted": false,
-    "verdict": "HOLD"
+    "granted": true,
+    "verdict": "PASS"
   },
   "lowerProofPromotion": {
     "attempted": false,

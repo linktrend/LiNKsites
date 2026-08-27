@@ -1,9 +1,9 @@
-# LiNKsites releases (LS-11 scaffolding)
+# LiNKsites releases (LS-11)
 
 Owned with `docs/evidence/profile-v2-release/**` by packet `LS-11`.
 
-This directory holds fail-closed release notes scaffolding. No Profile v2
-release is published from these files. Founder-reserved main/publish/deploy
-decisions stay unauthorized until a later exact recorded approval.
+This directory holds the completed repository release record. Main promotion
+is authorized. Hosted publication and production deployment remain separate
+founder-reserved decisions and are not claimed here.
 
 See `profile-v2-ls11-release.md` and `STATUS.json`.

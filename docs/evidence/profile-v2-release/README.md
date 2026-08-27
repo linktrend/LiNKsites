@@ -1,15 +1,11 @@
-# Profile v2 release evidence (LS-11 scaffolding)
+# Profile v2 release evidence (LS-11)
 
 Packet `LS-11` / Issues `ISS-34`, `ISS-35`, `ISS-36`. GitHub issue `361`.
 
-This directory is **dependency-safe scaffolding only**. It records fail-closed
-templates, checklists and validators for a future exact-tree review, Full and
-rollback rehearsal, receipt binding, admission/release/handoff, and
-founder-reserved main/publish/deploy decisions.
+This directory records the completed repository release evidence for LS-11.
 
-It does **not** complete LS-11. It does **not** bind LS-10 or Harness
-conformance receipts. It does **not** admit, release, hand off, promote,
-publish or deploy.
+It binds accepted LS-10 and Harness H-09 evidence and admits the repository
+release. It does not claim hosted publication or production deployment.
 
 ## Owned paths
 
@@ -22,13 +18,11 @@ No product, runtime, config, provider or Harness path is owned here.
 
 - repository `linktrend/LiNKsites`
 - ref `development`
-- commit `02ebf5d8710c50c1f2c390989239f0baf916ba97`
-- tree `fb427d30ea7c3e7060fc9cc1a63a1110266dd755`
+- commit `d5056f8e4ce832a759fda18f8b3282eba170b471`
+- tree `3358c4ae4e33143799b301aa5c34f498f6a3d7ac`
 
-LS-10 cutover and Harness H-09 conformance identities are reserved as
-`FUTURE_LS10_CUTOVER_IDENTITY` and `FUTURE_HARNESS_H09_CONFORMANCE_IDENTITY`.
-Those slots stay unbound (`commit`/`tree` null, `satisfied` false) until a
-later exact packet supplies them.
+Exact bound identities are recorded in `COMPLETION.json` and
+`DEPENDENCIES.json`.
 
 ## Fail-closed validator
 
@@ -39,6 +33,5 @@ node docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.
 node --test docs/evidence/profile-v2-release/validators/validate-ls11-release-evidence.test.mjs
 ```
 
-A validator `SCAFFOLDING_OK` result means only that this scaffolding is
-internally coherent. It is not LS-11 completion, production proof, or a
-founder authorization.
+A validator `COMPLETION_OK` result confirms the internal LS-11 repository
+evidence contract. It is not hosted or production proof.

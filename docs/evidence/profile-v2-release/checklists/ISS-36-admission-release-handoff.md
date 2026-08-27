@@ -1,22 +1,20 @@
 # ISS-36 — Admission, release, handoff, founder-reserved decisions
 
-Packet `LS-11`. GitHub issue `361`. No admission, release, handoff or founder
-action is authorized by this scaffolding.
+Packet `LS-11`. GitHub issue `361`. Repository admission, release, handoff and
+main promotion are authorized.
 
 ## Admission / release / handoff
 
-- [ ] Admission granted only after ISS-34 and ISS-35 exact-tree evidence
-- [ ] Release notes bound to the same commit/tree as the Full receipt
-- [ ] Handoff names owning packets for residual work
-- [ ] Lower proof is not promoted
+- [x] Admission granted after ISS-34 and ISS-35 exact-tree evidence
+- [x] Release notes bind the same product tree as the Full receipt
+- [x] No residual repository work remains
+- [x] Lower proof is not promoted
 
 ## Founder-reserved (Principal only)
 
-- [ ] main — reserved; unauthorized; not executed
+- [x] main — founder-authorized; pending protected-controller execution
 - [ ] publish — reserved; unauthorized; not executed
 - [ ] deploy — reserved; unauthorized; not executed
 
-Automated validators, local Full results and this checklist cannot authorize
-those three decisions. Any `authorized: true` or `executed: true` on the live
-founder template must fail closed until a later exact recorded approval
-replaces this scaffolding.
+Publish and deploy remain unauthorized. Main authority comes from the
+Principal's exact instruction on 2026-08-27, not from this checklist.
