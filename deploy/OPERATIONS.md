@@ -76,6 +76,15 @@ tokens, secrets, credentials, or URL query tokens in logs.
 | Credential rotation | Use gateway/CMS dual-key overlap, stop/drain outbox as required, rotate one service group, run readiness and signed-boundary proof, then revoke old key. |
 | Privacy incident | Immediately disable affected Traefik router, revoke preview token/API key, preserve evidence, assess exposure, and restore only private draft state. |
 
+## ISS-33 configuration cutover (offline)
+
+Configuration templates, redacted readback, isolated migrate/rollback and
+permanent drift checks for CMS, web-master, provider, hosting, database,
+queue, secrets, monitoring and deployment are in
+[`config/cutover/README.md`](./config/cutover/README.md). That rehearsal is
+local and name-only. Production, VPS and live canary remain external; the
+cutover CLI fails closed if those targets are requested.
+
 ## Rollback
 
 Roll back the application image only when the target revision is compatible

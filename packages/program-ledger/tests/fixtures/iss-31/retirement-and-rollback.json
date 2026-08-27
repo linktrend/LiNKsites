@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "retirement-and-rollback",
+  "retirePinCommitSha": "dbf749cb48ffa03bf2e702d37b608f14c63e0520",
+  "newSelectionPin": {
+    "repository": "https://github.com/linktrend/LiNKlibraries.git",
+    "commitSha": "c0ffee0000000000000000000000000000000001",
+    "treeSha": "c0ffee0000000000000000000000000000000002",
+    "entryId": "master-template-type-1",
+    "version": "2.0.1-a1.2",
+    "lifecycle": "draft",
+    "selectability": "non_selectable",
+    "contractName": "linksites.master-template",
+    "contractVersion": "2.0.0",
+    "compatibleRange": ">=2.0.0 <3.0.0"
+  },
+  "historicSiteId": "site-published-bystander",
+  "rollbackSiteId": "site-published-a"
+}

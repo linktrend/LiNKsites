@@ -78,6 +78,10 @@ and must be supplied by the Phase 2 protected deployment environment.
 | `NEXT_PUBLIC_PAYLOAD_API_URL` | LiNKsites operations | no | web-master build | private non-loopback HTTPS URL | rebuild web-master image |
 | `PAYLOAD_PUBLIC_SERVER_URL` | LiNKsites operations | no | web-master build | private non-loopback HTTPS URL | rebuild web-master image |
 
+ISS-33 name-only cutover templates, isolated migrate/readback/rollback, and
+permanent drift checks live in [`cutover/`](./cutover/README.md). They reuse
+these names and never store credential values or perform live/VPS mutation.
+
 No default credentials, localhost URLs, fixture mode, raw webhooks, or mock
 content are valid in this contract. The Phase 2 operator creates the protected
 runtime file and runs `node deploy/scripts/validate-runtime-config.mjs SERVICE`

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "packet": "LS-10",
+  "issue": "ISS-31",
+  "repository": "linktrend/LiNKsites",
+  "protectedDevelopment": {
+    "commit": "7542cb3b1fa1d76cec40f59a522514a86e083038",
+    "tree": "284814fd2296b2825d8c92f10d9f7dc78ae08e38"
+  },
+  "workBranch": "issue/368-ls-10-iss-31-evidence-rebind-for-successor-ident",
+  "githubIssue": 368,
+  "ls10Acceptance": "HOLD",
+  "h09ConsumerConformanceAccepted": false
+}
