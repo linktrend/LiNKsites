@@ -21,6 +21,8 @@
   "provider": {
     "declaredPin": "packages/factory-catalog/src/masterTemplatePin.ts",
     "selectability": "non_selectable",
+    "lifecycle": "draft",
+    "commitSha": "dbf749cb48ffa03bf2e702d37b608f14c63e0520",
     "liveCatalogueProbe": "hold_live_external"
   }
 }
