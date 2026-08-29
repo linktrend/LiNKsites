@@ -24,9 +24,9 @@
   },
   "apiReadback": {
     "source": "cursor-cloud/run-info",
-    "bcId": "bc-b3de788b-7e2b-4478-a259-bb0cdb55757b",
-    "originalModelName": "cursor-grok-4-6-medium",
-    "effectiveModel": "cursor-grok-4-6-medium",
+    "bcId": "bc-cb2df2a7-e0a6-4adb-bee5-02104173bc67",
+    "originalModelName": "cursor-grok-4.6-medium",
+    "effectiveModel": "cursor-grok-4.6-medium",
     "mode": "agent",
     "effort": "medium",
     "fast": false,
@@ -35,13 +35,14 @@
   "prepared": {
     "claimed": false,
     "status": "invalid_legacy_prepared",
-    "note": "MODEL-ROUTING-AUTHORITY.json status is ROUTES_BOUND_DISPATCH_NOT_AUTHORIZED for old PREPARED identities. This worker does not mint a new PREPARED intent artifact. Implementation proceeds under the explicit LS-00 follow-up instruction."
+    "note": "MODEL-ROUTING-AUTHORITY.json status is ROUTES_BOUND_DISPATCH_NOT_AUTHORIZED for old PREPARED identities. This worker does not mint a new PREPARED intent artifact. Implementation proceeds under the explicit LS-00 packet instruction."
   },
   "environmentProvenance": {
-    "name": "IDE Development 2.5.1",
-    "publicId": "1937ddb1-9d3e-11f1-a7d1-d6b4613131ce",
-    "requiredBuild": "bld-20260821-6bd9a399-9bc2-4443-b5af-3db13a2ae508",
-    "observedBootBuild": "bld-20260824-e1f18bd0-50c5-45cc-b864-2378bf4d7286",
+    "name": "IDE Development 2.5.2",
+    "publicId": "a142a1e6-9f9a-11f1-a7d1-d6b4613131ce",
+    "environmentVersionPublicId": "aaac441c-a055-11f1-b532-320a589b8025",
+    "observedBootBuild": "bld-20260829-59f2d818-03d3-441d-9c44-87c8f46e790f",
+    "environmentJson": "not_exposed_personal_environment",
     "buildEquality": "provenance_only_accepted"
   }
 }

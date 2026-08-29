@@ -1,39 +1,33 @@
 {
   "schemaVersion": 1,
   "status": "recorded",
-  "capturedAt": "2026-08-24T03:55:00Z",
+  "capturedAt": "2026-08-29T10:51:03Z",
   "primaryCheckout": {
-    "path": "/agent/repos/LiNKsites",
-    "branch": "main",
-    "head": "e46ce0c657a7445bfb898ac208f6f5d889b550f2",
+    "path": "/workspace",
+    "branch": "dev/cloudcursor/linksites-ls-00-d5e7",
+    "head": "a23f87aa44a8625a32bb2f0d5015d7c0cf57f33d",
     "dirty": false,
-    "note": "Environment primary checkout was not mutated. LS-00 work lives only on the isolated issue worktree."
+    "note": "Cursor-created packet branch at the protected development identity before LS-00 evidence refresh files were written."
   },
   "worktrees": [
     {
-      "path": "/agent/repos/LiNKsites",
-      "head": "e46ce0c657a7445bfb898ac208f6f5d889b550f2",
-      "branch": "refs/heads/main",
-      "role": "primary_checkout"
-    },
-    {
-      "path": "/agent/repos/LiNKsites/.git/linktrend-worktrees/issue-266-execute-ls-00-exact-baseline-and-authority-map-p",
-      "headAtCaptureBeforePacketFiles": "75ef17776e66cc8f0237089d45ff9bcf52820ce7",
-      "treeAtCaptureBeforePacketFiles": "67b1a23655d5b4ce9fc02da291dea906b9ecab94",
-      "branch": "refs/heads/issue/266-execute-ls-00-exact-baseline-and-authority-map-p",
-      "role": "ls00_isolated_issue_worktree"
+      "path": "/workspace",
+      "head": "a23f87aa44a8625a32bb2f0d5015d7c0cf57f33d",
+      "branch": "refs/heads/dev/cloudcursor/linksites-ls-00-d5e7",
+      "role": "ls00_cursor_packet_checkout"
     }
   ],
   "githubOpenIssuesSample": [
     {"number": 266, "title": "Execute LS-00 exact baseline and authority map packet", "state": "OPEN"},
-    {"number": 264, "title": "Apply principal routing amendment: Grok High review and Luna High checkpoint verification", "state": "OPEN"},
-    {"number": 261, "title": "Reuse runtime credentials when restarting recovery web service", "state": "OPEN"},
-    {"number": 259, "title": "Fix recovery hook to reuse runtime Payload API key", "state": "OPEN"},
-    {"number": 257, "title": "Investigate Payload restore readback response", "state": "OPEN"}
+    {"number": 395, "title": "Install and maintain AgentLens codebase documentation", "state": "OPEN"},
+    {"number": 391, "title": "Complete LS-11 exact final release proof and bind protected LS-10 H-09 Full rollback and release evidence", "state": "OPEN"},
+    {"number": 388, "title": "Repair ISS-32 aggregate Phase scope assertion", "state": "OPEN"},
+    {"number": 385, "title": "LS-10 Phase rebind after workflow bootstrap", "state": "OPEN"}
   ],
   "dirtyWorktreesAtBaselineCapture": [],
   "notes": [
     "ISS-01 records open GitHub work and worktree inventory; it does not close those issues.",
-    "Pre-existing OPEN issues remain outside LS-00 owned paths."
+    "Pre-existing OPEN issues remain outside LS-00 owned paths.",
+    "No additional git worktrees were attached to this checkout."
   ]
 }

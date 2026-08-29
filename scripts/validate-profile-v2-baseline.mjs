@@ -13,9 +13,9 @@ import { fileURLToPath } from "node:url";
 
 const EXPECTED_REPOSITORY = "linktrend/LiNKsites";
 const EXPECTED_ORIGIN = "https://github.com/linktrend/LiNKsites";
-const EXPECTED_BASELINE_COMMIT = "75ef17776e66cc8f0237089d45ff9bcf52820ce7";
-const EXPECTED_BASELINE_TREE = "67b1a23655d5b4ce9fc02da291dea906b9ecab94";
-const EXPECTED_ISSUE_BRANCH = "issue/266-execute-ls-00-exact-baseline-and-authority-map-p";
+const EXPECTED_BASELINE_COMMIT = "a23f87aa44a8625a32bb2f0d5015d7c0cf57f33d";
+const EXPECTED_BASELINE_TREE = "cc444092dfc07c9e77d9eb6f441751e5b9fec3d0";
+const EXPECTED_ISSUE_BRANCH = "dev/cloudcursor/linksites-ls-00-d5e7";
 const EXPECTED_SELECTOR = "grok-4.6";
 const FORBIDDEN_STATUS = new Set(["unknown", "PENDING", "pass", "PASS"]);
 const REQUIRED_JSON = [
