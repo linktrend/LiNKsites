@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls01-amendment-prep-independent-review",
+  "status": "recorded",
+  "packet": "LS-01-PREP-REVIEW",
+  "githubIssue": 402,
+  "issueBranch": "issue/402-independent-narrow-review-of-ls-01-prep-issue-40",
+  "repository": "linktrend/LiNKsites",
+  "normalizedOrigin": "https://github.com/linktrend/LiNKsites",
+  "protectedDevelopment": {
+    "ref": "refs/heads/development",
+    "commit": "635a1032f6c72e17729645d4ff464a0fe182cbee",
+    "tree": "6317e1ed6454087bf3ed74c49899ffb155bca418"
+  },
+  "reviewer": {
+    "worker": "bc-ad843395-7f37-490a-a5e4-54017830eed9",
+    "runName": "MAX-REFILL-3-LiNKsites-0901",
+    "servingModel": "cursor-grok-4.6-medium",
+    "displayModel": "Cursor Grok 4.6 Medium non-Fast",
+    "fast": false,
+    "separateWorker": true,
+    "namedRoute": "independent_review",
+    "namedSelector": "cursor-grok-4.6-high"
+  },
+  "ideDevelopment": {
+    "version": "2.5.2",
+    "managedCorePath": ".ide-development/",
+    "writeLease": false,
+    "touched": false
+  },
+  "ownedPaths": [
+    "docs/evidence/profile-v2-ls01-amendment-prep-review/",
+    "scripts/validate-profile-v2-ls01-amendment-prep-review.mjs"
+  ],
+  "prohibitedPaths": [
+    "packages/",
+    "apps/",
+    "supabase/migrations/",
+    ".ide-development/",
+    "docs/evidence/profile-v2-ls01-amendment-prep/",
+    "scripts/validate-profile-v2-ls01-amendment-prep.mjs"
+  ],
+  "profileDigest": "sha256:2d658a8af06ffe85a393f1792b23052d0a1e5e0b0b40714503dac610fbb921cf"
+}

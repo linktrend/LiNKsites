@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls01-amendment-prep-independent-review-findings",
+  "packet": "LS-01-PREP-REVIEW",
+  "githubIssue": 402,
+  "status": "recorded",
+  "findings": [
+    {
+      "id": "F-01",
+      "severity": "P3",
+      "blocking": false,
+      "path": "https://github.com/linktrend/LiNKsites/issues/401",
+      "summary": "GitHub issue 401 body is the create_issue_branch.py boilerplate and does not restate packet acceptance criteria. Machine-readable evidence on the candidate tree is complete without that body."
+    },
+    {
+      "id": "F-02",
+      "severity": "P3",
+      "blocking": false,
+      "path": "scripts/validate-profile-v2-ls01-amendment-prep.mjs",
+      "summary": "Prep validator requires the current branch name to equal issue/401-prepare-ls-01-executable-manifest-amendment-inpu, matching the LS-00 packet-local branch bind pattern. That is correct for this candidate and is not a development-merge unlock."
+    }
+  ]
+}

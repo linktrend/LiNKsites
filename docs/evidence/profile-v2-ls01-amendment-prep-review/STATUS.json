@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls01-amendment-prep-independent-review-status",
+  "packet": "LS-01-PREP-REVIEW",
+  "githubIssue": 402,
+  "status": "recorded",
+  "reviewComplete": true,
+  "verdict": "accepted",
+  "ls01Executable": false,
+  "dispatchAuthorized": false,
+  "hc1aBound": false,
+  "manifestAmended": false,
+  "routingAmended": false,
+  "ideManagedFilesTouched": false,
+  "candidateMutated": false,
+  "notTaken": [
+    "issue 398 / draft PR 400 IDE v2.5.2 Full-trigger repair",
+    "LS-00 redo after PR 397",
+    "mutate issue/401 candidate tree",
+    "invent LS-01 executable binding",
+    "HC1-A receipt probe",
+    "repeat predecessor HOLD analysis"
+  ]
+}
