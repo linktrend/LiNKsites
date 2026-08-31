@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls01-amendment-prep-independent-review-subject",
+  "packet": "LS-01-PREP-REVIEW",
+  "githubIssue": 402,
+  "subject": {
+    "packet": "LS-01-PREP",
+    "githubIssue": 401,
+    "issueBranch": "issue/401-prepare-ls-01-executable-manifest-amendment-inpu",
+    "commit": "dc1147058001009f31c3665091703a227afe837f",
+    "tree": "396f69ef443a6ec510f981ee3fc58301e4a5f58b",
+    "protectedDevelopment": {
+      "ref": "refs/heads/development",
+      "commit": "635a1032f6c72e17729645d4ff464a0fe182cbee",
+      "tree": "6317e1ed6454087bf3ed74c49899ffb155bca418"
+    },
+    "implementerWorker": "bc-061eb717-cf58-4d7f-8e99-75cdfb209305",
+    "implementerRunName": "MAX-CONTINUE-3-LiNKsites-0901"
+  }
+}
