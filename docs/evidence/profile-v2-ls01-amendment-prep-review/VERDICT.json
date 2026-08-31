@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls01-amendment-prep-independent-review-verdict",
+  "packet": "LS-01-PREP-REVIEW",
+  "githubIssue": 402,
+  "status": "recorded",
+  "verdict": "accepted",
+  "subjectCommit": "dc1147058001009f31c3665091703a227afe837f",
+  "subjectTree": "396f69ef443a6ec510f981ee3fc58301e4a5f58b",
+  "ls01Executable": false,
+  "dispatchAuthorized": false,
+  "hc1aBound": false,
+  "manifestAmended": false,
+  "selfReview": false,
+  "requiredRework": [],
+  "residualRisk": [
+    "LS-01 remains non-executable until an approved rebaselined executable-manifest amendment binds independently accepted HC1-A commit/tree and separate dispatch authorization exists.",
+    "Checkpoint verification (Luna High / terra_checkpoint route) is a distinct later worker and is not this review.",
+    "Named independent_review selector is cursor-grok-4.6-high; this refill owner executed as cursor-grok-4.6-medium Fast-off under Principal MAX-REFILL-3 separate-worker authorization and IDE v2.5.2 provider-neutral independent-review policy."
+  ]
+}
