@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "recorded",
-  "sourceCommit": "75ef17776e66cc8f0237089d45ff9bcf52820ce7",
+  "sourceCommit": "a23f87aa44a8625a32bb2f0d5015d7c0cf57f33d",
   "packageManager": "pnpm@10.0.0",
   "workspace": {
     "name": "linksites-monorepo",
@@ -12,6 +12,7 @@
     "@linksites/program-ledger",
     "@linksites/factory-catalog",
     "@linksites/autowork-boundary",
+    "@linksites/profile",
     "@linksites/cms",
     "@linksites/web-master",
     "@linksites/program-orchestrator",
@@ -20,15 +21,31 @@
   "masterTemplatePin": {
     "source": "packages/factory-catalog/src/masterTemplatePin.ts",
     "repositoryUrl": "https://github.com/linktrend/LiNKlibraries.git",
-    "branch": "issue/134-master-template-look-and-feel",
-    "commitSha": "6b87993ddaf403aebe7bef97bd268a543a1d14eb",
+    "branch": "development",
+    "commitSha": "dbf749cb48ffa03bf2e702d37b608f14c63e0520",
+    "providerTreeSha": "a968c801f0fa7cbeac40edc788a4f081617e2759",
+    "sourceReleaseCommitSha": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
+    "sourceReleaseTreeSha": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b",
     "entryId": "master-template-type-1",
-    "version": "1.0.0",
-    "artifactTreeSha1": "a2bf0d2e7759e5e6952dacfdeab3ef9b03657d3d",
+    "version": "2.0.0-a1.1",
+    "artifactTreeSha1": "a8c6c23fd41a5f0eb9221276998f96862a50119f",
+    "releaseManifestSha256": "d681e5305b611aa5247a0fa1711ce75e0a1734e121e6790e50c802b26c1c9697",
+    "inventorySha256": "ad743168022139e7e70bd38ae19c56503cdfc2c4fcc912ece154f4f17b70cc98",
+    "catalogueFileSha256": "da2178f497593c858611a29e40c53fa7798e31fa3cc3700bcf4e1c4a1f309543",
+    "catalogueRecordsSha256": "66a8971e38cc9bfb06836d8427534ca96de68065d0fca3b28f992e83584c7674",
+    "releaseSourceCommitSha": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+    "releaseSourceRepositoryTreeSha1": "873c4acc582050b416fb5a8bc59990345711df46",
     "lifecycle": "draft",
     "selectability": "non_selectable",
     "compatibility": "unknown_declared_on_pin",
-    "note": "Pin field compatibility is the string unknown_declared_on_pin in source; LS-00 does not treat that as validator unknown-evidence. Production selectability remains non_selectable."
+    "note": "Pin field compatibility is the string unknown in source; LS-00 records unknown_declared_on_pin and does not treat that as validator unknown-evidence. Production selectability remains non_selectable."
+  },
+  "profilePackageLibraryPin": {
+    "source": "packages/linkharness-profile/src/pin.ts",
+    "note": "Out of LS-00 writable scope. Records a older consumerCommit 6b87993ddaf403aebe7bef97bd268a543a1d14eb versus the factory-catalog pin above. LS-00 does not mutate packages/**.",
+    "planningCommit": "f25b385c1e34d958834ce4b7e085ab454a956918",
+    "planningTree": "626828346c8a4841c8ae95ac6b4fa9af4941f1fb",
+    "consumerCommit": "6b87993ddaf403aebe7bef97bd268a543a1d14eb"
   },
   "providerPlanningSource": {
     "repository": "linktrend/LiNKlibraries",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "status": "hold_live_runtime",
-  "reason": "This cloud-agent session has no authenticated live Payload/Supabase/host runtime. Snapshot is committed configuration only.",
+  "reason": "This cloud-agent session has no authenticated live Payload/Supabase/host runtime. Snapshot is committed configuration only. Live probe was not attempted.",
   "committedSupabase": {
     "configPath": "supabase/config.toml",
     "projectId": "w1-02-supabase-gate",
