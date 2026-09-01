@@ -7,11 +7,13 @@ import {
   IdentityClosedFailure,
   requireProviderIdentity,
   requireRuntimeIdentity,
+  requireFixtureIdentity,
 } from "./identities.mjs";
 import {
   evaluateAccessibility,
   evaluatePerformance,
   evaluateSeo,
+  evaluateFormsAndPrivacy,
   requireRendererOutput,
 } from "./contracts.mjs";
 
@@ -20,6 +22,7 @@ import {
  *   ok: boolean,
  *   packetComplete: false,
  *   ls06CompleteClaimed: false,
+ *   dependencyStatus: Record<string, "HOLD">,
  *   identities?: { provider: object, runtime: object },
  *   findings: { dimension: string, code: string, message: string }[],
  *   closedFailures: { code: string, message: string }[],
@@ -36,6 +39,12 @@ export function evaluateInjectedQuality(input) {
     ok: false,
     packetComplete: false,
     ls06CompleteClaimed: false,
+    dependencyStatus: {
+      ls06: "HOLD",
+      a1: "HOLD",
+      liveBrowser: "HOLD",
+      provider: "HOLD",
+    },
     findings: [],
     closedFailures: [],
   };
@@ -60,8 +69,9 @@ export function evaluateInjectedQuality(input) {
   try {
     const provider = requireProviderIdentity(payload.providerIdentity);
     const runtime = requireRuntimeIdentity(payload.runtimeIdentity);
+    const fixture = requireFixtureIdentity(payload.fixtureIdentity);
     const renderer = requireRendererOutput(payload.rendererOutput);
-    result.identities = { provider, runtime };
+    result.identities = { provider, runtime, fixture };
 
     const a11y = evaluateAccessibility(renderer).map((finding) => ({
       dimension: "accessibility",
@@ -72,10 +82,14 @@ export function evaluateInjectedQuality(input) {
       ...finding,
     }));
     const seo = evaluateSeo(renderer).map((finding) => ({
-      dimension: "seo",
+      dimension: "ssr-discoverability",
       ...finding,
     }));
-    result.findings = [...a11y, ...perf, ...seo];
+    const sideEffects = evaluateFormsAndPrivacy(renderer).map((finding) => ({
+      dimension: "forms-privacy",
+      ...finding,
+    }));
+    result.findings = [...a11y, ...perf, ...seo, ...sideEffects];
     result.ok = result.findings.length === 0;
     return result;
   } catch (error) {

@@ -6,6 +6,10 @@ preparation** only: a fixture harness that evaluates **injected renderer outputs
 LS-06 layout-aware web runtime is **not claimed complete**. Runtime identities
 must be injected; missing provider or runtime SHAs fail closed.
 
+LS-06, A1, live-browser, and provider-dependent proof are all **HOLD**. A
+deterministic fake runtime exercises dependency-independent SSR/discoverability,
+accessibility, forms, and privacy contracts without contacting any dependency.
+
 ## Owned paths
 
 - `scripts/profile-v2-quality/ls07/**`
@@ -15,7 +19,8 @@ must be injected; missing provider or runtime SHAs fail closed.
 
 - `apps/web-master/**` and other runtime product components
 - Provider template/media bytes from LiNKlibraries
-- ISS-22 / ISS-23 / ISS-24 product implementation
+- LS-06/A1/provider validation or live browser execution
+- ISS-22 / ISS-23 / ISS-24 packet completion
 - Packet-complete attestation
 
 ## How to run
