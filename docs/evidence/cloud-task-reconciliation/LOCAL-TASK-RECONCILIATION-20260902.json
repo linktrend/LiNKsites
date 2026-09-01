@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-task-reconciliation",
+  "repository": "linktrend/LiNKsites",
+  "exactBase": {
+    "ref": "development",
+    "commit": "255f133742c9d57d1fb8a301c554587809c3de1e",
+    "tree": "0c36f6d82d39125756491480057065986f002a4f"
+  },
+  "tasks": [
+    {
+      "taskId": "task_e_6a972a9b3fa08326815cec986b0d19bd",
+      "status": "REAL_DIFF_OBSERVED",
+      "source": "sites-worker-h-exact-development-20260902",
+      "sourceCommit": "d3406ccfcb6576853e1d33d3df23d8b98bbcf97d",
+      "sourceTree": "6d4b1fa5025b192ad92aae8712e35a3d80780968",
+      "importedCommit": "41eecf431175f1259739994ab7adf63a69bd47e6",
+      "importedTree": "245eb9fd56a729f468b79d21b1d504f13e65969f",
+      "scope": [
+        "scripts/profile-v2-quality/ls06/load-packet.mjs",
+        "scripts/profile-v2-quality/ls06/tests/ls06-preparation.test.mjs"
+      ],
+      "packetBoundary": "LS-06 path-boundary preparation only; not packet completion"
+    },
+    {
+      "taskId": "task_e_6a972a9ac9e88326971e014fc0b6ec48",
+      "status": "REAL_DIFF_OBSERVED",
+      "source": "sites-worker-h-exact-development-20260902",
+      "sourceCommit": "d3406ccfcb6576853e1d33d3df23d8b98bbcf97d",
+      "sourceTree": "6d4b1fa5025b192ad92aae8712e35a3d80780968",
+      "importedCommit": "3ad1fec05f255e2d288f6328dd9135e8acd10ccd",
+      "importedTree": "6d4b1fa5025b192ad92aae8712e35a3d80780968",
+      "scope": [
+        "scripts/profile-v2-quality/ls07/fixtures/source-gap.synthetic.json",
+        "scripts/profile-v2-quality/ls07/source-gap-validator.mjs",
+        "scripts/profile-v2-quality/ls07/tests/source-gap-validator.test.mjs"
+      ],
+      "packetBoundary": "LS-07 synthetic source-gap preparation only; not packet completion"
+    }
+  ],
+  "protectedEarlierSiteWork": {
+    "status": "PROTECTED",
+    "development": "255f133742c9d57d1fb8a301c554587809c3de1e",
+    "acceptedPhases": [
+      "PR #410 LS-02",
+      "PR #413 LS-03",
+      "PR #414 LS-04",
+      "PR #415 LS-05/LS-06/LS-07"
+    ],
+    "unprotectedEarlierCandidateImported": false,
+    "candidatePathOverlapWithPR415": false,
+    "basis": "The candidate is based on the current protected development tip; its five changed paths are disjoint from the files changed by the accepted PR #415 phase."
+  },
+  "candidateDiff": {
+    "changedPaths": [
+      "scripts/profile-v2-quality/ls06/load-packet.mjs",
+      "scripts/profile-v2-quality/ls06/tests/ls06-preparation.test.mjs",
+      "scripts/profile-v2-quality/ls07/fixtures/source-gap.synthetic.json",
+      "scripts/profile-v2-quality/ls07/source-gap-validator.mjs",
+      "scripts/profile-v2-quality/ls07/tests/source-gap-validator.test.mjs"
+    ],
+    "unrelatedChanges": false,
+    "oldPhase417Imported": false
+  },
+  "focusedValidation": [
+    {
+      "command": "node --test scripts/profile-v2-quality/ls06/tests/ls06-preparation.test.mjs",
+      "passed": true,
+      "tests": 17
+    },
+    {
+      "command": "node --test scripts/profile-v2-quality/ls07/tests/source-gap-validator.test.mjs",
+      "passed": true,
+      "tests": 6
+    },
+    {
+      "command": "node --test scripts/profile-v2-quality/ls07/tests/test_ls07_quality_harness.mjs",
+      "passed": true,
+      "tests": 17
+    },
+    {
+      "command": "git diff --check",
+      "passed": true
+    }
+  ],
+  "runtimeBoundary": "CLI/local only. No browser, live, staging, production, deployment, provider selection, or external canary claim."
+}
