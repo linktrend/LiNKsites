@@ -1,0 +1,29 @@
+{
+  "kind": "technical-prd-hostname-boundary",
+  "synthetic": true,
+  "source": "docs/LINKSITES-TECHNICAL-PRD.md#7-hosting-topology-cloudflare-traefik-vps",
+  "fixtureIdentity": "HOLD-technical-prd-hostname-boundary-v1",
+  "liveIdentities": {
+    "payload": "HOLD",
+    "browser": "HOLD",
+    "stage": "HOLD",
+    "production": "HOLD"
+  },
+  "cases": [
+    {
+      "name": "mapped published fixture host",
+      "hostname": " LOCALHOST:3000 ",
+      "expectedSiteId": "demo-site"
+    },
+    {
+      "name": "unknown fixture host",
+      "hostname": "unknown.synthetic.invalid",
+      "expectedSiteId": null
+    },
+    {
+      "name": "empty host",
+      "hostname": "",
+      "expectedSiteId": null
+    }
+  ]
+}
