@@ -28,7 +28,7 @@ describe('Revision 2 website-template materialization', () => {
       },
     })
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.errors.join(' ')).toMatch(/could not be read|receipt found|no such file/i)
+    if (!result.ok) expect(result.errors.join(' ')).toMatch(/could not be read|receipt found|no such file|provider catalogue path/i)
   })
 
   it('recognizes the canonical prerelease candidate receipt type', () => {

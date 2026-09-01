@@ -18,6 +18,9 @@ export type AdapterMappingResult =
   | Readonly<{ supported: true; mapping: ProviderSemanticMapping }>
   | Readonly<{ supported: false; providerRole: string; reason: 'unsupported_provider_semantic' }>
 
+export type VersionedAdapterResult = AdapterMappingResult
+  | Readonly<{ supported: false; providerRole: string; version: string; reason: 'unsupported_adapter_version' }>
+
 /** A1 roles required by the provider section-slot contract. */
 export const REQUIRED_A1_PROVIDER_ROLES = Object.freeze([
   'hero', 'trust', 'offer_summary', 'featured_services', 'featured_products',
@@ -58,6 +61,19 @@ export const MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST = createHash('sha1').update(
 export function mapProviderSemantic(providerRole: unknown): AdapterMappingResult {
   if (typeof providerRole !== 'string' || !providerRole.trim() || !A1_PROVIDER_SEMANTIC_MAP[providerRole]) return { supported: false, providerRole: String(providerRole), reason: 'unsupported_provider_semantic' }
   return { supported: true, mapping: A1_PROVIDER_SEMANTIC_MAP[providerRole] }
+}
+
+/** Fail closed before applying A1 semantics to bytes from any other version. */
+export function mapVersionedProviderSemantic(version: unknown, providerRole: unknown): VersionedAdapterResult {
+  if (version !== MASTER_TEMPLATE_ADAPTER_VERSION) {
+    return {
+      supported: false,
+      providerRole: String(providerRole),
+      version: String(version),
+      reason: 'unsupported_adapter_version',
+    }
+  }
+  return mapProviderSemantic(providerRole)
 }
 
 export function validateA1AdapterCoverage(requiredRoles: readonly string[] = REQUIRED_A1_PROVIDER_ROLES): Readonly<{ complete: true; missing: readonly [] }> | Readonly<{ complete: false; missing: readonly string[] }> {
