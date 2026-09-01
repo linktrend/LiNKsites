@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-task-reconciliation",
+  "repository": "linktrend/LiNKsites",
+  "exactBase": {
+    "ref": "development",
+    "commit": "255f133742c9d57d1fb8a301c554587809c3de1e",
+    "tree": "0c36f6d82d39125756491480057065986f002a4f"
+  },
+  "tasks": [
+    {
+      "taskId": "task_e_6a9715237c788326ae8118d212be5c79",
+      "status": "REAL_DIFF_OBSERVED",
+      "source": "sites-worker-h-exact-development-20260902",
+      "sourceCommit": "d3406ccfcb6576853e1d33d3df23d8b98bbcf97d",
+      "sourceTree": "6d4b1fa5025b192ad92aae8712e35a3d80780968",
+      "initialImportedCommit": "d8128da8b447377de0fb320ab7133147821647d0",
+      "importedCommit": "86365e4fe1423e64f7972463eb656e6e4443e0a0",
+      "importedTree": "62f27b17670fd6edb20d7b6a322a44421068fc1d",
+      "scope": [
+        "scripts/profile-v2-quality/ls06/load-packet.mjs",
+        "scripts/profile-v2-quality/ls06/tests/ls06-preparation.test.mjs",
+        "scripts/profile-v2-quality/ls07/fixtures/source-gap.synthetic.json",
+        "scripts/profile-v2-quality/ls07/source-gap-validator.mjs",
+        "scripts/profile-v2-quality/ls07/tests/source-gap-validator.test.mjs"
+      ],
+      "packetBoundary": "LS-06/LS-07 safety-contract preparation only; not packet completion"
+    },
+    {
+      "taskId": "task_e_6a97152371608326b928e8a5646c7e61",
+      "status": "NO_KNOWN_DIFF",
+      "verification": {
+        "matchingLocalArtifact": false,
+        "matchingBranch": false,
+        "matchingGitHubIssueOrPullRequest": false,
+        "sourceFilesChanged": false
+      },
+      "result": "No source or evidence change was imported for this task."
+    }
+  ],
+  "ls10Ls11": {
+    "status": "ALREADY_PROTECTED",
+    "protectedDevelopmentContainsAcceptedLs10Ls11Phase": true,
+    "ls10Ls11CandidateImported": false,
+    "basis": "The accepted LS-10 scope-repair and LS-11 final-release Phase history is already reachable from protected development; no separate unprotected LS-10/LS-11 candidate was found."
+  },
+  "focusedValidation": [
+    {
+      "command": "node --test scripts/profile-v2-quality/ls06/tests/ls06-preparation.test.mjs",
+      "passed": true,
+      "tests": 17
+    },
+    {
+      "command": "node --test scripts/profile-v2-quality/ls07/tests/source-gap-validator.test.mjs",
+      "passed": true,
+      "tests": 8
+    },
+    {
+      "command": "node --test scripts/profile-v2-quality/ls07/tests/test_ls07_quality_harness.mjs",
+      "passed": true,
+      "tests": 17
+    },
+    {
+      "command": "git diff --check HEAD^",
+      "passed": true
+    }
+  ],
+  "runtimeBoundary": "No browser, live, staging, production, deployment, provider selection, or external canary claim."
+}

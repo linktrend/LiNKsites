@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync, realpathSync, statSync } from "node:fs";
 import { isAbsolute, join, normalize, relative, resolve, sep } from "node:path";
 import { PACKET_SCHEMA } from "./constants.mjs";
 import { digestRef, sha256Hex } from "./digest.mjs";
@@ -30,7 +30,24 @@ function resolveInside(packetDir, relPath) {
       code: "PATH_ESCAPE",
     });
   }
-  return abs;
+  let safeAbs = abs;
+  try {
+    const realRoot = realpathSync(packetDir);
+    const realAbs = realpathSync(abs);
+    const realRel = relative(realRoot, realAbs);
+    if (realRel.startsWith("..") || isAbsolute(realRel)) {
+      throw Object.assign(new Error(`path escapes packet through symlink: ${relPath}`), {
+        code: "PATH_ESCAPE",
+      });
+    }
+    safeAbs = realAbs;
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "PATH_ESCAPE") {
+      throw error;
+    }
+    // Preserve the existing INPUT_MISSING contract for absent source files.
+  }
+  return safeAbs;
 }
 
 /**
