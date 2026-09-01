@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "cloud-task-reconciliation",
+  "lane": "LS-04-groundwork",
+  "taskId": "task_e_6a96d69734508326ba9837b9dae54b22",
+  "issueNumber": 412,
+  "branch": "issue/412-ls-04-groundwork-cloud-task-task-e-6a96d69734508",
+  "exactBase": {
+    "commit": "55ecb607b0d902c37d2fa6b1f3348a1070594a26",
+    "tree": "2f3008650f09d957b220401f208584a9b70e4483"
+  },
+  "scope": "Reconcile the existing LS-04 working-content production and typed Payload-promotion groundwork at this exact protected base.",
+  "focusedValidation": [
+    {
+      "command": "pnpm --filter @linksites/factory-catalog test tests/ls04WorkingContentPromotion.spec.ts",
+      "passed": true,
+      "tests": 25
+    },
+    {
+      "command": "pnpm --filter @linksites/factory-catalog typecheck",
+      "passed": true
+    }
+  ],
+  "runtimeBoundary": "local validation only; no live, staging, production, deployment, or provider-selection claim"
+}
