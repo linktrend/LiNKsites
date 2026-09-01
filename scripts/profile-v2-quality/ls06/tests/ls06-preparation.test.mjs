@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { cpSync, mkdtempSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -94,6 +96,25 @@ test("path escape fails closed", () => {
   const report = evaluatePacket(fixture("fail-path-escape"));
   assert.equal(report.status, "FAIL");
   assert.equal(report.loadError.code, "PATH_ESCAPE");
+});
+
+test("symlinked source escape fails closed", () => {
+  const temp = mkdtempSync(join(tmpdir(), "ls06-symlink-escape-"));
+  try {
+    const packetDir = join(temp, "packet");
+    cpSync(fixture("pass-injected-identities"), packetDir, { recursive: true });
+    const outsideContract = join(temp, "outside-contract.json");
+    writeFileSync(outsideContract, "{}\n");
+    unlinkSync(join(packetDir, "contract.json"));
+    symlinkSync(outsideContract, join(packetDir, "contract.json"));
+
+    const report = evaluatePacket(packetDir);
+    assert.equal(report.status, "FAIL");
+    assert.equal(report.loadError.code, "PATH_ESCAPE");
+    assert.match(report.loadError.message, /through symlink/);
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
 });
 
 test("rollback digest mismatch fails closed", () => {
