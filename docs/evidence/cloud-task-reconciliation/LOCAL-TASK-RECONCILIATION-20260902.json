@@ -48,11 +48,16 @@
       "PR #415 LS-05/LS-06/LS-07"
     ],
     "unprotectedEarlierCandidateImported": false,
-    "candidatePathOverlapWithPR415": false,
-    "basis": "The candidate is based on the current protected development tip; its five changed paths are disjoint from the files changed by the accepted PR #415 phase."
+    "candidatePathOverlapWithPR415": true,
+    "overlapPaths": [
+      ".github/linktrend-secret-scan-fixtures.json"
+    ],
+    "overlapJustification": "The one overlap is the generated secret-scan fixture binding, re-stamped for this exact candidate. No prior product or quality implementation file is imported."
   },
   "candidateDiff": {
     "changedPaths": [
+      ".github/linktrend-secret-scan-fixtures.json",
+      "docs/evidence/cloud-task-reconciliation/LOCAL-TASK-RECONCILIATION-20260902.json",
       "scripts/profile-v2-quality/ls06/load-packet.mjs",
       "scripts/profile-v2-quality/ls06/tests/ls06-preparation.test.mjs",
       "scripts/profile-v2-quality/ls07/fixtures/source-gap.synthetic.json",
