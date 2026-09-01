@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "cloud-task-reconciliation",
+  "lane": "LS-03",
+  "taskId": "task_e_6a96d682d8a48326bf4070ddf89f24cd",
+  "issueNumber": 411,
+  "branch": "issue/411-ls-03-cloud-task-task-e-6a96d682d8a48326bf4070dd",
+  "exactBase": {
+    "commit": "55ecb607b0d902c37d2fa6b1f3348a1070594a26",
+    "tree": "2f3008650f09d957b220401f208584a9b70e4483"
+  },
+  "scope": "Reconcile the existing LS-03 Payload semantic-model and additive-migration implementation at this exact protected base.",
+  "focusedValidation": [
+    {
+      "command": "pnpm --filter @linksites/cms exec vitest run --config ./vitest.config.mts tests/contracts/ls03-semantic-models.spec.ts tests/contracts/ls03-migrations.spec.ts",
+      "passed": true,
+      "tests": 17
+    },
+    {
+      "command": "pnpm --filter @linksites/cms typecheck",
+      "passed": true
+    }
+  ],
+  "runtimeBoundary": "local validation only; no live, staging, production, deployment, or provider-selection claim"
+}
