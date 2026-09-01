@@ -13,8 +13,10 @@
       "status": "REAL_DIFF_OBSERVED",
       "source": "sites-worker-h-exact-development-20260902",
       "sourceCommit": "d3406ccfcb6576853e1d33d3df23d8b98bbcf97d",
-      "sourceTree": "2a97aec332cdb6497baa4a72d2579a76a096cf06",
-      "importedCommit": "d8128da8b447377de0fb320ab7133147821647d0",
+      "sourceTree": "6d4b1fa5025b192ad92aae8712e35a3d80780968",
+      "initialImportedCommit": "d8128da8b447377de0fb320ab7133147821647d0",
+      "importedCommit": "86365e4fe1423e64f7972463eb656e6e4443e0a0",
+      "importedTree": "62f27b17670fd6edb20d7b6a322a44421068fc1d",
       "scope": [
         "scripts/profile-v2-quality/ls06/load-packet.mjs",
         "scripts/profile-v2-quality/ls06/tests/ls06-preparation.test.mjs",
@@ -51,7 +53,7 @@
     {
       "command": "node --test scripts/profile-v2-quality/ls07/tests/source-gap-validator.test.mjs",
       "passed": true,
-      "tests": 6
+      "tests": 8
     },
     {
       "command": "node --test scripts/profile-v2-quality/ls07/tests/test_ls07_quality_harness.mjs",
