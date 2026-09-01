@@ -195,7 +195,7 @@ describe('W2-06 commercial outcome lifecycle', () => {
     const service = new SiteLifecycleService(new InMemoryLifecycleStore(), authorization)
     const record = await service.recordOutcome(deferred)
     expect(record.status).toBe('retained')
-    const expired = await service.expireRetention(deferred.org_id, deferred.site_id, new Date('2026-10-01T00:00:00.000Z'))
+    const expired = await service.expireRetention(deferred.org_id, deferred.site_id, new Date(new Date(record.createdAt).getTime() + 31 * 24 * 60 * 60 * 1000))
     expect(expired?.status).toBe('manual_attention')
     expect(expired?.retentionUntil).toBeNull()
     expect(expired?.receipts.at(-1)?.details.automaticRetry).toBe(false)
