@@ -92,9 +92,12 @@ export function freezeEntitlementSnapshot(input: {
   siteRef: string
   planId: CapabilityCreditPlanId
 }): ImmutableEntitlementSnapshot {
+  if (!input.snapshotId.trim() || !input.siteRef.trim()) {
+    throw new CapabilityCreditError('Entitlement snapshots require non-empty snapshotId and siteRef identities.')
+  }
   const budgets = Object.freeze({ ...CAPABILITY_CREDIT_BUDGETS })
   const unsigned = {
-    schemaVersion: { major: 1 as const, minor: 0 as const },
+    schemaVersion: Object.freeze({ major: 1 as const, minor: 0 as const }),
     snapshotId: input.snapshotId,
     siteRef: input.siteRef,
     planId: input.planId,
@@ -107,7 +110,7 @@ export function freezeEntitlementSnapshot(input: {
 }
 
 export function assertImmutableEntitlementSnapshot(snapshot: ImmutableEntitlementSnapshot): void {
-  if (!FROZEN_SNAPSHOTS.has(snapshot) || !Object.isFrozen(snapshot) || !Object.isFrozen(snapshot.budgets)) {
+  if (!FROZEN_SNAPSHOTS.has(snapshot) || !Object.isFrozen(snapshot) || !Object.isFrozen(snapshot.schemaVersion) || !Object.isFrozen(snapshot.budgets)) {
     throw new CapabilityCreditError('Entitlement snapshot is not an immutable factory-issued snapshot.')
   }
   const unsigned = {
@@ -144,6 +147,9 @@ export function dispositionCreditsForPages(
   assertImmutableEntitlementSnapshot(snapshot)
   let consumed = 0
   const records: CreditDispositionRecord[] = pages.map((page) => {
+    if (!page.route.trim() || !page.pageType.trim()) {
+      throw new CapabilityCreditError('Credit disposition requires non-empty route and pageType identities.')
+    }
     const costClass = classifyPageCost(page.pageType)
     const zeroCost = isZeroCostPage(page.pageType)
     const creditCost: 0 | 1 = zeroCost ? 0 : 1
