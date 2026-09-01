@@ -18,7 +18,14 @@
   ],
   "harness": {
     "accepts": "injected renderer outputs",
-    "dimensions": ["accessibility", "performance", "seo"],
-    "failClosed": ["missing_provider_identity", "missing_runtime_identity", "missing_renderer_output"]
+    "dimensions": ["ssr-discoverability", "accessibility", "performance", "forms-privacy"],
+    "runtime": "deterministic injected fake only",
+    "failClosed": ["missing_provider_identity", "missing_runtime_identity", "missing_fixture_identity", "missing_renderer_output"]
+  },
+  "dependencies": {
+    "LS-06": "HOLD",
+    "A1": "HOLD",
+    "liveBrowser": "HOLD",
+    "provider": "HOLD"
   }
 }

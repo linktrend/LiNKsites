@@ -21,6 +21,13 @@
   "identityPolicy": {
     "providerIdentity": "required injected repository/commit/tree; fail closed when absent",
     "runtimeIdentity": "required injected LS-06 repository/commit/tree; fail closed when absent; pin is not LS-06 completion",
+    "fixtureIdentity": "required named injected-fake identity with deterministic=true; live/browser evidence is rejected",
     "rendererOutput": "required injected document; harness does not boot web-master"
+  },
+  "dependencyStatus": {
+    "LS-06": "HOLD",
+    "A1": "HOLD",
+    "liveBrowser": "HOLD",
+    "provider": "HOLD"
   }
 }

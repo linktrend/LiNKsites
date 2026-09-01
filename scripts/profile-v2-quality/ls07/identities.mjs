@@ -10,6 +10,7 @@ export const GIT_SHA1 = /^[0-9a-f]{40}$/;
 
 export const REQUIRED_PROVIDER_FIELDS = ["repository", "commit", "tree"];
 export const REQUIRED_RUNTIME_FIELDS = ["packet", "repository", "commit", "tree"];
+export const REQUIRED_FIXTURE_FIELDS = ["id", "source", "deterministic"];
 
 export class IdentityClosedFailure extends Error {
   /**
@@ -114,4 +115,33 @@ export function requireRuntimeIdentity(raw) {
     commit: requireGitSha1(record.commit, "runtimeIdentity.commit"),
     tree: requireGitSha1(record.tree, "runtimeIdentity.tree"),
   };
+}
+
+/**
+ * Proves that the evaluated renderer output is a named, injected fake rather
+ * than an unlabelled live/browser/provider observation.
+ * @param {unknown} raw
+ * @returns {{ id: string, source: "injected-fake", deterministic: true }}
+ */
+export function requireFixtureIdentity(raw) {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new IdentityClosedFailure(
+      "missing_fixture_identity",
+      "fixtureIdentity is required; unlabelled renderer output cannot be treated as deterministic proof",
+    );
+  }
+  const record = /** @type {Record<string, unknown>} */ (raw);
+  for (const field of REQUIRED_FIXTURE_FIELDS) {
+    if (!Object.prototype.hasOwnProperty.call(record, field)) {
+      throw new IdentityClosedFailure("missing_fixture_identity", `fixtureIdentity.${field} is required`);
+    }
+  }
+  const id = requireNonEmptyString(record.id, "fixtureIdentity.id");
+  if (record.source !== "injected-fake" || record.deterministic !== true) {
+    throw new IdentityClosedFailure(
+      "malformed_fixture_identity",
+      "fixtureIdentity must declare source=injected-fake and deterministic=true",
+    );
+  }
+  return { id, source: "injected-fake", deterministic: true };
 }
