@@ -38,12 +38,37 @@ function stringLeaves(value: unknown): string[] {
   return []
 }
 
+function containsInlineEventHandler(text: string): boolean {
+  const lower = text.toLowerCase()
+  let tagStart = lower.indexOf('<')
+  while (tagStart >= 0) {
+    const tagEnd = lower.indexOf('>', tagStart + 1)
+    if (tagEnd < 0) return false
+    const tag = lower.slice(tagStart + 1, tagEnd)
+    let attributeStart = 0
+    while (attributeStart < tag.length) {
+      const on = tag.indexOf('on', attributeStart)
+      if (on < 0) break
+      const previous = on === 0 ? '' : tag[on - 1]
+      if (on === 0 || previous === ' ' || previous === '\t' || previous === '\n' || previous === '\r' || previous === '/' || previous === '"' || previous === "'") {
+        let cursor = on + 2
+        while (cursor < tag.length && tag[cursor] >= 'a' && tag[cursor] <= 'z') cursor += 1
+        while (cursor < tag.length && /\s/.test(tag[cursor])) cursor += 1
+        if (cursor < tag.length && tag[cursor] === '=') return true
+      }
+      attributeStart = on + 2
+    }
+    tagStart = lower.indexOf('<', tagEnd + 1)
+  }
+  return false
+}
+
 /** Evaluate untrusted copy as individual values so JSON escaping cannot hide markup failures. */
 export function evaluateMarkupSafety(value: unknown): { security: boolean; accessibility: boolean } {
   const strings = stringLeaves(value)
   const security = strings.every((text) => {
     const normalized = text.replace(/\s+/g, ' ')
-    return !/<script\b|\bjavascript\s*:|\bdata\s*:\s*text\/html|<[^>]+\son[a-z]+\s*=/i.test(normalized)
+    return !/<script\b|\bjavascript\s*:|\bdata\s*:\s*text\/html/i.test(normalized) && !containsInlineEventHandler(normalized)
   })
   const accessibility = strings.every((text) => {
     const images = text.match(/<img\b[^>]*>/gi) ?? []
