@@ -1,0 +1,57 @@
+{
+  "kind": "ls07-source-gap-fixture",
+  "synthetic": true,
+  "networkAllowed": false,
+  "providerCheckoutAllowed": false,
+  "liveClaims": {
+    "materialization": "HOLD",
+    "runtime": "HOLD",
+    "liveBrowser": "HOLD"
+  },
+  "qualityInput": {
+    "schemaVersion": 1,
+    "kind": "ls07-injected-renderer-fixture",
+    "fixtureOnly": true,
+    "copiedProviderBytes": false,
+    "packetComplete": false,
+    "ls06CompleteClaimed": false,
+    "fixtureIdentity": {
+      "id": "ls07-source-gap-synthetic-v1",
+      "source": "injected-fake",
+      "deterministic": true
+    },
+    "providerIdentity": {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "1111111111111111111111111111111111111111",
+      "tree": "2222222222222222222222222222222222222222"
+    },
+    "runtimeIdentity": {
+      "packet": "LS-06",
+      "repository": "linktrend/LiNKsites",
+      "commit": "3333333333333333333333333333333333333333",
+      "tree": "4444444444444444444444444444444444444444"
+    },
+    "rendererOutput": {
+      "html": "<!doctype html><html lang=\"en\"><head><title>Synthetic source fixture</title></head><body><main><h1>Synthetic source fixture</h1><img alt=\"Fixture\" src=\"/fixture.png\"></main></body></html>",
+      "document": {
+        "title": "Synthetic source fixture",
+        "canonical": "https://fixture.example/en",
+        "robots": "index,follow",
+        "hreflang": [{ "lang": "en", "href": "https://fixture.example/en" }],
+        "visibleFacts": { "name": "Synthetic source fixture", "url": "https://fixture.example/en" },
+        "jsonLd": { "@type": "WebSite", "name": "Synthetic source fixture", "url": "https://fixture.example/en" }
+      },
+      "performance": { "lcpMs": 1000, "cls": 0, "inpMs": 50, "transferBytes": 1000 },
+      "accessibility": { "violations": [] },
+      "sideEffects": {
+        "networkAttempted": false,
+        "fakeSuccessRejected": true,
+        "unconfiguredHooksInactive": true,
+        "consentRequired": true,
+        "consentGranted": false,
+        "analyticsEmitted": false,
+        "secretFieldsPresent": false
+      }
+    }
+  }
+}
