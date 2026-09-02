@@ -60,7 +60,7 @@ export function Header({ lang, navigation, planId, actions }: Props) {
             {navItems.map((item) =>
               item.children && item.children.length > 0 ? (
                 <DropdownMenu key={item.id}>
-                  <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors focus:outline-none focus-visible:outline-none">
+                  <DropdownMenuTrigger className="flex items-center gap-1 rounded-sm text-sm font-medium hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                     {item.label}
                     <ChevronDown className="h-4 w-4 transition-transform" />
                   </DropdownMenuTrigger>
@@ -79,7 +79,7 @@ export function Header({ lang, navigation, planId, actions }: Props) {
                   key={item.id}
                   href={item.url}
                   target={item.external ? "_blank" : undefined}
-                  className="text-sm font-medium hover:text-primary transition-colors"
+                  className="rounded-sm text-sm font-medium hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
                   {item.label}
                 </Link>
