@@ -1135,12 +1135,12 @@ class ChangeScopedEvidenceTests(unittest.TestCase):
         root_remote = "https://github.com/example/change-scoped.git"
         git(root, "remote", "add", "origin", root_remote)
         write_tracked(root, "scripts/gitops/secret_scan.py", "note = \"baseline scanner\"\n")
-        old_secret = "pre-existing-credential"
+        old_secret = "ghp_" + ("A" * 36)
         write_tracked(root, "unchanged.py", f'token = "{old_secret}"\n')
         baseline, baseline_tree = commit(root, "baseline credential")
         git(root, "update-ref", "refs/remotes/origin/development", baseline)
         baseline_result = scan_repository(root)
-        changed_value = "new-credential"
+        changed_value = ("g" + "hp_") + ("B" * 36)
         write_tracked(root, "changed.py", f'token = "{changed_value}"\n')
         candidate, candidate_tree = commit(root, "candidate credential")
         evidence = {
@@ -1185,7 +1185,7 @@ class ChangeScopedEvidenceTests(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         git(root, "remote", "add", "origin", "https://github.com/example/change-scoped.git")
         write_tracked(root, "scripts/gitops/secret_scan.py", "note = \"baseline scanner\"\n")
-        old_secret = "pre-existing-credential"
+        old_secret = "ghp_" + ("A" * 36)
         write_tracked(root, "unchanged.py", f'token = "{old_secret}"\n')
         baseline, baseline_tree = commit(root, "baseline credential")
         git(root, "update-ref", "refs/remotes/origin/development", baseline)
