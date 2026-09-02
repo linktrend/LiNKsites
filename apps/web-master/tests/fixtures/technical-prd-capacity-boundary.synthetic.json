@@ -1,0 +1,20 @@
+{
+  "kind": "technical-prd-capacity-boundary",
+  "synthetic": true,
+  "source": "docs/LINKSITES-TECHNICAL-PRD.md#7-hosting-topology-cloudflare-traefik-vps",
+  "fixtureIdentity": "HOLD-technical-prd-capacity-boundary-v1",
+  "liveIdentities": {
+    "telemetry": "HOLD",
+    "loadTest": "HOLD",
+    "stage": "HOLD",
+    "production": "HOLD"
+  },
+  "forbiddenFixedLimits": [
+    "20 sites per VPS",
+    "20 sites/VPS"
+  ],
+  "runtimeSources": [
+    "deploy/docker-compose.deploy.yml",
+    "packages/program-ledger/src/hierarchy.ts"
+  ]
+}

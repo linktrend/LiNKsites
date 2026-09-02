@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { tmpdir } from "node:os";
 import test from "node:test";
 import { evaluateSourceGap } from "../source-gap-validator.mjs";
 
@@ -54,9 +55,40 @@ test("network or provider-checkout permission fails closed", () => {
   }
 });
 
+test("unsafe nested synthetic envelope claims fail closed", () => {
+  for (const [field, value] of [
+    ["schemaVersion", 2],
+    ["kind", "live-runtime"],
+    ["fixtureOnly", false],
+    ["copiedProviderBytes", true],
+    ["packetComplete", true],
+    ["ls06CompleteClaimed", true],
+  ]) {
+    const input = fixture();
+    input.qualityInput[field] = value;
+    const result = evaluateSourceGap(input);
+    assert.equal(result.status, "FAIL", field);
+    assert.ok(result.failures.some((failure) => failure.includes(`qualityInput.${field}`)), field);
+  }
+});
+
 test("CLI emits a HOLD result for the synthetic fixture", () => {
   const output = execFileSync(process.execPath, [validatorPath, fixturePath], { encoding: "utf8" });
   const result = JSON.parse(output);
   assert.equal(result.status, "HOLD");
   assert.equal(result.packetComplete, false);
+});
+
+test("symlinked CLI entrypoint still validates the synthetic fixture", () => {
+  const temp = mkdtempSync(join(tmpdir(), "ls07-validator-link-"));
+  try {
+    const link = join(temp, "validator.mjs");
+    symlinkSync(validatorPath, link);
+    const output = execFileSync(process.execPath, [link, fixturePath], { encoding: "utf8" });
+    const result = JSON.parse(output);
+    assert.equal(result.status, "HOLD");
+    assert.equal(result.packetComplete, false);
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
 });

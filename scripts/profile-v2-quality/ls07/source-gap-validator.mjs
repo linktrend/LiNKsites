@@ -6,8 +6,8 @@
  * live-browser identities remain HOLD until receipts from those authorities are
  * supplied. This module performs no checkout, network request, or live probe.
  */
-import { readFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+import { readFileSync, realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { evaluateInjectedQuality } from "./harness.mjs";
 
 const SHA1 = /^[0-9a-f]{40}$/;
@@ -28,6 +28,30 @@ function exactIdentity(value, repository) {
 
 function hold(id, reason) {
   return { id, status: "HOLD", reason };
+}
+
+function syntheticEnvelopeFailures(input) {
+  const failures = [];
+  if (!isRecord(input)) {
+    return ["qualityInput must be an object"];
+  }
+  if (input.schemaVersion !== 1) failures.push("qualityInput.schemaVersion must be 1");
+  if (input.kind !== "ls07-injected-renderer-fixture") {
+    failures.push("qualityInput.kind must be ls07-injected-renderer-fixture");
+  }
+  if (input.fixtureOnly !== true) failures.push("qualityInput.fixtureOnly must be true");
+  if (input.copiedProviderBytes !== false) {
+    failures.push("qualityInput.copiedProviderBytes must be false");
+  }
+  if (input.packetComplete !== false) failures.push("qualityInput.packetComplete must be false");
+  if (input.ls06CompleteClaimed !== false) {
+    failures.push("qualityInput.ls06CompleteClaimed must be false");
+  }
+  const fixture = input.fixtureIdentity;
+  if (!isRecord(fixture) || fixture.source !== "injected-fake" || fixture.deterministic !== true) {
+    failures.push("qualityInput.fixtureIdentity must be a deterministic injected-fake identity");
+  }
+  return failures;
 }
 
 /**
@@ -56,10 +80,12 @@ export function evaluateSourceGap(input) {
     }
   }
 
-  const quality = evaluateInjectedQuality(input.qualityInput);
-  if (quality.closedFailures.length) {
+  failures.push(...syntheticEnvelopeFailures(input.qualityInput));
+
+  const quality = isRecord(input.qualityInput) ? evaluateInjectedQuality(input.qualityInput) : null;
+  if (quality?.closedFailures.length) {
     failures.push(...quality.closedFailures.map((item) => `${item.code}: ${item.message}`));
-  } else if (!quality.ok) {
+  } else if (quality && !quality.ok) {
     failures.push(...quality.findings.map((item) => `${item.dimension}/${item.code}: ${item.message}`));
   }
 
@@ -111,6 +137,15 @@ function main(argv) {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+function isCliInvocation() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+}
+
+if (isCliInvocation()) {
   main(process.argv.slice(2));
 }
