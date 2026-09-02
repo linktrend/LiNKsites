@@ -6,12 +6,12 @@ documentation_milestone:
   status: complete
   principal_approval_received: true
 delivery_phase_1:
-  status: pre_vps_hardening_candidate_pending_hosted_gate_and_authoritative_integration
+  status: complete_pre_vps_source_engineering
   principal_implementation_approval_received: true
   active_wave: 2
   active_lane: hardening_and_pre_vps_handoff
-  release_checkpoint_sha: pending_hosted_gate
-  final_verdict: pending_hosted_gate_and_luna_high_verification
+  release_checkpoint_sha: "f900fd92dd712d22017eed11f95789a5176374ea"
+  final_verdict: source_pass
 delivery_phase_2:
   status: not_authorized
   principal_external_apply_approval_received: false
@@ -29,13 +29,13 @@ work_packets:
   W2-05: { status: integrated_and_source_audited, checkpoint_sha: "258aa36ff3cef4d6921c48e72c3d39cf74811146", verdict: pass }
   W2-06: { status: integrated_and_source_audited, checkpoint_sha: "258aa36ff3cef4d6921c48e72c3d39cf74811146", verdict: pass }
   W2-07: { status: implementation_complete_runtime_proof_deferred_to_phase_2, checkpoint_sha: "258aa36ff3cef4d6921c48e72c3d39cf74811146", verdict: source_pass }
-  W2-08: { status: pre_vps_hardening_candidate_pending_hosted_gate_and_luna_high_verification, checkpoint_sha: pending_hosted_gate, verdict: pending }
+  W2-08: { status: integrated_and_source_verified, checkpoint_sha: "f900fd92dd712d22017eed11f95789a5176374ea", verdict: source_pass }
 wave_gates:
   wave_1_integration_audit: { status: source_audited_in_integrated_candidate, checkpoint_sha: "258aa36ff3cef4d6921c48e72c3d39cf74811146", verdict: pass }
-  wave_2_phase_1_release_audit: { status: hardening_candidate_pending_hosted_gate_and_luna_high_verification, checkpoint_sha: pending_hosted_gate, verdict: pending }
+  wave_2_phase_1_release_audit: { status: source_verified_on_protected_checkpoint, checkpoint_sha: "f900fd92dd712d22017eed11f95789a5176374ea", verdict: source_pass }
 blockers: []
 notes:
-  - The earlier independent source audit at full SHA 258aa36ff3cef4d6921c48e72c3d39cf74811146 remains historical evidence only. Later hardening corrections require fresh Luna High verification and hosted required checks at the current candidate SHA.
+  - PR 449 hosted checks passed at tested head 21c77e280f3fddb742e9587eb86dffa3a5ab9edd; its tree equals protected merge f900fd92dd712d22017eed11f95789a5176374ea and is recorded in docs/production-roadmap/evidence/w2-08/PR-449-HOSTED-CHECK-RECEIPT.json.
   - Principal direction on 2026-08-10 moved local Compose, restore, and end-to-end runtime proof from Phase 1 to the separately authorized Phase 2 VPS execution gate.
-  - The current Phase 1 hardening candidate awaits hosted checks and Luna High verification; governed integration then remains required. Phase 2 proves runtime behaviour, recovery, and the first website completion on the VPS.
+  - Phase 1 source engineering is complete. Phase 2 remains separately unauthorized and must prove runtime behaviour, recovery, and the first website completion on the VPS.
   - Every final verdict and deployment claim must use a full 40-character immutable Git SHA.
