@@ -16,6 +16,7 @@
     "deploy:compose-rehearsal": "node deploy/scripts/rehearse-compose-stack.mjs",
     "ci:required": "bash scripts/ci-required.sh",
     "test:w2-04": "node scripts/w2-04-contract-tests.mjs && node scripts/w2-04-behavioral-tests.mjs && node scripts/w2-04-route-adversarial-tests.mjs && bash scripts/w2-04-local-proof.sh",
+    "test:w2-08": "node --test scripts/w2-08-pre-vps-validator.test.mjs && node scripts/w2-08-pre-vps-validator.mjs",
     "test:master-template-candidate-preview": "pnpm --filter @linksites/factory-catalog test tests/masterTemplateLookAndFeel.spec.ts tests/masterTemplateConnection.spec.ts && pnpm --filter @linksites/web-master exec tsx --test tests/master-template-look-and-feel.test.ts tests/master-template-candidate-preview.test.ts && bash scripts/master-template-candidate-preview-lite.sh",
     "dev": "turbo run dev"
   },
