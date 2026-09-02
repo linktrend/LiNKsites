@@ -1,0 +1,24 @@
+{
+  "kind": "technical-prd-payload-ci-skip",
+  "synthetic": true,
+  "source": "docs/LINKSITES-TECHNICAL-PRD.md#9-out-of-scope-for-this-version--deliberately-deferred",
+  "prdItem": 10,
+  "fixtureIdentity": "HOLD-technical-prd-payload-ci-skip-v1",
+  "liveIdentities": {
+    "payload": "HOLD",
+    "ciHosted": "HOLD",
+    "stage": "HOLD",
+    "production": "HOLD"
+  },
+  "requiredSkipEnvNames": [
+    "PAYLOAD_INTEGRATION_TEST_URL",
+    "PAYLOAD_INTEGRATION_TEST_JWT",
+    "PAYLOAD_INTEGRATION_TEST_API_KEY",
+    "PAYLOAD_INTEGRATION_TEST_SITE_ID"
+  ],
+  "integrationSpec": "packages/factory-catalog/tests/payloadRestDraftTarget.integration.spec.ts",
+  "ciSources": [
+    "scripts/ci-required.sh",
+    "scripts/ci-fast.sh"
+  ]
+}
