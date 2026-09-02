@@ -1140,7 +1140,7 @@ class ChangeScopedEvidenceTests(unittest.TestCase):
         baseline, baseline_tree = commit(root, "baseline credential")
         git(root, "update-ref", "refs/remotes/origin/development", baseline)
         baseline_result = scan_repository(root)
-        changed_value = ("g" + "hp_") + ("B" * 36)
+        changed_value = "new-credential"
         write_tracked(root, "changed.py", f'token = "{changed_value}"\n')
         candidate, candidate_tree = commit(root, "candidate credential")
         evidence = {
