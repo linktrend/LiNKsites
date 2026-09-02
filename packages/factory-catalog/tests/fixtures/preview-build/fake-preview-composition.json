@@ -1,0 +1,16 @@
+{
+  "fixtureAuthority": "linksites_fake_input_only",
+  "immutableProviderStatus": "HOLD_unavailable",
+  "providerAdmissionClaimed": false,
+  "productionSelectableClaimed": false,
+  "deployAttempted": false,
+  "composition": {
+    "assemblyManifestId": "manifest-preview-fake-001",
+    "assemblyManifestVersion": 1,
+    "siteClass": "preview",
+    "pageInstanceIds": ["home", "about", "contact"],
+    "adapterRevision": "linksites-adapter-fake-a1",
+    "contentReleaseDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "assemblyDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+}
