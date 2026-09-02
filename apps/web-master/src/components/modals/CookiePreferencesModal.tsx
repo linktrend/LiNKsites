@@ -132,13 +132,15 @@ export function CookiePreferencesModal({ isOpen, onClose }: Props) {
           <button
             type="button"
             onClick={() => setPolicyOpen((open) => !open)}
-            className="flex w-full items-center justify-between text-sm font-semibold text-slate-900 hover:text-primary transition-colors"
+            aria-expanded={policyOpen}
+            aria-controls="cookie-policy-details"
+            className="flex w-full items-center justify-between rounded-sm text-sm font-semibold text-slate-900 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             {t("cookies.modal.policyTitle")}
             <ChevronDown className={`h-4 w-4 transition-transform ${policyOpen ? "rotate-180" : ""}`} />
           </button>
           {policyOpen && (
-            <div className="mt-3 max-h-48 overflow-y-auto space-y-3 text-sm text-slate-600 leading-relaxed">
+            <div id="cookie-policy-details" className="mt-3 max-h-48 overflow-y-auto space-y-3 text-sm text-slate-600 leading-relaxed">
               {cookiePolicyBody ? (
                 <div dangerouslySetInnerHTML={{ __html: cookiePolicyBody }} />
               ) : (
