@@ -62,6 +62,8 @@ export interface SiteSpecification {
   adoptionIdentities?: SiteAdoptionIdentities
   /** LS-02 A/B/C/L capability-credit plan. */
   capabilityPlanId?: CapabilityCreditPlanId
+  /** Ordered page-type contract adopted by deterministic assembly. */
+  pageTypes?: readonly string[]
   /** LS-02 immutable entitlement snapshot issued at adoption. */
   entitlementSnapshot?: ImmutableEntitlementSnapshot
 }
@@ -141,6 +143,9 @@ export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): 
     if (input.pageTypes.length !== pageCount) {
       throw new SiteSpecificationError('LS-02 pageTypes length must equal pageCount.')
     }
+    if (input.pageTypes.some((pageType) => !pageType.trim())) {
+      throw new SiteSpecificationError('LS-02 pageTypes must contain only non-empty page-type identities.')
+    }
     adoptionIdentities = assertSiteAdoptionIdentities(input.adoptionIdentities)
     capabilityPlanId = input.capabilityPlanId
     const capabilityPageCount = input.pageTypes.filter((pageType) => classifyPageCost(pageType) === 'capability').length
@@ -177,7 +182,7 @@ export function resolveSiteSpecification(input: ResolveSiteSpecificationInput): 
     resolvedAt: new Date().toISOString(),
     ...(input.libraryConsumption ? { libraryEntryId: input.libraryConsumption.receipt.entryId, libraryReceipt: input.libraryConsumption.receipt, libraryConsumption: input.libraryConsumption } : {}),
     ...(adoptionIdentities && capabilityPlanId && entitlementSnapshot
-      ? { adoptionIdentities, capabilityPlanId, entitlementSnapshot }
+      ? { adoptionIdentities, capabilityPlanId, pageTypes: Object.freeze([...input.pageTypes!]), entitlementSnapshot }
       : {}),
   }
 }

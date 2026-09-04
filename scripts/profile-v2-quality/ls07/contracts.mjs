@@ -203,3 +203,32 @@ export function evaluateSeo(output) {
   }
   return findings;
 }
+
+/** Evaluates only injected side-effect observations; it never sends a form. */
+export function evaluateFormsAndPrivacy(output) {
+  const findings = [];
+  const effects = output.sideEffects;
+  if (effects == null || typeof effects !== "object" || Array.isArray(effects)) {
+    return [{ code: "side_effects_missing", message: "injected sideEffects contract is required" }];
+  }
+  const record = /** @type {Record<string, unknown>} */ (effects);
+  if (record.networkAttempted !== false) {
+    findings.push({ code: "side_effect_network_forbidden", message: "fake runtime must declare networkAttempted=false" });
+  }
+  if (record.fakeSuccessRejected !== true) {
+    findings.push({ code: "form_fake_success", message: "injected form result must prove fake success rejection" });
+  }
+  if (record.unconfiguredHooksInactive !== true) {
+    findings.push({ code: "form_unconfigured_hook_active", message: "unconfigured hooks must remain inactive" });
+  }
+  if (record.consentRequired !== true || record.consentGranted !== false) {
+    findings.push({ code: "privacy_consent_not_blocked", message: "fixture must exercise a denied consent decision" });
+  }
+  if (record.analyticsEmitted !== false) {
+    findings.push({ code: "privacy_analytics_leak", message: "analytics must not emit without consent" });
+  }
+  if (record.secretFieldsPresent !== false) {
+    findings.push({ code: "privacy_secret_leak", message: "renderer evidence must contain no secret fields" });
+  }
+  return findings;
+}

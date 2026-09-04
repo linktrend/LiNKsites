@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls01-amendment-prep-independent-review-scope",
+  "packet": "LS-01-PREP-REVIEW",
+  "githubIssue": 402,
+  "writable": [
+    "docs/evidence/profile-v2-ls01-amendment-prep-review/**",
+    "scripts/validate-profile-v2-ls01-amendment-prep-review.mjs"
+  ],
+  "readOnlyAuthority": [
+    "docs/architecture/linksites-profile-v2/EXECUTION-MANIFEST.json",
+    "docs/architecture/linksites-profile-v2/MODEL-ROUTING-AUTHORITY.json",
+    "docs/architecture/linksites-profile-v2/WORK-PACKETS-AND-ISSUES.md",
+    "origin/issue/401-prepare-ls-01-executable-manifest-amendment-inpu"
+  ],
+  "forbidden": [
+    "packages/**",
+    "apps/**",
+    "supabase/migrations/**",
+    ".ide-development/**",
+    "docs/architecture/linksites-profile-v2/EXECUTION-MANIFEST.json",
+    "docs/architecture/linksites-profile-v2/MODEL-ROUTING-AUTHORITY.json",
+    "docs/evidence/profile-v2-ls01-amendment-prep/**",
+    "scripts/validate-profile-v2-ls01-amendment-prep.mjs"
+  ]
+}

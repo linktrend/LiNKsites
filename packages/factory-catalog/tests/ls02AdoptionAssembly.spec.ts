@@ -147,10 +147,17 @@ describe('ISS-08 capability-credit entitlements', () => {
   it('freezes an immutable snapshot and rolls back mutation attempts', () => {
     const snapshot = freezeEntitlementSnapshot({ snapshotId: 'snap-1', siteRef: 'site-ls02', planId: 'B' })
     expect(Object.isFrozen(snapshot)).toBe(true)
+    expect(Object.isFrozen(snapshot.schemaVersion)).toBe(true)
     expect(snapshot.grantedCredits).toBe(15)
     const attempted = { ...snapshot, grantedCredits: 99, planId: 'A' as const }
     expect(() => rollbackEntitlementMutation(snapshot, attempted)).toThrow(CapabilityCreditError)
     expect(snapshot.grantedCredits).toBe(15)
+  })
+
+  it('rejects blank snapshot identities and page disposition identities', () => {
+    expect(() => freezeEntitlementSnapshot({ snapshotId: '', siteRef: 'site-ls02', planId: 'B' })).toThrow(CapabilityCreditError)
+    const snapshot = freezeEntitlementSnapshot({ snapshotId: 'snap-valid', siteRef: 'site-ls02', planId: 'B' })
+    expect(() => dispositionCreditsForPages(snapshot, [{ route: '', pageType: 'home' }])).toThrow(CapabilityCreditError)
   })
 
   it('activates zero-cost pages without consuming credits on Plan L', () => {
@@ -177,6 +184,8 @@ describe('ISS-07 resolveSiteSpecification adoption path', () => {
     expect(spec.adoptionIdentities?.provider).toBe(LS02_DEPENDENCY_EVIDENCE.mwt02Provider.candidateTree)
     expect(spec.capabilityPlanId).toBe('A')
     expect(spec.entitlementSnapshot?.grantedCredits).toBe(30)
+    expect(spec.pageTypes).toEqual(ADOPTION_PAGES.map((page) => page.pageType))
+    expect(Object.isFrozen(spec.pageTypes)).toBe(true)
     expect(spec.effectiveMaxPages).toBe(33)
   })
 
@@ -245,16 +254,14 @@ describe('ISS-09 deterministic Site Assembly Manifest', () => {
     expect(JSON.stringify({ ...first, resolvedAt: undefined })).toBe(JSON.stringify({ ...second, resolvedAt: undefined }))
   })
 
-  it('rejects over-budget capability pages instead of silently activating them', () => {
-    const extra: PagePlanEntry[] = [
-      ...pagePlan,
-      ...Array.from({ length: 20 }, (_, index) => ({
-        route: `/extra-${index}`,
-        pageType: 'blog',
-        componentIds: ['SignupHero'] as string[],
-      })),
-    ]
-    expect(() => assembleSiteManifest(assemblyInput({ pagePlan: extra }))).toThrow(CapabilityCreditError)
+  it('rejects a page plan that exceeds the adopted specification instead of silently activating it', () => {
+    const extra: PagePlanEntry[] = [...pagePlan, { route: '/extra', pageType: 'blog', componentIds: ['SignupHero'] }]
+    expect(() => assembleSiteManifest(assemblyInput({ pagePlan: extra }))).toThrow(SiteAssemblyError)
+  })
+
+  it('rejects a reordered or substituted page type against the adopted ordered contract', () => {
+    const changed = pagePlan.map((page, index) => index === 1 ? { ...page, pageType: 'terms' } : page)
+    expect(() => assembleSiteManifest(assemblyInput({ pagePlan: changed }))).toThrow(/does not match adopted type/)
   })
 
   it('rejects duplicate routes (negative path)', () => {

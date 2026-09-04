@@ -11,7 +11,7 @@ The workflow is intentionally split by event:
 
 | Event | Required LiNKsites result | Command / evidence | Why it exists |
 | --- | --- | --- | --- |
-| Phase PR opened, updated, reopened, or marked ready | `LiNKsites CI` | `scripts/ci-fast.sh` and its artifact | Lint, type, runtime-configuration contract, receipt-verifier, active-surface, and changed-range secret checks. The script fails after 300 seconds. |
+| Phase PR opened, updated, reopened, or marked ready | `LiNKsites CI` | `scripts/ci-fast.sh` and its artifact | W2-08 pre-VPS source certification, lint, type, runtime-configuration contract, receipt-verifier, active-surface, and changed-range secret checks. The script fails after 300 seconds. |
 | Final Phase PR labelled `linktrend-full-suite` | `full-production-suite` | `scripts/ci-required.sh` and `linksites-full-suite-<head>` | Exact-Fast receipt, application tests/builds, Supabase RLS, focused browser proof, Docker, deployment contract, and recovery rehearsal. The checkout and receipt use the exact Phase head SHA. |
 | Promotion PR to `staging` or `main` | `LiNKsites Promotion Receipt` | `scripts/ci_full_suite_receipt.py verify` | Reuses an unexpired successful `full-production-suite` artifact only when the Git tree and lockfile identity match. It never runs the Full application suite. |
 

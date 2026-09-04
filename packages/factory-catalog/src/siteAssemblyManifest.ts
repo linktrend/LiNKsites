@@ -226,20 +226,30 @@ export function assembleSiteManifest(input: AssembleSiteManifestInput): SiteAsse
     }
   })
 
-  const hasAdoption = Boolean(siteSpec.adoptionIdentities || siteSpec.capabilityPlanId || siteSpec.entitlementSnapshot)
+  const hasAdoption = Boolean(siteSpec.adoptionIdentities || siteSpec.capabilityPlanId || siteSpec.pageTypes || siteSpec.entitlementSnapshot)
   let ls02: Pick<SiteAssemblyManifest, 'shellPlan' | 'routePlan' | 'schemaPlan' | 'creditDispositions' | 'digest'> = {}
   if (hasAdoption) {
-    if (!siteSpec.adoptionIdentities || !siteSpec.capabilityPlanId || !siteSpec.entitlementSnapshot) {
-      throw new SiteAssemblyError('LS-02 assembly requires Site Specification identities, capability plan, and immutable entitlement snapshot together.')
+    if (!siteSpec.adoptionIdentities || !siteSpec.capabilityPlanId || !siteSpec.pageTypes || !siteSpec.entitlementSnapshot) {
+      throw new SiteAssemblyError('LS-02 assembly requires Site Specification identities, capability plan, ordered page types, and immutable entitlement snapshot together.')
     }
     const identities = assertSiteAdoptionIdentities(siteSpec.adoptionIdentities)
     if (siteSpec.capabilityPlanId !== siteSpec.entitlementSnapshot.planId) {
       throw new SiteAssemblyError('LS-02 capability plan does not match the frozen entitlement snapshot.')
     }
+    if (siteSpec.entitlementSnapshot.siteRef !== siteSpec.siteRef) {
+      throw new SiteAssemblyError('LS-02 entitlement snapshot site identity does not match the Site Specification.')
+    }
+    if (pagePlan.length !== siteSpec.pageCount || pagePlan.length !== siteSpec.pageTypes.length) {
+      throw new SiteAssemblyError('LS-02 page plan must contain exactly the adopted Site Specification page count.')
+    }
     const routes = new Set<string>()
-    for (const page of pagePlan) {
+    for (const [index, page] of pagePlan.entries()) {
+      if (!page.route.trim() || !page.pageType.trim()) throw new SiteAssemblyError('LS-02 assembly routes and page types must be non-empty.')
       if (routes.has(page.route)) throw new SiteAssemblyError(`LS-02 assembly rejected duplicate route "${page.route}".`)
       routes.add(page.route)
+      if (page.pageType !== siteSpec.pageTypes[index]) {
+        throw new SiteAssemblyError(`LS-02 page plan type "${page.pageType}" at index ${index} does not match adopted type "${siteSpec.pageTypes[index]}".`)
+      }
     }
     const creditDispositions = dispositionCreditsForPages(siteSpec.entitlementSnapshot, pagePlan)
     const routePlan: SiteAssemblyRoutePlanEntry[] = creditDispositions.map((record) => ({
