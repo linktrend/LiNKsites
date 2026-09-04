@@ -22,6 +22,7 @@ from .engine import (
     run_install_or_update,
     run_plan,
     run_rollback,
+    run_same_version_repair,
     run_verify,
     run_version,
 )
@@ -90,6 +91,15 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Plan only; guarantee no repository or git-metadata writes",
     )
+    common.add_argument(
+        "--resolution-manifest",
+        type=Path,
+        default=None,
+        help=(
+            "Explicit digest-bound managed-upgrade resolution JSON; only "
+            "provider_supersedes decisions are accepted"
+        ),
+    )
 
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -107,6 +117,17 @@ def build_parser() -> argparse.ArgumentParser:
         "update",
         parents=[common],
         help="Update an existing managed-core installation",
+    )
+    repair = sub.add_parser(
+        "repair",
+        parents=[common],
+        help="Apply an explicit exact-source same-version managed-file repair",
+    )
+    repair.add_argument(
+        "--repair-manifest",
+        type=Path,
+        required=True,
+        help="Digest-bound v2.5.2 same-version repair receipt",
     )
     sub.add_parser(
         "drift",
@@ -193,6 +214,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(list(argv) if argv is not None else None)
     as_json = bool(getattr(args, "json", False))
     dry_run = bool(getattr(args, "dry_run", False))
+    resolution_manifest = getattr(args, "resolution_manifest", None)
     target_arg = getattr(args, "target", None)
     package_arg = getattr(args, "package", None)
     target = Path(target_arg) if target_arg is not None else Path.cwd()
@@ -221,19 +243,34 @@ def main(argv: Sequence[str] | None = None) -> int:
             parser.error(f"Unknown release-candidate action: {args.rc_action}")
             return EXIT_ERROR
         if args.command == "plan":
-            result = run_plan(target=target, package=package, command="plan", dry_run=True)
+            result = run_plan(
+                target=target,
+                package=package,
+                command="plan",
+                dry_run=True,
+                resolution_manifest=resolution_manifest,
+            )
         elif args.command == "install":
             result = run_install_or_update(
                 target=target,
                 package=package,
                 command="install",
                 dry_run=dry_run,
+                resolution_manifest=resolution_manifest,
             )
         elif args.command == "update":
             result = run_install_or_update(
                 target=target,
                 package=package,
                 command="update",
+                dry_run=dry_run,
+                resolution_manifest=resolution_manifest,
+            )
+        elif args.command == "repair":
+            result = run_same_version_repair(
+                target=target,
+                package=package,
+                repair_manifest=args.repair_manifest,
                 dry_run=dry_run,
             )
         elif args.command == "drift":

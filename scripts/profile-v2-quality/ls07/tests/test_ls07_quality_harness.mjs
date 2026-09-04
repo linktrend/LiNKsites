@@ -18,7 +18,7 @@ function clone(value) {
   return structuredClone(value);
 }
 
-test("valid injected renderer output passes accessibility, performance, and SEO contracts", () => {
+test("deterministic injected fake passes SSR/discoverability/accessibility/forms/privacy contracts", () => {
   const result = evaluateInjectedQuality(loadFixture("injected-renderer.valid.json"));
   assert.equal(result.ok, true);
   assert.equal(result.packetComplete, false);
@@ -26,6 +26,32 @@ test("valid injected renderer output passes accessibility, performance, and SEO 
   assert.equal(result.closedFailures.length, 0);
   assert.equal(result.findings.length, 0);
   assert.equal(result.identities.runtime.packet, "LS-06");
+  assert.equal(result.identities.fixture.source, "injected-fake");
+  assert.deepEqual(Object.values(result.dependencyStatus), ["HOLD", "HOLD", "HOLD", "HOLD"]);
+});
+
+test("unlabelled or non-deterministic runtime evidence fails closed", () => {
+  const missing = clone(loadFixture("injected-renderer.valid.json"));
+  delete missing.fixtureIdentity;
+  assert.equal(evaluateInjectedQuality(missing).closedFailures[0].code, "missing_fixture_identity");
+  const live = clone(loadFixture("injected-renderer.valid.json"));
+  live.fixtureIdentity.source = "live-browser";
+  live.fixtureIdentity.deterministic = false;
+  assert.equal(evaluateInjectedQuality(live).closedFailures[0].code, "malformed_fixture_identity");
+});
+
+test("forms and privacy observations fail on fake success, consent bypass, analytics, or network", () => {
+  for (const [field, value, code] of [
+    ["fakeSuccessRejected", false, "form_fake_success"],
+    ["consentGranted", true, "privacy_consent_not_blocked"],
+    ["analyticsEmitted", true, "privacy_analytics_leak"],
+    ["networkAttempted", true, "side_effect_network_forbidden"],
+    ["secretFieldsPresent", true, "privacy_secret_leak"],
+  ]) {
+    const payload = clone(loadFixture("injected-renderer.valid.json"));
+    payload.rendererOutput.sideEffects[field] = value;
+    assert.ok(evaluateInjectedQuality(payload).findings.some((item) => item.code === code));
+  }
 });
 
 test("missing provider and runtime identities fail closed before quality scoring", () => {

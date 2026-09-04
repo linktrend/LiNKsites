@@ -1,0 +1,10 @@
+{
+  "fixtureAuthority": "linksites_fake_input_only",
+  "immutableProviderStatus": "HOLD_unavailable",
+  "version": "2.0.0-a1.1",
+  "providerAdmissionClaimed": false,
+  "pairedConsumerProofClaimed": false,
+  "roles": [
+    "hero", "trust", "offer_summary", "featured_services", "featured_products", "proof", "process", "about_snapshot", "faq", "cta", "story", "values", "team_preview", "contact_channels", "form", "locations_preview", "local_facts", "availability", "local_guidance", "area_cards", "breadcrumb", "title_metadata", "author_reviewer", "body", "concise_answer", "references", "related_articles", "service_summary", "service_features", "pricing", "plan_comparison", "product_summary", "product_features", "product_specs", "product_pricing", "gallery", "video", "location_details", "hours", "service_area_summary", "resource_list", "resource_detail", "team_list", "team_detail", "legal_body"
+  ]
+}

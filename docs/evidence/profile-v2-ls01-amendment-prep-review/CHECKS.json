@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "ls01-amendment-prep-independent-review-checks",
+  "packet": "LS-01-PREP-REVIEW",
+  "githubIssue": 402,
+  "status": "recorded",
+  "fullSuite": false,
+  "checks": [
+    {
+      "id": "prep-validator-on-exact-candidate",
+      "command": ["node", "scripts/validate-profile-v2-ls01-amendment-prep.mjs"],
+      "cwd": "git worktree at dc1147058001009f31c3665091703a227afe837f on issue/401-prepare-ls-01-executable-manifest-amendment-inpu",
+      "exitCode": 0,
+      "stdout": "PASS: LS-01 amendment-prep bound to 635a1032f6c72e17729645d4ff464a0fe182cbee tree 6317e1ed6454087bf3ed74c49899ffb155bca418; LS-01 remains locked\n",
+      "reused": false
+    },
+    {
+      "id": "candidate-diff-check",
+      "command": ["git", "diff", "--check", "635a1032f6c72e17729645d4ff464a0fe182cbee"],
+      "exitCode": 0,
+      "stdout": ""
+    },
+    {
+      "id": "candidate-scoped-diff",
+      "command": ["git", "diff", "--name-only", "635a1032f6c72e17729645d4ff464a0fe182cbee", "dc1147058001009f31c3665091703a227afe837f"],
+      "paths": [
+        "docs/evidence/profile-v2-ls01-amendment-prep/CURRENT-EXECUTABLE-MANIFEST.json",
+        "docs/evidence/profile-v2-ls01-amendment-prep/DEPENDENCIES.json",
+        "docs/evidence/profile-v2-ls01-amendment-prep/PROOF.md",
+        "docs/evidence/profile-v2-ls01-amendment-prep/PROPOSED-PACKET.json",
+        "docs/evidence/profile-v2-ls01-amendment-prep/README.md",
+        "docs/evidence/profile-v2-ls01-amendment-prep/SCOPE.json",
+        "docs/evidence/profile-v2-ls01-amendment-prep/STATUS.json",
+        "docs/evidence/profile-v2-ls01-amendment-prep/identity.json",
+        "scripts/validate-profile-v2-ls01-amendment-prep.mjs"
+      ]
+    }
+  ]
+}

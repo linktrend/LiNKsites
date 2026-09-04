@@ -21,6 +21,7 @@
   "packageTestCommands": {
     "@linksites/factory-catalog": "vitest run",
     "@linksites/program-ledger": "vitest run",
+    "@linksites/profile": "node --experimental-strip-types --test tests/*.test.ts",
     "@linksites/cms": "test:int and test:e2e",
     "@linksites/web-master": "tsx --test tests/*.test.ts"
   }

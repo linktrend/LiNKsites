@@ -5,6 +5,11 @@
   "copiedProviderBytes": false,
   "packetComplete": false,
   "ls06CompleteClaimed": false,
+  "fixtureIdentity": {
+    "id": "ls07-fake-runtime-v1",
+    "source": "injected-fake",
+    "deterministic": true
+  },
   "providerIdentity": {
     "repository": "linktrend/LiNKlibraries",
     "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -41,6 +46,15 @@
     },
     "accessibility": {
       "violations": []
+    },
+    "sideEffects": {
+      "networkAttempted": false,
+      "fakeSuccessRejected": true,
+      "unconfiguredHooksInactive": true,
+      "consentRequired": true,
+      "consentGranted": false,
+      "analyticsEmitted": false,
+      "secretFieldsPresent": false
     }
   }
 }

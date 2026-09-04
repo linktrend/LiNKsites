@@ -52,20 +52,22 @@
     {
       "id": "LS-RWB-07",
       "surface": "apps/cms Offers vs Products/Services",
-      "disposition": "replace_with_compatibility",
-      "targetOwner": "LiNKsites"
+      "disposition": "preserve_new_collections_keep_offer_case_compatibility",
+      "targetOwner": "LiNKsites",
+      "currentExact": "apps/cms/src/collections/Products.ts, Services.ts, ServiceAreas.ts, ResultsWork.ts exist alongside OfferPage.ts and CaseStudyPage.ts"
     },
     {
       "id": "LS-RWB-08",
-      "surface": "apps/cms collections Sites, SiteSettings, Pages, Navigation, Articles, Cases, Videos, Team, Locations, policies",
+      "surface": "apps/cms collections Sites, SiteSettings, Pages, Navigation, Articles, Cases, Videos, Team, Locations, policies, Products, Services, ServiceAreas, Results",
       "disposition": "reuse_foundations_extend",
       "targetOwner": "LiNKsites"
     },
     {
       "id": "LS-RWB-09",
       "surface": "adoption and entitlement authority records",
-      "disposition": "add",
-      "targetOwner": "LiNKsites"
+      "disposition": "preserve_and_keep_sites_templateId_as_deprecated_projection",
+      "targetOwner": "LiNKsites",
+      "currentExact": "apps/cms/src/collections/TemplateAdoptions.ts and EntitlementSnapshots.ts exist; Sites.templateId remains"
     },
     {
       "id": "LS-RWB-10",
@@ -123,9 +125,10 @@
     },
     {
       "id": "LS-RWB-19",
-      "surface": "@linksites/profile package",
-      "disposition": "add",
-      "targetOwner": "LiNKsites"
+      "surface": "packages/linkharness-profile (@linksites/profile)",
+      "disposition": "preserve_and_extend",
+      "targetOwner": "LiNKsites",
+      "currentExact": "package exists; LIBRARY_PIN.consumerCommit is older than factory-catalog MASTER_TEMPLATE_PIN and is outside LS-00 writable scope"
     },
     {
       "id": "LS-RWB-20",

@@ -31,6 +31,52 @@ const checksum = (value: unknown): string => createHash('sha256').update(stable(
 const clone = <T>(value: T): T => structuredClone(value)
 const safeKey = (value: string): string => createHash('sha256').update(value).digest('hex')
 
+function stringLeaves(value: unknown): string[] {
+  if (typeof value === 'string') return [value]
+  if (Array.isArray(value)) return value.flatMap(stringLeaves)
+  if (value && typeof value === 'object') return Object.values(value as Record<string, unknown>).flatMap(stringLeaves)
+  return []
+}
+
+function containsInlineEventHandler(text: string): boolean {
+  const lower = text.toLowerCase()
+  let tagStart = lower.indexOf('<')
+  while (tagStart >= 0) {
+    const tagEnd = lower.indexOf('>', tagStart + 1)
+    if (tagEnd < 0) return false
+    const tag = lower.slice(tagStart + 1, tagEnd)
+    let attributeStart = 0
+    while (attributeStart < tag.length) {
+      const on = tag.indexOf('on', attributeStart)
+      if (on < 0) break
+      const previous = on === 0 ? '' : tag[on - 1]
+      if (on === 0 || previous === ' ' || previous === '\t' || previous === '\n' || previous === '\r' || previous === '/' || previous === '"' || previous === "'") {
+        let cursor = on + 2
+        while (cursor < tag.length && tag[cursor] >= 'a' && tag[cursor] <= 'z') cursor += 1
+        while (cursor < tag.length && /\s/.test(tag[cursor])) cursor += 1
+        if (cursor < tag.length && tag[cursor] === '=') return true
+      }
+      attributeStart = on + 2
+    }
+    tagStart = lower.indexOf('<', tagEnd + 1)
+  }
+  return false
+}
+
+/** Evaluate untrusted copy as individual values so JSON escaping cannot hide markup failures. */
+export function evaluateMarkupSafety(value: unknown): { security: boolean; accessibility: boolean } {
+  const strings = stringLeaves(value)
+  const security = strings.every((text) => {
+    const normalized = text.replace(/\s+/g, ' ')
+    return !/<script\b|\bjavascript\s*:|\bdata\s*:\s*text\/html/i.test(normalized) && !containsInlineEventHandler(normalized)
+  })
+  const accessibility = strings.every((text) => {
+    const images = text.match(/<img\b[^>]*>/gi) ?? []
+    return images.every((image) => /\balt\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/i.test(image))
+  })
+  return { security, accessibility }
+}
+
 function stableUuid(value: string): string {
   const bytes = createHash('sha256').update(value).digest('hex').slice(0, 32).split('')
   bytes[12] = '4'
@@ -219,14 +265,15 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     // Each named gate has an independently persisted result.  Do not collapse
     // these into a generic "quality" boolean: downstream promotion relies on
     // the evidence to explain a rejection to the manual review boundary.
+    const markupSafety = evaluateMarkupSafety(current.contentPackage.content)
     const checks = {
       persisted: true,
       checksum: computeWorkingContentChecksum(current.contentPackage) === expectedChecksum,
-      security: !/<script\b|javascript:/i.test(rendered),
+      security: markupSafety.security,
       privacy: hasRoute('/privacy') && !/\b(?:password|api[_-]?key|secret)\b/i.test(rendered),
       contact: hasRoute('/contact') && /@|\+\d/.test(rendered),
       link: !/\b(?:javascript:|data:text\/html)/i.test(rendered),
-      accessibility: pageSections.every((section) => Boolean(section.componentId) && Object.values(section.content).every((value) => typeof value !== 'string' || !/<img\b(?![^>]*\balt=)/i.test(value))),
+      accessibility: pageSections.every((section) => Boolean(section.componentId)) && markupSafety.accessibility,
       brand: pages.every((page) => page.sections.length > 0) && current.contentPackage.provenance.length > 0,
       vertical: hasRoute('/services') && hasRoute('/contact'),
       requiredSection: pages.every((page) => page.sections.length > 0) && pageSections.some((section) => section.sectionId === 'hero'),
@@ -235,9 +282,10 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       uniqueRoutes: routes.size === pages.length,
       provenance: current.contentPackage.provenance.length > 0,
     }
-    const accepted = Object.values(checks).every(Boolean)
-    const artifact = await this.writeArtifact('working-content-gates', siteId, { siteId, packageId, versionNumber, checks, accepted })
-    if (!accepted) { await this.workingContentRepository.markGateOutcome({ workingPackageId: packageId, versionNumber, expectedChecksum, outcome: 'rejected', gateReference: 'w2-02-content-gates', evidenceReferences: [artifact.path] }); return { accepted: false, evidence: [artifact.path], reason: 'gate:working-content-quality-failed', artifactPath: artifact.path, artifactChecksum: artifact.checksum } }
+    const failedChecks = Object.entries(checks).filter(([, passed]) => !passed).map(([name]) => name)
+    const accepted = failedChecks.length === 0
+    const artifact = await this.writeArtifact('working-content-gates', siteId, { siteId, packageId, versionNumber, checks, failedChecks, accepted })
+    if (!accepted) { await this.workingContentRepository.markGateOutcome({ workingPackageId: packageId, versionNumber, expectedChecksum, outcome: 'rejected', gateReference: 'w2-02-content-gates', evidenceReferences: [artifact.path] }); return { accepted: false, evidence: [artifact.path], reason: `gate:working-content-quality-failed:${failedChecks.join(',')}`, artifactPath: artifact.path, artifactChecksum: artifact.checksum } }
     await this.workingContentRepository.markGateOutcome({ workingPackageId: packageId, versionNumber, expectedChecksum, outcome: 'accepted', gateReference: 'w2-02-content-gates', evidenceReferences: [artifact.path] })
     return { accepted: true, evidence: [artifact.path], artifactPath: artifact.path, artifactChecksum: artifact.checksum }
   }

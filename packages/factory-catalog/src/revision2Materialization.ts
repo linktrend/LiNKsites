@@ -84,11 +84,43 @@ const confined = (root: string, candidate: string): boolean => {
   return candidate === root || candidate.startsWith(rootWithSeparator)
 }
 
+function providerFileIsConfined(providerRoot: string, candidate: string): boolean {
+  const root = resolve(providerRoot)
+  const path = resolve(candidate)
+  if (!confined(root, path)) return false
+  try {
+    const rootStat = lstatSync(root)
+    if (rootStat.isSymbolicLink() || !rootStat.isDirectory()) return false
+    const realRoot = resolve(realpathSync(root))
+    const relativeParts = relative(root, path).split(sep).filter(Boolean)
+    let current = root
+    for (const part of relativeParts) {
+      current = join(current, part)
+      const stat = lstatSync(current)
+      if (stat.isSymbolicLink()) return false
+    }
+    const realPath = resolve(realpathSync(path))
+    return confined(realRoot, realPath) && lstatSync(path).isFile()
+  } catch {
+    return false
+  }
+}
+
+function readProviderJson(providerRoot: string, path: string): unknown {
+  if (!providerFileIsConfined(providerRoot, path)) throw new Error(`provider path is missing, non-regular, symlinked, or outside provider root: ${relative(resolve(providerRoot), resolve(path))}`)
+  return json(path)
+}
+
 const readReceipt = (input: Revision2MaterializationInput, releaseRoot: string): unknown => {
+  if (input.receiptPath && !providerFileIsConfined(input.providerRoot, resolve(input.receiptPath))) {
+    throw new Error('explicit provider receipt path is missing, non-regular, symlinked, or outside provider root')
+  }
   const candidates = [input.receiptPath, resolve(releaseRoot, 'receipt.json'), resolve(releaseRoot, 'release-receipt.json'), resolve(releaseRoot, 'cache-receipt.json'), resolve(input.providerRoot, 'docs/evidence/master-website-template-v2/a1-provider-gate/provider-gate-receipt.json'), resolve(input.providerRoot, 'materialization/cache/cache-receipt.json')].filter((candidate): candidate is string => Boolean(candidate))
   for (const candidate of candidates) {
     try {
-      const value = json(candidate)
+      const resolvedCandidate = resolve(candidate)
+      if (!providerFileIsConfined(input.providerRoot, resolvedCandidate)) continue
+      const value = json(resolvedCandidate)
       // The provider gate receipt is the immutable evidence for this draft
       // candidate; adapt its release coordinates to the native candidate
       // receipt shape without copying provider artifacts into LiNKsites.
@@ -131,11 +163,12 @@ export function materializeRevision2WebsiteTemplate(input: Revision2Materializat
   let bundle: unknown
   try {
     const cataloguePath = resolve(providerRoot, 'indexes/v2/catalog.json')
+    if (!providerFileIsConfined(providerRoot, cataloguePath)) throw new Error('provider catalogue path is missing, non-regular, symlinked, or outside provider root')
     const catalogueBytes = readFileSync(cataloguePath, 'utf8')
     const catalogue = JSON.parse(catalogueBytes) as unknown
-    const manifest = json(resolve(releaseRoot, 'manifest.json'))
-    const inventory = json(resolve(releaseRoot, 'inventory.json'))
-    const dependencyLock = json(resolve(releaseRoot, 'dependency-lock.json'))
+    const manifest = readProviderJson(providerRoot, resolve(releaseRoot, 'manifest.json'))
+    const inventory = readProviderJson(providerRoot, resolve(releaseRoot, 'inventory.json'))
+    const dependencyLock = readProviderJson(providerRoot, resolve(releaseRoot, 'dependency-lock.json'))
     const candidateReceipt = readReceipt(input, releaseRoot)
     if (candidateReceipt && typeof candidateReceipt === 'object' && !Array.isArray(candidateReceipt) && (candidateReceipt as Record<string, unknown>).receiptType === 'provider_prerelease_candidate') {
       const candidate = candidateReceipt as Record<string, any>

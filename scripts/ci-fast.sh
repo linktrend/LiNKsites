@@ -20,6 +20,7 @@ git cat-file -e "${HEAD_SHA}^{commit}"
 
 started_at="$(date +%s)"
 pnpm install --frozen-lockfile --prefer-offline
+pnpm test:w2-08
 pnpm lint
 pnpm typecheck
 node --test deploy/tests/runtime-contract.test.mjs
@@ -42,7 +43,7 @@ path.write_text(json.dumps({
     'status': 'passed',
     'elapsedSeconds': int(sys.argv[1]),
     'targetSeconds': 300,
-    'checks': ['frozen-install', 'lint', 'typecheck', 'runtime-contract', 'receipt-verifier-tests', 'legacy-surface-scan', 'changed-range-secret-scan'],
+    'checks': ['frozen-install', 'w2-08-source-certification', 'lint', 'typecheck', 'runtime-contract', 'receipt-verifier-tests', 'legacy-surface-scan', 'changed-range-secret-scan'],
 }, indent=2) + '\n', encoding='utf-8')
 PY
 

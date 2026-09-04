@@ -1,0 +1,37 @@
+{
+  "manifest": {
+    "schemaVersion": "1.0.0",
+    "digestAlgorithm": "sha256",
+    "siteId": "site-001",
+    "entries": [
+      {
+        "kind": "page",
+        "id": "home",
+        "digest": "688b40bcdd2beb94c674325ac8d1b9a0f5abf5debc99ce0cc9704acf32e1d963"
+      },
+      {
+        "kind": "settings",
+        "id": "primary",
+        "digest": "a69d24ac19f3ad1eb7fc70da54e9c220af177fa4cc95cfa7ae7b9f6d65330dbe"
+      }
+    ],
+    "bundleDigest": "1b0cb74c8c70956bd73b0d39e633c970d8e673eea9fc51ca824a872ef6e3d299"
+  },
+  "records": [
+    {
+      "kind": "page",
+      "id": "home",
+      "value": {
+        "title": "Tampered",
+        "route": "/"
+      }
+    },
+    {
+      "kind": "settings",
+      "id": "primary",
+      "value": {
+        "locale": "en"
+      }
+    }
+  ]
+}
