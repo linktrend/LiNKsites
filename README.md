@@ -1,5 +1,7 @@
 # LiNKsites
 
+> Production status: the pre-configuration engineering baseline is complete. See [the production-readiness index](docs/PRODUCTION-READINESS.md) for remaining configuration, staging, deployment, and operational acceptance work.
+
 LiNKsites is LiNKtrend's autonomous website factory and managed SMB website service. It continuously pulls and claims eligible work from the LiNKreach-owned CRM boundary, assembles governed reusable foundations into real prospect previews and paying-customer sites, promotes content through a trusted Payload CMS path, and hosts them on a shared Next.js platform — with LiNKreach owning the commercial lifecycle and human day-to-day involvement limited to strategy and exceptional escalation.
 
 Legacy name: Dev_Sites Website Factory (renamed **LiNKsites**).
