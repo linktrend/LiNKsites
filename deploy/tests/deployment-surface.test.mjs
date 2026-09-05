@@ -52,6 +52,13 @@ test('manifest and Compose name the same five deployable images', async () => {
   assert.ok(manifest.includes('Payload migration import does not resolve to a source file'), 'unresolved migration imports fail closed')
 })
 
+test('production migration runner accepts only real PostgreSQL URLs', async () => {
+  const migrationRunner = await read('deploy/scripts/run-supabase-migrations.sh')
+  assert.ok(migrationRunner.includes('postgresql://*)'), 'real PostgreSQL URLs are accepted')
+  assert.ok(!migrationRunner.includes('" + "'), 'generated string fragments cannot corrupt shell validation')
+  assert.ok(migrationRunner.includes('*localhost*|*127.0.0.1*|*0.0.0.0*'), 'loopback targets remain forbidden')
+})
+
 test('deployment contract binds preview token, production mode, and smoke topology', async () => {
   const contract = await read('deploy/config/runtime-contract.mjs')
   const preflight = await read('deploy/scripts/preflight.sh')
