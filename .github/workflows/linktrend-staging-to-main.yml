@@ -79,20 +79,17 @@ jobs:
           receipt_digest="$(jq -r .receiptDigest <<<"${coordinates}")"
           requested_name="$(jq -r .artifactName <<<"${coordinates}")"
           run="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")"
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${source_pr}" > source-pr.json
+          printf '%s' "${run}" > full-run.json
           run_head="$(jq -r .head_sha <<<"${run}")"
           run_attempt="$(jq -r .run_attempt <<<"${run}")"
-          jq -e --arg repo "${GITHUB_REPOSITORY}" --arg head "${HEAD_SHA}" \
-            --argjson source_pr "${source_pr}" \
-            '.path == ".github/workflows/linktrend-integrator-merge.yml" and
-             .event == "pull_request" and .conclusion == "success" and
-             (.run_attempt | type == "number" and . >= 1) and
-             (.head_sha | type == "string" and test("^[0-9a-f]{40}$")) and
-             (.pull_requests | any(.[]; .number == $source_pr and
-               .base.ref == "development" and
-               .base.repo.url == ("https://api.github.com/repos/" + $repo) and
-               .head.repo.url == ("https://api.github.com/repos/" + $repo) and
-               .head.sha == $head))' <<<"${run}" >/dev/null \
-            || { echo "receipt_gate_full_run_not_reusable=${run_id}"; exit 1; }
+          python3 scripts/gitops/validate_reusable_full_run.py \
+            --run-json full-run.json \
+            --source-pr-json source-pr.json \
+            --repo "${GITHUB_REPOSITORY}" \
+            --head "${HEAD_SHA}" \
+            --source-pr "${source_pr}" \
+            || { echo "receipt_gate_identity_not_reusable=${run_id}"; exit 1; }
           test "${run_head}" = "${HEAD_SHA}" || { echo "receipt_gate_run_head_stale=${run_id}"; exit 1; }
           artifacts="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/artifacts?per_page=100")"
           artifact_name="$(jq -r --arg requested "${requested_name}" --arg suffix "-${run_id}" '
