@@ -4,8 +4,9 @@ set -eu
 : "${DATABASE_URI:?DATABASE_URI is required}"
 : "${LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA:?LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA is required}"
 
+postgres_scheme=postgresql
 case "$DATABASE_URI" in
-  postgresql://*) ;;
+  "$postgres_scheme"://*) ;;
   *) echo 'DATABASE_URI must be a PostgreSQL URI' >&2; exit 78 ;;
 esac
 case "$DATABASE_URI" in

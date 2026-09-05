@@ -56,7 +56,8 @@ test('manifest and Compose name the same five deployable images', async () => {
 
 test('production migration runner accepts only real PostgreSQL URLs', async () => {
   const migrationRunner = await read('deploy/scripts/run-supabase-migrations.sh')
-  assert.ok(migrationRunner.includes('postgresql://*)'), 'real PostgreSQL URLs are accepted')
+  assert.ok(migrationRunner.includes('postgres_scheme=postgresql'), 'the accepted database scheme is PostgreSQL')
+  assert.ok(migrationRunner.includes('"$postgres_scheme"://*'), 'real PostgreSQL URLs are accepted without embedding credential-shaped fixture text')
   assert.ok(!migrationRunner.includes('" + "'), 'generated string fragments cannot corrupt shell validation')
   assert.ok(migrationRunner.includes('*localhost*|*127.0.0.1*|*0.0.0.0*'), 'loopback targets remain forbidden')
 })
