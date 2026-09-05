@@ -970,6 +970,7 @@ def promote_to_staging(
     }
     if transition_receipt is not None:
         marker["transitionReceiptDigest"] = compute_transition_digest(transition_receipt)
+        marker["transitionReceipt"] = dict(transition_receipt)
     body = f"<!-- linktrend-promote: {json.dumps(marker, sort_keys=True)} -->"
     pr = call_with_infrastructure_retry(
         lambda: github.create_pull_request(
@@ -1071,6 +1072,7 @@ def prepare_main_promotion(
     }
     if transition_receipt is not None:
         marker["transitionReceiptDigest"] = compute_transition_digest(transition_receipt)
+        marker["transitionReceipt"] = dict(transition_receipt)
     body = f"<!-- linktrend-promote: {json.dumps(marker, sort_keys=True)} -->"
     pr = call_with_infrastructure_retry(
         lambda: github.create_pull_request(
