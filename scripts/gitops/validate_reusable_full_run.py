@@ -33,7 +33,7 @@ def validate(
         run.get("path") == ".github/workflows/linktrend-integrator-merge.yml"
         and run.get("event") == "pull_request"
         and run.get("conclusion") == "success"
-        and isinstance(run.get("run_attempt"), int)
+        and type(run.get("run_attempt")) is int
         and run["run_attempt"] >= 1
         and run.get("head_sha") == head
     ):
