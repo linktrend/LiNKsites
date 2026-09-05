@@ -21,10 +21,23 @@ const payloadIndexPath = resolve(root, 'apps/cms/src/migrations/index.ts')
 const payloadIndex = await readFile(payloadIndexPath, 'utf8')
 const payloadMigrationImports = [...payloadIndex.matchAll(/from\s+['"]\.\/([^'"]+)['"]/g)].map((match) => match[1])
 if (payloadMigrationImports.length === 0) throw new Error('Payload migration index has no loaded migrations')
-const payloadMigrations = await Promise.all(payloadMigrationImports.map(async (file) => ({
-  file: `apps/cms/src/migrations/${file}`,
-  sha256: createHash('sha256').update(await readFile(resolve(root, 'apps/cms/src/migrations', file))).digest('hex'),
-})))
+const resolvePayloadMigration = async (specifier) => {
+  for (const file of [specifier, `${specifier}.ts`, `${specifier}.js`]) {
+    try {
+      return { file, content: await readFile(resolve(root, 'apps/cms/src/migrations', file)) }
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error
+    }
+  }
+  throw new Error(`Payload migration import does not resolve to a source file: ${specifier}`)
+}
+const payloadMigrations = await Promise.all(payloadMigrationImports.map(async (specifier) => {
+  const { file, content } = await resolvePayloadMigration(specifier)
+  return {
+    file: `apps/cms/src/migrations/${file}`,
+    sha256: createHash('sha256').update(content).digest('hex'),
+  }
+}))
 const required = [
   'LINKLIBRARIES_CATALOG_SHA', 'LINKLIBRARIES_ENTRY_SHA',
   'LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA',

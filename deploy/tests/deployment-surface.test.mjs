@@ -48,6 +48,8 @@ test('manifest and Compose name the same five deployable images', async () => {
     assert.ok(manifest.includes(`LINKSITES_${name}_IMAGE_DIGEST`), `manifest digest ${name}`)
   }
   assert.ok(manifest.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA'))
+  assert.ok(manifest.includes('`${specifier}.ts`'), 'extensionless TypeScript migration imports resolve to source files')
+  assert.ok(manifest.includes('Payload migration import does not resolve to a source file'), 'unresolved migration imports fail closed')
 })
 
 test('deployment contract binds preview token, production mode, and smoke topology', async () => {
