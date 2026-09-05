@@ -48,7 +48,8 @@ test('manifest and Compose name the same five deployable images', async () => {
     assert.ok(manifest.includes(`LINKSITES_${name}_IMAGE_DIGEST`), `manifest digest ${name}`)
   }
   assert.ok(manifest.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA'))
-  assert.ok(manifest.includes('`${sourceSpecifier}.ts`'), 'extensionless TypeScript migration imports resolve to source files')
+  assert.ok(manifest.includes("specifier.endsWith('.js')"), '.js imports prefer the corresponding TypeScript source')
+  assert.ok(manifest.includes('[specifier, `${specifier}.ts`, `${specifier}.js`]'), 'extensionless TypeScript migration imports resolve to source files')
   assert.ok(manifest.includes("specifier.replace(/\\.js$/, '')"), '.js migration imports resolve to TypeScript source files')
   assert.ok(manifest.includes('Payload migration import does not resolve to a source file'), 'unresolved migration imports fail closed')
 })

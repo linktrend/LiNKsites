@@ -23,7 +23,10 @@ const payloadMigrationImports = [...payloadIndex.matchAll(/from\s+['"]\.\/([^'"]
 if (payloadMigrationImports.length === 0) throw new Error('Payload migration index has no loaded migrations')
 const resolvePayloadMigration = async (specifier) => {
   const sourceSpecifier = specifier.replace(/\.js$/, '')
-  for (const file of [...new Set([specifier, `${sourceSpecifier}.ts`, `${sourceSpecifier}.js`])]) {
+  const candidates = specifier.endsWith('.js')
+    ? [`${sourceSpecifier}.ts`, specifier]
+    : [specifier, `${specifier}.ts`, `${specifier}.js`]
+  for (const file of candidates) {
     try {
       return { file, content: await readFile(resolve(root, 'apps/cms/src/migrations', file)) }
     } catch (error) {
