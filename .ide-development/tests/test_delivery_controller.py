@@ -301,6 +301,39 @@ class DeliveryControllerTests(unittest.TestCase):
                 full_suite_invoked=True,
             )
 
+    def test_promotion_marker_carries_digest_bound_transition_receipt(self) -> None:
+        development_head = _sha(12)
+        development_identity = _identity(
+            head=development_head,
+            tree=self.tree,
+            branch="development",
+        )
+        transition = receipts.create_transition_receipt(
+            self.receipt,
+            target_branch="development",
+            target_commit=development_head,
+            target_tree=self.tree,
+            protected_base_commit=_sha(9),
+        ).to_dict()
+        controller.promote_to_staging(
+            github=self.github,
+            repository="owner/name",
+            development_sha=development_head,
+            staging_sha=_sha(7),
+            candidate_sha=development_head,
+            candidate_tree=self.tree,
+            receipt=self.receipt,
+            candidate_identity=development_identity,
+            transition_receipt=transition,
+            release_gate={"status": "passed", "testProfile": "release"},
+            role="operator",
+        )
+        marker = json.loads(
+            re.search(r"<!-- linktrend-promote:\s*(\{.*?\})\s*-->", self.github.prs[1]["body"]).group(1)
+        )
+        self.assertEqual(marker["transitionReceipt"], transition)
+        self.assertEqual(marker["transitionReceiptDigest"], receipts.compute_transition_digest(transition))
+
     def test_staged_rollout_uses_configured_stage_names_on_critical_path(self) -> None:
         rollout = controller.StagedRolloutConfig.from_mapping(
             {
