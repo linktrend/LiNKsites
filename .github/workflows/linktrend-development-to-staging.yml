@@ -60,13 +60,29 @@ jobs:
           marker = json.loads(match.group(1))
           run_id = str(marker.get("fullRunId") or "").strip()
           artifact = ""
+          receipt_digest = str(marker.get("receiptDigest") or "").strip()
           if not run_id.isdigit() or int(run_id) < 1:
               raise SystemExit("receipt_gate_full_run_invalid")
-          print(json.dumps({"runId": run_id, "artifactName": artifact}))
+          if not re.fullmatch(r"sha256:[0-9a-f]{64}", receipt_digest):
+              raise SystemExit("receipt_gate_receipt_digest_invalid")
+          transition = marker.get("transitionReceipt")
+          transition_digest = str(marker.get("transitionReceiptDigest") or "").strip()
+          if not isinstance(transition, dict):
+              raise SystemExit("receipt_gate_transition_missing")
+          if not re.fullmatch(r"sha256:[0-9a-f]{64}", transition_digest):
+              raise SystemExit("receipt_gate_transition_digest_invalid")
+          if transition.get("receiptDigest") != transition_digest:
+              raise SystemExit("receipt_gate_transition_digest_mismatch")
+          with open("promotion-marker.json", "w", encoding="utf-8") as handle:
+              json.dump(marker, handle)
+          with open("transition-receipt.json", "w", encoding="utf-8") as handle:
+              json.dump(transition, handle)
+          print(json.dumps({"runId": run_id, "artifactName": artifact, "receiptDigest": receipt_digest}))
           PY
           )"
           run_id="$(jq -r .runId <<<"${coordinates}")"
           requested_name="$(jq -r .artifactName <<<"${coordinates}")"
+          receipt_digest="$(jq -r .receiptDigest <<<"${coordinates}")"
           run="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")"
           jq -e '.path == ".github/workflows/linktrend-integrator-merge.yml" and .event == "pull_request" and .conclusion == "success"' <<<"${run}" >/dev/null \
             || { echo "receipt_gate_full_run_not_reusable=${run_id}"; exit 1; }
@@ -79,7 +95,18 @@ jobs:
             | if length == 1 then .[0].name else empty end
           ' <<<"${artifacts}")"
           test -n "${artifact_name}" || { echo "receipt_gate_artifact_not_unique_or_missing=${run_id}"; exit 1; }
-          printf 'run_id=%s\nartifact_name=%s\n' "${run_id}" "${artifact_name}" >> "$GITHUB_OUTPUT"
+          source_pr="$(python3 - "${artifact_name}" "${run_id}" <<'PY'
+          import re, sys
+          match = re.fullmatch(r"linktrend-full-suite-receipt-([1-9][0-9]*)-" + re.escape(sys.argv[2]), sys.argv[1])
+          if not match:
+              raise SystemExit("receipt_gate_artifact_identity_invalid")
+          print(match.group(1))
+          PY
+          )"
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${source_pr}" > source-pr.json
+          printf '%s' "${run}" > full-run.json
+          printf 'run_id=%s\nrun_attempt=%s\nrun_head=%s\nsource_pr=%s\nreceipt_digest=%s\nartifact_name=%s\n' \
+            "${run_id}" "$(jq -r .run_attempt <<<"${run}")" "$(jq -r .head_sha <<<"${run}")" "${source_pr}" "${receipt_digest}" "${artifact_name}" >> "$GITHUB_OUTPUT"
 
       - name: Fetch exact promotion candidate without executing it
         run: |
@@ -104,10 +131,27 @@ jobs:
         run: |
           set -euo pipefail
           candidate_dir="$(cat candidate-dir.txt)"
+          source_head="$(jq -r .sourceIdentity.headCommit transition-receipt.json)"
+          python3 scripts/gitops/validate_reusable_full_run.py \
+            --run-json full-run.json --source-pr-json source-pr.json \
+            --repo "${GITHUB_REPOSITORY}" --head "${source_head}" \
+            --source-pr "${{ steps.receipt.outputs.source_pr }}"
           python3 "$GITHUB_WORKSPACE/scripts/gitops/gate_receipt.py" verify \
             --receipt receipt-artifact/full-suite-receipt.json \
             --repo "${candidate_dir}" \
             --profile full \
             --workflow-run-id "${RECEIPT_RUN_ID}" \
+            --workflow-run-attempt "${{ steps.receipt.outputs.run_attempt }}" \
+            --workflow-head-commit "${source_head}" \
+            --source-branch development \
+            --transition-receipt transition-receipt.json \
             --gate full-gate
+          receipt_digest="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.gitops.coordinator.receipts import compute_receipt_digest
+          print(compute_receipt_digest(json.loads(Path('receipt-artifact/full-suite-receipt.json').read_text())))
+          PY
+          )"
+          test "${receipt_digest}" = "${{ steps.receipt.outputs.receipt_digest }}" || { echo "receipt_gate_digest_mismatch"; exit 1; }
           echo "Linktrend Receipt Gate passed: exact tree/dependency/profile/workflow identity reused; no full suite rerun."
