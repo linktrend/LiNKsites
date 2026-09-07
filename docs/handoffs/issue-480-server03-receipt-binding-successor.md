@@ -1,91 +1,77 @@
-# Issue 480 successor handoff — Server03 native Revision 2 receipt binding
+# Issue 480 successor handoff — Server03 deferred runtime and native Revision 2 admission
 
-This is an implementation handoff for a fresh independent review. It does not
-authorize a Phase PR, merge, VPS operation, provider admission, staging/main
-promotion, or production release.
+This handoff requests fresh independent rereview. It does not authorize a
+Phase PR, merge, VPS operation, provider admission, staging/main promotion, or
+production release.
 
 ## Exact identity
 
 - Repository: `linktrend/LiNKsites`
-- Branch: `issue/480-repair-server03-deployment-template-release-stat`
-- Review base commit: `2a1ebc93d39dd77a444eee19cf6decc48872b90e`
-- Review base tree: `b0cd77e4eef780123a90beed8b6819ee84a82226`
-- Prior implementation checkpoint: `3ec1693dc35408701fade9191709f8675eff1c3d`
-- Successor implementation checkpoint: `5f4d26292862463b36f5138973bbe5b30a48eec8`
-- Successor implementation tree: `e6b8c19582c6da89dfb8b9546142d4ea80e3d70e`
-- Successor parent: `8b7eb4a49f4bd7ca6f332477c8a74b4573211d01`
-- Verification successor: `db22982c29d43fc04d8e362fa49800cb95fbc3f9`
-- Verification successor tree: `9496e65b63f475733c86ab301d8ab0214af74e86`
-- Verification successor parent: `5f4d26292862463b36f5138973bbe5b30a48eec8`
-- Exact-base ancestry: `2a1ebc9` → `3ec1693` → `8b7eb4a` → `5f4d262` → `db22982`
+- Successor branch: `issue/480-repair-server03-deployment-template-release-stat-successor`
+- Exact remote review base commit: `205377db5e659a48a845c4630301178e2f220971`
+- Exact remote review base tree: `8c714cfd87b0c116ffd64196a880915d11875de7`
+- Implementation checkpoint pushed before this handoff update: `de5d90c467f77bd873cae6a2edbf7b24923b52b3`
+- Implementation checkpoint tree: `3d7084b29ef4eaebde8d0263de72bf69d54d6a41`
 
-The implementation checkpoint is pushed to `origin` at the branch named above.
+The implementation checkpoint is a fresh successor from the requested remote
+candidate. The final branch head and tree must be read back after this handoff
+document is committed and pushed; completion evidence is valid only when it
+binds that exact remote branch head and tree.
 
-## Implemented boundary
+## Repaired boundaries
 
-Ready mode now fails closed unless the mounted native Revision 2 receipt:
+1. Deferred template state is provider-independent. Server03 base Compose,
+   runtime configuration, preflight, foundation preflight, and health smoke do
+   not require provider root/checkout/receipt/artifact mounts. The ready-only
+   Compose overlay adds those mounts and environment values only after native
+   Revision 2 admission.
+2. Deferred production keeps infrastructure and service health available while
+   fail-closing template-dependent rendering, publishing, orchestrator intake,
+   and site-pilot work. Disposable local compose proof remains explicitly
+   exempt through its existing proof flags.
+3. Ready admission now verifies the committed catalogue, exactly one selected
+   entry/version, admitted/selectable/compatible status, release manifest,
+   exhaustive artifact inventory, dependency lock, artifact bytes, provider
+   commit/tree, receipt, and all cross-file identities. Manifest publishing
+   eligibility is set only after that complete admission succeeds.
+4. Fixtures now include native catalogue and artifact-inventory files and
+   adversarial tests cover non-selectable records, missing selected records,
+   and missing inventory, in addition to existing receipt, checkout, and lock
+   drift cases.
 
-1. is a confined, regular file and its bytes exactly equal the configured
-   receipt JSON;
-2. are present as the exact receipt blob in the configured provider commit;
-3. pass native v2 consumption or verified-cache shape checks;
-4. match the mounted release manifest's entry, version, release source,
-   manifest digest, and artifact tree; and
-5. match the mounted dependency-lock file, its configured file digest, and its
-   canonical dependency projection, while the mounted provider Git HEAD/tree
-   match the configured provider identity.
+## Verification performed
 
-Manifest generation and deployment preflight use the same verifier. Legacy v1
-receipts remain rejected. Deferred mode remains receipt-free and continues to
-permit infrastructure/service-health acceptance while marking template-
-dependent rendering, publishing, intake, and pilot capabilities blocked.
-
-The successor extends the same boundary into the web runtime: production
-readiness reads the mounted receipt at `LINKSITES_LINKLIBRARIES_RECEIPT_PATH`,
-requires byte-for-byte and SHA-256 equality with the supplied receipt evidence,
-passes the explicit receipt through native `validateExactRelease()` over the
-complete provider bundle, verifies the mounted provider checkout commit/tree,
-and binds entry/version, source-release, artifact-tree, and dependency-lock
-identities. An explicit receipt path can no longer fall through to a legacy or
-alternate receipt after a read or parse failure.
-
-## Focused proof
-
-Command:
+Passed on the implementation checkpoint:
 
 ```text
-node --test deploy/tests/runtime-contract.test.mjs deploy/tests/deployment-manifest.test.mjs deploy/tests/deployment-surface.test.mjs
-```
-
-Result: the deployment/runtime suite passed 32/32; the focused factory-catalog
-suite passed 11/11; and the web-master candidate plus readiness suites passed
-13/13, including deferred behavior, exact mounted-byte and digest binding,
-forged environment bytes, stale mounted receipt bytes, dependency-lock drift,
-provider checkout identity drift, native materializer regressions, and legacy
-v1 rejection. Affected typechecks passed.
-
-Additional checks passed:
-
-```text
+node --test deploy/tests/deployment-manifest.test.mjs deploy/tests/runtime-contract.test.mjs deploy/tests/deployment-surface.test.mjs
+  34/34 passed
+pnpm --filter @linksites/factory-catalog exec vitest run
+  367 passed, 4 skipped
+GITHUB_HEAD_REF=phase/480-independent-review-repair pnpm --filter @linksites/program-orchestrator test
+  74/74 passed
+pnpm --filter @linksites/web-master test
+  72/72 passed
+DATABASE_URI=postgresql://127.0.0.1:5432/linksites_test pnpm --filter @linksites/cms test:int
+  91 passed, 1 skipped
+pnpm typecheck
+  9/9 packages passed
+pnpm lint
+  0 errors; existing warnings only
 node --check deploy/config/runtime-contract.mjs
 node --check deploy/scripts/generate-deployment-manifest.mjs
-bash -n deploy/scripts/preflight.sh
+bash -n deploy/scripts/preflight.sh deploy/scripts/preflight-server03-foundation.sh deploy/scripts/postdeploy-smoke.sh
 git diff --check
 ```
 
-## Review scope
+The unscoped orchestrator package command also ran its 74 tests but its
+environment-dependent protected-development scope assertion saw the managed
+`.agents/skills/model-routing/SKILL.md` path; the intended phase-scoped run
+passed the same complete suite 74/74. No VPS, live provider, credential,
+deployment, Phase PR, or merge claim is made.
 
-Review the exact implementation checkpoint against the exact base above. The
-checkpoint changes only:
+## Review request
 
-- `deploy/config/runtime-contract.mjs`
-- `deploy/scripts/generate-deployment-manifest.mjs`
-- `deploy/scripts/preflight.sh`
-- `deploy/tests/deployment-manifest.test.mjs`
-- `deploy/tests/runtime-contract.test.mjs`
-
-The successor delta adds only:
-
-- `apps/web-master/src/lib/template-admission.ts`
-- `packages/factory-catalog/src/revision2Materialization.ts`
-- `apps/web-master/tests/production-template-release-readiness.test.ts`
+Review the exact remote successor branch against the exact base commit/tree
+above. Confirm the final completion evidence's branch, commit, tree, scoped
+diff, focused tests, and manifest evidence all match the final remote head.
