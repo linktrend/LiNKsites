@@ -123,6 +123,8 @@ test('Server03 immutable publication is protected-main and artifact-only until P
   assert.ok(workflow.includes('artifactOnly'))
   assert.ok(workflow.includes('deploymentEligible'))
   assert.ok(workflow.includes('requiresPlatformAdmission'))
+  assert.ok(workflow.includes('sha256sum server03-release-manifest.json > server03-release-manifest.sha256'))
+  assert.ok(workflow.includes('server03-release-manifest.sha256'))
 })
 
 test('production migration runner accepts only real PostgreSQL URLs', async () => {

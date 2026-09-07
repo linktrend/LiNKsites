@@ -207,6 +207,7 @@ jobs:
               f"LINKSITES_ORCHESTRATOR_IMAGE=ghcr.io/linktrend/linksites-program-orchestrator@{os.environ['ORCHESTRATOR_DIGEST']}",
               f"LINKSITES_MIGRATIONS_IMAGE=ghcr.io/linktrend/linksites-migrations@{os.environ['MIGRATIONS_DIGEST']}",
           ]) + "\n")
+          sha256sum server03-release-manifest.json > server03-release-manifest.sha256
           PY
 
       - name: Upload immutable publication evidence
@@ -215,6 +216,7 @@ jobs:
           name: linksites-server03-release-${{ steps.identity.outputs.release_sha }}
           path: |
             server03-release-manifest.json
+            server03-release-manifest.sha256
             server03-release.env
           if-no-files-found: error
           retention-days: 90
