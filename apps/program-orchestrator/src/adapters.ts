@@ -174,6 +174,8 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   async resolveLibrary(siteId: string): Promise<Record<string, unknown>> { return this.boundary('library.verify', async () => { const consumption = await this.libraryEvidence(); if ('reference' in consumption) return { entryId: consumption.reference.entryId, revision: consumption.reference.releaseSourceCommitSha, releaseManifestSha256: consumption.reference.releaseManifestSha256, inventorySha256: consumption.reference.inventorySha256, status: consumption.reference.receiptType === 'candidate' ? 'draft_candidate' : 'approved', materialized: true, authority: 'linksites_local', libraryAuthority: 'reference_only', consumption, siteId }; return { entryId: consumption.entry.entryId, revision: this.config.libraryCommitSha, catalogChecksum: this.config.libraryCatalogChecksum, entryChecksum: this.config.libraryEntryChecksum, status: 'approved', materialized: true, verificationId: consumption.receipt.verificationId, consumption, siteId } }) }
 
   private async libraryEvidence(): Promise<LibraryProductionEvidence> {
+    if (process.env.LINKSITES_DEPLOYMENT_ENV === 'production' && process.env.LINKSITES_TEMPLATE_RELEASE_STATE !== 'ready') throw new Error('library:template-release-deferred')
+    if (process.env.LINKSITES_DEPLOYMENT_ENV === 'production' && process.env.LINKSITES_TEMPLATE_FORMAT !== 'revision2') throw new Error('library:legacy-template-contract-forbidden')
     if (process.env.LINKSITES_TEMPLATE_FORMAT === 'revision2') {
       const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT
       const sourceCommitSha = process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA
@@ -414,7 +416,12 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     const cms = await fetch(`${this.config.payloadBaseUrl}/api/pages?site=${encodeURIComponent(this.config.payloadSiteId)}&limit=1`, { headers: { Authorization: `users API-Key ${this.config.payloadApiKey}` } }).then((response) => response.ok).catch(() => false)
     const frontend = await fetch(`${this.config.webMasterBaseUrl}/api/healthz`).then(async (response) => response.ok && (await response.json() as { service?: unknown }).service === 'web-master').catch(() => false)
     const library = await Promise.resolve().then(() => {
-      execFileSync('git', ['-C', this.config.libraryRepositoryPath, 'cat-file', '-e', `${this.config.libraryCommitSha}^{commit}`], { stdio: 'ignore' })
+      const nativeV2Provider = process.env.LINKSITES_TEMPLATE_FORMAT === 'revision2'
+      const providerRoot = nativeV2Provider ? process.env.LINKSITES_LINKLIBRARIES_ROOT : this.config.libraryRepositoryPath
+      const providerCommit = nativeV2Provider ? process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA : this.config.libraryCommitSha
+      if (!providerRoot || !providerCommit) throw new Error('library provider identity is absent')
+      execFileSync('git', ['-C', providerRoot, 'cat-file', '-e', `${providerCommit}^{commit}`], { stdio: 'ignore' })
+      if (nativeV2Provider && process.env.LINKSITES_LINKLIBRARIES_TREE_SHA && execFileSync('git', ['-C', providerRoot, 'rev-parse', `${providerCommit}^{tree}`], { encoding: 'utf8' }).trim() !== process.env.LINKSITES_LINKLIBRARIES_TREE_SHA) throw new Error('native v2 provider tree mismatch')
       return true
     }).catch(() => false)
     // Exercise the actual durable boundary with a reversible write/read/delete,

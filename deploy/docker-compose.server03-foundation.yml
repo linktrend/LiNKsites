@@ -1,8 +1,7 @@
 name: linksites-foundation
 
 # Server03 runs the real CMS, renderer, worker and Program orchestrator with
-# the currently admitted marketing-smb-v1 artifact and private Traefik routes.
-# Reuse the canonical production definition so replacement-template deferral
-# cannot substitute a health-only runtime or disable existing intake.
+# private Traefik routes. Native v2 template-dependent rendering/publishing is
+# explicitly deferred until a selectable provider receipt is admitted.
 include:
   - docker-compose.deploy.yml
