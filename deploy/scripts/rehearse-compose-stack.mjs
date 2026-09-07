@@ -257,7 +257,16 @@ try {
     try {
       const stored = await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select state::text from lsites_ledger.program_runtime_states where org_id = '${localOrgId}' order by updated_at desc limit 1;`])
       const value = JSON.parse(stored.trim())
-      lastProgramDiagnostic = JSON.stringify({ programState: value.program?.state, issueCount: value.issues?.length, completedIssues: value.issues?.filter((issue) => issue.state === 'completed').length, completionState: value.completion?.state, outboxCount: value.outbox?.length, outboxStatus: value.outbox?.[0]?.status })
+      lastProgramDiagnostic = JSON.stringify({
+        programState: value.program?.state,
+        issueCount: value.issues?.length,
+        completedIssues: value.issues?.filter((issue) => issue.state === 'completed').length,
+        nonCompletedIssues: value.issues?.filter((issue) => issue.state !== 'completed').slice(0, 4).map((issue) => ({ issueId: issue.issueId, state: issue.state, gate: issue.gate })),
+        failedRuns: value.runs?.filter((run) => run.failure).slice(0, 4).map((run) => ({ issueId: run.issueId, failure: run.failure })),
+        completionState: value.completion?.state,
+        outboxCount: value.outbox?.length,
+        outboxStatus: value.outbox?.[0]?.status,
+      }).slice(0, 1800)
       return value.program?.state === 'completed' && value.issues?.length === 16 && value.issues.every((issue) => issue.state === 'completed') && value.completion?.state === 'emitted' && value.outbox?.length === 1 && value.outbox[0]?.status === 'delivered'
     } catch (error) { lastProgramDiagnostic = `ledger read failed: ${error instanceof Error ? error.message : String(error)}`; return false }
   }, 'the certified 16-issue Program fixture')
