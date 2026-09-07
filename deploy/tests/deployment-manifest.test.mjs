@@ -163,6 +163,9 @@ test('deferred native v2 provider state remains eligible for honest infrastructu
     assert.equal('catalogSha' in manifest.libraries, false)
     assert.deepEqual(manifest.deferredTemplates, [{ entryId: 'master-template-type-1', state: 'deferred', reason: 'native-v2-selectable-release-deferred', blocksActiveProvider: false }])
     assert.equal(manifest.platform.state, 'pending')
+    assert.equal(manifest.platform.artifactOnly, true)
+    assert.equal(manifest.platform.deploymentEligible, false)
+    assert.equal(manifest.platform.requiresPlatformAdmission, true)
     assert.equal(receipt.manifestSha256, createHash('sha256').update(bytes).digest('hex'))
   } finally {
     await rm(directory, { recursive: true, force: true })
