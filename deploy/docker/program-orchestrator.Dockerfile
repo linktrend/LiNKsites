@@ -1,7 +1,10 @@
 FROM node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed AS base
 WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-RUN apk add --no-cache libc6-compat git ca-certificates && corepack enable && corepack prepare pnpm@10.0.0 --activate
+RUN apk add --no-cache libc6-compat git ca-certificates \
+ && git config --system --add safe.directory /opt/linksites/linklibraries \
+ && corepack enable \
+ && corepack prepare pnpm@10.0.0 --activate
 
 FROM base AS runtime-source
 # The orchestrator is a source-runtime workspace application.  Preserve the
