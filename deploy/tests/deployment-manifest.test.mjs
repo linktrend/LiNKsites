@@ -34,8 +34,9 @@ async function nativeProviderFixture(options = {}) {
   const inventorySha256 = canonicalSha256(inventoryEntries)
   const inventory = { schemaVersion: 2, schemaRevision: 2, inventoryType: 'exhaustive_tree_inventory', root: 'artifact', complete: true, includesDirectories: true, includesFiles: true, includesSymlinks: false, entries: inventoryEntries, inventorySha256, artifactTreeSha1: '2'.repeat(40) }
   if (!options.omitInventory) await writeFile(join(releaseDirectory, 'inventory.json'), `${JSON.stringify(inventory)}\n`)
-  const dependencyProjectionSha256 = createHash('sha256').update('[]').digest('hex')
-  const dependencyLock = { schemaVersion: 2, schemaRevision: 2, lockType: 'deterministic_dependency_lock', manager: 'other', lockVersion: 'fixture-1', dependencies: [], lockSha256: dependencyProjectionSha256 }
+  const dependencyEntries = options.dependencyEntries ?? []
+  const dependencyProjectionSha256 = canonicalSha256(dependencyEntries)
+  const dependencyLock = { schemaVersion: 2, schemaRevision: 2, lockType: 'deterministic_dependency_lock', manager: 'other', lockVersion: 'fixture-1', dependencies: dependencyEntries, lockSha256: dependencyProjectionSha256 }
   const dependencyLockBytes = `${JSON.stringify(dependencyLock)}\n`
   const dependencyLockSha256 = createHash('sha256').update(dependencyLockBytes).digest('hex')
   const manifest = {
@@ -53,6 +54,8 @@ async function nativeProviderFixture(options = {}) {
     releaseSource: { releaseSourceCommitSha: 'f'.repeat(40), releaseSourceRepositoryTreeSha1: '1'.repeat(40) },
     extension: { extensionType: 'website_template', templateClass: 'shared_renderer_declarative', contentScope: { siteId: true, locale: true, publicationStatus: true }, draftOnly: true, directPublication: false, urls: ['https://example.invalid/template'], compatibilityDisposition: 'compatible', routes: [{ route: '/', page: 'source-inventory.json' }], assets: ['source-inventory.json'], urlPolicy: { provenanceUrls: ['https://example.invalid/provenance'], licenseUrls: ['https://example.invalid/license'], docsUrls: ['https://example.invalid/docs'] }, runtimeEndpointContracts: [], materialization: { mode: 'copy', sourceRoot: 'artifact', destinationRoot: 'output', commands: [], substitutions: [], outputs: ['source-inventory.json'], network: { allowNetwork: false, allowedHosts: [] } } },
   }
+  if (options.materializationOverrides) manifest.extension.materialization = { ...manifest.extension.materialization, ...options.materializationOverrides }
+  if (options.omitManifestField) delete manifest[options.omitManifestField]
   const manifestBytes = `${JSON.stringify(manifest)}\n`
   await writeFile(join(releaseDirectory, 'manifest.json'), manifestBytes)
   await writeFile(join(releaseDirectory, 'dependency-lock.json'), dependencyLockBytes)
@@ -60,7 +63,23 @@ async function nativeProviderFixture(options = {}) {
   const catalogueRecords = options.catalogueRecords ?? [catalogueRecord]
   const catalogue = { schemaVersion: 2, schemaRevision: 2, catalogueType: 'catalogue', recordsSha256: canonicalSha256(catalogueRecords), records: catalogueRecords }
   await writeFile(join(directory, 'indexes/v2/catalog.json'), `${JSON.stringify(catalogue)}\n`)
-  const receipt = {
+  const catalogueBytes = await readFile(join(directory, 'indexes/v2/catalog.json'))
+  const receipt = options.receiptType === 'verified_cache' ? {
+    schemaVersion: 2,
+    schemaRevision: 2,
+    receiptType: 'verified_cache',
+    sourceEvidence: { kind: 'external_repository_receipt', receiptId: 'fixture-cache', selectedRepositoryCommitSha: 'f'.repeat(40), selectedRepositoryTreeSha1: '1'.repeat(40), immutable: true },
+    releaseSource: manifest.releaseSource,
+    catalogueSha256: createHash('sha256').update(catalogueBytes).digest('hex'),
+    catalogueRecordsSha256: catalogue.recordsSha256,
+    entryId: manifest.entryId,
+    version: manifest.version,
+    releaseManifestSha256: createHash('sha256').update(manifestBytes).digest('hex'),
+    inventorySha256,
+    payloadSha256: manifest.payloadSha256,
+    artifactTreeSha1: manifest.artifactTreeSha1,
+    ...options.receiptOverrides,
+  } : {
     schemaVersion: 2,
     schemaRevision: 2,
     receiptType: 'consumption',
@@ -188,6 +207,11 @@ test('ready provider state requires an admitted selectable catalogue record and 
     ['non-selectable catalogue record', { recordOverrides: { selectability: 'non_selectable', lifecycle: 'draft', compatibility: 'unknown' } }, /catalogue selected record is not admitted\/selectable\/compatible/],
     ['missing selected catalogue record', { catalogueRecords: [] }, /exactly one selected entry\/version record/],
     ['missing artifact inventory', { omitInventory: true }, /artifact inventory/],
+    ['malformed governance', { recordOverrides: { governance: { qualification: { status: 'qualified', receiptId: 'fixture-qualification', independentPass: false }, admission: { status: 'admitted', receiptId: 'fixture-admission' } } } }, /governance\.qualification is invalid/],
+    ['incomplete manifest', { omitManifestField: 'extension' }, /manifest\.extension is missing/],
+    ['unknown dependency closure', { dependencyEntries: [{ name: 'runtime-a', version: '1.0.0', ecosystem: 'other', source: 'registry:fixture', integritySha256: 'a'.repeat(64), dependencies: ['runtime-missing'] }] }, /dependencyLock\.dependencies\[0\] closure is invalid/],
+    ['circular runtime dependency closure', { dependencyEntries: [{ name: 'runtime-a', version: '1.0.0', ecosystem: 'other', source: 'registry:fixture', integritySha256: 'a'.repeat(64), dependencies: ['runtime-b'] }, { name: 'runtime-b', version: '1.0.0', ecosystem: 'other', source: 'registry:fixture', integritySha256: 'b'.repeat(64), dependencies: ['runtime-a'] }] }, /circular runtime dependency/],
+    ['materializer network escape', { materializationOverrides: { network: { allowNetwork: true, allowedHosts: ['example.test'] } } }, /manifest\.extension\.materialization\.network is invalid/],
   ]
   for (const [label, options, expected] of cases) {
     const fixture = await nativeProviderFixture(options)
@@ -196,5 +220,27 @@ test('ready provider state requires an admitted selectable catalogue record and 
     } finally {
       await rm(fixture.directory, { recursive: true, force: true })
     }
+  }
+})
+
+test('verified-cache receipt catalogue digest is cryptographically bound to mounted catalogue bytes', async () => {
+  const fixture = await nativeProviderFixture({ receiptType: 'verified_cache', receiptOverrides: { catalogueSha256: '0'.repeat(64) } })
+  try {
+    assert.throws(() => execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', join(fixture.directory, 'manifest.json')], { cwd: root, env: fixture.env, encoding: 'utf8' }), /catalogueSha256 is not bound to the mounted catalogue bytes/)
+  } finally {
+    await rm(fixture.directory, { recursive: true, force: true })
+  }
+})
+
+test('mounted catalogue byte drift fails closed even when its JSON remains well formed', async () => {
+  const fixture = await nativeProviderFixture()
+  try {
+    const cataloguePath = join(fixture.directory, 'indexes/v2/catalog.json')
+    const catalogue = JSON.parse(await readFile(cataloguePath, 'utf8'))
+    catalogue.records[0].summary = 'stale mounted bytes'
+    await writeFile(cataloguePath, `${JSON.stringify(catalogue)}\n`)
+    assert.throws(() => execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', join(fixture.directory, 'manifest.json')], { cwd: root, env: fixture.env, encoding: 'utf8' }), /mounted native v2 provider catalogue bytes do not match the configured provider commit/)
+  } finally {
+    await rm(fixture.directory, { recursive: true, force: true })
   }
 })
