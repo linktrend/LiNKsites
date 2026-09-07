@@ -34,6 +34,9 @@ test('Server03 uses the canonical operational Compose services and admitted prov
       assert.notEqual(foundation.services[name].environment.LINKSITES_TEMPLATE_RELEASE_STATE, 'pending')
       assert.ok(foundation.services[name].volumes.some((volume) => volume.target === '/opt/linksites/linklibraries' && volume.read_only))
     }
+    assert.equal(foundation.services['web-master'].environment.LINKSITES_TEMPLATE_FORMAT, 'revision2')
+    assert.equal(foundation.services['program-orchestrator'].environment.LINKSITES_TEMPLATE_FORMAT, 'revision2')
+    assert.ok(!canonical.includes('LINKSITES_ADMITTED_TEMPLATE_SHA'))
     assert.ok(foundation.services['web-master'].labels['traefik.http.routers.linksites-preview.middlewares'])
     assert.equal(foundation.services['web-master'].ports?.length ?? 0, 0)
   } finally {

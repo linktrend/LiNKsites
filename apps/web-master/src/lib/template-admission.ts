@@ -24,6 +24,19 @@ export class TemplateAdmissionError extends Error {
   }
 }
 
+export const assertProductionTemplateReleaseReady = (templateId: string): void => {
+  if (process.env.LINKSITES_DEPLOYMENT_ENV !== "production") return;
+  if (process.env.LINKSITES_TEMPLATE_RELEASE_STATE !== "ready") {
+    throw new TemplateAdmissionError("template-dependent rendering and publishing are deferred until a native Revision 2 release is admitted");
+  }
+  if (process.env.LINKSITES_TEMPLATE_FORMAT !== "revision2") {
+    throw new TemplateAdmissionError("production template selection requires the native Revision 2 materializer");
+  }
+  if (process.env.LINKSITES_TEMPLATE_ID && process.env.LINKSITES_TEMPLATE_ID !== templateId) {
+    throw new TemplateAdmissionError(`production template selection is pinned to ${process.env.LINKSITES_TEMPLATE_ID}`);
+  }
+};
+
 const parseJson = (raw: string, label: string): unknown => {
   try {
     return JSON.parse(raw) as unknown;
@@ -116,6 +129,7 @@ export const getAdmittedTemplateEvidence = (): LibraryConsumptionEvidence => loa
 export const getAdmittedTemplateReceipt = (): AdmittedTemplateReceipt => loadAdmittedEvidence().receipt;
 
 export const getAdmittedRevision2Template = () => {
+  assertProductionTemplateReleaseReady(process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_PIN.entryId);
   const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT ?? process.env.LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH;
   if (!providerRoot) throw new TemplateAdmissionError("Revision 2 provider root is not configured");
   const result = materializeRevision2WebsiteTemplate({

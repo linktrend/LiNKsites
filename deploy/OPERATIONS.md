@@ -3,14 +3,15 @@
 This document prepares a deployment. It does not authorize or perform VPS,
 DNS, public-domain, Cloudflare, Traefik, or customer-data changes.
 
-## Server03 operational acceptance with the admitted provider
+## Server03 operational acceptance with template publishing deferred
 
-Use the exact admitted `marketing-smb-v1` artifact and evidence with the real
+Use a manifest whose native v2 template state is `deferred` with the real
 production services. `docker-compose.server03-foundation.yml` includes the
 canonical production Compose definition under the `linksites-foundation`
 project name; its preflight and smoke entrypoints reuse the same production
-checks. The unfinished `master-template-type-1` replacement is recorded in
-`deferredTemplates` and does not disable rendering or Program intake.
+checks. The unfinished `master-template-type-1` release remains non-selectable;
+template-dependent rendering, Program intake, and publishing are blocked while
+the infrastructure and service runtime are accepted.
 
 Require exact image and migration identities, CMS/worker operation, a complete
 private one-site Program run, real rendered preview with noindex, delivered
@@ -25,7 +26,7 @@ scrape target and backup textfile metrics exist. Validate with `promtool check
 rules` before reload. Runtime attention, absent metrics, failed health and stale
 backup/restore evidence must alert; normal intake is expected.
 
-Generate a new immutable manifest for later replacement-template adoption and
+Generate a new immutable manifest for later native-v2 template adoption and
 repeat provider admission, preview and rollback verification. Never alter a
 released manifest in place. Missing production Platform authority still blocks
 production migration and startup; disposable proof does not supply that authority.

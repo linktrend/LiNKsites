@@ -23,7 +23,9 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
 const manifest = JSON.parse(await readFile(process.argv[2], 'utf8'))
-if (manifest.libraries?.state !== 'ready' || manifest.libraries?.entryId !== 'marketing-smb-v1') throw new Error('operational acceptance requires the currently admitted marketing-smb-v1 provider')
+if (!['deferred', 'ready'].includes(manifest.libraries?.state) || manifest.libraries?.entryId !== 'master-template-type-1') throw new Error('manifest must carry an explicit native v2 template release state')
+if (manifest.libraries.state === 'deferred' && (manifest.libraries.publishingEligible !== false || !manifest.libraries.blockedCapabilities?.includes('template-dependent-publishing'))) throw new Error('deferred template release must block template-dependent publishing')
+if (manifest.libraries.state === 'ready' && manifest.libraries.publishingEligible !== true) throw new Error('ready template release must explicitly enable publishing only after native v2 admission')
 if (manifest.platform?.state !== 'ready' || !/^[a-f0-9]{40}$/i.test(manifest.platform.migrationsAppliedSha ?? '')) throw new Error('operational acceptance requires an exact admitted Platform migration SHA')
 const checksum = async (file) => createHash('sha256').update(await readFile(resolve(process.cwd(), file))).digest('hex')
 const cmsDatabase = new URL(process.env.DATABASE_URI)
@@ -61,20 +63,17 @@ const payloadIndex = manifest.schemas?.payloadMigrationIndex
 if (!payloadIndex || await checksum(payloadIndex.file) !== payloadIndex.sha256) throw new Error('Payload migration index checksum does not match the release manifest')
 for (const row of manifest.schemas?.payloadMigrations ?? []) if (await checksum(row.file) !== row.sha256) throw new Error(`Payload migration source checksum mismatch: ${row.file}`)
 const library = manifest.libraries
-if (!library?.catalogSha || !library?.entrySha || library.catalogSha !== library.entrySha) throw new Error('manifest must bind catalog and entry evidence to one exact LiNKlibraries commit')
-if (library.catalogSha !== process.env.LINKLIBRARIES_CATALOG_SHA || library.entrySha !== process.env.LINKLIBRARIES_ENTRY_SHA) throw new Error('LiNKlibraries ref does not match the release manifest')
-if (process.env.W2_02_LIBRARY_COMMIT_SHA && process.env.W2_02_LIBRARY_COMMIT_SHA !== library.catalogSha) throw new Error('orchestrator library commit does not match the release manifest')
-if (process.env.W2_02_LIBRARY_CATALOG_SHA256 && process.env.W2_02_LIBRARY_CATALOG_SHA256 !== library.catalogContentSha256) throw new Error('orchestrator catalog checksum does not match the release manifest')
-if (process.env.W2_02_LIBRARY_ENTRY_SHA256 && process.env.W2_02_LIBRARY_ENTRY_SHA256 !== library.entryContentSha256) throw new Error('orchestrator entry checksum does not match the release manifest')
 const artifact = process.env.LINKLIBRARIES_ARTIFACT_PATH
-const git = (args) => execFileSync('git', ['-C', artifact, ...args], { encoding: 'utf8' })
-if (git(['rev-parse', '--is-inside-work-tree']).trim() !== 'true') throw new Error('LINKLIBRARIES_ARTIFACT_PATH is not a Git working tree')
-git(['cat-file', '-e', `${library.catalogSha}^{commit}`])
-const catalog = git(['show', `${library.catalogSha}:${library.catalogPath}`])
-const entry = git(['show', `${library.entrySha}:${library.entryPath}`])
-if (createHash('sha256').update(catalog).digest('hex') !== library.catalogContentSha256) throw new Error('LiNKlibraries catalog content checksum does not match the release manifest')
-if (createHash('sha256').update(entry).digest('hex') !== library.entryContentSha256) throw new Error('LiNKlibraries entry content checksum does not match the release manifest')
-if (!JSON.parse(catalog).entries?.some((row) => row.entryId === library.entryId && row.status === 'approved')) throw new Error('LiNKlibraries manifest entry is not approved in the exact catalog')
+const git = (args) => execFileSync('git', ['-C', artifact, ...args], { encoding: 'utf8' }).trim()
+if (!artifact || git(['rev-parse', '--is-inside-work-tree']) !== 'true') throw new Error('LINKLIBRARIES_ARTIFACT_PATH is not a Git working tree')
+if (git(['rev-parse', 'HEAD']) !== library.providerCommitSha || git(['rev-parse', 'HEAD^{tree}']) !== library.providerTreeSha) throw new Error('native v2 provider checkout identity does not match the release manifest')
+if (process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA !== library.providerCommitSha || process.env.LINKSITES_LINKLIBRARIES_TREE_SHA !== library.providerTreeSha) throw new Error('native v2 provider identity does not match the release manifest')
+if (library.state === 'ready') {
+  const receiptRaw = process.env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON
+  if (!receiptRaw || createHash('sha256').update(receiptRaw).digest('hex') !== library.receiptSha256) throw new Error('native v2 provider receipt does not match the release manifest')
+} else if (process.env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON) {
+  throw new Error('deferred template release must not carry provider admission receipt evidence')
+}
 NODE
 docker compose --env-file "$runtime_env" -f deploy/docker-compose.deploy.yml config --quiet
 echo 'LiNKsites Phase 2 preflight passed; this command performed no deployment.'

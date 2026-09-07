@@ -22,10 +22,15 @@ const base = {
   LINKAUTOWORK_OUTBOX_PATH: '/var/lib/linksites/outbox.json',
   LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: secret,
   LINKAUTOWORK_EVENT_GRANTS: JSON.stringify([{ eventName: 'demo.completed', environments: ['production'], orgIds: ['linksites-test'] }]),
-  LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: '/var/lib/linksites/linklibraries',
-  LINKSITES_ADMITTED_TEMPLATE_SHA: 'a'.repeat(40),
-  LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON: JSON.stringify({ receipt: 'fixture' }),
-  LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON: JSON.stringify({ evidence: 'fixture' }),
+  LINKSITES_TEMPLATE_RELEASE_STATE: 'deferred',
+  LINKSITES_TEMPLATE_FORMAT: 'revision2',
+  LINKSITES_TEMPLATE_ID: 'master-template-type-1',
+  LINKSITES_TEMPLATE_VERSION: '2.0.0-a1.1',
+  LINKSITES_LINKLIBRARIES_ROOT: '/var/lib/linksites/linklibraries',
+  LINKSITES_LINKLIBRARIES_COMMIT_SHA: 'd'.repeat(40),
+  LINKSITES_LINKLIBRARIES_TREE_SHA: 'e'.repeat(40),
+  LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: 'f'.repeat(64),
+  LINKSITES_LINKLIBRARIES_RECEIPT_PATH: '/var/lib/linksites/linklibraries/receipt.json',
   NEXT_PUBLIC_CMS_PROVIDER: 'payload',
   PAYLOAD_BASE_URL: 'https://cms.example.test',
   NEXT_PUBLIC_PAYLOAD_API_URL: 'https://cms.example.test',
@@ -74,30 +79,35 @@ test('rejects preview token drift between web-master and orchestrator interfaces
   assert.ok(result.errors.some((error) => error.name === 'PREVIEW_ACCESS_TOKEN'))
 })
 
-test('pending provider cannot bypass operational renderer admission', () => {
-  const pending = {
-    ...base,
-    LINKSITES_TEMPLATE_RELEASE_STATE: 'pending',
-  }
-  delete pending.LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH
-  delete pending.LINKSITES_ADMITTED_TEMPLATE_SHA
-  delete pending.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON
-  delete pending.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON
-  const result = validateRuntimeConfig(pending, 'web-master')
+for (const state of [undefined, 'pending', 'unknown', 'quarantined']) {
+  test(`operational services reject ${state ?? 'missing'} template release state`, () => {
+    const environment = { ...base }
+    if (state === undefined) delete environment.LINKSITES_TEMPLATE_RELEASE_STATE
+    else environment.LINKSITES_TEMPLATE_RELEASE_STATE = state
+    for (const service of ['web-master', 'program-orchestrator']) {
+      const result = validateRuntimeConfig(environment, service)
+      assert.equal(result.ok, false, `${service} must reject ${state ?? 'missing'}`)
+      assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_STATE'))
+    }
+  })
+}
+
+test('ready template release requires a valid native v2 receipt', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'ready' }, 'web-master')
   assert.equal(result.ok, false)
-  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON'))
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON'))
 })
 
-test('operational renderer rejects legacy pending-provider mode', () => {
-  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'web-master')
+test('deferred template release rejects legacy v1 admission inputs', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_ADMITTED_TEMPLATE_SHA: 'a'.repeat(40) }, 'web-master')
   assert.equal(result.ok, false)
-  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_STATE'))
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_ADMITTED_TEMPLATE_SHA'))
 })
 
-test('operational orchestrator rejects legacy pending-provider mode', () => {
-  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'program-orchestrator')
+test('deferred template release rejects provider admission receipt evidence', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: JSON.stringify({ schemaVersion: 2 }) }, 'web-master')
   assert.equal(result.ok, false)
-  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_STATE'))
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON'))
 })
 
 test('accepts a valid first numeric Payload document ID and rejects an invalid one', () => {

@@ -96,15 +96,22 @@ services:
       payload:
         condition: service_healthy
     environment:
-      # The renderer loads only the same immutable LiNKlibraries checkout that
-      # is pinned by the release manifest. The admission SHA is deliberately
-      # injected from that manifest rather than copied as a second operator
-      # value.
-      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /opt/linksites/linklibraries
-      LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
+      # Runtime acceptance may use the current provider checkout as a
+      # read-only reference, but deferred state prevents template selection or
+      # publishing until a native v2 receipt is supplied.
+      LINKSITES_TEMPLATE_RELEASE_STATE: ${LINKSITES_TEMPLATE_RELEASE_STATE:?set deferred or ready}
+      LINKSITES_TEMPLATE_FORMAT: revision2
+      LINKSITES_TEMPLATE_ID: ${LINKSITES_TEMPLATE_ID:-master-template-type-1}
+      LINKSITES_TEMPLATE_VERSION: ${LINKSITES_TEMPLATE_VERSION:-2.0.0-a1.1}
+      LINKSITES_LINKLIBRARIES_ROOT: /opt/linksites/linklibraries
+      LINKSITES_LINKLIBRARIES_COMMIT_SHA: ${LINKSITES_LINKLIBRARIES_COMMIT_SHA:-dbf749cb48ffa03bf2e702d37b608f14c63e0520}
+      LINKSITES_LINKLIBRARIES_TREE_SHA: ${LINKSITES_LINKLIBRARIES_TREE_SHA:-a968c801f0fa7cbeac40edc788a4f081617e2759}
+      LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: ${LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256:-59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23}
+      LINKSITES_LINKLIBRARIES_RECEIPT_PATH: ${LINKSITES_LINKLIBRARIES_RECEIPT_PATH:-/opt/linksites/linklibraries/receipt.json}
+      LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: ${LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON:-}
     volumes:
       - linksites-runtime:/var/lib/linksites:ro
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/opt/linksites/linklibraries:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set native v2 LiNKlibraries provider checkout}:/opt/linksites/linklibraries:ro
     tmpfs: [/tmp]
     networks: [internal, edge, egress]
     labels:
@@ -165,10 +172,17 @@ services:
       W2_02_PREVIEW_ACCESS_TOKEN: ${W2_02_PREVIEW_ACCESS_TOKEN:?set protected preview token}
       W2_05_OUTCOME_GATEWAY_SECRET: ${W2_05_OUTCOME_GATEWAY_SECRET:?set outcome gateway secret}
       W2_05_OUTCOME_GATEWAY_KEY_ID: ${W2_05_OUTCOME_GATEWAY_KEY_ID:?set outcome gateway key id}
+      LINKSITES_TEMPLATE_RELEASE_STATE: ${LINKSITES_TEMPLATE_RELEASE_STATE:?set deferred or ready}
+      LINKSITES_TEMPLATE_FORMAT: revision2
+      LINKSITES_TEMPLATE_ID: ${LINKSITES_TEMPLATE_ID:-master-template-type-1}
+      LINKSITES_TEMPLATE_VERSION: ${LINKSITES_TEMPLATE_VERSION:-2.0.0-a1.1}
+      LINKSITES_LINKLIBRARIES_ROOT: /opt/linksites/linklibraries
+      LINKSITES_LINKLIBRARIES_COMMIT_SHA: ${LINKSITES_LINKLIBRARIES_COMMIT_SHA:-dbf749cb48ffa03bf2e702d37b608f14c63e0520}
+      LINKSITES_LINKLIBRARIES_TREE_SHA: ${LINKSITES_LINKLIBRARIES_TREE_SHA:-a968c801f0fa7cbeac40edc788a4f081617e2759}
+      LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: ${LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256:-59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23}
+      LINKSITES_LINKLIBRARIES_RECEIPT_PATH: ${LINKSITES_LINKLIBRARIES_RECEIPT_PATH:-/opt/linksites/linklibraries/receipt.json}
+      LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: ${LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON:-}
       W2_02_LIBRARY_REPOSITORY_PATH: ${W2_02_LIBRARY_REPOSITORY_PATH:?set mounted library repository path}
-      W2_02_LIBRARY_COMMIT_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
-      W2_02_LIBRARY_CATALOG_SHA256: ${LINKLIBRARIES_CATALOG_CONTENT_SHA256:?set exact LiNKlibraries catalog checksum}
-      W2_02_LIBRARY_ENTRY_SHA256: ${LINKLIBRARIES_ENTRY_CONTENT_SHA256:?set exact LiNKlibraries entry checksum}
     depends_on:
       payload:
         condition: service_healthy
@@ -177,7 +191,7 @@ services:
     networks: [internal, egress]
     volumes:
       - linksites-runtime:/var/lib/linksites
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/opt/linksites/linklibraries:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set native v2 LiNKlibraries provider checkout}:/opt/linksites/linklibraries:ro
 
 networks:
   edge:
