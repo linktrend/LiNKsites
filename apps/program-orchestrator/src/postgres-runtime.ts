@@ -11,7 +11,16 @@ export interface PostgresExecutor {
   end?: () => Promise<void>
 }
 
-const safeHash = (value: unknown): string => createHash('sha256').update(JSON.stringify(value)).digest('hex')
+// PostgreSQL jsonb does not preserve object-key insertion order. Hash a
+// canonical representation so a state written by Node still verifies after a
+// jsonb round trip (arrays deliberately retain their semantic order).
+const stableJson = (value: unknown): string => value === null || typeof value !== 'object'
+  ? JSON.stringify(value)
+  : Array.isArray(value)
+    ? `[${value.map(stableJson).join(',')}]`
+    : `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${stableJson((value as Record<string, unknown>)[key])}`).join(',')}}`
+
+const safeHash = (value: unknown): string => createHash('sha256').update(stableJson(value)).digest('hex')
 
 /**
  * Production state boundary. The table is intentionally migration-owned: this
