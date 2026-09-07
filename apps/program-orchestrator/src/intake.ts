@@ -9,7 +9,18 @@ import type { Composition } from './composition.ts'
  */
 export { FileWorkIntakePort }
 
+export function templateDependentOperationsEnabled(): boolean {
+  return process.env.LINKSITES_W2_04_LOCAL_PROOF === '1' ||
+    process.env.LINKSITES_LOCAL_COMPOSE_PROOF === '1' ||
+    process.env.LINKSITES_DEPLOYMENT_ENV !== 'production' ||
+    process.env.LINKSITES_TEMPLATE_RELEASE_STATE === 'ready'
+}
+
 export async function runFirstReadyLead(composition: Composition): Promise<LeadResearchPackage | null> {
+  // Keep Server03 health/readiness available while a template release is
+  // deferred, but do not pull or claim work that would render or publish a
+  // site. The ready-state preflight is the separate admission gate.
+  if (!templateDependentOperationsEnabled()) return null
   const items = await composition.intake.pullReady(1, new Date().toISOString())
   const item = items[0]
   if (!item) return null

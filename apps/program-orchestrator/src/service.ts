@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 import { configFromEnvironment, createProductionComposition } from './composition.ts'
-import { runFirstReadyLead } from './intake.ts'
+import { runFirstReadyLead, templateDependentOperationsEnabled } from './intake.ts'
 
 const port = Number(process.env.PORT ?? '3000')
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be an integer between 1 and 65535')
@@ -37,6 +37,10 @@ const server = createServer(async (request, response) => {
     for await (const chunk of request) chunks.push(Buffer.from(chunk))
     try {
       if (!composition.leadResearchIngress) throw new Error('production intake ingress is unavailable outside production mode')
+      if (!templateDependentOperationsEnabled()) {
+        response.writeHead(503, { 'content-type': 'application/json', 'cache-control': 'no-store' }).end(JSON.stringify({ error: 'template-dependent intake is deferred' }))
+        return
+      }
       const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as unknown
       if (!body || typeof body !== 'object' || !('envelope' in body) || !('timestamp' in body) || !('nonce' in body)) throw new Error('invalid gateway request')
       const intake = await composition.leadResearchIngress.accept(body as Parameters<typeof composition.leadResearchIngress.accept>[0])

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
 import {
@@ -112,8 +113,16 @@ function readProviderJson(providerRoot: string, path: string): unknown {
 }
 
 const readReceipt = (input: Revision2MaterializationInput, releaseRoot: string): unknown => {
-  if (input.receiptPath && !providerFileIsConfined(input.providerRoot, resolve(input.receiptPath))) {
-    throw new Error('explicit provider receipt path is missing, non-regular, symlinked, or outside provider root')
+  if (input.receiptPath) {
+    const explicitPath = resolve(input.receiptPath)
+    if (!providerFileIsConfined(input.providerRoot, explicitPath)) {
+      throw new Error('explicit provider receipt path is missing, non-regular, symlinked, or outside provider root')
+    }
+    try {
+      return json(explicitPath)
+    } catch (error) {
+      throw new Error(`explicit provider receipt is invalid JSON: ${error instanceof Error ? error.message : 'invalid JSON'}`)
+    }
   }
   const candidates = [input.receiptPath, resolve(releaseRoot, 'receipt.json'), resolve(releaseRoot, 'release-receipt.json'), resolve(releaseRoot, 'cache-receipt.json'), resolve(input.providerRoot, 'docs/evidence/master-website-template-v2/a1-provider-gate/provider-gate-receipt.json'), resolve(input.providerRoot, 'materialization/cache/cache-receipt.json')].filter((candidate): candidate is string => Boolean(candidate))
   for (const candidate of candidates) {
@@ -153,6 +162,18 @@ const readReceipt = (input: Revision2MaterializationInput, releaseRoot: string):
   throw new Error(`no Revision 2 receipt found for ${input.entryId}@${input.version}`)
 }
 
+function providerCheckoutIdentity(providerRoot: string, pin: Revision2ProviderPin): readonly string[] {
+  try {
+    const git = (...args: string[]) => execFileSync('git', ['-C', providerRoot, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
+    const errors: string[] = []
+    if (git('rev-parse', 'HEAD') !== pin.providerCommitSha) errors.push('provider checkout commit does not match the configured provider commit')
+    if (git('rev-parse', 'HEAD^{tree}') !== pin.providerTreeSha) errors.push('provider checkout tree does not match the configured provider tree')
+    return errors
+  } catch {
+    return ['provider checkout is not a readable Git worktree']
+  }
+}
+
 /** Read-only provider release materialization. Provider bytes never enter the repository. */
 export function materializeRevision2WebsiteTemplate(input: Revision2MaterializationInput): Revision2Result<Revision2MaterializedWebsiteTemplate> {
   const providerRoot = resolve(input.providerRoot)
@@ -160,6 +181,8 @@ export function materializeRevision2WebsiteTemplate(input: Revision2Materializat
   const artifactRoot = resolve(releaseRoot, 'artifact')
   const errors: string[] = []
   if (!confined(providerRoot, releaseRoot) || !confined(providerRoot, artifactRoot)) return failure(['provider release path escapes provider root'])
+  errors.push(...providerCheckoutIdentity(providerRoot, input.pin))
+  if (errors.length) return failure(errors)
   let bundle: unknown
   try {
     const cataloguePath = resolve(providerRoot, 'indexes/v2/catalog.json')
