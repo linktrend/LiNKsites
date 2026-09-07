@@ -98,6 +98,16 @@ test('ready template release requires a valid native v2 receipt', () => {
   assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON'))
 })
 
+test('ready template release rejects a legacy v1 receipt before mounted binding', () => {
+  const result = validateRuntimeConfig({
+    ...base,
+    LINKSITES_TEMPLATE_RELEASE_STATE: 'ready',
+    LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: JSON.stringify({ schemaVersion: 1, receiptType: 'consumption', entryId: base.LINKSITES_TEMPLATE_ID, version: base.LINKSITES_TEMPLATE_VERSION }),
+  }, 'web-master')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON' && error.error.includes('Revision 2 schema 2.2')))
+})
+
 test('deferred template release rejects legacy v1 admission inputs', () => {
   const result = validateRuntimeConfig({ ...base, LINKSITES_ADMITTED_TEMPLATE_SHA: 'a'.repeat(40) }, 'web-master')
   assert.equal(result.ok, false)

@@ -1,4 +1,7 @@
 import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
+import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs'
+import { relative, resolve, sep } from 'node:path'
 
 export const CONFIG_SCHEMA_VERSION = '1.2.0'
 export const TEMPLATE_RELEASE_STATES = Object.freeze(['deferred', 'ready'])
@@ -9,6 +12,74 @@ const sha256 = /^[a-f0-9]{64}$/i
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const required = (name, format, secret = false) => ({ name, required: true, format, secret })
+
+const canonicalJson = (value) => value === null || typeof value !== 'object'
+  ? JSON.stringify(value)
+  : Array.isArray(value)
+    ? `[${value.map(canonicalJson).join(',')}]`
+    : `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(',')}}`
+
+const sha256Bytes = (value) => createHash('sha256').update(value).digest('hex')
+const sha256Json = (value) => sha256Bytes(canonicalJson(value))
+
+function pathIsConfined(root, candidate) {
+  const lexicalRoot = resolve(root)
+  const lexicalCandidate = resolve(candidate)
+  const prefix = lexicalRoot.endsWith(sep) ? lexicalRoot : `${lexicalRoot}${sep}`
+  if (lexicalCandidate !== lexicalRoot && !lexicalCandidate.startsWith(prefix)) return false
+  try {
+    const rootStat = lstatSync(lexicalRoot)
+    if (rootStat.isSymbolicLink() || !rootStat.isDirectory()) return false
+    const realRoot = resolve(realpathSync(lexicalRoot))
+    let current = lexicalRoot
+    for (const part of relative(lexicalRoot, lexicalCandidate).split(sep).filter(Boolean)) {
+      current = resolve(current, part)
+      const stat = lstatSync(current)
+      if (stat.isSymbolicLink()) return false
+    }
+    const realCandidate = resolve(realpathSync(lexicalCandidate))
+    const realPrefix = realRoot.endsWith(sep) ? realRoot : `${realRoot}${sep}`
+    return (realCandidate === realRoot || realCandidate.startsWith(realPrefix)) && lstatSync(lexicalCandidate).isFile()
+  } catch {
+    return false
+  }
+}
+
+function mountedProviderRoot(environment, override) {
+  if (override) return resolve(override)
+  const configuredRoot = environment.LINKSITES_LINKLIBRARIES_ROOT
+  // The deployment preflight runs on the host while the service runs with the
+  // container path. Use the host artifact only when the configured mount path
+  // is not present; never silently substitute it inside the service.
+  if (configuredRoot && existsSync(configuredRoot)) return resolve(configuredRoot)
+  if (environment.LINKLIBRARIES_ARTIFACT_PATH && existsSync(environment.LINKLIBRARIES_ARTIFACT_PATH)) return resolve(environment.LINKLIBRARIES_ARTIFACT_PATH)
+  return configuredRoot ? resolve(configuredRoot) : null
+}
+
+function mountedReceiptPath(environment, root) {
+  const configuredPath = environment.LINKSITES_LINKLIBRARIES_RECEIPT_PATH
+  const configuredRoot = environment.LINKSITES_LINKLIBRARIES_ROOT
+  if (!configuredPath) return null
+  if (configuredRoot) {
+    const configuredRootPath = resolve(configuredRoot)
+    const candidate = resolve(configuredPath)
+    const prefix = configuredRootPath.endsWith(sep) ? configuredRootPath : `${configuredRootPath}${sep}`
+    if (candidate.startsWith(prefix)) return resolve(root, relative(configuredRootPath, candidate))
+  }
+  return resolve(configuredPath)
+}
+
+function readJsonFile(root, path, label) {
+  if (!pathIsConfined(root, path)) throw new Error(`${label} is missing, non-regular, symlinked, or outside the mounted provider root`)
+  const bytes = readFileSync(path)
+  try { return { bytes, value: JSON.parse(bytes.toString('utf8')) } } catch { throw new Error(`${label} is not valid JSON`) }
+}
+
+function readCommittedFile(root, path, label) {
+  const relativePath = relative(resolve(root), resolve(path))
+  if (!relativePath || relativePath.startsWith(`..${sep}`) || relativePath === '..') throw new Error(`${label} is outside the committed provider checkout`)
+  try { return execFileSync('git', ['-C', root, 'show', `HEAD:${relativePath}`]) } catch { throw new Error(`${label} is not present in the configured provider commit`) }
+}
 
 /**
  * This is the executable deployment configuration contract. It deliberately
@@ -176,7 +247,7 @@ export function validateRuntimeConfig(environment, service) {
   return { ok: errors.length === 0, service, schemaVersion: CONFIG_SCHEMA_VERSION, errors }
 }
 
-export function validateNativeV2Receipt(raw, environment = {}) {
+function validateNativeV2ReceiptShape(raw, environment = {}) {
   if (typeof raw !== 'string' || !raw.trim()) return 'ready template releases require a native Revision 2 receipt'
   let receipt
   try { receipt = JSON.parse(raw) } catch { return 'must be valid native Revision 2 receipt JSON' }
@@ -200,6 +271,54 @@ export function validateNativeV2Receipt(raw, environment = {}) {
   if (receipt.receiptType === 'consumption' && (typeof receipt.receiptId !== 'string' || !/^[a-z0-9][a-z0-9._-]*$/.test(receipt.receiptId) || !receipt.issuedAt || Number.isNaN(Date.parse(receipt.issuedAt)) || !receipt.issuer || typeof receipt.issuer !== 'object' || !Array.isArray(receipt.evidence) || receipt.evidence.length < 1 || receipt.result !== 'pass' || typeof receipt.consumerId !== 'string' || !['inspect', 'materialize', 'test'].includes(receipt.consumptionMode) || typeof receipt.consumerMaterializedTreeSha1 !== 'string' || !sha1.test(receipt.consumerMaterializedTreeSha1))) return 'consumption receipt must be a passing native materialization/test receipt'
   if (receipt.receiptType === 'verified_cache' && (!receipt.sourceEvidence || receipt.sourceEvidence.kind !== 'external_repository_receipt' || receipt.sourceEvidence.immutable !== true)) return 'verified_cache receipt must carry immutable external source evidence'
   return null
+}
+
+export function readAndVerifyNativeV2Receipt(environment, { providerRoot: providerRootOverride, expectedRaw } = {}) {
+  try {
+    const providerRoot = mountedProviderRoot(environment, providerRootOverride)
+    const receiptPath = providerRoot && mountedReceiptPath(environment, providerRoot)
+    if (!providerRoot || !receiptPath) throw new Error('ready template releases require a mounted native Revision 2 receipt path')
+    const receiptFile = readJsonFile(providerRoot, receiptPath, 'mounted native Revision 2 receipt')
+    const raw = receiptFile.bytes.toString('utf8')
+    const suppliedRaw = expectedRaw ?? environment.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON
+    if (typeof suppliedRaw !== 'string' || suppliedRaw !== raw) throw new Error('configured native v2 receipt bytes do not exactly match the mounted receipt')
+    const providerCommit = execFileSync('git', ['-C', providerRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+    const providerTree = execFileSync('git', ['-C', providerRoot, 'rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim()
+    if (providerCommit !== environment.LINKSITES_LINKLIBRARIES_COMMIT_SHA || providerTree !== environment.LINKSITES_LINKLIBRARIES_TREE_SHA) throw new Error('mounted native v2 provider commit/tree does not match configured identity')
+    if (!readCommittedFile(providerRoot, receiptPath, 'mounted native Revision 2 receipt').equals(receiptFile.bytes)) throw new Error('mounted native Revision 2 receipt bytes do not match the configured provider commit')
+    const shapeError = validateNativeV2ReceiptShape(raw, environment)
+    if (shapeError) throw new Error(shapeError)
+    const receipt = receiptFile.value
+    const releaseRoot = resolve(providerRoot, 'registry/v2/entries', environment.LINKSITES_TEMPLATE_ID, 'versions', environment.LINKSITES_TEMPLATE_VERSION)
+    const manifestFile = readJsonFile(providerRoot, resolve(releaseRoot, 'manifest.json'), 'mounted native v2 release manifest')
+    const dependencyLockFile = readJsonFile(providerRoot, resolve(releaseRoot, 'dependency-lock.json'), 'mounted native v2 dependency lock')
+    if (!readCommittedFile(providerRoot, resolve(releaseRoot, 'manifest.json'), 'mounted native v2 release manifest').equals(manifestFile.bytes)) throw new Error('mounted native v2 release manifest bytes do not match the configured provider commit')
+    if (!readCommittedFile(providerRoot, resolve(releaseRoot, 'dependency-lock.json'), 'mounted native v2 dependency lock').equals(dependencyLockFile.bytes)) throw new Error('mounted native v2 dependency lock bytes do not match the configured provider commit')
+    const manifest = manifestFile.value
+    const dependencyLock = dependencyLockFile.value
+    if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) throw new Error('mounted native v2 release manifest is not an object')
+    if (!dependencyLock || typeof dependencyLock !== 'object' || Array.isArray(dependencyLock)) throw new Error('mounted native v2 dependency lock is not an object')
+    if (manifest.entryId !== environment.LINKSITES_TEMPLATE_ID || manifest.version !== environment.LINKSITES_TEMPLATE_VERSION) throw new Error('mounted native v2 release identity does not match configured entry/version')
+    if (manifest.dependencyLockSha256 !== environment.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256 || sha256Bytes(dependencyLockFile.bytes) !== environment.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256 || dependencyLock.lockSha256 !== sha256Json(dependencyLock.dependencies)) throw new Error('mounted native v2 dependency lock does not match the configured identity')
+    const manifestSha256 = sha256Bytes(manifestFile.bytes)
+    if (manifestSha256 !== receipt.releaseManifestSha256) throw new Error('native v2 receipt release manifest digest does not match the mounted release')
+    if (manifest.artifactTreeSha1 !== receipt.artifactTreeSha1) throw new Error('native v2 receipt artifact identity does not match the mounted release')
+    const manifestSource = manifest.releaseSource
+    const receiptSource = receipt.receiptType === 'verified_cache' ? receipt.releaseSource : receipt
+    if (!manifestSource || manifestSource.releaseSourceCommitSha !== receiptSource.releaseSourceCommitSha || manifestSource.releaseSourceRepositoryTreeSha1 !== receiptSource.releaseSourceRepositoryTreeSha1) throw new Error('native v2 receipt source identity does not match the mounted release')
+    if (receipt.receiptType === 'verified_cache' && (receipt.sourceEvidence.selectedRepositoryCommitSha !== manifestSource.releaseSourceCommitSha || receipt.sourceEvidence.selectedRepositoryTreeSha1 !== manifestSource.releaseSourceRepositoryTreeSha1)) throw new Error('verified cache source evidence does not match the mounted release source')
+    return { ok: true, raw, receipt, receiptSha256: sha256Bytes(receiptFile.bytes), providerRoot, receiptPath }
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : 'mounted native v2 receipt verification failed' }
+  }
+}
+
+export function validateNativeV2Receipt(raw, environment = {}, options = {}) {
+  const shapeError = validateNativeV2ReceiptShape(raw, environment)
+  if (shapeError) return shapeError
+  if (options.verifyMounted === false) return null
+  const result = readAndVerifyNativeV2Receipt(environment, { expectedRaw: raw })
+  return result.ok ? null : result.error
 }
 
 export function redactedConfigFingerprint(environment, service) {

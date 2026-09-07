@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import test from 'node:test'
@@ -14,6 +14,73 @@ const images = {
   LINKSITES_ORCHESTRATOR_IMAGE_DIGEST: digest('3'),
   LINKSITES_WORKER_IMAGE_DIGEST: digest('4'),
   LINKSITES_MIGRATIONS_IMAGE_DIGEST: digest('5'),
+}
+
+async function nativeProviderFixture() {
+  const directory = await mkdtemp(join(tmpdir(), 'linksites-manifest-v2-'))
+  const releaseDirectory = join(directory, 'registry/v2/entries/master-template-type-1/versions/2.0.0-a1.1')
+  await mkdir(releaseDirectory, { recursive: true })
+  const dependencyProjectionSha256 = createHash('sha256').update('[]').digest('hex')
+  const dependencyLockBytes = `${JSON.stringify({ lockSha256: dependencyProjectionSha256, dependencies: [] })}\n`
+  const dependencyLockSha256 = createHash('sha256').update(dependencyLockBytes).digest('hex')
+  const manifest = {
+    schemaVersion: 2,
+    schemaRevision: 2,
+    manifestType: 'immutable_release',
+    releaseId: 'master-template-type-1-2.0.0-a1.1',
+    entryId: 'master-template-type-1',
+    version: '2.0.0-a1.1',
+    dependencyLockSha256,
+    artifactTreeSha1: '2'.repeat(40),
+    releaseSource: { releaseSourceCommitSha: 'f'.repeat(40), releaseSourceRepositoryTreeSha1: '1'.repeat(40) },
+  }
+  const manifestBytes = `${JSON.stringify(manifest)}\n`
+  await writeFile(join(releaseDirectory, 'manifest.json'), manifestBytes)
+  await writeFile(join(releaseDirectory, 'dependency-lock.json'), dependencyLockBytes)
+  const receipt = {
+    schemaVersion: 2,
+    schemaRevision: 2,
+    receiptType: 'consumption',
+    receiptId: 'native-v2-consumption',
+    entryId: 'master-template-type-1',
+    version: '2.0.0-a1.1',
+    releaseManifestSha256: createHash('sha256').update(manifestBytes).digest('hex'),
+    releaseSourceCommitSha: 'f'.repeat(40),
+    releaseSourceRepositoryTreeSha1: '1'.repeat(40),
+    artifactTreeSha1: '2'.repeat(40),
+    consumerMaterializedTreeSha1: '3'.repeat(40),
+    issuedAt: '2026-09-07T00:00:00Z',
+    issuer: { actorType: 'automation', actorId: 'fixture' },
+    result: 'pass',
+    evidence: [{ kind: 'receipt', locator: 'fixture', sha256: '4'.repeat(64) }],
+    consumerId: 'linksites',
+    consumptionMode: 'materialize',
+  }
+  const receiptBytes = `${JSON.stringify(receipt)}\n`
+  const receiptPath = join(directory, 'receipt.json')
+  await writeFile(receiptPath, receiptBytes)
+  const git = (...args) => execFileSync('git', ['-C', directory, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
+  git('init')
+  git('add', '.')
+  git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'native v2 provider fixture')
+  const commit = git('rev-parse', 'HEAD')
+  const tree = git('rev-parse', 'HEAD^{tree}')
+  const env = {
+    ...process.env,
+    ...images,
+    LINKSITES_TEMPLATE_ID: receipt.entryId,
+    LINKSITES_TEMPLATE_VERSION: receipt.version,
+    LINKSITES_TEMPLATE_FORMAT: 'revision2',
+    LINKSITES_LINKLIBRARIES_ROOT: directory,
+    LINKSITES_LINKLIBRARIES_COMMIT_SHA: commit,
+    LINKSITES_LINKLIBRARIES_TREE_SHA: tree,
+    LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: dependencyLockSha256,
+    LINKSITES_LINKLIBRARIES_RECEIPT_PATH: receiptPath,
+    LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: receiptBytes,
+    LINKLIBRARIES_ARTIFACT_PATH: directory,
+    LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: '6'.repeat(40),
+  }
+  return { directory, env, receipt, receiptBytes, receiptPath, dependencyLockSha256 }
 }
 
 test('deferred native v2 provider state remains eligible for honest infrastructure acceptance', async () => {
@@ -53,38 +120,40 @@ test('ready provider state refuses absent native v2 receipt', async () => {
 })
 
 test('ready provider state records exact native v2 provider and receipt identity', async () => {
-  const directory = await mkdtemp(join(tmpdir(), 'linksites-manifest-v2-'))
-  const output = join(directory, 'manifest.json')
+  const fixture = await nativeProviderFixture()
+  const output = join(fixture.directory, 'manifest.json')
   try {
-    await writeFile(join(directory, 'provider-marker'), 'native-v2\n')
-    const git = (...args) => execFileSync('git', ['-C', directory, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
-    git('init')
-    git('add', 'provider-marker')
-    git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'native v2 provider fixture')
-    const commit = git('rev-parse', 'HEAD')
-    const tree = git('rev-parse', 'HEAD^{tree}')
-    const receipt = {
-      schemaVersion: 2, schemaRevision: 2, receiptType: 'consumption', receiptId: 'native-v2-consumption',
-      entryId: 'master-template-type-1', version: '2.0.0-a1.1', releaseManifestSha256: 'e'.repeat(64),
-      releaseSourceCommitSha: 'f'.repeat(40), releaseSourceRepositoryTreeSha1: '1'.repeat(40), artifactTreeSha1: '2'.repeat(40),
-      consumerMaterializedTreeSha1: '3'.repeat(40), issuedAt: '2026-09-07T00:00:00Z', issuer: { actorType: 'automation', actorId: 'fixture' },
-      result: 'pass', evidence: [{ kind: 'receipt', locator: 'fixture', sha256: '4'.repeat(64) }], consumerId: 'linksites', consumptionMode: 'materialize',
-    }
-    await writeFile(join(directory, 'receipt.json'), `${JSON.stringify(receipt)}\n`)
-    const env = {
-      ...process.env, ...images, LINKSITES_TEMPLATE_ID: receipt.entryId, LINKSITES_TEMPLATE_VERSION: receipt.version, LINKSITES_TEMPLATE_FORMAT: 'revision2',
-      LINKSITES_LINKLIBRARIES_ROOT: directory, LINKSITES_LINKLIBRARIES_COMMIT_SHA: commit, LINKSITES_LINKLIBRARIES_TREE_SHA: tree,
-      LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: '5'.repeat(64), LINKSITES_LINKLIBRARIES_RECEIPT_PATH: join(directory, 'receipt.json'),
-      LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: JSON.stringify(receipt), LINKLIBRARIES_ARTIFACT_PATH: directory, LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: '6'.repeat(40),
-    }
-    execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', output], { cwd: root, env, encoding: 'utf8' })
+    execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', output], { cwd: root, env: fixture.env, encoding: 'utf8' })
     const manifest = JSON.parse(await readFile(output, 'utf8'))
     assert.equal(manifest.libraries.state, 'ready')
-    assert.equal(manifest.libraries.providerCommitSha, commit)
-    assert.equal(manifest.libraries.providerTreeSha, tree)
+    assert.equal(manifest.libraries.providerCommitSha, fixture.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA)
+    assert.equal(manifest.libraries.providerTreeSha, fixture.env.LINKSITES_LINKLIBRARIES_TREE_SHA)
     assert.equal(manifest.libraries.receiptType, 'consumption')
-    assert.equal(manifest.libraries.receiptSha256, createHash('sha256').update(JSON.stringify(receipt)).digest('hex'))
+    assert.equal(manifest.libraries.receiptSha256, createHash('sha256').update(fixture.receiptBytes).digest('hex'))
   } finally {
-    await rm(directory, { recursive: true, force: true })
+    await rm(fixture.directory, { recursive: true, force: true })
+  }
+})
+
+test('ready provider state rejects forged, stale, or mismatched native v2 receipt bindings', async () => {
+  const cases = [
+    ['forged environment receipt bytes', (fixture) => ({ ...fixture.env, LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: fixture.receiptBytes.replace('native-v2-consumption', 'forged-receipt') }), /exactly match the mounted receipt/],
+    ['stale mounted receipt bytes', async (fixture) => {
+      const stale = { ...fixture.receipt, releaseManifestSha256: 'a'.repeat(64) }
+      const staleBytes = `${JSON.stringify(stale)}\n`
+      await writeFile(fixture.receiptPath, staleBytes)
+      return { ...fixture.env, LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: staleBytes }
+    }, /receipt bytes do not match the configured provider commit/],
+    ['provider dependency-lock drift', (fixture) => ({ ...fixture.env, LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: 'b'.repeat(64) }), /dependency lock does not match/],
+    ['provider checkout identity drift', (fixture) => ({ ...fixture.env, LINKSITES_LINKLIBRARIES_COMMIT_SHA: 'c'.repeat(40) }), /provider commit does not match the release identity/],
+  ]
+  for (const [label, mutate, expected] of cases) {
+    const fixture = await nativeProviderFixture()
+    try {
+      const environment = await mutate(fixture)
+      assert.throws(() => execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', join(fixture.directory, 'manifest.json')], { cwd: root, env: environment, encoding: 'utf8' }), expected, label)
+    } finally {
+      await rm(fixture.directory, { recursive: true, force: true })
+    }
   }
 })

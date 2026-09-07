@@ -22,6 +22,7 @@ import { stat } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
+import { readAndVerifyNativeV2Receipt } from './deploy/config/runtime-contract.mjs'
 const manifest = JSON.parse(await readFile(process.argv[2], 'utf8'))
 if (!['deferred', 'ready'].includes(manifest.libraries?.state) || manifest.libraries?.entryId !== 'master-template-type-1') throw new Error('manifest must carry an explicit native v2 template release state')
 if (manifest.libraries.state === 'deferred' && (manifest.libraries.publishingEligible !== false || !manifest.libraries.blockedCapabilities?.includes('template-dependent-publishing'))) throw new Error('deferred template release must block template-dependent publishing')
@@ -69,8 +70,8 @@ if (!artifact || git(['rev-parse', '--is-inside-work-tree']) !== 'true') throw n
 if (git(['rev-parse', 'HEAD']) !== library.providerCommitSha || git(['rev-parse', 'HEAD^{tree}']) !== library.providerTreeSha) throw new Error('native v2 provider checkout identity does not match the release manifest')
 if (process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA !== library.providerCommitSha || process.env.LINKSITES_LINKLIBRARIES_TREE_SHA !== library.providerTreeSha) throw new Error('native v2 provider identity does not match the release manifest')
 if (library.state === 'ready') {
-  const receiptRaw = process.env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON
-  if (!receiptRaw || createHash('sha256').update(receiptRaw).digest('hex') !== library.receiptSha256) throw new Error('native v2 provider receipt does not match the release manifest')
+  const receiptVerification = readAndVerifyNativeV2Receipt(process.env, { providerRoot: artifact })
+  if (!receiptVerification.ok || receiptVerification.receiptSha256 !== library.receiptSha256) throw new Error(`native v2 provider receipt is not exactly bound to the release manifest: ${receiptVerification.ok ? 'digest mismatch' : receiptVerification.error}`)
 } else if (process.env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON) {
   throw new Error('deferred template release must not carry provider admission receipt evidence')
 }
