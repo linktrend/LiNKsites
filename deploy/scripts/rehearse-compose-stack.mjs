@@ -273,14 +273,25 @@ try {
       return value.program?.state === 'completed' && value.issues?.length === 16 && value.issues.every((issue) => issue.state === 'completed') && value.completion?.state === 'emitted' && value.outbox?.length === 1 && value.outbox[0]?.status === 'delivered'
     } catch (error) { lastProgramDiagnostic = `ledger read failed: ${error instanceof Error ? error.message : String(error)}`; return false }
   }, 'the certified 16-issue Program fixture')
-  const headers = join(proofRoot, 'preview.headers')
-  const body = join(proofRoot, 'preview.html')
-  // Docker Desktop can report the service graph ready a fraction before its
-  // loopback port-forward is accepting connections. Retry only that transient
-  // connection-refused state; a TLS, router, authorization, or render failure
-  // still leaves curl non-zero and fails this proof.
+  // Execute the final token-route readback inside the isolated Compose network.
+  // A tooling container's 127.0.0.1 is not the Docker host on Linux, so a host
+  // published-port curl is not portable. Emit only boolean/status evidence;
+  // the credential and rendered body never leave the runtime container.
   try {
-    await run('curl', ['--fail', '--silent', '--show-error', '--noproxy', '*', '--retry', '20', '--retry-connrefused', '--retry-delay', '1', '--cacert', localCa, '--resolve', `preview.localtest:${tlsPort}:127.0.0.1`, '-D', headers, '-o', body, `https://preview.localtest:${tlsPort}/en/demo/${previewToken}`])
+    const readback = JSON.parse((await composeQuiet(['exec', '-T', 'program-orchestrator', 'node', '-e', `
+      fetch(process.env.W2_02_WEB_MASTER_BASE_URL + '/en/demo/' + process.env.W2_02_PREVIEW_ACCESS_TOKEN)
+        .then(async (response) => {
+          const body = await response.text()
+          process.stdout.write(JSON.stringify({
+            ok: response.ok,
+            status: response.status,
+            noindex: (response.headers.get('x-robots-tag') ?? '').includes('noindex'),
+            marker: body.includes(process.env.PREVIEW_RUN_MARKER ?? '__missing__'),
+            privatePreview: body.includes('data-private-preview="true"'),
+          }))
+        }).catch(() => process.exit(2))
+    `])).trim())
+    assert.deepEqual(readback, { ok: true, status: 200, noindex: true, marker: true, privatePreview: true })
   } catch (error) {
     // Do not emit environment files, request URLs, or generated credentials.
     // Service output and state identify a routing/listener failure without
@@ -291,8 +302,6 @@ try {
     ])
     throw new Error(`private preview request failed\n\nCompose listener diagnostics:\n${state}\n${logs}`)
   }
-  assert.match(await readFile(headers, 'utf8'), /x-robots-tag:\s*noindex/i)
-  assert.match(await readFile(body, 'utf8'), new RegExp(runMarker))
   await run('curl', ['--fail', '--silent', '--show-error', '--cacert', localCa, `http://127.0.0.1:${orchestratorPort}/readyz`])
   const databaseReadback = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select count(*) from public.pages where promotion_run_marker = '${runMarker}' and status = 'draft' and _status = 'draft';`])).trim()
   assert.equal(databaseReadback, '5', 'Compose stack must preserve five private draft documents')
