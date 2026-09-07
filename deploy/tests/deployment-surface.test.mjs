@@ -161,5 +161,6 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   assert.ok(rehearsal.includes('servers: [{ url: http://local-autowork-gateway:3001 }]'), 'the isolated TLS router must reach the completion receiver')
   assert.ok(overlay.includes('payload-seed:\n        condition: service_completed_successfully'), 'the disposable renderer must wait for the admission evidence producer')
   assert.ok(rehearsal.includes("['up', '--detach', '--no-build', '--wait'"))
+  assert.ok(rehearsal.includes("'--noproxy', '*'"), 'the loopback TLS proof must not escape through an ambient proxy')
   assert.ok(rehearsal.includes("completedIssues: 16"))
 })

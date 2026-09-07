@@ -280,7 +280,7 @@ try {
   // connection-refused state; a TLS, router, authorization, or render failure
   // still leaves curl non-zero and fails this proof.
   try {
-    await run('curl', ['--fail', '--silent', '--show-error', '--retry', '20', '--retry-connrefused', '--retry-delay', '1', '--cacert', localCa, '--resolve', `preview.localtest:${tlsPort}:127.0.0.1`, '-D', headers, '-o', body, `https://preview.localtest:${tlsPort}/en/demo/${previewToken}`])
+    await run('curl', ['--fail', '--silent', '--show-error', '--noproxy', '*', '--retry', '20', '--retry-connrefused', '--retry-delay', '1', '--cacert', localCa, '--resolve', `preview.localtest:${tlsPort}:127.0.0.1`, '-D', headers, '-o', body, `https://preview.localtest:${tlsPort}/en/demo/${previewToken}`])
   } catch (error) {
     // Do not emit environment files, request URLs, or generated credentials.
     // Service output and state identify a routing/listener failure without
