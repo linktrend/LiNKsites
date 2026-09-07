@@ -44,4 +44,6 @@ LiNKlibraries Git commit, records catalog/entry content checksums, and fails
 unless the selected catalog entry is approved. Full preflight repeats those
 checks against the VPS-mounted checkout; a directory that is not a Git
 repository is not a valid ready artifact. Commit the generated release
-manifest with its release evidence; never place secrets in it.
+manifest with its release evidence in the immutable release store; do not add a
+post-build manifest to the source commit whose identity it records, because
+that would change the release SHA. Never place secrets in it.
