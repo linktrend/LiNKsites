@@ -56,6 +56,9 @@ test('production Dockerfiles validate configuration before app startup', async (
     assert.ok(dockerfile.includes('USER '), `${file} has non-root execution`)
     assert.ok(dockerfile.includes('HEALTHCHECK'), `${file} has health check`)
   }
+  const orchestrator = await read('deploy/docker/program-orchestrator.Dockerfile')
+  assert.ok(orchestrator.includes('git config --system --add safe.directory /opt/linksites/linklibraries'), 'orchestrator can read only the fixed immutable library mount as its non-root user')
+  assert.ok(!orchestrator.includes('safe.directory *'), 'orchestrator does not trust arbitrary Git repositories')
 })
 
 test('every deployed image has an immutable base and release label contract', async () => {
