@@ -254,7 +254,7 @@ try {
   }
   await waitFor(async () => {
     try {
-      const stored = await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select state::text from lsites_ledger.program_runtime_states where org_id = '${orgId}' and program_id = '${programId}';`])
+      const stored = await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select state::text from lsites_ledger.program_runtime_states where org_id = '${localOrgId}' order by updated_at desc limit 1;`])
       const value = JSON.parse(stored.trim())
       return value.program?.state === 'completed' && value.issues?.length === 16 && value.issues.every((issue) => issue.state === 'completed') && value.completion?.state === 'emitted' && value.outbox?.length === 1 && value.outbox[0]?.status === 'delivered'
     } catch { return false }
