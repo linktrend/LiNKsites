@@ -6,6 +6,7 @@ import type { DemoCompletionEnvelope, LeadResearchPackage } from '@linksites/typ
 import { FileCompletionSink, type CompletionSink } from '@linksites/intake-orchestrator'
 import {
   createPreviewDeployment,
+  ContentProductionError,
   type LibraryConsumptionEvidence,
   type PayloadDraftTarget,
   type WorkingContentPackage,
@@ -31,6 +32,7 @@ const checksum = (value: unknown): string => createHash('sha256').update(stable(
 const clone = <T>(value: T): T => structuredClone(value)
 const safeKey = (value: string): string => createHash('sha256').update(value).digest('hex')
 const safeBoundaryDiagnostic = (error: unknown): string => {
+  if (error instanceof ContentProductionError) return `content-production:${error.code}`
   const message = error instanceof Error ? error.message : ''
   return /^[a-z0-9][a-z0-9:._-]{0,159}$/iu.test(message) ? message : 'boundary:diagnostic-redacted'
 }
