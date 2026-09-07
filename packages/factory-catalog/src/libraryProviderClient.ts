@@ -15,8 +15,8 @@ export const FROZEN_DEPENDENCY_LOCK_SHA256 =
 export type Revision2ProviderPin = Readonly<{
   sourceCommitSha: string;
   sourceTreeSha: string;
-  providerCommitSha?: string;
-  providerTreeSha?: string;
+  providerCommitSha: string;
+  providerTreeSha: string;
   releaseCommitSha?: string;
   releaseTreeSha?: string;
   catalogueFileSha256?: string;

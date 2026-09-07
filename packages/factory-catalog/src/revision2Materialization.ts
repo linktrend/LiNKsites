@@ -163,7 +163,6 @@ const readReceipt = (input: Revision2MaterializationInput, releaseRoot: string):
 }
 
 function providerCheckoutIdentity(providerRoot: string, pin: Revision2ProviderPin): readonly string[] {
-  if (!pin.providerCommitSha || !pin.providerTreeSha) return []
   try {
     const git = (...args: string[]) => execFileSync('git', ['-C', providerRoot, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
     const errors: string[] = []

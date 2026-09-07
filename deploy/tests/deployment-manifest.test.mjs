@@ -107,6 +107,21 @@ async function nativeProviderFixture(options = {}) {
   git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'native v2 provider fixture')
   const commit = git('rev-parse', 'HEAD')
   const tree = git('rev-parse', 'HEAD^{tree}')
+  let configuredCommit = commit
+  let configuredTree = tree
+  if (options.checkoutHeadMismatch) {
+    git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--allow-empty', '-m', 'provider commit object present but not checked out')
+    configuredCommit = git('rev-parse', 'HEAD')
+    configuredTree = git('rev-parse', 'HEAD^{tree}')
+    git('checkout', '--detach', commit)
+  }
+  if (options.checkoutTreeMismatch) {
+    await writeFile(join(directory, 'checkout-tree-mismatch.txt'), 'tree drift fixture\n')
+    git('add', 'checkout-tree-mismatch.txt')
+    git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'provider tree mismatch fixture')
+    configuredTree = git('rev-parse', 'HEAD^{tree}')
+    git('checkout', '--detach', commit)
+  }
   const env = {
     ...process.env,
     ...images,
@@ -114,8 +129,8 @@ async function nativeProviderFixture(options = {}) {
     LINKSITES_TEMPLATE_VERSION: receipt.version,
     LINKSITES_TEMPLATE_FORMAT: 'revision2',
     LINKSITES_LINKLIBRARIES_ROOT: directory,
-    LINKSITES_LINKLIBRARIES_COMMIT_SHA: commit,
-    LINKSITES_LINKLIBRARIES_TREE_SHA: tree,
+    LINKSITES_LINKLIBRARIES_COMMIT_SHA: configuredCommit,
+    LINKSITES_LINKLIBRARIES_TREE_SHA: configuredTree,
     LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: dependencyLockSha256,
     LINKSITES_LINKLIBRARIES_RECEIPT_PATH: receiptPath,
     LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: receiptBytes,
@@ -143,6 +158,8 @@ test('deferred native v2 provider state remains eligible for honest infrastructu
     assert.equal(manifest.libraries.infrastructureAcceptanceEligible, true)
     assert.equal(manifest.libraries.publishingEligible, false)
     assert.ok(manifest.libraries.blockedCapabilities.includes('template-dependent-publishing'))
+    assert.equal('providerCommitSha' in manifest.libraries, false)
+    assert.equal('providerTreeSha' in manifest.libraries, false)
     assert.equal('catalogSha' in manifest.libraries, false)
     assert.deepEqual(manifest.deferredTemplates, [{ entryId: 'master-template-type-1', state: 'deferred', reason: 'native-v2-selectable-release-deferred', blocksActiveProvider: false }])
     assert.equal(manifest.platform.state, 'pending')
@@ -199,6 +216,24 @@ test('ready provider state rejects forged, stale, or mismatched native v2 receip
     } finally {
       await rm(fixture.directory, { recursive: true, force: true })
     }
+  }
+})
+
+test('ready provider state rejects an existing provider commit object when checkout HEAD differs', async () => {
+  const fixture = await nativeProviderFixture({ checkoutHeadMismatch: true })
+  try {
+    assert.throws(() => execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', join(fixture.directory, 'manifest.json')], { cwd: root, env: fixture.env, encoding: 'utf8' }), /provider commit does not match the release identity/)
+  } finally {
+    await rm(fixture.directory, { recursive: true, force: true })
+  }
+})
+
+test('ready provider state rejects a checked-out provider tree mismatch', async () => {
+  const fixture = await nativeProviderFixture({ checkoutTreeMismatch: true })
+  try {
+    assert.throws(() => execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', join(fixture.directory, 'manifest.json')], { cwd: root, env: fixture.env, encoding: 'utf8' }), /provider tree does not match the release identity/)
+  } finally {
+    await rm(fixture.directory, { recursive: true, force: true })
   }
 })
 

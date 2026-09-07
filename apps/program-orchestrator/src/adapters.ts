@@ -16,6 +16,7 @@ import {
   buildPromotionRequestFromPreparedWorkingContent,
   canonicalJsonChecksum,
   MASTER_TEMPLATE_ID,
+  FROZEN_PROVIDER_PIN,
   MARKETING_SMB_V1_CATALOG_AUTHORITY,
   promotePreparedWorkingContent,
   assertValidWorkingContentPackage,
@@ -178,11 +179,11 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     if (process.env.LINKSITES_DEPLOYMENT_ENV === 'production' && process.env.LINKSITES_TEMPLATE_FORMAT !== 'revision2') throw new Error('library:legacy-template-contract-forbidden')
     if (process.env.LINKSITES_TEMPLATE_FORMAT === 'revision2') {
       const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT
-      const sourceCommitSha = process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA
-      const sourceTreeSha = process.env.LINKSITES_LINKLIBRARIES_TREE_SHA
+      const providerCommitSha = process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA
+      const providerTreeSha = process.env.LINKSITES_LINKLIBRARIES_TREE_SHA
       const dependencyLockSha256 = process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256
-      if (!providerRoot || !sourceCommitSha || !sourceTreeSha || !dependencyLockSha256) throw new Error('library:revision2-pinned-provider-input-missing')
-      const result = materializeRevision2WebsiteTemplate({ providerRoot, entryId: process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_ID, version: process.env.LINKSITES_TEMPLATE_VERSION ?? '1.0.0', pin: { sourceCommitSha, sourceTreeSha, dependencyLockSha256 }, receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH })
+      if (!providerRoot || !providerCommitSha || !providerTreeSha || !dependencyLockSha256) throw new Error('library:revision2-pinned-provider-input-missing')
+      const result = materializeRevision2WebsiteTemplate({ providerRoot, entryId: process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_ID, version: process.env.LINKSITES_TEMPLATE_VERSION ?? '1.0.0', pin: { sourceCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha, sourceTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha, providerCommitSha, providerTreeSha, dependencyLockSha256 }, receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH })
       if (!result.ok) throw new Error(`library:revision2-release-rejected:${result.errors.join('|')}`)
       return result.value
     }
@@ -417,11 +418,18 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     const frontend = await fetch(`${this.config.webMasterBaseUrl}/api/healthz`).then(async (response) => response.ok && (await response.json() as { service?: unknown }).service === 'web-master').catch(() => false)
     const library = await Promise.resolve().then(() => {
       const nativeV2Provider = process.env.LINKSITES_TEMPLATE_FORMAT === 'revision2'
+      if (nativeV2Provider && process.env.LINKSITES_DEPLOYMENT_ENV === 'production' && process.env.LINKSITES_TEMPLATE_RELEASE_STATE === 'deferred') return true
       const providerRoot = nativeV2Provider ? process.env.LINKSITES_LINKLIBRARIES_ROOT : this.config.libraryRepositoryPath
       const providerCommit = nativeV2Provider ? process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA : this.config.libraryCommitSha
-      if (!providerRoot || !providerCommit) throw new Error('library provider identity is absent')
-      execFileSync('git', ['-C', providerRoot, 'cat-file', '-e', `${providerCommit}^{commit}`], { stdio: 'ignore' })
-      if (nativeV2Provider && process.env.LINKSITES_LINKLIBRARIES_TREE_SHA && execFileSync('git', ['-C', providerRoot, 'rev-parse', `${providerCommit}^{tree}`], { encoding: 'utf8' }).trim() !== process.env.LINKSITES_LINKLIBRARIES_TREE_SHA) throw new Error('native v2 provider tree mismatch')
+      const providerTree = nativeV2Provider ? process.env.LINKSITES_LINKLIBRARIES_TREE_SHA : undefined
+      if (!providerRoot || !providerCommit || (nativeV2Provider && !providerTree)) throw new Error('library provider identity is absent')
+      const git = (args: string[]) => execFileSync('git', ['-C', providerRoot, ...args], { encoding: 'utf8' }).trim()
+      if (nativeV2Provider) {
+        if (git(['rev-parse', 'HEAD']) !== providerCommit) throw new Error('native v2 provider checkout commit mismatch')
+        if (git(['rev-parse', 'HEAD^{tree}']) !== providerTree) throw new Error('native v2 provider checkout tree mismatch')
+      } else {
+        git(['cat-file', '-e', `${providerCommit}^{commit}`])
+      }
       return true
     }).catch(() => false)
     // Exercise the actual durable boundary with a reversible write/read/delete,
