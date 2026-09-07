@@ -60,6 +60,31 @@ describe('Publish permissions workflow', () => {
     expect(updated.status).toBe('published')
   })
 
+  it('fails closed when production template-dependent publishing is deferred', async () => {
+    const previous = {
+      deployment: process.env.LINKSITES_DEPLOYMENT_ENV,
+      state: process.env.LINKSITES_TEMPLATE_RELEASE_STATE,
+    }
+    process.env.LINKSITES_DEPLOYMENT_ENV = 'production'
+    process.env.LINKSITES_TEMPLATE_RELEASE_STATE = 'deferred'
+    try {
+      const data = { status: 'published', site: 'site-1', locale: 'en' }
+      await expect(validatePublishPermissions({
+        collection: { slug: 'articles' } as never,
+        context: {},
+        operation: 'update',
+        data,
+        req: buildReq(publisherUser, data) as never,
+        originalDoc: { status: 'pending', site: 'site-1', locale: 'en' },
+      })).rejects.toThrow(/template-dependent publishing is deferred/)
+    } finally {
+      if (previous.deployment === undefined) delete process.env.LINKSITES_DEPLOYMENT_ENV
+      else process.env.LINKSITES_DEPLOYMENT_ENV = previous.deployment
+      if (previous.state === undefined) delete process.env.LINKSITES_TEMPLATE_RELEASE_STATE
+      else process.env.LINKSITES_TEMPLATE_RELEASE_STATE = previous.state
+    }
+  })
+
   it('blocks published → draft for users without publish permission', async () => {
     const data = { status: 'draft', site: 'site-1', locale: 'en' }
     await expect(

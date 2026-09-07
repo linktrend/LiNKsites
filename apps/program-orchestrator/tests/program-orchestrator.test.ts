@@ -149,6 +149,29 @@ test('manual NDJSON intake uses the shared port and claims once', async () => {
   } finally { await value.close(); await rm(value.directory, { recursive: true, force: true }) }
 })
 
+test('deferred production intake leaves ready work unclaimed for later admission', async () => {
+  const previous = {
+    deployment: process.env.LINKSITES_DEPLOYMENT_ENV,
+    state: process.env.LINKSITES_TEMPLATE_RELEASE_STATE,
+  }
+  process.env.LINKSITES_DEPLOYMENT_ENV = 'production'
+  process.env.LINKSITES_TEMPLATE_RELEASE_STATE = 'deferred'
+  const value = await composition('deferred-template-intake')
+  try {
+    const candidate = lead('deferred-template-intake')
+    await writeFile(value.config.intakePath, `${JSON.stringify(candidate)}\n`, 'utf8')
+    assert.equal(await runFirstReadyLead(value), null)
+    assert.equal(await readFile(value.config.intakePath, 'utf8'), `${JSON.stringify(candidate)}\n`)
+  } finally {
+    await value.close()
+    await rm(value.directory, { recursive: true, force: true })
+    if (previous.deployment === undefined) delete process.env.LINKSITES_DEPLOYMENT_ENV
+    else process.env.LINKSITES_DEPLOYMENT_ENV = previous.deployment
+    if (previous.state === undefined) delete process.env.LINKSITES_TEMPLATE_RELEASE_STATE
+    else process.env.LINKSITES_TEMPLATE_RELEASE_STATE = previous.state
+  }
+})
+
 test('intake records retry disposition when durable completion delivery is pending', async () => {
   const value = await composition('lead-intake-retry-disposition')
   try {

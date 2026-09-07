@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { validateNativeV2Bundle } from "./nativeRevision2Validator.js";
 
 /** Protected LiNKlibraries development identity supplied for the A1 consumer. */
 export const FROZEN_CANDIDATE_SHA = "dbf749cb48ffa03bf2e702d37b608f14c63e0520";
@@ -14,8 +15,8 @@ export const FROZEN_DEPENDENCY_LOCK_SHA256 =
 export type Revision2ProviderPin = Readonly<{
   sourceCommitSha: string;
   sourceTreeSha: string;
-  providerCommitSha?: string;
-  providerTreeSha?: string;
+  providerCommitSha: string;
+  providerTreeSha: string;
   releaseCommitSha?: string;
   releaseTreeSha?: string;
   catalogueFileSha256?: string;
@@ -411,6 +412,25 @@ export function validateExactRelease(input: unknown, pin: Revision2ProviderPin =
   const tree = inventory(bundle.inventory, errors);
   const lock = dependencyLock(bundle.dependencyLock, errors);
   const receiptValue = draftCandidateProbe ? candidateReceipt(bundle.receipt, errors) : receipt(bundle.receipt, errors);
+  const nativeValidation = validateNativeV2Bundle({
+    source: bundle.source,
+    catalogue: bundle.catalogue,
+    record: candidateRecord,
+    manifest: bundle.manifest,
+    inventory: bundle.inventory,
+    dependencyLock: bundle.dependencyLock,
+    receipt: bundle.receipt,
+    ...(bundle.catalogueFileSha256 === undefined ? {} : { catalogueFileSha256: bundle.catalogueFileSha256 }),
+  }, {
+    selectionPolicy: draftCandidateProbe ? "draft_candidate_probe" : "selectable",
+    expectedSourceCommitSha: pin.sourceCommitSha,
+    expectedSourceTreeSha: pin.sourceTreeSha,
+    expectedCatalogueFileSha256: pin.catalogueFileSha256,
+    expectedCatalogueRecordsSha256: pin.catalogueRecordsSha256,
+    expectedDependencyLockSha256: pin.dependencyLockSha256,
+    releaseManifestSha256: receiptValue && draftCandidateProbe ? (receiptValue.release as JsonRecord).manifestSha256 : receiptValue?.releaseManifestSha256,
+  });
+  if (!nativeValidation.ok) errors.push(...nativeValidation.errors);
   if (!identity || !catalog || !item || !release || !tree || !lock || !receiptValue) return { ok: false, errors };
   const releaseIdentity = release.releaseSource as JsonRecord;
   const itemReleaseIdentity = item.releaseSource as JsonRecord;

@@ -5,47 +5,50 @@ manifest is a release artifact, not a hand-maintained environment file. Create
 one only after all five deployable images have their registry digests:
 
 ```bash
-LINKLIBRARIES_CATALOG_SHA=<approved-catalog-sha> \
-LINKLIBRARIES_ENTRY_SHA=<approved-entry-sha> \
-LINKLIBRARIES_ARTIFACT_PATH=/absolute/path/to/approved-linklibraries-git-checkout \
+LINKSITES_TEMPLATE_ID=master-template-type-1 \
+LINKSITES_TEMPLATE_VERSION=2.0.0-a1.1 \
+LINKSITES_TEMPLATE_FORMAT=revision2 \
 LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA=<verified-platform-sha> \
 LINKSITES_CMS_IMAGE_DIGEST=sha256:<digest> \
 LINKSITES_WEB_MASTER_IMAGE_DIGEST=sha256:<digest> \
 LINKSITES_ORCHESTRATOR_IMAGE_DIGEST=sha256:<digest> \
 LINKSITES_WORKER_IMAGE_DIGEST=sha256:<digest> \
 LINKSITES_MIGRATIONS_IMAGE_DIGEST=sha256:<digest> \
-node deploy/scripts/generate-deployment-manifest.mjs --output deploy/manifests/<release-sha>.json
+node deploy/scripts/generate-deployment-manifest.mjs --provider-state deferred --output deploy/manifests/<release-sha>.json
 ```
 
-While `master-template-type-1` is unfinished, use the exact admitted
-`marketing-smb-v1` identity in the command above. The manifest records the
-replacement in `deferredTemplates` without blocking the active provider.
-For artifact inventory only, an unavailable active-provider or production
-Platform identity can be recorded explicitly:
+While `master-template-type-1` is unfinished, use `--provider-state deferred`.
+This permits infrastructure/application runtime acceptance while explicitly
+blocking template-dependent publishing. No v1 catalog row is admitted or used.
+For a ready manifest, supply the provider checkout, exact provider identity,
+receipt, and complete native Revision 2 catalogue/inventory inputs. For an
+inventory-only deferred manifest when the production Platform identity is absent:
 
 ```bash
+LINKSITES_TEMPLATE_ID=master-template-type-1 \
+LINKSITES_TEMPLATE_VERSION=2.0.0-a1.1 \
+LINKSITES_TEMPLATE_FORMAT=revision2 \
 LINKSITES_CMS_IMAGE_DIGEST=sha256:<digest> \
 LINKSITES_WEB_MASTER_IMAGE_DIGEST=sha256:<digest> \
 LINKSITES_ORCHESTRATOR_IMAGE_DIGEST=sha256:<digest> \
 LINKSITES_WORKER_IMAGE_DIGEST=sha256:<digest> \
 LINKSITES_MIGRATIONS_IMAGE_DIGEST=sha256:<digest> \
 node deploy/scripts/generate-deployment-manifest.mjs \
-  --provider-state pending \
+  --provider-state deferred \
   --platform-state pending \
   --output deploy/manifests/<release-sha>-server03-foundation.json
 ```
 
-That pending manifest cannot earn Server03 operational acceptance or pass either
-production preflight. Pending active-provider identity is distinct from a deferred
-replacement. Use the existing admitted provider for setup and private-site proof;
-exact Platform migration authority remains independently required for startup.
+That deferred manifest can pass the infrastructure preflight without a provider
+checkout or receipt; it cannot activate template-dependent publishing.
+`pending`, unknown, quarantined, and missing template states are rejected by the
+runtime contract.
 
 The generator always reads the Payload migration index and records every
-imported migration with its checksum. In ready mode it also reads the exact
-LiNKlibraries Git commit, records catalog/entry content checksums, and fails
-unless the selected catalog entry is approved. Full preflight repeats those
-checks against the VPS-mounted checkout; a directory that is not a Git
-repository is not a valid ready artifact. Commit the generated release
+imported migration with its checksum. In ready mode it records the exact native
+v2 provider commit/tree and passing consumption or verified-cache receipt. Full
+preflight repeats those identity checks against the VPS-mounted checkout; a
+directory that is not a Git repository is not a valid ready artifact. Commit the generated release
 manifest with its release evidence in the immutable release store; do not add a
 post-build manifest to the source commit whose identity it records, because
 that would change the release SHA. Never place secrets in it.

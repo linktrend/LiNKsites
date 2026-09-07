@@ -40,9 +40,9 @@ describe('LS-05 bounded exact-A1 engineering', () => {
         entryId: 'master-template-type-1',
         version: '2.0.0-a1.1',
         selectionPolicy: 'draft_candidate_probe',
-        pin: { sourceCommitSha: '12'.repeat(20), sourceTreeSha: '34'.repeat(20), dependencyLockSha256: '56'.repeat(32) },
+        pin: { sourceCommitSha: '12'.repeat(20), sourceTreeSha: '34'.repeat(20), providerCommitSha: '56'.repeat(20), providerTreeSha: '78'.repeat(20), dependencyLockSha256: '56'.repeat(32) },
       })
-      expect(result).toEqual({ ok: false, errors: ['provider catalogue path is missing, non-regular, symlinked, or outside provider root'] })
+      expect(result).toEqual({ ok: false, errors: ['provider checkout is not a readable Git worktree'] })
     } finally {
       await rm(providerRoot, { recursive: true, force: true })
       await rm(outsideRoot, { recursive: true, force: true })
