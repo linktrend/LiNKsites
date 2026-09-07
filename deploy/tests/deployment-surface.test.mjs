@@ -148,6 +148,7 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   assert.ok(rehearsal.includes('env: { ...process.env, ...runtimeValues, ...composeVariables'), 'the rehearsal must supply generated runtime values to Compose interpolation and override ambient inputs')
   assert.ok(overlay.includes('local-proof-web-master-entrypoint.mjs'), 'the disposable renderer must consume the seed-created admission evidence through an explicit proof-only launcher')
   assert.ok(overlay.includes('LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}'), 'the seed and renderer must bind the same admitted library commit')
+  assert.ok(overlay.includes('aliases: [cms.localtest, preview.localtest, gateway.localtest]'), 'the isolated TLS gateway hostname must resolve through the local router')
   assert.ok(overlay.match(/payload-seed:[\s\S]*LINKLIBRARIES_ARTIFACT_PATH[\s\S]*\/opt\/linksites\/linklibraries:ro/), 'the seed must inspect the same read-only library artifact as the renderer')
   const seed = await read('apps/cms/scripts/w2-04-seed.ts')
   assert.ok(seed.includes('MARKETING_SMB_V1_CATALOG_AUTHORITY'), 'the disposable seed must use the source-owned authority instead of an offline placeholder receipt')

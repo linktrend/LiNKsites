@@ -33,7 +33,7 @@ services:
       - ${LINKSITES_LOCAL_PROOF_TLS_DIR:?set generated local TLS directory}:/etc/traefik:ro
     networks:
       internal:
-        aliases: [cms.localtest, preview.localtest]
+        aliases: [cms.localtest, preview.localtest, gateway.localtest]
 
   local-autowork-gateway:
     image: ${LINKSITES_ORCHESTRATOR_IMAGE:?set local proof orchestrator image}
