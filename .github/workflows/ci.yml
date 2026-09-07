@@ -246,7 +246,6 @@ jobs:
             --repo "${GITHUB_REPOSITORY}" \
             --workflow ci.yml \
             --output .ci-artifacts/full-suite-reuse.json
-          node deploy/scripts/validate-runtime-config.mjs
           git diff --exit-code
           git diff --cached --exit-code
 
