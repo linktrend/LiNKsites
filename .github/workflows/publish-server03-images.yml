@@ -1,0 +1,207 @@
+name: LiNKsites Server03 Immutable Images
+
+# This is deliberately manual and protected-branch-only.  It publishes the
+# exact current main tree for the Server03 deployment; it never builds PR code
+# and it never publishes a moving "latest" tag.
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Full 40-character protected-main commit to publish
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: linksites-server03-image-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish immutable Server03 images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout protected main exactly
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: refs/heads/main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify requested release identity
+        id: identity
+        env:
+          REQUESTED_SHA: ${{ inputs.release_sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import re
+          import subprocess
+
+          requested = os.environ["REQUESTED_SHA"]
+          if not re.fullmatch(r"[0-9a-f]{40}", requested):
+              raise SystemExit("release_sha_must_be_a_full_lowercase_sha")
+          actual_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          actual_tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], text=True).strip()
+          if actual_sha != requested:
+              raise SystemExit("requested_release_is_not_current_protected_main")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"release_sha={actual_sha}\nrelease_tree={actual_tree}\n")
+          PY
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v3
+
+      - name: Log in to GHCR with the workflow token
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Reject existing immutable release tags
+        env:
+          RELEASE_SHA: ${{ steps.identity.outputs.release_sha }}
+        run: |
+          set -euo pipefail
+          for image in cms web-master autowork-worker program-orchestrator migrations; do
+            reference="ghcr.io/linktrend/linksites-${image}:sha-${RELEASE_SHA}"
+            if docker buildx imagetools inspect "${reference}" >/dev/null 2>&1; then
+              echo "immutable_release_tag_already_exists=${reference}" >&2
+              exit 1
+            fi
+          done
+
+      - name: Build and publish CMS image
+        id: cms
+        uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v6
+        with:
+          context: .
+          file: deploy/docker/cms.Dockerfile
+          push: true
+          tags: ghcr.io/linktrend/linksites-cms:sha-${{ steps.identity.outputs.release_sha }}
+          build-args: LINKSITES_RELEASE_SHA=${{ steps.identity.outputs.release_sha }}
+          provenance: mode=max
+          sbom: true
+
+      - name: Build and publish web-master image
+        id: web_master
+        uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v6
+        with:
+          context: .
+          file: deploy/docker/web-master.Dockerfile
+          push: true
+          tags: ghcr.io/linktrend/linksites-web-master:sha-${{ steps.identity.outputs.release_sha }}
+          build-args: |
+            LINKSITES_RELEASE_SHA=${{ steps.identity.outputs.release_sha }}
+            NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.linkserver-03.tailf7e13a.ts.net
+            PAYLOAD_PUBLIC_SERVER_URL=https://cms.linkserver-03.tailf7e13a.ts.net
+          provenance: mode=max
+          sbom: true
+
+      - name: Build and publish worker image
+        id: worker
+        uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v6
+        with:
+          context: .
+          file: deploy/docker/autowork-worker.Dockerfile
+          push: true
+          tags: ghcr.io/linktrend/linksites-autowork-worker:sha-${{ steps.identity.outputs.release_sha }}
+          build-args: LINKSITES_RELEASE_SHA=${{ steps.identity.outputs.release_sha }}
+          provenance: mode=max
+          sbom: true
+
+      - name: Build and publish orchestrator image
+        id: orchestrator
+        uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v6
+        with:
+          context: .
+          file: deploy/docker/program-orchestrator.Dockerfile
+          push: true
+          tags: ghcr.io/linktrend/linksites-program-orchestrator:sha-${{ steps.identity.outputs.release_sha }}
+          build-args: LINKSITES_RELEASE_SHA=${{ steps.identity.outputs.release_sha }}
+          provenance: mode=max
+          sbom: true
+
+      - name: Build and publish migrations image
+        id: migrations
+        uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v6
+        with:
+          context: .
+          file: deploy/docker/migrations.Dockerfile
+          push: true
+          tags: ghcr.io/linktrend/linksites-migrations:sha-${{ steps.identity.outputs.release_sha }}
+          build-args: LINKSITES_RELEASE_SHA=${{ steps.identity.outputs.release_sha }}
+          provenance: mode=max
+          sbom: true
+
+      - name: Write immutable publication manifest
+        env:
+          RELEASE_SHA: ${{ steps.identity.outputs.release_sha }}
+          RELEASE_TREE: ${{ steps.identity.outputs.release_tree }}
+          CMS_DIGEST: ${{ steps.cms.outputs.digest }}
+          WEB_MASTER_DIGEST: ${{ steps.web_master.outputs.digest }}
+          WORKER_DIGEST: ${{ steps.worker.outputs.digest }}
+          ORCHESTRATOR_DIGEST: ${{ steps.orchestrator.outputs.digest }}
+          MIGRATIONS_DIGEST: ${{ steps.migrations.outputs.digest }}
+        run: |
+          set -euo pipefail
+          export LINKSITES_RELEASE_SHA="${RELEASE_SHA}"
+          export LINKSITES_TEMPLATE_RELEASE_STATE=deferred
+          export LINKSITES_TEMPLATE_ID=master-template-type-1
+          export LINKSITES_TEMPLATE_VERSION=2.0.0-a1.1
+          export LINKSITES_TEMPLATE_FORMAT=revision2
+          export LINKSITES_CMS_IMAGE_DIGEST="${CMS_DIGEST}"
+          export LINKSITES_WEB_MASTER_IMAGE_DIGEST="${WEB_MASTER_DIGEST}"
+          export LINKSITES_WORKER_IMAGE_DIGEST="${WORKER_DIGEST}"
+          export LINKSITES_ORCHESTRATOR_IMAGE_DIGEST="${ORCHESTRATOR_DIGEST}"
+          export LINKSITES_MIGRATIONS_IMAGE_DIGEST="${MIGRATIONS_DIGEST}"
+          node deploy/scripts/generate-deployment-manifest.mjs \
+            --provider-state deferred \
+            --platform-state pending \
+            --output server03-release-manifest.json
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path("server03-release-manifest.json")
+          manifest = json.loads(path.read_text())
+          manifest["repository"]["releaseTree"] = os.environ["RELEASE_TREE"]
+          manifest["publication"] = {
+              "registry": "ghcr.io",
+              "mode": "protected-main-workflow",
+              "publicRoutes": False,
+              "imageRefs": {
+                  "cms": f"ghcr.io/linktrend/linksites-cms@{os.environ['CMS_DIGEST']}",
+                  "webMaster": f"ghcr.io/linktrend/linksites-web-master@{os.environ['WEB_MASTER_DIGEST']}",
+                  "worker": f"ghcr.io/linktrend/linksites-autowork-worker@{os.environ['WORKER_DIGEST']}",
+                  "orchestrator": f"ghcr.io/linktrend/linksites-program-orchestrator@{os.environ['ORCHESTRATOR_DIGEST']}",
+                  "migrations": f"ghcr.io/linktrend/linksites-migrations@{os.environ['MIGRATIONS_DIGEST']}",
+              },
+          }
+          path.write_text(json.dumps(manifest, indent=2) + "\n")
+          Path("server03-release.env").write_text("\n".join([
+              f"LINKSITES_RELEASE_SHA={os.environ['RELEASE_SHA']}",
+              f"LINKSITES_CMS_IMAGE=ghcr.io/linktrend/linksites-cms@{os.environ['CMS_DIGEST']}",
+              f"LINKSITES_WEB_MASTER_IMAGE=ghcr.io/linktrend/linksites-web-master@{os.environ['WEB_MASTER_DIGEST']}",
+              f"LINKSITES_WORKER_IMAGE=ghcr.io/linktrend/linksites-autowork-worker@{os.environ['WORKER_DIGEST']}",
+              f"LINKSITES_ORCHESTRATOR_IMAGE=ghcr.io/linktrend/linksites-program-orchestrator@{os.environ['ORCHESTRATOR_DIGEST']}",
+              f"LINKSITES_MIGRATIONS_IMAGE=ghcr.io/linktrend/linksites-migrations@{os.environ['MIGRATIONS_DIGEST']}",
+          ]) + "\n")
+          PY
+
+      - name: Upload immutable publication evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: linksites-server03-release-${{ steps.identity.outputs.release_sha }}
+          path: |
+            server03-release-manifest.json
+            server03-release.env
+          if-no-files-found: error
+          retention-days: 90
