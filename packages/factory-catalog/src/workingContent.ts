@@ -496,10 +496,10 @@ export class WorkingContentRepository {
           currentVersion === 0 ? null : expectedCurrentVersion,
           input.authorId,
           input.executorId,
-          input.contentPackage.content,
-          input.contentPackage.assetRefs,
-          input.contentPackage.libraryRefs,
-          input.contentPackage.provenance,
+          JSON.stringify(input.contentPackage.content),
+          JSON.stringify(input.contentPackage.assetRefs),
+          JSON.stringify(input.contentPackage.libraryRefs),
+          JSON.stringify(input.contentPackage.provenance),
           checksum,
         ],
       )
@@ -565,7 +565,7 @@ export class WorkingContentRepository {
                 gate_evidence_refs = $6, updated_at = now()
           where working_package_id = $1 and version_number = $2
           returning *`,
-        [workingPackageId, versionNumber, lifecycleState, gateOutcome, gateReference, evidenceReferences],
+        [workingPackageId, versionNumber, lifecycleState, gateOutcome, gateReference, JSON.stringify(evidenceReferences)],
       )
       if (lifecycleState === 'accepted') {
         await tx.query(
@@ -679,7 +679,7 @@ export class WorkingContentRepository {
            payload_document_id, payload_draft_revision, receipt)
          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          returning *`,
-        [input.promotionReceiptId, input.orgId, input.workingPackageId, input.versionNumber, input.promotionIdempotencyKey, input.contentChecksum, input.payloadTargetCollection, input.payloadDocumentId ?? null, input.payloadDraftRevision ?? null, input.receipt],
+        [input.promotionReceiptId, input.orgId, input.workingPackageId, input.versionNumber, input.promotionIdempotencyKey, input.contentChecksum, input.payloadTargetCollection, input.payloadDocumentId ?? null, input.payloadDraftRevision ?? null, JSON.stringify(input.receipt)],
       )
       await tx.query(
         `update lsites_sites.working_content_versions

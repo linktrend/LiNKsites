@@ -344,7 +344,11 @@ def ensure_branch(
         common = Path(git_dir)
         if not common.is_absolute():
             common = (workdir / common).resolve()
-        wt_root = common / "linktrend-worktrees"
+        # Vite denies browser transforms beneath **/.git/**, including its own
+        # runtime modules installed in a nested worktree. Use a sibling of the
+        # primary repository; the common directory keeps linked callers stable.
+        primary = common.parent if common.name == ".git" else common
+        wt_root = primary.parent / f"{primary.name}-worktrees"
         wt_root.mkdir(parents=True, exist_ok=True)
         wt_path = wt_root / branch.replace("/", "-")
         if wt_path.exists():

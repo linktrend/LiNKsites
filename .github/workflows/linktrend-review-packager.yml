@@ -54,6 +54,7 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
       SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+      LINKTREND_TARGET_BASELINE_SHA: ${{ github.event.pull_request.base.sha }}
     steps:
       - name: Checkout exact Phase PR head
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4

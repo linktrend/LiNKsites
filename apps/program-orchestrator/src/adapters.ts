@@ -6,6 +6,7 @@ import type { DemoCompletionEnvelope, LeadResearchPackage } from '@linksites/typ
 import { FileCompletionSink, type CompletionSink } from '@linksites/intake-orchestrator'
 import {
   createPreviewDeployment,
+  ContentProductionError,
   type LibraryConsumptionEvidence,
   type PayloadDraftTarget,
   type WorkingContentPackage,
@@ -30,6 +31,11 @@ const stable = (value: unknown): string => value === null || typeof value !== 'o
 const checksum = (value: unknown): string => createHash('sha256').update(stable(value)).digest('hex')
 const clone = <T>(value: T): T => structuredClone(value)
 const safeKey = (value: string): string => createHash('sha256').update(value).digest('hex')
+const safeBoundaryDiagnostic = (error: unknown): string => {
+  if (error instanceof ContentProductionError) return `content-production:${error.code}`
+  const message = error instanceof Error ? error.message : ''
+  return /^[a-z0-9][a-z0-9:._-]{0,159}$/iu.test(message) ? message : 'boundary:diagnostic-redacted'
+}
 
 function stringLeaves(value: unknown): string[] {
   if (typeof value === 'string') return [value]
@@ -141,7 +147,13 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     }
     const fault = this.fault(operation)
     if (fault && fault.kind !== 'crash_after_receipt') throw new Error(`boundary:${operation}:${fault.kind}-failure`)
-    const value = await effect()
+    let value: T
+    try {
+      value = await effect()
+    } catch (error) {
+      console.error(JSON.stringify({ service: 'program-orchestrator', event: 'boundary_failed', operation, diagnostic: safeBoundaryDiagnostic(error) }))
+      throw error
+    }
     if (fence) await this.leaseVerifier!(fence)
     if (fault?.kind === 'crash_after_receipt') throw new Error(`crash-after-receipt:${operation}`)
     return clone(value)
@@ -366,7 +378,14 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const html = await response.text()
       const robots = response.headers.get('x-robots-tag') ?? ''
       const cache = response.headers.get('cache-control') ?? ''
-      if (!response.ok || !html.includes('data-private-preview="true"') || !robots.includes('noindex') || !cache.includes('no-store')) throw new Error('frontend:protected-web-master-render-failed')
+      const markerPresent = html.includes('data-private-preview="true"')
+      const noindexPresent = robots.includes('noindex')
+      const noStorePresent = cache.includes('no-store')
+      if (!response.ok || !markerPresent || !noindexPresent || !noStorePresent) {
+        // This diagnostic is deliberately limited to status and boolean gate
+        // results. Never log the response body, request credential, or URL.
+        throw new Error(`frontend:protected-web-master-render-failed:status-${response.status}:marker-${markerPresent}:noindex-${noindexPresent}:no-store-${noStorePresent}`)
+      }
       // The response body can legitimately contain a token-bearing navigation
       // link. It is evaluated in-memory, then represented by a checksum and
       // boolean gates only; durable evidence must never retain that credential.
