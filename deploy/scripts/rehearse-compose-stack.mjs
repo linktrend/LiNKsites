@@ -109,13 +109,16 @@ grant usage on schema platform to svc_linksites_runtime, svc_linksites_ledger;
 grant execute on function platform.has_org_access(uuid, platform.member_role) to svc_linksites_runtime, svc_linksites_ledger;
 `
 
-const tenantSql = `
+const tenantSql = (leadEnvelope) => `
 insert into platform.organizations (id, name, kind, status)
 values ('${localOrgId}', 'LiNKsites disposable proof', 'client', 'active')
 on conflict (id) do nothing;
 insert into lsites_sites.sites (id, org_id, name, status, template_id, primary_domain, default_locale)
 values ('00000000-0000-4000-8000-000000000002', '${localOrgId}', 'LiNKsites disposable proof', 'active', 'marketing-smb-v1', 'preview.localtest', 'en')
 on conflict (id) do nothing;
+insert into lsites_ledger.program_intake (org_id, item_id, lead_id, idempotency_key, envelope, state)
+values ('${localOrgId}', 'compose:${runMarker}', '${runMarker}', 'compose:${runMarker}', '${JSON.stringify(leadEnvelope).replaceAll("'", "''")}'::jsonb, 'ready')
+on conflict (org_id, idempotency_key) do nothing;
 `
 
 const runtimeValues = {
@@ -192,7 +195,7 @@ try {
   await chmod(runtimeDir, 0o777)
   await chmod(join(runtimeDir, 'program'), 0o777)
   await writeFile(platformBootstrap, platformSql)
-  await writeFile(tenantBootstrap, tenantSql)
+  await writeFile(tenantBootstrap, tenantSql(lead))
   await run('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', localKey, '-out', localCa, '-days', '1', '-subj', '/CN=LiNKsites local proof CA'])
   await run('openssl', ['req', '-newkey', 'rsa:2048', '-nodes', '-keyout', join(tlsDir, 'server-request.key'), '-out', join(tlsDir, 'server.csr'), '-subj', '/CN=cms.localtest', '-addext', 'subjectAltName=DNS:cms.localtest,DNS:preview.localtest'])
   await writeFile(join(tlsDir, 'server.ext'), 'subjectAltName=DNS:cms.localtest,DNS:preview.localtest\n')
