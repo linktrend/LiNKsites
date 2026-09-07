@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs'
 import { relative, resolve, sep } from 'node:path'
+import { validateNativeV2Bundle, validateNativeV2ReceiptValue } from '../../packages/factory-catalog/src/nativeRevision2Validator.js'
 
 export const CONFIG_SCHEMA_VERSION = '1.2.0'
 export const TEMPLATE_RELEASE_STATES = Object.freeze(['deferred', 'ready'])
@@ -106,29 +107,32 @@ function directoryIsConfined(root, path) {
 
 function validateNativeV2CatalogueAndInventory(providerRoot, releaseRoot, environment, receipt, manifest, inventory, catalogue, dependencyLock) {
   const errors = []
-  const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
-  const digest = (value) => typeof value === 'string' && sha256.test(value)
-  const gitSha = (value) => typeof value === 'string' && sha1.test(value)
-  const relativePath = (value) => typeof value === 'string' && value.length > 0 && !value.startsWith('/') && !value.includes('\\') && !/(^|\/)\.\.?($|\/)/.test(value)
-  if (!object(catalogue) || catalogue.schemaVersion !== 2 || catalogue.schemaRevision !== 2 || catalogue.catalogueType !== 'catalogue' || !Array.isArray(catalogue.records) || !digest(catalogue.recordsSha256) || sha256Json(catalogue.records) !== catalogue.recordsSha256) errors.push('provider catalogue is not a complete native Revision 2 catalogue')
   const records = Array.isArray(catalogue?.records) ? catalogue.records : []
-  const selected = records.filter((record) => object(record) && record.entryId === environment.LINKSITES_TEMPLATE_ID && record.version === environment.LINKSITES_TEMPLATE_VERSION)
+  const selected = records.filter((record) => record?.entryId === environment.LINKSITES_TEMPLATE_ID && record?.version === environment.LINKSITES_TEMPLATE_VERSION)
   if (selected.length !== 1) errors.push('provider catalogue must contain exactly one selected entry/version record')
-  const record = selected[0]
-  if (!object(record) || record.recordType !== 'catalogue_record' || record.artifactType !== 'website_template' || !['admitted', 'selectable'].includes(record.lifecycle) || record.selectability !== 'selectable' || record.compatibility !== 'compatible' || record.bundlePath !== `registry/v2/entries/${environment.LINKSITES_TEMPLATE_ID}/versions/${environment.LINKSITES_TEMPLATE_VERSION}`) errors.push('provider catalogue selected record is not admitted/selectable/compatible')
-  if (object(record)) {
-    if (record.releaseManifestSha256 !== sha256Bytes(readFileSync(resolve(releaseRoot, 'manifest.json')))) errors.push('provider catalogue selected record manifest digest does not match the mounted manifest')
-    if (record.inventorySha256 !== inventory?.inventorySha256) errors.push('provider catalogue selected record inventory digest does not match the mounted inventory')
-    if (record.artifactTreeSha1 !== manifest?.artifactTreeSha1 || record.artifactTreeSha1 !== inventory?.artifactTreeSha1) errors.push('provider catalogue selected record artifact identity does not match the mounted release')
-    if (!object(record.releaseSource) || record.releaseSource.releaseSourceCommitSha !== manifest?.releaseSource?.releaseSourceCommitSha || record.releaseSource.releaseSourceRepositoryTreeSha1 !== manifest?.releaseSource?.releaseSourceRepositoryTreeSha1) errors.push('provider catalogue selected record source identity does not match the mounted release')
-  }
-  if (!object(manifest) || manifest.schemaVersion !== 2 || manifest.schemaRevision !== 2 || manifest.manifestType !== 'immutable_release' || manifest.entryId !== environment.LINKSITES_TEMPLATE_ID || manifest.version !== environment.LINKSITES_TEMPLATE_VERSION || manifest.artifactType !== 'website_template' || !gitSha(manifest.artifactTreeSha1) || !digest(manifest.inventorySha256) || !digest(manifest.payloadSha256) || !digest(manifest.dependencyLockSha256) || !object(manifest.releaseSource)) errors.push('mounted native v2 release manifest is incomplete')
-  if (!object(inventory) || inventory.schemaVersion !== 2 || inventory.schemaRevision !== 2 || inventory.inventoryType !== 'exhaustive_tree_inventory' || inventory.complete !== true || inventory.includesDirectories !== true || inventory.includesFiles !== true || inventory.includesSymlinks !== false || !Array.isArray(inventory.entries) || !digest(inventory.inventorySha256) || !gitSha(inventory.artifactTreeSha1) || sha256Json(inventory.entries) !== inventory.inventorySha256) errors.push('mounted native v2 artifact inventory is incomplete or tampered')
-  if (object(manifest) && object(inventory) && (manifest.inventorySha256 !== inventory.inventorySha256 || manifest.artifactTreeSha1 !== inventory.artifactTreeSha1)) errors.push('native v2 manifest and artifact inventory identities do not match')
-  if (!object(dependencyLock) || dependencyLock.schemaVersion !== 2 || dependencyLock.schemaRevision !== 2 || dependencyLock.lockType !== 'deterministic_dependency_lock' || !Array.isArray(dependencyLock.dependencies) || !digest(dependencyLock.lockSha256) || sha256Json(dependencyLock.dependencies) !== dependencyLock.lockSha256) errors.push('mounted native v2 dependency lock is incomplete or tampered')
-  if (object(manifest) && manifest.dependencyLockSha256 !== environment.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256) errors.push('native v2 manifest dependency lock does not match the configured identity')
+  const catalogueBytes = readFileSync(resolve(providerRoot, 'indexes/v2/catalog.json'))
+  const releaseManifestBytes = readFileSync(resolve(releaseRoot, 'manifest.json'))
+  const validation = validateNativeV2Bundle({
+    source: { commitSha: environment.LINKSITES_LINKLIBRARIES_COMMIT_SHA, treeSha: environment.LINKSITES_LINKLIBRARIES_TREE_SHA },
+    catalogue,
+    record: selected[0],
+    manifest,
+    inventory,
+    dependencyLock,
+    receipt,
+    catalogueFileSha256: sha256Bytes(catalogueBytes),
+    dependencyLockFileSha256: sha256Bytes(readFileSync(resolve(releaseRoot, 'dependency-lock.json'))),
+  }, {
+    expectedDependencyLockSha256: environment.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256,
+    catalogueFileSha256: sha256Bytes(catalogueBytes),
+    releaseManifestSha256: sha256Bytes(releaseManifestBytes),
+  })
+  if (!validation.ok) errors.push(...validation.errors)
   const artifactRoot = resolve(releaseRoot, 'artifact')
   if (!directoryIsConfined(providerRoot, artifactRoot)) errors.push('native v2 artifact root is missing, symlinked, or outside the provider checkout')
+  const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+  const digest = (value) => typeof value === 'string' && sha256.test(value)
+  const relativePath = (value) => typeof value === 'string' && value.length > 0 && !value.startsWith('/') && !value.includes('\\') && !/(^|\/)\.\.?($|\/)/.test(value)
   const paths = new Set()
   for (const item of inventory?.entries ?? []) {
     if (!object(item) || !relativePath(item.path) || paths.has(item.path)) { errors.push('native v2 artifact inventory contains an unsafe or duplicate path'); continue }
@@ -145,7 +149,6 @@ function validateNativeV2CatalogueAndInventory(providerRoot, releaseRoot, enviro
       if (!readCommittedFile(providerRoot, candidate, `native v2 artifact ${item.path}`).equals(bytes)) errors.push(`native v2 artifact ${item.path} bytes do not match the configured provider commit`)
     } catch (error) { errors.push(error instanceof Error ? error.message : `native v2 artifact ${item.path} is not committed`) }
   }
-  if (receipt.receiptType === 'verified_cache' && (receipt.catalogueRecordsSha256 !== catalogue?.recordsSha256 || receipt.inventorySha256 !== inventory?.inventorySha256 || receipt.payloadSha256 !== manifest?.payloadSha256)) errors.push('verified_cache receipt catalogue or inventory identity does not match the mounted release')
   return errors
 }
 
@@ -310,23 +313,13 @@ function validateNativeV2ReceiptShape(raw, environment = {}) {
   try { receipt = JSON.parse(raw) } catch { return 'must be valid native Revision 2 receipt JSON' }
   if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) return 'must be a native Revision 2 receipt object'
   if (receipt.schemaVersion !== 2 || receipt.schemaRevision !== 2) return 'must use native Revision 2 schema 2.2'
-  if (!['consumption', 'verified_cache'].includes(receipt.receiptType)) return 'must be a native consumption or verified_cache receipt'
-  const sha1Fields = receipt.receiptType === 'verified_cache'
-    ? ['artifactTreeSha1']
-    : ['releaseSourceCommitSha', 'releaseSourceRepositoryTreeSha1', 'artifactTreeSha1']
-  for (const name of sha1Fields) if (typeof receipt[name] !== 'string' || !sha1.test(receipt[name])) return `${name} must be a full 40-character Git SHA`
-  if (receipt.receiptType === 'verified_cache') {
-    if (!receipt.releaseSource || typeof receipt.releaseSource !== 'object') return 'verified_cache receipt must carry native releaseSource identity'
-    for (const name of ['releaseSourceCommitSha', 'releaseSourceRepositoryTreeSha1']) if (!sha1.test(receipt.releaseSource[name] ?? '')) return `releaseSource.${name} must be a full 40-character Git SHA`
-    for (const name of ['catalogueSha256', 'catalogueRecordsSha256', 'inventorySha256', 'payloadSha256']) if (!sha256.test(receipt[name] ?? '')) return `${name} must be a full SHA-256 digest`
-  }
+  const shapeErrors = validateNativeV2ReceiptValue(receipt)
+  if (shapeErrors.length) return shapeErrors.join('; ')
   if (typeof receipt.entryId !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(receipt.entryId)) return 'entryId is invalid'
   if (environment.LINKSITES_TEMPLATE_ID && receipt.entryId !== environment.LINKSITES_TEMPLATE_ID) return 'receipt entryId does not match LINKSITES_TEMPLATE_ID'
   if (typeof receipt.version !== 'string' || !/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.test(receipt.version)) return 'version is invalid'
   if (environment.LINKSITES_TEMPLATE_VERSION && receipt.version !== environment.LINKSITES_TEMPLATE_VERSION) return 'receipt version does not match LINKSITES_TEMPLATE_VERSION'
-  if (typeof receipt.releaseManifestSha256 !== 'string' || !sha256.test(receipt.releaseManifestSha256)) return 'releaseManifestSha256 must be a full SHA-256 digest'
-  if (receipt.receiptType === 'consumption' && (typeof receipt.receiptId !== 'string' || !/^[a-z0-9][a-z0-9._-]*$/.test(receipt.receiptId) || !receipt.issuedAt || Number.isNaN(Date.parse(receipt.issuedAt)) || !receipt.issuer || typeof receipt.issuer !== 'object' || !Array.isArray(receipt.evidence) || receipt.evidence.length < 1 || receipt.result !== 'pass' || typeof receipt.consumerId !== 'string' || !['inspect', 'materialize', 'test'].includes(receipt.consumptionMode) || typeof receipt.consumerMaterializedTreeSha1 !== 'string' || !sha1.test(receipt.consumerMaterializedTreeSha1))) return 'consumption receipt must be a passing native materialization/test receipt'
-  if (receipt.receiptType === 'verified_cache' && (!receipt.sourceEvidence || receipt.sourceEvidence.kind !== 'external_repository_receipt' || receipt.sourceEvidence.immutable !== true)) return 'verified_cache receipt must carry immutable external source evidence'
+  if (receipt.receiptType === 'consumption' && (receipt.result !== 'pass' || !sha1.test(receipt.consumerMaterializedTreeSha1))) return 'consumption receipt must be a passing native materialization/test receipt'
   return null
 }
 
