@@ -57,12 +57,12 @@ Command:
 node --test deploy/tests/runtime-contract.test.mjs deploy/tests/deployment-manifest.test.mjs deploy/tests/deployment-surface.test.mjs
 ```
 
-Result: the deployment/runtime suite passed 32/32; factory-catalog passed
-367 tests with 4 explicitly skipped live-integration cases; web-master passed
-72/72. The focused readiness file passed 11/11, including deferred behavior,
-exact mounted-byte and digest binding, forged environment bytes, stale mounted
-receipt bytes, dependency-lock drift, provider checkout identity drift, native
-materializer regressions, and legacy v1 rejection. Affected typechecks passed.
+Result: the deployment/runtime suite passed 32/32; the focused factory-catalog
+suite passed 11/11; and the web-master candidate plus readiness suites passed
+13/13, including deferred behavior, exact mounted-byte and digest binding,
+forged environment bytes, stale mounted receipt bytes, dependency-lock drift,
+provider checkout identity drift, native materializer regressions, and legacy
+v1 rejection. Affected typechecks passed.
 
 Additional checks passed:
 
