@@ -39,10 +39,13 @@ node deploy/scripts/generate-deployment-manifest.mjs \
   --output deploy/manifests/<release-sha>-server03-foundation.json
 ```
 
-That deferred manifest can pass the infrastructure preflight without a provider
-checkout or receipt; it cannot activate template-dependent publishing.
-`pending`, unknown, quarantined, and missing template states are rejected by the
-runtime contract.
+That deferred manifest is an inventory-only artifact: it records the immutable
+images and explicitly remains deployment-ineligible until an exact Platform
+migration admission is available. It cannot pass operational preflight or start
+production services. Regenerate a separate manifest with
+`--platform-state ready` and the admitted Platform migration SHA before running
+preflight. `pending`, unknown, quarantined, and missing template states are
+rejected by the runtime contract.
 
 The generator always reads the Payload migration index and records every
 imported migration with its checksum. In ready mode it records the exact native

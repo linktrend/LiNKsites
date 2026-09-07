@@ -91,7 +91,15 @@ const manifest = {
   deferredTemplates: [{ entryId: 'master-template-type-1', state: 'deferred', reason: 'native-v2-selectable-release-deferred', blocksActiveProvider: false }],
   platform: platformState === 'ready'
     ? { state: 'ready', migrationsAppliedSha: process.env.LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA, authority: 'external-governed-admission-required' }
-    : { state: 'pending', reason: 'production-project-migration-authority-and-receipt-not-yet-available', infrastructureArtifactAcceptanceEligible: true, blockedCapabilities: ['production-migration-apply', 'production-data-plane-startup'] },
+    : {
+      state: 'pending',
+      reason: 'production-project-migration-authority-and-receipt-not-yet-available',
+      infrastructureArtifactAcceptanceEligible: true,
+      artifactOnly: true,
+      deploymentEligible: false,
+      requiresPlatformAdmission: true,
+      blockedCapabilities: ['production-migration-apply', 'production-data-plane-startup'],
+    },
   images: { cms: process.env.LINKSITES_CMS_IMAGE_DIGEST, webMaster: process.env.LINKSITES_WEB_MASTER_IMAGE_DIGEST, orchestrator: process.env.LINKSITES_ORCHESTRATOR_IMAGE_DIGEST, autoworkWorker: process.env.LINKSITES_WORKER_IMAGE_DIGEST, migrations: process.env.LINKSITES_MIGRATIONS_IMAGE_DIGEST },
   configurationSchema: 'deploy/config/runtime-contract.mjs@1.2.0',
   schemas: { supabaseMigrations: migrations, payloadMigrationIndex: { file: 'apps/cms/src/migrations/index.ts', sha256: createHash('sha256').update(payloadIndex).digest('hex'), loaded: payloadMigrations }, payloadMigrations },

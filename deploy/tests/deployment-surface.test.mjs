@@ -116,6 +116,18 @@ test('manifest and Compose name the same five deployable images', async () => {
   assert.ok(manifest.includes('Payload migration import does not resolve to a source file'), 'unresolved migration imports fail closed')
 })
 
+test('Server03 immutable publication is protected-main and artifact-only until Platform admission', async () => {
+  const workflow = await read('.github/workflows/publish-server03-images.yml')
+  assert.ok(workflow.includes('WORKFLOW_REF'))
+  assert.ok(workflow.includes("refs/heads/main"))
+  assert.ok(workflow.includes('artifactOnly'))
+  assert.ok(workflow.includes('deploymentEligible'))
+  assert.ok(workflow.includes('requiresPlatformAdmission'))
+  assert.ok(workflow.includes('sha256sum server03-release-manifest.json > server03-release-manifest.sha256'))
+  assert.ok(workflow.includes('server03-release-manifest.sha256'))
+  assert.ok(workflow.indexOf('PY\n          sha256sum server03-release-manifest.json') > workflow.indexOf('python3 - <<\'PY\''))
+})
+
 test('production migration runner accepts only real PostgreSQL URLs', async () => {
   const migrationRunner = await read('deploy/scripts/run-supabase-migrations.sh')
   assert.ok(migrationRunner.includes('postgres_scheme=postgresql'), 'the accepted database scheme is PostgreSQL')
