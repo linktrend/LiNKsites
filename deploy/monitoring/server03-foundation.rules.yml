@@ -1,0 +1,33 @@
+groups:
+  - name: linksites-server03-foundation
+    rules:
+      - alert: LiNKsitesFoundationTargetDown
+        expr: up{job="linksites-server03-foundation"} == 0
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: LiNKsites Server03 foundation health target is unavailable
+      - alert: LiNKsitesFoundationIntakeUnexpectedlyEnabled
+        expr: linksites_program_intake_enabled != 0
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          summary: Program intake changed while the template provider release is pending
+      - alert: LiNKsitesFoundationProviderPendingMetricMissing
+        expr: linksites_program_provider_release_pending != 1
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: Staged orchestrator no longer reports the expected provider HOLD
+      - alert: LiNKsitesFoundationBackupStale
+        expr: time() - linksites_backup_last_success_timestamp_seconds > 90000
+        for: 15m
+        labels: { severity: critical }
+        annotations:
+          summary: LiNKsites backup success is older than 25 hours
+      - alert: LiNKsitesFoundationRestoreRehearsalStale
+        expr: time() - linksites_restore_rehearsal_last_success_timestamp_seconds > 2678400
+        for: 1h
+        labels: { severity: warning }
+        annotations:
+          summary: LiNKsites isolated restore rehearsal is older than 31 days

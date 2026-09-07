@@ -86,6 +86,9 @@ export const SERVICE_CONFIGURATION = {
     required('LINKAUTOWORK_ENVIRONMENT', 'literal:production'),
     required('LINKAUTOWORK_EVENT_GRANTS', 'nonempty-json-array'),
   ],
+  'program-orchestrator-staged': [
+    required('LINKSITES_TEMPLATE_RELEASE_STATE', 'literal:pending'),
+  ],
 }
 
 function isPublicLoopback(hostname) {
@@ -128,7 +131,11 @@ function validateValue(value, format) {
 export function validateRuntimeConfig(environment, service) {
   if (!Object.prototype.hasOwnProperty.call(SERVICE_CONFIGURATION, service)) throw new Error(`unknown service: ${service}`)
   const errors = []
-  const requirements = [...SERVICE_CONFIGURATION.shared, ...SERVICE_CONFIGURATION[service]]
+  const providerPending = environment.LINKSITES_TEMPLATE_RELEASE_STATE === 'pending'
+  const serviceRequirements = service === 'web-master' && providerPending
+    ? SERVICE_CONFIGURATION[service].filter((requirement) => !requirement.name.startsWith('LINKSITES_ADMITTED_TEMPLATE_'))
+    : SERVICE_CONFIGURATION[service]
+  const requirements = [...SERVICE_CONFIGURATION.shared, ...serviceRequirements]
   for (const requirement of requirements) {
     const result = validateValue(environment[requirement.name], requirement.format)
     if (result) errors.push({ name: requirement.name, error: result, secret: requirement.secret })
@@ -137,6 +144,7 @@ export function validateRuntimeConfig(environment, service) {
   if (environment.NEXT_PUBLIC_CMS_PROVIDER === 'fixture' || environment.CMS_FIXTURE_PATH) errors.push({ name: 'NEXT_PUBLIC_CMS_PROVIDER', error: 'fixture content is forbidden in the production bundle', secret: false })
   if (environment.W2_02_MODE && environment.W2_02_MODE !== 'production') errors.push({ name: 'W2_02_MODE', error: 'must equal production for the Phase 2 deployment contract', secret: false })
   if (service === 'web-master' && environment.PREVIEW_ACCESS_TOKEN && environment.W2_02_PREVIEW_ACCESS_TOKEN && environment.PREVIEW_ACCESS_TOKEN !== environment.W2_02_PREVIEW_ACCESS_TOKEN) errors.push({ name: 'PREVIEW_ACCESS_TOKEN', error: 'must equal W2_02_PREVIEW_ACCESS_TOKEN when both are supplied', secret: true })
+  if (service === 'web-master' && providerPending && environment.LINKSITES_ADMITTED_TEMPLATE_SHA) errors.push({ name: 'LINKSITES_ADMITTED_TEMPLATE_SHA', error: 'must be absent while the provider release is pending', secret: false })
   if (service === 'web-master' && environment.LINKSITES_ADMITTED_TEMPLATE_SHA && environment.LINKLIBRARIES_CATALOG_SHA && environment.LINKSITES_ADMITTED_TEMPLATE_SHA !== environment.LINKLIBRARIES_CATALOG_SHA) errors.push({ name: 'LINKSITES_ADMITTED_TEMPLATE_SHA', error: 'must equal the manifest-bound LiNKlibraries catalog commit', secret: false })
   if (service === 'program-orchestrator' && environment.W2_02_EXECUTION_REVISION && environment.LINKSITES_RELEASE_SHA && environment.W2_02_EXECUTION_REVISION !== environment.LINKSITES_RELEASE_SHA) errors.push({ name: 'W2_02_EXECUTION_REVISION', error: 'must equal LINKSITES_RELEASE_SHA', secret: false })
   if (service === 'program-orchestrator' && environment.W2_02_LIBRARY_COMMIT_SHA && environment.LINKLIBRARIES_CATALOG_SHA && environment.W2_02_LIBRARY_COMMIT_SHA !== environment.LINKLIBRARIES_CATALOG_SHA) errors.push({ name: 'W2_02_LIBRARY_COMMIT_SHA', error: 'must equal the manifest-bound LiNKlibraries catalog commit', secret: false })

@@ -13,6 +13,33 @@ test('active deployment uses fail-closed inputs, ordered migrations, and private
   assert.ok(!compose.includes('web-company'), 'inactive app is not deployable')
 })
 
+test('Server03 foundation starts all images privately while provider-dependent intake stays disabled', async () => {
+  const compose = await read('deploy/docker-compose.server03-foundation.yml')
+  for (const service of ['supabase-migrate:', 'payload-migrate:', 'payload:', 'web-master:', 'autowork-worker:', 'program-orchestrator:']) assert.ok(compose.includes(service), service)
+  assert.ok(compose.includes('LINKSITES_TEMPLATE_RELEASE_STATE: pending'))
+  assert.ok(compose.includes('program-orchestrator-staged'))
+  assert.ok(compose.includes('internal: true'))
+  assert.ok(!compose.includes('ports:'), 'foundation publishes no host ports')
+  assert.ok(!compose.includes('traefik.'), 'foundation creates no public ingress')
+  assert.ok(!compose.includes('LINKLIBRARIES_ARTIFACT_PATH'), 'pending provider bytes are not fabricated or mounted')
+  assert.ok(compose.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA:-'), 'artifact-only rendering permits pending Platform authority while migration execution fails closed')
+})
+
+test('Server03 foundation preflight binds immutable artifacts and explicit provider HOLD', async () => {
+  const preflight = await read('deploy/scripts/preflight-server03-foundation.sh')
+  const smoke = await read('deploy/scripts/postdeploy-server03-foundation-smoke.sh')
+  for (const name of ['LINKSITES_CMS_IMAGE', 'LINKSITES_WEB_MASTER_IMAGE', 'LINKSITES_WORKER_IMAGE', 'LINKSITES_ORCHESTRATOR_IMAGE', 'LINKSITES_MIGRATIONS_IMAGE']) assert.ok(preflight.includes(name), name)
+  for (const capability of ['renderer-activation', 'orchestrator-intake', 'private-site-pilot', 'public-site-release']) assert.ok(preflight.includes(capability), capability)
+  assert.ok(smoke.includes("ingress.status !== 503"), 'staged intake denial is verified')
+})
+
+test('Server03 foundation monitoring detects health, intake drift, and stale recovery proof', async () => {
+  const rules = await read('deploy/monitoring/server03-foundation.rules.yml')
+  for (const alert of ['LiNKsitesFoundationTargetDown', 'LiNKsitesFoundationIntakeUnexpectedlyEnabled', 'LiNKsitesFoundationProviderPendingMetricMissing', 'LiNKsitesFoundationBackupStale', 'LiNKsitesFoundationRestoreRehearsalStale']) assert.ok(rules.includes(alert), alert)
+  assert.ok(rules.includes('linksites_program_intake_enabled != 0'))
+  assert.ok(rules.includes('linksites_program_provider_release_pending != 1'))
+})
+
 test('active package scripts cannot invoke retired mirror tooling', async () => {
   const cmsPackage = await read('apps/cms/package.json')
   assert.ok(!cmsPackage.includes('sync-supabase-to-cms'))
@@ -48,6 +75,8 @@ test('manifest and Compose name the same five deployable images', async () => {
     assert.ok(manifest.includes(`LINKSITES_${name}_IMAGE_DIGEST`), `manifest digest ${name}`)
   }
   assert.ok(manifest.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA'))
+  assert.ok(manifest.includes("--platform-state"))
+  assert.ok(manifest.includes("infrastructureArtifactAcceptanceEligible"))
   assert.ok(manifest.includes("specifier.endsWith('.js')"), '.js imports prefer the corresponding TypeScript source')
   assert.ok(manifest.includes('[specifier, `${specifier}.ts`, `${specifier}.js`]'), 'extensionless TypeScript migration imports resolve to source files')
   assert.ok(manifest.includes("specifier.replace(/\\.js$/, '')"), '.js migration imports resolve to TypeScript source files')

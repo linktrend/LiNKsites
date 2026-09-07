@@ -1,0 +1,96 @@
+name: linksites-foundation
+
+# Provider-independent Server03 acceptance surface. It starts every LiNKsites
+# image without public ingress. Template-backed rendering and Program intake
+# remain disabled until a separately admitted selectable provider release is
+# bound through docker-compose.deploy.yml.
+x-runtime: &runtime
+  env_file:
+    - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+  restart: unless-stopped
+  init: true
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  deploy:
+    resources:
+      limits: { cpus: '1.00', memory: 1024M }
+      reservations: { memory: 256M }
+  networks: [internal]
+
+services:
+  supabase-migrate:
+    image: ${LINKSITES_MIGRATIONS_IMAGE:?set immutable migration image digest}
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+    environment:
+      # Empty renders the artifact-only plan but makes the migration job fail
+      # closed. A full SHA is required before this service may be started.
+      LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: ${LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA:-}
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    networks: [internal, egress]
+
+  payload-migrate:
+    image: ${LINKSITES_WORKER_IMAGE:?set immutable worker image digest}
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
+    depends_on:
+      supabase-migrate: { condition: service_completed_successfully }
+    working_dir: /app/apps/cms
+    command: ["node", "/app/deploy/scripts/entrypoint.mjs", "autowork-worker", "node_modules/.bin/payload", "migrate", "--config", "src/payload.config.ts"]
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    networks: [internal]
+
+  payload:
+    <<: *runtime
+    image: ${LINKSITES_CMS_IMAGE:?set immutable CMS image digest}
+    depends_on:
+      payload-migrate: { condition: service_completed_successfully }
+    volumes:
+      - linksites-runtime:/var/lib/linksites
+    tmpfs: [/tmp]
+    networks: [internal, egress]
+
+  web-master:
+    <<: *runtime
+    image: ${LINKSITES_WEB_MASTER_IMAGE:?set immutable web-master image digest}
+    depends_on:
+      payload: { condition: service_healthy }
+    environment:
+      LINKSITES_TEMPLATE_RELEASE_STATE: pending
+    volumes:
+      - linksites-runtime:/var/lib/linksites:ro
+    tmpfs: [/tmp]
+    networks: [internal, egress]
+
+  autowork-worker:
+    <<: *runtime
+    image: ${LINKSITES_WORKER_IMAGE:?set immutable worker image digest}
+    depends_on:
+      payload: { condition: service_healthy }
+    volumes:
+      - linksites-runtime:/var/lib/linksites
+    networks: [internal, egress]
+
+  program-orchestrator:
+    <<: *runtime
+    image: ${LINKSITES_ORCHESTRATOR_IMAGE:?set immutable orchestrator image digest}
+    command: ["node", "/app/deploy/scripts/entrypoint.mjs", "program-orchestrator-staged", "/app/apps/program-orchestrator/node_modules/.bin/tsx", "apps/program-orchestrator/src/staged-service.ts"]
+    environment:
+      LINKSITES_TEMPLATE_RELEASE_STATE: pending
+    depends_on:
+      payload: { condition: service_healthy }
+      web-master: { condition: service_healthy }
+    volumes:
+      - linksites-runtime:/var/lib/linksites
+    networks: [internal]
+
+networks:
+  internal: { internal: true }
+  egress: { internal: false }
+
+volumes:
+  linksites-runtime:

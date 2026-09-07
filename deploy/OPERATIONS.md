@@ -3,6 +3,37 @@
 This document prepares a deployment. It does not authorize or perform VPS,
 DNS, public-domain, Cloudflare, Traefik, or customer-data changes.
 
+## Server03 foundation acceptance while the provider is pending
+
+The unfinished Master Website Template is a content/provider release HOLD, not
+a Server03 installation blocker. Use the foundation manifest, preflight and
+Compose surface described in `deploy/README.md`. All five immutable images are
+installed and started; web-master proves CMS connectivity through `/api/readyz`;
+the staged orchestrator reports `intakeEnabled=false`, exports the pending-state
+metric, and rejects every ingress request with HTTP 503. No host port, Traefik
+router, selected-template preview, customer content, or public hostname exists.
+
+Foundation acceptance may cover OS/container compatibility, exact artifact
+identity, governed migrations, CMS/worker operation, renderer and orchestrator
+process health, resource limits, restart behavior, logs/metrics, backup/restore,
+and application-image rollback. It must record these remaining HOLDs:
+
+- selectable LiNKlibraries provider release and exact receipt;
+- renderer activation against selected-template bytes;
+- Program intake and one-site end-to-end pilot;
+- private external preview route and any public/customer launch.
+
+Import `deploy/monitoring/server03-foundation.rules.yml` into the existing
+Server03 Prometheus rule set only after its `linksites-server03-foundation`
+scrape target and backup textfile metrics exist. Validate with `promtool check
+rules` before reload. The intake-drift rule is critical: foundation mode must
+never consume work.
+
+Moving from foundation to the full Compose surface is a new admission event.
+Generate a `--provider-state ready` manifest and repeat backup, preflight,
+migrations/readback, health, privacy, and rollback gates; never edit the pending
+manifest in place.
+
 ## Topology and privacy
 
 The `edge` network is the existing Traefik network; `internal` is a Docker

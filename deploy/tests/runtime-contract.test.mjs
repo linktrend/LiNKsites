@@ -74,6 +74,31 @@ test('rejects preview token drift between web-master and orchestrator interfaces
   assert.ok(result.errors.some((error) => error.name === 'PREVIEW_ACCESS_TOKEN'))
 })
 
+test('provider-pending web-master starts without fabricated admission evidence', () => {
+  const pending = {
+    ...base,
+    LINKSITES_TEMPLATE_RELEASE_STATE: 'pending',
+  }
+  delete pending.LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH
+  delete pending.LINKSITES_ADMITTED_TEMPLATE_SHA
+  delete pending.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON
+  delete pending.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON
+  assert.equal(validateRuntimeConfig(pending, 'web-master').ok, true)
+})
+
+test('provider-pending web-master rejects a misleading admitted template SHA', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'web-master')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_ADMITTED_TEMPLATE_SHA'))
+})
+
+test('staged orchestrator requires an explicit pending provider state', () => {
+  assert.equal(validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'program-orchestrator-staged').ok, true)
+  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'ready' }, 'program-orchestrator-staged')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_STATE'))
+})
+
 test('accepts a valid first numeric Payload document ID and rejects an invalid one', () => {
   assert.equal(validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '1' }, 'program-orchestrator').ok, true)
   const result = validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '0' }, 'program-orchestrator')
