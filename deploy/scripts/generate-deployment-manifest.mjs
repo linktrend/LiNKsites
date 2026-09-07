@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
-import { validateNativeV2Receipt } from '../config/runtime-contract.mjs'
+import { readAndVerifyNativeV2Receipt } from '../config/runtime-contract.mjs'
 
 const root = resolve(new URL('../..', import.meta.url).pathname)
 const outputFlag = process.argv.indexOf('--output')
@@ -81,12 +81,9 @@ if (providerState === 'deferred') {
   if (libraryGit(['rev-parse', '--is-inside-work-tree']).trim() !== 'true') throw new Error('LINKLIBRARIES_ARTIFACT_PATH must be a Git working tree')
   if (libraryGit(['rev-parse', 'HEAD']) !== process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA) throw new Error('LiNKlibraries provider commit does not match the release identity')
   if (libraryGit(['rev-parse', 'HEAD^{tree}']) !== process.env.LINKSITES_LINKLIBRARIES_TREE_SHA) throw new Error('LiNKlibraries provider tree does not match the release identity')
-  let receipt
-  try { receipt = JSON.parse(process.env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON) } catch { throw new Error('LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON must be valid JSON') }
-  const receiptError = validateNativeV2Receipt(JSON.stringify(receipt), process.env)
-  if (receiptError) throw new Error(`LiNKlibraries release receipt is not a passing native Revision 2 consumption or verified_cache receipt: ${receiptError}`)
-  if (receipt.entryId !== process.env.LINKSITES_TEMPLATE_ID || receipt.version !== process.env.LINKSITES_TEMPLATE_VERSION) throw new Error('native v2 receipt template identity does not match the release inputs')
-  const receiptSha256 = createHash('sha256').update(process.env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON).digest('hex')
+  const receiptVerification = readAndVerifyNativeV2Receipt(process.env, { providerRoot: process.env.LINKLIBRARIES_ARTIFACT_PATH })
+  if (!receiptVerification.ok) throw new Error(`LiNKlibraries release receipt is not exactly bound to the mounted native Revision 2 release: ${receiptVerification.error}`)
+  const { receipt, receiptSha256 } = receiptVerification
   libraries = { state: 'ready', entryId: receipt.entryId, version: receipt.version, providerCommitSha: process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA, providerTreeSha: process.env.LINKSITES_LINKLIBRARIES_TREE_SHA, dependencyLockSha256: process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256, receiptType: receipt.receiptType, receiptId: receipt.receiptId ?? null, receiptSha256, infrastructureAcceptanceEligible: true, publishingEligible: true }
 }
 
