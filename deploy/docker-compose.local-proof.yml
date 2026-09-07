@@ -64,6 +64,8 @@ services:
     environment:
       LINKSITES_W2_04_LOCAL_PROOF: '1'
       W2_04_PROOF_PATH: /var/lib/linksites/seed.json
+      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /opt/linksites/linklibraries
+      LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
     # The proof network is deliberately isolated. Invoke the CMS-local runner
     # already bundled in the immutable worker image instead of Corepack/pnpm,
     # which can otherwise attempt a registry download at runtime.
@@ -74,6 +76,7 @@ services:
         condition: service_healthy
     volumes:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/opt/linksites/linklibraries:ro
     networks: [internal]
     restart: 'no'
     security_opt: [no-new-privileges:true]
