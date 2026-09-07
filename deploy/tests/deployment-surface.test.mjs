@@ -157,6 +157,7 @@ test('deployment contract binds preview token, production mode, and smoke topolo
     'LINKLIBRARIES_ENTRY_SHA',
     'LINKLIBRARIES_CATALOG_CONTENT_SHA256',
     'LINKLIBRARIES_ENTRY_CONTENT_SHA256',
+    'W2_02_LIBRARY_REPOSITORY_PATH',
   ]) assert.equal(exampleNames.has(name), false, `${name} must remain unset in deferred runtime example`)
   assert.ok(compose.includes('W2_02_MODE: ${W2_02_MODE:?set W2_02_MODE=production}'))
   assert.ok(compose.includes('DATABASE_URI: ${W2_02_DATABASE_URI:?set distinct orchestrator PostgreSQL URI}'))
