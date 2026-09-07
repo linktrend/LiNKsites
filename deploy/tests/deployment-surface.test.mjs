@@ -134,6 +134,8 @@ test('deployment contract binds preview token, production mode, and smoke topolo
     const match = line.match(/^([A-Z0-9_]+)=/)
     return match ? [match[1]] : []
   }))
+  assert.equal(exampleNames.has('LINKSITES_TEMPLATE_RELEASE_STATE'), true)
+  assert.match(example, /^LINKSITES_TEMPLATE_RELEASE_STATE=deferred$/m)
   assert.ok(contract.includes("required('PREVIEW_ACCESS_TOKEN', 'secret-min-32', true)"))
   assert.ok(contract.includes("required('W2_02_MODE', 'literal:production')"))
   assert.ok(contract.includes("required('DATABASE_URI', 'postgres-url', true)"))
