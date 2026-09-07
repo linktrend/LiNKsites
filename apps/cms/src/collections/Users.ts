@@ -27,6 +27,9 @@ export const Users: CollectionConfig<'users'> = {
       return manageUsersAccess({ req })
     },
     delete: manageUsersAccess,
+    // Account recovery is user management, not ordinary authenticated access
+    // (GHSA-jg8r-5jh2-v2xj). Do not inherit Payload's permissive unlock default.
+    unlock: manageUsersAccess,
   },
   fields: [
     {
