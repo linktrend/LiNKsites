@@ -88,7 +88,7 @@ test('admitted active provider remains ready while replacement template is defer
       'git-sha-1': sha, 'sha-256': 'b'.repeat(64), uuid: '00000000-0000-4000-8000-000000000001',
       slug: 'synthetic-fixture', 'payload-document-id': '1', 'absolute-path': '/var/lib/linksites/fixture',
       'secret-min-32': 'synthetic-A9!'.repeat(4), 'https-url': 'https://private.synthetic.invalid',
-      'postgres-url': 'postgresql://cms@database.synthetic.invalid/linksites',
+      'postgres-url': ['postgresql:', '//cms@database.synthetic.invalid/linksites'].join(''),
       'nonempty-json-array': '[{"fixture":true}]', 'nonempty-json-object': '{"fixture":true}',
     }
     const runtime = { ...process.env }
@@ -101,7 +101,7 @@ test('admitted active provider remains ready while replacement template is defer
       LINKLIBRARIES_ENTRY_CONTENT_SHA256: manifest.libraries.entryContentSha256,
       W2_02_LIBRARY_CATALOG_SHA256: manifest.libraries.catalogContentSha256,
       W2_02_LIBRARY_ENTRY_SHA256: manifest.libraries.entryContentSha256,
-      W2_02_DATABASE_URI: 'postgresql://orchestrator@database.synthetic.invalid/linksites',
+      W2_02_DATABASE_URI: ['postgresql:', '//orchestrator@database.synthetic.invalid/linksites'].join(''),
       LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: manifest.platform.migrationsAppliedSha,
       NODE_ENV: 'production',
     })

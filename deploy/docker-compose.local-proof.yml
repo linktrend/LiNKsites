@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ltfx.fix2.postgres_password.cf215bab08df.v1
+      POSTGRES_PASSWORD: ${LINKSITES_LOCAL_PROOF_POSTGRES_PASSWORD:?set generated disposable database password}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 2s
@@ -58,7 +58,7 @@ services:
   local-tenant-bootstrap:
     image: postgres:16.8-alpine@sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c
     environment:
-      PGPASSWORD: ltfx.fix2.postgres_password.cf215bab08df.v1
+      PGPASSWORD: ${LINKSITES_LOCAL_PROOF_POSTGRES_PASSWORD:?set generated disposable database password}
     command: ["psql", "-h", "local-postgres", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-f", "/proof/tenant.sql"]
     depends_on:
       supabase-migrate:

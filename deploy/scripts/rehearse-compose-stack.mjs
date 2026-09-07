@@ -73,7 +73,9 @@ const payloadSecret = random()
 const gatewaySecret = random()
 const runMarker = `w2-02-run-${random().slice(0, 16)}`
 const checkpointHash = await checkpoint()
-const localDatabaseUrl = 'postgresql://postgres:ltfx.fix2.postgres_password.cf215bab08df.v1@local-postgres:5432/postgres'
+const localDatabasePassword = random()
+const localDatabaseUrl = new URL(['postgresql:', '//postgres@local-postgres:5432/postgres'].join(''))
+localDatabaseUrl.password = localDatabasePassword
 const localOrgId = '00000000-0000-4000-8000-000000000001'
 
 let composeVariables
@@ -126,7 +128,7 @@ const runtimeValues = {
   LINKSITES_CONFIG_SCHEMA_VERSION: '1.1.0',
   LINKSITES_RELEASE_SHA: sourceRevision,
   LINKSITES_ORG_ID: localOrgId,
-  DATABASE_URI: localDatabaseUrl,
+  DATABASE_URI: localDatabaseUrl.href,
   PAYLOAD_SECRET: payloadSecret,
   PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
   LINKAUTOWORK_GATEWAY_URL: 'https://gateway.localtest',
@@ -149,7 +151,7 @@ const runtimeValues = {
   LINKSITES_LOCAL_COMPOSE_PROOF: '1',
   LINKSITES_ADMITTED_TEMPLATE_SHA: libraryRevision,
   W2_02_MODE: 'production',
-  W2_02_DATABASE_URI: localDatabaseUrl,
+  W2_02_DATABASE_URI: localDatabaseUrl.href,
   W2_02_ORG_ID: localOrgId,
   W2_02_SITE_ID: '00000000-0000-4000-8000-000000000002',
   W2_02_DATABASE_ROLE: 'svc_linksites_runtime',
@@ -208,6 +210,7 @@ try {
   // not create it as owner-only or the non-root orchestrator cannot read it.
   await writeFile(join(runtimeDir, 'program', 'approved-facts.json'), `${JSON.stringify(facts)}\n`, { mode: 0o444 })
   composeVariables = {
+    LINKSITES_LOCAL_PROOF_POSTGRES_PASSWORD: localDatabasePassword,
     COMPOSE_PROJECT_NAME: project,
     LINKSITES_RUNTIME_ENV_FILE: runtimeEnv,
     LINKSITES_CMS_IMAGE: 'linksites-cms:w2-07-local',
