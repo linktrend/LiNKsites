@@ -75,14 +75,14 @@ const loadAdmittedConsumption = async (): Promise<LibraryConsumptionEvidence> =>
   }
   const catalogRaw = await readFile(resolve(admittedLibraryRoot, 'indexes/catalog.json'), 'utf8')
   const entryRaw = await readFile(resolve(admittedLibraryRoot, authority.entryPath, 'entry.json'), 'utf8')
-  if (sha256(catalogRaw) !== authority.catalogChecksum || sha256(entryRaw) !== authority.entryChecksum) {
+  const admittedEntry = JSON.parse(entryRaw) as LibraryEntryContract
+  if (sha256(catalogRaw) !== authority.catalogChecksum || canonicalJsonChecksum(admittedEntry) !== authority.entryChecksum) {
     throw new Error('W2-04 admitted proof library metadata checksum mismatch')
   }
   const admittedCatalog = JSON.parse(catalogRaw) as LibraryCatalog
   if (!admittedCatalog.entries.some((row) => row.entryId === authority.entryId && row.status === 'approved')) {
     throw new Error('W2-04 admitted proof library entry is not approved')
   }
-  const admittedEntry = JSON.parse(entryRaw) as LibraryEntryContract
   const admittedFiles = Object.fromEntries(await Promise.all(admittedEntry.files.map(async (asset) => {
     const contents = await readFile(resolve(admittedLibraryRoot, authority.entryPath, asset.path), 'utf8')
     if (sha256(contents) !== asset.sha256) throw new Error(`W2-04 admitted proof asset checksum mismatch: ${asset.path}`)

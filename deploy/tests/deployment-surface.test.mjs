@@ -152,6 +152,7 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   const seed = await read('apps/cms/scripts/w2-04-seed.ts')
   assert.ok(seed.includes('MARKETING_SMB_V1_CATALOG_AUTHORITY'), 'the disposable seed must use the source-owned authority instead of an offline placeholder receipt')
   assert.ok(seed.includes("sha256(catalogRaw) !== authority.catalogChecksum"), 'the disposable seed must verify mounted catalog bytes')
+  assert.ok(seed.includes("canonicalJsonChecksum(admittedEntry) !== authority.entryChecksum"), 'the disposable seed must verify canonical entry metadata')
   assert.ok(seed.includes("sha256(contents) !== asset.sha256"), 'the disposable seed must verify every mounted asset byte')
   assert.ok(overlay.includes('payload-seed:\n        condition: service_completed_successfully'), 'the disposable renderer must wait for the admission evidence producer')
   assert.ok(rehearsal.includes("['up', '--detach', '--no-build', '--wait'"))
