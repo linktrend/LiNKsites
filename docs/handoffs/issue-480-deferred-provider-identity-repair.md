@@ -37,4 +37,3 @@ branches, deploy, open or merge an implementer PR, or promote a Phase. The
 independent review must issue a fresh verdict against the exact pushed
 candidate; only the governed coordinator/controller may perform later Phase
 promotion after all required approvals and receipts exist.
-
