@@ -14,7 +14,10 @@ promotion, or production release.
 - Successor implementation checkpoint: `5f4d26292862463b36f5138973bbe5b30a48eec8`
 - Successor implementation tree: `e6b8c19582c6da89dfb8b9546142d4ea80e3d70e`
 - Successor parent: `8b7eb4a49f4bd7ca6f332477c8a74b4573211d01`
-- Exact-base ancestry: `2a1ebc9` → `3ec1693` → `8b7eb4a` → successor
+- Verification successor: `db22982c29d43fc04d8e362fa49800cb95fbc3f9`
+- Verification successor tree: `9496e65b63f475733c86ab301d8ab0214af74e86`
+- Verification successor parent: `5f4d26292862463b36f5138973bbe5b30a48eec8`
+- Exact-base ancestry: `2a1ebc9` → `3ec1693` → `8b7eb4a` → `5f4d262` → `db22982`
 
 The implementation checkpoint is pushed to `origin` at the branch named above.
 
@@ -54,11 +57,12 @@ Command:
 node --test deploy/tests/runtime-contract.test.mjs deploy/tests/deployment-manifest.test.mjs deploy/tests/deployment-surface.test.mjs
 ```
 
-Result: 12 web-master tests, 11 factory-catalog tests, and 21 deployment/runtime
-tests passed, including deferred acceptance, exact mounted-byte binding, forged
-environment bytes, stale mounted receipt bytes, dependency-lock drift, provider
-checkout identity drift, native materializer regressions, and legacy v1
-rejection. Both focused typechecks also passed.
+Result: the deployment/runtime suite passed 32/32; factory-catalog passed
+367 tests with 4 explicitly skipped live-integration cases; web-master passed
+72/72. The focused readiness file passed 11/11, including deferred behavior,
+exact mounted-byte and digest binding, forged environment bytes, stale mounted
+receipt bytes, dependency-lock drift, provider checkout identity drift, native
+materializer regressions, and legacy v1 rejection. Affected typechecks passed.
 
 Additional checks passed:
 
