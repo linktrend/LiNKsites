@@ -35,6 +35,21 @@ services:
       internal:
         aliases: [cms.localtest, preview.localtest]
 
+  local-autowork-gateway:
+    image: ${LINKSITES_ORCHESTRATOR_IMAGE:?set local proof orchestrator image}
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:?set generated local proof runtime env}
+    command: ["/app/apps/program-orchestrator/node_modules/.bin/tsx", "/app/deploy/scripts/local-proof-autowork-gateway.mjs"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    networks: [internal]
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
   supabase-migrate:
     depends_on:
       local-postgres:
@@ -121,6 +136,8 @@ services:
         condition: service_completed_successfully
       local-tenant-bootstrap:
         condition: service_completed_successfully
+      local-autowork-gateway:
+        condition: service_healthy
     volumes:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites
       - ${LINKSITES_LOCAL_PROOF_TLS_DIR:?set generated local TLS directory}/ca.crt:/run/linksites-local-proof/ca.crt:ro
