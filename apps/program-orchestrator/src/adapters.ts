@@ -378,7 +378,14 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const html = await response.text()
       const robots = response.headers.get('x-robots-tag') ?? ''
       const cache = response.headers.get('cache-control') ?? ''
-      if (!response.ok || !html.includes('data-private-preview="true"') || !robots.includes('noindex') || !cache.includes('no-store')) throw new Error('frontend:protected-web-master-render-failed')
+      const markerPresent = html.includes('data-private-preview="true"')
+      const noindexPresent = robots.includes('noindex')
+      const noStorePresent = cache.includes('no-store')
+      if (!response.ok || !markerPresent || !noindexPresent || !noStorePresent) {
+        // This diagnostic is deliberately limited to status and boolean gate
+        // results. Never log the response body, request credential, or URL.
+        throw new Error(`frontend:protected-web-master-render-failed:status-${response.status}:marker-${markerPresent}:noindex-${noindexPresent}:no-store-${noStorePresent}`)
+      }
       // The response body can legitimately contain a token-bearing navigation
       // link. It is evaluated in-memory, then represented by a checksum and
       // boolean gates only; durable evidence must never retain that credential.
