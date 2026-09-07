@@ -21,7 +21,10 @@ const cycle = async () => {
   } catch (error) {
     // No ready work is normal. The externally visible diagnostic stays safe.
     lastError = error instanceof Error ? error.message.replace(/(?:secret|token|password|authorization|api.?key)\s*[:=]\s*\S+/gi, '[REDACTED]') : 'unknown'
-    log('intake_cycle_failed', { safeCode: 'program:intake-cycle-failed' })
+    // Keep the operator-visible diagnostic bounded and credential-redacted.
+    // A bare failure counter is insufficient to distinguish a provider,
+    // database, library, or content-gate failure during a staged rollout.
+    log('intake_cycle_failed', { safeCode: 'program:intake-cycle-failed', diagnostic: lastError.slice(0, 240) })
   } finally {
     cycling = false
   }

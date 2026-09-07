@@ -1,6 +1,12 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig, Field, FieldAccess } from 'payload'
 import { manageUsersAccess } from '@/access'
 import { isBootstrapMode } from '@/utils/bootstrap'
+
+// Self-profile access must not let callers assign their own authority. Field
+// access requires a boolean, so accept only the existing explicit global grant.
+// Trusted Local API bootstrap retains its explicit overrideAccess path.
+const manageUserGrantsAccess: FieldAccess = async ({ req }) =>
+  (await manageUsersAccess({ req })) === true
 
 export const Users: CollectionConfig<'users'> = {
   slug: 'users',
@@ -27,6 +33,9 @@ export const Users: CollectionConfig<'users'> = {
       return manageUsersAccess({ req })
     },
     delete: manageUsersAccess,
+    // Account recovery is user management, not ordinary authenticated access
+    // (GHSA-jg8r-5jh2-v2xj). Do not inherit Payload's permissive unlock default.
+    unlock: manageUsersAccess,
   },
   fields: [
     {
@@ -51,6 +60,8 @@ export const Users: CollectionConfig<'users'> = {
         condition: () => true,
       },
       access: {
+        create: manageUserGrantsAccess,
+        update: manageUserGrantsAccess,
         read: async ({ req }) => {
           if (await isBootstrapMode(req)) return true
           const hasAccess = await manageUsersAccess({ req })
@@ -71,6 +82,10 @@ export const Users: CollectionConfig<'users'> = {
       relationTo: 'sites',
       hasMany: true,
       required: true,
+      access: {
+        create: manageUserGrantsAccess,
+        update: manageUserGrantsAccess,
+      },
       admin: {
         description: 'Sites this user has access to',
       },
@@ -80,6 +95,10 @@ export const Users: CollectionConfig<'users'> = {
       type: 'text',
       hasMany: true,
       required: true,
+      access: {
+        create: manageUserGrantsAccess,
+        update: manageUserGrantsAccess,
+      },
       admin: {
         description: 'Locales this user can access (e.g., en, es, fr)',
       },

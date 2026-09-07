@@ -29,6 +29,11 @@ const checks = [
 for (const [name, url] of checks) {
   const response = await fetch(url, { redirect: 'manual', headers: name === 'private preview' ? { 'X-LiNKsites-Preview-Key': process.env.PREVIEW_ACCESS_TOKEN } : {} })
   if (response.status !== 200) throw new Error(`${name} smoke failed with HTTP ${response.status}`)
+  if (name === 'orchestrator readiness' && (await response.json()).status !== 'ready') throw new Error('orchestrator must report real runtime readiness')
+  if (name === 'private preview') {
+    const html = await response.text()
+    if (!html.includes('data-private-preview="true"') || !/noindex/i.test(`${response.headers.get('x-robots-tag') ?? ''} ${html}`)) throw new Error('private preview must render with noindex protection')
+  }
 }
 console.log('Post-deploy private health checks passed. This does not activate a public domain.')
 NODE

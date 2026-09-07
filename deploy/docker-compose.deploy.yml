@@ -100,11 +100,11 @@ services:
       # is pinned by the release manifest. The admission SHA is deliberately
       # injected from that manifest rather than copied as a second operator
       # value.
-      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /var/lib/linksites/linklibraries
+      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /opt/linksites/linklibraries
       LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
     volumes:
       - linksites-runtime:/var/lib/linksites:ro
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/var/lib/linksites/linklibraries:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/opt/linksites/linklibraries:ro
     tmpfs: [/tmp]
     networks: [internal, edge, egress]
     labels:
@@ -177,7 +177,7 @@ services:
     networks: [internal, egress]
     volumes:
       - linksites-runtime:/var/lib/linksites
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/var/lib/linksites/linklibraries:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/opt/linksites/linklibraries:ro
 
 networks:
   edge:
