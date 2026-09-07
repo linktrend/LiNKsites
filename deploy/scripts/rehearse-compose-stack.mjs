@@ -59,6 +59,7 @@ const runtimeDir = join(proofRoot, 'runtime')
 const runtimeEnv = join(proofRoot, 'runtime.env')
 const composeEnv = join(proofRoot, 'compose.env')
 const platformBootstrap = join(proofRoot, 'platform-bootstrap.sql')
+const tenantBootstrap = join(proofRoot, 'tenant-bootstrap.sql')
 const localCertificate = join(tlsDir, 'server.crt')
 const localKey = join(tlsDir, 'server.key')
 const localCa = join(tlsDir, 'ca.crt')
@@ -106,6 +107,15 @@ create or replace function platform.has_org_access(target_org_id uuid, min_role 
 returns boolean language sql stable as $$ select true $$;
 grant usage on schema platform to svc_linksites_runtime, svc_linksites_ledger;
 grant execute on function platform.has_org_access(uuid, platform.member_role) to svc_linksites_runtime, svc_linksites_ledger;
+`
+
+const tenantSql = `
+insert into platform.organizations (id, name, kind, status)
+values ('${localOrgId}', 'LiNKsites disposable proof', 'client', 'active')
+on conflict (id) do nothing;
+insert into lsites_sites.sites (id, org_id, name, status, template_id, primary_domain, default_locale)
+values ('00000000-0000-4000-8000-000000000002', '${localOrgId}', 'LiNKsites disposable proof', 'active', 'marketing-smb-v1', 'preview.localtest', 'en')
+on conflict (id) do nothing;
 `
 
 const runtimeValues = {
@@ -182,6 +192,7 @@ try {
   await chmod(runtimeDir, 0o777)
   await chmod(join(runtimeDir, 'program'), 0o777)
   await writeFile(platformBootstrap, platformSql)
+  await writeFile(tenantBootstrap, tenantSql)
   await run('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', localKey, '-out', localCa, '-days', '1', '-subj', '/CN=LiNKsites local proof CA'])
   await run('openssl', ['req', '-newkey', 'rsa:2048', '-nodes', '-keyout', join(tlsDir, 'server-request.key'), '-out', join(tlsDir, 'server.csr'), '-subj', '/CN=cms.localtest', '-addext', 'subjectAltName=DNS:cms.localtest,DNS:preview.localtest'])
   await writeFile(join(tlsDir, 'server.ext'), 'subjectAltName=DNS:cms.localtest,DNS:preview.localtest\n')
@@ -213,6 +224,7 @@ try {
     TRAEFIK_CMS_PRIVATE_MIDDLEWARE: 'local-proof-private',
     TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE: 'local-proof-private',
     LINKSITES_LOCAL_PROOF_PLATFORM_BOOTSTRAP: platformBootstrap,
+    LINKSITES_LOCAL_PROOF_TENANT_BOOTSTRAP: tenantBootstrap,
     LINKSITES_LOCAL_PROOF_TLS_DIR: tlsDir,
     LINKSITES_LOCAL_PROOF_RUNTIME_DIR: runtimeDir,
     LINKSITES_LOCAL_PROOF_TLS_PORT: tlsPort,

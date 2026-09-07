@@ -40,6 +40,21 @@ services:
       local-postgres:
         condition: service_healthy
 
+  local-tenant-bootstrap:
+    image: postgres:16.8-alpine@sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c
+    environment:
+      PGPASSWORD: ltfx.fix2.postgres_password.cf215bab08df.v1
+    command: ["psql", "-h", "local-postgres", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-f", "/proof/tenant.sql"]
+    depends_on:
+      supabase-migrate:
+        condition: service_completed_successfully
+    volumes:
+      - ${LINKSITES_LOCAL_PROOF_TENANT_BOOTSTRAP:?set generated local tenant bootstrap}:/proof/tenant.sql:ro
+    networks: [internal]
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+
   payload-seed:
     image: ${LINKSITES_WORKER_IMAGE:?set local proof worker image}
     env_file:
@@ -98,6 +113,8 @@ services:
       - 127.0.0.1:${LINKSITES_LOCAL_PROOF_ORCHESTRATOR_PORT:?set local proof orchestrator port}:3000
     depends_on:
       payload-seed:
+        condition: service_completed_successfully
+      local-tenant-bootstrap:
         condition: service_completed_successfully
     volumes:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites
