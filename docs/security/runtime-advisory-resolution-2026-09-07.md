@@ -26,6 +26,25 @@ mutation, and privileged reset of the selected account's lockout fields. The
 initial 16-case regression had 11 failures on the unchanged parent, before the
 explicit rule was added. The final suite includes two operation-level tests.
 
+The related self-service grant boundary is protected as part of this fix. Users
+may still update their own profile, but `roles`, `assignedSites` and
+`allowedLocales` now require the same explicit MANAGE_USERS authority on both
+create and update. A field read restriction alone does not restrict writes in
+Payload. The field rules use the authenticated caller, never submitted role,
+permission or bypass claims; a bootstrap read hint does not confer write access.
+Trusted Local API bootstrap scripts already pass `overrideAccess: true` and
+retain that explicit server-only path. Existing privileged administrators may
+continue assigning grants under the unchanged global user-management model.
+
+`users-grant-write-access.spec.ts` runs Payload's real before-validation field
+traversal with access enforcement enabled. It proves that unauthorized updates
+retain the original role/site/locale grants while first/last-name edits survive,
+new scopes and subsequent unlock remain denied, ordinary creation and edits to
+other accounts remain denied, and privileged plus explicit trusted bootstrap
+writes still work. The 25-case regression had 16 failures before field guards.
+Only the unrelated bootstrap database-read helper is mocked; field authorization
+and field fallback behavior are exercised from the installed framework.
+
 The upstream package has no published fixed version in the observed advisory.
 The package-version audit therefore still reports this one moderate advisory;
 the explicit application authorization fixes the affected LiNKsites path. This
