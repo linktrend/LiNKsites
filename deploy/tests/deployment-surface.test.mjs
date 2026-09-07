@@ -133,6 +133,7 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   assert.ok(rehearsal.includes('LINKSITES_ADMITTED_TEMPLATE_SHA: libraryRevision'), 'the disposable admission fixture must use the exact historical library revision it verifies')
   assert.ok(rehearsal.includes('LINKLIBRARIES_CATALOG_CONTENT_SHA256: libraryCatalogChecksum'), 'the rehearsal must supply the verified catalog checksum to Compose')
   assert.ok(rehearsal.includes('LINKLIBRARIES_ENTRY_CONTENT_SHA256: libraryEntryChecksum'), 'the rehearsal must supply the verified entry checksum to Compose')
+  assert.ok(rehearsal.includes("W2_02_POSTGRES_ADAPTER_MODULE: '@linksites/program-orchestrator/postgres-adapter'"), 'the rehearsal must select the packaged production Postgres adapter')
   assert.ok(rehearsal.includes("process.env.LINKSITES_PLATFORM_REPOSITORY ?? '/Users/linktrend/Projects/LiNKplatform'"), 'the Platform provenance checkout must be relocatable for a Linux rehearsal host')
   assert.ok(rehearsal.includes("process.env.LINKLIBRARIES_ARTIFACT_PATH ?? '/Users/linktrend/Projects/LiNKlibraries'"), 'the library evidence checkout must be relocatable for a Linux rehearsal host')
   assert.ok(rehearsal.includes('env: { ...process.env, ...runtimeValues, ...composeVariables'), 'the rehearsal must supply generated runtime values to Compose interpolation and override ambient inputs')

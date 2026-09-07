@@ -139,6 +139,7 @@ const runtimeValues = {
   W2_02_SITE_ID: '00000000-0000-4000-8000-000000000002',
   W2_02_DATABASE_ROLE: 'svc_linksites_runtime',
   W2_02_APPROVED_FACTS_PATH: '/var/lib/linksites/program/approved-facts.json',
+  W2_02_POSTGRES_ADAPTER_MODULE: '@linksites/program-orchestrator/postgres-adapter',
   W2_02_EXECUTION_REVISION: sourceRevision,
   W2_02_EXECUTABLE_CHECKPOINT: checkpointHash,
   W2_02_STATE_DIR: '/var/lib/linksites/program',
