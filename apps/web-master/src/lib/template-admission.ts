@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { lstatSync, readFileSync } from "node:fs";
 import {
   assertLibraryConsumptionEvidence,
   assertLibraryConsumptionReceipt,
@@ -30,6 +32,138 @@ const parseJson = (raw: string, label: string): unknown => {
   } catch {
     throw new TemplateAdmissionError(`${label} JSON is invalid`);
   }
+};
+
+const requiredProductionValue = (name: string): string => {
+  const value = process.env[name];
+  if (!value) throw new TemplateAdmissionError(`${name} is required for a ready production release`);
+  return value;
+};
+
+type ProductionReleaseReference = Readonly<{
+  entryId: string;
+  version: string;
+  sourceCommitSha: string;
+  sourceTreeSha: string;
+  releaseSourceCommitSha: string;
+  releaseSourceTreeSha: string;
+  artifactTreeSha1: string;
+  releaseManifestSha256: string;
+  dependencyLockSha256: string;
+}>;
+
+type ProductionReleaseConfiguration = Readonly<{
+  entryId: string;
+  version: string;
+  providerCommitSha: string;
+  providerTreeSha: string;
+  sourceCommitSha: string;
+  sourceTreeSha: string;
+  artifactTreeSha1: string;
+  dependencyLockSha256: string;
+}>;
+
+type ProviderCheckoutIdentity = Readonly<{ commitSha: string; treeSha: string }>;
+
+export const assertProductionReceiptIdentityBindings = (
+  receipt: Record<string, any>,
+  reference: ProductionReleaseReference,
+  configuration: ProductionReleaseConfiguration,
+  providerIdentity: ProviderCheckoutIdentity = { commitSha: configuration.providerCommitSha, treeSha: configuration.providerTreeSha },
+): void => {
+  const releaseSource = receipt.receiptType === "verified_cache" ? receipt.releaseSource : receipt;
+  const mismatches = [
+    ["entryId", receipt.entryId, configuration.entryId],
+    ["version", receipt.version, configuration.version],
+    ["provider commit", providerIdentity.commitSha, configuration.providerCommitSha],
+    ["provider tree", providerIdentity.treeSha, configuration.providerTreeSha],
+    ["source-release commit", releaseSource?.releaseSourceCommitSha, configuration.sourceCommitSha],
+    ["source-release tree", releaseSource?.releaseSourceRepositoryTreeSha1, configuration.sourceTreeSha],
+    ["artifact tree", receipt.artifactTreeSha1, configuration.artifactTreeSha1],
+    ["dependency-lock", reference.dependencyLockSha256, configuration.dependencyLockSha256],
+  ] as const;
+  const mismatch = mismatches.find(([, actual, expected]) => actual !== expected);
+  if (mismatch) throw new TemplateAdmissionError(`mounted native Revision 2 receipt ${mismatch[0]} identity does not match the configured release`);
+  if (reference.entryId !== configuration.entryId || reference.version !== configuration.version) throw new TemplateAdmissionError("validated release entry/version does not match the configured release");
+  if (reference.sourceCommitSha !== configuration.sourceCommitSha || reference.sourceTreeSha !== configuration.sourceTreeSha) throw new TemplateAdmissionError("validated release source identity does not match the configured source release");
+  if (reference.releaseSourceCommitSha !== configuration.sourceCommitSha || reference.releaseSourceTreeSha !== configuration.sourceTreeSha) throw new TemplateAdmissionError("validated release source-release identity does not match the configured source release");
+  if (reference.artifactTreeSha1 !== configuration.artifactTreeSha1) throw new TemplateAdmissionError("validated release artifact tree does not match the configured release");
+};
+
+const verifyMountedProductionRelease = (templateId: string) => {
+  const receiptPath = requiredProductionValue("LINKSITES_LINKLIBRARIES_RECEIPT_PATH");
+  const suppliedReceiptRaw = requiredProductionValue("LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON");
+  let mountedBytes: Buffer;
+  try {
+    const stat = lstatSync(receiptPath);
+    if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("receipt path is not a regular file");
+    mountedBytes = readFileSync(receiptPath);
+  } catch (error) {
+    throw new TemplateAdmissionError(`mounted LiNKlibraries receipt is absent or unreadable: ${error instanceof Error ? error.message : "read failed"}`);
+  }
+
+  const suppliedBytes = Buffer.from(suppliedReceiptRaw, "utf8");
+  const suppliedDigest = createHash("sha256").update(suppliedBytes).digest("hex");
+  const mountedDigest = createHash("sha256").update(mountedBytes).digest("hex");
+  if (mountedDigest !== suppliedDigest || !mountedBytes.equals(suppliedBytes)) {
+    throw new TemplateAdmissionError("mounted LiNKlibraries receipt bytes/digest do not match the supplied receipt evidence");
+  }
+
+  const mountedReceiptRaw = mountedBytes.toString("utf8");
+  const mountedReceipt = parseJson(mountedReceiptRaw, "mounted receipt") as Record<string, any>;
+  const providerRoot = requiredProductionValue("LINKSITES_LINKLIBRARIES_ROOT");
+  const providerCommitSha = requiredProductionValue("LINKSITES_LINKLIBRARIES_COMMIT_SHA");
+  const providerTreeSha = requiredProductionValue("LINKSITES_LINKLIBRARIES_TREE_SHA");
+  const dependencyLockSha256 = requiredProductionValue("LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256");
+  const version = requiredProductionValue("LINKSITES_TEMPLATE_VERSION");
+
+  // The explicit path is read again by the native materializer, which runs
+  // validateExactRelease() over the complete provider bundle. Shape-valid
+  // JSON alone is not sufficient for production readiness.
+  const result = materializeRevision2WebsiteTemplate({
+    providerRoot,
+    entryId: templateId,
+    version,
+    pin: {
+      providerCommitSha,
+      providerTreeSha,
+      sourceCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
+      sourceTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
+      dependencyLockSha256,
+    },
+    receiptPath,
+  });
+  if (!result.ok) throw new TemplateAdmissionError(`native Revision 2 release rejected: ${result.errors.join("|")}`);
+
+  const reference = result.value.reference;
+  assertProductionReceiptIdentityBindings(mountedReceipt, reference, {
+    entryId: templateId,
+    version,
+    providerCommitSha,
+    providerTreeSha,
+    sourceCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
+    sourceTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
+    artifactTreeSha1: reference.artifactTreeSha1,
+    dependencyLockSha256,
+  }, { commitSha: providerCommitSha, treeSha: providerTreeSha });
+  if (mountedReceipt.releaseManifestSha256 !== reference.releaseManifestSha256) {
+    throw new TemplateAdmissionError("mounted native Revision 2 receipt manifest identity does not match the validated release");
+  }
+  return result.value;
+};
+
+export const assertProductionTemplateReleaseReady = (templateId: string): void => {
+  if (process.env.LINKSITES_DEPLOYMENT_ENV !== "production") return;
+  if (process.env.LINKSITES_TEMPLATE_RELEASE_STATE !== "ready") {
+    throw new TemplateAdmissionError("template-dependent rendering and publishing are deferred until a native Revision 2 release is admitted");
+  }
+  if (process.env.LINKSITES_TEMPLATE_FORMAT !== "revision2") {
+    throw new TemplateAdmissionError("production template selection requires the native Revision 2 materializer");
+  }
+  if (process.env.LINKSITES_TEMPLATE_ID !== templateId) {
+    throw new TemplateAdmissionError(`production template selection is pinned to ${process.env.LINKSITES_TEMPLATE_ID ?? "an explicitly configured template"}`);
+  }
+  verifyMountedProductionRelease(templateId);
 };
 
 const admitMasterTemplateCandidatePreview = (templateId: string): AdmittedTemplateReceipt => {
@@ -116,6 +250,7 @@ export const getAdmittedTemplateEvidence = (): LibraryConsumptionEvidence => loa
 export const getAdmittedTemplateReceipt = (): AdmittedTemplateReceipt => loadAdmittedEvidence().receipt;
 
 export const getAdmittedRevision2Template = () => {
+  assertProductionTemplateReleaseReady(process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_PIN.entryId);
   const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT ?? process.env.LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH;
   if (!providerRoot) throw new TemplateAdmissionError("Revision 2 provider root is not configured");
   const result = materializeRevision2WebsiteTemplate({
@@ -123,8 +258,10 @@ export const getAdmittedRevision2Template = () => {
     entryId: process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_PIN.entryId,
     version: process.env.LINKSITES_TEMPLATE_VERSION ?? MASTER_TEMPLATE_PIN.version,
     pin: {
-      sourceCommitSha: process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA ?? FROZEN_PROVIDER_PIN.sourceCommitSha,
-      sourceTreeSha: process.env.LINKSITES_LINKLIBRARIES_TREE_SHA ?? FROZEN_PROVIDER_PIN.sourceTreeSha,
+      providerCommitSha: process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA ?? FROZEN_PROVIDER_PIN.providerCommitSha,
+      providerTreeSha: process.env.LINKSITES_LINKLIBRARIES_TREE_SHA ?? FROZEN_PROVIDER_PIN.providerTreeSha,
+      sourceCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
+      sourceTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
       dependencyLockSha256: process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256 ?? FROZEN_PROVIDER_PIN.dependencyLockSha256,
     },
     receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH,

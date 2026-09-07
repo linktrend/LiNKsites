@@ -1,0 +1,26 @@
+services:
+  # Selected only after ready-state preflight has admitted the complete native
+  # Revision 2 catalogue, manifest, inventory, dependency lock, receipt, and
+  # exact provider checkout identity.
+  web-master:
+    environment:
+      LINKSITES_LINKLIBRARIES_ROOT: /opt/linksites/linklibraries
+      LINKSITES_LINKLIBRARIES_COMMIT_SHA: ${LINKSITES_LINKLIBRARIES_COMMIT_SHA:?set native v2 provider commit}
+      LINKSITES_LINKLIBRARIES_TREE_SHA: ${LINKSITES_LINKLIBRARIES_TREE_SHA:?set native v2 provider tree}
+      LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: ${LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256:?set native v2 dependency-lock digest}
+      LINKSITES_LINKLIBRARIES_RECEIPT_PATH: /opt/linksites/linklibraries/receipt.json
+      LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: ${LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON:?set native v2 receipt JSON}
+    volumes:
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set native v2 LiNKlibraries provider checkout}:/opt/linksites/linklibraries:ro
+
+  program-orchestrator:
+    environment:
+      LINKSITES_LINKLIBRARIES_ROOT: /opt/linksites/linklibraries
+      LINKSITES_LINKLIBRARIES_COMMIT_SHA: ${LINKSITES_LINKLIBRARIES_COMMIT_SHA:?set native v2 provider commit}
+      LINKSITES_LINKLIBRARIES_TREE_SHA: ${LINKSITES_LINKLIBRARIES_TREE_SHA:?set native v2 provider tree}
+      LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: ${LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256:?set native v2 dependency-lock digest}
+      LINKSITES_LINKLIBRARIES_RECEIPT_PATH: /opt/linksites/linklibraries/receipt.json
+      LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON: ${LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON:?set native v2 receipt JSON}
+      W2_02_LIBRARY_REPOSITORY_PATH: /opt/linksites/linklibraries
+    volumes:
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set native v2 LiNKlibraries provider checkout}:/opt/linksites/linklibraries:ro

@@ -96,15 +96,15 @@ services:
       payload:
         condition: service_healthy
     environment:
-      # The renderer loads only the same immutable LiNKlibraries checkout that
-      # is pinned by the release manifest. The admission SHA is deliberately
-      # injected from that manifest rather than copied as a second operator
-      # value.
-      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /opt/linksites/linklibraries
-      LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
+      # Deferred state is deliberately provider-independent. The ready-only
+      # Compose overlay adds the native provider environment and mount after
+      # preflight has admitted the complete Revision 2 bundle.
+      LINKSITES_TEMPLATE_RELEASE_STATE: ${LINKSITES_TEMPLATE_RELEASE_STATE:?set deferred or ready}
+      LINKSITES_TEMPLATE_FORMAT: revision2
+      LINKSITES_TEMPLATE_ID: ${LINKSITES_TEMPLATE_ID:-master-template-type-1}
+      LINKSITES_TEMPLATE_VERSION: ${LINKSITES_TEMPLATE_VERSION:-2.0.0-a1.1}
     volumes:
       - linksites-runtime:/var/lib/linksites:ro
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/opt/linksites/linklibraries:ro
     tmpfs: [/tmp]
     networks: [internal, edge, egress]
     labels:
@@ -165,10 +165,10 @@ services:
       W2_02_PREVIEW_ACCESS_TOKEN: ${W2_02_PREVIEW_ACCESS_TOKEN:?set protected preview token}
       W2_05_OUTCOME_GATEWAY_SECRET: ${W2_05_OUTCOME_GATEWAY_SECRET:?set outcome gateway secret}
       W2_05_OUTCOME_GATEWAY_KEY_ID: ${W2_05_OUTCOME_GATEWAY_KEY_ID:?set outcome gateway key id}
-      W2_02_LIBRARY_REPOSITORY_PATH: ${W2_02_LIBRARY_REPOSITORY_PATH:?set mounted library repository path}
-      W2_02_LIBRARY_COMMIT_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
-      W2_02_LIBRARY_CATALOG_SHA256: ${LINKLIBRARIES_CATALOG_CONTENT_SHA256:?set exact LiNKlibraries catalog checksum}
-      W2_02_LIBRARY_ENTRY_SHA256: ${LINKLIBRARIES_ENTRY_CONTENT_SHA256:?set exact LiNKlibraries entry checksum}
+      LINKSITES_TEMPLATE_RELEASE_STATE: ${LINKSITES_TEMPLATE_RELEASE_STATE:?set deferred or ready}
+      LINKSITES_TEMPLATE_FORMAT: revision2
+      LINKSITES_TEMPLATE_ID: ${LINKSITES_TEMPLATE_ID:-master-template-type-1}
+      LINKSITES_TEMPLATE_VERSION: ${LINKSITES_TEMPLATE_VERSION:-2.0.0-a1.1}
     depends_on:
       payload:
         condition: service_healthy
@@ -177,7 +177,6 @@ services:
     networks: [internal, egress]
     volumes:
       - linksites-runtime:/var/lib/linksites
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved LiNKlibraries artifact directory}:/opt/linksites/linklibraries:ro
 
 networks:
   edge:

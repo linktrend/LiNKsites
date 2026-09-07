@@ -21,19 +21,27 @@ test('Server03 uses the canonical operational Compose services and admitted prov
     const runtimeFile = join(directory, 'runtime.env')
     await writeFile(runtimeFile, '')
     const canonical = await read('deploy/docker-compose.deploy.yml')
+    const readyOverlay = await read('deploy/docker-compose.template-ready.yml')
     const env = { ...process.env }
-    for (const match of canonical.matchAll(/\$\{([A-Z0-9_]+)/g)) env[match[1]] = 'synthetic-fixture'
+    for (const match of `${canonical}\n${readyOverlay}`.matchAll(/\$\{([A-Z0-9_]+)/g)) env[match[1]] = 'synthetic-fixture'
     env.LINKSITES_RUNTIME_ENV_FILE = runtimeFile
     env.LINKLIBRARIES_ARTIFACT_PATH = directory
-    const config = (file) => JSON.parse(execFileSync('docker', ['compose', '--project-name', 'linksites-foundation', '-f', file, 'config', '--format', 'json'], { cwd: root, env, encoding: 'utf8' }))
+    env.LINKSITES_TEMPLATE_RELEASE_STATE = 'ready'
+    env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON = '{}'
+    const config = (...files) => JSON.parse(execFileSync('docker', ['compose', '--project-name', 'linksites-foundation', ...files.flatMap((file) => ['-f', file]), 'config', '--format', 'json'], { cwd: root, env, encoding: 'utf8' }))
     const baseline = config('deploy/docker-compose.deploy.yml')
     const foundation = config('deploy/docker-compose.server03-foundation.yml')
+    const ready = config('deploy/docker-compose.deploy.yml', 'deploy/docker-compose.template-ready.yml')
     assert.deepEqual(foundation.services, baseline.services, 'Server03 must run the real production services')
     assert.equal(foundation.services['program-orchestrator'].command ?? null, null, 'use the real image entrypoint')
     for (const name of ['web-master', 'program-orchestrator']) {
       assert.notEqual(foundation.services[name].environment.LINKSITES_TEMPLATE_RELEASE_STATE, 'pending')
-      assert.ok(foundation.services[name].volumes.some((volume) => volume.target === '/opt/linksites/linklibraries' && volume.read_only))
+      assert.equal(foundation.services[name].volumes.some((volume) => volume.target === '/opt/linksites/linklibraries'), false, 'deferred/base Server03 must not require provider mounts')
+      assert.ok(ready.services[name].volumes.some((volume) => volume.target === '/opt/linksites/linklibraries' && volume.read_only), 'ready overlay must add the provider mount')
     }
+    assert.equal(foundation.services['web-master'].environment.LINKSITES_TEMPLATE_FORMAT, 'revision2')
+    assert.equal(foundation.services['program-orchestrator'].environment.LINKSITES_TEMPLATE_FORMAT, 'revision2')
+    assert.ok(!canonical.includes('LINKSITES_ADMITTED_TEMPLATE_SHA'))
     assert.ok(foundation.services['web-master'].labels['traefik.http.routers.linksites-preview.middlewares'])
     assert.equal(foundation.services['web-master'].ports?.length ?? 0, 0)
   } finally {
@@ -122,6 +130,12 @@ test('deployment contract binds preview token, production mode, and smoke topolo
   const smoke = await read('deploy/scripts/postdeploy-smoke.sh')
   const example = await read('deploy/config/production.env.example')
   const compose = await read('deploy/docker-compose.deploy.yml')
+  const exampleNames = new Set(example.split('\n').flatMap((line) => {
+    const match = line.match(/^([A-Z0-9_]+)=/)
+    return match ? [match[1]] : []
+  }))
+  assert.equal(exampleNames.has('LINKSITES_TEMPLATE_RELEASE_STATE'), true)
+  assert.match(example, /^LINKSITES_TEMPLATE_RELEASE_STATE=deferred$/m)
   assert.ok(contract.includes("required('PREVIEW_ACCESS_TOKEN', 'secret-min-32', true)"))
   assert.ok(contract.includes("required('W2_02_MODE', 'literal:production')"))
   assert.ok(contract.includes("required('DATABASE_URI', 'postgres-url', true)"))
@@ -133,6 +147,20 @@ test('deployment contract binds preview token, production mode, and smoke topolo
   assert.ok(contract.includes("required('W2_02_POSTGRES_ADAPTER_MODULE', 'literal:@linksites/program-orchestrator/postgres-adapter')"))
   assert.ok(example.includes(['PREVIEW_ACCESS_TOKEN', 'ltfx.' + 'placeholder.5e0a9b3c2eac.v1'].join('=')))
   assert.ok(example.includes('W2_02_POSTGRES_ADAPTER_MODULE=@linksites/program-orchestrator/postgres-adapter'))
+  for (const name of [
+    'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON',
+    'LINKSITES_LINKLIBRARIES_ROOT',
+    'LINKSITES_LINKLIBRARIES_COMMIT_SHA',
+    'LINKSITES_LINKLIBRARIES_TREE_SHA',
+    'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256',
+    'LINKSITES_LINKLIBRARIES_RECEIPT_PATH',
+    'LINKLIBRARIES_ARTIFACT_PATH',
+    'LINKLIBRARIES_CATALOG_SHA',
+    'LINKLIBRARIES_ENTRY_SHA',
+    'LINKLIBRARIES_CATALOG_CONTENT_SHA256',
+    'LINKLIBRARIES_ENTRY_CONTENT_SHA256',
+    'W2_02_LIBRARY_REPOSITORY_PATH',
+  ]) assert.equal(exampleNames.has(name), false, `${name} must remain unset in deferred runtime example`)
   assert.ok(compose.includes('W2_02_MODE: ${W2_02_MODE:?set W2_02_MODE=production}'))
   assert.ok(compose.includes('DATABASE_URI: ${W2_02_DATABASE_URI:?set distinct orchestrator PostgreSQL URI}'))
   assert.ok(compose.includes('W2_02_APPROVED_FACTS_PATH: ${W2_02_APPROVED_FACTS_PATH:?set absolute approved facts path}'))
