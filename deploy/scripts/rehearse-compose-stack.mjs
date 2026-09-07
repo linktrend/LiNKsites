@@ -134,7 +134,7 @@ const runtimeValues = {
   W2_04_LOCAL_PROOF_HOST: 'preview.localtest',
   LINKSITES_LOCAL_COMPOSE_PROOF: '1',
   LINKSITES_ADMITTED_TEMPLATE_SHA: libraryRevision,
-  W2_02_MODE: 'local',
+  W2_02_MODE: 'production',
   W2_02_DATABASE_URI: localDatabaseUrl,
   W2_02_ORG_ID: 'local-proof-org',
   W2_02_SITE_ID: '00000000-0000-4000-8000-000000000002',
