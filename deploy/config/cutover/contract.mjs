@@ -335,6 +335,21 @@ export function committedTemplateDrift({ catalog, productionExample, compose, op
           'MONITORING_LOG_REDACTION',
           'MONITORING_LIVE_SCRAPE',
           'DEPLOYMENT_LIVE_CANARY',
+          'LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH',
+          'LINKSITES_ADMITTED_TEMPLATE_SHA',
+          'LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON',
+          'LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON',
+          'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON',
+          'LINKSITES_LINKLIBRARIES_ROOT',
+          'LINKSITES_LINKLIBRARIES_COMMIT_SHA',
+          'LINKSITES_LINKLIBRARIES_TREE_SHA',
+          'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256',
+          'LINKSITES_LINKLIBRARIES_RECEIPT_PATH',
+          'LINKLIBRARIES_ARTIFACT_PATH',
+          'LINKLIBRARIES_CATALOG_SHA',
+          'LINKLIBRARIES_ENTRY_SHA',
+          'LINKLIBRARIES_CATALOG_CONTENT_SHA256',
+          'LINKLIBRARIES_ENTRY_CONTENT_SHA256',
         ]
         if (!documented.includes(key.name) && !key.name.startsWith('MONITORING_') && !key.name.startsWith('PROVIDER_') && !key.name.startsWith('HOSTING_') && !key.name.startsWith('DATABASE_CREDENTIAL') && !key.name.startsWith('DEPLOYMENT_')) {
           errors.push(`${surface.id}:${key.name} is missing from production.env.example`)
