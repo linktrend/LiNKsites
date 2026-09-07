@@ -3,6 +3,37 @@
 This document prepares a deployment. It does not authorize or perform VPS,
 DNS, public-domain, Cloudflare, Traefik, or customer-data changes.
 
+## Server03 operational acceptance with template publishing deferred
+
+Use a manifest whose native v2 template state is `deferred` with the real
+production services. `docker-compose.server03-foundation.yml` includes the
+canonical production Compose definition under the `linksites-foundation`
+project name; its preflight and smoke entrypoints reuse the same production
+checks. Deferred acceptance requires no provider checkout, receipt, or artifact
+mount. The unfinished `master-template-type-1` release remains non-selectable;
+template-dependent rendering, Program intake, and publishing are blocked while
+the infrastructure and service runtime are accepted. The provider checkout and
+ready-only Compose overlay are added only after complete native Revision 2
+catalogue, selectability, manifest, inventory, lock, and receipt admission.
+
+Require exact image and migration identities, CMS/worker operation, a complete
+private one-site Program run, real rendered preview with noindex, delivered
+completion, health, resource limits, restart behavior, logs/metrics and a tested
+backup/restore and rollback. Readiness-only staging cannot earn operational
+acceptance. Private routes use existing named Traefik privacy middleware;
+public/customer launch and replacement-template adoption remain separately gated.
+
+Import `deploy/monitoring/server03-foundation.rules.yml` into the existing
+Server03 Prometheus rule set only after its `linksites-server03-foundation`
+scrape target and backup textfile metrics exist. Validate with `promtool check
+rules` before reload. Runtime attention, absent metrics, failed health and stale
+backup/restore evidence must alert; normal intake is expected.
+
+Generate a new immutable manifest for later native-v2 template adoption and
+repeat provider admission, preview and rollback verification. Never alter a
+released manifest in place. Missing production Platform authority still blocks
+production migration and startup; disposable proof does not supply that authority.
+
 ## Topology and privacy
 
 The `edge` network is the existing Traefik network; `internal` is a Docker
@@ -35,7 +66,8 @@ The orchestrator must run with `W2_02_MODE=production`, a UUID
 absolute `W2_02_APPROVED_FACTS_PATH`, the distinct `W2_02_DATABASE_URI`
 least-privilege credential, and the exact packaged
 `W2_02_POSTGRES_ADAPTER_MODULE=@linksites/program-orchestrator/postgres-adapter`,
-and the release-pinned `LINKLIBRARIES_ARTIFACT_PATH` Git checkout. Compose
+and, only for a ready template release, the release-pinned
+`LINKLIBRARIES_ARTIFACT_PATH` Git checkout. Compose
 passes the distinct URI to the adapter's `DATABASE_URI` name only inside the
 orchestrator container; CMS/worker/migration services retain their separate
 `DATABASE_URI`. No credential or preview token belongs in the image or this document. The

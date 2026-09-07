@@ -1,0 +1,7 @@
+name: linksites-foundation
+
+# Server03 runs the real CMS, renderer, worker and Program orchestrator with
+# private Traefik routes. Native v2 template-dependent rendering/publishing is
+# explicitly deferred until a selectable provider receipt is admitted.
+include:
+  - docker-compose.deploy.yml

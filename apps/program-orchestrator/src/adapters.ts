@@ -6,6 +6,7 @@ import type { DemoCompletionEnvelope, LeadResearchPackage } from '@linksites/typ
 import { FileCompletionSink, type CompletionSink } from '@linksites/intake-orchestrator'
 import {
   createPreviewDeployment,
+  ContentProductionError,
   type LibraryConsumptionEvidence,
   type PayloadDraftTarget,
   type WorkingContentPackage,
@@ -15,6 +16,7 @@ import {
   buildPromotionRequestFromPreparedWorkingContent,
   canonicalJsonChecksum,
   MASTER_TEMPLATE_ID,
+  FROZEN_PROVIDER_PIN,
   MARKETING_SMB_V1_CATALOG_AUTHORITY,
   promotePreparedWorkingContent,
   assertValidWorkingContentPackage,
@@ -30,6 +32,11 @@ const stable = (value: unknown): string => value === null || typeof value !== 'o
 const checksum = (value: unknown): string => createHash('sha256').update(stable(value)).digest('hex')
 const clone = <T>(value: T): T => structuredClone(value)
 const safeKey = (value: string): string => createHash('sha256').update(value).digest('hex')
+const safeBoundaryDiagnostic = (error: unknown): string => {
+  if (error instanceof ContentProductionError) return `content-production:${error.code}`
+  const message = error instanceof Error ? error.message : ''
+  return /^[a-z0-9][a-z0-9:._-]{0,159}$/iu.test(message) ? message : 'boundary:diagnostic-redacted'
+}
 
 function stringLeaves(value: unknown): string[] {
   if (typeof value === 'string') return [value]
@@ -141,7 +148,13 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     }
     const fault = this.fault(operation)
     if (fault && fault.kind !== 'crash_after_receipt') throw new Error(`boundary:${operation}:${fault.kind}-failure`)
-    const value = await effect()
+    let value: T
+    try {
+      value = await effect()
+    } catch (error) {
+      console.error(JSON.stringify({ service: 'program-orchestrator', event: 'boundary_failed', operation, diagnostic: safeBoundaryDiagnostic(error) }))
+      throw error
+    }
     if (fence) await this.leaseVerifier!(fence)
     if (fault?.kind === 'crash_after_receipt') throw new Error(`crash-after-receipt:${operation}`)
     return clone(value)
@@ -162,13 +175,15 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
   async resolveLibrary(siteId: string): Promise<Record<string, unknown>> { return this.boundary('library.verify', async () => { const consumption = await this.libraryEvidence(); if ('reference' in consumption) return { entryId: consumption.reference.entryId, revision: consumption.reference.releaseSourceCommitSha, releaseManifestSha256: consumption.reference.releaseManifestSha256, inventorySha256: consumption.reference.inventorySha256, status: consumption.reference.receiptType === 'candidate' ? 'draft_candidate' : 'approved', materialized: true, authority: 'linksites_local', libraryAuthority: 'reference_only', consumption, siteId }; return { entryId: consumption.entry.entryId, revision: this.config.libraryCommitSha, catalogChecksum: this.config.libraryCatalogChecksum, entryChecksum: this.config.libraryEntryChecksum, status: 'approved', materialized: true, verificationId: consumption.receipt.verificationId, consumption, siteId } }) }
 
   private async libraryEvidence(): Promise<LibraryProductionEvidence> {
+    if (process.env.LINKSITES_DEPLOYMENT_ENV === 'production' && process.env.LINKSITES_TEMPLATE_RELEASE_STATE !== 'ready') throw new Error('library:template-release-deferred')
+    if (process.env.LINKSITES_DEPLOYMENT_ENV === 'production' && process.env.LINKSITES_TEMPLATE_FORMAT !== 'revision2') throw new Error('library:legacy-template-contract-forbidden')
     if (process.env.LINKSITES_TEMPLATE_FORMAT === 'revision2') {
       const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT
-      const sourceCommitSha = process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA
-      const sourceTreeSha = process.env.LINKSITES_LINKLIBRARIES_TREE_SHA
+      const providerCommitSha = process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA
+      const providerTreeSha = process.env.LINKSITES_LINKLIBRARIES_TREE_SHA
       const dependencyLockSha256 = process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256
-      if (!providerRoot || !sourceCommitSha || !sourceTreeSha || !dependencyLockSha256) throw new Error('library:revision2-pinned-provider-input-missing')
-      const result = materializeRevision2WebsiteTemplate({ providerRoot, entryId: process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_ID, version: process.env.LINKSITES_TEMPLATE_VERSION ?? '1.0.0', pin: { sourceCommitSha, sourceTreeSha, dependencyLockSha256 }, receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH })
+      if (!providerRoot || !providerCommitSha || !providerTreeSha || !dependencyLockSha256) throw new Error('library:revision2-pinned-provider-input-missing')
+      const result = materializeRevision2WebsiteTemplate({ providerRoot, entryId: process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_ID, version: process.env.LINKSITES_TEMPLATE_VERSION ?? '1.0.0', pin: { sourceCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha, sourceTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha, providerCommitSha, providerTreeSha, dependencyLockSha256 }, receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH })
       if (!result.ok) throw new Error(`library:revision2-release-rejected:${result.errors.join('|')}`)
       return result.value
     }
@@ -366,7 +381,14 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
       const html = await response.text()
       const robots = response.headers.get('x-robots-tag') ?? ''
       const cache = response.headers.get('cache-control') ?? ''
-      if (!response.ok || !html.includes('data-private-preview="true"') || !robots.includes('noindex') || !cache.includes('no-store')) throw new Error('frontend:protected-web-master-render-failed')
+      const markerPresent = html.includes('data-private-preview="true"')
+      const noindexPresent = robots.includes('noindex')
+      const noStorePresent = cache.includes('no-store')
+      if (!response.ok || !markerPresent || !noindexPresent || !noStorePresent) {
+        // This diagnostic is deliberately limited to status and boolean gate
+        // results. Never log the response body, request credential, or URL.
+        throw new Error(`frontend:protected-web-master-render-failed:status-${response.status}:marker-${markerPresent}:noindex-${noindexPresent}:no-store-${noStorePresent}`)
+      }
       // The response body can legitimately contain a token-bearing navigation
       // link. It is evaluated in-memory, then represented by a checksum and
       // boolean gates only; durable evidence must never retain that credential.
@@ -395,7 +417,19 @@ export class LocalBoundaryAdaptersImpl implements LocalBoundaryAdapters {
     const cms = await fetch(`${this.config.payloadBaseUrl}/api/pages?site=${encodeURIComponent(this.config.payloadSiteId)}&limit=1`, { headers: { Authorization: `users API-Key ${this.config.payloadApiKey}` } }).then((response) => response.ok).catch(() => false)
     const frontend = await fetch(`${this.config.webMasterBaseUrl}/api/healthz`).then(async (response) => response.ok && (await response.json() as { service?: unknown }).service === 'web-master').catch(() => false)
     const library = await Promise.resolve().then(() => {
-      execFileSync('git', ['-C', this.config.libraryRepositoryPath, 'cat-file', '-e', `${this.config.libraryCommitSha}^{commit}`], { stdio: 'ignore' })
+      const nativeV2Provider = process.env.LINKSITES_TEMPLATE_FORMAT === 'revision2'
+      if (nativeV2Provider && process.env.LINKSITES_DEPLOYMENT_ENV === 'production' && process.env.LINKSITES_TEMPLATE_RELEASE_STATE === 'deferred') return true
+      const providerRoot = nativeV2Provider ? process.env.LINKSITES_LINKLIBRARIES_ROOT : this.config.libraryRepositoryPath
+      const providerCommit = nativeV2Provider ? process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA : this.config.libraryCommitSha
+      const providerTree = nativeV2Provider ? process.env.LINKSITES_LINKLIBRARIES_TREE_SHA : undefined
+      if (!providerRoot || !providerCommit || (nativeV2Provider && !providerTree)) throw new Error('library provider identity is absent')
+      const git = (args: string[]) => execFileSync('git', ['-C', providerRoot, ...args], { encoding: 'utf8' }).trim()
+      if (nativeV2Provider) {
+        if (git(['rev-parse', 'HEAD']) !== providerCommit) throw new Error('native v2 provider checkout commit mismatch')
+        if (git(['rev-parse', 'HEAD^{tree}']) !== providerTree) throw new Error('native v2 provider checkout tree mismatch')
+      } else {
+        git(['cat-file', '-e', `${providerCommit}^{commit}`])
+      }
       return true
     }).catch(() => false)
     // Exercise the actual durable boundary with a reversible write/read/delete,

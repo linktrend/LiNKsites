@@ -24,11 +24,13 @@ describe('Revision 2 website-template materialization', () => {
       pin: {
         sourceCommitSha: 'a'.repeat(40),
         sourceTreeSha: 'b'.repeat(40),
+        providerCommitSha: 'c'.repeat(40),
+        providerTreeSha: 'd'.repeat(40),
         dependencyLockSha256: 'c'.repeat(64),
       },
     })
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.errors.join(' ')).toMatch(/could not be read|receipt found|no such file|provider catalogue path/i)
+    if (!result.ok) expect(result.errors.join(' ')).toMatch(/could not be read|receipt found|no such file|provider catalogue path|readable Git worktree/i)
   })
 
   it('recognizes the canonical prerelease candidate receipt type', () => {

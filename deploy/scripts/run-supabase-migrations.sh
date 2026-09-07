@@ -67,9 +67,9 @@ for migration in $(find /migrations -maxdepth 1 -type f -name '*.sql' -print | s
   [ -f "$migration" ] || continue
   migration_name="$(basename "$migration")"
   migration_checksum="$(sha256sum "$migration" | awk '{print $1}')"
-  applied_checksum="$(psql "$DATABASE_URI" --no-align --tuples-only --quiet --set ON_ERROR_STOP=1 \
-    -v migration_name="$migration_name" \
-    --command "select checksum from lsites_ledger.linksites_migration_history where filename = :'migration_name';" | tr -d '[:space:]')"
+  applied_checksum="$(printf '%s\n' "select checksum from lsites_ledger.linksites_migration_history where filename = :'migration_name';" | \
+    psql "$DATABASE_URI" --no-align --tuples-only --quiet --set ON_ERROR_STOP=1 \
+      -v migration_name="$migration_name" | tr -d '[:space:]')"
   if [ -n "$applied_checksum" ]; then
     [ "$applied_checksum" = "$migration_checksum" ] || {
       echo "applied migration checksum mismatch: $migration_name" >&2

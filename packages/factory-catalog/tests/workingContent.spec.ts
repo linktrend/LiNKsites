@@ -132,6 +132,23 @@ afterAll(async () => {
 })
 
 describe('working-content contract and checksum', () => {
+  it('serializes every jsonb parameter for the node-postgres driver', async () => {
+    const captured: unknown[][] = []
+    const driverShapedRepository = new WorkingContentRepository({
+      query: async (sql, params) => {
+        if (/working_content_versions\s*\n\s*\(/u.test(sql) || sql.includes('gate_evidence_refs = $6')) captured.push([...(params ?? [])])
+        return db.query(sql, params)
+      },
+    })
+    await asRuntime(USER_A, async () => {
+      const version = await driverShapedRepository.createVersion({ workingPackageId: 'wp-jsonb-driver', orgId: ORG_A, leadId: 'lead-wp-jsonb-driver', siteId: SITE_A, programRef: 'links-program', runId: 'run-jsonb', expectedCurrentVersion: 0, authorId: 'agent-author', executorId: 'codex-luna-high', contentPackage: workingContentFixture })
+      await driverShapedRepository.markReadyForGate('wp-jsonb-driver', version.versionNumber, version.contentChecksum)
+    })
+    expect(captured).toHaveLength(2)
+    for (const value of captured[0].slice(13, 17)) expect(typeof value).toBe('string')
+    expect(typeof captured[1][5]).toBe('string')
+  })
+
   it('accepts the structured template/content package and rejects incompatible shapes', () => {
     expect(validateWorkingContentPackage(workingContentFixture)).toBe(true)
     expect(validateWorkingContentPackage({ ...workingContentFixture, content: { pages: [] } })).toBe(false)

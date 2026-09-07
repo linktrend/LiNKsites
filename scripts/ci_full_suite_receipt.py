@@ -49,6 +49,25 @@ def require_sha(value: str, label: str) -> str:
     return normalized
 
 
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Do not forward GitHub API credentials to signed artifact hosts."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if redirected is None:
+            return None
+        source_host = urllib.parse.urlsplit(req.full_url).netloc.lower()
+        target_host = urllib.parse.urlsplit(newurl).netloc.lower()
+        if source_host != target_host:
+            for header_name in list(redirected.headers):
+                if header_name.lower() == "authorization":
+                    redirected.headers.pop(header_name, None)
+            for header_name in list(redirected.unredirected_hdrs):
+                if header_name.lower() == "authorization":
+                    redirected.unredirected_hdrs.pop(header_name, None)
+        return redirected
+
+
 def validate_receipt(
     receipt: dict[str, Any],
     *,
@@ -88,7 +107,8 @@ def api_request(url: str, token: str, *, binary: bool = False) -> Any:
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        opener = urllib.request.build_opener(_SafeRedirectHandler())
+        with opener.open(request, timeout=30) as response:
             payload = response.read()
     except urllib.error.HTTPError as exc:
         # A stale artifact from an unrelated historical run may be expired or
