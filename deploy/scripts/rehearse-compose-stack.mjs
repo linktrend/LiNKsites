@@ -244,20 +244,22 @@ try {
     const logs = await composeQuiet(['logs', '--no-color']).catch(() => '')
     throw new Error(`${error instanceof Error ? error.message : String(error)}\n\nCompose service logs:\n${logs}`)
   }
+  let lastProgramDiagnostic = 'no persisted program state observed'
   const waitFor = async (predicate, description) => {
     for (let attempt = 0; attempt < 90; attempt += 1) {
       if (await predicate()) return
       await new Promise((resolveWait) => setTimeout(resolveWait, 1_000))
     }
     const logs = await composeQuiet(['logs', '--no-color', '--tail', '120', 'program-orchestrator']).catch(() => '')
-    throw new Error(`timed out waiting for ${description}\n\nOrchestrator diagnostics:\n${logs}`)
+    throw new Error(`timed out waiting for ${description}; ${lastProgramDiagnostic}\n\nOrchestrator diagnostics:\n${logs}`)
   }
   await waitFor(async () => {
     try {
       const stored = await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select state::text from lsites_ledger.program_runtime_states where org_id = '${localOrgId}' order by updated_at desc limit 1;`])
       const value = JSON.parse(stored.trim())
+      lastProgramDiagnostic = JSON.stringify({ programState: value.program?.state, issueCount: value.issues?.length, completedIssues: value.issues?.filter((issue) => issue.state === 'completed').length, completionState: value.completion?.state, outboxCount: value.outbox?.length, outboxStatus: value.outbox?.[0]?.status })
       return value.program?.state === 'completed' && value.issues?.length === 16 && value.issues.every((issue) => issue.state === 'completed') && value.completion?.state === 'emitted' && value.outbox?.length === 1 && value.outbox[0]?.status === 'delivered'
-    } catch { return false }
+    } catch (error) { lastProgramDiagnostic = `ledger read failed: ${error instanceof Error ? error.message : String(error)}`; return false }
   }, 'the certified 16-issue Program fixture')
   const headers = join(proofRoot, 'preview.headers')
   const body = join(proofRoot, 'preview.html')
