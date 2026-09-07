@@ -171,6 +171,28 @@ def _run_git(root: Path, *args: str) -> str:
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
+def phase_changed_paths(root: Path, baseline_sha: str | None) -> list[str]:
+    """Classify the accumulated Phase delta, never its packaging parent diff.
+
+    This is risk metadata only: the declared full-repository secret scan is
+    unchanged. A missing/stale/non-ancestor target must fail before execution.
+    """
+    if not baseline_sha:
+        raise DeliveryProfileError("phase_risk_baseline_missing")
+    try:
+        from scripts.gitops.generated_output_closure import resolve_candidate_baseline
+    except ModuleNotFoundError:  # script-style execution
+        from generated_output_closure import resolve_candidate_baseline
+    baseline = resolve_candidate_baseline(
+        root, baseline_sha=baseline_sha, baseline_ref="origin/development"
+    )
+    result = subprocess.run(
+        ["git", "diff", "--name-only", "--no-renames", "-z", baseline, "HEAD", "--"],
+        cwd=root, capture_output=True, check=True,
+    )
+    return sorted(path.decode("utf-8") for path in result.stdout.split(b"\0") if path)
+
+
 def _remote_repository(root: Path) -> str:
     value = os.environ.get("GITHUB_REPOSITORY") or _run_git(root, "config", "--get", "remote.origin.url")
     value = value.removesuffix(".git")
@@ -505,6 +527,7 @@ def main() -> int:
     parser.add_argument("--inventory-json", type=Path)
     parser.add_argument("--reuse-evidence", type=Path)
     parser.add_argument("--changed", action="append", default=[])
+    parser.add_argument("--baseline-sha", help="exact protected development baseline for Phase risk")
     parser.add_argument("--repository")
     parser.add_argument("--head")
     parser.add_argument("--tree")
@@ -514,6 +537,11 @@ def main() -> int:
     parser.add_argument("--preflight", action="store_true", help="run the declared runtime preflight before profile commands")
     args = parser.parse_args()
     root = args.root.resolve()
+    changed = set(args.changed)
+    if os.environ.get("SOURCE_BRANCH", "").startswith("phase/") or args.baseline_sha:
+        changed.update(phase_changed_paths(
+            root, args.baseline_sha or os.environ.get("LINKTREND_TARGET_BASELINE_SHA")
+        ))
     config_path, commands = load_profile(root, args.profile)
     identity = build_identity(
         root,
@@ -542,7 +570,7 @@ def main() -> int:
         args.profile,
         config_path=config_path,
         commands=commands,
-        changed_paths=args.changed,
+        changed_paths=sorted(changed),
         identity=identity,
         preflight=args.preflight,
     )

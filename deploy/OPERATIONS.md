@@ -3,6 +3,33 @@
 This document prepares a deployment. It does not authorize or perform VPS,
 DNS, public-domain, Cloudflare, Traefik, or customer-data changes.
 
+## Server03 operational acceptance with the admitted provider
+
+Use the exact admitted `marketing-smb-v1` artifact and evidence with the real
+production services. `docker-compose.server03-foundation.yml` includes the
+canonical production Compose definition under the `linksites-foundation`
+project name; its preflight and smoke entrypoints reuse the same production
+checks. The unfinished `master-template-type-1` replacement is recorded in
+`deferredTemplates` and does not disable rendering or Program intake.
+
+Require exact image and migration identities, CMS/worker operation, a complete
+private one-site Program run, real rendered preview with noindex, delivered
+completion, health, resource limits, restart behavior, logs/metrics and a tested
+backup/restore and rollback. Readiness-only staging cannot earn operational
+acceptance. Private routes use existing named Traefik privacy middleware;
+public/customer launch and replacement-template adoption remain separately gated.
+
+Import `deploy/monitoring/server03-foundation.rules.yml` into the existing
+Server03 Prometheus rule set only after its `linksites-server03-foundation`
+scrape target and backup textfile metrics exist. Validate with `promtool check
+rules` before reload. Runtime attention, absent metrics, failed health and stale
+backup/restore evidence must alert; normal intake is expected.
+
+Generate a new immutable manifest for later replacement-template adoption and
+repeat provider admission, preview and rollback verification. Never alter a
+released manifest in place. Missing production Platform authority still blocks
+production migration and startup; disposable proof does not supply that authority.
+
 ## Topology and privacy
 
 The `edge` network is the existing Traefik network; `internal` is a Docker
