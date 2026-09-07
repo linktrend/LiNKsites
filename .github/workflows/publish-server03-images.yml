@@ -25,6 +25,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
+      - name: Require protected-main workflow ref
+        env:
+          WORKFLOW_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          test "${WORKFLOW_REF}" = 'refs/heads/main' || {
+            echo 'immutable Server03 publication must be dispatched from refs/heads/main' >&2
+            exit 78
+          }
+
       - name: Checkout protected main exactly
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -176,6 +186,9 @@ jobs:
           manifest["publication"] = {
               "registry": "ghcr.io",
               "mode": "protected-main-workflow",
+              "artifactOnly": True,
+              "deploymentEligible": False,
+              "requiresPlatformAdmission": True,
               "publicRoutes": False,
               "imageRefs": {
                   "cms": f"ghcr.io/linktrend/linksites-cms@{os.environ['CMS_DIGEST']}",
