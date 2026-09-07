@@ -38,8 +38,9 @@ const sourceRevision = (await quiet('git', ['rev-parse', 'HEAD'])).trim()
 // rather than a potentially stale local checkout branch.  This is only a
 // provenance read; it does not claim that the local bootstrap is a Platform
 // deployment or that it can promote a Platform migration.
-const platformRevision = (await quiet('git', ['-C', '/Users/linktrend/Projects/LiNKplatform', 'rev-parse', 'origin/main'])).trim()
-const libraryPath = '/Users/linktrend/Projects/LiNKlibraries'
+const platformPath = resolve(process.env.LINKSITES_PLATFORM_REPOSITORY ?? '/Users/linktrend/Projects/LiNKplatform')
+const libraryPath = resolve(process.env.LINKLIBRARIES_ARTIFACT_PATH ?? '/Users/linktrend/Projects/LiNKlibraries')
+const platformRevision = (await quiet('git', ['-C', platformPath, 'rev-parse', 'origin/main'])).trim()
 await run('git', ['-C', libraryPath, 'cat-file', '-e', 'a7193d40152747db2a03e094fa263f324a971a0b^{commit}'])
 
 const checkpoint = async () => {
@@ -221,7 +222,7 @@ try {
   await compose(['config', '--quiet'])
   try {
     await compose(['up', '--detach', '--no-build', '--wait', '--wait-timeout', '180'])
-  } catch {
+  } catch (error) {
     // Preserve the service-level diagnostic before the scoped finally block
     // tears down this disposable proof project.
     const logs = await composeQuiet(['logs', '--no-color']).catch(() => '')
