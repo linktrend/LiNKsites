@@ -203,7 +203,10 @@ try {
   await writeFile(gatewayConfig, `tls:\n  certificates:\n    - certFile: /etc/traefik/server.crt\n      keyFile: /etc/traefik/server-request.key\nhttp:\n  routers:\n    cms:\n      rule: Host(\`cms.localtest\`)\n      entryPoints: [websecure]\n      service: cms\n      tls: {}\n    preview:\n      rule: Host(\`preview.localtest\`)\n      entryPoints: [websecure]\n      service: preview\n      tls: {}\n  services:\n    cms:\n      loadBalancer:\n        servers: [{ url: http://payload:3000 }]\n    preview:\n      loadBalancer:\n        servers: [{ url: http://web-master:3000 }]\n`)
   await writeFile(runtimeEnv, `${Object.entries(runtimeValues).map(([name, value]) => `${name}=${value}`).join('\n')}\n`, { mode: 0o600 })
   await writeFile(join(runtimeDir, 'program', 'leads.ndjson'), `${JSON.stringify(lead)}\n`, { mode: 0o600 })
-  await writeFile(join(runtimeDir, 'program', 'approved-facts.json'), `${JSON.stringify(facts)}\n`, { mode: 0o600 })
+  // This synthetic fixture contains no credentials and is mounted read-only
+  // into the UID 1001 production container. The root-run proof launcher must
+  // not create it as owner-only or the non-root orchestrator cannot read it.
+  await writeFile(join(runtimeDir, 'program', 'approved-facts.json'), `${JSON.stringify(facts)}\n`, { mode: 0o444 })
   composeVariables = {
     COMPOSE_PROJECT_NAME: project,
     LINKSITES_RUNTIME_ENV_FILE: runtimeEnv,
