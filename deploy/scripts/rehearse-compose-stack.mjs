@@ -73,6 +73,7 @@ const gatewaySecret = random()
 const runMarker = `w2-02-run-${random().slice(0, 16)}`
 const checkpointHash = await checkpoint()
 const localDatabaseUrl = 'postgresql://postgres:ltfx.fix2.postgres_password.cf215bab08df.v1@local-postgres:5432/postgres'
+const localOrgId = '00000000-0000-4000-8000-000000000001'
 
 let composeVariables
 // Compose gives ambient shell variables precedence over --env-file. Every
@@ -111,7 +112,7 @@ const runtimeValues = {
   LINKSITES_DEPLOYMENT_ENV: 'production',
   LINKSITES_CONFIG_SCHEMA_VERSION: '1.1.0',
   LINKSITES_RELEASE_SHA: sourceRevision,
-  LINKSITES_ORG_ID: 'local-proof-org',
+  LINKSITES_ORG_ID: localOrgId,
   DATABASE_URI: localDatabaseUrl,
   PAYLOAD_SECRET: payloadSecret,
   PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
@@ -121,7 +122,7 @@ const runtimeValues = {
   LINKAUTOWORK_ENVIRONMENT: 'production',
   LINKAUTOWORK_OUTBOX_PATH: '/var/lib/linksites/linkautowork-outbox.json',
   LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: random(),
-  LINKAUTOWORK_EVENT_GRANTS: JSON.stringify([{ eventName: 'demo.completed', environments: ['production'], orgIds: ['local-proof-org'] }]),
+  LINKAUTOWORK_EVENT_GRANTS: JSON.stringify([{ eventName: 'demo.completed', environments: ['production'], orgIds: [localOrgId] }]),
   NEXT_PUBLIC_CMS_PROVIDER: 'payload',
   PAYLOAD_BASE_URL: 'https://cms.localtest',
   NEXT_PUBLIC_PAYLOAD_API_URL: 'https://cms.localtest',
@@ -136,7 +137,7 @@ const runtimeValues = {
   LINKSITES_ADMITTED_TEMPLATE_SHA: libraryRevision,
   W2_02_MODE: 'production',
   W2_02_DATABASE_URI: localDatabaseUrl,
-  W2_02_ORG_ID: 'local-proof-org',
+  W2_02_ORG_ID: localOrgId,
   W2_02_SITE_ID: '00000000-0000-4000-8000-000000000002',
   W2_02_DATABASE_ROLE: 'svc_linksites_runtime',
   W2_02_APPROVED_FACTS_PATH: '/var/lib/linksites/program/approved-facts.json',
@@ -158,12 +159,12 @@ const runtimeValues = {
 }
 
 const lead = {
-  schema_version: { major: 1, minor: 0 }, org_id: 'local-proof-org', correlation_id: `compose:${runMarker}`,
+  schema_version: { major: 1, minor: 0 }, org_id: localOrgId, correlation_id: `compose:${runMarker}`,
   idempotency_key: `compose:${runMarker}`, lead_id: runMarker, requested_vertical: 'home_services', source: 'manual-file',
   research: { summary: 'Disposable W2-07 Compose proof.', sources: ['source:founder:brief'] },
 }
 const facts = {
-  schemaVersion: { major: 1, minor: 0 }, orgId: 'local-proof-org', leadId: runMarker,
+  schemaVersion: { major: 1, minor: 0 }, orgId: localOrgId, leadId: runMarker,
   businessName: `W2-07 ${runMarker}`, geography: 'Taipei', services: ['Local service consultation'],
   credentials: ['Founder-provided credentials'], reviews: [{ quote: 'Founder-provided review', author: 'Approved customer' }],
   contact: { phone: '+886200000000', email: 'proof@local.invalid', address: 'Taipei, Taiwan', website: 'https://local.invalid.test' },
