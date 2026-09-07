@@ -76,7 +76,7 @@ let composeVariables
 // old local port/network setting cannot silently change this isolated run.
 const composeOptions = (options = {}) => ({
   ...options,
-  env: { ...process.env, ...composeVariables, ...(options.env ?? {}) },
+  env: { ...process.env, ...runtimeValues, ...composeVariables, ...(options.env ?? {}) },
 })
 const compose = (args, options = {}) => run('docker', ['compose', '--project-name', project, '--env-file', composeEnv, '-f', 'deploy/docker-compose.deploy.yml', '-f', 'deploy/docker-compose.local-proof.yml', ...args], composeOptions(options))
 const composeQuiet = (args, options = {}) => quiet('docker', ['compose', '--project-name', project, '--env-file', composeEnv, '-f', 'deploy/docker-compose.deploy.yml', '-f', 'deploy/docker-compose.local-proof.yml', ...args], composeOptions(options))
