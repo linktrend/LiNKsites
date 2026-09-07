@@ -48,6 +48,8 @@ services:
     depends_on:
       supabase-migrate:
         condition: service_completed_successfully
+      payload-migrate:
+        condition: service_completed_successfully
     volumes:
       - ${LINKSITES_LOCAL_PROOF_TENANT_BOOTSTRAP:?set generated local tenant bootstrap}:/proof/tenant.sql:ro
     networks: [internal]
