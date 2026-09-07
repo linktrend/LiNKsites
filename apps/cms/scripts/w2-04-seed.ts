@@ -1,13 +1,16 @@
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { getPayload } from 'payload'
 import { Client } from 'pg'
 import {
   LINKLIBRARIES_REPOSITORY,
+  MARKETING_SMB_V1_CATALOG_AUTHORITY,
+  canonicalJsonChecksum,
   consumePinnedLibraryEntry,
   createOfflineLibraryFixtureTransport,
   type LibraryCatalog,
+  type LibraryConsumptionEvidence,
   type LibraryEntryContract,
 } from '../../../packages/factory-catalog/src/libraryConsumer.ts'
 
@@ -50,7 +53,7 @@ const catalog: LibraryCatalog = {
   }],
 }
 
-const consumption = await consumePinnedLibraryEntry({
+const offlineConsumption = await consumePinnedLibraryEntry({
   catalogReference: { repositoryUrl: LINKLIBRARIES_REPOSITORY, commitSha, ref: commitSha, catalog },
   entryId: 'marketing-smb-v1',
   compatibility: { nodeMajor: 22, runtimes: ['node', 'browser'] },
@@ -61,6 +64,52 @@ const consumption = await consumePinnedLibraryEntry({
   }),
   recordedAt: '2026-08-05T00:00:00.000Z',
 })
+
+const admittedLibraryRoot = process.env.LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH
+const admittedLibrarySha = process.env.LINKSITES_ADMITTED_TEMPLATE_SHA
+const sha256 = (value: string) => createHash('sha256').update(value, 'utf8').digest('hex')
+const loadAdmittedConsumption = async (): Promise<LibraryConsumptionEvidence> => {
+  const authority = MARKETING_SMB_V1_CATALOG_AUTHORITY
+  if (!admittedLibraryRoot || admittedLibrarySha !== authority.commitSha) {
+    throw new Error('W2-04 admitted proof requires the exact source-owned LiNKlibraries authority')
+  }
+  const catalogRaw = await readFile(resolve(admittedLibraryRoot, 'indexes/catalog.json'), 'utf8')
+  const entryRaw = await readFile(resolve(admittedLibraryRoot, authority.entryPath, 'entry.json'), 'utf8')
+  const admittedEntry = JSON.parse(entryRaw) as LibraryEntryContract
+  if (sha256(catalogRaw) !== authority.catalogChecksum || canonicalJsonChecksum(admittedEntry) !== authority.entryChecksum) {
+    throw new Error('W2-04 admitted proof library metadata checksum mismatch')
+  }
+  const admittedCatalog = JSON.parse(catalogRaw) as LibraryCatalog
+  if (!admittedCatalog.entries.some((row) => row.entryId === authority.entryId && row.status === 'approved')) {
+    throw new Error('W2-04 admitted proof library entry is not approved')
+  }
+  const admittedFiles = Object.fromEntries(await Promise.all(admittedEntry.files.map(async (asset) => {
+    const contents = await readFile(resolve(admittedLibraryRoot, authority.entryPath, asset.path), 'utf8')
+    if (sha256(contents) !== asset.sha256) throw new Error(`W2-04 admitted proof asset checksum mismatch: ${asset.path}`)
+    return [asset.path, contents]
+  })))
+  const assetChecksums = Object.fromEntries(admittedEntry.files.map((asset) => [asset.path, asset.sha256]))
+  const receipt = {
+    schemaVersion: { major: 1 as const, minor: 0 as const },
+    receiptId: `library-consumption:${authority.entryId}:${authority.commitSha}`,
+    consumer: 'linksites' as const,
+    entryId: authority.entryId,
+    catalogCommitSha: authority.commitSha,
+    libraryCommitSha: authority.commitSha,
+    verificationId: authority.verificationId,
+    entryChecksum: canonicalJsonChecksum(admittedEntry),
+    assetChecksums,
+    entrypoint: 'src/index.mjs',
+    testFiles: ['tests/marketing-smb-v1.test.mjs'],
+    compatibility: { compatible: true as const, consumer: 'linksites' as const, nodeMajor: 22, runtimes: ['node', 'browser'] },
+    recordedAt: new Date().toISOString(),
+  }
+  return { entry: admittedEntry, files: admittedFiles, receipt, verification: { ...authority, assetChecksums } }
+}
+
+const consumption = admittedLibraryRoot || admittedLibrarySha
+  ? await loadAdmittedConsumption()
+  : offlineConsumption
 
 console.error('W2-04 seed: opening disposable Payload database')
 const payload = await getPayload({ config })

@@ -1,0 +1,33 @@
+groups:
+  - name: linksites-server03-foundation
+    rules:
+      - alert: LiNKsitesFoundationTargetDown
+        expr: up{job="linksites-server03-foundation"} == 0
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: LiNKsites Server03 foundation health target is unavailable
+      - alert: LiNKsitesFoundationRuntimeAttention
+        expr: linksites_program_dead_letters_total{job="linksites-server03-foundation"} > 0 or linksites_program_manual_attention_total{job="linksites-server03-foundation"} > 0
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          summary: LiNKsites Program runtime requires attention
+      - alert: LiNKsitesFoundationRuntimeMetricsMissing
+        expr: absent(linksites_program_active_issues{job="linksites-server03-foundation"})
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: LiNKsites Program runtime metrics are missing
+      - alert: LiNKsitesFoundationBackupStale
+        expr: time() - linksites_backup_last_success_timestamp_seconds > 90000
+        for: 15m
+        labels: { severity: critical }
+        annotations:
+          summary: LiNKsites backup success is older than 25 hours
+      - alert: LiNKsitesFoundationRestoreRehearsalStale
+        expr: time() - linksites_restore_rehearsal_last_success_timestamp_seconds > 2678400
+        for: 1h
+        labels: { severity: warning }
+        annotations:
+          summary: LiNKsites isolated restore rehearsal is older than 31 days

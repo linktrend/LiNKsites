@@ -38,9 +38,13 @@ const sourceRevision = (await quiet('git', ['rev-parse', 'HEAD'])).trim()
 // rather than a potentially stale local checkout branch.  This is only a
 // provenance read; it does not claim that the local bootstrap is a Platform
 // deployment or that it can promote a Platform migration.
-const platformRevision = (await quiet('git', ['-C', '/Users/linktrend/Projects/LiNKplatform', 'rev-parse', 'origin/main'])).trim()
-const libraryPath = '/Users/linktrend/Projects/LiNKlibraries'
-await run('git', ['-C', libraryPath, 'cat-file', '-e', 'a7193d40152747db2a03e094fa263f324a971a0b^{commit}'])
+const platformPath = resolve(process.env.LINKSITES_PLATFORM_REPOSITORY ?? '/Users/linktrend/Projects/LiNKplatform')
+const libraryPath = resolve(process.env.LINKLIBRARIES_ARTIFACT_PATH ?? '/Users/linktrend/Projects/LiNKlibraries')
+const platformRevision = (await quiet('git', ['-C', platformPath, 'rev-parse', 'origin/main'])).trim()
+const libraryRevision = 'a7193d40152747db2a03e094fa263f324a971a0b'
+await run('git', ['-C', libraryPath, 'cat-file', '-e', `${libraryRevision}^{commit}`])
+const libraryCatalogChecksum = createHash('sha256').update(await quiet('git', ['-C', libraryPath, 'show', `${libraryRevision}:indexes/catalog.json`])).digest('hex')
+const libraryEntryChecksum = createHash('sha256').update(await quiet('git', ['-C', libraryPath, 'show', `${libraryRevision}:entries/marketing-smb-v1/entry.json`])).digest('hex')
 
 const checkpoint = async () => {
   const files = (await quiet('git', ['ls-files', 'apps/program-orchestrator/src', 'apps/program-orchestrator/package.json', 'packages/factory-catalog/src', 'packages/factory-catalog/package.json', 'packages/program-ledger/src', 'packages/program-ledger/package.json'])).trim().split(/\r?\n/).filter(Boolean).sort()
@@ -55,6 +59,7 @@ const runtimeDir = join(proofRoot, 'runtime')
 const runtimeEnv = join(proofRoot, 'runtime.env')
 const composeEnv = join(proofRoot, 'compose.env')
 const platformBootstrap = join(proofRoot, 'platform-bootstrap.sql')
+const tenantBootstrap = join(proofRoot, 'tenant-bootstrap.sql')
 const localCertificate = join(tlsDir, 'server.crt')
 const localKey = join(tlsDir, 'server.key')
 const localCa = join(tlsDir, 'ca.crt')
@@ -68,6 +73,8 @@ const payloadSecret = random()
 const gatewaySecret = random()
 const runMarker = `w2-02-run-${random().slice(0, 16)}`
 const checkpointHash = await checkpoint()
+const localDatabaseUrl = 'postgresql://postgres:ltfx.fix2.postgres_password.cf215bab08df.v1@local-postgres:5432/postgres'
+const localOrgId = '00000000-0000-4000-8000-000000000001'
 
 let composeVariables
 // Compose gives ambient shell variables precedence over --env-file. Every
@@ -75,7 +82,7 @@ let composeVariables
 // old local port/network setting cannot silently change this isolated run.
 const composeOptions = (options = {}) => ({
   ...options,
-  env: { ...process.env, ...composeVariables, ...(options.env ?? {}) },
+  env: { ...process.env, ...runtimeValues, ...composeVariables, ...(options.env ?? {}) },
 })
 const compose = (args, options = {}) => run('docker', ['compose', '--project-name', project, '--env-file', composeEnv, '-f', 'deploy/docker-compose.deploy.yml', '-f', 'deploy/docker-compose.local-proof.yml', ...args], composeOptions(options))
 const composeQuiet = (args, options = {}) => quiet('docker', ['compose', '--project-name', project, '--env-file', composeEnv, '-f', 'deploy/docker-compose.deploy.yml', '-f', 'deploy/docker-compose.local-proof.yml', ...args], composeOptions(options))
@@ -102,12 +109,24 @@ grant usage on schema platform to svc_linksites_runtime, svc_linksites_ledger;
 grant execute on function platform.has_org_access(uuid, platform.member_role) to svc_linksites_runtime, svc_linksites_ledger;
 `
 
+const tenantSql = (leadEnvelope) => `
+insert into platform.organizations (id, name, kind, status)
+values ('${localOrgId}', 'LiNKsites disposable proof', 'client', 'active')
+on conflict (id) do nothing;
+insert into lsites_sites.sites (id, org_id, name, status, template_id, primary_domain, default_locale)
+values ('00000000-0000-4000-8000-000000000002', '${localOrgId}', 'LiNKsites disposable proof', 'active', 'marketing-smb-v1', 'preview.localtest', 'en')
+on conflict (id) do nothing;
+insert into lsites_ledger.program_intake (org_id, item_id, lead_id, idempotency_key, envelope, state)
+values ('${localOrgId}', 'compose:${runMarker}', '${runMarker}', 'compose:${runMarker}', '${JSON.stringify(leadEnvelope).replaceAll("'", "''")}'::jsonb, 'ready')
+on conflict (org_id, idempotency_key) do nothing;
+`
+
 const runtimeValues = {
   LINKSITES_DEPLOYMENT_ENV: 'production',
   LINKSITES_CONFIG_SCHEMA_VERSION: '1.1.0',
   LINKSITES_RELEASE_SHA: sourceRevision,
-  LINKSITES_ORG_ID: 'local-proof-org',
-  DATABASE_URI: 'ltfx.db.uri.postgresql.8ecb343762.v1',
+  LINKSITES_ORG_ID: localOrgId,
+  DATABASE_URI: localDatabaseUrl,
   PAYLOAD_SECRET: payloadSecret,
   PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
   LINKAUTOWORK_GATEWAY_URL: 'https://gateway.localtest',
@@ -116,7 +135,7 @@ const runtimeValues = {
   LINKAUTOWORK_ENVIRONMENT: 'production',
   LINKAUTOWORK_OUTBOX_PATH: '/var/lib/linksites/linkautowork-outbox.json',
   LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: random(),
-  LINKAUTOWORK_EVENT_GRANTS: JSON.stringify([{ eventName: 'demo.completed', environments: ['production'], orgIds: ['local-proof-org'] }]),
+  LINKAUTOWORK_EVENT_GRANTS: JSON.stringify([{ eventName: 'demo.completed', environments: ['production'], orgIds: [localOrgId] }]),
   NEXT_PUBLIC_CMS_PROVIDER: 'payload',
   PAYLOAD_BASE_URL: 'https://cms.localtest',
   NEXT_PUBLIC_PAYLOAD_API_URL: 'https://cms.localtest',
@@ -128,16 +147,14 @@ const runtimeValues = {
   // otherwise web-master correctly rejects the unmapped token-gated tenant.
   W2_04_LOCAL_PROOF_HOST: 'preview.localtest',
   LINKSITES_LOCAL_COMPOSE_PROOF: '1',
-  // The deterministic offline consumption fixture records a full Git SHA;
-  // keep this derived so a truncated literal cannot silently bypass the
-  // template-admission contract.
-  LINKSITES_ADMITTED_TEMPLATE_SHA: '1'.repeat(40),
-  W2_02_MODE: 'local',
-  W2_02_DATABASE_URI: 'ltfx.db.uri.postgresql.8ecb343762.v1',
-  W2_02_ORG_ID: 'local-proof-org',
+  LINKSITES_ADMITTED_TEMPLATE_SHA: libraryRevision,
+  W2_02_MODE: 'production',
+  W2_02_DATABASE_URI: localDatabaseUrl,
+  W2_02_ORG_ID: localOrgId,
   W2_02_SITE_ID: '00000000-0000-4000-8000-000000000002',
   W2_02_DATABASE_ROLE: 'svc_linksites_runtime',
   W2_02_APPROVED_FACTS_PATH: '/var/lib/linksites/program/approved-facts.json',
+  W2_02_POSTGRES_ADAPTER_MODULE: '@linksites/program-orchestrator/postgres-adapter',
   W2_02_EXECUTION_REVISION: sourceRevision,
   W2_02_EXECUTABLE_CHECKPOINT: checkpointHash,
   W2_02_STATE_DIR: '/var/lib/linksites/program',
@@ -148,19 +165,19 @@ const runtimeValues = {
   W2_02_PREVIEW_ACCESS_TOKEN: previewToken,
   W2_05_OUTCOME_GATEWAY_SECRET: gatewaySecret,
   W2_05_OUTCOME_GATEWAY_KEY_ID: 'local-proof-key',
-  W2_02_LIBRARY_REPOSITORY_PATH: '/var/lib/linksites/linklibraries',
+  W2_02_LIBRARY_REPOSITORY_PATH: '/opt/linksites/linklibraries',
   W2_04_PREVIEW_API_KEY: apiKey,
   W2_04_PREVIEW_PASSWORD: random(),
   LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: platformRevision,
 }
 
 const lead = {
-  schema_version: { major: 1, minor: 0 }, org_id: 'local-proof-org', correlation_id: `compose:${runMarker}`,
+  schema_version: { major: 1, minor: 0 }, org_id: localOrgId, correlation_id: `compose:${runMarker}`,
   idempotency_key: `compose:${runMarker}`, lead_id: runMarker, requested_vertical: 'home_services', source: 'manual-file',
   research: { summary: 'Disposable W2-07 Compose proof.', sources: ['source:founder:brief'] },
 }
 const facts = {
-  schemaVersion: { major: 1, minor: 0 }, orgId: 'local-proof-org', leadId: runMarker,
+  schemaVersion: { major: 1, minor: 0 }, orgId: localOrgId, leadId: runMarker,
   businessName: `W2-07 ${runMarker}`, geography: 'Taipei', services: ['Local service consultation'],
   credentials: ['Founder-provided credentials'], reviews: [{ quote: 'Founder-provided review', author: 'Approved customer' }],
   contact: { phone: '+886200000000', email: 'proof@local.invalid', address: 'Taipei, Taiwan', website: 'https://local.invalid.test' },
@@ -178,14 +195,18 @@ try {
   await chmod(runtimeDir, 0o777)
   await chmod(join(runtimeDir, 'program'), 0o777)
   await writeFile(platformBootstrap, platformSql)
+  await writeFile(tenantBootstrap, tenantSql(lead))
   await run('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', localKey, '-out', localCa, '-days', '1', '-subj', '/CN=LiNKsites local proof CA'])
-  await run('openssl', ['req', '-newkey', 'rsa:2048', '-nodes', '-keyout', join(tlsDir, 'server-request.key'), '-out', join(tlsDir, 'server.csr'), '-subj', '/CN=cms.localtest', '-addext', 'subjectAltName=DNS:cms.localtest,DNS:preview.localtest'])
-  await writeFile(join(tlsDir, 'server.ext'), 'subjectAltName=DNS:cms.localtest,DNS:preview.localtest\n')
+  await run('openssl', ['req', '-newkey', 'rsa:2048', '-nodes', '-keyout', join(tlsDir, 'server-request.key'), '-out', join(tlsDir, 'server.csr'), '-subj', '/CN=cms.localtest', '-addext', 'subjectAltName=DNS:cms.localtest,DNS:preview.localtest,DNS:gateway.localtest'])
+  await writeFile(join(tlsDir, 'server.ext'), 'subjectAltName=DNS:cms.localtest,DNS:preview.localtest,DNS:gateway.localtest\n')
   await run('openssl', ['x509', '-req', '-in', join(tlsDir, 'server.csr'), '-CA', localCa, '-CAkey', localKey, '-CAcreateserial', '-out', localCertificate, '-days', '1', '-extfile', join(tlsDir, 'server.ext')])
-  await writeFile(gatewayConfig, `tls:\n  certificates:\n    - certFile: /etc/traefik/server.crt\n      keyFile: /etc/traefik/server-request.key\nhttp:\n  routers:\n    cms:\n      rule: Host(\`cms.localtest\`)\n      entryPoints: [websecure]\n      service: cms\n      tls: {}\n    preview:\n      rule: Host(\`preview.localtest\`)\n      entryPoints: [websecure]\n      service: preview\n      tls: {}\n  services:\n    cms:\n      loadBalancer:\n        servers: [{ url: http://payload:3000 }]\n    preview:\n      loadBalancer:\n        servers: [{ url: http://web-master:3000 }]\n`)
+  await writeFile(gatewayConfig, `tls:\n  certificates:\n    - certFile: /etc/traefik/server.crt\n      keyFile: /etc/traefik/server-request.key\nhttp:\n  routers:\n    cms:\n      rule: Host(\`cms.localtest\`)\n      entryPoints: [websecure]\n      service: cms\n      tls: {}\n    preview:\n      rule: Host(\`preview.localtest\`)\n      entryPoints: [websecure]\n      service: preview\n      tls: {}\n    gateway:\n      rule: Host(\`gateway.localtest\`)\n      entryPoints: [websecure]\n      service: gateway\n      tls: {}\n  services:\n    cms:\n      loadBalancer:\n        servers: [{ url: http://payload:3000 }]\n    preview:\n      loadBalancer:\n        servers: [{ url: http://web-master:3000 }]\n    gateway:\n      loadBalancer:\n        servers: [{ url: http://local-autowork-gateway:3001 }]\n`)
   await writeFile(runtimeEnv, `${Object.entries(runtimeValues).map(([name, value]) => `${name}=${value}`).join('\n')}\n`, { mode: 0o600 })
   await writeFile(join(runtimeDir, 'program', 'leads.ndjson'), `${JSON.stringify(lead)}\n`, { mode: 0o600 })
-  await writeFile(join(runtimeDir, 'program', 'approved-facts.json'), `${JSON.stringify(facts)}\n`, { mode: 0o600 })
+  // This synthetic fixture contains no credentials and is mounted read-only
+  // into the UID 1001 production container. The root-run proof launcher must
+  // not create it as owner-only or the non-root orchestrator cannot read it.
+  await writeFile(join(runtimeDir, 'program', 'approved-facts.json'), `${JSON.stringify(facts)}\n`, { mode: 0o444 })
   composeVariables = {
     COMPOSE_PROJECT_NAME: project,
     LINKSITES_RUNTIME_ENV_FILE: runtimeEnv,
@@ -199,11 +220,9 @@ try {
     PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
     NEXT_PUBLIC_PAYLOAD_API_URL: 'https://cms.localtest',
     LINKLIBRARIES_ARTIFACT_PATH: libraryPath,
-    // The disposable receipt/evidence fixture is intentionally bound to a
-    // deterministic full SHA.  The Compose renderer must receive exactly the
-    // same value, otherwise this proof would exercise a different admission
-    // identity than the one produced by payload-seed.
-    LINKLIBRARIES_CATALOG_SHA: '1'.repeat(40),
+    LINKLIBRARIES_CATALOG_SHA: libraryRevision,
+    LINKLIBRARIES_CATALOG_CONTENT_SHA256: libraryCatalogChecksum,
+    LINKLIBRARIES_ENTRY_CONTENT_SHA256: libraryEntryChecksum,
     TRAEFIK_NETWORK: `${project}-edge`,
     TRAEFIK_CMS_HOST: 'cms.localtest',
     TRAEFIK_PREVIEW_HOST: 'preview.localtest',
@@ -211,6 +230,7 @@ try {
     TRAEFIK_CMS_PRIVATE_MIDDLEWARE: 'local-proof-private',
     TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE: 'local-proof-private',
     LINKSITES_LOCAL_PROOF_PLATFORM_BOOTSTRAP: platformBootstrap,
+    LINKSITES_LOCAL_PROOF_TENANT_BOOTSTRAP: tenantBootstrap,
     LINKSITES_LOCAL_PROOF_TLS_DIR: tlsDir,
     LINKSITES_LOCAL_PROOF_RUNTIME_DIR: runtimeDir,
     LINKSITES_LOCAL_PROOF_TLS_PORT: tlsPort,
@@ -221,33 +241,57 @@ try {
   await compose(['config', '--quiet'])
   try {
     await compose(['up', '--detach', '--no-build', '--wait', '--wait-timeout', '180'])
-  } catch {
+  } catch (error) {
     // Preserve the service-level diagnostic before the scoped finally block
     // tears down this disposable proof project.
     const logs = await composeQuiet(['logs', '--no-color']).catch(() => '')
     throw new Error(`${error instanceof Error ? error.message : String(error)}\n\nCompose service logs:\n${logs}`)
   }
+  let lastProgramDiagnostic = 'no persisted program state observed'
   const waitFor = async (predicate, description) => {
     for (let attempt = 0; attempt < 90; attempt += 1) {
       if (await predicate()) return
       await new Promise((resolveWait) => setTimeout(resolveWait, 1_000))
     }
-    throw new Error(`timed out waiting for ${description}`)
+    const logs = await composeQuiet(['logs', '--no-color', '--tail', '120', 'program-orchestrator']).catch(() => '')
+    throw new Error(`timed out waiting for ${description}; ${lastProgramDiagnostic}\n\nOrchestrator diagnostics:\n${logs}`)
   }
   await waitFor(async () => {
     try {
-      const value = JSON.parse(await readFile(join(runtimeDir, 'program', 'program-ledger.json'), 'utf8'))
+      const stored = await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select state::text from lsites_ledger.program_runtime_states where org_id = '${localOrgId}' order by updated_at desc limit 1;`])
+      const value = JSON.parse(stored.trim())
+      lastProgramDiagnostic = JSON.stringify({
+        programState: value.program?.state,
+        issueCount: value.issues?.length,
+        completedIssues: value.issues?.filter((issue) => issue.state === 'completed').length,
+        nonCompletedIssues: value.issues?.filter((issue) => issue.state !== 'completed').slice(0, 4).map((issue) => ({ issueId: issue.issueId, state: issue.state, gate: issue.gate })),
+        failedRuns: value.runs?.filter((run) => run.failure).slice(0, 4).map((run) => ({ issueId: run.issueId, failure: run.failure })),
+        completionState: value.completion?.state,
+        outboxCount: value.outbox?.length,
+        outboxStatus: value.outbox?.[0]?.status,
+      }).slice(0, 1800)
       return value.program?.state === 'completed' && value.issues?.length === 16 && value.issues.every((issue) => issue.state === 'completed') && value.completion?.state === 'emitted' && value.outbox?.length === 1 && value.outbox[0]?.status === 'delivered'
-    } catch { return false }
+    } catch (error) { lastProgramDiagnostic = `ledger read failed: ${error instanceof Error ? error.message : String(error)}`; return false }
   }, 'the certified 16-issue Program fixture')
-  const headers = join(proofRoot, 'preview.headers')
-  const body = join(proofRoot, 'preview.html')
-  // Docker Desktop can report the service graph ready a fraction before its
-  // loopback port-forward is accepting connections. Retry only that transient
-  // connection-refused state; a TLS, router, authorization, or render failure
-  // still leaves curl non-zero and fails this proof.
+  // Execute the final token-route readback inside the isolated Compose network.
+  // A tooling container's 127.0.0.1 is not the Docker host on Linux, so a host
+  // published-port curl is not portable. Emit only boolean/status evidence;
+  // the credential and rendered body never leave the runtime container.
   try {
-    await run('curl', ['--fail', '--silent', '--show-error', '--retry', '20', '--retry-connrefused', '--retry-delay', '1', '--cacert', localCa, '--resolve', `preview.localtest:${tlsPort}:127.0.0.1`, '-D', headers, '-o', body, `https://preview.localtest:${tlsPort}/en/demo/${previewToken}`])
+    const readback = JSON.parse((await composeQuiet(['exec', '-T', 'program-orchestrator', 'node', '-e', `
+      fetch(process.env.W2_02_WEB_MASTER_BASE_URL + '/en/demo/' + process.env.W2_02_PREVIEW_ACCESS_TOKEN)
+        .then(async (response) => {
+          const body = await response.text()
+          process.stdout.write(JSON.stringify({
+            ok: response.ok,
+            status: response.status,
+            noindex: (response.headers.get('x-robots-tag') ?? '').includes('noindex'),
+            marker: body.includes(process.env.PREVIEW_RUN_MARKER ?? '__missing__'),
+            privatePreview: body.includes('data-private-preview="true"'),
+          }))
+        }).catch(() => process.exit(2))
+    `])).trim())
+    assert.deepEqual(readback, { ok: true, status: 200, noindex: true, marker: true, privatePreview: true })
   } catch (error) {
     // Do not emit environment files, request URLs, or generated credentials.
     // Service output and state identify a routing/listener failure without
@@ -258,15 +302,19 @@ try {
     ])
     throw new Error(`private preview request failed\n\nCompose listener diagnostics:\n${state}\n${logs}`)
   }
-  assert.match(await readFile(headers, 'utf8'), /x-robots-tag:\s*noindex/i)
-  assert.match(await readFile(body, 'utf8'), new RegExp(runMarker))
-  await run('curl', ['--fail', '--silent', '--show-error', '--cacert', localCa, `http://127.0.0.1:${orchestratorPort}/readyz`])
-  const databaseReadback = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select count(*) from public.pages where promotion_run_marker = '${runMarker}' and status = 'draft' and _status = 'draft';`])).trim()
-  assert.equal(databaseReadback, '5', 'Compose stack must preserve five private draft documents')
+  const orchestratorReady = (await composeQuiet(['exec', '-T', 'program-orchestrator', 'node', '-e',
+    "fetch('http://127.0.0.1:3000/readyz').then(response=>process.stdout.write(String(response.ok))).catch(()=>process.exit(2))",
+  ])).trim()
+  assert.equal(orchestratorReady, 'true', 'orchestrator readiness must pass inside its runtime namespace')
+  const databaseReadback = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select count(*) from public.pages where promotion_run_marker = '${runMarker}' and status = 'published' and _status = 'published' and preview_environment = 'private-preview' and public_activation = false;`])).trim()
+  assert.equal(databaseReadback, '5', 'Compose stack must preserve five published private-preview documents without public activation')
   const migrationReceipt = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select platform_commit_sha from lsites_ledger.platform_migration_receipts where platform_commit_sha = '${platformRevision}';`])).trim()
   assert.equal(migrationReceipt, platformRevision, 'migration job receipt must bind its supplied platform revision')
   await compose(['stop', '--timeout', '20'])
-  const state = JSON.parse(await composeQuiet(['ps', '--format', 'json']))
+  const stoppedStateRaw = (await composeQuiet(['ps', '--all', '--format', 'json'])).trim()
+  const state = stoppedStateRaw.startsWith('[')
+    ? JSON.parse(stoppedStateRaw)
+    : stoppedStateRaw.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line))
   for (const name of ['payload', 'web-master', 'autowork-worker', 'program-orchestrator']) assert.notEqual(state.find((service) => service.Service === name)?.State, 'running', `${name} did not stop cleanly`)
   const receipt = {
     schemaVersion: '1.0.0', gate: 'w2-07-compose-stack-v1', sourceRevision, executableCheckpoint: checkpointHash,
@@ -274,7 +322,7 @@ try {
     applications: ['cms', 'web-master', 'autowork-worker', 'program-orchestrator', 'migrations'],
     configuration: { strictRuntimeContract: true, nonLoopbackHttps: true, ephemeralTlsCa: true },
     migrations: { ordered: true, localPlatformDatabaseShapeBootstrapped: true, suppliedPlatformRevision: platformRevision, externalPlatformAdmission: 'not asserted; separate governed prerequisite remains' },
-    certifiedFixture: { runMarker, completedIssues: 16, privateDrafts: 5, completion: 'delivered', privatePreviewNoindex: true },
+    certifiedFixture: { runMarker, completedIssues: 16, privatePublishedDocuments: 5, publicActivation: false, completion: 'delivered', privatePreviewNoindex: true },
     health: { orchestratorReadiness: true, gracefulShutdown: true },
   }
   if (evidencePath) { await writeFile(evidencePath, `${JSON.stringify(receipt, null, 2)}\n`); }

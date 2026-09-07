@@ -33,12 +33,44 @@ services:
       - ${LINKSITES_LOCAL_PROOF_TLS_DIR:?set generated local TLS directory}:/etc/traefik:ro
     networks:
       internal:
-        aliases: [cms.localtest, preview.localtest]
+        aliases: [cms.localtest, preview.localtest, gateway.localtest]
+
+  local-autowork-gateway:
+    image: ${LINKSITES_ORCHESTRATOR_IMAGE:?set local proof orchestrator image}
+    env_file:
+      - ${LINKSITES_RUNTIME_ENV_FILE:?set generated local proof runtime env}
+    command: ["/app/apps/program-orchestrator/node_modules/.bin/tsx", "/app/deploy/scripts/local-proof-autowork-gateway.mjs"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    networks: [internal]
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
 
   supabase-migrate:
     depends_on:
       local-postgres:
         condition: service_healthy
+
+  local-tenant-bootstrap:
+    image: postgres:16.8-alpine@sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c
+    environment:
+      PGPASSWORD: ltfx.fix2.postgres_password.cf215bab08df.v1
+    command: ["psql", "-h", "local-postgres", "-U", "postgres", "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-f", "/proof/tenant.sql"]
+    depends_on:
+      supabase-migrate:
+        condition: service_completed_successfully
+      payload-migrate:
+        condition: service_completed_successfully
+    volumes:
+      - ${LINKSITES_LOCAL_PROOF_TENANT_BOOTSTRAP:?set generated local tenant bootstrap}:/proof/tenant.sql:ro
+    networks: [internal]
+    restart: 'no'
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
 
   payload-seed:
     image: ${LINKSITES_WORKER_IMAGE:?set local proof worker image}
@@ -47,6 +79,8 @@ services:
     environment:
       LINKSITES_W2_04_LOCAL_PROOF: '1'
       W2_04_PROOF_PATH: /var/lib/linksites/seed.json
+      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /opt/linksites/linklibraries
+      LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
     # The proof network is deliberately isolated. Invoke the CMS-local runner
     # already bundled in the immutable worker image instead of Corepack/pnpm,
     # which can otherwise attempt a registry download at runtime.
@@ -57,6 +91,7 @@ services:
         condition: service_healthy
     volumes:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/opt/linksites/linklibraries:ro
     networks: [internal]
     restart: 'no'
     security_opt: [no-new-privileges:true]
@@ -80,12 +115,12 @@ services:
       # The proof launcher supplies the receipt/evidence after the seed
       # succeeds; this binding supplies the matching immutable artifact and
       # commit identity that the ordinary renderer verifies.
-      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /var/lib/linksites/linklibraries
+      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /opt/linksites/linklibraries
       LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
     volumes:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites:ro
       - ${LINKSITES_LOCAL_PROOF_TLS_DIR:?set generated local TLS directory}/ca.crt:/run/linksites-local-proof/ca.crt:ro
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/var/lib/linksites/linklibraries:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/opt/linksites/linklibraries:ro
 
   autowork-worker:
     volumes:
@@ -99,10 +134,14 @@ services:
     depends_on:
       payload-seed:
         condition: service_completed_successfully
+      local-tenant-bootstrap:
+        condition: service_completed_successfully
+      local-autowork-gateway:
+        condition: service_healthy
     volumes:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites
       - ${LINKSITES_LOCAL_PROOF_TLS_DIR:?set generated local TLS directory}/ca.crt:/run/linksites-local-proof/ca.crt:ro
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/var/lib/linksites/linklibraries:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/opt/linksites/linklibraries:ro
 
 networks:
   edge:

@@ -7,6 +7,7 @@ formats, and safe redacted fingerprints. It never prints values.
 | Name | Owner | Secret | Required by | Format | Rotation effect |
 |---|---|---:|---|---|---|
 | `LINKSITES_DEPLOYMENT_ENV` | LiNKsites operations | no | all | exact `production` | restart affected service |
+| `LINKSITES_TEMPLATE_RELEASE_STATE` | LiNKsites/LiNKlibraries release process | no | active web-master and orchestrator | `ready` or omitted; operational startup rejects `pending` | keep replacement-template deferral separate from active-provider admission |
 | `LINKSITES_CONFIG_SCHEMA_VERSION` | LiNKsites operations | no | all | exact current schema | update manifest and restart |
 | `LINKSITES_RELEASE_SHA` | release process | no | all | full Git SHA | deployment identity changes |
 | `LINKSITES_ORG_ID` | LiNKsites program owner | no | all | identifier | redeploy only after tenancy review |

@@ -74,6 +74,32 @@ test('rejects preview token drift between web-master and orchestrator interfaces
   assert.ok(result.errors.some((error) => error.name === 'PREVIEW_ACCESS_TOKEN'))
 })
 
+test('pending provider cannot bypass operational renderer admission', () => {
+  const pending = {
+    ...base,
+    LINKSITES_TEMPLATE_RELEASE_STATE: 'pending',
+  }
+  delete pending.LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH
+  delete pending.LINKSITES_ADMITTED_TEMPLATE_SHA
+  delete pending.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON
+  delete pending.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON
+  const result = validateRuntimeConfig(pending, 'web-master')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON'))
+})
+
+test('operational renderer rejects legacy pending-provider mode', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'web-master')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_STATE'))
+})
+
+test('operational orchestrator rejects legacy pending-provider mode', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'program-orchestrator')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_STATE'))
+})
+
 test('accepts a valid first numeric Payload document ID and rejects an invalid one', () => {
   assert.equal(validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '1' }, 'program-orchestrator').ok, true)
   const result = validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '0' }, 'program-orchestrator')

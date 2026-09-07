@@ -1,6 +1,6 @@
 # Delivery Phase 2 — VPS Deployment and One-Website Pilot Packet
 
-**Status:** Planned — separately authorized only after Delivery Phase 1 PASS. Phase 2 must inject one release-manifest-bound LiNKlibraries commit plus its catalog and entry byte checksums into the orchestrator runtime contract; it must not substitute a branch name or a second ref.
+**Status:** Planned — separately authorized only after Delivery Phase 1 PASS. Server03 operational acceptance uses the currently admitted `marketing-smb-v1` provider with real intake and private rendering; the unfinished replacement template is deferred. The one-website pilot must inject one release-manifest-bound selectable LiNKlibraries commit plus its catalog and entry byte checksums into the orchestrator runtime contract; it must not substitute a branch name or a second ref.
 **Executor:** Terra master coordinating narrowly scoped Luna High operators/implementers
 **Independent audit:** Codex Sol Medium at deployment readiness and final pilot evidence
 **Live-change warning:** This packet mutates VPS services, databases, secrets, routing, and private hosting. It must not begin under Phase 1 approval.
@@ -15,7 +15,7 @@ This pilot excludes payment, sales, public customer launch, customer-domain acti
 
 Do not proceed unless all are true:
 
-1. Phase 1 exact SHA and image/artifact digests have a final Sol Medium `PASS`.
+1. Phase 1 exact SHA and image/artifact digests have a final independent `PASS`. Use the existing admitted provider for the pilot; an unfinished replacement does not block setup or operational acceptance.
 2. The repository and release worktrees are clean and the exact commits are pushed/available.
 3. The Principal explicitly authorizes this Phase 2 packet and names the target VPS/environment.
 4. Target inventory, access method, maintenance window, change owner, and rollback decision-maker are recorded.
