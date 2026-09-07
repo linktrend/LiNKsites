@@ -306,8 +306,8 @@ try {
     "fetch('http://127.0.0.1:3000/readyz').then(response=>process.stdout.write(String(response.ok))).catch(()=>process.exit(2))",
   ])).trim()
   assert.equal(orchestratorReady, 'true', 'orchestrator readiness must pass inside its runtime namespace')
-  const databaseReadback = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select count(*) from public.pages where promotion_run_marker = '${runMarker}' and status = 'draft' and _status = 'draft';`])).trim()
-  assert.equal(databaseReadback, '5', 'Compose stack must preserve five private draft documents')
+  const databaseReadback = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select count(*) from public.pages where promotion_run_marker = '${runMarker}' and status = 'published' and _status = 'published' and preview_environment = 'private-preview' and public_activation = false;`])).trim()
+  assert.equal(databaseReadback, '5', 'Compose stack must preserve five published private-preview documents without public activation')
   const migrationReceipt = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select platform_commit_sha from lsites_ledger.platform_migration_receipts where platform_commit_sha = '${platformRevision}';`])).trim()
   assert.equal(migrationReceipt, platformRevision, 'migration job receipt must bind its supplied platform revision')
   await compose(['stop', '--timeout', '20'])
@@ -319,7 +319,7 @@ try {
     applications: ['cms', 'web-master', 'autowork-worker', 'program-orchestrator', 'migrations'],
     configuration: { strictRuntimeContract: true, nonLoopbackHttps: true, ephemeralTlsCa: true },
     migrations: { ordered: true, localPlatformDatabaseShapeBootstrapped: true, suppliedPlatformRevision: platformRevision, externalPlatformAdmission: 'not asserted; separate governed prerequisite remains' },
-    certifiedFixture: { runMarker, completedIssues: 16, privateDrafts: 5, completion: 'delivered', privatePreviewNoindex: true },
+    certifiedFixture: { runMarker, completedIssues: 16, privatePublishedDocuments: 5, publicActivation: false, completion: 'delivered', privatePreviewNoindex: true },
     health: { orchestratorReadiness: true, gracefulShutdown: true },
   }
   if (evidencePath) { await writeFile(evidencePath, `${JSON.stringify(receipt, null, 2)}\n`); }
