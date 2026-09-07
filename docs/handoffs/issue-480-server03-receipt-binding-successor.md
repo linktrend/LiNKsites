@@ -52,7 +52,7 @@ GITHUB_HEAD_REF=phase/480-independent-review-repair pnpm --filter @linksites/pro
   74/74 passed
 pnpm --filter @linksites/web-master test
   72/72 passed
-DATABASE_URI=postgresql://127.0.0.1:5432/linksites_test pnpm --filter @linksites/cms test:int
+DATABASE_URI="$DATABASE_URI" pnpm --filter @linksites/cms test:int
   91 passed, 1 skipped
 pnpm typecheck
   9/9 packages passed
