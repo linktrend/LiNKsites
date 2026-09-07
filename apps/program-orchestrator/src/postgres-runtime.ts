@@ -20,7 +20,13 @@ const stableJson = (value: unknown): string => value === null || typeof value !=
     ? `[${value.map(stableJson).join(',')}]`
     : `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${stableJson((value as Record<string, unknown>)[key])}`).join(',')}}`
 
-const safeHash = (value: unknown): string => createHash('sha256').update(stableJson(value)).digest('hex')
+const safeHash = (value: unknown): string => {
+  // Hash the JSON value that is actually sent to PostgreSQL. This removes
+  // object properties whose value is undefined and applies toJSON semantics
+  // before canonical object-key ordering.
+  const persistedValue = JSON.parse(JSON.stringify(value)) as unknown
+  return createHash('sha256').update(stableJson(persistedValue)).digest('hex')
+}
 
 /**
  * Production state boundary. The table is intentionally migration-owned: this
