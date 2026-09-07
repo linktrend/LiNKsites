@@ -4,26 +4,29 @@ This directory is the only active deployment surface. It is prepared for a
 separately authorized Phase 2 VPS installation; it does not itself contact a
 VPS, cloud account, DNS provider, Traefik host, or public domain.
 
-Server03 uses the currently admitted `marketing-smb-v1` provider for real CMS,
-renderer, worker, Program intake and private-preview operation. The unfinished
-`master-template-type-1` replacement remains deferred in the manifest and is
-not a setup or operational-acceptance prerequisite. The foundation Compose
+Server03 uses the real CMS, renderer, worker and Program runtime for
+infrastructure/application acceptance while native v2 template-dependent
+publishing remains explicitly deferred. No legacy or quarantined template is
+represented as production-ready. The unfinished `master-template-type-1`
+release is not a setup prerequisite. The foundation Compose
 entrypoint includes the canonical production definition and its existing
 private Traefik middleware requirements. Use:
 
-1. Generate a manifest with `--provider-state ready` and the exact admitted
-   LiNKlibraries commit and artifact directory. Record `--platform-state pending`
-   only for an artifact inventory while production migration authority is absent.
+1. Generate a manifest with `--provider-state deferred`. Use `--provider-state
+   ready` only with an exact native v2 provider commit/tree and passing receipt.
+   Record `--platform-state pending` only for an artifact inventory while
+   production migration authority is absent.
 2. Run `pnpm deploy:server03:preflight -- <runtime-env-file> <manifest>`.
 3. After exact Platform authority and preflight pass, apply migrations and start
-   `deploy/docker-compose.server03-foundation.yml`. Pending authority permits
-   artifact inventory and disposable rehearsal only, not operational acceptance.
+   `deploy/docker-compose.server03-foundation.yml`. Deferred template state
+   permits runtime acceptance but blocks template-dependent intake/publishing.
 4. Run `pnpm deploy:server03:smoke -- <runtime-env-file>`.
 
-Operational acceptance requires a real private one-site run through intake,
-CMS publication, admitted-template rendering, completion delivery and restore.
-Readiness probes alone do not prove that run. Public release and adoption of
-the deferred replacement each remain separate approval events.
+Operational acceptance requires real private service runtime, health, resource,
+restart, monitoring, backup/restore and rollback proof. Template-dependent
+intake, rendering and publishing remain blocked until native v2 admission;
+readiness probes alone do not prove production acceptance. Public release and
+later template adoption remain separate approval events.
 
 For the full provider-bound pilot:
 

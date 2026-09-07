@@ -93,6 +93,16 @@ export const validatePublishPermissions: CollectionBeforeChangeHook = async ({
     resolveStatus(workflowReq?.data) ?? resolveStatus(data) ?? previousStatus ?? 'draft'
   const normalizedRequested = normalizeWorkflowStatus(requestedStatus)
 
+  if (
+    normalizedRequested === 'published' &&
+    process.env.LINKSITES_DEPLOYMENT_ENV === 'production' &&
+    process.env.LINKSITES_TEMPLATE_RELEASE_STATE !== 'ready' &&
+    process.env.LINKSITES_W2_04_LOCAL_PROOF !== '1' &&
+    process.env.LINKSITES_LOCAL_COMPOSE_PROOF !== '1'
+  ) {
+    throw new Error('template-dependent publishing is deferred until a native Revision 2 release is admitted')
+  }
+
   if (normalizedRequested === previousStatus) {
     return data
   }

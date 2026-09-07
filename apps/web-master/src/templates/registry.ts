@@ -1,5 +1,5 @@
 import type { TemplateId, TemplateModule } from "@/templates/types";
-import { getAdmittedRevision2Template, getAdmittedTemplateEvidence, assertTemplateAdmission } from "@/lib/template-admission";
+import { assertProductionTemplateReleaseReady, getAdmittedRevision2Template, getAdmittedTemplateEvidence, assertTemplateAdmission } from "@/lib/template-admission";
 import { MASTER_TEMPLATE_ID } from "@linksites/factory-catalog";
 import { PageRenderer } from "@/components/page-renderer";
 import { MasterTemplateCandidatePreviewRenderer } from "@/components/master-template/MasterTemplateCandidatePreviewRenderer";
@@ -68,6 +68,7 @@ if (isMasterTemplateLookAndFeelProofHarnessEnabled()) {
 }
 
 export const getTemplateModule = (templateId: TemplateId): TemplateModule => {
+  assertProductionTemplateReleaseReady(templateId);
   if (templateId === MASTER_TEMPLATE_ID || process.env.LINKSITES_TEMPLATE_FORMAT === "revision2") {
     const materialized = getAdmittedRevision2Template();
     if (materialized.reference.entryId !== templateId) {
