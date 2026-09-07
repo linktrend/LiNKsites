@@ -136,6 +136,7 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   assert.ok(rehearsal.includes('LINKSITES_ADMITTED_TEMPLATE_SHA: libraryRevision'), 'the disposable admission fixture must use the exact historical library revision it verifies')
   assert.ok(rehearsal.includes('LINKLIBRARIES_CATALOG_CONTENT_SHA256: libraryCatalogChecksum'), 'the rehearsal must supply the verified catalog checksum to Compose')
   assert.ok(rehearsal.includes('LINKLIBRARIES_ENTRY_CONTENT_SHA256: libraryEntryChecksum'), 'the rehearsal must supply the verified entry checksum to Compose')
+  assert.ok(rehearsal.includes('select state::text from lsites_ledger.program_runtime_states'), 'production-mode completion proof must read the PostgreSQL ledger, not a local state file')
   assert.ok(rehearsal.includes("W2_02_POSTGRES_ADAPTER_MODULE: '@linksites/program-orchestrator/postgres-adapter'"), 'the rehearsal must select the packaged production Postgres adapter')
   assert.ok(rehearsal.includes('DATABASE_URI: localDatabaseUrl'), 'the disposable services must receive an executable local PostgreSQL URI')
   assert.ok(rehearsal.includes('W2_02_DATABASE_URI: localDatabaseUrl'), 'the disposable orchestrator must receive an executable local PostgreSQL URI')

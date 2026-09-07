@@ -249,11 +249,13 @@ try {
       if (await predicate()) return
       await new Promise((resolveWait) => setTimeout(resolveWait, 1_000))
     }
-    throw new Error(`timed out waiting for ${description}`)
+    const logs = await composeQuiet(['logs', '--no-color', '--tail', '120', 'program-orchestrator']).catch(() => '')
+    throw new Error(`timed out waiting for ${description}\n\nOrchestrator diagnostics:\n${logs}`)
   }
   await waitFor(async () => {
     try {
-      const value = JSON.parse(await readFile(join(runtimeDir, 'program', 'program-ledger.json'), 'utf8'))
+      const stored = await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select state::text from lsites_ledger.program_runtime_states where org_id = '${orgId}' and program_id = '${programId}';`])
+      const value = JSON.parse(stored.trim())
       return value.program?.state === 'completed' && value.issues?.length === 16 && value.issues.every((issue) => issue.state === 'completed') && value.completion?.state === 'emitted' && value.outbox?.length === 1 && value.outbox[0]?.status === 'delivered'
     } catch { return false }
   }, 'the certified 16-issue Program fixture')
