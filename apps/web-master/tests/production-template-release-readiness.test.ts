@@ -86,6 +86,25 @@ test("production readiness rejects mounted receipt bytes that differ from suppli
   }
 });
 
+test("deferred production release remains blocked without inspecting provider receipt evidence", () => {
+  const names = ["LINKSITES_DEPLOYMENT_ENV", "LINKSITES_TEMPLATE_RELEASE_STATE", "LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON"];
+  const previous = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  try {
+    process.env.LINKSITES_DEPLOYMENT_ENV = "production";
+    process.env.LINKSITES_TEMPLATE_RELEASE_STATE = "deferred";
+    process.env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON = "not-json";
+    assert.throws(
+      () => assertProductionTemplateReleaseReady(reference.entryId),
+      (error: unknown) => error instanceof TemplateAdmissionError && /deferred/.test(error.message),
+    );
+  } finally {
+    for (const [name, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+});
+
 test("production readiness identity binding accepts a complete native receipt", () => {
   assert.doesNotThrow(() => assertProductionReceiptIdentityBindings(receipt, reference, configuration));
 });
