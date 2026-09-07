@@ -80,12 +80,12 @@ services:
       # The proof launcher supplies the receipt/evidence after the seed
       # succeeds; this binding supplies the matching immutable artifact and
       # commit identity that the ordinary renderer verifies.
-      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /var/lib/linksites/linklibraries
+      LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH: /opt/linksites/linklibraries
       LINKSITES_ADMITTED_TEMPLATE_SHA: ${LINKLIBRARIES_CATALOG_SHA:?set exact approved LiNKlibraries commit}
     volumes:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites:ro
       - ${LINKSITES_LOCAL_PROOF_TLS_DIR:?set generated local TLS directory}/ca.crt:/run/linksites-local-proof/ca.crt:ro
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/var/lib/linksites/linklibraries:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/opt/linksites/linklibraries:ro
 
   autowork-worker:
     volumes:
@@ -102,7 +102,7 @@ services:
     volumes:
       - ${LINKSITES_LOCAL_PROOF_RUNTIME_DIR:?set generated local proof runtime directory}:/var/lib/linksites
       - ${LINKSITES_LOCAL_PROOF_TLS_DIR:?set generated local TLS directory}/ca.crt:/run/linksites-local-proof/ca.crt:ro
-      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/var/lib/linksites/linklibraries:ro
+      - ${LINKLIBRARIES_ARTIFACT_PATH:?set approved local LiNKlibraries checkout}:/opt/linksites/linklibraries:ro
 
 networks:
   edge:

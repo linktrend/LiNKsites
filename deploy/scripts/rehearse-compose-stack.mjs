@@ -151,7 +151,7 @@ const runtimeValues = {
   W2_02_PREVIEW_ACCESS_TOKEN: previewToken,
   W2_05_OUTCOME_GATEWAY_SECRET: gatewaySecret,
   W2_05_OUTCOME_GATEWAY_KEY_ID: 'local-proof-key',
-  W2_02_LIBRARY_REPOSITORY_PATH: '/var/lib/linksites/linklibraries',
+  W2_02_LIBRARY_REPOSITORY_PATH: '/opt/linksites/linklibraries',
   W2_04_PREVIEW_API_KEY: apiKey,
   W2_04_PREVIEW_PASSWORD: random(),
   LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: platformRevision,
