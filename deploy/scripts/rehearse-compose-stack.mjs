@@ -72,6 +72,7 @@ const payloadSecret = random()
 const gatewaySecret = random()
 const runMarker = `w2-02-run-${random().slice(0, 16)}`
 const checkpointHash = await checkpoint()
+const localDatabaseUrl = 'postgresql://postgres:ltfx.fix2.postgres_password.cf215bab08df.v1@local-postgres:5432/postgres'
 
 let composeVariables
 // Compose gives ambient shell variables precedence over --env-file. Every
@@ -111,7 +112,7 @@ const runtimeValues = {
   LINKSITES_CONFIG_SCHEMA_VERSION: '1.1.0',
   LINKSITES_RELEASE_SHA: sourceRevision,
   LINKSITES_ORG_ID: 'local-proof-org',
-  DATABASE_URI: 'ltfx.db.uri.postgresql.8ecb343762.v1',
+  DATABASE_URI: localDatabaseUrl,
   PAYLOAD_SECRET: payloadSecret,
   PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
   LINKAUTOWORK_GATEWAY_URL: 'https://gateway.localtest',
@@ -134,7 +135,7 @@ const runtimeValues = {
   LINKSITES_LOCAL_COMPOSE_PROOF: '1',
   LINKSITES_ADMITTED_TEMPLATE_SHA: libraryRevision,
   W2_02_MODE: 'local',
-  W2_02_DATABASE_URI: 'ltfx.db.uri.postgresql.8ecb343762.v1',
+  W2_02_DATABASE_URI: localDatabaseUrl,
   W2_02_ORG_ID: 'local-proof-org',
   W2_02_SITE_ID: '00000000-0000-4000-8000-000000000002',
   W2_02_DATABASE_ROLE: 'svc_linksites_runtime',
