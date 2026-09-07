@@ -207,8 +207,8 @@ jobs:
               f"LINKSITES_ORCHESTRATOR_IMAGE=ghcr.io/linktrend/linksites-program-orchestrator@{os.environ['ORCHESTRATOR_DIGEST']}",
               f"LINKSITES_MIGRATIONS_IMAGE=ghcr.io/linktrend/linksites-migrations@{os.environ['MIGRATIONS_DIGEST']}",
           ]) + "\n")
-          sha256sum server03-release-manifest.json > server03-release-manifest.sha256
           PY
+          sha256sum server03-release-manifest.json > server03-release-manifest.sha256
 
       - name: Upload immutable publication evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
