@@ -311,7 +311,10 @@ try {
   const migrationReceipt = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select platform_commit_sha from lsites_ledger.platform_migration_receipts where platform_commit_sha = '${platformRevision}';`])).trim()
   assert.equal(migrationReceipt, platformRevision, 'migration job receipt must bind its supplied platform revision')
   await compose(['stop', '--timeout', '20'])
-  const state = JSON.parse(await composeQuiet(['ps', '--format', 'json']))
+  const stoppedStateRaw = (await composeQuiet(['ps', '--all', '--format', 'json'])).trim()
+  const state = stoppedStateRaw.startsWith('[')
+    ? JSON.parse(stoppedStateRaw)
+    : stoppedStateRaw.split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line))
   for (const name of ['payload', 'web-master', 'autowork-worker', 'program-orchestrator']) assert.notEqual(state.find((service) => service.Service === name)?.State, 'running', `${name} did not stop cleanly`)
   const receipt = {
     schemaVersion: '1.0.0', gate: 'w2-07-compose-stack-v1', sourceRevision, executableCheckpoint: checkpointHash,

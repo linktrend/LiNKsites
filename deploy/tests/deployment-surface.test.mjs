@@ -165,5 +165,7 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   assert.ok(rehearsal.includes("privatePreview: body.includes('data-private-preview=\"true\"')"), 'the final readback must verify the protected renderer marker without emitting HTML')
   assert.ok(rehearsal.includes("fetch('http://127.0.0.1:3000/readyz')"), 'orchestrator readiness must be checked inside its Linux runtime namespace')
   assert.ok(rehearsal.includes("preview_environment = 'private-preview' and public_activation = false"), 'database readback must prove published private-preview state without public activation')
+  assert.ok(rehearsal.includes("['ps', '--all', '--format', 'json']"), 'graceful-shutdown proof must include stopped containers')
+  assert.ok(rehearsal.includes("split(/\\r?\\n/).filter(Boolean).map"), 'shutdown state must tolerate Compose JSON and NDJSON output')
   assert.ok(rehearsal.includes("completedIssues: 16"))
 })
