@@ -17,8 +17,11 @@ LINKSITES_MIGRATIONS_IMAGE_DIGEST=sha256:<digest> \
 node deploy/scripts/generate-deployment-manifest.mjs --output deploy/manifests/<release-sha>.json
 ```
 
-While `master-template-type-1` is not selectable, generate the infrastructure
-manifest without inventing provider identity:
+While `master-template-type-1` is unfinished, use the exact admitted
+`marketing-smb-v1` identity in the command above. The manifest records the
+replacement in `deferredTemplates` without blocking the active provider.
+For artifact inventory only, an unavailable active-provider or production
+Platform identity can be recorded explicitly:
 
 ```bash
 LINKSITES_CMS_IMAGE_DIGEST=sha256:<digest> \
@@ -32,11 +35,10 @@ node deploy/scripts/generate-deployment-manifest.mjs \
   --output deploy/manifests/<release-sha>-server03-foundation.json
 ```
 
-That manifest records the exact blocked provider-dependent capabilities and,
-when Platform authority is also pending, the production data-plane HOLD. It is
-valid only for artifact installation plus disposable rehearsal until an exact
-Platform application receipt exists. It cannot be used by the full-pilot
-preflight.
+That pending manifest cannot earn Server03 operational acceptance or pass either
+production preflight. Pending active-provider identity is distinct from a deferred
+replacement. Use the existing admitted provider for setup and private-site proof;
+exact Platform migration authority remains independently required for startup.
 
 The generator always reads the Payload migration index and records every
 imported migration with its checksum. In ready mode it also reads the exact

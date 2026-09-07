@@ -7,18 +7,18 @@ groups:
         labels: { severity: critical }
         annotations:
           summary: LiNKsites Server03 foundation health target is unavailable
-      - alert: LiNKsitesFoundationIntakeUnexpectedlyEnabled
-        expr: linksites_program_intake_enabled != 0
+      - alert: LiNKsitesFoundationRuntimeAttention
+        expr: linksites_program_dead_letters_total{job="linksites-server03-foundation"} > 0 or linksites_program_manual_attention_total{job="linksites-server03-foundation"} > 0
         for: 1m
         labels: { severity: critical }
         annotations:
-          summary: Program intake changed while the template provider release is pending
-      - alert: LiNKsitesFoundationProviderPendingMetricMissing
-        expr: linksites_program_provider_release_pending != 1
+          summary: LiNKsites Program runtime requires attention
+      - alert: LiNKsitesFoundationRuntimeMetricsMissing
+        expr: absent(linksites_program_active_issues{job="linksites-server03-foundation"})
         for: 5m
         labels: { severity: warning }
         annotations:
-          summary: Staged orchestrator no longer reports the expected provider HOLD
+          summary: LiNKsites Program runtime metrics are missing
       - alert: LiNKsitesFoundationBackupStale
         expr: time() - linksites_backup_last_success_timestamp_seconds > 90000
         for: 15m

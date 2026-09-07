@@ -3,36 +3,32 @@
 This document prepares a deployment. It does not authorize or perform VPS,
 DNS, public-domain, Cloudflare, Traefik, or customer-data changes.
 
-## Server03 foundation acceptance while the provider is pending
+## Server03 operational acceptance with the admitted provider
 
-The unfinished Master Website Template is a content/provider release HOLD, not
-a Server03 installation blocker. Use the foundation manifest, preflight and
-Compose surface described in `deploy/README.md`. All five immutable images are
-installed and started; web-master proves CMS connectivity through `/api/readyz`;
-the staged orchestrator reports `intakeEnabled=false`, exports the pending-state
-metric, and rejects every ingress request with HTTP 503. No host port, Traefik
-router, selected-template preview, customer content, or public hostname exists.
+Use the exact admitted `marketing-smb-v1` artifact and evidence with the real
+production services. `docker-compose.server03-foundation.yml` includes the
+canonical production Compose definition under the `linksites-foundation`
+project name; its preflight and smoke entrypoints reuse the same production
+checks. The unfinished `master-template-type-1` replacement is recorded in
+`deferredTemplates` and does not disable rendering or Program intake.
 
-Foundation acceptance may cover OS/container compatibility, exact artifact
-identity, governed migrations, CMS/worker operation, renderer and orchestrator
-process health, resource limits, restart behavior, logs/metrics, backup/restore,
-and application-image rollback. It must record these remaining HOLDs:
-
-- selectable LiNKlibraries provider release and exact receipt;
-- renderer activation against selected-template bytes;
-- Program intake and one-site end-to-end pilot;
-- private external preview route and any public/customer launch.
+Require exact image and migration identities, CMS/worker operation, a complete
+private one-site Program run, real rendered preview with noindex, delivered
+completion, health, resource limits, restart behavior, logs/metrics and a tested
+backup/restore and rollback. Readiness-only staging cannot earn operational
+acceptance. Private routes use existing named Traefik privacy middleware;
+public/customer launch and replacement-template adoption remain separately gated.
 
 Import `deploy/monitoring/server03-foundation.rules.yml` into the existing
 Server03 Prometheus rule set only after its `linksites-server03-foundation`
 scrape target and backup textfile metrics exist. Validate with `promtool check
-rules` before reload. The intake-drift rule is critical: foundation mode must
-never consume work.
+rules` before reload. Runtime attention, absent metrics, failed health and stale
+backup/restore evidence must alert; normal intake is expected.
 
-Moving from foundation to the full Compose surface is a new admission event.
-Generate a `--provider-state ready` manifest and repeat backup, preflight,
-migrations/readback, health, privacy, and rollback gates; never edit the pending
-manifest in place.
+Generate a new immutable manifest for later replacement-template adoption and
+repeat provider admission, preview and rollback verification. Never alter a
+released manifest in place. Missing production Platform authority still blocks
+production migration and startup; disposable proof does not supply that authority.
 
 ## Topology and privacy
 

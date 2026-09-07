@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { access, readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { access, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
 
 const root = resolve(new URL('../..', import.meta.url).pathname)
 const read = (file) => readFile(resolve(root, file), 'utf8')
@@ -13,31 +15,51 @@ test('active deployment uses fail-closed inputs, ordered migrations, and private
   assert.ok(!compose.includes('web-company'), 'inactive app is not deployable')
 })
 
-test('Server03 foundation starts all images privately while provider-dependent intake stays disabled', async () => {
-  const compose = await read('deploy/docker-compose.server03-foundation.yml')
-  for (const service of ['supabase-migrate:', 'payload-migrate:', 'payload:', 'web-master:', 'autowork-worker:', 'program-orchestrator:']) assert.ok(compose.includes(service), service)
-  assert.ok(compose.includes('LINKSITES_TEMPLATE_RELEASE_STATE: pending'))
-  assert.ok(compose.includes('program-orchestrator-staged'))
-  assert.ok(compose.includes('internal: true'))
-  assert.ok(!compose.includes('ports:'), 'foundation publishes no host ports')
-  assert.ok(!compose.includes('traefik.'), 'foundation creates no public ingress')
-  assert.ok(!compose.includes('LINKLIBRARIES_ARTIFACT_PATH'), 'pending provider bytes are not fabricated or mounted')
-  assert.ok(compose.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA:-'), 'artifact-only rendering permits pending Platform authority while migration execution fails closed')
+test('Server03 uses the canonical operational Compose services and admitted provider', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'linksites-compose-operational-'))
+  try {
+    const runtimeFile = join(directory, 'runtime.env')
+    await writeFile(runtimeFile, '')
+    const canonical = await read('deploy/docker-compose.deploy.yml')
+    const env = { ...process.env }
+    for (const match of canonical.matchAll(/\$\{([A-Z0-9_]+)/g)) env[match[1]] = 'synthetic-fixture'
+    env.LINKSITES_RUNTIME_ENV_FILE = runtimeFile
+    env.LINKLIBRARIES_ARTIFACT_PATH = directory
+    const config = (file) => JSON.parse(execFileSync('docker', ['compose', '--project-name', 'linksites-foundation', '-f', file, 'config', '--format', 'json'], { cwd: root, env, encoding: 'utf8' }))
+    const baseline = config('deploy/docker-compose.deploy.yml')
+    const foundation = config('deploy/docker-compose.server03-foundation.yml')
+    assert.deepEqual(foundation.services, baseline.services, 'Server03 must run the real production services')
+    assert.equal(foundation.services['program-orchestrator'].command ?? null, null, 'use the real image entrypoint')
+    for (const name of ['web-master', 'program-orchestrator']) {
+      assert.notEqual(foundation.services[name].environment.LINKSITES_TEMPLATE_RELEASE_STATE, 'pending')
+      assert.ok(foundation.services[name].volumes.some((volume) => volume.target === '/opt/linksites/linklibraries' && volume.read_only))
+    }
+    assert.ok(foundation.services['web-master'].labels['traefik.http.routers.linksites-preview.middlewares'])
+    assert.equal(foundation.services['web-master'].ports?.length ?? 0, 0)
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })
 
-test('Server03 foundation preflight binds immutable artifacts and explicit provider HOLD', async () => {
+test('Server03 delegates to operational admission and authenticated preview checks', async () => {
   const preflight = await read('deploy/scripts/preflight-server03-foundation.sh')
   const smoke = await read('deploy/scripts/postdeploy-server03-foundation-smoke.sh')
-  for (const name of ['LINKSITES_CMS_IMAGE', 'LINKSITES_WEB_MASTER_IMAGE', 'LINKSITES_WORKER_IMAGE', 'LINKSITES_ORCHESTRATOR_IMAGE', 'LINKSITES_MIGRATIONS_IMAGE']) assert.ok(preflight.includes(name), name)
-  for (const capability of ['renderer-activation', 'orchestrator-intake', 'private-site-pilot', 'public-site-release']) assert.ok(preflight.includes(capability), capability)
-  assert.ok(smoke.includes("ingress.status !== 503"), 'staged intake denial is verified')
+  const operationalSmoke = await read('deploy/scripts/postdeploy-smoke.sh')
+  assert.ok(preflight.includes('bash deploy/scripts/preflight.sh "$@"'))
+  assert.ok(smoke.includes('bash deploy/scripts/postdeploy-smoke.sh "$@"'))
+  assert.ok(preflight.includes('COMPOSE_PROJECT_NAME=linksites-foundation'))
+  assert.ok(smoke.includes('COMPOSE_PROJECT_NAME=linksites-foundation'))
+  assert.ok(operationalSmoke.includes(".status !== 'ready'"))
+  assert.ok(operationalSmoke.includes('data-private-preview='))
+  assert.ok(operationalSmoke.includes('noindex'))
 })
 
-test('Server03 foundation monitoring detects health, intake drift, and stale recovery proof', async () => {
+test('Server03 monitoring watches real runtime health and recovery evidence', async () => {
   const rules = await read('deploy/monitoring/server03-foundation.rules.yml')
-  for (const alert of ['LiNKsitesFoundationTargetDown', 'LiNKsitesFoundationIntakeUnexpectedlyEnabled', 'LiNKsitesFoundationProviderPendingMetricMissing', 'LiNKsitesFoundationBackupStale', 'LiNKsitesFoundationRestoreRehearsalStale']) assert.ok(rules.includes(alert), alert)
-  assert.ok(rules.includes('linksites_program_intake_enabled != 0'))
-  assert.ok(rules.includes('linksites_program_provider_release_pending != 1'))
+  for (const alert of ['LiNKsitesFoundationTargetDown', 'LiNKsitesFoundationRuntimeAttention', 'LiNKsitesFoundationRuntimeMetricsMissing', 'LiNKsitesFoundationBackupStale', 'LiNKsitesFoundationRestoreRehearsalStale']) assert.ok(rules.includes(alert), alert)
+  assert.ok(rules.includes('linksites_program_dead_letters_total'))
+  assert.ok(rules.includes('linksites_program_active_issues'))
+  assert.ok(!rules.includes('linksites_program_intake_enabled != 0'))
 })
 
 test('active package scripts cannot invoke retired mirror tooling', async () => {

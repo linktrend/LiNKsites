@@ -61,9 +61,9 @@ let libraries
 if (providerState === 'pending') {
   libraries = {
     state: 'pending',
-    entryId: 'master-template-type-1',
-    reason: 'selectable-provider-release-not-yet-available',
-    infrastructureAcceptanceEligible: true,
+    entryId: 'marketing-smb-v1',
+    reason: 'active-provider-admission-not-supplied',
+    infrastructureAcceptanceEligible: false,
     blockedCapabilities: ['renderer-activation', 'orchestrator-intake', 'private-site-pilot', 'public-site-release'],
   }
 } else {
@@ -85,6 +85,7 @@ const manifest = {
   generatedAt: new Date().toISOString(),
   repository: { name: 'LiNKsites', releaseSha, lockfileSha256: createHash('sha256').update(lockfile).digest('hex') },
   libraries,
+  deferredTemplates: [{ entryId: 'master-template-type-1', state: 'pending', reason: 'replacement-template-release-deferred', blocksActiveProvider: false }],
   platform: platformState === 'ready'
     ? { state: 'ready', migrationsAppliedSha: process.env.LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA, authority: 'external-governed-admission-required' }
     : { state: 'pending', reason: 'production-project-migration-authority-and-receipt-not-yet-available', infrastructureArtifactAcceptanceEligible: true, blockedCapabilities: ['production-migration-apply', 'production-data-plane-startup'] },

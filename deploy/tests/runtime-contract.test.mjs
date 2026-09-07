@@ -74,7 +74,7 @@ test('rejects preview token drift between web-master and orchestrator interfaces
   assert.ok(result.errors.some((error) => error.name === 'PREVIEW_ACCESS_TOKEN'))
 })
 
-test('provider-pending web-master starts without fabricated admission evidence', () => {
+test('pending provider cannot bypass operational renderer admission', () => {
   const pending = {
     ...base,
     LINKSITES_TEMPLATE_RELEASE_STATE: 'pending',
@@ -83,18 +83,19 @@ test('provider-pending web-master starts without fabricated admission evidence',
   delete pending.LINKSITES_ADMITTED_TEMPLATE_SHA
   delete pending.LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON
   delete pending.LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON
-  assert.equal(validateRuntimeConfig(pending, 'web-master').ok, true)
+  const result = validateRuntimeConfig(pending, 'web-master')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON'))
 })
 
-test('provider-pending web-master rejects a misleading admitted template SHA', () => {
+test('operational renderer rejects legacy pending-provider mode', () => {
   const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'web-master')
   assert.equal(result.ok, false)
-  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_ADMITTED_TEMPLATE_SHA'))
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_STATE'))
 })
 
-test('staged orchestrator requires an explicit pending provider state', () => {
-  assert.equal(validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'program-orchestrator-staged').ok, true)
-  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'ready' }, 'program-orchestrator-staged')
+test('operational orchestrator rejects legacy pending-provider mode', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_TEMPLATE_RELEASE_STATE: 'pending' }, 'program-orchestrator')
   assert.equal(result.ok, false)
   assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_STATE'))
 })
