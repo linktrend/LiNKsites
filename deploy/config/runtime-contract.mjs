@@ -81,6 +81,74 @@ function readCommittedFile(root, path, label) {
   try { return execFileSync('git', ['-C', root, 'show', `HEAD:${relativePath}`]) } catch { throw new Error(`${label} is not present in the configured provider commit`) }
 }
 
+function directoryIsConfined(root, path) {
+  const lexicalRoot = resolve(root)
+  const lexicalCandidate = resolve(path)
+  const prefix = lexicalRoot.endsWith(sep) ? lexicalRoot : `${lexicalRoot}${sep}`
+  if (lexicalCandidate !== lexicalRoot && !lexicalCandidate.startsWith(prefix)) return false
+  try {
+    const rootStat = lstatSync(lexicalRoot)
+    if (rootStat.isSymbolicLink() || !rootStat.isDirectory()) return false
+    const realRoot = resolve(realpathSync(lexicalRoot))
+    let current = lexicalRoot
+    for (const part of relative(lexicalRoot, lexicalCandidate).split(sep).filter(Boolean)) {
+      current = resolve(current, part)
+      const stat = lstatSync(current)
+      if (stat.isSymbolicLink()) return false
+    }
+    const realCandidate = resolve(realpathSync(lexicalCandidate))
+    const realPrefix = realRoot.endsWith(sep) ? realRoot : `${realRoot}${sep}`
+    return (realCandidate === realRoot || realCandidate.startsWith(realPrefix)) && lstatSync(lexicalCandidate).isDirectory()
+  } catch {
+    return false
+  }
+}
+
+function validateNativeV2CatalogueAndInventory(providerRoot, releaseRoot, environment, receipt, manifest, inventory, catalogue, dependencyLock) {
+  const errors = []
+  const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+  const digest = (value) => typeof value === 'string' && sha256.test(value)
+  const gitSha = (value) => typeof value === 'string' && sha1.test(value)
+  const relativePath = (value) => typeof value === 'string' && value.length > 0 && !value.startsWith('/') && !value.includes('\\') && !/(^|\/)\.\.?($|\/)/.test(value)
+  if (!object(catalogue) || catalogue.schemaVersion !== 2 || catalogue.schemaRevision !== 2 || catalogue.catalogueType !== 'catalogue' || !Array.isArray(catalogue.records) || !digest(catalogue.recordsSha256) || sha256Json(catalogue.records) !== catalogue.recordsSha256) errors.push('provider catalogue is not a complete native Revision 2 catalogue')
+  const records = Array.isArray(catalogue?.records) ? catalogue.records : []
+  const selected = records.filter((record) => object(record) && record.entryId === environment.LINKSITES_TEMPLATE_ID && record.version === environment.LINKSITES_TEMPLATE_VERSION)
+  if (selected.length !== 1) errors.push('provider catalogue must contain exactly one selected entry/version record')
+  const record = selected[0]
+  if (!object(record) || record.recordType !== 'catalogue_record' || record.artifactType !== 'website_template' || !['admitted', 'selectable'].includes(record.lifecycle) || record.selectability !== 'selectable' || record.compatibility !== 'compatible' || record.bundlePath !== `registry/v2/entries/${environment.LINKSITES_TEMPLATE_ID}/versions/${environment.LINKSITES_TEMPLATE_VERSION}`) errors.push('provider catalogue selected record is not admitted/selectable/compatible')
+  if (object(record)) {
+    if (record.releaseManifestSha256 !== sha256Bytes(readFileSync(resolve(releaseRoot, 'manifest.json')))) errors.push('provider catalogue selected record manifest digest does not match the mounted manifest')
+    if (record.inventorySha256 !== inventory?.inventorySha256) errors.push('provider catalogue selected record inventory digest does not match the mounted inventory')
+    if (record.artifactTreeSha1 !== manifest?.artifactTreeSha1 || record.artifactTreeSha1 !== inventory?.artifactTreeSha1) errors.push('provider catalogue selected record artifact identity does not match the mounted release')
+    if (!object(record.releaseSource) || record.releaseSource.releaseSourceCommitSha !== manifest?.releaseSource?.releaseSourceCommitSha || record.releaseSource.releaseSourceRepositoryTreeSha1 !== manifest?.releaseSource?.releaseSourceRepositoryTreeSha1) errors.push('provider catalogue selected record source identity does not match the mounted release')
+  }
+  if (!object(manifest) || manifest.schemaVersion !== 2 || manifest.schemaRevision !== 2 || manifest.manifestType !== 'immutable_release' || manifest.entryId !== environment.LINKSITES_TEMPLATE_ID || manifest.version !== environment.LINKSITES_TEMPLATE_VERSION || manifest.artifactType !== 'website_template' || !gitSha(manifest.artifactTreeSha1) || !digest(manifest.inventorySha256) || !digest(manifest.payloadSha256) || !digest(manifest.dependencyLockSha256) || !object(manifest.releaseSource)) errors.push('mounted native v2 release manifest is incomplete')
+  if (!object(inventory) || inventory.schemaVersion !== 2 || inventory.schemaRevision !== 2 || inventory.inventoryType !== 'exhaustive_tree_inventory' || inventory.complete !== true || inventory.includesDirectories !== true || inventory.includesFiles !== true || inventory.includesSymlinks !== false || !Array.isArray(inventory.entries) || !digest(inventory.inventorySha256) || !gitSha(inventory.artifactTreeSha1) || sha256Json(inventory.entries) !== inventory.inventorySha256) errors.push('mounted native v2 artifact inventory is incomplete or tampered')
+  if (object(manifest) && object(inventory) && (manifest.inventorySha256 !== inventory.inventorySha256 || manifest.artifactTreeSha1 !== inventory.artifactTreeSha1)) errors.push('native v2 manifest and artifact inventory identities do not match')
+  if (!object(dependencyLock) || dependencyLock.schemaVersion !== 2 || dependencyLock.schemaRevision !== 2 || dependencyLock.lockType !== 'deterministic_dependency_lock' || !Array.isArray(dependencyLock.dependencies) || !digest(dependencyLock.lockSha256) || sha256Json(dependencyLock.dependencies) !== dependencyLock.lockSha256) errors.push('mounted native v2 dependency lock is incomplete or tampered')
+  if (object(manifest) && manifest.dependencyLockSha256 !== environment.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256) errors.push('native v2 manifest dependency lock does not match the configured identity')
+  const artifactRoot = resolve(releaseRoot, 'artifact')
+  if (!directoryIsConfined(providerRoot, artifactRoot)) errors.push('native v2 artifact root is missing, symlinked, or outside the provider checkout')
+  const paths = new Set()
+  for (const item of inventory?.entries ?? []) {
+    if (!object(item) || !relativePath(item.path) || paths.has(item.path)) { errors.push('native v2 artifact inventory contains an unsafe or duplicate path'); continue }
+    paths.add(item.path)
+    const candidate = resolve(artifactRoot, item.path)
+    if (item.type === 'directory') {
+      if (!directoryIsConfined(artifactRoot, candidate)) errors.push(`native v2 artifact inventory directory is not present: ${item.path}`)
+      continue
+    }
+    if (item.type !== 'file' || !Number.isSafeInteger(item.byteLength) || item.byteLength < 0 || !digest(item.sha256) || !pathIsConfined(artifactRoot, candidate)) { errors.push(`native v2 artifact inventory file is invalid or missing: ${item.path}`); continue }
+    const bytes = readFileSync(candidate)
+    if (bytes.byteLength !== item.byteLength || sha256Bytes(bytes) !== item.sha256) errors.push(`native v2 artifact inventory digest mismatch: ${item.path}`)
+    try {
+      if (!readCommittedFile(providerRoot, candidate, `native v2 artifact ${item.path}`).equals(bytes)) errors.push(`native v2 artifact ${item.path} bytes do not match the configured provider commit`)
+    } catch (error) { errors.push(error instanceof Error ? error.message : `native v2 artifact ${item.path} is not committed`) }
+  }
+  if (receipt.receiptType === 'verified_cache' && (receipt.catalogueRecordsSha256 !== catalogue?.recordsSha256 || receipt.inventorySha256 !== inventory?.inventorySha256 || receipt.payloadSha256 !== manifest?.payloadSha256)) errors.push('verified_cache receipt catalogue or inventory identity does not match the mounted release')
+  return errors
+}
+
 /**
  * This is the executable deployment configuration contract. It deliberately
  * contains names and validation rules only; values are never persisted here.
@@ -115,11 +183,6 @@ export const SERVICE_CONFIGURATION = {
     required('LINKSITES_TEMPLATE_FORMAT', 'literal:revision2'),
     required('LINKSITES_TEMPLATE_ID', 'slug'),
     required('LINKSITES_TEMPLATE_VERSION', 'semver'),
-    required('LINKSITES_LINKLIBRARIES_ROOT', 'absolute-path'),
-    required('LINKSITES_LINKLIBRARIES_COMMIT_SHA', 'git-sha-1'),
-    required('LINKSITES_LINKLIBRARIES_TREE_SHA', 'git-sha-1'),
-    required('LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256', 'sha-256'),
-    required('LINKSITES_LINKLIBRARIES_RECEIPT_PATH', 'absolute-path'),
   ],
   'autowork-worker': [
     required('DATABASE_URI', 'postgres-url', true),
@@ -154,16 +217,10 @@ export const SERVICE_CONFIGURATION = {
     required('W2_02_PREVIEW_ACCESS_TOKEN', 'secret-min-32', true),
     required('W2_05_OUTCOME_GATEWAY_SECRET', 'secret-min-32', true),
     required('W2_05_OUTCOME_GATEWAY_KEY_ID', 'slug'),
-    required('W2_02_LIBRARY_REPOSITORY_PATH', 'absolute-path'),
     required('LINKSITES_TEMPLATE_RELEASE_STATE', 'template-release-state'),
     required('LINKSITES_TEMPLATE_FORMAT', 'literal:revision2'),
     required('LINKSITES_TEMPLATE_ID', 'slug'),
     required('LINKSITES_TEMPLATE_VERSION', 'semver'),
-    required('LINKSITES_LINKLIBRARIES_ROOT', 'absolute-path'),
-    required('LINKSITES_LINKLIBRARIES_COMMIT_SHA', 'git-sha-1'),
-    required('LINKSITES_LINKLIBRARIES_TREE_SHA', 'git-sha-1'),
-    required('LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256', 'sha-256'),
-    required('LINKSITES_LINKLIBRARIES_RECEIPT_PATH', 'absolute-path'),
     required('LINKAUTOWORK_GATEWAY_URL', 'https-url'),
     required('LINKAUTOWORK_SIGNING_SECRET', 'secret-min-32', true),
     required('LINKAUTOWORK_SIGNING_KEY_ID', 'slug'),
@@ -290,11 +347,17 @@ export function readAndVerifyNativeV2Receipt(environment, { providerRoot: provid
     if (shapeError) throw new Error(shapeError)
     const receipt = receiptFile.value
     const releaseRoot = resolve(providerRoot, 'registry/v2/entries', environment.LINKSITES_TEMPLATE_ID, 'versions', environment.LINKSITES_TEMPLATE_VERSION)
+    const catalogueFile = readJsonFile(providerRoot, resolve(providerRoot, 'indexes/v2/catalog.json'), 'mounted native v2 provider catalogue')
     const manifestFile = readJsonFile(providerRoot, resolve(releaseRoot, 'manifest.json'), 'mounted native v2 release manifest')
+    const inventoryFile = readJsonFile(providerRoot, resolve(releaseRoot, 'inventory.json'), 'mounted native v2 artifact inventory')
     const dependencyLockFile = readJsonFile(providerRoot, resolve(releaseRoot, 'dependency-lock.json'), 'mounted native v2 dependency lock')
+    if (!readCommittedFile(providerRoot, resolve(providerRoot, 'indexes/v2/catalog.json'), 'mounted native v2 provider catalogue').equals(catalogueFile.bytes)) throw new Error('mounted native v2 provider catalogue bytes do not match the configured provider commit')
     if (!readCommittedFile(providerRoot, resolve(releaseRoot, 'manifest.json'), 'mounted native v2 release manifest').equals(manifestFile.bytes)) throw new Error('mounted native v2 release manifest bytes do not match the configured provider commit')
+    if (!readCommittedFile(providerRoot, resolve(releaseRoot, 'inventory.json'), 'mounted native v2 artifact inventory').equals(inventoryFile.bytes)) throw new Error('mounted native v2 artifact inventory bytes do not match the configured provider commit')
     if (!readCommittedFile(providerRoot, resolve(releaseRoot, 'dependency-lock.json'), 'mounted native v2 dependency lock').equals(dependencyLockFile.bytes)) throw new Error('mounted native v2 dependency lock bytes do not match the configured provider commit')
     const manifest = manifestFile.value
+    const inventory = inventoryFile.value
+    const catalogue = catalogueFile.value
     const dependencyLock = dependencyLockFile.value
     if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) throw new Error('mounted native v2 release manifest is not an object')
     if (!dependencyLock || typeof dependencyLock !== 'object' || Array.isArray(dependencyLock)) throw new Error('mounted native v2 dependency lock is not an object')
@@ -307,6 +370,8 @@ export function readAndVerifyNativeV2Receipt(environment, { providerRoot: provid
     const receiptSource = receipt.receiptType === 'verified_cache' ? receipt.releaseSource : receipt
     if (!manifestSource || manifestSource.releaseSourceCommitSha !== receiptSource.releaseSourceCommitSha || manifestSource.releaseSourceRepositoryTreeSha1 !== receiptSource.releaseSourceRepositoryTreeSha1) throw new Error('native v2 receipt source identity does not match the mounted release')
     if (receipt.receiptType === 'verified_cache' && (receipt.sourceEvidence.selectedRepositoryCommitSha !== manifestSource.releaseSourceCommitSha || receipt.sourceEvidence.selectedRepositoryTreeSha1 !== manifestSource.releaseSourceRepositoryTreeSha1)) throw new Error('verified cache source evidence does not match the mounted release source')
+    const admissionErrors = validateNativeV2CatalogueAndInventory(providerRoot, releaseRoot, environment, receipt, manifest, inventory, catalogue, dependencyLock)
+    if (admissionErrors.length) throw new Error(`native Revision 2 catalogue/inventory admission failed: ${admissionErrors.join('; ')}`)
     return { ok: true, raw, receipt, receiptSha256: sha256Bytes(receiptFile.bytes), providerRoot, receiptPath }
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : 'mounted native v2 receipt verification failed' }

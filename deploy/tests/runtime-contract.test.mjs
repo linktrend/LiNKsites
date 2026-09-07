@@ -120,6 +120,12 @@ test('deferred template release rejects provider admission receipt evidence', ()
   assert.ok(result.errors.some((error) => error.name === 'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON'))
 })
 
+test('deferred operational services do not require provider checkout, root, lock, or receipt mounts', () => {
+  const environment = { ...base }
+  for (const name of ['LINKSITES_LINKLIBRARIES_ROOT', 'LINKSITES_LINKLIBRARIES_COMMIT_SHA', 'LINKSITES_LINKLIBRARIES_TREE_SHA', 'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256', 'LINKSITES_LINKLIBRARIES_RECEIPT_PATH', 'W2_02_LIBRARY_REPOSITORY_PATH']) delete environment[name]
+  for (const service of ['web-master', 'program-orchestrator']) assert.equal(validateRuntimeConfig(environment, service).ok, true, service)
+})
+
 test('accepts a valid first numeric Payload document ID and rejects an invalid one', () => {
   assert.equal(validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '1' }, 'program-orchestrator').ok, true)
   const result = validateRuntimeConfig({ ...base, W2_02_PAYLOAD_SITE_ID: '0' }, 'program-orchestrator')

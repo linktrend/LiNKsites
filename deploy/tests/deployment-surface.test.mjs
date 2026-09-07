@@ -21,18 +21,23 @@ test('Server03 uses the canonical operational Compose services and admitted prov
     const runtimeFile = join(directory, 'runtime.env')
     await writeFile(runtimeFile, '')
     const canonical = await read('deploy/docker-compose.deploy.yml')
+    const readyOverlay = await read('deploy/docker-compose.template-ready.yml')
     const env = { ...process.env }
-    for (const match of canonical.matchAll(/\$\{([A-Z0-9_]+)/g)) env[match[1]] = 'synthetic-fixture'
+    for (const match of `${canonical}\n${readyOverlay}`.matchAll(/\$\{([A-Z0-9_]+)/g)) env[match[1]] = 'synthetic-fixture'
     env.LINKSITES_RUNTIME_ENV_FILE = runtimeFile
     env.LINKLIBRARIES_ARTIFACT_PATH = directory
-    const config = (file) => JSON.parse(execFileSync('docker', ['compose', '--project-name', 'linksites-foundation', '-f', file, 'config', '--format', 'json'], { cwd: root, env, encoding: 'utf8' }))
+    env.LINKSITES_TEMPLATE_RELEASE_STATE = 'ready'
+    env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON = '{}'
+    const config = (...files) => JSON.parse(execFileSync('docker', ['compose', '--project-name', 'linksites-foundation', ...files.flatMap((file) => ['-f', file]), 'config', '--format', 'json'], { cwd: root, env, encoding: 'utf8' }))
     const baseline = config('deploy/docker-compose.deploy.yml')
     const foundation = config('deploy/docker-compose.server03-foundation.yml')
+    const ready = config('deploy/docker-compose.deploy.yml', 'deploy/docker-compose.template-ready.yml')
     assert.deepEqual(foundation.services, baseline.services, 'Server03 must run the real production services')
     assert.equal(foundation.services['program-orchestrator'].command ?? null, null, 'use the real image entrypoint')
     for (const name of ['web-master', 'program-orchestrator']) {
       assert.notEqual(foundation.services[name].environment.LINKSITES_TEMPLATE_RELEASE_STATE, 'pending')
-      assert.ok(foundation.services[name].volumes.some((volume) => volume.target === '/opt/linksites/linklibraries' && volume.read_only))
+      assert.equal(foundation.services[name].volumes.some((volume) => volume.target === '/opt/linksites/linklibraries'), false, 'deferred/base Server03 must not require provider mounts')
+      assert.ok(ready.services[name].volumes.some((volume) => volume.target === '/opt/linksites/linklibraries' && volume.read_only), 'ready overlay must add the provider mount')
     }
     assert.equal(foundation.services['web-master'].environment.LINKSITES_TEMPLATE_FORMAT, 'revision2')
     assert.equal(foundation.services['program-orchestrator'].environment.LINKSITES_TEMPLATE_FORMAT, 'revision2')

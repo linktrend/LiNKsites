@@ -52,7 +52,8 @@ const required = [
   'LINKSITES_ORCHESTRATOR_IMAGE_DIGEST', 'LINKSITES_WORKER_IMAGE_DIGEST',
   'LINKSITES_MIGRATIONS_IMAGE_DIGEST',
 ]
-required.push('LINKSITES_TEMPLATE_ID', 'LINKSITES_TEMPLATE_VERSION', 'LINKSITES_TEMPLATE_FORMAT', 'LINKSITES_LINKLIBRARIES_ROOT', 'LINKSITES_LINKLIBRARIES_COMMIT_SHA', 'LINKSITES_LINKLIBRARIES_TREE_SHA', 'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256', 'LINKSITES_LINKLIBRARIES_RECEIPT_PATH', 'LINKLIBRARIES_ARTIFACT_PATH')
+required.push('LINKSITES_TEMPLATE_ID', 'LINKSITES_TEMPLATE_VERSION', 'LINKSITES_TEMPLATE_FORMAT')
+if (providerState === 'ready') required.push('LINKSITES_LINKLIBRARIES_ROOT', 'LINKSITES_LINKLIBRARIES_COMMIT_SHA', 'LINKSITES_LINKLIBRARIES_TREE_SHA', 'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256', 'LINKSITES_LINKLIBRARIES_RECEIPT_PATH', 'LINKLIBRARIES_ARTIFACT_PATH')
 if (providerState === 'ready') required.push('LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON')
 if (platformState === 'ready') required.push('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA')
 const missing = required.filter((name) => !process.env[name] || /<|replace|example|todo/i.test(process.env[name]))
@@ -60,16 +61,11 @@ if (missing.length) throw new Error(`missing immutable release identity: ${missi
 for (const name of required.filter((name) => name.endsWith('_DIGEST'))) if (!/^sha256:[a-f0-9]{64}$/i.test(process.env[name])) throw new Error(`${name} must be an image SHA-256 digest`)
 if (platformState === 'ready' && !/^[a-f0-9]{40}$/i.test(process.env.LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA)) throw new Error('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA must be a full immutable Git SHA')
 let libraries
-for (const name of ['LINKSITES_LINKLIBRARIES_COMMIT_SHA', 'LINKSITES_LINKLIBRARIES_TREE_SHA']) if (!/^[a-f0-9]{40}$/i.test(process.env[name])) throw new Error(`${name} must be a full immutable Git SHA`)
-if (!/^[a-f0-9]{64}$/i.test(process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256)) throw new Error('LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256 must be a full SHA-256 digest')
 if (providerState === 'deferred') {
   libraries = {
     state: 'deferred',
     entryId: 'master-template-type-1',
     version: process.env.LINKSITES_TEMPLATE_VERSION,
-    providerCommitSha: process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA,
-    providerTreeSha: process.env.LINKSITES_LINKLIBRARIES_TREE_SHA,
-    dependencyLockSha256: process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256,
     reason: 'native-v2-selectable-release-deferred',
     infrastructureAcceptanceEligible: true,
     publishingEligible: false,
