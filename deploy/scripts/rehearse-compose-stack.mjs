@@ -41,7 +41,10 @@ const sourceRevision = (await quiet('git', ['rev-parse', 'HEAD'])).trim()
 const platformPath = resolve(process.env.LINKSITES_PLATFORM_REPOSITORY ?? '/Users/linktrend/Projects/LiNKplatform')
 const libraryPath = resolve(process.env.LINKLIBRARIES_ARTIFACT_PATH ?? '/Users/linktrend/Projects/LiNKlibraries')
 const platformRevision = (await quiet('git', ['-C', platformPath, 'rev-parse', 'origin/main'])).trim()
-await run('git', ['-C', libraryPath, 'cat-file', '-e', 'a7193d40152747db2a03e094fa263f324a971a0b^{commit}'])
+const libraryRevision = 'a7193d40152747db2a03e094fa263f324a971a0b'
+await run('git', ['-C', libraryPath, 'cat-file', '-e', `${libraryRevision}^{commit}`])
+const libraryCatalogChecksum = createHash('sha256').update(await quiet('git', ['-C', libraryPath, 'show', `${libraryRevision}:indexes/catalog.json`])).digest('hex')
+const libraryEntryChecksum = createHash('sha256').update(await quiet('git', ['-C', libraryPath, 'show', `${libraryRevision}:entries/marketing-smb-v1/entry.json`])).digest('hex')
 
 const checkpoint = async () => {
   const files = (await quiet('git', ['ls-files', 'apps/program-orchestrator/src', 'apps/program-orchestrator/package.json', 'packages/factory-catalog/src', 'packages/factory-catalog/package.json', 'packages/program-ledger/src', 'packages/program-ledger/package.json'])).trim().split(/\r?\n/).filter(Boolean).sort()
@@ -129,10 +132,7 @@ const runtimeValues = {
   // otherwise web-master correctly rejects the unmapped token-gated tenant.
   W2_04_LOCAL_PROOF_HOST: 'preview.localtest',
   LINKSITES_LOCAL_COMPOSE_PROOF: '1',
-  // The deterministic offline consumption fixture records a full Git SHA;
-  // keep this derived so a truncated literal cannot silently bypass the
-  // template-admission contract.
-  LINKSITES_ADMITTED_TEMPLATE_SHA: '1'.repeat(40),
+  LINKSITES_ADMITTED_TEMPLATE_SHA: libraryRevision,
   W2_02_MODE: 'local',
   W2_02_DATABASE_URI: 'ltfx.db.uri.postgresql.8ecb343762.v1',
   W2_02_ORG_ID: 'local-proof-org',
@@ -200,11 +200,9 @@ try {
     PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.localtest',
     NEXT_PUBLIC_PAYLOAD_API_URL: 'https://cms.localtest',
     LINKLIBRARIES_ARTIFACT_PATH: libraryPath,
-    // The disposable receipt/evidence fixture is intentionally bound to a
-    // deterministic full SHA.  The Compose renderer must receive exactly the
-    // same value, otherwise this proof would exercise a different admission
-    // identity than the one produced by payload-seed.
-    LINKLIBRARIES_CATALOG_SHA: '1'.repeat(40),
+    LINKLIBRARIES_CATALOG_SHA: libraryRevision,
+    LINKLIBRARIES_CATALOG_CONTENT_SHA256: libraryCatalogChecksum,
+    LINKLIBRARIES_ENTRY_CONTENT_SHA256: libraryEntryChecksum,
     TRAEFIK_NETWORK: `${project}-edge`,
     TRAEFIK_CMS_HOST: 'cms.localtest',
     TRAEFIK_PREVIEW_HOST: 'preview.localtest',
