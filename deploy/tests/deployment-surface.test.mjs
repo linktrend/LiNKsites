@@ -163,5 +163,6 @@ test('local Compose rehearsal is an explicit disposable overlay of the deploy bu
   assert.ok(rehearsal.includes("['up', '--detach', '--no-build', '--wait'"))
   assert.ok(rehearsal.includes("'exec', '-T', 'program-orchestrator', 'node', '-e'"), 'the final private-preview readback must run inside the isolated Compose network')
   assert.ok(rehearsal.includes("privatePreview: body.includes('data-private-preview=\"true\"')"), 'the final readback must verify the protected renderer marker without emitting HTML')
+  assert.ok(rehearsal.includes("fetch('http://127.0.0.1:3000/readyz')"), 'orchestrator readiness must be checked inside its Linux runtime namespace')
   assert.ok(rehearsal.includes("completedIssues: 16"))
 })

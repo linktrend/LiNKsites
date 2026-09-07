@@ -302,7 +302,10 @@ try {
     ])
     throw new Error(`private preview request failed\n\nCompose listener diagnostics:\n${state}\n${logs}`)
   }
-  await run('curl', ['--fail', '--silent', '--show-error', '--cacert', localCa, `http://127.0.0.1:${orchestratorPort}/readyz`])
+  const orchestratorReady = (await composeQuiet(['exec', '-T', 'program-orchestrator', 'node', '-e',
+    "fetch('http://127.0.0.1:3000/readyz').then(response=>process.stdout.write(String(response.ok))).catch(()=>process.exit(2))",
+  ])).trim()
+  assert.equal(orchestratorReady, 'true', 'orchestrator readiness must pass inside its runtime namespace')
   const databaseReadback = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select count(*) from public.pages where promotion_run_marker = '${runMarker}' and status = 'draft' and _status = 'draft';`])).trim()
   assert.equal(databaseReadback, '5', 'Compose stack must preserve five private draft documents')
   const migrationReceipt = (await composeQuiet(['exec', '-T', 'local-postgres', 'psql', '-At', '-U', 'postgres', '-d', 'postgres', '-c', `select platform_commit_sha from lsites_ledger.platform_migration_receipts where platform_commit_sha = '${platformRevision}';`])).trim()
