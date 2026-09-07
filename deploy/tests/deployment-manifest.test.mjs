@@ -15,13 +15,28 @@ const images = {
   LINKSITES_WORKER_IMAGE_DIGEST: digest('4'),
   LINKSITES_MIGRATIONS_IMAGE_DIGEST: digest('5'),
 }
+const canonical = (value) => value === null || typeof value !== 'object'
+  ? JSON.stringify(value)
+  : Array.isArray(value)
+    ? `[${value.map(canonical).join(',')}]`
+    : `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}`
+const canonicalSha256 = (value) => createHash('sha256').update(canonical(value)).digest('hex')
 
-async function nativeProviderFixture() {
+async function nativeProviderFixture(options = {}) {
   const directory = await mkdtemp(join(tmpdir(), 'linksites-manifest-v2-'))
   const releaseDirectory = join(directory, 'registry/v2/entries/master-template-type-1/versions/2.0.0-a1.1')
-  await mkdir(releaseDirectory, { recursive: true })
+  const artifactDirectory = join(releaseDirectory, 'artifact')
+  await mkdir(join(directory, 'indexes/v2'), { recursive: true })
+  await mkdir(artifactDirectory, { recursive: true })
+  const sourceInventoryBytes = '{"sourceRepository":"LiNKsites","sourceCommit":"f28fd53d454cbc33d97951d8e62826dae5a83e40","sourceTree":"34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b"}\n'
+  await writeFile(join(artifactDirectory, 'source-inventory.json'), sourceInventoryBytes)
+  const inventoryEntries = [{ path: 'source-inventory.json', type: 'file', byteLength: Buffer.byteLength(sourceInventoryBytes), sha256: createHash('sha256').update(sourceInventoryBytes).digest('hex'), mediaType: 'application/json', classification: 'public_reusable', retention: 'release', immutable: true, runtimeDownload: false }]
+  const inventorySha256 = canonicalSha256(inventoryEntries)
+  const inventory = { schemaVersion: 2, schemaRevision: 2, inventoryType: 'exhaustive_tree_inventory', root: 'artifact', complete: true, includesDirectories: true, includesFiles: true, includesSymlinks: false, entries: inventoryEntries, inventorySha256, artifactTreeSha1: '2'.repeat(40) }
+  if (!options.omitInventory) await writeFile(join(releaseDirectory, 'inventory.json'), `${JSON.stringify(inventory)}\n`)
   const dependencyProjectionSha256 = createHash('sha256').update('[]').digest('hex')
-  const dependencyLockBytes = `${JSON.stringify({ lockSha256: dependencyProjectionSha256, dependencies: [] })}\n`
+  const dependencyLock = { schemaVersion: 2, schemaRevision: 2, lockType: 'deterministic_dependency_lock', manager: 'other', lockVersion: 'fixture-1', dependencies: [], lockSha256: dependencyProjectionSha256 }
+  const dependencyLockBytes = `${JSON.stringify(dependencyLock)}\n`
   const dependencyLockSha256 = createHash('sha256').update(dependencyLockBytes).digest('hex')
   const manifest = {
     schemaVersion: 2,
@@ -30,13 +45,21 @@ async function nativeProviderFixture() {
     releaseId: 'master-template-type-1-2.0.0-a1.1',
     entryId: 'master-template-type-1',
     version: '2.0.0-a1.1',
+    artifactType: 'website_template',
     dependencyLockSha256,
     artifactTreeSha1: '2'.repeat(40),
+    payloadSha256: '7'.repeat(64),
+    inventorySha256,
     releaseSource: { releaseSourceCommitSha: 'f'.repeat(40), releaseSourceRepositoryTreeSha1: '1'.repeat(40) },
+    extension: { extensionType: 'website_template', templateClass: 'shared_renderer_declarative', contentScope: { siteId: true, locale: true, publicationStatus: true }, draftOnly: true, directPublication: false, urls: ['https://example.invalid/template'], compatibilityDisposition: 'compatible', routes: [{ route: '/', page: 'source-inventory.json' }], assets: ['source-inventory.json'], urlPolicy: { provenanceUrls: ['https://example.invalid/provenance'], licenseUrls: ['https://example.invalid/license'], docsUrls: ['https://example.invalid/docs'] }, runtimeEndpointContracts: [], materialization: { mode: 'copy', sourceRoot: 'artifact', destinationRoot: 'output', commands: [], substitutions: [], outputs: ['source-inventory.json'], network: { allowNetwork: false, allowedHosts: [] } } },
   }
   const manifestBytes = `${JSON.stringify(manifest)}\n`
   await writeFile(join(releaseDirectory, 'manifest.json'), manifestBytes)
   await writeFile(join(releaseDirectory, 'dependency-lock.json'), dependencyLockBytes)
+  const catalogueRecord = { schemaVersion: 2, schemaRevision: 2, recordType: 'catalogue_record', entryId: manifest.entryId, version: manifest.version, artifactType: manifest.artifactType, releaseManifestSha256: createHash('sha256').update(manifestBytes).digest('hex'), releaseSource: manifest.releaseSource, artifactTreeSha1: manifest.artifactTreeSha1, inventorySha256: manifest.inventorySha256, lifecycle: 'selectable', selectability: 'selectable', compatibility: 'compatible', bundlePath: 'registry/v2/entries/master-template-type-1/versions/2.0.0-a1.1', governance: { qualification: { status: 'qualified', receiptId: 'fixture-qualification', independentPass: true }, admission: { status: 'admitted', receiptId: 'fixture-admission' } }, ...options.recordOverrides }
+  const catalogueRecords = options.catalogueRecords ?? [catalogueRecord]
+  const catalogue = { schemaVersion: 2, schemaRevision: 2, catalogueType: 'catalogue', recordsSha256: canonicalSha256(catalogueRecords), records: catalogueRecords }
+  await writeFile(join(directory, 'indexes/v2/catalog.json'), `${JSON.stringify(catalogue)}\n`)
   const receipt = {
     schemaVersion: 2,
     schemaRevision: 2,
@@ -52,7 +75,7 @@ async function nativeProviderFixture() {
     issuedAt: '2026-09-07T00:00:00Z',
     issuer: { actorType: 'automation', actorId: 'fixture' },
     result: 'pass',
-    evidence: [{ kind: 'receipt', locator: 'fixture', sha256: '4'.repeat(64) }],
+    evidence: [{ kind: 'catalogue', locator: 'indexes/v2/catalog.json', sha256: '4'.repeat(64) }],
     consumerId: 'linksites',
     consumptionMode: 'materialize',
   }
@@ -87,8 +110,10 @@ test('deferred native v2 provider state remains eligible for honest infrastructu
   const directory = await mkdtemp(join(tmpdir(), 'linksites-manifest-'))
   const output = join(directory, 'manifest.json')
   try {
+    const deferredEnv = { ...process.env, ...images, LINKSITES_TEMPLATE_ID: 'master-template-type-1', LINKSITES_TEMPLATE_VERSION: '2.0.0-a1.1', LINKSITES_TEMPLATE_FORMAT: 'revision2' }
+    for (const name of ['LINKSITES_LINKLIBRARIES_ROOT', 'LINKSITES_LINKLIBRARIES_COMMIT_SHA', 'LINKSITES_LINKLIBRARIES_TREE_SHA', 'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256', 'LINKSITES_LINKLIBRARIES_RECEIPT_PATH', 'LINKLIBRARIES_ARTIFACT_PATH', 'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON']) delete deferredEnv[name]
     const stdout = execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'deferred', '--platform-state', 'pending', '--output', output], {
-      cwd: root, env: { ...process.env, ...images, LINKSITES_TEMPLATE_ID: 'master-template-type-1', LINKSITES_TEMPLATE_VERSION: '2.0.0-a1.1', LINKSITES_TEMPLATE_FORMAT: 'revision2', LINKSITES_LINKLIBRARIES_ROOT: '/var/lib/linksites/linklibraries', LINKSITES_LINKLIBRARIES_COMMIT_SHA: 'a'.repeat(40), LINKSITES_LINKLIBRARIES_TREE_SHA: 'b'.repeat(40), LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256: 'c'.repeat(64), LINKSITES_LINKLIBRARIES_RECEIPT_PATH: '/var/lib/linksites/linklibraries/receipt.json', LINKLIBRARIES_ARTIFACT_PATH: '/var/lib/linksites/linklibraries' }, encoding: 'utf8',
+      cwd: root, env: deferredEnv, encoding: 'utf8',
     })
     const bytes = await readFile(output)
     const manifest = JSON.parse(bytes)
@@ -152,6 +177,22 @@ test('ready provider state rejects forged, stale, or mismatched native v2 receip
     try {
       const environment = await mutate(fixture)
       assert.throws(() => execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', join(fixture.directory, 'manifest.json')], { cwd: root, env: environment, encoding: 'utf8' }), expected, label)
+    } finally {
+      await rm(fixture.directory, { recursive: true, force: true })
+    }
+  }
+})
+
+test('ready provider state requires an admitted selectable catalogue record and complete artifact inventory', async () => {
+  const cases = [
+    ['non-selectable catalogue record', { recordOverrides: { selectability: 'non_selectable', lifecycle: 'draft', compatibility: 'unknown' } }, /catalogue selected record is not admitted\/selectable\/compatible/],
+    ['missing selected catalogue record', { catalogueRecords: [] }, /exactly one selected entry\/version record/],
+    ['missing artifact inventory', { omitInventory: true }, /artifact inventory/],
+  ]
+  for (const [label, options, expected] of cases) {
+    const fixture = await nativeProviderFixture(options)
+    try {
+      assert.throws(() => execFileSync(process.execPath, ['deploy/scripts/generate-deployment-manifest.mjs', '--provider-state', 'ready', '--output', join(fixture.directory, 'manifest.json')], { cwd: root, env: fixture.env, encoding: 'utf8' }), expected, label)
     } finally {
       await rm(fixture.directory, { recursive: true, force: true })
     }

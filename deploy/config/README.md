@@ -28,10 +28,10 @@ formats, and safe redacted fingerprints. It never prints values.
 | `PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | web-master | 32+ chars | rotate the application-level private preview token and restart web-master |
 | `LINKSITES_TEMPLATE_FORMAT` | LiNKsites/LiNKlibraries release process | no | web-master and orchestrator | exact `revision2` | rebuild/redeploy only with the native provider contract |
 | `LINKSITES_TEMPLATE_ID` / `LINKSITES_TEMPLATE_VERSION` | LiNKlibraries release process | no | web-master and orchestrator | exact native v2 release identity | change only with a new manifest and receipt |
-| `LINKSITES_LINKLIBRARIES_ROOT` | LiNKsites operations | no | web-master and orchestrator | absolute read-only provider root | mount only the manifest-bound provider checkout |
-| `LINKSITES_LINKLIBRARIES_COMMIT_SHA` / `LINKSITES_LINKLIBRARIES_TREE_SHA` | LiNKlibraries release process | no | web-master and orchestrator | exact native v2 provider commit/tree | redeploy only with matching provider identity |
-| `LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256` | LiNKlibraries release process | no | web-master and orchestrator | exact native v2 dependency-lock digest | redeploy only with matching provider receipt |
-| `LINKSITES_LINKLIBRARIES_RECEIPT_PATH` | LiNKlibraries release process | no | web-master and orchestrator | absolute provider receipt path | replace only with the matching native v2 receipt |
+| `LINKSITES_LINKLIBRARIES_ROOT` | LiNKsites operations | no | web-master and orchestrator when `ready` | absolute read-only provider root | mount only the manifest-bound provider checkout |
+| `LINKSITES_LINKLIBRARIES_COMMIT_SHA` / `LINKSITES_LINKLIBRARIES_TREE_SHA` | LiNKlibraries release process | no | web-master and orchestrator when `ready` | exact native v2 provider commit/tree | redeploy only with matching provider identity |
+| `LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256` | LiNKlibraries release process | no | web-master and orchestrator when `ready` | exact native v2 dependency-lock digest | redeploy only with matching provider receipt |
+| `LINKSITES_LINKLIBRARIES_RECEIPT_PATH` | LiNKlibraries release process | no | web-master and orchestrator when `ready` | absolute provider receipt path | replace only with the matching native v2 receipt |
 | `LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON` | LiNKlibraries/LiNKsites release process | no | web-master and orchestrator | native v2 `consumption` or `verified_cache` receipt when state is `ready`; absent when `deferred` | change only with a new exact provider manifest |
 | `W2_02_MODE` | LiNKsites program owner | no | orchestrator | exact `production` | non-production execution is refused by the deployment contract |
 | `W2_02_DATABASE_URI` | database owner | yes | orchestrator | canonical distinct non-loopback PostgreSQL URL for the least-privilege orchestrator credential; the packaged adapter may receive the same value as its `DATABASE_URI` alias; never reuse CMS `DATABASE_URI` | rolling restart; preserve adapter connection compatibility |
@@ -53,7 +53,7 @@ formats, and safe redacted fingerprints. It never prints values.
 | `W2_02_PREVIEW_ACCESS_TOKEN` | LiNKsites operations | yes | orchestrator | 32+ chars | must be the same protected token supplied to web-master as `PREVIEW_ACCESS_TOKEN` |
 | `W2_05_OUTCOME_GATEWAY_SECRET` | LiNKreach/LiNKautowork | yes | orchestrator | 32+ chars | dual-key overlap then restart |
 | `W2_05_OUTCOME_GATEWAY_KEY_ID` | LiNKreach/LiNKautowork | no | orchestrator | identifier | must name accepted gateway key |
-| `W2_02_LIBRARY_REPOSITORY_PATH` | LiNKsites operations | no | orchestrator | read-only absolute artifact mount | release only a verified immutable library artifact |
+| `W2_02_LIBRARY_REPOSITORY_PATH` | LiNKsites operations | no | orchestrator when `ready` | read-only absolute artifact mount | release only a verified immutable library artifact |
 
 The Compose host inputs are also part of the one configuration reference. They
 are evaluated before a service starts, are never copied into a browser bundle,
@@ -68,7 +68,7 @@ and must be supplied by the Phase 2 protected deployment environment.
 | `LINKSITES_ORCHESTRATOR_IMAGE` | release process | no | Compose orchestrator | exact immutable `name@sha256:` reference from the release manifest | new release deployment |
 | `LINKSITES_MIGRATIONS_IMAGE` | release process | no | Compose Supabase migration | exact immutable `name@sha256:` reference from the release manifest | one-shot, exact release only |
 | `LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA` | LiNKplatform release authority | no | migration job and manifest | authoritative full 40-character Git SHA | external governed admission required |
-| `LINKLIBRARIES_ARTIFACT_PATH` | LiNKlibraries release process | no | preflight and orchestrator mount | read-only absolute Git checkout for the native v2 provider reference | remount only the exact manifest-bound provider checkout |
+| `LINKLIBRARIES_ARTIFACT_PATH` | LiNKlibraries release process | no | preflight and orchestrator mount when `ready` | read-only absolute Git checkout for the native v2 provider reference | remount only the exact manifest-bound provider checkout |
 | `TRAEFIK_NETWORK` | infrastructure operator | no | Compose edge | existing external Docker network name | coordinated proxy maintenance |
 | `TRAEFIK_ENTRYPOINT` | infrastructure operator | no | Traefik routers | existing TLS entrypoint name | coordinated proxy maintenance |
 | `TRAEFIK_CMS_HOST` | infrastructure operator | no | private CMS router | private DNS hostname | Phase 2 DNS/TLS operation only |
@@ -87,8 +87,10 @@ content are valid in this contract. The Phase 2 operator creates the protected
 runtime file and runs `node deploy/scripts/validate-runtime-config.mjs SERVICE`
 before compose can start any service. `deploy/scripts/preflight.sh` also compares
 all five `LINKSITES_*_IMAGE` values byte-for-byte with the corresponding
-manifest digest, verifies the native v2 provider identity and receipt when
-ready, and rejects tags, placeholders, missing paths, and missing Traefik inputs
-before invoking Compose. The packaged adapter receives the distinct
+manifest digest, verifies the native v2 provider identity, complete
+catalogue/selectability admission, and receipt only when ready, and rejects
+tags, placeholders, missing paths, and missing Traefik inputs before invoking
+Compose. Deferred mode intentionally does not require a provider checkout,
+receipt, or artifact mount. The packaged adapter receives the distinct
 `W2_02_DATABASE_URI` as its adapter-facing `DATABASE_URI` only in
 the orchestrator container.

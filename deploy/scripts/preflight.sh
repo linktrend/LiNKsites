@@ -49,12 +49,11 @@ for (const [name, digest] of Object.entries(imageBindings)) {
 }
 const required = ['TRAEFIK_NETWORK', 'TRAEFIK_ENTRYPOINT', 'TRAEFIK_CMS_HOST', 'TRAEFIK_PREVIEW_HOST', 'TRAEFIK_CMS_PRIVATE_MIDDLEWARE', 'TRAEFIK_PREVIEW_PRIVATE_MIDDLEWARE']
 for (const name of required) if (!process.env[name]?.trim() || /<|replace|example|todo/i.test(process.env[name])) throw new Error(`${name} is missing or a placeholder`)
-for (const name of ['LINKSITES_RUNTIME_ENV_FILE', 'LINKLIBRARIES_ARTIFACT_PATH']) {
+for (const name of ['LINKSITES_RUNTIME_ENV_FILE']) {
   const value = process.env[name]
   if (!value?.startsWith('/')) throw new Error(`${name} must be an absolute host path`)
   const details = await stat(value).catch(() => null)
   if (!details) throw new Error(`${name} does not exist on the deployment host`)
-  if (name === 'LINKLIBRARIES_ARTIFACT_PATH' && !details.isDirectory()) throw new Error(`${name} must be a directory`)
 }
 if (manifest.platform?.migrationsAppliedSha !== process.env.LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA) throw new Error('platform migration SHA does not match the release manifest')
 const migrationRows = manifest.schemas?.supabaseMigrations
@@ -64,17 +63,24 @@ const payloadIndex = manifest.schemas?.payloadMigrationIndex
 if (!payloadIndex || await checksum(payloadIndex.file) !== payloadIndex.sha256) throw new Error('Payload migration index checksum does not match the release manifest')
 for (const row of manifest.schemas?.payloadMigrations ?? []) if (await checksum(row.file) !== row.sha256) throw new Error(`Payload migration source checksum mismatch: ${row.file}`)
 const library = manifest.libraries
-const artifact = process.env.LINKLIBRARIES_ARTIFACT_PATH
-const git = (args) => execFileSync('git', ['-C', artifact, ...args], { encoding: 'utf8' }).trim()
-if (!artifact || git(['rev-parse', '--is-inside-work-tree']) !== 'true') throw new Error('LINKLIBRARIES_ARTIFACT_PATH is not a Git working tree')
-if (git(['rev-parse', 'HEAD']) !== library.providerCommitSha || git(['rev-parse', 'HEAD^{tree}']) !== library.providerTreeSha) throw new Error('native v2 provider checkout identity does not match the release manifest')
-if (process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA !== library.providerCommitSha || process.env.LINKSITES_LINKLIBRARIES_TREE_SHA !== library.providerTreeSha) throw new Error('native v2 provider identity does not match the release manifest')
 if (library.state === 'ready') {
+  const artifact = process.env.LINKLIBRARIES_ARTIFACT_PATH
+  if (!artifact) throw new Error('ready template release requires LINKLIBRARIES_ARTIFACT_PATH')
+  const artifactDetails = await stat(artifact).catch(() => null)
+  if (!artifactDetails?.isDirectory()) throw new Error('LINKLIBRARIES_ARTIFACT_PATH must be an existing directory for ready template releases')
+  const git = (args) => execFileSync('git', ['-C', artifact, ...args], { encoding: 'utf8' }).trim()
+  if (git(['rev-parse', '--is-inside-work-tree']) !== 'true') throw new Error('LINKLIBRARIES_ARTIFACT_PATH is not a Git working tree')
+  if (git(['rev-parse', 'HEAD']) !== library.providerCommitSha || git(['rev-parse', 'HEAD^{tree}']) !== library.providerTreeSha) throw new Error('native v2 provider checkout identity does not match the release manifest')
+  if (process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA !== library.providerCommitSha || process.env.LINKSITES_LINKLIBRARIES_TREE_SHA !== library.providerTreeSha) throw new Error('native v2 provider identity does not match the release manifest')
   const receiptVerification = readAndVerifyNativeV2Receipt(process.env, { providerRoot: artifact })
   if (!receiptVerification.ok || receiptVerification.receiptSha256 !== library.receiptSha256) throw new Error(`native v2 provider receipt is not exactly bound to the release manifest: ${receiptVerification.ok ? 'digest mismatch' : receiptVerification.error}`)
 } else if (process.env.LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON) {
   throw new Error('deferred template release must not carry provider admission receipt evidence')
 }
 NODE
-docker compose --env-file "$runtime_env" -f deploy/docker-compose.deploy.yml config --quiet
+compose_files=(-f deploy/docker-compose.deploy.yml)
+if [[ "${LINKSITES_TEMPLATE_RELEASE_STATE:-}" == 'ready' ]]; then
+  compose_files+=(-f deploy/docker-compose.template-ready.yml)
+fi
+docker compose --env-file "$runtime_env" "${compose_files[@]}" config --quiet
 echo 'LiNKsites Phase 2 preflight passed; this command performed no deployment.'
