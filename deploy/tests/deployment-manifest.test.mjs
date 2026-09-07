@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -12,7 +13,7 @@ test('pending provider and Platform authorities produce an honest infrastructure
   const directory = await mkdtemp(join(tmpdir(), 'linksites-manifest-'))
   const output = join(directory, 'manifest.json')
   try {
-    execFileSync(process.execPath, [
+    const stdout = execFileSync(process.execPath, [
       'deploy/scripts/generate-deployment-manifest.mjs',
       '--provider-state', 'pending',
       '--platform-state', 'pending',
@@ -27,9 +28,11 @@ test('pending provider and Platform authorities produce an honest infrastructure
         LINKSITES_WORKER_IMAGE_DIGEST: digest('4'),
         LINKSITES_MIGRATIONS_IMAGE_DIGEST: digest('5'),
       },
-      stdio: 'pipe',
+      encoding: 'utf8',
     })
-    const manifest = JSON.parse(await readFile(output, 'utf8'))
+    const bytes = await readFile(output)
+    const manifest = JSON.parse(bytes.toString('utf8'))
+    const receipt = JSON.parse(stdout)
     assert.equal(manifest.schemaVersion, '1.2.0')
     assert.equal(manifest.libraries.state, 'pending')
     assert.equal(manifest.libraries.infrastructureAcceptanceEligible, true)
@@ -37,6 +40,7 @@ test('pending provider and Platform authorities produce an honest infrastructure
     assert.equal(manifest.platform.infrastructureArtifactAcceptanceEligible, true)
     assert.equal('catalogSha' in manifest.libraries, false)
     assert.equal('migrationsAppliedSha' in manifest.platform, false)
+    assert.equal(receipt.manifestSha256, createHash('sha256').update(bytes).digest('hex'))
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

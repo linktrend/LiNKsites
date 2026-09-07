@@ -94,5 +94,6 @@ const manifest = {
   privacy: { privatePreviewOnly: true, publicDnsOrDomainOperationsExecuted: false },
 }
 await mkdir(dirname(output), { recursive: true })
-await writeFile(output, `${JSON.stringify(manifest, null, 2)}\n`)
-console.log(JSON.stringify({ status: 'deployment_manifest_generated', output, releaseSha, manifestSha256: createHash('sha256').update(JSON.stringify(manifest)).digest('hex') }))
+const manifestBytes = `${JSON.stringify(manifest, null, 2)}\n`
+await writeFile(output, manifestBytes)
+console.log(JSON.stringify({ status: 'deployment_manifest_generated', output, releaseSha, manifestSha256: createHash('sha256').update(manifestBytes).digest('hex') }))
