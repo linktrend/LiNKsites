@@ -130,6 +130,10 @@ test('deployment contract binds preview token, production mode, and smoke topolo
   const smoke = await read('deploy/scripts/postdeploy-smoke.sh')
   const example = await read('deploy/config/production.env.example')
   const compose = await read('deploy/docker-compose.deploy.yml')
+  const exampleNames = new Set(example.split('\n').flatMap((line) => {
+    const match = line.match(/^([A-Z0-9_]+)=/)
+    return match ? [match[1]] : []
+  }))
   assert.ok(contract.includes("required('PREVIEW_ACCESS_TOKEN', 'secret-min-32', true)"))
   assert.ok(contract.includes("required('W2_02_MODE', 'literal:production')"))
   assert.ok(contract.includes("required('DATABASE_URI', 'postgres-url', true)"))
@@ -141,6 +145,19 @@ test('deployment contract binds preview token, production mode, and smoke topolo
   assert.ok(contract.includes("required('W2_02_POSTGRES_ADAPTER_MODULE', 'literal:@linksites/program-orchestrator/postgres-adapter')"))
   assert.ok(example.includes(['PREVIEW_ACCESS_TOKEN', 'ltfx.' + 'placeholder.5e0a9b3c2eac.v1'].join('=')))
   assert.ok(example.includes('W2_02_POSTGRES_ADAPTER_MODULE=@linksites/program-orchestrator/postgres-adapter'))
+  for (const name of [
+    'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON',
+    'LINKSITES_LINKLIBRARIES_ROOT',
+    'LINKSITES_LINKLIBRARIES_COMMIT_SHA',
+    'LINKSITES_LINKLIBRARIES_TREE_SHA',
+    'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256',
+    'LINKSITES_LINKLIBRARIES_RECEIPT_PATH',
+    'LINKLIBRARIES_ARTIFACT_PATH',
+    'LINKLIBRARIES_CATALOG_SHA',
+    'LINKLIBRARIES_ENTRY_SHA',
+    'LINKLIBRARIES_CATALOG_CONTENT_SHA256',
+    'LINKLIBRARIES_ENTRY_CONTENT_SHA256',
+  ]) assert.equal(exampleNames.has(name), false, `${name} must remain unset in deferred runtime example`)
   assert.ok(compose.includes('W2_02_MODE: ${W2_02_MODE:?set W2_02_MODE=production}'))
   assert.ok(compose.includes('DATABASE_URI: ${W2_02_DATABASE_URI:?set distinct orchestrator PostgreSQL URI}'))
   assert.ok(compose.includes('W2_02_APPROVED_FACTS_PATH: ${W2_02_APPROVED_FACTS_PATH:?set absolute approved facts path}'))
