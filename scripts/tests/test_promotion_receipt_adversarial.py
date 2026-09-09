@@ -234,3 +234,44 @@ def test_exact_head_receipts_still_work_without_transitions() -> None:
     stale = verify_receipt(receipt, target, "full-gate")
     assert not stale.accepted
     assert stale.code == "head_mismatch"
+
+
+def test_self_created_transition_digest_is_not_a_promotion_authority() -> None:
+    from pathlib import Path
+
+    receipt, target, _transition, source_head, _target_head, protected_base = chain("development", "staging")
+    self_created = create_transition_receipt(
+        receipt,
+        target_branch="staging",
+        target_commit=target["headCommit"],
+        target_tree=target["gitTree"],
+        protected_base_commit=protected_base,
+    ).to_dict()
+    assert self_created["authenticatedBy"] == "delivery-controller"
+    assert self_created["receiptDigest"] == compute_transition_digest(self_created)
+    assert source_head
+
+    ci = (Path(__file__).resolve().parents[2] / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    docs = (Path(__file__).resolve().parents[2] / "docs" / "contracts" / "CI-SUITE.md").read_text(encoding="utf-8")
+    assert "transition-receipt.json" not in ci
+    assert "compute_transition_digest" not in ci
+    assert "authenticatedBy" not in ci
+    assert "LiNKsites Promotion Receipt" not in ci
+    assert "LiNKsites Promotion Receipt" not in docs
+    assert "Linktrend Receipt Gate" in docs
+    assert "Linktrend Branch Source Policy" in docs
+
+
+def test_candidate_cannot_create_duplicate_successful_promotion_checks() -> None:
+    from pathlib import Path
+
+    ci = (Path(__file__).resolve().parents[2] / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    for forbidden in (
+        "LiNKsites Promotion Receipt",
+        "Linktrend Receipt Gate",
+        "Linktrend Branch Source Policy",
+        "promotion-receipt:",
+    ):
+        assert forbidden not in ci
+    assert "pull_request:" in ci
+    assert "branches: [development]" in ci
