@@ -25,6 +25,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
+      - name: Require protected-main workflow ref
+        env:
+          WORKFLOW_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          test "${WORKFLOW_REF}" = 'refs/heads/main' || {
+            echo 'immutable Server03 publication must be dispatched from refs/heads/main' >&2
+            exit 78
+          }
+
       - name: Checkout protected main exactly
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -176,6 +186,9 @@ jobs:
           manifest["publication"] = {
               "registry": "ghcr.io",
               "mode": "protected-main-workflow",
+              "artifactOnly": True,
+              "deploymentEligible": False,
+              "requiresPlatformAdmission": True,
               "publicRoutes": False,
               "imageRefs": {
                   "cms": f"ghcr.io/linktrend/linksites-cms@{os.environ['CMS_DIGEST']}",
@@ -195,6 +208,7 @@ jobs:
               f"LINKSITES_MIGRATIONS_IMAGE=ghcr.io/linktrend/linksites-migrations@{os.environ['MIGRATIONS_DIGEST']}",
           ]) + "\n")
           PY
+          sha256sum server03-release-manifest.json > server03-release-manifest.sha256
 
       - name: Upload immutable publication evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -202,6 +216,7 @@ jobs:
           name: linksites-server03-release-${{ steps.identity.outputs.release_sha }}
           path: |
             server03-release-manifest.json
+            server03-release-manifest.sha256
             server03-release.env
           if-no-files-found: error
           retention-days: 90

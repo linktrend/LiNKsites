@@ -15,9 +15,12 @@ private Traefik middleware requirements. Use:
 1. Generate a manifest with `--provider-state deferred`. Use `--provider-state
    ready` only with an exact native v2 provider commit/tree and passing receipt.
    Record `--platform-state pending` only for an artifact inventory while
-   production migration authority is absent.
-2. Run `pnpm deploy:server03:preflight -- <runtime-env-file> <manifest>`.
-3. After exact Platform authority and preflight pass, apply migrations and start
+   production migration authority is absent. A pending artifact is not
+   operationally eligible and must not be passed to preflight or startup.
+2. After exact Platform authority is admitted, regenerate a separate manifest
+   with `--platform-state ready` and the exact migration SHA, then run
+   `pnpm deploy:server03:preflight -- <runtime-env-file> <manifest>`.
+3. After that preflight passes, apply migrations and start
    `deploy/docker-compose.server03-foundation.yml`. Deferred template state
    permits runtime acceptance but blocks template-dependent intake/publishing.
 4. Run `pnpm deploy:server03:smoke -- <runtime-env-file>`.
