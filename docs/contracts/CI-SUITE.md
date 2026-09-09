@@ -13,7 +13,7 @@ The workflow is intentionally split by event:
 | --- | --- | --- | --- |
 | Phase PR opened, updated, reopened, or marked ready | `LiNKsites CI` | `scripts/ci-fast.sh` and its artifact | W2-08 pre-VPS source certification, lint, type, runtime-configuration contract, receipt-verifier, active-surface, and changed-range secret checks. The script fails after 300 seconds. |
 | Final Phase PR labelled `linktrend-full-suite` | `full-production-suite` | `scripts/ci-required.sh` and `linksites-full-suite-<head>` | Exact-Fast receipt, application tests/builds, Supabase RLS, focused browser proof, Docker, deployment contract, and recovery rehearsal. The checkout and receipt use the exact Phase head SHA. |
-| Promotion PR to `staging` or `main` | `LiNKsites Promotion Receipt` | `scripts/ci_full_suite_receipt.py verify` | Reuses an unexpired successful `full-production-suite` artifact only when the Git tree and lockfile identity match. It never runs the Full application suite. |
+| Promotion PR to `staging` or `main` | `LiNKsites Promotion Receipt` | `scripts/gitops/gate_receipt.py verify` with the retained `FullSuiteReceipt` and controller transition receipt | Reuses the authenticated `linktrend-integrator-merge.yml` receipt only when repository, original source identity, workflow run/attempt, receipt and transition digests, branch, commit, tree, dependency, profile, workflow, and target identity match. It never runs the Full application suite or trusts a marker by itself. |
 
 The managed `Linktrend Fast Checks`, `Linktrend Full Suite`, `Linktrend Receipt
 Gate`, and `Linktrend Branch Source Policy` remain separate required delivery
