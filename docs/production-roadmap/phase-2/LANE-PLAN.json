@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "owner": "01a088ee-0886-78f2-97af-1924d73ac079",
+  "repository": "linktrend/LiNKsites",
+  "parallelGroup": "wave-2-source-repair",
+  "maximumConcurrentWriters": 4,
+  "prerequisites": ["LSG0-02", "LSG0-05", "LSDATA-01"],
+  "lanes": [
+    {
+      "lane_id": "L-TRUST",
+      "packet": "LSTRUST-01",
+      "allowed_paths": [
+        ".github/workflows/linktrend-development-to-staging.yml",
+        ".github/workflows/linktrend-staging-to-main.yml",
+        ".github/workflows/linktrend-review-packager.yml",
+        ".github/linktrend-secret-scan-fixtures.json",
+        "scripts/gitops/gate_receipt.py",
+        "scripts/gitops/promotion_receipt_gate.py",
+        "scripts/gitops/receipt_seal.py",
+        "scripts/tests/test_gate_receipt_transition.py",
+        "scripts/tests/test_promotion_transition_workflows.py"
+      ]
+    },
+    {
+      "lane_id": "L-FACTORY",
+      "packet": "LSFACT-01",
+      "allowed_paths": [
+        "packages/factory-catalog/src/",
+        "packages/factory-catalog/tests/",
+        "packages/factory-catalog/WORKING-CONTENT.md"
+      ],
+      "excluded_paths_owned_by_completed_prerequisite": [
+        "packages/factory-catalog/src/adoptionIdentities.ts",
+        "packages/factory-catalog/src/capabilityCredits.ts"
+      ]
+    },
+    {
+      "lane_id": "L-RENDER",
+      "packet": "LSRENDER-01",
+      "allowed_paths": [
+        "apps/web-master/src/",
+        "apps/web-master/tests/",
+        "apps/web-master/template.config.json",
+        "scripts/profile-v2-quality/ls06/",
+        "scripts/profile-v2-quality/ls07/"
+      ]
+    },
+    {
+      "lane_id": "L-AUTOWORK",
+      "packet": "LSAUTO-01",
+      "allowed_paths": [
+        "packages/autowork-boundary/src/",
+        "packages/autowork-boundary/tests/",
+        "apps/program-orchestrator/src/",
+        "apps/program-orchestrator/tests/",
+        "apps/cms/cron/",
+        "apps/cms/src/payload/utils/autowork.ts",
+        "apps/cms/tests/contracts/autowork-composition.spec.ts"
+      ]
+    }
+  ],
+  "exclusivePackets": ["LSDATA-01", "LSSEC-01", "LSDEP-01", "LSOPS-01", "LSINT-01"],
+  "rules": {
+    "differentIssueBranchPerLane": true,
+    "literalPathsOnly": true,
+    "sharedRootLockMigrationGeneratedPathsForbidden": true,
+    "oneWriterPerLane": true,
+    "semanticInputChangeInvalidatesAllDependentPackets": true
+  }
+}
