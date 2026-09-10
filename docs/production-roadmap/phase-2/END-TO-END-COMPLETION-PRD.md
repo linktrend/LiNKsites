@@ -238,65 +238,69 @@ LiNKsites is DONE only when all of the following are true.
 4. Focused packet checks pass, followed by one Full Suite on each consolidated
    release candidate and one independent Luna High source review on its exact
    commit/tree.
-5. The promotion trust boundary rejects candidate-authored, copied, stale,
+5. The final dependency and image closure has an exact current advisory
+   inventory. No unresolved exploitable critical/high finding reaches release;
+   every non-applicable or deferred alert has evidence, an owner and an
+   acceptance threshold, and every security exception has founder authority.
+6. The promotion trust boundary rejects candidate-authored, copied, stale,
    duplicate-name and wrong-base evidence.
-6. Accepted source is integrated to protected `development` and promoted
+7. Accepted source is integrated to protected `development` and promoted
    through `staging` to `main` with exact readback and no invented check.
 
 ### Provider and full website product
 
-7. The first operational provider is an exact currently selectable
+8. The first operational provider is an exact currently selectable
    `marketing-smb-v1` LiNKlibraries release; if LiNKlibraries has not admitted
    it, the initial website cannot claim PASS.
-8. Full completion uses exact admitted `master-template-type-1` provider inputs
+9. Full completion uses exact admitted `master-template-type-1` provider inputs
    and passes A1/A2/A3 x A/B/C/L paired proof at the claimed levels.
-9. Every site has exact layered identity/adoption/entitlement/rollback records;
+10. Every site has exact layered identity/adoption/entitlement/rollback records;
    Products/Services, semantic content, routes, shell, SSR, structured data,
    discovery and AI projections agree.
-10. Existing-site migration, failed-upgrade preservation, provider-cache
+11. Existing-site migration, failed-upgrade preservation, provider-cache
     restart, retirement and rollback pass against production-shaped data.
 
 ### Release and installation
 
-11. Five immutable image digests and one verified release manifest are built
+12. Five immutable image digests and one verified release manifest are built
     from exact accepted protected `main`.
-12. One and only one `linksites-foundation` production installation exists on
+13. One and only one `linksites-foundation` production installation exists on
     Server03. All intended services run the exact digests and existing portfolio
     services remain healthy.
-13. Existing data is inventoried; pre-change backup and isolated restore pass;
+14. Existing data is inventoried; pre-change backup and isolated restore pass;
     migrations and least-privilege grants have exact receipts.
-14. Private CMS/preview routes authenticate correctly; unauthorized and unknown
+15. Private CMS/preview routes authenticate correctly; unauthorized and unknown
     hosts fail; private content is `noindex,nofollow`; no direct sensitive port
     is exposed.
-15. Monitoring, logs, alert, scheduled backup, isolated restore, restart,
+16. Monitoring, logs, alert, scheduled backup, isolated restore, restart,
     route-disable and rollback procedures work on the actual installation.
 
 ### Initial operational website
 
-16. One founder-approved, legally usable representative facts package enters
+17. One founder-approved, legally usable representative facts package enters
     once through the real canonical manual boundary and produces one complete
     private prospect-specific website using real Payload content and
     `web-master` rendering.
-17. There is one traceable Program/Phase/Issue/Run/provider/content/promotion/
+18. There is one traceable Program/Phase/Issue/Run/provider/content/promotion/
     publication/deployment/completion chain and one CRM-shaped completion record
     containing the private URL and exact identities.
-18. No mock, lorem, placeholder, unsupported claim, fixture provider or manual
+19. No mock, lorem, placeholder, unsupported claim, fixture provider or manual
     downstream success insertion appears.
-19. Replaying the same logical input and performing a controlled restart creates
+20. Replaying the same logical input and performing a controlled restart creates
     no second logical site, publication, deployment or completion record and
     causes no corruption.
 
 ### Full operation and final acceptance
 
-20. The same installation consumes live scoped Platform and LiNKautowork
+21. The same installation consumes live scoped Platform and LiNKautowork
     handoffs, submits/receives one exact signed automation request/receipt and
     preserves LiNKsites as completion authority.
-21. Functional, responsive, accessibility, metadata, privacy, tenancy,
+22. Functional, responsive, accessibility, metadata, privacy, tenancy,
     security, practical performance and recovery acceptance pass on the final
     live private site/release.
-22. One independent Luna High operational review returns PASS against the exact
+23. One independent Luna High operational review returns PASS against the exact
     deployed source, five image digests, provider identities and live evidence.
-23. The founder handoff contains access, identity, health, logs, backup,
+24. The founder handoff contains access, identity, health, logs, backup,
     restore, restart, route-disable and rollback instructions. No required
     knowledge remains only in chat or on the coordinator's Mac.
 
@@ -326,6 +330,7 @@ planning accepted + founder APPROVE
 -> publish exact upstream contract inputs
 -> additive data compatibility freeze
 -> four parallel source lanes
+-> exclusive dependency security/remediation and disposition
 -> deployment and operations source
 -> consolidation + Full + independent source review
 -> protected development/staging/main + five immutable images
@@ -341,6 +346,9 @@ planning accepted + founder APPROVE
 
 - Each implementation packet runs only its direct unit/integration/static checks
   and affected build/type checks.
+- One exclusive dependency-security packet refreshes and owns the alert/deployed
+  closure, performs required compatible repairs, and records evidence-backed
+  dispositions before deployment source and Full acceptance.
 - Consolidation runs one complete source suite on the exact candidate.
 - Provider/browser matrices run when the exact provider/adapter identity changes,
   not for unrelated deployment edits.

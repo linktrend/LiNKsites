@@ -76,21 +76,39 @@ that adds exactly:
 "01a088ee-0886-78f2-97af-1924d73ac079": ["linktrend/LiNKsites"]
 ```
 
-The update must:
+The transaction must hold an exclusive lock on the dispatcher's persistent
+`outputs/cursor-cloud/state/.dispatch.lock` continuously until all write,
+readback and capacity-reconciliation steps finish. While holding that lock it
+must:
 
-- take `.resume-scope.lock` with an exclusive lock;
-- read and validate the current JSON immediately before writing;
-- preserve every existing owner, repository membership, top-level field,
-  timestamp, objective, mode and unknown key;
-- add the repository only if it is absent;
-- write a mode-0600 temporary file and atomically replace the target;
-- read back the exact addition and record a sanitized transition receipt; and
-- leave `SUSPENDED` in place because the dispatcher uses the scoped exception.
+1. read the latest `RESUME-SCOPE.json`; reject a symlink, non-regular file,
+   malformed document or unsupported structure;
+2. record the current file mode, full comparison hash, whether the owner key
+   already existed and whether this transaction actually adds the membership;
+3. preserve every existing owner, repository membership, top-level field,
+   timestamp, objective, mode and unknown key while unioning only the required
+   membership;
+4. write a regular temporary file in the same directory, preserve the
+   refreshed current mode rather than assuming `0600`, flush the file, then
+   atomically replace the target and sync its directory where supported;
+5. parse, validate and read back the replaced file, proving the intended union
+   and preservation of all other state;
+6. reconcile current outstanding/writer capacity under the same lock and
+   record the sanitized before/after identity and capacity receipt; and
+7. leave global `SUSPENDED` in place and release the lock only after all prior
+   steps pass. A failed step before replacement writes nothing; a failed
+   post-replacement readback invokes the bounded owned rollback below.
 
-Rollback removes only the `linktrend/LiNKsites` membership added by this
-transition. It removes the owner key only if that key was created by the
-transition and is empty afterward. It never restores a whole preimage over
-unrelated concurrent changes.
+Rollback reacquires and continuously holds that same `.dispatch.lock`, reads
+and validates the latest scope and current mode, and removes only the
+`linktrend/LiNKsites` membership if the transition receipt proves this task
+actually added it. It preserves every intervening grant, unknown field,
+current mode, global `SUSPENDED` and any owner key that existed before the
+transaction. It removes the owner key only if this task created it and the key
+is still empty after owned-membership removal. It uses the same same-directory
+temporary-file, flush, atomic-replace, directory-sync, parse/readback and
+capacity-reconciliation sequence. Pre-change backups and hashes are comparison
+evidence only and are never written back over newer shared state.
 
 This queue change is not made during planning. If current structure or owner
 membership differs after approval, the coordinator recomputes the additive

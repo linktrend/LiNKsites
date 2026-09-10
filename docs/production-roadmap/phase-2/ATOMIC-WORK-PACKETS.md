@@ -113,14 +113,19 @@ acceptance is not packet acceptance by itself.
 - Actions: create/reuse GitHub issues and `issue/<number>-<slug>` branches from
   current protected development; calculate the accepted lane-plan SHA-256;
   render one dispatch packet per implementation lane; read back exact branch
-  commit/tree; atomically add only this task's LiNKsites queue membership; set
-  `admitted: true` only after founder/identity/dependency checks; run dispatcher
-  `validate` on each packet.
+  commit/tree; under the persistent `outputs/cursor-cloud/state/.dispatch.lock`,
+  atomically union only this task's LiNKsites queue membership using the exact
+  transaction in `EXECUTION-ROUTE.md`; set `admitted: true` only after founder/
+  identity/dependency checks; run dispatcher `validate` on each packet.
 - Acceptance: every packet validates, every advertised branch exists at exact
   commit/tree, scopes are literal/non-overlapping, queue readback proves only
-  the additive membership, and no worker has yet been created.
-- Rollback: remove only membership added by this transition and retain issue
-  branches/checkpoints.
+  the additive membership, owner-key preexistence/addition and file-mode facts
+  are recorded, capacity is reconciled under the same lock, and no worker has
+  yet been created.
+- Rollback: reread latest state under the same persistent lock and remove only
+  membership this task actually added; preserve concurrent grants, unknown
+  fields, current mode, global `SUSPENDED`, any pre-existing empty owner key,
+  and all issue branches/checkpoints. A backup is never a rollback overwrite.
 
 ## Wave 1 — exclusive data compatibility
 
@@ -218,13 +223,39 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
   exact scoped handoff; duplicate and late callbacks return the original result;
   missing endpoint/keys/grants fails closed.
 
-## Wave 3 — deployment and operations source
+## Wave 3 — dependency security, deployment and operations source
+
+### LSSEC-01 — Reconcile dependency security and release closure
+
+- Lane: L-SECURITY, repository-exclusive after the four Wave 2 source lanes.
+- Dependencies: LSTRUST-01, LSFACT-01, LSRENDER-01 and LSAUTO-01.
+- Allowed paths: `package.json`, `pnpm-lock.yaml`, `apps/cms/package.json`,
+  `apps/web-master/package.json` and
+  `archive/paused-applications/web-company/package.json`.
+- Objective: own the current 33 open Dependabot alerts and the final
+  production dependency/image closure before Full or immutable release.
+- Actions: refresh the exact alert inventory and affected dependency graph;
+  identify deployed, build/test-only and archived paths; determine
+  exploitability; make the smallest compatible manifest/lock changes for every
+  release-blocking finding; and record evidence, owner, reason and acceptance
+  threshold for every non-applicable or explicitly deferred finding. Never use
+  a green Full Suite or an archived-path label as automatic disposition.
+- Acceptance commands: frozen install; CMS and web-master affected tests,
+  typechecks and builds; any package directly changed for compatibility;
+  repository production `pnpm audit --prod --audit-level=high`, licence/SBOM/
+  supply-chain validators and `git diff --check`.
+- Acceptance: no unresolved exploitable critical/high advisory is present in
+  the deployed or build-to-deploy closure; every remaining alert has an exact
+  evidence-backed disposition and owner, and no security exception is accepted
+  without separate founder authority.
+- Recovery: compatibility failure returns to the smallest owning source lane;
+  any additional required manifest/path causes a lane-plan revision before
+  editing. Revert only this issue checkpoint; do not rewrite the lock manually.
 
 ### LSDEP-01 — Reconcile release, configuration and five images
 
 - Lane: L-DEPLOY, exclusive.
-- Dependencies: all four Wave 2 checkpoints and current provider/Platform/
-  Autowork handoff shapes.
+- Dependencies: LSSEC-01 and current provider/Platform/Autowork handoff shapes.
 - Objective: make Compose, environment schema, preflight, migrations, smoke,
   provider modes, exact service images and publication workflow agree.
 - Actions: remove hardcoded/unproven hostname assumptions; support initial
@@ -259,7 +290,7 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 
 - Owner/type: coordinator integration.
 - Dependencies: LSDATA-01, LSTRUST-01, LSFACT-01, LSRENDER-01, LSAUTO-01,
-  LSDEP-01, LSOPS-01, LSG0-03 exact provider handoffs.
+  LSSEC-01, LSDEP-01, LSOPS-01, LSG0-03 exact provider handoffs.
 - Actions: verify pushed identities/evidence; integrate in dependency order;
   return conflicts to owners; bind upstream copies; run only conflict-affected
   checks; finalize branch dispositions and requirement-to-change traceability.
@@ -273,7 +304,8 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
   including lint/type/build/tests, provider/browser contract checks, migration,
   deployment, secret-fixture, supply-chain/licence and release validators.
 - Acceptance: hosted run succeeds with no skipped required job and receipt binds
-  candidate commit/tree/workflow/dependencies/artifacts.
+  candidate commit/tree/workflow/dependencies/artifacts; LSSEC-01's exact alert
+  inventory and dispositions still match the candidate dependency closure.
 - Recovery: code failures return to the smallest source lane; changed candidate
   receives one new Full run. Infrastructure outage retries the same identity
   only after diagnosis.
@@ -450,7 +482,7 @@ G0-00 -> G0-01 -> G0-02 -> DATA-01
 G0-00 -> G0-03 -------------------------------> INT-01
 G0-00 -> G0-04 -------------------------------> FULL-02
 G0-02 + DATA-01 -> TRUST / FACTORY / RENDER / AUTOWORK (max four)
-four lanes -> DEPLOY -> OPS -> INT -> FULL SUITE -> SOURCE REVIEW
+four lanes -> SECURITY -> DEPLOY -> OPS -> INT -> FULL SUITE -> SOURCE REVIEW
 -> protected promotion -> five images -> layout -> backup/restore -> data
 -> single install -> private routes/operations -> first website -> replay/recovery
 -> MWT v2 + live Autowork on same install -> final review/handoff

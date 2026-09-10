@@ -17,7 +17,7 @@ promotes or deploys.
 ## Lane plan
 
 The machine-readable candidate is `LANE-PLAN.json`, currently SHA-256
-`e48bdaa06f5203b9315fea1e75f868fee121fd4b49c1306df3d3456042521fa5`.
+`2f6848d74a904fd47f54b7be7677cdfe46dae670c9693093ca2400cd359983f3`.
 The final `lane_plan_sha256` is recalculated from its advisor-accepted exact
 bytes before packet admission. Any change to a lane, dependency or path
 produces a new hash and invalidates all unsubmitted packets derived from the
@@ -31,7 +31,8 @@ old plan.
 | L-FACTORY | provider selection, adoption and deterministic assembly | `packages/factory-catalog/src/`, `packages/factory-catalog/tests/`, `packages/factory-catalog/WORKING-CONTENT.md` | L-TRUST, L-RENDER, L-AUTOWORK after L-DATA | the two data-owned factory files until L-DATA is accepted; root package/lock files |
 | L-RENDER | Payload projection, React rendering, routes, SEO/AI, accessibility and forms | `apps/web-master/src/`, `apps/web-master/tests/`, `apps/web-master/template.config.json`, `scripts/profile-v2-quality/ls06/`, `scripts/profile-v2-quality/ls07/` | L-TRUST, L-FACTORY, L-AUTOWORK after L-DATA | root package/lock files; CMS migrations; deployment files |
 | L-AUTOWORK | canonical intake/completion and live gateway adapter | `packages/autowork-boundary/src/`, `packages/autowork-boundary/tests/`, `apps/program-orchestrator/src/`, `apps/program-orchestrator/tests/`, `apps/cms/cron/`, `apps/cms/src/payload/utils/autowork.ts`, `apps/cms/tests/contracts/autowork-composition.spec.ts` | L-TRUST, L-FACTORY, L-RENDER after L-DATA | root package/lock files; deployment files |
-| L-DEPLOY | release, runtime configuration and five images | `deploy/config/`, `deploy/docker/`, `deploy/docker-compose.deploy.yml`, `deploy/docker-compose.server03-foundation.yml`, `deploy/docker-compose.template-ready.yml`, `deploy/manifests/`, `deploy/scripts/entrypoint.mjs`, `deploy/scripts/generate-deployment-manifest.mjs`, `deploy/scripts/postdeploy-server03-foundation-smoke.sh`, `deploy/scripts/preflight-server03-foundation.sh`, `deploy/scripts/validate-runtime-config.mjs`, `deploy/tests/deployment-manifest.test.mjs`, `deploy/tests/deployment-surface.test.mjs`, `deploy/tests/runtime-contract.test.mjs`, `.github/workflows/publish-server03-images.yml`, `apps/cms/Dockerfile` | none; starts after source lanes integrate | trust workflow edits, operations files and all shared/root files |
+| L-SECURITY | dependency alert remediation and disposition | `package.json`, `pnpm-lock.yaml`, `apps/cms/package.json`, `apps/web-master/package.json`, `archive/paused-applications/web-company/package.json` | none; runs after all four main source lanes | every product/deployment source path and every unlisted manifest |
+| L-DEPLOY | release, runtime configuration and five images | `deploy/config/`, `deploy/docker/`, `deploy/docker-compose.deploy.yml`, `deploy/docker-compose.server03-foundation.yml`, `deploy/docker-compose.template-ready.yml`, `deploy/manifests/`, `deploy/scripts/entrypoint.mjs`, `deploy/scripts/generate-deployment-manifest.mjs`, `deploy/scripts/postdeploy-server03-foundation-smoke.sh`, `deploy/scripts/preflight-server03-foundation.sh`, `deploy/scripts/validate-runtime-config.mjs`, `deploy/tests/deployment-manifest.test.mjs`, `deploy/tests/deployment-surface.test.mjs`, `deploy/tests/runtime-contract.test.mjs`, `.github/workflows/publish-server03-images.yml`, `apps/cms/Dockerfile` | none; starts after L-SECURITY | trust workflow edits, operations files and all shared/root files |
 | L-OPS | monitoring, backup, restore and runbook | `deploy/monitoring/`, `deploy/scripts/rehearse-local-restore.mjs`, `deploy/OPERATIONS.md` | none while L-DEPLOY writes; then may be repaired independently before consolidation | L-DEPLOY paths and all Server03 live paths |
 
 Paths above are literal files or slash-terminated directory trees. Actual
@@ -45,6 +46,7 @@ as `apps/`, `packages/`, `docs/`, `scripts/`, `deploy/` or `.github/`.
 | upstream publication | 1 | produces the immutable interfaces needed by all dependent lanes |
 | data compatibility/migrations | 1 | migration and generated-type scope is exclusive |
 | main source repair | 4 | L-TRUST, L-FACTORY, L-RENDER and L-AUTOWORK have disjoint literal paths after interfaces and migrations freeze |
+| dependency security | 1 | root lock and affected manifests are shared release inputs; all current alerts receive remediation or explicit evidence-backed disposition |
 | deployment source | 1 | release/config/image contracts integrate all service identities and contain a workflow |
 | operations source | 1 | shares deployment behavior and starts after L-DEPLOY |
 | consolidation/Full/review/promotion/images | 1 | every result is identity-dependent on the preceding result |
@@ -71,3 +73,6 @@ files. Fewer run when dependencies or account capacity are unavailable.
    invalidates dependent source and browser evidence.
 5. Integration conflicts return to the lane that owns the behavior. The
    coordinator does not use `prefer-incoming` or discard either side.
+6. L-SECURITY owns only the five listed manifest/lock paths. If compatibility
+   repair needs another manifest, it stops and the coordinator publishes a new
+   non-overlapping lane-plan identity before that file is changed.

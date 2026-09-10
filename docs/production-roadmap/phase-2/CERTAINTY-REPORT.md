@@ -24,6 +24,12 @@ The remaining planning check is independent substantive review by Deployment
 Advisor 2 against the exact pushed commit/tree. This task will not call its own
 package 99% complete or execution-ready before that review passes.
 
+The first exact review correctly rejected commit
+`4a3fd2304d9d837ad874914169e37f427370b572`: it found the wrong queue-lock name
+and no executable owner for current dependency alerts. This revision uses the
+persistent dispatcher lock transaction and adds LSSEC-01. The prior FAIL is not
+relabelled; the superseding exact identity needs a new verdict.
+
 ### 2. Are the material factual statements forming the plan accurate?
 
 Current answer: **99% confidence for the bounded current-state statements in
@@ -47,6 +53,10 @@ Material corrections to the previous revision are:
   not Cursor desktop, CLI sign-in or presence of an SDK/key in another runtime;
 - the current queue has no LiNKsites owner membership and needs one additive,
   reversible post-approval transition;
+- that transition uses the persistent dispatcher `.dispatch.lock` across
+  latest-state mutation, readback, capacity reconciliation and owned rollback;
+- GitHub currently reports 33 open Dependabot alerts (13 high and 20 medium),
+  now owned by an exclusive pre-release remediation/disposition packet;
 - accepted upstream plans are planning inputs, not source/live/runtime proof;
 - Platform remains owned by its active task and is consumed through exact
   handoffs, never repaired from LiNKsites; and
@@ -93,6 +103,7 @@ work after approval.
 | Retained branch inventory | unique families identified | final file-level disposition is first execution packet |
 | Cursor account/model/repository route | direct REST `check` passed | verified; no worker created |
 | Queue authority | current JSON/lock/suspension read | exact additive transition specified, not performed |
+| Dependency advisories | GitHub Dependabot API: 33 open, 13 high and 20 medium | LSSEC-01 remediates release blockers and evidentially dispositions the rest before Full/release |
 | LiNKlibraries legacy provider | source exists; current catalogue quarantined/non-selectable | upstream work/evidence required; no local override |
 | Master Website Template | planned/candidate source exists; current operational plan says non-selectable | full consumer requirement preserved; exact handoff required |
 | Platform | current source/task inspected | solely upstream-owned; plan acceptance is not live readiness |
@@ -114,6 +125,9 @@ contradictory:
 - protocol-valid manifest and atomic dependency graph;
 - feasible literal lane scopes with no migration/root/shared-file collision;
 - real Cursor/queue/Git branch admission and checkpoint route;
+- continuous use of the exact persistent queue lock, latest-state preservation,
+  owned rollback and capacity reconciliation;
+- an executable owner and release threshold for every current dependency alert;
 - one-source-promotion/five-image/one-installation delivery;
 - backup/restore, least privilege, private routing and rollback;
 - bounded, non-repetitive tests and independent review; or

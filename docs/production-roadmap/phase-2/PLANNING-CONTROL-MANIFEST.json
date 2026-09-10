@@ -18,7 +18,7 @@
     "initialAcceptance": "one real private marketing-smb-v1 website after truthful provider admission",
     "finalAcceptance": "full Profile v2 and Master Website Template plus live Platform/Autowork operation on the same installation"
   },
-  "verifiedAt": "2026-09-10T20:35:09+08:00",
+  "verifiedAt": "2026-09-10T20:56:30+08:00",
   "protectedBaseline": {
     "development": {"commit":"4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb","tree":"e29607c43146decdf81c2f132562745f6a911780"},
     "staging": {"commit":"b67221f90c1eff6a96592cc7be74390c9b843da2","tree":"e29607c43146decdf81c2f132562745f6a911780"},
@@ -62,16 +62,31 @@
     "suspendedMarkerPresent":true,
     "resumeScopePresent":true,
     "currentOwnerMembershipPresent":false,
-    "postApprovalTransition":"add only executionOwnerTask -> linktrend/LiNKsites under lock and atomic readback",
-    "rollback":"remove only added membership or newly created empty owner",
+    "transactionLockRegularFileObserved":true,
+    "scopeFileRegularNonSymlinkObserved":true,
+    "scopeFileModeObserved":"0600",
+    "transactionLock":"/Users/linktrend/Documents/Codex/2026-09-09/files-pasted-by-the-user-i/outputs/cursor-cloud/state/.dispatch.lock",
+    "scopeFile":"/Users/linktrend/Documents/Codex/2026-09-09/files-pasted-by-the-user-i/outputs/queue-control/RESUME-SCOPE.json",
+    "postApprovalTransition":"hold persistent dispatch lock through latest regular-file read, mode and owner-preexistence capture, additive union, same-directory flushed atomic replace, directory sync where supported, parse/readback and capacity reconciliation",
+    "rollback":"under the same persistent lock reread latest state and remove only membership this task actually added; preserve intervening grants, unknown fields, current mode, global SUSPENDED and any pre-existing empty owner key; never restore a stale backup",
     "maximumOutstanding":20,
     "maximumWriters":16,
     "reservedForReviewOrDownstream":4,
     "maximumSafeLiNKsitesParallelWriters":4
   },
+  "dependencyAdvisoryBaseline": {
+    "source":"GitHub Dependabot API open alerts",
+    "observedDate":"2026-09-10",
+    "total":33,
+    "severity":{"high":13,"medium":20},
+    "packages":{"next":27,"payload":2,"qs":2,"sharp":1,"@vitest/mocker":1},
+    "manifestLocations":{"apps/cms/package.json":11,"apps/web-master/package.json":9,"archive/paused-applications/web-company/package.json":9,"pnpm-lock.yaml":4},
+    "executionOwner":"LSSEC-01",
+    "releaseThreshold":"no unresolved exploitable critical/high finding in deployed or build-to-deploy closure; every remainder explicitly dispositioned; founder authority required for exception"
+  },
   "lanePlan": {
     "path":"docs/production-roadmap/phase-2/LANE-PLAN.json",
-    "candidateSha256":"e48bdaa06f5203b9315fea1e75f868fee121fd4b49c1306df3d3456042521fa5",
+    "candidateSha256":"2f6848d74a904fd47f54b7be7677cdfe46dae670c9693093ca2400cd359983f3",
     "recalculateAfterAdvisorAcceptance":true
   },
   "serverBaseline": {
@@ -89,6 +104,7 @@
   },
   "qualityBudget": {
     "focusedTestsPerChangedPacket":true,
+    "dependencySecurityPacket":"one exclusive remediation/disposition pass before deployment source and Full acceptance",
     "fullSuitePerConsolidatedSourceCandidate":1,
     "independentSourceReviewPerExactCandidate":1,
     "independentFinalOperationalReview":1,
@@ -96,7 +112,7 @@
   },
   "approvalBoundary": {
     "currentFounderExecutionApproval":false,
-    "allowedNow":["read-only verification","planning documentation","Issue 515 planning commit and push","one Deployment Advisor review handoff"],
+    "allowedNow":["read-only verification","planning documentation","Issue 515 planning commit and push","one substantive Deployment Advisor review handoff per superseding exact planning candidate"],
     "forbiddenNow":["product implementation","worker dispatch","paid Cursor job","queue-control mutation","pull request creation or mutation","protected merge or promotion","image publication","Server03 or database mutation","deployment"],
     "advisorAcceptanceIsExecutionApproval":false
   }

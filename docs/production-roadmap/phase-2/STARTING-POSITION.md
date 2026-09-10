@@ -89,6 +89,11 @@ later preservation packet explicitly isolates it.
 - Unique work on Issue 480 variants, Issues 490, 492, 508 and 511 and a small
   number of Phase tips has not yet received a final file-level disposition.
   Useful work must be reused or completed, never discarded.
+- Current GitHub readback reports 33 open Dependabot alerts: 13 high and 20
+  medium across Next.js, Payload, `qs`, `sharp` and `@vitest/mocker`. They need
+  one exclusive dependency-security packet to remediate release-blocking
+  findings and explicitly disposition findings outside the deployed closure;
+  a later Full Suite cannot silently absorb this debt.
 
 ### Production configuration
 
@@ -118,6 +123,9 @@ later preservation packet explicitly isolates it.
 - Produce a final source candidate that binds one exact accepted provider,
   Platform and LiNKautowork interfaces, corrected promotion trust, production
   runtime configuration and retained-branch dispositions.
+- Reconcile the final dependency/image closure so no unresolved exploitable
+  critical/high advisory reaches release and every remaining alert has an
+  evidence-backed disposition and owner.
 - Pass one exact-candidate Full Suite and one independent consolidated source
   review, then integrate and promote through the governed protected flow.
 - Build and publish the five immutable production images and one release

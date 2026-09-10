@@ -59,7 +59,7 @@
       ]
     }
   ],
-  "exclusivePackets": ["LSDATA-01", "LSDEP-01", "LSOPS-01", "LSINT-01"],
+  "exclusivePackets": ["LSDATA-01", "LSSEC-01", "LSDEP-01", "LSOPS-01", "LSINT-01"],
   "rules": {
     "differentIssueBranchPerLane": true,
     "literalPathsOnly": true,
