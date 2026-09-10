@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "protocol": {
+    "id": "coding-execution-protocol",
+    "version": "1.0.1",
+    "amendment": "V25_BOOTSTRAP_LEAN"
+  },
+  "program": {
+    "id": "linksites-production-completion",
+    "name": "LiNKsites end-to-end completion and one Server03 installation",
+    "targetRelease": "first-private-production-pilot"
+  },
+  "baseline": {
+    "repository": "linktrend/LiNKsites",
+    "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+    "tree": "e29607c43146decdf81c2f132562745f6a911780",
+    "ref": "refs/heads/development"
+  },
+  "packets": [
+    {
+      "id": "LSPRE-001",
+      "title": "Freeze current identities",
+      "ownedPaths": ["read-only:repository", "read-only:github", "read-only:server03"],
+      "prohibitedPaths": ["apps/cms/next-env.d.ts"],
+      "verificationCommands": [["git", "status", "--short", "--branch"], ["git", "ls-remote", "origin"], ["gh", "api", "repos/linktrend/LiNKsites/rulesets"], ["ssh", "linkserver-03", "read-only-inventory"]],
+      "dependencies": [],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSPRE-002",
+      "title": "Salvage and disposition all retained work",
+      "ownedPaths": ["read-only:refs/heads/issue/*", "read-only:refs/heads/phase/*", "read-only:open-pull-requests"],
+      "prohibitedPaths": ["apps/cms/next-env.d.ts"],
+      "verificationCommands": [["git", "rev-list", "--left-right", "--count"], ["git", "patch-id", "--stable"], ["git", "diff", "--name-status"]],
+      "dependencies": ["LSPRE-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSPRE-003",
+      "title": "Resolve founder-owned production inputs",
+      "ownedPaths": ["read-only:secret-references", "read-only:runtime-inputs", "read-only:pilot-input"],
+      "prohibitedPaths": ["secrets:values", "lead:raw-personal-data"],
+      "verificationCommands": [["validate", "secret-reference-presence"], ["validate", "runtime-input-schema"], ["validate", "pilot-input-checksum"]],
+      "dependencies": ["LSPRE-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSPRE-004",
+      "title": "Bind execution routes and workspaces without dispatch",
+      "ownedPaths": ["prepared:cursor-sdk-intents", "prepared:isolated-worktrees"],
+      "prohibitedPaths": ["live:cursor-agent-create", "apps/cms/next-env.d.ts"],
+      "verificationCommands": [["validate", "repos-ref-commit-tree-binding"], ["validate", "grok-4.6-medium-fast-false"], ["validate", "no-agent-created"]],
+      "dependencies": ["LSPRE-001", "LSPRE-002"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSSRC-001",
+      "title": "Repair the promotion trust boundary",
+      "ownedPaths": [".github/workflows/**", ".github/linktrend-secret-scan-fixtures.json", "scripts/gitops/**", "scripts/tests/test_promotion_*.py", "docs/contracts/CI-SUITE.md"],
+      "prohibitedPaths": ["apps/cms/next-env.d.ts", "deploy/**", "packages/factory-catalog/**"],
+      "verificationCommands": [["python3", "-m", "unittest", "scripts.tests.test_promotion_receipt_adversarial", "scripts.tests.test_promotion_transition_workflows"], ["git", "diff", "--check"]],
+      "dependencies": ["LSPRE-002", "LSPRE-004"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSSRC-002",
+      "title": "Make marketing-smb-v1 the real pilot provider",
+      "ownedPaths": ["apps/web-master/src/templates/**", "apps/web-master/src/lib/template-*.ts", "packages/factory-catalog/**", "apps/program-orchestrator/src/adapters.ts", "apps/program-orchestrator/src/composition.ts", "apps/program-orchestrator/tests/**"],
+      "prohibitedPaths": ["apps/cms/next-env.d.ts", ".github/workflows/**", "deploy/**"],
+      "verificationCommands": [["pnpm", "--filter", "@linksites/factory-catalog", "test"], ["pnpm", "--filter", "@linksites/web-master", "test"], ["git", "diff", "--check"]],
+      "dependencies": ["LSPRE-002", "LSPRE-004"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSSRC-003",
+      "title": "Reconcile production deployment contracts",
+      "ownedPaths": ["deploy/**"],
+      "prohibitedPaths": ["apps/cms/next-env.d.ts", ".github/workflows/**", "deploy/monitoring/**"],
+      "verificationCommands": [["node", "--test", "deploy/tests/*.test.mjs"], ["bash", "deploy/scripts/preflight-server03-foundation.sh", "fixture.env"], ["docker", "compose", "config", "--quiet"], ["git", "diff", "--check"]],
+      "dependencies": ["LSPRE-002", "LSSRC-002"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSOPS-001",
+      "title": "Complete monitoring backup restore and rollback contracts",
+      "ownedPaths": ["deploy/monitoring/**", "deploy/OPERATIONS.md", "deploy/scripts/*backup*", "deploy/scripts/*restore*"],
+      "prohibitedPaths": ["apps/cms/next-env.d.ts", ".github/workflows/**"],
+      "verificationCommands": [["node", "deploy/scripts/rehearse-local-restore.mjs"], ["validate", "monitoring-rules"], ["git", "diff", "--check"]],
+      "dependencies": ["LSPRE-002", "LSPRE-003"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSINT-001",
+      "title": "Consolidate source checkpoints",
+      "ownedPaths": ["docs/evidence/production-completion/**"],
+      "prohibitedPaths": ["apps/cms/next-env.d.ts"],
+      "verificationCommands": [["git", "diff", "--check"], ["validate", "branch-disposition-complete"], ["validate", "requirement-traceability"]],
+      "dependencies": ["LSSRC-001", "LSSRC-002", "LSSRC-003", "LSOPS-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSVAL-001",
+      "title": "Run the one complete source suite",
+      "ownedPaths": ["read-only:exact-consolidated-candidate"],
+      "verificationCommands": [["run", "Linktrend Full Suite", "exact-candidate"], ["verify", "full-suite-receipt"]],
+      "dependencies": ["LSINT-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSREV-001",
+      "title": "Independent consolidated source and release review",
+      "ownedPaths": ["read-only:exact-source-candidate", "review:source-verdict"],
+      "verificationCommands": [["review", "exact-candidate", "PASS-or-FAIL"]],
+      "dependencies": ["LSVAL-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSREL-001",
+      "title": "Integrate to protected development",
+      "ownedPaths": ["github:phase-pr", "github:refs/heads/development"],
+      "verificationCommands": [["python3", "scripts/gitops/delivery_controller.py", "status"], ["git", "ls-remote", "origin", "refs/heads/development"]],
+      "dependencies": ["LSREV-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSREL-002",
+      "title": "Promote once through staging to main",
+      "ownedPaths": ["github:refs/heads/staging", "github:refs/heads/main"],
+      "verificationCommands": [["verify", "trusted-transition-receipt"], ["git", "ls-remote", "origin", "refs/heads/staging", "refs/heads/main"]],
+      "dependencies": ["LSREL-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSART-001",
+      "title": "Build and publish five immutable images",
+      "ownedPaths": ["ghcr.io/linktrend/linksites-cms", "ghcr.io/linktrend/linksites-web-master", "ghcr.io/linktrend/linksites-autowork-worker", "ghcr.io/linktrend/linksites-program-orchestrator", "ghcr.io/linktrend/linksites-migrations"],
+      "verificationCommands": [["gh", "workflow", "run", "publish-server03-images.yml"], ["docker", "buildx", "imagetools", "inspect"], ["verify", "release-manifest"]],
+      "dependencies": ["LSREL-002"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSVPS-001",
+      "title": "Create recoverable Server03 application layout",
+      "ownedPaths": ["/srv/linktrend/apps/linksites", "/srv/linktrend/releases/linksites/<main-sha>", "/srv/linktrend/backups/linksites"],
+      "prohibitedPaths": ["/srv/linktrend/apps/*-other-than-linksites", "/srv/linktrend/backups/*-other-than-linksites"],
+      "verificationCommands": [["ssh", "linkserver-03", "validate-linksites-paths-permissions-checksums"]],
+      "dependencies": ["LSART-001", "LSPRE-003"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSDATA-001",
+      "title": "Prove pre-change backup and isolated restore",
+      "ownedPaths": ["/srv/linktrend/backups/linksites", "postgres:isolated-linksites-restore"],
+      "prohibitedPaths": ["postgres:unrelated-databases"],
+      "verificationCommands": [["ssh", "linkserver-03", "linksites-backup"], ["ssh", "linkserver-03", "linksites-isolated-restore-verify"]],
+      "dependencies": ["LSVPS-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSDATA-002",
+      "title": "Provision least-privilege roles and apply migrations",
+      "ownedPaths": ["postgres:linksites", "postgres:linksites-roles", "docker:linksites-migrations"],
+      "prohibitedPaths": ["postgres:unrelated-databases"],
+      "verificationCommands": [["docker", "compose", "run", "--rm", "migrations"], ["verify", "schema-grants-denials-migration-sha"]],
+      "dependencies": ["LSDATA-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSVPS-002",
+      "title": "Start the single LiNKsites production project",
+      "ownedPaths": ["docker-compose-project:linksites-foundation"],
+      "prohibitedPaths": ["docker-compose-project:all-other-projects"],
+      "verificationCommands": [["docker", "compose", "--project-name", "linksites-foundation", "up", "-d"], ["docker", "compose", "--project-name", "linksites-foundation", "ps"], ["verify", "five-exact-digests-and-health"]],
+      "dependencies": ["LSDATA-002"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSEDGE-001",
+      "title": "Enable private CMS and preview routes",
+      "ownedPaths": ["/srv/linktrend/apps/core/dynamic/linksites.yml"],
+      "prohibitedPaths": ["/srv/linktrend/apps/core/dynamic/*-other-than-linksites.yml"],
+      "verificationCommands": [["verify", "traefik-config"], ["verify", "authorized-private-access"], ["verify", "unauthorized-and-unknown-host-denial"], ["verify", "tls-noindex-no-public-db"]],
+      "dependencies": ["LSVPS-002"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSOPS-002",
+      "title": "Activate monitoring and scheduled backups",
+      "ownedPaths": ["server03:linksites-monitoring-rules", "server03:linksites-backup-schedule"],
+      "prohibitedPaths": ["server03:unrelated-monitoring-and-backups"],
+      "verificationCommands": [["verify", "linksites-alert"], ["verify", "production-backup"], ["verify", "isolated-restore"]],
+      "dependencies": ["LSVPS-002", "LSEDGE-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSPILOT-001",
+      "title": "Process one real lead into one private website",
+      "ownedPaths": ["runtime:one-approved-lead", "runtime:one-private-site", "runtime:one-completion-record"],
+      "prohibitedPaths": ["runtime:public-launch", "runtime:payment", "runtime:customer-domain"],
+      "verificationCommands": [["submit", "manual-lead-contract"], ["verify", "program-content-publication-deployment-trace"], ["verify", "private-site-acceptance"]],
+      "dependencies": ["LSOPS-002"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSPILOT-002",
+      "title": "Prove duplicate prevention and recovery",
+      "ownedPaths": ["runtime:pilot-idempotency-key", "runtime:controlled-restart", "runtime:post-pilot-backup"],
+      "prohibitedPaths": ["runtime:second-logical-site"],
+      "verificationCommands": [["replay", "same-logical-input"], ["verify", "logical-counts-equal-one"], ["verify", "controlled-restart"], ["verify", "post-pilot-backup"]],
+      "dependencies": ["LSPILOT-001"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSREV-002",
+      "title": "Independent final operational review",
+      "ownedPaths": ["read-only:live-linksites", "review:operational-verdict"],
+      "verificationCommands": [["review", "exact-deployment-and-private-site", "PASS-or-FAIL"]],
+      "dependencies": ["LSPILOT-002"],
+      "executionState": "PLAN"
+    },
+    {
+      "id": "LSHANDOFF-001",
+      "title": "Founder handoff and DONE declaration",
+      "ownedPaths": ["handoff:linksites-production-completion"],
+      "verificationCommands": [["verify", "all-definition-of-done-evidence"], ["write", "founder-handoff"]],
+      "dependencies": ["LSREV-002"],
+      "executionState": "PLAN"
+    }
+  ],
+  "controls": {
+    "exactCandidateInvalidation": {"enabled": true, "identityFields": ["repository", "commit", "tree", "workflowDigest", "profileDigest"]},
+    "boundedRetry": {"ordinarySourceRepairs": 3, "infrastructureAttemptsPerCandidate": 2, "codeFailureRetries": 0},
+    "orchestrationLease": {"required": true, "scope": "packet-repository", "ttlSeconds": 3600},
+    "resourceUncertainty": {"failClosed": true, "unknownIsBlocking": true},
+    "automaticApproval": {"checkpoint": "automatic", "stagingPromote": "automatic-on-receipt-identity", "reservedActions": ["main_promote", "publish_release", "deploy_production", "github_protection_change", "provider_live_mutation"], "forbiddenActors": ["self_review", "self_merge", "prefer_incoming"]},
+    "gitAuthority": {"workBranchPattern": "issue/<n>-<slug>", "protectedRefs": ["development", "staging", "main"], "implementerMayOpenPr": false, "implementerMayMerge": false, "nestedSelfInstall": false},
+    "publisherAuthority": {"canonicalForV25": "none", "legacyPublishers": ["linktrend-review-ready-publisher", "mark-review-ready.sh-as-publisher", "review-ready.json", "user-pat-publisher"], "missingOrFailedClassification": "WAIVED_LEGACY_GATE"},
+    "autoworkDiscovery": {"requiredWhenCallable": true, "unavailableIsHold": true},
+    "issueCheckpoint": {"acceptWithoutReviewReady": true, "acceptWithoutToken": true, "requiredEvidence": ["exact_pushed_commit_tree", "scoped_diff", "focused_tests", "independent_narrow_review", "manifest_evidence"]},
+    "administratorRecovery": {"namedExceptionOnly": true, "afterReplacementProof": true, "allowedOperations": ["protection_snapshot", "restore", "readback"]},
+    "durableHeartbeat": {"writeReadbackRequired": true, "persistBeforeMutation": true},
+    "checkoutBoundVerification": {"bindToCheckout": true, "forbidMergeRefIdentity": true},
+    "retryExhaustion": {"diagnoseBeforeRecovery": true, "forbidSilentRetry": true, "ordinaryRecovery": "new_identity", "infrastructureRecovery": "hold", "codeFailureRecovery": "new_identity"},
+    "hostedCapacityScheduler": {"requireCompleteSnapshot": true, "busyIsNotDiagnosis": true, "unknownIsBlocking": true, "hostedConcurrencyAuthority": "execution-protocol", "maxAdmittedSlots": {"local": 1}, "adaptiveConcurrency": {"mode": "minimum_of_live_evidence", "capacityEvidence": "authenticated_cursor_account", "identityFields": ["accountId", "apiKeyName", "teamId", "programRunId"], "spendCeilingEvidence": "required", "safetyConstraintEvidence": "required", "evidenceMaxAgeSeconds": 3600}, "unknownProbeSeconds": 600, "backstopSeconds": 600, "prioritization": ["priority", "dependencyReady", "fifo"], "utilizationGapEvent": "UTILIZATION_GAP", "recomputeOnEvents": ["admission", "completion", "invalidation", "probe_timeout", "api_rejection", "utilization_gap_repair"]},
+    "packetRouting": {"digestBound": true, "preferredRoutes": ["grok", "independent_review", "composer"], "thirdPartyRequiresException": true, "oneHopFallback": true, "exceptionEvidence": ["capability", "security", "independence", "context"]},
+    "cursorCloudExecution": {"preDispatchAdvertisedRefValidation": true, "missingRefAction": "rebaseline_and_recreate_branch", "preparedSupersession": {"immutable": true, "requiresNewIntent": true, "neverReuseCloudAttempt": true, "supersedeObsoleteFixedCapacity": true, "preserveCompletedEvidence": true}, "actualModelReadback": true}
+  }
+}

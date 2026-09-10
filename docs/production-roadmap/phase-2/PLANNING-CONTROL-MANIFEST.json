@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "linksites-end-to-end-production-completion-2026-09-10",
+  "manifestClass": "pre-approval-planning-control",
+  "status": "PREPARED_NOT_AUTHORIZED",
+  "executionAuthorized": false,
+  "productionMutationAuthorized": false,
+  "product": "LiNKsites",
+  "repository": "linktrend/LiNKsites",
+  "target": {
+    "host": "linkserver-03",
+    "installationCount": 1,
+    "composeProject": "linksites-foundation",
+    "separateStagingServer": false,
+    "applicationRoot": "/srv/linktrend/apps/linksites",
+    "releaseRootPattern": "/srv/linktrend/releases/linksites/<main-sha>",
+    "backupRoot": "/srv/linktrend/backups/linksites",
+    "privateOnly": true
+  },
+  "verifiedAt": "2026-09-10T12:25:54+08:00",
+  "protectedBaseline": {
+    "development": {
+      "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+      "tree": "e29607c43146decdf81c2f132562745f6a911780"
+    },
+    "staging": {
+      "commit": "b67221f90c1eff6a96592cc7be74390c9b843da2",
+      "tree": "e29607c43146decdf81c2f132562745f6a911780"
+    },
+    "main": {
+      "commit": "9eb995d7c151aab6aafabd66e91893084e1acdb2",
+      "tree": "fa16550a8d1981a37113c4ba356cbb0ff0a369f8"
+    },
+    "acceptedFullSuite": {
+      "runId": 34165549526,
+      "headCommit": "6bf85741e9b0881e0cf0a15e14a6ef8540ce410f",
+      "conclusion": "success"
+    }
+  },
+  "protectedRulesets": [
+    {
+      "id": 20623043,
+      "branch": "development",
+      "requiredChecks": [
+        "Linktrend Fast Checks",
+        "Linktrend Branch Source Policy"
+      ],
+      "bypassActors": []
+    },
+    {
+      "id": 20623044,
+      "branch": "staging",
+      "requiredChecks": [
+        "Linktrend Receipt Gate",
+        "Linktrend Branch Source Policy"
+      ],
+      "bypassActors": []
+    },
+    {
+      "id": 20623046,
+      "branch": "main",
+      "requiredChecks": [
+        "Linktrend Receipt Gate",
+        "Linktrend Branch Source Policy"
+      ],
+      "bypassActors": []
+    }
+  ],
+  "executionRoute": {
+    "provider": "cursor",
+    "transport": "direct-sdk-api",
+    "sdk": "@cursor/sdk",
+    "serverObservedVersion": "1.0.23",
+    "model": "grok-4.6",
+    "effort": "medium",
+    "fast": false,
+    "repositoryBinding": "repos[]",
+    "requiredReadback": [
+      "repository",
+      "ref",
+      "commit",
+      "tree",
+      "provider",
+      "model",
+      "effort",
+      "fast"
+    ],
+    "apiCredentialObservedPresent": true,
+    "cliLoginRequired": false,
+    "dispatchPermittedBeforeApproval": false
+  },
+  "serverBaseline": {
+    "ssh": "PASS",
+    "dockerVersion": "29.8.0",
+    "containersRunning": 17,
+    "observedContainersHealthy": 17,
+    "postgresAdministrativeProbe": "PASS",
+    "linksitesDatabasesObserved": [
+      "linksites",
+      "linksites_payload_baseline"
+    ],
+    "linksitesRolesObserved": [
+      "linksites",
+      "linksites_payload_baseline"
+    ],
+    "sharedNetworks": [
+      "linktrend-s03-proxy",
+      "linktrend-s03-core-private",
+      "linktrend-s03-data"
+    ],
+    "composeProjectPresent": false,
+    "applicationRootPresent": false,
+    "backupRootPresent": false,
+    "privateMiddlewaresPresent": true,
+    "routersPresent": false
+  },
+  "preservation": {
+    "userOwnedDirtyPaths": [
+      "apps/cms/next-env.d.ts"
+    ],
+    "mustRemainUntouchedUntilExplicitlyIsolated": true,
+    "uniqueRemoteWorkRequiringDisposition": [
+      "issue/480-repair-server03-deployment-template-release-stat",
+      "issue/480-repair-server03-deployment-template-release-stat-successor",
+      "issue/480-repair-server03-deployment-template-release-stat-validator",
+      "issue/490-fix-promotion-receipt-runtime-config-validation",
+      "issue/492-refresh-secret-scan-fixture-source-tree-binding",
+      "issue/508-repair-server03-immutable-publication-deployment",
+      "issue/511-complete-canonical-linksites-server03-s03-36-thr",
+      "unique phase branch tips"
+    ],
+    "deletionAuthorized": false
+  },
+  "providerDecision": {
+    "pilotProvider": "marketing-smb-v1",
+    "providerRepository": "linktrend/LiNKlibraries",
+    "knownPinnedCommit": "a7193d40152747db2a03e094fa263f324a971a0b",
+    "knownPinnedTree": "d35f81d84971df3b58da23443393f71ec1332462",
+    "catalogSha256": "67ff0aba772e2f0255d72819def7315fd665c568dfc1d098717be59f2bcbac14",
+    "entryGitTreeObjectSha1": "31e6defa7b27a6c5067a43b384105250e3f964d2",
+    "protectedEntryStatus": "approved",
+    "replacementTemplateIncluded": false,
+    "fixtureProviderAllowedInProduction": false,
+    "exactTreeAndByteChecksumsRequiredAtExecution": true
+  },
+  "qualityBudget": {
+    "focusedTestsPerPacket": true,
+    "consolidatedFullSuiteCount": 1,
+    "independentSourceReviews": 1,
+    "independentOperationalReviews": 1,
+    "additionalReviewOnlyAfterSubstantiveCorrection": true
+  },
+  "packets": [
+    {"id":"LS-PRE-001","wave":0,"kind":"read-only","dependsOn":[],"mutates":false},
+    {"id":"LS-PRE-002","wave":0,"kind":"read-only","dependsOn":["LS-PRE-001"],"mutates":false},
+    {"id":"LS-PRE-003","wave":0,"kind":"read-only-validation","dependsOn":["LS-PRE-001"],"mutates":false},
+    {"id":"LS-PRE-004","wave":0,"kind":"prepared-dispatch","dependsOn":["LS-PRE-001","LS-PRE-002"],"mutates":false},
+    {"id":"LS-SRC-001","wave":1,"kind":"source-engineering","dependsOn":["LS-PRE-002","LS-PRE-004"],"mutates":true},
+    {"id":"LS-SRC-002","wave":1,"kind":"source-engineering","dependsOn":["LS-PRE-002","LS-PRE-004"],"mutates":true},
+    {"id":"LS-SRC-003","wave":1,"kind":"source-engineering","dependsOn":["LS-PRE-002","LS-SRC-002"],"mutates":true},
+    {"id":"LS-OPS-001","wave":1,"kind":"source-engineering","dependsOn":["LS-PRE-002","LS-PRE-003"],"mutates":true},
+    {"id":"LS-INT-001","wave":2,"kind":"source-integration","dependsOn":["LS-SRC-001","LS-SRC-002","LS-SRC-003","LS-OPS-001"],"mutates":true},
+    {"id":"LS-VAL-001","wave":2,"kind":"validation","dependsOn":["LS-INT-001"],"mutates":false},
+    {"id":"LS-REV-001","wave":2,"kind":"independent-review","dependsOn":["LS-VAL-001"],"mutates":false},
+    {"id":"LS-REL-001","wave":3,"kind":"protected-integration","dependsOn":["LS-REV-001","FOUNDER_EXECUTION_APPROVAL"],"mutates":true},
+    {"id":"LS-REL-002","wave":3,"kind":"protected-promotion","dependsOn":["LS-REL-001"],"mutates":true},
+    {"id":"LS-ART-001","wave":3,"kind":"artifact-publication","dependsOn":["LS-REL-002"],"mutates":true},
+    {"id":"LS-VPS-001","wave":4,"kind":"live-preparation","dependsOn":["LS-ART-001","LS-PRE-003","FOUNDER_EXECUTION_APPROVAL"],"mutates":true},
+    {"id":"LS-DATA-001","wave":4,"kind":"backup-restore","dependsOn":["LS-VPS-001"],"mutates":true},
+    {"id":"LS-DATA-002","wave":4,"kind":"database-migration","dependsOn":["LS-DATA-001"],"mutates":true},
+    {"id":"LS-VPS-002","wave":5,"kind":"production-deployment","dependsOn":["LS-DATA-002"],"mutates":true},
+    {"id":"LS-EDGE-001","wave":5,"kind":"private-routing","dependsOn":["LS-VPS-002"],"mutates":true},
+    {"id":"LS-OPS-002","wave":5,"kind":"live-operations","dependsOn":["LS-VPS-002","LS-EDGE-001"],"mutates":true},
+    {"id":"LS-PILOT-001","wave":6,"kind":"real-pilot","dependsOn":["LS-OPS-002"],"mutates":true},
+    {"id":"LS-PILOT-002","wave":6,"kind":"duplicate-recovery-proof","dependsOn":["LS-PILOT-001"],"mutates":true},
+    {"id":"LS-REV-002","wave":6,"kind":"independent-operational-review","dependsOn":["LS-PILOT-002"],"mutates":false},
+    {"id":"LS-HANDOFF-001","wave":6,"kind":"founder-handoff","dependsOn":["LS-REV-002"],"mutates":false}
+  ],
+  "approvalGate": {
+    "requiredLiteralMeaning": "Founder explicitly approves this execution package",
+    "currentState": "NOT_GRANTED",
+    "allowedBeforeApproval": [
+      "read-only verification",
+      "planning artifacts outside repository"
+    ],
+    "forbiddenBeforeApproval": [
+      "issue creation",
+      "agent dispatch",
+      "repository file edits",
+      "commit or push",
+      "pull request mutation",
+      "GitHub settings mutation",
+      "server or database mutation",
+      "promotion",
+      "deployment"
+    ]
+  }
+}
