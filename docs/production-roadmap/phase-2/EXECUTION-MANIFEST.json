@@ -1,14 +1,10 @@
 {
   "schemaVersion": 1,
-  "protocol": {
-    "id": "coding-execution-protocol",
-    "version": "1.0.1",
-    "amendment": "V25_BOOTSTRAP_LEAN"
-  },
+  "protocol": {"id": "coding-execution-protocol", "version": "1.0.1", "amendment": "V25_BOOTSTRAP_LEAN"},
   "program": {
-    "id": "linksites-production-completion",
-    "name": "LiNKsites end-to-end completion and one Server03 installation",
-    "targetRelease": "first-private-production-pilot"
+    "id": "linksites-end-to-end-delivery",
+    "name": "LiNKsites full product completion through one Server03 production installation",
+    "targetRelease": "linksites-full-private-production"
   },
   "baseline": {
     "repository": "linktrend/LiNKsites",
@@ -17,215 +13,35 @@
     "ref": "refs/heads/development"
   },
   "packets": [
-    {
-      "id": "LSPRE-001",
-      "title": "Freeze current identities",
-      "ownedPaths": ["read-only:repository", "read-only:github", "read-only:server03"],
-      "prohibitedPaths": ["apps/cms/next-env.d.ts"],
-      "verificationCommands": [["git", "status", "--short", "--branch"], ["git", "ls-remote", "origin"], ["gh", "api", "repos/linktrend/LiNKsites/rulesets"], ["ssh", "linkserver-03", "read-only-inventory"]],
-      "dependencies": [],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSPRE-002",
-      "title": "Salvage and disposition all retained work",
-      "ownedPaths": ["read-only:refs/heads/issue/*", "read-only:refs/heads/phase/*", "read-only:open-pull-requests"],
-      "prohibitedPaths": ["apps/cms/next-env.d.ts"],
-      "verificationCommands": [["git", "rev-list", "--left-right", "--count"], ["git", "patch-id", "--stable"], ["git", "diff", "--name-status"]],
-      "dependencies": ["LSPRE-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSPRE-003",
-      "title": "Resolve founder-owned production inputs",
-      "ownedPaths": ["read-only:secret-references", "read-only:runtime-inputs", "read-only:pilot-input"],
-      "prohibitedPaths": ["secrets:values", "lead:raw-personal-data"],
-      "verificationCommands": [["validate", "secret-reference-presence"], ["validate", "runtime-input-schema"], ["validate", "pilot-input-checksum"]],
-      "dependencies": ["LSPRE-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSPRE-004",
-      "title": "Bind execution routes and workspaces without dispatch",
-      "ownedPaths": ["prepared:cursor-sdk-intents", "prepared:isolated-worktrees"],
-      "prohibitedPaths": ["live:cursor-agent-create", "apps/cms/next-env.d.ts"],
-      "verificationCommands": [["validate", "repos-ref-commit-tree-binding"], ["validate", "grok-4.6-medium-fast-false"], ["validate", "no-agent-created"]],
-      "dependencies": ["LSPRE-001", "LSPRE-002"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSSRC-001",
-      "title": "Repair the promotion trust boundary",
-      "ownedPaths": [".github/workflows/**", ".github/linktrend-secret-scan-fixtures.json", "scripts/gitops/**", "scripts/tests/test_promotion_*.py", "docs/contracts/CI-SUITE.md"],
-      "prohibitedPaths": ["apps/cms/next-env.d.ts", "deploy/**", "packages/factory-catalog/**"],
-      "verificationCommands": [["python3", "-m", "unittest", "scripts.tests.test_promotion_receipt_adversarial", "scripts.tests.test_promotion_transition_workflows"], ["git", "diff", "--check"]],
-      "dependencies": ["LSPRE-002", "LSPRE-004"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSSRC-002",
-      "title": "Make marketing-smb-v1 the real pilot provider",
-      "ownedPaths": ["apps/web-master/src/templates/**", "apps/web-master/src/lib/template-*.ts", "packages/factory-catalog/**", "apps/program-orchestrator/src/adapters.ts", "apps/program-orchestrator/src/composition.ts", "apps/program-orchestrator/tests/**"],
-      "prohibitedPaths": ["apps/cms/next-env.d.ts", ".github/workflows/**", "deploy/**"],
-      "verificationCommands": [["pnpm", "--filter", "@linksites/factory-catalog", "test"], ["pnpm", "--filter", "@linksites/web-master", "test"], ["git", "diff", "--check"]],
-      "dependencies": ["LSPRE-002", "LSPRE-004"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSSRC-003",
-      "title": "Reconcile production deployment contracts",
-      "ownedPaths": ["deploy/**"],
-      "prohibitedPaths": ["apps/cms/next-env.d.ts", ".github/workflows/**", "deploy/monitoring/**"],
-      "verificationCommands": [["node", "--test", "deploy/tests/*.test.mjs"], ["bash", "deploy/scripts/preflight-server03-foundation.sh", "fixture.env"], ["docker", "compose", "config", "--quiet"], ["git", "diff", "--check"]],
-      "dependencies": ["LSPRE-002", "LSSRC-002"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSOPS-001",
-      "title": "Complete monitoring backup restore and rollback contracts",
-      "ownedPaths": ["deploy/monitoring/**", "deploy/OPERATIONS.md", "deploy/scripts/*backup*", "deploy/scripts/*restore*"],
-      "prohibitedPaths": ["apps/cms/next-env.d.ts", ".github/workflows/**"],
-      "verificationCommands": [["node", "deploy/scripts/rehearse-local-restore.mjs"], ["validate", "monitoring-rules"], ["git", "diff", "--check"]],
-      "dependencies": ["LSPRE-002", "LSPRE-003"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSINT-001",
-      "title": "Consolidate source checkpoints",
-      "ownedPaths": ["docs/evidence/production-completion/**"],
-      "prohibitedPaths": ["apps/cms/next-env.d.ts"],
-      "verificationCommands": [["git", "diff", "--check"], ["validate", "branch-disposition-complete"], ["validate", "requirement-traceability"]],
-      "dependencies": ["LSSRC-001", "LSSRC-002", "LSSRC-003", "LSOPS-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSVAL-001",
-      "title": "Run the one complete source suite",
-      "ownedPaths": ["read-only:exact-consolidated-candidate"],
-      "verificationCommands": [["run", "Linktrend Full Suite", "exact-candidate"], ["verify", "full-suite-receipt"]],
-      "dependencies": ["LSINT-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSREV-001",
-      "title": "Independent consolidated source and release review",
-      "ownedPaths": ["read-only:exact-source-candidate", "review:source-verdict"],
-      "verificationCommands": [["review", "exact-candidate", "PASS-or-FAIL"]],
-      "dependencies": ["LSVAL-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSREL-001",
-      "title": "Integrate to protected development",
-      "ownedPaths": ["github:phase-pr", "github:refs/heads/development"],
-      "verificationCommands": [["python3", "scripts/gitops/delivery_controller.py", "status"], ["git", "ls-remote", "origin", "refs/heads/development"]],
-      "dependencies": ["LSREV-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSREL-002",
-      "title": "Promote once through staging to main",
-      "ownedPaths": ["github:refs/heads/staging", "github:refs/heads/main"],
-      "verificationCommands": [["verify", "trusted-transition-receipt"], ["git", "ls-remote", "origin", "refs/heads/staging", "refs/heads/main"]],
-      "dependencies": ["LSREL-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSART-001",
-      "title": "Build and publish five immutable images",
-      "ownedPaths": ["ghcr.io/linktrend/linksites-cms", "ghcr.io/linktrend/linksites-web-master", "ghcr.io/linktrend/linksites-autowork-worker", "ghcr.io/linktrend/linksites-program-orchestrator", "ghcr.io/linktrend/linksites-migrations"],
-      "verificationCommands": [["gh", "workflow", "run", "publish-server03-images.yml"], ["docker", "buildx", "imagetools", "inspect"], ["verify", "release-manifest"]],
-      "dependencies": ["LSREL-002"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSVPS-001",
-      "title": "Create recoverable Server03 application layout",
-      "ownedPaths": ["/srv/linktrend/apps/linksites", "/srv/linktrend/releases/linksites/<main-sha>", "/srv/linktrend/backups/linksites"],
-      "prohibitedPaths": ["/srv/linktrend/apps/*-other-than-linksites", "/srv/linktrend/backups/*-other-than-linksites"],
-      "verificationCommands": [["ssh", "linkserver-03", "validate-linksites-paths-permissions-checksums"]],
-      "dependencies": ["LSART-001", "LSPRE-003"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSDATA-001",
-      "title": "Prove pre-change backup and isolated restore",
-      "ownedPaths": ["/srv/linktrend/backups/linksites", "postgres:isolated-linksites-restore"],
-      "prohibitedPaths": ["postgres:unrelated-databases"],
-      "verificationCommands": [["ssh", "linkserver-03", "linksites-backup"], ["ssh", "linkserver-03", "linksites-isolated-restore-verify"]],
-      "dependencies": ["LSVPS-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSDATA-002",
-      "title": "Provision least-privilege roles and apply migrations",
-      "ownedPaths": ["postgres:linksites", "postgres:linksites-roles", "docker:linksites-migrations"],
-      "prohibitedPaths": ["postgres:unrelated-databases"],
-      "verificationCommands": [["docker", "compose", "run", "--rm", "migrations"], ["verify", "schema-grants-denials-migration-sha"]],
-      "dependencies": ["LSDATA-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSVPS-002",
-      "title": "Start the single LiNKsites production project",
-      "ownedPaths": ["docker-compose-project:linksites-foundation"],
-      "prohibitedPaths": ["docker-compose-project:all-other-projects"],
-      "verificationCommands": [["docker", "compose", "--project-name", "linksites-foundation", "up", "-d"], ["docker", "compose", "--project-name", "linksites-foundation", "ps"], ["verify", "five-exact-digests-and-health"]],
-      "dependencies": ["LSDATA-002"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSEDGE-001",
-      "title": "Enable private CMS and preview routes",
-      "ownedPaths": ["/srv/linktrend/apps/core/dynamic/linksites.yml"],
-      "prohibitedPaths": ["/srv/linktrend/apps/core/dynamic/*-other-than-linksites.yml"],
-      "verificationCommands": [["verify", "traefik-config"], ["verify", "authorized-private-access"], ["verify", "unauthorized-and-unknown-host-denial"], ["verify", "tls-noindex-no-public-db"]],
-      "dependencies": ["LSVPS-002"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSOPS-002",
-      "title": "Activate monitoring and scheduled backups",
-      "ownedPaths": ["server03:linksites-monitoring-rules", "server03:linksites-backup-schedule"],
-      "prohibitedPaths": ["server03:unrelated-monitoring-and-backups"],
-      "verificationCommands": [["verify", "linksites-alert"], ["verify", "production-backup"], ["verify", "isolated-restore"]],
-      "dependencies": ["LSVPS-002", "LSEDGE-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSPILOT-001",
-      "title": "Process one real lead into one private website",
-      "ownedPaths": ["runtime:one-approved-lead", "runtime:one-private-site", "runtime:one-completion-record"],
-      "prohibitedPaths": ["runtime:public-launch", "runtime:payment", "runtime:customer-domain"],
-      "verificationCommands": [["submit", "manual-lead-contract"], ["verify", "program-content-publication-deployment-trace"], ["verify", "private-site-acceptance"]],
-      "dependencies": ["LSOPS-002"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSPILOT-002",
-      "title": "Prove duplicate prevention and recovery",
-      "ownedPaths": ["runtime:pilot-idempotency-key", "runtime:controlled-restart", "runtime:post-pilot-backup"],
-      "prohibitedPaths": ["runtime:second-logical-site"],
-      "verificationCommands": [["replay", "same-logical-input"], ["verify", "logical-counts-equal-one"], ["verify", "controlled-restart"], ["verify", "post-pilot-backup"]],
-      "dependencies": ["LSPILOT-001"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSREV-002",
-      "title": "Independent final operational review",
-      "ownedPaths": ["read-only:live-linksites", "review:operational-verdict"],
-      "verificationCommands": [["review", "exact-deployment-and-private-site", "PASS-or-FAIL"]],
-      "dependencies": ["LSPILOT-002"],
-      "executionState": "PLAN"
-    },
-    {
-      "id": "LSHANDOFF-001",
-      "title": "Founder handoff and DONE declaration",
-      "ownedPaths": ["handoff:linksites-production-completion"],
-      "verificationCommands": [["verify", "all-definition-of-done-evidence"], ["write", "founder-handoff"]],
-      "dependencies": ["LSREV-002"],
-      "executionState": "PLAN"
-    }
+    {"id":"LSG0-00","title":"Refresh exact authority and runtime state","ownedPaths":["read-only:LiNKsites/GitHub/dispatcher/queue/Server03/upstreams"],"prohibitedPaths":["mutation:any"],"verificationCommands":[["git","status","--short","--branch"],["git","ls-remote","origin"],["python3","cursor_cloud.py","check"],["ssh","linkserver-03","read-only-inventory"]],"dependencies":[],"executionState":"PLAN"},
+    {"id":"LSG0-01","title":"Preserve and disposition existing work","ownedPaths":["docs/evidence/end-to-end-delivery/branch-disposition.json"],"prohibitedPaths":["apps/cms/next-env.d.ts","delete:any-ref-or-worktree"],"verificationCommands":[["git","rev-list","--left-right","--count"],["git","patch-id","--stable"],["git","diff","--name-status"]],"dependencies":["LSG0-00"],"executionState":"PLAN"},
+    {"id":"LSG0-02","title":"Publish worker-visible upstream inputs","ownedPaths":["docs/end-to-end-delivery/upstreams/"],"prohibitedPaths":["upstream-implementation","secrets","customer-data"],"verificationCommands":[["verify","source-provenance-and-sha256"],["git","diff","--check"]],"dependencies":["LSG0-00"],"executionState":"PLAN"},
+    {"id":"LSG0-03","title":"Obtain truthful LiNKlibraries provider handoffs","ownedPaths":["read-only:LiNKlibraries-handoffs"],"prohibitedPaths":["mutation:LiNKlibraries","fixture-as-production"],"verificationCommands":[["verify","provider-protected-commit-tree-lifecycle-digests-receipt"]],"dependencies":["LSG0-00"],"executionState":"PLAN"},
+    {"id":"LSG0-04","title":"Obtain Platform and LiNKautowork handoffs","ownedPaths":["read-only:Platform-and-Autowork-handoffs"],"prohibitedPaths":["mutation:upstreams","secret-values"],"verificationCommands":[["verify","platform-contract-and-live-receipts"],["verify","autowork-contract-endpoint-grants-receipts"]],"dependencies":["LSG0-00"],"executionState":"PLAN"},
+    {"id":"LSG0-05","title":"Create issue branches lane hash and admitted packets","ownedPaths":["github:LiNKsites-issues-and-issue-branches","queue-control:additive-LiNKsites-membership","prepared:dispatch-packets"],"prohibitedPaths":["cursor:submit","queue-control:unrelated-memberships"],"verificationCommands":[["python3","cursor_cloud.py","validate","PACKET.json"],["git","ls-remote","origin","refs/heads/issue/<number>-<slug>"],["verify","queue-additive-readback"]],"dependencies":["LSG0-01","LSG0-02"],"executionState":"PLAN"},
+    {"id":"LSDATA-01","title":"Freeze additive Payload and data compatibility","ownedPaths":["apps/cms/src/collections/","apps/cms/src/globals/","apps/cms/src/migrations/","apps/cms/src/payload-types.ts","apps/cms/src/payload.config.ts","apps/cms/tests/contracts/","packages/factory-catalog/src/adoptionIdentities.ts","packages/factory-catalog/src/capabilityCredits.ts"],"prohibitedPaths":["apps/cms/next-env.d.ts","existing-applied-migration-bytes"],"verificationCommands":[["pnpm","--filter","@linksites/cms","test:int"],["pnpm","--filter","@linksites/factory-catalog","test"],["git","diff","--check"]],"dependencies":["LSG0-02","LSG0-05"],"executionState":"PLAN"},
+    {"id":"LSTRUST-01","title":"Close protected promotion trust boundary","ownedPaths":[".github/workflows/linktrend-development-to-staging.yml",".github/workflows/linktrend-staging-to-main.yml",".github/workflows/linktrend-review-packager.yml",".github/linktrend-secret-scan-fixtures.json","scripts/gitops/gate_receipt.py","scripts/gitops/promotion_receipt_gate.py","scripts/gitops/receipt_seal.py","scripts/tests/test_gate_receipt_transition.py","scripts/tests/test_promotion_transition_workflows.py"],"prohibitedPaths":["deploy/","packages/factory-catalog/","apps/"],"verificationCommands":[["python3","-m","unittest","scripts.tests.test_gate_receipt_transition","scripts.tests.test_promotion_transition_workflows"],["git","diff","--check"]],"dependencies":["LSDATA-01","LSG0-05"],"executionState":"PLAN"},
+    {"id":"LSFACT-01","title":"Complete exact provider adoption and assembly","ownedPaths":["packages/factory-catalog/src/","packages/factory-catalog/tests/","packages/factory-catalog/WORKING-CONTENT.md"],"prohibitedPaths":["apps/cms/next-env.d.ts","packages/factory-catalog/src/adoptionIdentities.ts","packages/factory-catalog/src/capabilityCredits.ts","package.json","pnpm-lock.yaml"],"verificationCommands":[["pnpm","--filter","@linksites/factory-catalog","test"],["pnpm","--filter","@linksites/factory-catalog","typecheck"],["git","diff","--check"]],"dependencies":["LSDATA-01","LSG0-05"],"executionState":"PLAN"},
+    {"id":"LSRENDER-01","title":"Complete rendering routes discovery and user quality","ownedPaths":["apps/web-master/src/","apps/web-master/tests/","apps/web-master/template.config.json","scripts/profile-v2-quality/ls06/","scripts/profile-v2-quality/ls07/"],"prohibitedPaths":["package.json","pnpm-lock.yaml","apps/cms/","deploy/"],"verificationCommands":[["pnpm","--filter","@linksites/web-master","test"],["pnpm","--filter","@linksites/web-master","build"],["node","--test","scripts/profile-v2-quality/ls06/tests/ls06-preparation.test.mjs"],["node","--test","scripts/profile-v2-quality/ls07/tests/source-gap-validator.test.mjs","scripts/profile-v2-quality/ls07/tests/test_ls07_quality_harness.mjs"],["git","diff","--check"]],"dependencies":["LSDATA-01","LSG0-05"],"executionState":"PLAN"},
+    {"id":"LSAUTO-01","title":"Complete canonical intake automation and completion boundary","ownedPaths":["packages/autowork-boundary/src/","packages/autowork-boundary/tests/","apps/program-orchestrator/src/","apps/program-orchestrator/tests/","apps/cms/cron/","apps/cms/src/payload/utils/autowork.ts","apps/cms/tests/contracts/autowork-composition.spec.ts"],"prohibitedPaths":["package.json","pnpm-lock.yaml","deploy/"],"verificationCommands":[["pnpm","--filter","@linksites/autowork-boundary","test"],["pnpm","--filter","@linksites/program-orchestrator","test"],["git","diff","--check"]],"dependencies":["LSDATA-01","LSG0-05"],"executionState":"PLAN"},
+    {"id":"LSDEP-01","title":"Reconcile release configuration and five images","ownedPaths":["deploy/config/","deploy/docker/","deploy/docker-compose.deploy.yml","deploy/docker-compose.server03-foundation.yml","deploy/docker-compose.template-ready.yml","deploy/manifests/","deploy/scripts/entrypoint.mjs","deploy/scripts/generate-deployment-manifest.mjs","deploy/scripts/postdeploy-server03-foundation-smoke.sh","deploy/scripts/preflight-server03-foundation.sh","deploy/scripts/validate-runtime-config.mjs","deploy/tests/deployment-manifest.test.mjs","deploy/tests/deployment-surface.test.mjs","deploy/tests/runtime-contract.test.mjs",".github/workflows/publish-server03-images.yml","apps/cms/Dockerfile"],"prohibitedPaths":["deploy/monitoring/","deploy/OPERATIONS.md","package.json","pnpm-lock.yaml"],"verificationCommands":[["node","--test","deploy/tests/deployment-manifest.test.mjs","deploy/tests/deployment-surface.test.mjs","deploy/tests/runtime-contract.test.mjs"],["docker","compose","config","--quiet"],["git","diff","--check"]],"dependencies":["LSTRUST-01","LSFACT-01","LSRENDER-01","LSAUTO-01"],"executionState":"PLAN"},
+    {"id":"LSOPS-01","title":"Complete monitoring backup restore and rollback source","ownedPaths":["deploy/monitoring/","deploy/scripts/rehearse-local-restore.mjs","deploy/OPERATIONS.md"],"prohibitedPaths":["deploy/config/","deploy/docker/","deploy/docker-compose.deploy.yml"],"verificationCommands":[["node","deploy/scripts/rehearse-local-restore.mjs"],["verify","monitoring-rules-and-runbook"],["git","diff","--check"]],"dependencies":["LSDEP-01"],"executionState":"PLAN"},
+    {"id":"LSINT-01","title":"Consolidate retained and new checkpoints","ownedPaths":["docs/evidence/end-to-end-delivery/"],"prohibitedPaths":["apps/cms/next-env.d.ts"],"verificationCommands":[["verify","all-pushed-checkpoints"],["verify","branch-disposition-and-requirement-traceability"],["git","diff","--check"]],"dependencies":["LSG0-03","LSDATA-01","LSTRUST-01","LSFACT-01","LSRENDER-01","LSAUTO-01","LSDEP-01","LSOPS-01"],"executionState":"PLAN"},
+    {"id":"LSVAL-01","title":"Run one complete source suite","ownedPaths":["read-only:exact-consolidated-candidate"],"verificationCommands":[["run","Linktrend-Full-Suite","exact-candidate"],["verify","exact-full-suite-receipt"]],"dependencies":["LSINT-01"],"executionState":"PLAN"},
+    {"id":"LSREV-01","title":"Independent consolidated source review","ownedPaths":["read-only:exact-source-candidate","review:source-verdict"],"verificationCommands":[["review","Luna-High","exact-candidate","PASS-or-FAIL"]],"dependencies":["LSVAL-01"],"executionState":"PLAN"},
+    {"id":"LSREL-01","title":"Integrate and promote protected source","ownedPaths":["github:phase-pr","github:development","github:staging","github:main"],"verificationCommands":[["python3","scripts/gitops/delivery_controller.py","status"],["git","ls-remote","origin","refs/heads/development","refs/heads/staging","refs/heads/main"]],"dependencies":["LSREV-01"],"executionState":"PLAN"},
+    {"id":"LSART-01","title":"Build and publish five immutable images","ownedPaths":["ghcr.io/linktrend/linksites-cms","ghcr.io/linktrend/linksites-web-master","ghcr.io/linktrend/linksites-autowork-worker","ghcr.io/linktrend/linksites-program-orchestrator","ghcr.io/linktrend/linksites-migrations"],"verificationCommands":[["gh","workflow","run","publish-server03-images.yml"],["docker","buildx","imagetools","inspect"],["verify","release-manifest"]],"dependencies":["LSREL-01"],"executionState":"PLAN"},
+    {"id":"LSVPS-01","title":"Prepare recoverable Server03 application layout","ownedPaths":["/srv/linktrend/apps/linksites","/srv/linktrend/releases/linksites/<main-sha>","/srv/linktrend/backups/linksites"],"prohibitedPaths":["/srv/linktrend/apps/other-projects","/srv/linktrend/backups/other-projects"],"verificationCommands":[["ssh","linkserver-03","validate-linksites-layout-without-start"]],"dependencies":["LSART-01","LSG0-00"],"executionState":"PLAN"},
+    {"id":"LSVPS-02","title":"Back up and prove isolated restore","ownedPaths":["/srv/linktrend/backups/linksites","postgres:isolated-linksites-restore"],"prohibitedPaths":["postgres:unrelated-databases"],"verificationCommands":[["ssh","linkserver-03","linksites-backup-and-isolated-restore"]],"dependencies":["LSVPS-01"],"executionState":"PLAN"},
+    {"id":"LSVPS-03","title":"Apply least privilege data and configuration","ownedPaths":["postgres:linksites","postgres:linksites-roles","docker:linksites-migrations"],"prohibitedPaths":["postgres:unrelated-databases"],"verificationCommands":[["verify","migration-receipts-grants-denials-backup"]],"dependencies":["LSVPS-02","LSG0-04"],"executionState":"PLAN"},
+    {"id":"LSVPS-04","title":"Start the single production installation","ownedPaths":["docker-compose-project:linksites-foundation"],"prohibitedPaths":["docker-compose-project:all-other-projects"],"verificationCommands":[["docker","compose","--project-name","linksites-foundation","up","-d"],["verify","exact-digests-health-and-restart"]],"dependencies":["LSVPS-03"],"executionState":"PLAN"},
+    {"id":"LSVPS-05","title":"Enable private routes and operations","ownedPaths":["/srv/linktrend/apps/core/dynamic/linksites.yml","server03:linksites-monitoring","server03:linksites-backups"],"prohibitedPaths":["server03:unrelated-routes-monitoring-backups"],"verificationCommands":[["verify","private-route-denial-tls-noindex"],["verify","alert-backup-isolated-restore"]],"dependencies":["LSVPS-04","LSOPS-01"],"executionState":"PLAN"},
+    {"id":"LSPILOT-01","title":"Configure admitted legacy provider and real facts","ownedPaths":["runtime:linksites-provider-cache","runtime:one-approved-facts-package"],"prohibitedPaths":["runtime:fixture-provider","runtime:public-launch"],"verificationCommands":[["verify","selectable-marketing-smb-v1-and-production-preflight"]],"dependencies":["LSVPS-05","LSG0-03"],"executionState":"PLAN"},
+    {"id":"LSPILOT-02","title":"Produce one real private website","ownedPaths":["runtime:one-private-site","runtime:one-completion-record"],"prohibitedPaths":["runtime:public-domain","runtime:manual-success-insertion"],"verificationCommands":[["submit","canonical-manual-input"],["verify","site-content-payload-render-publication-completion-quality"]],"dependencies":["LSPILOT-01"],"executionState":"PLAN"},
+    {"id":"LSPILOT-03","title":"Prove duplicate prevention and recovery","ownedPaths":["runtime:pilot-idempotency","runtime:controlled-restart","runtime:post-pilot-backup"],"prohibitedPaths":["runtime:second-logical-site"],"verificationCommands":[["replay","same-logical-input"],["verify","counts-one-restart-integrity-backup"]],"dependencies":["LSPILOT-02"],"executionState":"PLAN"},
+    {"id":"LSFULL-01","title":"Activate exact Master Website Template v2","ownedPaths":["runtime:existing-linksites-installation-provider-cache-and-config"],"prohibitedPaths":["runtime:second-installation","runtime:unadmitted-provider"],"verificationCommands":[["verify","A1-A2-A3-by-A-B-C-L-paired-matrix"],["verify","migration-restart-retirement-rollback"]],"dependencies":["LSPILOT-03","LSG0-03"],"executionState":"PLAN"},
+    {"id":"LSFULL-02","title":"Activate live Platform and LiNKautowork integration","ownedPaths":["runtime:existing-linksites-installation-platform-autowork-config"],"prohibitedPaths":["runtime:second-installation","runtime:broad-credential","runtime:arbitrary-workflow"],"verificationCommands":[["verify","signed-request-ack-execution-receipt-completion"],["verify","duplicate-late-callback-and-outage-recovery"]],"dependencies":["LSPILOT-03","LSG0-04"],"executionState":"PLAN"},
+    {"id":"LSFULL-03","title":"Final operational acceptance and founder handoff","ownedPaths":["read-only:live-linksites","review:operational-verdict","handoff:founder"],"verificationCommands":[["review","Luna-High","exact-live-release","PASS-or-FAIL"],["verify","all-definition-of-done-evidence"]],"dependencies":["LSFULL-01","LSFULL-02"],"executionState":"PLAN"}
   ],
   "controls": {
     "exactCandidateInvalidation": {"enabled": true, "identityFields": ["repository", "commit", "tree", "workflowDigest", "profileDigest"]},
@@ -242,7 +58,7 @@
     "checkoutBoundVerification": {"bindToCheckout": true, "forbidMergeRefIdentity": true},
     "retryExhaustion": {"diagnoseBeforeRecovery": true, "forbidSilentRetry": true, "ordinaryRecovery": "new_identity", "infrastructureRecovery": "hold", "codeFailureRecovery": "new_identity"},
     "hostedCapacityScheduler": {"requireCompleteSnapshot": true, "busyIsNotDiagnosis": true, "unknownIsBlocking": true, "hostedConcurrencyAuthority": "execution-protocol", "maxAdmittedSlots": {"local": 1}, "adaptiveConcurrency": {"mode": "minimum_of_live_evidence", "capacityEvidence": "authenticated_cursor_account", "identityFields": ["accountId", "apiKeyName", "teamId", "programRunId"], "spendCeilingEvidence": "required", "safetyConstraintEvidence": "required", "evidenceMaxAgeSeconds": 3600}, "unknownProbeSeconds": 600, "backstopSeconds": 600, "prioritization": ["priority", "dependencyReady", "fifo"], "utilizationGapEvent": "UTILIZATION_GAP", "recomputeOnEvents": ["admission", "completion", "invalidation", "probe_timeout", "api_rejection", "utilization_gap_repair"]},
-    "packetRouting": {"digestBound": true, "preferredRoutes": ["grok", "independent_review", "composer"], "thirdPartyRequiresException": true, "oneHopFallback": true, "exceptionEvidence": ["capability", "security", "independence", "context"]},
+    "packetRouting": {"digestBound": true, "preferredRoutes": ["grok", "independent_review", "specialist"], "thirdPartyRequiresException": true, "oneHopFallback": true, "exceptionEvidence": ["capability", "security", "independence", "context"]},
     "cursorCloudExecution": {"preDispatchAdvertisedRefValidation": true, "missingRefAction": "rebaseline_and_recreate_branch", "preparedSupersession": {"immutable": true, "requiresNewIntent": true, "neverReuseCloudAttempt": true, "supersedeObsoleteFixedCapacity": true, "preserveCompletedEvidence": true}, "actualModelReadback": true}
   }
 }

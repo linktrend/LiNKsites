@@ -1,0 +1,20 @@
+{
+  "packet_id": "LSSRC-PLACEHOLDER",
+  "owner": "01a088ee-0886-78f2-97af-1924d73ac079",
+  "repository": "linktrend/LiNKsites",
+  "ref": "issue/000-replace-after-approval",
+  "commit": "0000000000000000000000000000000000000000",
+  "tree": "0000000000000000000000000000000000000000",
+  "prompt": "Replace with one complete atomic work packet from ATOMIC-WORK-PACKETS.md. Preserve existing work; modify only allowed paths; run the named focused checks; commit and push the checkpoint; report exact starting/final repository, branch, commit and tree; do not create a PR, merge, promote, deploy, reveal secrets or dispatch another worker.",
+  "allowed_paths": [
+    "replace/with/literal/file-or-directory/"
+  ],
+  "acceptance_commands": [
+    "replace with an exact focused command"
+  ],
+  "role": "implementation",
+  "lane_id": "REPLACE_AFTER_APPROVAL",
+  "lane_plan_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "admitted": false,
+  "admission_evidence": ""
+}

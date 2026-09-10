@@ -1,29 +1,20 @@
-# LiNKsites Phase 2 production-completion package
+# LiNKsites Phase 2 delivery documents
 
-This directory contains the canonical pre-execution package for completing
-LiNKsites and installing it once on Server03.
+The stable entry point is
+[`docs/end-to-end-delivery/README.md`](../../end-to-end-delivery/README.md).
+This directory holds the authoritative documents linked from that entry point.
 
 ## Reading order
 
-1. `END-TO-END-COMPLETION-PRD.md` — outcome, scope, architecture, definition
-   of done, quality budget, evidence, and rollback rules.
-2. `ATOMIC-WORK-PACKETS.md` — atomic tasks, dependencies, file ownership,
-   checks, acceptance criteria, evidence, and recovery.
-3. `PLANNING-CONTROL-MANIFEST.json` — current verified repository, GitHub,
-   Cursor, provider, and Server03 truth plus the approval boundary.
-4. `EXECUTION-MANIFEST.json` — Coding Execution Protocol 1.0.1 / IDE
-   Development 2.5.2 machine-readable packet plan.
-5. `CERTAINTY-REPORT.md` — evidence-backed answer to the founder's three
-   certainty questions.
-6. `VPS-DEPLOYMENT-AND-PILOT-PACKET.md` — prior Phase 2 packet retained as
-   historical planning input. Where it conflicts with this package, the new
-   package is the proposed replacement subject to founder approval.
+Follow the reading order in the stable entry point. Do not treat the historical
+VPS packet as a second or alternate execution plan.
 
 ## Authority
 
-These files prepare a decision. They do not authorize implementation,
-promotion, image publication, server mutation, or deployment. Only a later
-explicit founder approval authorizes execution.
+These files are a correction candidate for substantive Deployment Advisor
+review. They do not authorise implementation, dispatch, promotion, image
+publication, server mutation or deployment. Advisor acceptance is not founder
+execution approval.
 
 The issue branch carrying this package is a planning checkpoint. It must not be
-packaged into protected `development` until the founder accepts the package.
+packaged into protected `development` until the founder approves execution.

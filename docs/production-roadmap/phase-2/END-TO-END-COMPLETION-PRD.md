@@ -1,241 +1,374 @@
-# LiNKsites End-to-End Completion PRD
+# LiNKsites end-to-end completion PRD
 
-Status: pre-execution specification; no implementation or production change is authorized
-Prepared: 2026-09-10, Asia/Taipei
-Product: LiNKsites only
-Target: one production installation on Server03
+Status: correction candidate for Deployment Advisor review; not execution authority
 
-## 1. Purpose
+Product: LiNKsites
 
-Complete LiNKsites from the current protected repository state through one verified production installation and one real private website pilot. The work must preserve useful existing work, avoid duplicate engineering, use the already installed IDE Development 2.5.2 process, use the existing Cursor SDK/API route for normal Grok work, and require a separate founder approval before implementation begins.
+Production target: exactly one installation on Server03
 
-This document is an execution specification. It is not execution approval.
+## 1. Outcome
 
-## 2. Governing rules
+Finish LiNKsites as an autonomous website factory that accepts an authorised
+website facts package, selects and verifies an exact LiNKlibraries provider,
+creates and promotes tenant-safe content in Payload, deterministically assembles
+and renders the website, publishes it through `web-master`, integrates through
+governed automation contracts, and retains exact source, provider, content,
+deployment, recovery and completion evidence.
 
-1. Do not claim a fact unless supported by current evidence or explicitly labelled as a decision still to be resolved.
-2. Never discard existing work merely because it is unmerged, stale, or untidy. Compare it to the protected source, retain useful changes, refactor or complete them, and record the disposition of every unique branch.
-3. Use exactly one live installation: Server03. There is no separate staging server. The Git branches `development`, `staging`, and `main` remain source-control promotion stages only.
-4. Do not change Server03 until the final source candidate, image digests, backup plan, runtime configuration, and rollback plan have passed their entry gates.
-5. Use focused tests while implementing each packet, one complete source suite on the consolidated candidate, one independent source/release review, and one independent final operational review. Do not create repetitive audit loops.
-6. Checkpoint engineering work with commit and push. Collate substantial compatible work into a small number of Phase PRs, then use one source promotion sequence and one production installation.
-7. Normal engineering route: Cursor SDK/API, Grok 4.6 Medium, Fast off, explicit repository/ref/commit/tree binding. A named Cursor environment may be maintained for convenience but is not routing authority.
-8. Founder bootstrap may be used only as an expedited, truthful recovery path when the normal protected release mechanism is technically unable to complete. It must use real commits, real test results, real review evidence, and real readback. It may waive a broken publishing mechanism; it may never invent or label missing evidence as PASS.
-9. No public customer launch, customer domain activation, payment, sales workflow, or post-sales activity is included.
+Delivery has two acceptance milestones on the same installation:
 
-## 3. Verified starting state
+1. **Initial operational acceptance:** install the protected application once
+   on Server03 and produce one real private website using the agreed legacy
+   `marketing-smb-v1` provider, but only after LiNKlibraries truthfully makes an
+   exact release selectable. The existing manual/file adapter may carry the
+   canonical intake/completion contract while LiNKautowork is not yet live.
+2. **Full product completion:** complete and prove the Profile v2 / Master
+   Website Template requirements, live LiNKautowork integration and operational
+   lifecycle on that same installation. This is the final DONE boundary.
 
-The following facts were read back on 2026-09-10.
+The first milestone is not permission to delete or defer the second. Updating
+the same `linksites-foundation` installation with later accepted immutable
+releases does not create a second production installation.
 
-### 3.1 Protected repository identities
+## 2. Governing decisions
 
-| Branch | Commit | Tree |
-|---|---|---|
-| `development` | `4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb` | `e29607c43146decdf81c2f132562745f6a911780` |
-| `staging` | `b67221f90c1eff6a96592cc7be74390c9b843da2` | `e29607c43146decdf81c2f132562745f6a911780` |
-| `main` | `9eb995d7c151aab6aafabd66e91893084e1acdb2` | `fa16550a8d1981a37113c4ba356cbb0ff0a369f8` |
+1. Preserve completed and partial work. Inspect each unique branch/file;
+   integrate, refactor, complete, supersede with evidence or retain it. Do not
+   delete work as part of this delivery.
+2. Source, provider, consumer, configuration, live deployment and production
+   proof are separate evidence levels.
+3. Server03 production is also the operational proving environment. Git
+   `development`, `staging` and `main` are source promotion stages, not servers.
+4. Use one or a few substantial Phase PRs, one protected promotion sequence
+   for each accepted immutable source release, and one Server03 installation.
+   Later full-scope increments update that installation by immutable digest.
+5. Use focused tests per packet, one complete suite on each consolidated source
+   release candidate, one independent source review and one final independent
+   operational review. Repeat only after a substantive correction invalidates
+   prior evidence.
+6. IDE Development 2.5.2 is the installed development process, not another
+   LiNKsites product dependency. Do not edit its repository or managed package.
+7. Implementation uses the verified Cursor REST route with Grok 4.6 Medium,
+   Fast false and exact GitHub repository/ref/commit/tree binding. Independent
+   review uses Luna High. Cursor desktop/CLI login is irrelevant.
+8. Founder bootstrap is permitted only when the installed protected publication
+   mechanism itself cannot complete after bounded repair. It may use real
+   checkpoint, test, review and protection evidence; it may never manufacture
+   a check, receipt, approval or PASS.
+9. No proposed code, copied receipt, stale receipt, duplicate check name,
+   candidate credential or self-review may authorise protected promotion.
+10. Accounts, API keys, endpoints, hostnames and public consent are resolved
+    just in time by their owner. Missing values remain disabled; no placeholder
+    is treated as production configuration.
 
-Protected `development` is a verified GitHub merge commit. Its accepted parent candidate `6bf85741e9b0881e0cf0a15e14a6ef8540ce410f` passed GitHub Full Suite run `34165549526`.
+## 3. Existing authority and starting state
 
-### 3.2 GitHub release controls
+The current evidence classification is in `STARTING-POSITION.md`. Product
+requirements remain governed by:
 
-- GitHub authentication is active for `linktrend/LiNKsites` with repository and workflow access.
-- `development` requires `Linktrend Fast Checks` and `Linktrend Branch Source Policy`.
-- `staging` and `main` require `Linktrend Receipt Gate` and `Linktrend Branch Source Policy`.
-- The three active rulesets have no bypass actors.
-- The current promotion workflows consume a transition receipt supplied through promotion PR metadata. The final repair must bind that receipt to current protected branch state and to a trusted producer; candidate code must not be able to authorize itself.
-- Issue 511 contains useful adversarial tests and CI changes, but it does not by itself repair the complete trust boundary.
+- `docs/PRD.md` for the source/configuration/production acceptance boundary;
+- `docs/architecture/linksites-profile-v2/CANONICAL-PRD-ROADMAP.md` for the
+  Profile v2 product and LS-FR-01 through LS-FR-25;
+- `docs/LINKSITES-TECHNICAL-PRD.md` for system topology and domain context; and
+- the exact upstream plans/interfaces recorded in `UPSTREAM-DEPENDENCIES.md`.
 
-### 3.3 Existing source capability
+Where older status prose conflicts with current exact evidence, current
+protected source and the starting-position evidence control factual status.
+Older product requirements are not silently removed by that rule.
 
-Protected source contains production-oriented CMS, `web-master`, worker, Program orchestrator, PostgreSQL/Payload migrations, factory catalog, image Dockerfiles, immutable deployment-manifest tooling, Server03 Compose, runtime preflight, post-deployment smoke, monitoring rules, and restore/Compose rehearsal tooling. Repository evidence that says “complete” or “released” is historical source evidence; it is not proof of a current live LiNKsites installation.
+## 4. Users and workflows
 
-### 3.4 Existing work that must be preserved
+### Founder/operator
 
-- The primary checkout has a pre-existing user-owned modification at `apps/cms/next-env.d.ts`. It must not be overwritten, staged, or moved without an explicit preservation procedure.
-- Most remote issue branches through Issue 501 are already ancestors of protected `development` and have no unique commits.
-- Unique work exists on three Issue 480 variants and Issues 490, 492, 508, and 511. Stale Phase branches also contain a small number of unique tips. Each must receive a recorded `retain`, `superseded`, `already integrated`, or `not applicable` disposition based on file-level comparison; none may be deleted as part of this delivery.
-- Issue 511 head: `56125fc5e83cc0f223a085561bcadfe32e4f2652`, tree `34a42e3c3bf7ec1910df9fca8a71cb55ec979c8b`.
+The founder can identify the exact live source and image digests, access the
+private CMS and private website, submit an authorised facts package, observe
+progress and failure, inspect the resulting site and completion record, view
+health/alerts/backups, restart the application, disable its routes and invoke a
+documented rollback without unstated knowledge.
 
-### 3.5 Server03
+### Website factory
 
-- SSH access works through `linkserver-03`.
-- Docker 29.8.0 is available through non-interactive `sudo`.
-- Seventeen existing containers are running and healthy, including Traefik, PostgreSQL, Redis, MinIO, monitoring, and other portfolio applications.
-- Existing shared networks include `linktrend-s03-proxy`, `linktrend-s03-core-private`, and `linktrend-s03-data`.
-- PostgreSQL already contains databases and roles named `linksites` and `linksites_payload_baseline`; administrative access was verified without revealing credentials.
-- The PostgreSQL container contains a LiNKsites-specific database password variable.
-- No `linksites-foundation` Compose project is running.
-- `/srv/linktrend/apps/linksites` and `/srv/linktrend/backups/linksites` do not exist.
-- `/srv/linktrend/apps/core/dynamic/linksites.yml` contains private Tailscale middlewares but no LiNKsites routers.
-- Historical LiNKsites release material and Issue 470 rehearsal material exist on the server. They are inputs for reconciliation, not proof of deployment.
+The factory accepts one canonical, schema-valid, idempotent input; verifies the
+provider and tenant; resolves capabilities, layout, plan, routes, navigation,
+content and evidence; persists before side effects; promotes through Payload;
+renders/publishes; returns one completion record; and resumes without duplicate
+sites or success records after retry or restart.
 
-### 3.6 Cursor execution access
+### Content/provider owners
 
-- IDE Development 2.5.2 defines direct Cursor SDK/API with explicit `repos[]` binding as the normal post-Gate-0 route.
-- The running LiNKdeveloper factory on Server03 contains `@cursor/sdk` 1.0.23 and a present `CURSOR_API_KEY` environment variable. Its value was not displayed.
-- The local `cursor-agent` CLI login state is irrelevant to SDK/API authority and must not be used as a blocker.
-- No Cursor worker is to be dispatched before founder execution approval.
+LiNKlibraries publishes immutable selectable provider releases and reference
+contracts. Research/editorial or the founder supplies legally usable approved
+facts through a canonical contract. LiNKsites never changes provider authority,
+fabricates facts or lets draft/quarantined assets pass production selection.
 
-## 4. Product definition of done
+### Visitor
 
-LiNKsites is DONE only when every item below is supported by exact evidence.
+An authorised private visitor receives a coherent, responsive, accessible,
+server-rendered site with real prospect-specific content, working intended
+interactions, visible evidence-aligned structured data and no mock success.
 
-### 4.1 Source and release
+### Automation and portfolio consumers
 
-1. All retained branches and dirty work have recorded dispositions; useful work is incorporated once and nothing is silently discarded.
-2. Production uses the approved legacy `marketing-smb-v1` LiNKlibraries provider for the pilot. The unfinished replacement template remains excluded from selection and does not block the pilot.
-3. The production configuration, runtime contract, manifest, orchestrator, renderer, and tests agree on that provider identity. No fake receipt, fake provider, test fixture, placeholder, or deferred publishing path can be credited as the operational pilot.
-4. The promotion trust boundary cannot be satisfied by candidate-authored evidence, copied evidence, stale evidence, self-consistent fabricated evidence, or duplicate check names.
-5. Focused packet tests pass.
-6. One consolidated exact source candidate passes the complete source suite.
-7. One independent reviewer returns PASS against the exact candidate commit and tree.
-8. The accepted candidate is integrated into protected `development`, then promoted through `staging` to `main` with exact tree readback. Founder bootstrap is permitted only under the truthful recovery rule in section 2.
+LiNKautowork may carry signed input/completion events and durable receipts but
+does not decide that the website is complete. Console, Portal, Channel, Client,
+Developer, Brain, Skills and OpenClaw consume only their explicit future ports;
+none acquires source, release or deployment authority over LiNKsites.
 
-### 4.2 Immutable release
+## 5. Functional requirements
 
-1. Exactly five production images are built from the accepted `main` source: CMS, web-master, worker, orchestrator, and migrations.
-2. Each image is published by immutable digest, not a mutable tag alone.
-3. A release manifest binds repository commit/tree, five digests, migration identities, template/provider identity, configuration schema, and build provenance.
-4. Manifest generation and verification pass against the actual published digests.
+### FR-01 Exact provider selection and materialisation
 
-### 4.3 One Server03 production installation
+Validate repository, protected commit/tree, entry/version, lifecycle,
+compatibility, manifest, inventory, dependency lock, payload/artifact digests,
+qualification, admission and receipt. Materialise exact bytes atomically into a
+consumer-owned immutable cache. Reject draft, quarantined, non-selectable,
+tampered, partial, unsupported or path-escaping inputs. Runtime must start after
+the provider checkout is removed.
 
-1. One Compose project named `linksites-foundation` is installed under `/srv/linktrend/apps/linksites` from an immutable release directory.
-2. Existing portfolio services remain healthy and are not replaced.
-3. Dedicated LiNKsites database roles, schemas, permissions, runtime directories, secrets, and persistent data are configured with least privilege.
-4. Pre-change backup and isolated restore proof pass before migrations.
-5. Migrations apply once, record exact identities, and are safe to rerun or fail closed.
-6. CMS, web-master, worker, orchestrator, and migration job use the five exact digests and pass health checks after a controlled restart.
-7. Private CMS and preview routes use existing Traefik/Tailscale controls; unknown hosts fail closed, unauthorised requests are denied, and preview content is `noindex,nofollow`.
-8. Monitoring, logs, backup, restore, and rollback procedures work on the actual installation.
+### FR-02 Site identity, adoption and entitlements
 
-### 4.4 Real operational pilot
+Every site stores provider, capability contract, A1/A2/A3 layout, A/B/C/L plan,
+optional overlay or explicit null, customer configuration, content release,
+adapter revision/range, effective configuration, Site Assembly Manifest,
+entitlement snapshot, previous adoption and rollback identities. Defaults never
+silently move an existing site.
 
-1. A founder-approved, legally usable, representative lead/research package is submitted through the real manual intake boundary exactly once.
-2. The continuously operating Program processes it without manually inserting success records downstream.
-3. It produces one complete private marketing website using `marketing-smb-v1`, real approved facts, real Payload content, and real `web-master` rendering.
-4. The private site has the required routes and prospect-specific content; no mock, lorem, placeholder, unsupported claim, or fixture provider appears.
-5. The result includes one traceable Program/Phase/Issue/Run/content/promotion/publication/deployment/completion chain and one CRM-shaped completion record containing the private URL and exact identities.
-6. Replaying the same logical input creates no duplicate site, publication, deployment, or completion record.
-7. A controlled restart or recovery test resumes safely without duplication or data corruption.
-8. Functional, responsive, accessibility, metadata, privacy, tenancy, security, and practical performance acceptance pass for the pilot.
-9. One independent operational reviewer returns PASS against the deployed digests and live private site.
+### FR-03 Deterministic assembly
 
-## 5. Explicit exclusions
+Identical normalized business inputs produce identical semantic assembly
+digests. Resolve capability dispositions, credits, page families, routes,
+locale, navigation, sections, content requirements, shell, metadata, schema and
+actions. Products and Services remain distinct. Count, entitlement, collision,
+reserved-path and downgrade rules fail closed.
 
-- A second Server03 installation or a separate staging server.
-- Public launch or customer domain cutover.
-- Billing, payment, sales, CRM write-back beyond the shaped completion record, or post-sales.
-- Completion of the unfinished native Revision 2 replacement template.
-- Changes to the IDE Development repository or installed `.ide-development` package.
-- Broad refactors unrelated to the definition of done.
-- Repeating tests or audits solely to create more evidence.
+### FR-04 Payload content lifecycle
 
-## 6. Required architecture
+Use tenant- and locale-scoped models for Products, Services, Results/Work,
+Articles, Videos, FAQ/Help, Team, Locations, Service Areas, Policies and typed
+core settings. Preserve provenance, evidence and semantic IDs from working
+content through draft, promotion, readback and publication. Remove the all-Hero
+or generic fallback projection. Additive migrations preserve existing Offer,
+Case and template-pin data through explicit compatibility or migration.
 
-### 6.1 Source flow
+### FR-05 Versioned adapter and rendering
 
-`issue/* checkpoints` → `one or few Phase PRs` → protected `development` → protected `staging` → protected `main` → five immutable images → one Server03 installation.
+Map every required provider semantic ID to an owned Payload block and React
+symbol through a versioned adapter with an explicit provider range. Render real
+structural A1/A2/A3 differences and A/B/C/L behavior from one semantic source.
+Unknown required IDs, missing mappings and public error/template text fail.
 
-### 6.2 Server paths
+### FR-06 Routes, shell and discovery
 
-| Purpose | Required path |
-|---|---|
-| Canonical application control directory | `/srv/linktrend/apps/linksites` |
-| Immutable release directories | `/srv/linktrend/releases/linksites/<main-sha>` |
-| Protected runtime configuration | `/srv/linktrend/apps/linksites/config/production.env` |
-| Evidence | `/srv/linktrend/apps/linksites/evidence/<main-sha>` |
-| Backups | `/srv/linktrend/backups/linksites` |
-| Shared Traefik dynamic configuration | `/srv/linktrend/apps/core/dynamic/linksites.yml` |
+Build tenant/locale-safe canonical routes, redirects, navigation, accessible
+mobile header and five-zone footer from real configuration. Server HTML, title,
+one H1, landmarks, crawlable links, canonical/hreflang, JSON-LD, sitemap,
+robots, `llms.txt` and AI projections must agree with visible published facts.
+Private/draft/redirected content is excluded from public discovery surfaces.
 
-The implementation packet may adjust a path only if live discovery proves an existing Server03 convention requires it and the change is recorded before mutation.
+### FR-07 Accessibility, privacy and performance
 
-### 6.3 Runtime services
+Target WCAG 2.2 AA with automated and bounded manual keyboard, focus, heading,
+contrast, motion, touch, zoom, media, viewport and RTL-readiness evidence.
+Forms/newsletter/analytics/cookies activate only with real configured hooks,
+consent and failure behavior. No fake success or leaked secret. Representative
+lab targets are LCP <=2.5s, INP <=200ms and CLS <=0.1; label lab evidence and do
+not claim field performance without field data.
 
-- CMS/Payload
-- `web-master`
-- LiNKautowork-facing worker/outbox adapter
-- Program orchestrator
-- one-shot migrations job
+### FR-08 Program and automation lifecycle
 
-The service definitions must use the existing `deploy/docker-compose.server03-foundation.yml` structure unless focused reconciliation proves that one of the retained branches contains a safer completed version.
+Load one exact LiNKharness/Profile composition and delegate generic ledger,
+lease, retry, lock, gate, evidence and executor behavior to it. LiNKsites owns
+website Modules/Phases/Issues, domain states and verdicts. Canonical intake and
+completion events include correlation and idempotency identity. Persist before
+side effects; replay returns the original logical result.
 
-### 6.4 Data and network boundaries
+The initial private website may use the production-shaped manual/file adapter.
+Full completion configures the live LiNKautowork signed gateway with scoped
+Platform claims, event grants, replay protection, bounded retry,
+acknowledgement, durable outbox and receipt readback. A LiNKautowork receipt is
+automation evidence, not a LiNKsites completion verdict.
 
-- Reuse the shared Server03 PostgreSQL service; do not start a competing PostgreSQL instance.
-- Reuse existing Traefik and existing `linktrend-s03-proxy` network.
-- Create only LiNKsites-specific roles, schemas, data volumes, and private routes.
-- Database credentials for CMS and orchestrator must be distinct and least privilege.
-- CMS/admin/database ports must not be publicly exposed.
-- All sensitive values remain outside Git, issues, prompts, logs, and evidence.
+### FR-09 Release integrity
 
-## 7. Required production inputs
+Build exactly five production image entries—CMS, web-master, worker,
+orchestrator and migrations—from accepted protected `main`. Every image is
+selected by immutable digest. One release manifest binds repository commit/tree,
+provider identities, Harness/Profile, migrations, configuration schema,
+toolchain, image digests, provenance and checksums.
 
-The executor must resolve and validate these values before live mutation. No placeholder can pass.
+### FR-10 One Server03 installation
 
-1. Exact accepted LiNKsites `main` commit and tree.
-2. Five immutable image digests.
-3. Exact `marketing-smb-v1` provider commit, tree, catalogue checksum, entry checksum, and consumer proof.
-4. Production organisation UUID, site UUID, Payload site identifier, and approved-facts file checksum.
-5. Private CMS and preview hostnames using the Server03 Tailscale/Traefik boundary.
-6. CMS, Payload API, preview, LiNKautowork signing/outbox, outcome gateway, database, and backup credentials obtained by reference from the approved secret mechanism.
-7. LiNKautowork gateway URL, key identifiers, environment, and exact event grants.
-8. Database target, roles, current schema versions, migration target SHA, and rollback compatibility decision.
-9. Backup retention, encryption, owner, and restore target.
-10. Founder-approved pilot lead/research package and its non-sensitive checksum.
+Install one Compose project `linksites-foundation` under
+`/srv/linktrend/apps/linksites` from commit-addressed release material. Reuse
+Server03 PostgreSQL, Traefik and approved shared services. Configure distinct
+least-privilege identities, private routes, persistent data, health, limits,
+logs, monitoring and backups. Do not expose CMS/admin/database ports publicly or
+replace any shared portfolio service.
 
-## 8. Quality and evidence model
+### FR-11 Migration, recovery and rollback
 
-### 8.1 Testing budget
+Before mutation, inventory existing LiNKsites database/release/proxy state,
+create an encrypted backup and prove isolated restore. Migrations bind exact
+source/checksums, record receipts and are safe to no-op/reconcile or fail closed.
+A failed application/provider/site upgrade retains the prior active release,
+cache, adoption and data. Application rollback, route disable and database
+restore are separate procedures; no volume deletion is permitted.
 
-- Per packet: only tests directly covering changed behavior plus lint/type/build checks affected by that packet.
-- Before source integration: one complete source suite against the exact consolidated candidate.
-- After deployment: only preflight, migration verification, service health, route/security checks, pilot acceptance, duplicate/recovery check, and backup/restore proof.
-- Reviews: exactly one consolidated source/release review and one final operational review, unless a review fails and a corrected exact candidate requires re-review.
+### FR-12 Operational evidence
 
-### 8.2 Evidence rules
+Correlate intake, Program, Phase, Issue, Run, provider, content, promotion,
+publication, deployment, automation and completion identities. Expose health,
+backlog, retries/dead letters, completion, certificate, backup age, storage,
+resource and restart signals. Evidence is sanitized, checksum-bound and states
+its exact source/live level.
 
-Every PASS record must contain:
+## 6. Definition of done
 
-- packet ID;
-- repository and exact commit/tree, or Server03 release SHA and image digests;
-- command or observation performed;
-- start/end timestamp;
-- exit/result status;
-- sanitized output or artifact checksum;
-- executor identity;
-- reviewer identity where applicable;
-- explicit exclusions and unresolved items.
+LiNKsites is DONE only when all of the following are true.
 
-No secret value, raw lead data, authentication token, or database password may be recorded.
+### Preservation and source
 
-## 9. Rollback policy
+1. Every identified unique issue/Phase branch and the user-owned dirty file has
+   a recorded disposition; all useful work is incorporated exactly once or
+   deliberately retained with reason.
+2. The final source satisfies FR-01 through FR-12 and LS-FR-01 through LS-FR-25,
+   or an explicit founder product decision identifies a superseded requirement.
+3. Sanitized upstream contracts used by workers are committed with exact
+   provenance and compatibility; no local-only input is required.
+4. Focused packet checks pass, followed by one Full Suite on each consolidated
+   release candidate and one independent Luna High source review on its exact
+   commit/tree.
+5. The promotion trust boundary rejects candidate-authored, copied, stale,
+   duplicate-name and wrong-base evidence.
+6. Accepted source is integrated to protected `development` and promoted
+   through `staging` to `main` with exact readback and no invented check.
 
-1. Never use `docker compose down -v`, delete a database, prune images/volumes, or overwrite a backup during this delivery.
-2. Before migration, capture configuration, database, persistent data, and current shared proxy state and prove a restore into an isolated target.
-3. Retain the immediately previous immutable application release and runtime configuration.
-4. Application rollback switches the canonical control directory to the prior verified release and starts it with its matching configuration.
-5. Database rollback is allowed only when the migration-specific compatibility decision says it is safe; otherwise restore the pre-change backup to an isolated target and obtain the recorded recovery decision.
-6. On tenant leakage, unauthorised public access, unknown digest, credential exposure, or data integrity loss, disable LiNKsites routes and stop LiNKsites services without affecting shared portfolio services, then enter recovery.
+### Provider and full website product
 
-## 10. Execution waves
+7. The first operational provider is an exact currently selectable
+   `marketing-smb-v1` LiNKlibraries release; if LiNKlibraries has not admitted
+   it, the initial website cannot claim PASS.
+8. Full completion uses exact admitted `master-template-type-1` provider inputs
+   and passes A1/A2/A3 x A/B/C/L paired proof at the claimed levels.
+9. Every site has exact layered identity/adoption/entitlement/rollback records;
+   Products/Services, semantic content, routes, shell, SSR, structured data,
+   discovery and AI projections agree.
+10. Existing-site migration, failed-upgrade preservation, provider-cache
+    restart, retirement and rollback pass against production-shaped data.
 
-| Wave | Outcome | Safe parallel lanes |
-|---|---|---|
-| 0 | Exact baseline, access, branch salvage, and execution identities frozen | read-only repository, GitHub, Server03, Cursor, provider inventory |
-| 1 | Source gaps repaired on governed issue branches | release trust; provider/runtime alignment; deployment/runtime reconciliation; operations evidence |
-| 2 | Consolidated candidate verified | focused tests in lanes, then one full suite and one independent source review |
-| 3 | Protected source promoted and five images published | sequential because every identity depends on the prior protected result |
-| 4 | Server03 prepared and data layer proven | backup/restore and non-mutating config validation may overlap; migration is sequential |
-| 5 | One production installation made healthy and private | services then routes then observability |
-| 6 | One real site pilot and final operational review | pilot is sequential; independent observations may run after stable deployment |
+### Release and installation
 
-The detailed dependency graph and ownership boundaries are in
-`ATOMIC-WORK-PACKETS.md`. The pre-approval truth snapshot is in
-`PLANNING-CONTROL-MANIFEST.json`, and the installed protocol-compatible
-execution plan is in `EXECUTION-MANIFEST.json`.
+11. Five immutable image digests and one verified release manifest are built
+    from exact accepted protected `main`.
+12. One and only one `linksites-foundation` production installation exists on
+    Server03. All intended services run the exact digests and existing portfolio
+    services remain healthy.
+13. Existing data is inventoried; pre-change backup and isolated restore pass;
+    migrations and least-privilege grants have exact receipts.
+14. Private CMS/preview routes authenticate correctly; unauthorized and unknown
+    hosts fail; private content is `noindex,nofollow`; no direct sensitive port
+    is exposed.
+15. Monitoring, logs, alert, scheduled backup, isolated restore, restart,
+    route-disable and rollback procedures work on the actual installation.
+
+### Initial operational website
+
+16. One founder-approved, legally usable representative facts package enters
+    once through the real canonical manual boundary and produces one complete
+    private prospect-specific website using real Payload content and
+    `web-master` rendering.
+17. There is one traceable Program/Phase/Issue/Run/provider/content/promotion/
+    publication/deployment/completion chain and one CRM-shaped completion record
+    containing the private URL and exact identities.
+18. No mock, lorem, placeholder, unsupported claim, fixture provider or manual
+    downstream success insertion appears.
+19. Replaying the same logical input and performing a controlled restart creates
+    no second logical site, publication, deployment or completion record and
+    causes no corruption.
+
+### Full operation and final acceptance
+
+20. The same installation consumes live scoped Platform and LiNKautowork
+    handoffs, submits/receives one exact signed automation request/receipt and
+    preserves LiNKsites as completion authority.
+21. Functional, responsive, accessibility, metadata, privacy, tenancy,
+    security, practical performance and recovery acceptance pass on the final
+    live private site/release.
+22. One independent Luna High operational review returns PASS against the exact
+    deployed source, five image digests, provider identities and live evidence.
+23. The founder handoff contains access, identity, health, logs, backup,
+    restore, restart, route-disable and rollback instructions. No required
+    knowledge remains only in chat or on the coordinator's Mac.
+
+## 7. Production layout and configuration
+
+| Purpose | Path |
+| --- | --- |
+| control directory | `/srv/linktrend/apps/linksites` |
+| immutable release | `/srv/linktrend/releases/linksites/<main-sha>` |
+| protected configuration | `/srv/linktrend/apps/linksites/config/production.env` |
+| evidence | `/srv/linktrend/apps/linksites/evidence/<main-sha>` |
+| backups | `/srv/linktrend/backups/linksites` |
+| scoped Traefik configuration | `/srv/linktrend/apps/core/dynamic/linksites.yml` |
+
+Required production inputs include exact source/tree, five image digests,
+provider receipts/digests, Harness/Profile identity, Platform contract and live
+receipt identity, LiNKautowork endpoint/grants/key references, tenant/site IDs,
+approved facts checksum, private hostnames, database/migration state, backup
+policy and secret references. Secret values never enter source, packets, logs or
+evidence.
+
+## 8. Delivery sequence
+
+```text
+planning accepted + founder APPROVE
+-> current-state/queue/branch refresh and work preservation
+-> publish exact upstream contract inputs
+-> additive data compatibility freeze
+-> four parallel source lanes
+-> deployment and operations source
+-> consolidation + Full + independent source review
+-> protected development/staging/main + five immutable images
+-> backup/restore + one Server03 installation
+-> first real private marketing-smb-v1 website
+-> exact MWT v2 and live LiNKautowork increments on same installation
+-> full live acceptance + independent operational review + handoff
+```
+
+`ATOMIC-WORK-PACKETS.md` is the executable dependency breakdown.
+
+## 9. Test and evidence budget
+
+- Each implementation packet runs only its direct unit/integration/static checks
+  and affected build/type checks.
+- Consolidation runs one complete source suite on the exact candidate.
+- Provider/browser matrices run when the exact provider/adapter identity changes,
+  not for unrelated deployment edits.
+- Live checks are limited to preflight, backup/restore, migration/grant denial,
+  service/route health, one first-site acceptance, duplicate/restart, one live
+  automation acceptance and final review.
+- A failure produces the smallest corrective packet and invalidates only evidence
+  affected by changed bytes/identity.
+- Every PASS names exact commit/tree or deployed digests, command/observation,
+  timestamps, result, executor, reviewer where applicable, sanitized evidence
+  checksum, exclusions and unresolved items.
+
+## 10. Exclusions
+
+- a second production installation or separate staging server;
+- public/customer domain cutover or an unapproved public launch;
+- billing/payment/sales/post-sales behavior not already required by LS-FR;
+- mutation of upstream repositories from the LiNKsites task;
+- completing unrelated portfolio programs;
+- editing IDE Development or its installed managed package;
+- broad unrelated refactors, new audit frameworks or repetitive proof loops;
+- destructive database/volume cleanup or protected history rewrite.
 
 ## 11. Approval boundary
 
-Pre-approval work ends when the PRD, packets, manifest, and certainty report are delivered. Implementation begins only after the founder explicitly approves the execution package. That approval authorizes the listed engineering and one production installation; it does not authorize excluded public-launch or commercial actions.
+Planning publication and Deployment Advisor review do not authorise execution.
+Implementation begins only after the founder explicitly approves the exact
+advisor-accepted package. That approval covers the listed LiNKsites work and one
+Server03 installation; a materially new product, public action, paid account,
+destructive recovery, security exception or upstream-repository mutation needs
+its own authority.
