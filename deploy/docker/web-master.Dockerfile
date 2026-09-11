@@ -11,7 +11,13 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY packages/types/package.json packages/types/package.json
 COPY packages/autowork-boundary/package.json packages/autowork-boundary/package.json
+COPY packages/factory-catalog/package.json packages/factory-catalog/package.json
+COPY packages/program-ledger/package.json packages/program-ledger/package.json
+COPY packages/linkharness-profile/package.json packages/linkharness-profile/package.json
+COPY apps/cms/package.json apps/cms/package.json
 COPY apps/web-master/package.json apps/web-master/package.json
+COPY apps/program-orchestrator/package.json apps/program-orchestrator/package.json
+COPY apps/intake-orchestrator/package.json apps/intake-orchestrator/package.json
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
