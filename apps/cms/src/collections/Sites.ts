@@ -68,6 +68,22 @@ export const Sites: CollectionConfig<'sites'> = {
       },
     },
     {
+      name: 'templateAdoption',
+      type: 'relationship',
+      relationTo: 'template-adoptions',
+      admin: {
+        description: 'Canonical immutable template adoption pin for this site. Existing templateId remains a deprecated projection.',
+      },
+    },
+    {
+      name: 'entitlementSnapshot',
+      type: 'relationship',
+      relationTo: 'entitlement-snapshots',
+      admin: {
+        description: 'Canonical immutable entitlement snapshot pin for this site.',
+      },
+    },
+    {
       name: 'orgId',
       type: 'text',
       required: true,
