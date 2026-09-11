@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "program": "linkautowork",
+  "repository": "linktrend/LiNKautowork",
+  "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+  "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+  "directory": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26",
+  "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+  "status": "COPIED",
+  "copiedFileCount": 17,
+  "copiedOriginalPaths": [
+    "docs/contracts/provider-contract-v1.md",
+    "docs/contracts/provider-http-v1.md",
+    "docs/contracts/provider-events-v1.md",
+    "docs/contracts/provider-lifecycle-v1.md",
+    "docs/contracts/provider-status-v1.md",
+    "docs/contracts/provider-dispatch-v1.md",
+    "automations/fixtures/contracts/README.md",
+    "automations/fixtures/contracts/fixture-matrix.json",
+    "automations/fixtures/contracts/provider-valid-request.json",
+    "automations/fixtures/contracts/package-valid.json",
+    "automations/fixtures/contracts/package-invalid-id.json",
+    "automations/fixtures/contracts/package-invalid-semver.json",
+    "automations/fixtures/contracts/package-invalid-lifecycle.json",
+    "automations/fixtures/contracts/package-invalid-engine.json",
+    "automations/fixtures/contracts/package-missing-monitoring.json",
+    "automations/fixtures/contracts/package-missing-evaluation.json",
+    "automations/fixtures/contracts/provenance-unresolved.json"
+  ],
+  "withheldFromReadableSource": [
+    {
+      "originalPath": "automations/fixtures/contracts/package-embedded-secret-shaped.json",
+      "reason": "Reject fixture still contains secret-shaped field/value; withheld per prohibited-categories check."
+    },
+    {
+      "originalPath": "packages/automation-contracts/src/provider-contract.ts",
+      "reason": "Executable implementation source; contract documentation and sanitized fixtures copied instead."
+    },
+    {
+      "originalPath": "gateway/src/**",
+      "reason": "Runtime implementation; HTTP contract markdown copied instead."
+    }
+  ],
+  "byteCompare": "each copiedPath sha256 equals source file at exact commit/tree before commit"
+}
