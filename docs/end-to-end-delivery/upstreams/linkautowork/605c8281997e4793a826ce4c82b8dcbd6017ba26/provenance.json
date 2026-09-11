@@ -6,7 +6,7 @@
   "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
   "directory": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26",
   "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
-  "status": "COPIED",
+  "status": "PARTIAL_WITHHOLD",
   "copiedFileCount": 17,
   "copiedOriginalPaths": [
     "docs/contracts/provider-contract-v1.md",
@@ -41,5 +41,11 @@
       "reason": "Runtime implementation; HTTP contract markdown copied instead."
     }
   ],
-  "byteCompare": "each copiedPath sha256 equals source file at exact commit/tree before commit"
+  "byteCompare": "each copiedPath sha256 equals git object bytes at exact bound source commit before commit",
+  "sourceBinding": {
+    "role": "read-only",
+    "checkedOutCommit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+    "checkedOutTree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+    "developmentTipNotUsed": true
+  }
 }

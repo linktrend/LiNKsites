@@ -6,17 +6,59 @@
   "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
   "directory": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32",
   "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
-  "status": "HOLD",
-  "copiedFileCount": 0,
-  "hold": {
-    "status": "HOLD",
-    "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKlibraries (HTTP 404). Exact commit/tree not substituted.",
-    "evaluatedConsumerSurfaces": [
-      "indexes/v2/catalog.json and schemas/v2 (provider-baseline cataloguePath/schemaPath)",
-      "marketing-smb-v1 entry/content schema",
-      "master-template-type-1 integration/handoff contract"
-    ],
-    "providerTruthWithoutSourceBytes": "Consumer code treats master-template as draft/non-selectable/unknown (not_selectable). Local marketing-smb-v1 fixture status=approved is offline test data only and is not copied as provider truth. marketing-smb-v1 remains quarantined/non-selectable and MWT remains planning/candidate unless exact source bytes prove otherwise. No admission or live readiness invented.",
-    "accessProbe": "gh api + origin-token GitHub REST both 404"
+  "status": "PARTIAL_WITHHOLD",
+  "copiedFileCount": 14,
+  "copiedOriginalPaths": [
+    "indexes/v2/catalog.json",
+    "schemas/v2/catalogue.schema.json",
+    "schemas/v2/catalogue-record.schema.json",
+    "schemas/v2/common.schema.json",
+    "schemas/v2/website-template.schema.json",
+    "schemas/v2/entry-index.schema.json",
+    "schemas/v2/release-manifest.schema.json",
+    "schemas/v2/consumption-receipt.schema.json",
+    "entries/marketing-smb-v1/entry.json",
+    "entries/marketing-smb-v1/content/content.schema.json",
+    "entries/marketing-smb-v1/README.md",
+    "registry/v2/entries/master-template-type-1/versions/2.0.0/index.json",
+    "registry/v2/entries/master-template-type-1/versions/2.0.0/manifest.json",
+    "docs/architecture/master-template/LINKSITES-HANDOFF.md"
+  ],
+  "withheldFromReadableSource": [
+    {
+      "originalPath": "entries/marketing-smb-v1/src/index.mjs",
+      "reason": "Executable implementation source."
+    },
+    {
+      "originalPath": "entries/marketing-smb-v1/tests/**",
+      "reason": "Executable tests; schema/entry/README copied instead."
+    },
+    {
+      "originalPath": "entries/marketing-smb-v1/assets/**",
+      "reason": "Assets/binaries (svg/template dumps) withheld."
+    },
+    {
+      "originalPath": "entries/marketing-smb-v1/content/baseline-copy.json",
+      "reason": "Copy payload not required once content schema and quarantine entry are present."
+    },
+    {
+      "originalPath": "registry/v2/entries/master-template-type-1/versions/*/artifact/**",
+      "reason": "Template HTML/tokens/assets/binaries; planning uses catalogue + index/manifest + schemas only."
+    },
+    {
+      "originalPath": "docs/evidence/master-website-template-v2/**",
+      "reason": "Historical bulk evidence addenda; not live proof. LINKSITES-HANDOFF.md copied as planning contract with historical-SHA caveat."
+    }
+  ],
+  "byteCompare": "each copiedPath sha256 equals git object bytes at exact bound source commit before commit",
+  "sourceBinding": {
+    "role": "read-only",
+    "checkedOutCommit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+    "checkedOutTree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+    "developmentTipNotUsed": true
+  },
+  "providerTruth": {
+    "marketing-smb-v1": "quarantined/non-selectable (entries/marketing-smb-v1/entry.json state=quarantined selectable=false; absent from indexes/v2/catalog.json records)",
+    "master-template-type-1": "planning/candidate (catalogue lifecycle=draft selectability=non_selectable compatibility=unknown). Not production admission."
   }
 }
