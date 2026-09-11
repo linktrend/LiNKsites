@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, Field } from 'payload'
 import { createAccess, deleteAccess, updateAccess } from '@/access'
 import { createSiteFilteredAccess } from '@/admin/utils/siteFilterOptions'
 import { localeField } from '@/fields/localeField'
@@ -9,6 +9,14 @@ import { createSlugField } from '@/fields/slugField'
 import { workflowFields } from '@/fields/workflowFields'
 import { injectDefaultSEO } from '@/hooks/injectDefaultSEO'
 import { triggerRebuild } from '@/hooks/triggerRebuild'
+
+export const assertFixedProductKind: CollectionBeforeChangeHook = ({ data }) => {
+  if (!data) return
+  if (data.semanticKind != null && data.semanticKind !== 'product') {
+    throw new Error('Products remain semantically distinct from Services; incompatible kind rejected without activation.')
+  }
+  data.semanticKind = 'product'
+}
 
 export const Products: CollectionConfig = {
   slug: 'products',
@@ -25,7 +33,7 @@ export const Products: CollectionConfig = {
   },
   versions: { drafts: true },
   hooks: {
-    beforeChange: [injectDefaultSEO],
+    beforeChange: [assertFixedProductKind, injectDefaultSEO],
     afterChange: [triggerRebuild],
   },
   fields: [
