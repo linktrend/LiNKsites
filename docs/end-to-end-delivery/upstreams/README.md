@@ -4,29 +4,31 @@ This directory is a **sanitized, worker-visible planning/source input bundle** f
 
 These files are **immutable planning/source inputs**. They are not product code, not an admitted provider release, and not live/E2E/production evidence.
 
+This generation **corrects the same version directories** (source commit/tree identity did not change). Access-only HOLDs from the prior checkpoint are replaced with exact bound-source copies. Semantic/provider/live HOLDs remain.
+
 ## Versioning
 
-Copied material lives under ` <program>/<full-source-commit>/ `.
+Copied material lives under `<program>/<full-source-commit>/`.
 
-- Do not edit copied bytes in place.
-- A later exact handoff, pin change, or semantic correction produces a **new version directory** keyed by the new full source commit.
+- Do not edit copied source bytes in place.
+- A later exact handoff, pin change, or semantic source-identity change produces a **new version directory** keyed by the new full source commit.
 - `index.json` is the catalogue for this bundle generation. Hash mismatch or semantic drift invalidates the generation (see `semanticChangeInvalidation` in `index.json`).
 
 ## Provider truth preserved without invention
 
-- `marketing-smb-v1` is treated as **quarantined/non-selectable** unless exact LiNKlibraries source bytes at the pinned commit/tree prove otherwise. Those bytes were **not readable** here, so the program is **HOLD** and local LiNKsites fixtures were not substituted.
-- Master Website Template material remains **planning/candidate** input unless exact source bytes prove otherwise. Not copied; **HOLD**.
-- LiNKharness Profile/ports/events and the linksites-profile fixture were evaluated from the consumer but **not copied** (source unreadable; Harness pin also forbids copying implementation source).
-- LiNKplatform auth-claims/token/catalogue-provider schemas and accept/reject fixtures were evaluated from the consumer but **not copied** (source unreadable).
-- LiNKautowork gateway/event/status/lifecycle/HTTP/receipt **contract documentation** and **sanitized accept/reject fixtures** were copied from the exact readable pin. Implementation source, secret-shaped fixtures, private endpoints, tokens, and historical bulk evidence were withheld.
+- `marketing-smb-v1` is **quarantined/non-selectable** at the exact LiNKlibraries pin (`entries/marketing-smb-v1/entry.json`: `state=quarantined`, `selectable=false`; absent from `indexes/v2/catalog.json` records).
+- Master Website Template (`master-template-type-1`) remains **planning/candidate**: catalogue `lifecycle=draft`, `selectability=non_selectable`, `compatibility=unknown`. Not production admission.
+- LiNKharness: LiNKsites Profile fixture plus Profile authoring contract copied. TypeScript schema/port/event implementation withheld (`do_not_copy_harness_source`). Not hosted-executor proof.
+- LiNKplatform: auth-claims 1.1.0, token-envelope schema, catalogue-provider handoff schema, and sanitized accept/reject fixtures copied. Token-envelope fixtures with private/stage endpoints withheld. Freeze records are **not** live hosted-auth proof.
+- LiNKautowork: gateway/event/status/lifecycle/HTTP/receipt **contract documentation** and **sanitized accept/reject fixtures** retained from the exact pin. Implementation source, secret-shaped fixtures, private endpoints, tokens, and historical bulk evidence remain withheld.
 
 ## Programs
 
 | Program | Pin | Bundle status |
 |---|---|---|
-| linkharness | `7f8d5199…` / tree `2ce580d5…` | HOLD (repo unreadable with available auth) |
-| linklibraries | `5188aaf1…` / tree `e389671f…` | HOLD (repo unreadable with available auth) |
-| linkplatform | `67ba8646…` / tree `863e6b1f…` | HOLD (repo unreadable with available auth) |
-| linkautowork | `605c8281…` / tree `c03f9c65…` | Copied contract docs + sanitized fixtures |
+| linkharness | `7f8d5199…` / tree `2ce580d5…` | PARTIAL_WITHHOLD (Profile fixture + authoring contract; TS implementation withheld) |
+| linklibraries | `5188aaf1…` / tree `e389671f…` | PARTIAL_WITHHOLD (catalogue/entry/schema/handoff; assets/executable/bulk evidence withheld) |
+| linkplatform | `67ba8646…` / tree `863e6b1f…` | PARTIAL_WITHHOLD (auth/token/catalogue schemas + sanitized fixtures; private-endpoint token fixtures and TS withheld) |
+| linkautowork | `605c8281…` / tree `c03f9c65…` | PARTIAL_WITHHOLD (contract docs + sanitized fixtures; secret-shaped fixture and implementation withheld) |
 
-No branch tip was substituted for an unread pin.
+Exact bound source commits were used. Development branch tips were not substituted.

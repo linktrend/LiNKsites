@@ -1,0 +1,113 @@
+{
+  "identity": {
+    "identityType": "profile",
+    "id": "minimal-example-profile",
+    "version": "0.1.0"
+  },
+  "compatibleHarnessRange": ">=0.1.0 <0.2.0",
+  "program": {
+    "identity": {
+      "identityType": "program",
+      "id": "minimal-example-program",
+      "version": "0.1.0"
+    },
+    "profileId": "minimal-example-profile",
+    "compatibleHarnessRange": ">=0.1.0 <0.2.0",
+    "moduleIds": ["mod-01"],
+    "budgetIds": ["budget-01"],
+    "createdAt": "2026-08-22T00:00:00.000Z",
+    "updatedAt": "2026-08-22T00:00:00.000Z",
+    "actor": {
+      "identity": {
+        "identityType": "actor",
+        "id": "system",
+        "version": "0.1.0"
+      },
+      "role": "system"
+    }
+  },
+  "modules": [
+    {
+      "identity": {
+        "identityType": "module",
+        "id": "mod-01",
+        "version": "0.1.0"
+      },
+      "programId": "minimal-example-program",
+      "phaseIds": ["phase-01"],
+      "dependsOn": [],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    }
+  ],
+  "phases": [
+    {
+      "identity": {
+        "identityType": "phase",
+        "id": "phase-01",
+        "version": "0.1.0"
+      },
+      "programId": "minimal-example-program",
+      "moduleId": "mod-01",
+      "issueIds": ["issue-01"],
+      "gateIds": ["gate-01"],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    }
+  ],
+  "issues": [
+    {
+      "identity": {
+        "identityType": "issue",
+        "id": "issue-01",
+        "version": "0.1.0"
+      },
+      "programId": "minimal-example-program",
+      "moduleId": "mod-01",
+      "phaseId": "phase-01",
+      "ownedResources": ["resource:issue-01"],
+      "dependsOn": [],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    }
+  ],
+  "adapters": [
+    {
+      "adapterId": "process",
+      "contractVersion": "0.1.0"
+    }
+  ],
+  "redaction": {
+    "deniedPaths": ["secret", "credential"]
+  },
+  "compatibility": {
+    "contractName": "@linktrend/linkharness-contracts",
+    "contractVersion": "0.1.0",
+    "compatibleRange": ">=0.1.0 <0.2.0",
+    "migrations": []
+  }
+}

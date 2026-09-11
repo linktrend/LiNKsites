@@ -17,17 +17,46 @@
       "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
       "directory": "linkharness/7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
       "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
-      "status": "HOLD",
-      "copiedFileCount": 0,
-      "hold": {
-        "status": "HOLD",
-        "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKharness (HTTP 404 on repo and commit APIs). Exact commit/tree not substituted with any branch tip.",
-        "evaluatedConsumerSurfaces": [
-          "packages/linkharness-profile Profile/ports/events composition",
-          "linksites-profile identity and HARNESS_PIN copyPolicy do_not_copy_harness_source",
-          "would copy only Profile/ports/events schemas and linksites-profile fixture if source bytes were readable"
-        ],
-        "accessProbe": "gh api + origin-token GitHub REST both 404"
+      "status": "PARTIAL_WITHHOLD",
+      "copiedFileCount": 3,
+      "copiedOriginalPaths": [
+        "packages/contracts/fixtures/linksites-profile.json",
+        "packages/profile-sdk/fixtures/minimal-profile.json",
+        "docs/guides/profile-authoring.md"
+      ],
+      "withheldFromReadableSource": [
+        {
+          "originalPath": "packages/contracts/src/schemas.ts",
+          "reason": "JSON Schema objects exist only as TypeScript implementation; executable implementation source withheld. Profile fixture plus authoring contract copied instead."
+        },
+        {
+          "originalPath": "packages/contracts/src/ports.ts",
+          "reason": "Executable adapter/Profile/event port implementation; withheld per prohibited-categories."
+        },
+        {
+          "originalPath": "packages/contracts/src/events.ts",
+          "reason": "Executable event-port implementation; withheld per prohibited-categories."
+        },
+        {
+          "originalPath": "packages/contracts/src/validate.ts",
+          "reason": "Executable validator; withheld per prohibited-categories."
+        },
+        {
+          "originalPath": "docs/evidence/consumer-conformance/**",
+          "reason": "Historical bulk conformance evidence; not live proof and not required to interpret the Profile fixture."
+        },
+        {
+          "originalPath": "packages/profile-sdk/vendor/linkharness-contracts/**",
+          "reason": "Vendored implementation duplicate of contracts package; canonical fixture copied from packages/contracts/fixtures."
+        }
+      ],
+      "byteCompare": "each copiedPath sha256 equals git object bytes at exact bound source commit before commit",
+      "copyPolicy": "do_not_copy_harness_source; fixture and authoring contract only",
+      "sourceBinding": {
+        "role": "read-only",
+        "checkedOutCommit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+        "checkedOutTree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+        "developmentTipNotUsed": true
       }
     },
     "linklibraries": {
@@ -38,18 +67,60 @@
       "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
       "directory": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32",
       "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
-      "status": "HOLD",
-      "copiedFileCount": 0,
-      "hold": {
-        "status": "HOLD",
-        "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKlibraries (HTTP 404). Exact commit/tree not substituted.",
-        "evaluatedConsumerSurfaces": [
-          "indexes/v2/catalog.json and schemas/v2 (provider-baseline cataloguePath/schemaPath)",
-          "marketing-smb-v1 entry/content schema",
-          "master-template-type-1 integration/handoff contract"
-        ],
-        "providerTruthWithoutSourceBytes": "Consumer code treats master-template as draft/non-selectable/unknown (not_selectable). Local marketing-smb-v1 fixture status=approved is offline test data only and is not copied as provider truth. marketing-smb-v1 remains quarantined/non-selectable and MWT remains planning/candidate unless exact source bytes prove otherwise. No admission or live readiness invented.",
-        "accessProbe": "gh api + origin-token GitHub REST both 404"
+      "status": "PARTIAL_WITHHOLD",
+      "copiedFileCount": 14,
+      "copiedOriginalPaths": [
+        "indexes/v2/catalog.json",
+        "schemas/v2/catalogue.schema.json",
+        "schemas/v2/catalogue-record.schema.json",
+        "schemas/v2/common.schema.json",
+        "schemas/v2/website-template.schema.json",
+        "schemas/v2/entry-index.schema.json",
+        "schemas/v2/release-manifest.schema.json",
+        "schemas/v2/consumption-receipt.schema.json",
+        "entries/marketing-smb-v1/entry.json",
+        "entries/marketing-smb-v1/content/content.schema.json",
+        "entries/marketing-smb-v1/README.md",
+        "registry/v2/entries/master-template-type-1/versions/2.0.0/index.json",
+        "registry/v2/entries/master-template-type-1/versions/2.0.0/manifest.json",
+        "docs/architecture/master-template/LINKSITES-HANDOFF.md"
+      ],
+      "withheldFromReadableSource": [
+        {
+          "originalPath": "entries/marketing-smb-v1/src/index.mjs",
+          "reason": "Executable implementation source."
+        },
+        {
+          "originalPath": "entries/marketing-smb-v1/tests/**",
+          "reason": "Executable tests; schema/entry/README copied instead."
+        },
+        {
+          "originalPath": "entries/marketing-smb-v1/assets/**",
+          "reason": "Assets/binaries (svg/template dumps) withheld."
+        },
+        {
+          "originalPath": "entries/marketing-smb-v1/content/baseline-copy.json",
+          "reason": "Copy payload not required once content schema and quarantine entry are present."
+        },
+        {
+          "originalPath": "registry/v2/entries/master-template-type-1/versions/*/artifact/**",
+          "reason": "Template HTML/tokens/assets/binaries; planning uses catalogue + index/manifest + schemas only."
+        },
+        {
+          "originalPath": "docs/evidence/master-website-template-v2/**",
+          "reason": "Historical bulk evidence addenda; not live proof. LINKSITES-HANDOFF.md copied as planning contract with historical-SHA caveat."
+        }
+      ],
+      "byteCompare": "each copiedPath sha256 equals git object bytes at exact bound source commit before commit",
+      "providerTruth": {
+        "marketing-smb-v1": "quarantined/non-selectable (entries/marketing-smb-v1/entry.json state=quarantined selectable=false; absent from indexes/v2/catalog.json records)",
+        "master-template-type-1": "planning/candidate (catalogue lifecycle=draft selectability=non_selectable compatibility=unknown). Not production admission."
+      },
+      "sourceBinding": {
+        "role": "read-only",
+        "checkedOutCommit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+        "checkedOutTree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+        "developmentTipNotUsed": true
       }
     },
     "linkplatform": {
@@ -60,18 +131,67 @@
       "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
       "directory": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3",
       "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
-      "status": "HOLD",
-      "copiedFileCount": 0,
-      "hold": {
-        "status": "HOLD",
-        "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKplatform (HTTP 404). Exact commit/tree not substituted.",
-        "evaluatedConsumerSurfaces": [
-          "platform.auth-claims/1.1.0",
-          "platform.provider-trust/1.0.0",
-          "catalogue-provider handoff schemas",
-          "sanitized accept/reject fixtures"
-        ],
-        "accessProbe": "gh api + origin-token GitHub REST both 404"
+      "status": "PARTIAL_WITHHOLD",
+      "copiedFileCount": 28,
+      "copiedOriginalPaths": [
+        "packages/contracts/schemas/platform-auth-claims.v1.1.0.json",
+        "packages/contracts/schemas/platform-auth-token-envelope.v0.1.0.json",
+        "packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
+        "packages/contracts/schemas/platform-catalogue-profile.v1.0.0.json",
+        "docs/contracts/platform-auth-claims-v1.md",
+        "docs/contracts/frozen/platform-auth-claims-v1.1.0.FROZEN.md",
+        "docs/contracts/platform-auth-token-envelope-v0.1.md",
+        "docs/contracts/frozen/platform-auth-token-envelope-v0.1.0.FROZEN.md",
+        "docs/contracts/frozen/platform-catalogue-profile-v1.0.0.FROZEN.md",
+        "packages/contracts/fixtures/claims/accept-valid.json",
+        "packages/contracts/fixtures/claims/reject-revoked.json",
+        "packages/contracts/fixtures/claims/reject-wrong-audience.json",
+        "packages/contracts/fixtures/claims/reject-expired.json",
+        "packages/contracts/fixtures/claims/reject-rotated.json",
+        "packages/contracts/fixtures/claims/reject-wrong-service.json",
+        "packages/contracts/fixtures/claims/reject-wrong-org.json",
+        "packages/contracts/fixtures/catalogue-profile/accept-valid.json",
+        "packages/contracts/fixtures/catalogue-profile/accept-client-profile.json",
+        "packages/contracts/fixtures/catalogue-profile/reject-extra-field.json",
+        "packages/contracts/fixtures/catalogue-profile/reject-wrong-version.json",
+        "packages/contracts/fixtures/catalogue-profile/reject-unknown-status.json",
+        "packages/contracts/fixtures/catalogue-profile/reject-bad-kind.json",
+        "packages/contracts/fixtures/catalogue-profile/reject-paci-capability-id.json",
+        "packages/contracts/fixtures/catalogue-provider-handoff/reject-wrong-commit.json",
+        "packages/contracts/fixtures/catalogue-provider-handoff/reject-consumer-proof.json",
+        "packages/contracts/fixtures/catalogue-provider-handoff/reject-extra-field.json",
+        "packages/contracts/fixtures/catalogue-provider-handoff/reject-integration-claimed.json",
+        "packages/contracts/fixtures/catalogue-provider-handoff/reject-invented-tag.json"
+      ],
+      "withheldFromReadableSource": [
+        {
+          "originalPath": "packages/contracts/src/**",
+          "reason": "Executable TypeScript (claims/token/provider-trust). JSON schemas and sanitized fixtures copied instead."
+        },
+        {
+          "originalPath": "packages/contracts/fixtures/auth-token-envelope/**",
+          "reason": "Accept/discovery fixtures contain private/stage issuer and token endpoints (auth.stage.linkplatform.linktrend.dev); withheld."
+        },
+        {
+          "originalPath": "packages/contracts/fixtures/provider-trust/**",
+          "reason": "Provider-trust exists only as implementation plus operational fixtures; no JSON schema at this pin. Not live PACI proof."
+        },
+        {
+          "originalPath": "docs/handoffs/**",
+          "reason": "Historical operational evidence; not live hosted-auth proof."
+        },
+        {
+          "originalPath": "packages/contracts/schemas/platform-auth-claims.v1.0.0.json",
+          "reason": "Superseded 1.0.0 schema; LiNKsites pins 1.1.0."
+        }
+      ],
+      "byteCompare": "each copiedPath sha256 equals git object bytes at exact bound source commit before commit",
+      "notLiveProof": "Copied freeze records and sanitized fixtures are not hosted-auth, PACI, or production proof. Historical handoffs withheld.",
+      "sourceBinding": {
+        "role": "read-only",
+        "checkedOutCommit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+        "checkedOutTree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+        "developmentTipNotUsed": true
       }
     },
     "linkautowork": {
@@ -82,7 +202,7 @@
       "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
       "directory": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26",
       "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
-      "status": "COPIED",
+      "status": "PARTIAL_WITHHOLD",
       "copiedFileCount": 17,
       "copiedOriginalPaths": [
         "docs/contracts/provider-contract-v1.md",
@@ -117,10 +237,601 @@
           "reason": "Runtime implementation; HTTP contract markdown copied instead."
         }
       ],
-      "byteCompare": "each copiedPath sha256 equals source file at exact commit/tree before commit"
+      "byteCompare": "each copiedPath sha256 equals git object bytes at exact bound source commit before commit",
+      "sourceBinding": {
+        "role": "read-only",
+        "checkedOutCommit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+        "checkedOutTree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+        "developmentTipNotUsed": true
+      }
     }
   },
   "files": [
+    {
+      "repository": "linktrend/LiNKharness",
+      "commit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+      "originalPath": "packages/contracts/fixtures/linksites-profile.json",
+      "copiedPath": "linkharness/7f8d5199f67057fb0a314c1d90e04ea6f64df0bf/packages/contracts/fixtures/linksites-profile.json",
+      "sourceSha256": "b282ac187bddb9d1b48086be32f9ef1de52afa39595cfcb7c105655cf5803cc0",
+      "copiedSha256": "b282ac187bddb9d1b48086be32f9ef1de52afa39595cfcb7c105655cf5803cc0",
+      "contentType": "json",
+      "compatibility": "LiNKsites Profile fixture used to interpret Profile identity/ports/events composition. Planning/source input only; Harness copyPolicy remains do_not_copy_harness_source.",
+      "owner": "linktrend/LiNKharness",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKharness",
+      "commit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+      "originalPath": "packages/profile-sdk/fixtures/minimal-profile.json",
+      "copiedPath": "linkharness/7f8d5199f67057fb0a314c1d90e04ea6f64df0bf/packages/profile-sdk/fixtures/minimal-profile.json",
+      "sourceSha256": "d45d8e544e027dd475fa9b6b8ec6f229f16399e55e009c3a92cb7813c6a6f6a9",
+      "copiedSha256": "d45d8e544e027dd475fa9b6b8ec6f229f16399e55e009c3a92cb7813c6a6f6a9",
+      "contentType": "json",
+      "compatibility": "Minimal Profile fixture showing required Profile/program/module/phase/issue/adapter/redaction/compatibility fields needed to interpret linksites-profile.json.",
+      "owner": "linktrend/LiNKharness",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKharness",
+      "commit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+      "originalPath": "docs/guides/profile-authoring.md",
+      "copiedPath": "linkharness/7f8d5199f67057fb0a314c1d90e04ea6f64df0bf/docs/guides/profile-authoring.md",
+      "sourceSha256": "dfb83bf086de44ee4bb2a1a7823cd1b48b3ce56af1d8f38985ee057702a04336",
+      "copiedSha256": "dfb83bf086de44ee4bb2a1a7823cd1b48b3ce56af1d8f38985ee057702a04336",
+      "contentType": "markdown",
+      "compatibility": "Profile/port/event/evidence/verdict authoring contract: schema-validated JSON plus ports; evidence meaning stays in the Profile. Not hosted-executor proof.",
+      "owner": "linktrend/LiNKharness",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "indexes/v2/catalog.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/indexes/v2/catalog.json",
+      "sourceSha256": "8f45b387b79032fbe37dead79440e881195b1e736f8f07d18bc6209067c684b4",
+      "copiedSha256": "8f45b387b79032fbe37dead79440e881195b1e736f8f07d18bc6209067c684b4",
+      "contentType": "json",
+      "compatibility": "Provider cataloguePath consumed by LiNKsites provider-baseline. Records prove master-template-type-1 is draft/non_selectable/unknown (planning/candidate). marketing-smb-v1 is absent from this catalogue (quarantined entry, not selectable). Not production admission.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "schemas/v2/catalogue.schema.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/schemas/v2/catalogue.schema.json",
+      "sourceSha256": "21fc3b9b8288f930c862db134cc23e366e163c5a23d537f88afd9760702166a3",
+      "copiedSha256": "21fc3b9b8288f930c862db134cc23e366e163c5a23d537f88afd9760702166a3",
+      "contentType": "json",
+      "compatibility": "Catalogue schema for indexes/v2/catalog.json.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "schemas/v2/catalogue-record.schema.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/schemas/v2/catalogue-record.schema.json",
+      "sourceSha256": "46e5fa9fe03d8c19fa67cc455cdc56142ea258de978846a09959b4f0690ebb7f",
+      "copiedSha256": "46e5fa9fe03d8c19fa67cc455cdc56142ea258de978846a09959b4f0690ebb7f",
+      "contentType": "json",
+      "compatibility": "Catalogue record schema used to interpret MWT and other catalogue rows.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "schemas/v2/common.schema.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/schemas/v2/common.schema.json",
+      "sourceSha256": "b304a1d448136561d1b9e477ad7aca4dea75f188840ea578c2ca2da8af736931",
+      "copiedSha256": "b304a1d448136561d1b9e477ad7aca4dea75f188840ea578c2ca2da8af736931",
+      "contentType": "json",
+      "compatibility": "Shared schema $defs required by catalogue/website-template/entry schemas.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "schemas/v2/website-template.schema.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/schemas/v2/website-template.schema.json",
+      "sourceSha256": "bb9cc907cd39d4da6b6a34d7b93bd6f8e68067a40850311a0d0f42a8119a54ce",
+      "copiedSha256": "bb9cc907cd39d4da6b6a34d7b93bd6f8e68067a40850311a0d0f42a8119a54ce",
+      "contentType": "json",
+      "compatibility": "Website-template artifact schema for Master Website Template planning compatibility.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "schemas/v2/entry-index.schema.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/schemas/v2/entry-index.schema.json",
+      "sourceSha256": "305b236dfb2d6a121986912db5291636692148639266a62564a77696bb11939d",
+      "copiedSha256": "305b236dfb2d6a121986912db5291636692148639266a62564a77696bb11939d",
+      "contentType": "json",
+      "compatibility": "Entry/release index schema for MWT planning handoff.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "schemas/v2/release-manifest.schema.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/schemas/v2/release-manifest.schema.json",
+      "sourceSha256": "dedf76f99ca9fcfc2770dd81eea90e92a8d604f214a45887688cfd84e5bde67b",
+      "copiedSha256": "dedf76f99ca9fcfc2770dd81eea90e92a8d604f214a45887688cfd84e5bde67b",
+      "contentType": "json",
+      "compatibility": "Release manifest schema for MWT planning compatibility.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "schemas/v2/consumption-receipt.schema.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/schemas/v2/consumption-receipt.schema.json",
+      "sourceSha256": "74f265dd5ef1592f15b1ac4c9777b707514e24d4654e35206a52dc973f2670de",
+      "copiedSha256": "74f265dd5ef1592f15b1ac4c9777b707514e24d4654e35206a52dc973f2670de",
+      "contentType": "json",
+      "compatibility": "Consumption-receipt schema used by LiNKsites library consumer planning.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "entries/marketing-smb-v1/entry.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/entries/marketing-smb-v1/entry.json",
+      "sourceSha256": "55104945ee886889b6ec2ce1d549a2f860ff59693e3df584a4ff3c7f8c35cfe9",
+      "copiedSha256": "55104945ee886889b6ec2ce1d549a2f860ff59693e3df584a4ff3c7f8c35cfe9",
+      "contentType": "json",
+      "compatibility": "Exact provider entry for marketing-smb-v1: state=quarantined, selectable=false. Not selectable and not production admission.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "entries/marketing-smb-v1/content/content.schema.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/entries/marketing-smb-v1/content/content.schema.json",
+      "sourceSha256": "b6d809f845f8bd5c0fecfd3815209ecb6d7afb325c034bdd468197ac6088c0dd",
+      "copiedSha256": "b6d809f845f8bd5c0fecfd3815209ecb6d7afb325c034bdd468197ac6088c0dd",
+      "contentType": "json",
+      "compatibility": "marketing-smb-v1 content/input schema required for planning compatibility. Draft-only; not live content.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "entries/marketing-smb-v1/README.md",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/entries/marketing-smb-v1/README.md",
+      "sourceSha256": "fc75a8541eb964a6543eb4b389558ad68190030ff6ce6a29bd003a948d5d6313",
+      "copiedSha256": "fc75a8541eb964a6543eb4b389558ad68190030ff6ce6a29bd003a948d5d6313",
+      "contentType": "markdown",
+      "compatibility": "Entry contract document stating renderer/CMS compatibility unknown and selection forbidden.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "registry/v2/entries/master-template-type-1/versions/2.0.0/index.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/registry/v2/entries/master-template-type-1/versions/2.0.0/index.json",
+      "sourceSha256": "f23c036a71681af59dd0c0ecf18c2e31286550f91b87931aa5efab9631d931fa",
+      "copiedSha256": "f23c036a71681af59dd0c0ecf18c2e31286550f91b87931aa5efab9631d931fa",
+      "contentType": "json",
+      "compatibility": "MWT 2.0.0 release index (planning/candidate). Catalogue lifecycle remains draft/non_selectable.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "registry/v2/entries/master-template-type-1/versions/2.0.0/manifest.json",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/registry/v2/entries/master-template-type-1/versions/2.0.0/manifest.json",
+      "sourceSha256": "f1ba6261aefd628672a4bae3333fc07827f82df1a39083e1c20ae881c2cc9916",
+      "copiedSha256": "f1ba6261aefd628672a4bae3333fc07827f82df1a39083e1c20ae881c2cc9916",
+      "contentType": "json",
+      "compatibility": "MWT 2.0.0 release manifest (planning/candidate). Not production admission.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "originalPath": "docs/architecture/master-template/LINKSITES-HANDOFF.md",
+      "copiedPath": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/docs/architecture/master-template/LINKSITES-HANDOFF.md",
+      "sourceSha256": "5c47a90758ce60f8dded0f5a67d4fff0588ef259b2355759f0d425996e483651",
+      "copiedSha256": "5c47a90758ce60f8dded0f5a67d4fff0588ef259b2355759f0d425996e483651",
+      "contentType": "markdown",
+      "compatibility": "MWT integration/handoff contract for LiNKsites. Historical SHAs inside are not this pin and are not live proof; planning/candidate only.",
+      "owner": "linktrend/LiNKlibraries",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/schemas/platform-auth-claims.v1.1.0.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/schemas/platform-auth-claims.v1.1.0.json",
+      "sourceSha256": "c2e8bc68b3feb9a3dacc497f5a5d497b466c400804fb4f9e41734c10772ddfa1",
+      "copiedSha256": "c2e8bc68b3feb9a3dacc497f5a5d497b466c400804fb4f9e41734c10772ddfa1",
+      "contentType": "json",
+      "compatibility": "Frozen platform.auth-claims/1.1.0 schema consumed by LiNKsites provider-baseline.authClaimsSchema. Not hosted-auth proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/schemas/platform-auth-token-envelope.v0.1.0.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/schemas/platform-auth-token-envelope.v0.1.0.json",
+      "sourceSha256": "7173b9f9bca59ce8a0e3e3dc2b78b680dd07fdd2451215e3ecd97ff3dd463eed",
+      "copiedSha256": "7173b9f9bca59ce8a0e3e3dc2b78b680dd07fdd2451215e3ecd97ff3dd463eed",
+      "contentType": "json",
+      "compatibility": "Auth token envelope schema required to interpret claims-in-token mapping. Fixtures with private/stage endpoints withheld.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
+      "sourceSha256": "2b9961a4aeadd85a355cef49a0bdddf1097519fd420858cb9c7c2cce45baad61",
+      "copiedSha256": "2b9961a4aeadd85a355cef49a0bdddf1097519fd420858cb9c7c2cce45baad61",
+      "contentType": "json",
+      "compatibility": "Catalogue-provider handoff schema used by LiNKsites platform catalogue pin mapping.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/schemas/platform-catalogue-profile.v1.0.0.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/schemas/platform-catalogue-profile.v1.0.0.json",
+      "sourceSha256": "4a263ff73ed4740185934454f5fbdd4dc58d880e31c19c6493b44740a8c18523",
+      "copiedSha256": "4a263ff73ed4740185934454f5fbdd4dc58d880e31c19c6493b44740a8c18523",
+      "contentType": "json",
+      "compatibility": "Catalogue/Profile contract schema bound by the provider-handoff. Not PACI live proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "docs/contracts/platform-auth-claims-v1.md",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/docs/contracts/platform-auth-claims-v1.md",
+      "sourceSha256": "5bf6595903925fe60df8e0c3959f9d11f98ae2a08cfabd9ce07ba519e6e1b655",
+      "copiedSha256": "5bf6595903925fe60df8e0c3959f9d11f98ae2a08cfabd9ce07ba519e6e1b655",
+      "contentType": "markdown",
+      "compatibility": "Auth-claims semantics contract for 1.1.0.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "docs/contracts/frozen/platform-auth-claims-v1.1.0.FROZEN.md",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/docs/contracts/frozen/platform-auth-claims-v1.1.0.FROZEN.md",
+      "sourceSha256": "3646ada287449f17d7c6ab47fe43eae17805a2e8627af133020a7f22513413a6",
+      "copiedSha256": "3646ada287449f17d7c6ab47fe43eae17805a2e8627af133020a7f22513413a6",
+      "contentType": "markdown",
+      "compatibility": "Freeze record (hashes/paths) for platform.auth-claims/1.1.0. Historical freeze is not live hosted-auth proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "docs/contracts/platform-auth-token-envelope-v0.1.md",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/docs/contracts/platform-auth-token-envelope-v0.1.md",
+      "sourceSha256": "0f9d557285af72d92167b36d0618144d188e593dfdcf06d12fd14d68950a6c6d",
+      "copiedSha256": "0f9d557285af72d92167b36d0618144d188e593dfdcf06d12fd14d68950a6c6d",
+      "contentType": "markdown",
+      "compatibility": "Token envelope contract document. Not live issuer proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "docs/contracts/frozen/platform-auth-token-envelope-v0.1.0.FROZEN.md",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/docs/contracts/frozen/platform-auth-token-envelope-v0.1.0.FROZEN.md",
+      "sourceSha256": "de76dafc9cc81a3c1935ce514298527d44953e99ed39d1c74570c7695858eed3",
+      "copiedSha256": "de76dafc9cc81a3c1935ce514298527d44953e99ed39d1c74570c7695858eed3",
+      "contentType": "markdown",
+      "compatibility": "Freeze record for token envelope. Not live proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "docs/contracts/frozen/platform-catalogue-profile-v1.0.0.FROZEN.md",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/docs/contracts/frozen/platform-catalogue-profile-v1.0.0.FROZEN.md",
+      "sourceSha256": "87f3c203490d80f38e9d24231541d6680b17b67c195ab50945f901f37361b5ea",
+      "copiedSha256": "87f3c203490d80f38e9d24231541d6680b17b67c195ab50945f901f37361b5ea",
+      "contentType": "markdown",
+      "compatibility": "Freeze record for catalogue/Profile. Not consumer/live proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/claims/accept-valid.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/claims/accept-valid.json",
+      "sourceSha256": "cf9b420e090f03e09672ba12b1501417d38b8f75551c9ead1961d014caa8cdc3",
+      "copiedSha256": "cf9b420e090f03e09672ba12b1501417d38b8f75551c9ead1961d014caa8cdc3",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for auth-claims 1.1.0. Synthetic actor/org IDs only.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/claims/reject-revoked.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/claims/reject-revoked.json",
+      "sourceSha256": "0452cca5d565b3b937f3debb39e0020b737f4d1c4632cfdbe3738e9d19b3cf5c",
+      "copiedSha256": "0452cca5d565b3b937f3debb39e0020b737f4d1c4632cfdbe3738e9d19b3cf5c",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: revoked credential.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/claims/reject-wrong-audience.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/claims/reject-wrong-audience.json",
+      "sourceSha256": "64fbc63cdb14d04c583fb2a3be3974199f6b5a0e09e1204e1d5d213a44dce36d",
+      "copiedSha256": "64fbc63cdb14d04c583fb2a3be3974199f6b5a0e09e1204e1d5d213a44dce36d",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: audience mismatch.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/claims/reject-expired.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/claims/reject-expired.json",
+      "sourceSha256": "d8146547b3a613875bc5bf16ed9bca106cf2cf085a1dc369a05aeeee05636f3a",
+      "copiedSha256": "d8146547b3a613875bc5bf16ed9bca106cf2cf085a1dc369a05aeeee05636f3a",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: expired claims.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/claims/reject-rotated.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/claims/reject-rotated.json",
+      "sourceSha256": "e694ca5e15bf2672957ffc7a20ec3cdbee3bb6af2a7022d3cbc55645f08f6566",
+      "copiedSha256": "e694ca5e15bf2672957ffc7a20ec3cdbee3bb6af2a7022d3cbc55645f08f6566",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: rotated credential.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/claims/reject-wrong-service.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/claims/reject-wrong-service.json",
+      "sourceSha256": "0b0fb18bffead1cb2993342c037aac16fc990114af31921e57fc85e36db4ee34",
+      "copiedSha256": "0b0fb18bffead1cb2993342c037aac16fc990114af31921e57fc85e36db4ee34",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: service mismatch.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/claims/reject-wrong-org.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/claims/reject-wrong-org.json",
+      "sourceSha256": "da2eeeb9d51a5091a235b3120201b4fd91611801f24c3dc06f2c8073a744fa5b",
+      "copiedSha256": "da2eeeb9d51a5091a235b3120201b4fd91611801f24c3dc06f2c8073a744fa5b",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: org mismatch.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/accept-valid.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-profile/accept-valid.json",
+      "sourceSha256": "bc8326fb033aece83da852f58734111b0ff237a7b6965afee94ee544409c7cf5",
+      "copiedSha256": "bc8326fb033aece83da852f58734111b0ff237a7b6965afee94ee544409c7cf5",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for catalogue/Profile contract.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/accept-client-profile.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-profile/accept-client-profile.json",
+      "sourceSha256": "17a57963512a55ed390e16e8a44876507da2b7be48c1fa72ff54a854efb27217",
+      "copiedSha256": "17a57963512a55ed390e16e8a44876507da2b7be48c1fa72ff54a854efb27217",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for client Profile shape.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-extra-field.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-profile/reject-extra-field.json",
+      "sourceSha256": "53b3578342f4032c785686e877d1258810866f9a14be661df8361710bd0ad10f",
+      "copiedSha256": "53b3578342f4032c785686e877d1258810866f9a14be661df8361710bd0ad10f",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: extra field.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-wrong-version.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-profile/reject-wrong-version.json",
+      "sourceSha256": "4ef905302ddfd2db34609d33935af9d07aa69e56005109a8222d99bb2a782583",
+      "copiedSha256": "4ef905302ddfd2db34609d33935af9d07aa69e56005109a8222d99bb2a782583",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: wrong version.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-unknown-status.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-profile/reject-unknown-status.json",
+      "sourceSha256": "5c49ac4ee563c846621531b49a3cd6941cba5719321060d7c4a98364fff7eb17",
+      "copiedSha256": "5c49ac4ee563c846621531b49a3cd6941cba5719321060d7c4a98364fff7eb17",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: unknown status.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-bad-kind.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-profile/reject-bad-kind.json",
+      "sourceSha256": "1981c0346833f96d486a00cf024ebbe99abf8fd6d540f5007bdb51882bfc65fd",
+      "copiedSha256": "1981c0346833f96d486a00cf024ebbe99abf8fd6d540f5007bdb51882bfc65fd",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: bad kind.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-paci-capability-id.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-profile/reject-paci-capability-id.json",
+      "sourceSha256": "93575a17c63775059711698cda5426f4fc79631126e6526e9228c8f7cd880f63",
+      "copiedSha256": "93575a17c63775059711698cda5426f4fc79631126e6526e9228c8f7cd880f63",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: PACI capability id not allowed on this contract.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-wrong-commit.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-provider-handoff/reject-wrong-commit.json",
+      "sourceSha256": "9c2e35211bd76f1596cc559370af0cca409c87ea98b93d0598abf7af7f00bf59",
+      "copiedSha256": "9c2e35211bd76f1596cc559370af0cca409c87ea98b93d0598abf7af7f00bf59",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: wrong commit pin.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-consumer-proof.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-provider-handoff/reject-consumer-proof.json",
+      "sourceSha256": "4f5081dada937636c9fbb86933dc62443d63da76c85053493940710290a09e2f",
+      "copiedSha256": "4f5081dada937636c9fbb86933dc62443d63da76c85053493940710290a09e2f",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: consumer proof claimed.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-extra-field.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-provider-handoff/reject-extra-field.json",
+      "sourceSha256": "f8578e99f8150f950ba963198872b39abc0d001ed1b5e35e57fc04d16eabbcaf",
+      "copiedSha256": "f8578e99f8150f950ba963198872b39abc0d001ed1b5e35e57fc04d16eabbcaf",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: extra field.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-integration-claimed.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-provider-handoff/reject-integration-claimed.json",
+      "sourceSha256": "d5ee87c83006458991a3f1e7e5f5aa0465d0c611207119f7bf61a3fa48472517",
+      "copiedSha256": "d5ee87c83006458991a3f1e7e5f5aa0465d0c611207119f7bf61a3fa48472517",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: integration claimed.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-invented-tag.json",
+      "copiedPath": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3/packages/contracts/fixtures/catalogue-provider-handoff/reject-invented-tag.json",
+      "sourceSha256": "3f59da9c7851399dbd6c707d2ac920404fa0ee6054776e7b4d9203af31c967ce",
+      "copiedSha256": "3f59da9c7851399dbd6c707d2ac920404fa0ee6054776e7b4d9203af31c967ce",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: invented tag.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
     {
       "repository": "linktrend/LiNKautowork",
       "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
@@ -346,24 +1057,95 @@
   "missingOrWithheldInputs": [
     {
       "program": "linkharness",
-      "status": "HOLD",
+      "status": "PARTIAL_WITHHOLD",
       "requestedCommit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
       "requestedTree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
-      "withheld": "all Profile/ports/events schemas and linksites-profile fixture; source repository unreadable"
+      "withheld": [
+        {
+          "originalPath": "packages/contracts/src/schemas.ts",
+          "reason": "JSON Schema objects exist only as TypeScript implementation; executable implementation source withheld. Profile fixture plus authoring contract copied instead."
+        },
+        {
+          "originalPath": "packages/contracts/src/ports.ts",
+          "reason": "Executable adapter/Profile/event port implementation; withheld per prohibited-categories."
+        },
+        {
+          "originalPath": "packages/contracts/src/events.ts",
+          "reason": "Executable event-port implementation; withheld per prohibited-categories."
+        },
+        {
+          "originalPath": "packages/contracts/src/validate.ts",
+          "reason": "Executable validator; withheld per prohibited-categories."
+        },
+        {
+          "originalPath": "docs/evidence/consumer-conformance/**",
+          "reason": "Historical bulk conformance evidence; not live proof and not required to interpret the Profile fixture."
+        },
+        {
+          "originalPath": "packages/profile-sdk/vendor/linkharness-contracts/**",
+          "reason": "Vendored implementation duplicate of contracts package; canonical fixture copied from packages/contracts/fixtures."
+        }
+      ]
     },
     {
       "program": "linklibraries",
-      "status": "HOLD",
+      "status": "PARTIAL_WITHHOLD",
       "requestedCommit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
       "requestedTree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
-      "withheld": "catalogue, marketing-smb-v1 entry/content schema, MWT integration/handoff contract; source repository unreadable. Local LiNKsites fixtures were not substituted."
+      "withheld": [
+        {
+          "originalPath": "entries/marketing-smb-v1/src/index.mjs",
+          "reason": "Executable implementation source."
+        },
+        {
+          "originalPath": "entries/marketing-smb-v1/tests/**",
+          "reason": "Executable tests; schema/entry/README copied instead."
+        },
+        {
+          "originalPath": "entries/marketing-smb-v1/assets/**",
+          "reason": "Assets/binaries (svg/template dumps) withheld."
+        },
+        {
+          "originalPath": "entries/marketing-smb-v1/content/baseline-copy.json",
+          "reason": "Copy payload not required once content schema and quarantine entry are present."
+        },
+        {
+          "originalPath": "registry/v2/entries/master-template-type-1/versions/*/artifact/**",
+          "reason": "Template HTML/tokens/assets/binaries; planning uses catalogue + index/manifest + schemas only."
+        },
+        {
+          "originalPath": "docs/evidence/master-website-template-v2/**",
+          "reason": "Historical bulk evidence addenda; not live proof. LINKSITES-HANDOFF.md copied as planning contract with historical-SHA caveat."
+        }
+      ]
     },
     {
       "program": "linkplatform",
-      "status": "HOLD",
+      "status": "PARTIAL_WITHHOLD",
       "requestedCommit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
       "requestedTree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
-      "withheld": "auth-claims/token/catalogue-provider handoff schemas and sanitized accept/reject fixtures; source repository unreadable"
+      "withheld": [
+        {
+          "originalPath": "packages/contracts/src/**",
+          "reason": "Executable TypeScript (claims/token/provider-trust). JSON schemas and sanitized fixtures copied instead."
+        },
+        {
+          "originalPath": "packages/contracts/fixtures/auth-token-envelope/**",
+          "reason": "Accept/discovery fixtures contain private/stage issuer and token endpoints (auth.stage.linkplatform.linktrend.dev); withheld."
+        },
+        {
+          "originalPath": "packages/contracts/fixtures/provider-trust/**",
+          "reason": "Provider-trust exists only as implementation plus operational fixtures; no JSON schema at this pin. Not live PACI proof."
+        },
+        {
+          "originalPath": "docs/handoffs/**",
+          "reason": "Historical operational evidence; not live hosted-auth proof."
+        },
+        {
+          "originalPath": "packages/contracts/schemas/platform-auth-claims.v1.0.0.json",
+          "reason": "Superseded 1.0.0 schema; LiNKsites pins 1.1.0."
+        }
+      ]
     },
     {
       "program": "linkautowork",
@@ -371,47 +1153,45 @@
       "requestedCommit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
       "requestedTree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
       "withheld": [
-        "automations/fixtures/contracts/package-embedded-secret-shaped.json",
-        "implementation source under gateway/ and packages/automation-contracts/src/",
-        "historical bulk evidence under docs/production-roadmap/evidence/ and docs/handoffs/"
+        {
+          "originalPath": "automations/fixtures/contracts/package-embedded-secret-shaped.json",
+          "reason": "Reject fixture still contains secret-shaped field/value; withheld per prohibited-categories check."
+        },
+        {
+          "originalPath": "packages/automation-contracts/src/provider-contract.ts",
+          "reason": "Executable implementation source; contract documentation and sanitized fixtures copied instead."
+        },
+        {
+          "originalPath": "gateway/src/**",
+          "reason": "Runtime implementation; HTTP contract markdown copied instead."
+        }
       ]
     }
   ],
   "holds": [
     {
-      "program": "linkharness",
-      "status": "HOLD",
-      "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKharness (HTTP 404 on repo and commit APIs). Exact commit/tree not substituted with any branch tip.",
-      "evaluatedConsumerSurfaces": [
-        "packages/linkharness-profile Profile/ports/events composition",
-        "linksites-profile identity and HARNESS_PIN copyPolicy do_not_copy_harness_source",
-        "would copy only Profile/ports/events schemas and linksites-profile fixture if source bytes were readable"
-      ],
-      "accessProbe": "gh api + origin-token GitHub REST both 404"
-    },
-    {
       "program": "linklibraries",
       "status": "HOLD",
-      "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKlibraries (HTTP 404). Exact commit/tree not substituted.",
-      "evaluatedConsumerSurfaces": [
-        "indexes/v2/catalog.json and schemas/v2 (provider-baseline cataloguePath/schemaPath)",
-        "marketing-smb-v1 entry/content schema",
-        "master-template-type-1 integration/handoff contract"
-      ],
-      "providerTruthWithoutSourceBytes": "Consumer code treats master-template as draft/non-selectable/unknown (not_selectable). Local marketing-smb-v1 fixture status=approved is offline test data only and is not copied as provider truth. marketing-smb-v1 remains quarantined/non-selectable and MWT remains planning/candidate unless exact source bytes prove otherwise. No admission or live readiness invented.",
-      "accessProbe": "gh api + origin-token GitHub REST both 404"
+      "kind": "provider_selectability",
+      "reason": "Exact LiNKlibraries bytes at this pin prove marketing-smb-v1 is quarantined/non-selectable and master-template-type-1 is draft/non_selectable/unknown (planning/candidate). Not production admission and not a selectable catalogue entry."
     },
     {
       "program": "linkplatform",
       "status": "HOLD",
-      "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKplatform (HTTP 404). Exact commit/tree not substituted.",
-      "evaluatedConsumerSurfaces": [
-        "platform.auth-claims/1.1.0",
-        "platform.provider-trust/1.0.0",
-        "catalogue-provider handoff schemas",
-        "sanitized accept/reject fixtures"
-      ],
-      "accessProbe": "gh api + origin-token GitHub REST both 404"
+      "kind": "not_live_proof",
+      "reason": "Copied auth-claims/token/catalogue-provider schemas and sanitized fixtures are planning/source input only. They do not prove hosted Platform auth, PACI provider-trust, or live production. Token-envelope fixtures with private/stage endpoints were withheld. provider-trust has no JSON schema at this pin (implementation withheld)."
+    },
+    {
+      "program": "linkharness",
+      "status": "HOLD",
+      "kind": "implementation_schema_withheld",
+      "reason": "Profile/port/event JSON Schema objects exist only as TypeScript implementation at this pin and were withheld. The LiNKsites Profile fixture and authoring contract were copied. This is not hosted-executor proof and does not copy Harness source."
+    },
+    {
+      "program": "linkautowork",
+      "status": "HOLD",
+      "kind": "not_live_activation",
+      "reason": "Copied Autowork contracts/fixtures are planning/source input only; not gateway activation. Secret-shaped reject fixture and implementation source remain withheld."
     }
   ],
   "prohibitedCategoriesChecked": [
@@ -421,7 +1201,7 @@
     "customer data / private endpoints",
     "operational dumps / historical bulk evidence"
   ],
-  "semanticChangeInvalidation": "Any semantic change to copied bytes, originalPath selection, commit/tree identity, hashes, compatibility meaning, or withheld/HOLD facts invalidates this version directory. Do not mutate files in place. Later exact handoffs MUST create a new directory keyed by program and the new full source commit. Hash mismatch between sourceSha256 and copiedSha256 is an invalid bundle.",
+  "semanticChangeInvalidation": "Any semantic change to copied bytes, originalPath selection, commit/tree identity, hashes, compatibility meaning, or withheld/HOLD facts invalidates this version directory. Do not mutate copied source bytes in place. Later exact handoffs MUST create a new directory keyed by program and the new full source commit. Hash mismatch between sourceSha256 and copiedSha256 is an invalid bundle. This generation corrects access HOLDs in the same version directories because source commit/tree identity did not change.",
   "notEvidenceOf": [
     "provider admission",
     "live readiness",
