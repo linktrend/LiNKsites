@@ -10,6 +10,8 @@ import { normalizeLocale } from "@/lib/locale-context";
 import { getPublicSiteIdOrNull } from "@/lib/public-route-guard";
 import { MarketingLayoutClient } from "@/components/layouts/MarketingLayoutClient";
 import { loadAcceptedLayoutRuntime } from "@/components/page-renderer/accepted-identities";
+import { resolvePlanActivation } from "@/components/page-renderer/plan-behavior";
+import { resolveConfiguredHook } from "@/lib/forms/side-effect-policy";
 
 // Multi-tenant websites must render per-request (hostname determines tenant).
 export const dynamic = "force-dynamic";
@@ -63,6 +65,10 @@ export default async function LangLayout({
           footerNav={footerNav}
           trafficSource={trafficSource}
           planId={runtime.planId}
+          newsletterEnabled={
+            resolvePlanActivation(runtime.planId).newsletter && resolveConfiguredHook("newsletter")
+          }
+          cookiesEnabled={resolvePlanActivation(runtime.planId).cookies}
         >
           {children}
         </MarketingLayoutClient>

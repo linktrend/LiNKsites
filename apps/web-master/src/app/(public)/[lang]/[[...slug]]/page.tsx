@@ -8,6 +8,7 @@ import { getTemplateModule } from "@/templates/registry";
 import { PageTypeMarker } from "@/components/layouts/PageTypeMarker";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 import { loadAcceptedLayoutRuntime } from "@/components/page-renderer/accepted-identities";
+import { jsonLdForVisibleFamily, visibleFactsFromPage } from "@/lib/seo/family-jsonld";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -67,8 +68,16 @@ export default async function CmsPage({ params }: PageProps) {
     return notFound();
   }
 
+  const facts = visibleFactsFromPage({
+    name: page.title,
+    headline: page.title,
+    description: page.seo?.description,
+  });
+  const jsonLd = jsonLdForVisibleFamily(page.pageType === "home" ? "home" : "detail", facts);
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageTypeMarker pageType={page.pageType ?? null} />
       <template.PageRenderer
         page={page}

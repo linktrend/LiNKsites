@@ -73,8 +73,9 @@ export function evaluateIss1921RuntimeProof(rootDir = resolve(dirname(fileURLToP
       check(
         "iss19.compositions",
         LAYOUT_COMPOSITIONS.A1.pageRenderer !== LAYOUT_COMPOSITIONS.A2.pageRenderer &&
-          LAYOUT_COMPOSITIONS.A2.architectureReady &&
-          LAYOUT_COMPOSITIONS.A3.architectureReady,
+        LAYOUT_COMPOSITIONS.A1.architectureReady &&
+        LAYOUT_COMPOSITIONS.A2.architectureReady &&
+        LAYOUT_COMPOSITIONS.A3.architectureReady,
         "A1/A2/A3 PageRenderer compositions are structurally distinct",
         "compositions are not structurally distinct",
       ),

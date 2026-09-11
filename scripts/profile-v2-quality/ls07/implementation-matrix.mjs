@@ -13,6 +13,7 @@ export const IMPLEMENTATION_A11Y_MATRIX = Object.freeze({
     { id: "a11y.h1", mode: "automated" },
     { id: "a11y.alt", mode: "automated" },
     { id: "a11y.keyboard", mode: "manual", proof: "lab/manual" },
+    { id: "a11y.motion", mode: "automated" },
     { id: "a11y.legal", mode: "legal", proof: "not-claimed" },
   ],
 });
