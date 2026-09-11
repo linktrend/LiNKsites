@@ -1,0 +1,433 @@
+{
+  "schemaVersion": 1,
+  "kind": "linksites-worker-visible-upstream-inputs",
+  "packet": "LSG0-02",
+  "consumerRepository": "linktrend/LiNKsites",
+  "consumerIssueBranch": "issue/523-publish-worker-visible-upstream-inputs-for-links",
+  "planIdentity": {
+    "commit": "87ae0a7029eae7c877f08ef24cda0bdc54041aed",
+    "tree": "87448dec5b60a60773975c48439aceb71fb8806e"
+  },
+  "programs": {
+    "linkharness": {
+      "schemaVersion": 1,
+      "program": "linkharness",
+      "repository": "linktrend/LiNKharness",
+      "commit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+      "directory": "linkharness/7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+      "status": "HOLD",
+      "copiedFileCount": 0,
+      "hold": {
+        "status": "HOLD",
+        "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKharness (HTTP 404 on repo and commit APIs). Exact commit/tree not substituted with any branch tip.",
+        "evaluatedConsumerSurfaces": [
+          "packages/linkharness-profile Profile/ports/events composition",
+          "linksites-profile identity and HARNESS_PIN copyPolicy do_not_copy_harness_source",
+          "would copy only Profile/ports/events schemas and linksites-profile fixture if source bytes were readable"
+        ],
+        "accessProbe": "gh api + origin-token GitHub REST both 404"
+      }
+    },
+    "linklibraries": {
+      "schemaVersion": 1,
+      "program": "linklibraries",
+      "repository": "linktrend/LiNKlibraries",
+      "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "directory": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+      "status": "HOLD",
+      "copiedFileCount": 0,
+      "hold": {
+        "status": "HOLD",
+        "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKlibraries (HTTP 404). Exact commit/tree not substituted.",
+        "evaluatedConsumerSurfaces": [
+          "indexes/v2/catalog.json and schemas/v2 (provider-baseline cataloguePath/schemaPath)",
+          "marketing-smb-v1 entry/content schema",
+          "master-template-type-1 integration/handoff contract"
+        ],
+        "providerTruthWithoutSourceBytes": "Consumer code treats master-template as draft/non-selectable/unknown (not_selectable). Local marketing-smb-v1 fixture status=approved is offline test data only and is not copied as provider truth. marketing-smb-v1 remains quarantined/non-selectable and MWT remains planning/candidate unless exact source bytes prove otherwise. No admission or live readiness invented.",
+        "accessProbe": "gh api + origin-token GitHub REST both 404"
+      }
+    },
+    "linkplatform": {
+      "schemaVersion": 1,
+      "program": "linkplatform",
+      "repository": "linktrend/LiNKplatform",
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "directory": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+      "status": "HOLD",
+      "copiedFileCount": 0,
+      "hold": {
+        "status": "HOLD",
+        "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKplatform (HTTP 404). Exact commit/tree not substituted.",
+        "evaluatedConsumerSurfaces": [
+          "platform.auth-claims/1.1.0",
+          "platform.provider-trust/1.0.0",
+          "catalogue-provider handoff schemas",
+          "sanitized accept/reject fixtures"
+        ],
+        "accessProbe": "gh api + origin-token GitHub REST both 404"
+      }
+    },
+    "linkautowork": {
+      "schemaVersion": 1,
+      "program": "linkautowork",
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "directory": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+      "status": "COPIED",
+      "copiedFileCount": 17,
+      "copiedOriginalPaths": [
+        "docs/contracts/provider-contract-v1.md",
+        "docs/contracts/provider-http-v1.md",
+        "docs/contracts/provider-events-v1.md",
+        "docs/contracts/provider-lifecycle-v1.md",
+        "docs/contracts/provider-status-v1.md",
+        "docs/contracts/provider-dispatch-v1.md",
+        "automations/fixtures/contracts/README.md",
+        "automations/fixtures/contracts/fixture-matrix.json",
+        "automations/fixtures/contracts/provider-valid-request.json",
+        "automations/fixtures/contracts/package-valid.json",
+        "automations/fixtures/contracts/package-invalid-id.json",
+        "automations/fixtures/contracts/package-invalid-semver.json",
+        "automations/fixtures/contracts/package-invalid-lifecycle.json",
+        "automations/fixtures/contracts/package-invalid-engine.json",
+        "automations/fixtures/contracts/package-missing-monitoring.json",
+        "automations/fixtures/contracts/package-missing-evaluation.json",
+        "automations/fixtures/contracts/provenance-unresolved.json"
+      ],
+      "withheldFromReadableSource": [
+        {
+          "originalPath": "automations/fixtures/contracts/package-embedded-secret-shaped.json",
+          "reason": "Reject fixture still contains secret-shaped field/value; withheld per prohibited-categories check."
+        },
+        {
+          "originalPath": "packages/automation-contracts/src/provider-contract.ts",
+          "reason": "Executable implementation source; contract documentation and sanitized fixtures copied instead."
+        },
+        {
+          "originalPath": "gateway/src/**",
+          "reason": "Runtime implementation; HTTP contract markdown copied instead."
+        }
+      ],
+      "byteCompare": "each copiedPath sha256 equals source file at exact commit/tree before commit"
+    }
+  },
+  "files": [
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "docs/contracts/provider-contract-v1.md",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/docs/contracts/provider-contract-v1.md",
+      "sourceSha256": "ac337a3596cf67729fb2dbf719225f563b14332b94bc4f9355f10713309bbc88",
+      "copiedSha256": "ac337a3596cf67729fb2dbf719225f563b14332b94bc4f9355f10713309bbc88",
+      "contentType": "markdown",
+      "compatibility": "LiNKsites AutoworkClient/provider-baseline contractVersion 2026-08-13.v1; receipt/request/event/callback wire contract. Planning/source input only; not live readiness.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "docs/contracts/provider-http-v1.md",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/docs/contracts/provider-http-v1.md",
+      "sourceSha256": "dff8e1f20c72f8428de20396ca092748d27f67dcf710320f0703a3749cf5832d",
+      "copiedSha256": "dff8e1f20c72f8428de20396ca092748d27f67dcf710320f0703a3749cf5832d",
+      "contentType": "markdown",
+      "compatibility": "CMS/web-master gateway HTTP surface mapping (bounded metadata, receipts). Not an endpoint admission.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "docs/contracts/provider-events-v1.md",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/docs/contracts/provider-events-v1.md",
+      "sourceSha256": "cd5b08264691e4bd97a6df6db3e1513f40fca2912f05de6da129035f02d97933",
+      "copiedSha256": "cd5b08264691e4bd97a6df6db3e1513f40fca2912f05de6da129035f02d97933",
+      "contentType": "markdown",
+      "compatibility": "Durable event/outbox metadata consumed by LiNKsites gateway event grants. Payloads remain withheld.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "docs/contracts/provider-lifecycle-v1.md",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/docs/contracts/provider-lifecycle-v1.md",
+      "sourceSha256": "f654412bbecd4dd20758b87a0c6f70bb44186f1ffa33d7cb19329934f7c1ef16",
+      "copiedSha256": "f654412bbecd4dd20758b87a0c6f70bb44186f1ffa33d7cb19329934f7c1ef16",
+      "contentType": "markdown",
+      "compatibility": "Run/lifecycle fail-closed transitions mapped by AutoworkClient AutoworkRunState. No consumer-domain proof.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "docs/contracts/provider-status-v1.md",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/docs/contracts/provider-status-v1.md",
+      "sourceSha256": "aed3d817694d96d35aa60106e78931b7644233ade6e7a6534be01e66b2a63ec2",
+      "copiedSha256": "aed3d817694d96d35aa60106e78931b7644233ade6e7a6534be01e66b2a63ec2",
+      "contentType": "markdown",
+      "compatibility": "Capability status/non-authority fields mapped by AutoworkCapabilityStatus.doesNotProve.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "docs/contracts/provider-dispatch-v1.md",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/docs/contracts/provider-dispatch-v1.md",
+      "sourceSha256": "a469335ad4297251524dcd0a202d50299e1df15a4d9aef29027f4ca2bafca42a",
+      "copiedSha256": "a469335ad4297251524dcd0a202d50299e1df15a4d9aef29027f4ca2bafca42a",
+      "contentType": "markdown",
+      "compatibility": "Dispatch eligibility/HOLD for external assistance; LiNKsites must not treat as activation.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/README.md",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/README.md",
+      "sourceSha256": "d2a214221e5913e58e0b355d8e1aa09bcac7fcf56798b03dd22d5e5eab59aea9",
+      "copiedSha256": "d2a214221e5913e58e0b355d8e1aa09bcac7fcf56798b03dd22d5e5eab59aea9",
+      "contentType": "markdown",
+      "compatibility": "Sanitized WP-01 fixture policy: no credentials; accept/reject matrix for contract validation.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/fixture-matrix.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/fixture-matrix.json",
+      "sourceSha256": "5e47d6b344d5844097cd4704b5299863f9658a836f8a7952414a826219be33a6",
+      "copiedSha256": "5e47d6b344d5844097cd4704b5299863f9658a836f8a7952414a826219be33a6",
+      "contentType": "json",
+      "compatibility": "Accept/reject fixture map consumed as worker-visible validation catalogue. Secret-shaped reject fixture withheld.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/provider-valid-request.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/provider-valid-request.json",
+      "sourceSha256": "53a711b521e49de7edc7a363568c92138f63648088a22a39900c2f4b75e38057",
+      "copiedSha256": "53a711b521e49de7edc7a363568c92138f63648088a22a39900c2f4b75e38057",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for 2026-08-13.v1 metadata-only request classification.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/package-valid.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/package-valid.json",
+      "sourceSha256": "a133bc545dbcebc5749caca2199cb09c0c43721545a79374446c884ef9045e0c",
+      "copiedSha256": "a133bc545dbcebc5749caca2199cb09c0c43721545a79374446c884ef9045e0c",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for automation package schema; draft/non-deployable.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/package-invalid-id.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/package-invalid-id.json",
+      "sourceSha256": "528b38ebc5c0a95c16e277ec88dcb92224e03b38973853007a74174a1d9cbd6f",
+      "copiedSha256": "528b38ebc5c0a95c16e277ec88dcb92224e03b38973853007a74174a1d9cbd6f",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: automation_id rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/package-invalid-semver.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/package-invalid-semver.json",
+      "sourceSha256": "d0e78b78c4655a364955f3bd136ea0b81f0674c3af66ae967bef22686a4ab202",
+      "copiedSha256": "d0e78b78c4655a364955f3bd136ea0b81f0674c3af66ae967bef22686a4ab202",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: release.version rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/package-invalid-lifecycle.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/package-invalid-lifecycle.json",
+      "sourceSha256": "fef9800d25d3062beb55d7dbdbd0b392b83a685e46bea50a25aa96d664c97c67",
+      "copiedSha256": "fef9800d25d3062beb55d7dbdbd0b392b83a685e46bea50a25aa96d664c97c67",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: release.lifecycle rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/package-invalid-engine.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/package-invalid-engine.json",
+      "sourceSha256": "6e6db04e983dc6712a5f9600cee21ccbf31f0729466cebbbf2fc117a5b93e9ae",
+      "copiedSha256": "6e6db04e983dc6712a5f9600cee21ccbf31f0729466cebbbf2fc117a5b93e9ae",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: runtime.engine rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/package-missing-monitoring.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/package-missing-monitoring.json",
+      "sourceSha256": "4cf57fc874c54bd0b0730735436bc1082a89314038d72755540cc0144d7d3d90",
+      "copiedSha256": "4cf57fc874c54bd0b0730735436bc1082a89314038d72755540cc0144d7d3d90",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: operations.monitoring_ref rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/package-missing-evaluation.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/package-missing-evaluation.json",
+      "sourceSha256": "1944ca6842a5ab5cda0157b5545d43ffd523f1faff1999adc9964c8a545d0922",
+      "copiedSha256": "1944ca6842a5ab5cda0157b5545d43ffd523f1faff1999adc9964c8a545d0922",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: evaluation rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "originalPath": "automations/fixtures/contracts/provenance-unresolved.json",
+      "copiedPath": "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/automations/fixtures/contracts/provenance-unresolved.json",
+      "sourceSha256": "552c196b18d58a5599a41db07be5cbb948921e48502f3211e7d0abdfacd4a78b",
+      "copiedSha256": "552c196b18d58a5599a41db07be5cbb948921e48502f3211e7d0abdfacd4a78b",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: unresolved provenance/licence policy. Uses example.invalid locator only.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_planning_input"
+    }
+  ],
+  "missingOrWithheldInputs": [
+    {
+      "program": "linkharness",
+      "status": "HOLD",
+      "requestedCommit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "requestedTree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+      "withheld": "all Profile/ports/events schemas and linksites-profile fixture; source repository unreadable"
+    },
+    {
+      "program": "linklibraries",
+      "status": "HOLD",
+      "requestedCommit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "requestedTree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+      "withheld": "catalogue, marketing-smb-v1 entry/content schema, MWT integration/handoff contract; source repository unreadable. Local LiNKsites fixtures were not substituted."
+    },
+    {
+      "program": "linkplatform",
+      "status": "HOLD",
+      "requestedCommit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "requestedTree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+      "withheld": "auth-claims/token/catalogue-provider handoff schemas and sanitized accept/reject fixtures; source repository unreadable"
+    },
+    {
+      "program": "linkautowork",
+      "status": "PARTIAL_WITHHOLD",
+      "requestedCommit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "requestedTree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
+      "withheld": [
+        "automations/fixtures/contracts/package-embedded-secret-shaped.json",
+        "implementation source under gateway/ and packages/automation-contracts/src/",
+        "historical bulk evidence under docs/production-roadmap/evidence/ and docs/handoffs/"
+      ]
+    }
+  ],
+  "holds": [
+    {
+      "program": "linkharness",
+      "status": "HOLD",
+      "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKharness (HTTP 404 on repo and commit APIs). Exact commit/tree not substituted with any branch tip.",
+      "evaluatedConsumerSurfaces": [
+        "packages/linkharness-profile Profile/ports/events composition",
+        "linksites-profile identity and HARNESS_PIN copyPolicy do_not_copy_harness_source",
+        "would copy only Profile/ports/events schemas and linksites-profile fixture if source bytes were readable"
+      ],
+      "accessProbe": "gh api + origin-token GitHub REST both 404"
+    },
+    {
+      "program": "linklibraries",
+      "status": "HOLD",
+      "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKlibraries (HTTP 404). Exact commit/tree not substituted.",
+      "evaluatedConsumerSurfaces": [
+        "indexes/v2/catalog.json and schemas/v2 (provider-baseline cataloguePath/schemaPath)",
+        "marketing-smb-v1 entry/content schema",
+        "master-template-type-1 integration/handoff contract"
+      ],
+      "providerTruthWithoutSourceBytes": "Consumer code treats master-template as draft/non-selectable/unknown (not_selectable). Local marketing-smb-v1 fixture status=approved is offline test data only and is not copied as provider truth. marketing-smb-v1 remains quarantined/non-selectable and MWT remains planning/candidate unless exact source bytes prove otherwise. No admission or live readiness invented.",
+      "accessProbe": "gh api + origin-token GitHub REST both 404"
+    },
+    {
+      "program": "linkplatform",
+      "status": "HOLD",
+      "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKplatform (HTTP 404). Exact commit/tree not substituted.",
+      "evaluatedConsumerSurfaces": [
+        "platform.auth-claims/1.1.0",
+        "platform.provider-trust/1.0.0",
+        "catalogue-provider handoff schemas",
+        "sanitized accept/reject fixtures"
+      ],
+      "accessProbe": "gh api + origin-token GitHub REST both 404"
+    }
+  ],
+  "prohibitedCategoriesChecked": [
+    "upstream implementation source / executable code",
+    "assets / binaries",
+    "secrets / key IDs / tokens / environment values",
+    "customer data / private endpoints",
+    "operational dumps / historical bulk evidence"
+  ],
+  "semanticChangeInvalidation": "Any semantic change to copied bytes, originalPath selection, commit/tree identity, hashes, compatibility meaning, or withheld/HOLD facts invalidates this version directory. Do not mutate files in place. Later exact handoffs MUST create a new directory keyed by program and the new full source commit. Hash mismatch between sourceSha256 and copiedSha256 is an invalid bundle.",
+  "notEvidenceOf": [
+    "provider admission",
+    "live readiness",
+    "selectable marketing-smb-v1 catalogue entry",
+    "Master Website Template production admission",
+    "Platform hosted auth",
+    "Autowork gateway activation"
+  ]
+}

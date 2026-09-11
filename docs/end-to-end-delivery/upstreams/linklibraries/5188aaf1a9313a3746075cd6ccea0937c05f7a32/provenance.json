@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "program": "linklibraries",
+  "repository": "linktrend/LiNKlibraries",
+  "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+  "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+  "directory": "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+  "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+  "status": "HOLD",
+  "copiedFileCount": 0,
+  "hold": {
+    "status": "HOLD",
+    "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKlibraries (HTTP 404). Exact commit/tree not substituted.",
+    "evaluatedConsumerSurfaces": [
+      "indexes/v2/catalog.json and schemas/v2 (provider-baseline cataloguePath/schemaPath)",
+      "marketing-smb-v1 entry/content schema",
+      "master-template-type-1 integration/handoff contract"
+    ],
+    "providerTruthWithoutSourceBytes": "Consumer code treats master-template as draft/non-selectable/unknown (not_selectable). Local marketing-smb-v1 fixture status=approved is offline test data only and is not copied as provider truth. marketing-smb-v1 remains quarantined/non-selectable and MWT remains planning/candidate unless exact source bytes prove otherwise. No admission or live readiness invented.",
+    "accessProbe": "gh api + origin-token GitHub REST both 404"
+  }
+}

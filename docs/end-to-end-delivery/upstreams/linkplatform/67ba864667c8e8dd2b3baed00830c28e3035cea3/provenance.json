@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "program": "linkplatform",
+  "repository": "linktrend/LiNKplatform",
+  "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+  "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+  "directory": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3",
+  "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+  "status": "HOLD",
+  "copiedFileCount": 0,
+  "hold": {
+    "status": "HOLD",
+    "reason": "Authenticated GitHub access already available in this VM cannot read linktrend/LiNKplatform (HTTP 404). Exact commit/tree not substituted.",
+    "evaluatedConsumerSurfaces": [
+      "platform.auth-claims/1.1.0",
+      "platform.provider-trust/1.0.0",
+      "catalogue-provider handoff schemas",
+      "sanitized accept/reject fixtures"
+    ],
+    "accessProbe": "gh api + origin-token GitHub REST both 404"
+  }
+}
