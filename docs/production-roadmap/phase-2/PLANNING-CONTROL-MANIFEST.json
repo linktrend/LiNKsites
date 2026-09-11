@@ -86,7 +86,7 @@
   },
   "lanePlan": {
     "path":"docs/production-roadmap/phase-2/LANE-PLAN.json",
-    "candidateSha256":"2f6848d74a904fd47f54b7be7677cdfe46dae670c9693093ca2400cd359983f3",
+    "candidateSha256":"608e332e0475037accf43ed37c7acb33af96f6513692ee5d20087dd1126c37a0",
     "recalculateAfterAdvisorAcceptance":true
   },
   "serverBaseline": {

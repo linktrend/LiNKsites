@@ -6,11 +6,14 @@ Status: correction candidate; dispatch is not authorised
 
 Every packet must name its exact protected base, issue/branch, allowed and
 prohibited paths, dependencies, inputs, acceptance commands, evidence and stop
-conditions before work starts. Source implementers use the verified Cursor REST
-route with Grok 4.6 Medium/Fast false; reviewers use separate Luna High
-read-only execution. Implementers commit and push checkpoints but do not open
-PRs, merge, promote or deploy. The coordinator preserves unrelated dirty work,
-uses the installed completion gate, and returns conflicts to the behavior owner.
+conditions before work starts. Founder execution direction supersedes every
+other worker or reviewer model: every implementation, repair, source review and
+operational review agent uses the Cursor REST/API SDK with Grok 4.6 Medium
+and Fast false. Reviews remain separate, independent, read-only agents and
+cannot review their own implementation. Implementers commit and push
+checkpoints but do not open PRs, merge, promote or deploy. The coordinator
+preserves unrelated dirty work, uses the installed completion gate, and returns
+conflicts to the behavior owner.
 
 Completion classes are only:
 
@@ -159,12 +162,21 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 - Dependencies: LSDATA-01 and LSG0-05.
 - Objective: ensure only a trusted producer can attest the exact approved
   source/current base/test/review/expiry/single-use transition.
+- Allowed paths: the L-TRUST literal set in `IMPLEMENTATION-LANES.md` and
+  `LANE-PLAN.json`, including `.github/workflows/ci.yml`,
+  `docs/contracts/CI-SUITE.md` and
+  `scripts/tests/test_promotion_receipt_adversarial.py`. Those three paths are
+  admitted so LSTRUST-01 can incorporate and complete retained Issue 511 work
+  (`ee671c0242dd6d6f3832f8a7ed064de03dfc4b98` / tree
+  `be90a36770dc429101702dbe8cc0c40629fad6e7`) rather than discard or duplicate
+  it. They remain disjoint from every other lane.
 - Actions: reconcile current workflows and Issue 511; keep proposed-code
   credentials unable to publish the authoritative check; bind receipts to
   repository, transition, base/head commit/tree, workflow identity, result,
   reviewer, expiry and consumption; reject copied/stale/duplicate-name/
   candidate-authored/wrong-base/self-reviewed evidence.
-- Acceptance commands: focused receipt/transition unit tests, workflow static
+- Acceptance commands: focused receipt/transition unit tests including
+  `scripts/tests/test_promotion_receipt_adversarial.py`, workflow static
   validation and `git diff --check`.
 - Acceptance: every adversarial case fails for the intended reason and one
   genuine fixture passes without giving candidate code approval authority.
@@ -312,7 +324,8 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 
 ### LSREV-01 — Independent consolidated source/release review
 
-- Reviewer/type: Luna High, independent read-only.
+- Reviewer/type: independent read-only Cursor REST/API SDK agent using Grok
+  4.6 Medium and Fast false; cannot review its own implementation.
 - Dependencies: LSVAL-01.
 - Scope: exact base-to-candidate diff, all PRD requirements, preserved work,
   upstream identities, provider lifecycle, data/migration, trust, runtime,
@@ -464,8 +477,9 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 
 ### LSFULL-03 — Final operational acceptance and handoff
 
-- Reviewer/type: independent Luna High operational review, then coordinator
-  handoff.
+- Reviewer/type: independent read-only operational review via Cursor REST/API
+  SDK with Grok 4.6 Medium and Fast false, then coordinator handoff. The
+  operational reviewer cannot review its own implementation.
 - Dependencies: LSFULL-01 and LSFULL-02.
 - Scope: exact protected main/tree, five deployed digests, both provider
   identities, full LS-FR matrix, one installation, site/content trace, live

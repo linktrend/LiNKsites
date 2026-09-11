@@ -17,7 +17,7 @@ promotes or deploys.
 ## Lane plan
 
 The machine-readable candidate is `LANE-PLAN.json`, currently SHA-256
-`2f6848d74a904fd47f54b7be7677cdfe46dae670c9693093ca2400cd359983f3`.
+`608e332e0475037accf43ed37c7acb33af96f6513692ee5d20087dd1126c37a0`.
 The final `lane_plan_sha256` is recalculated from its advisor-accepted exact
 bytes before packet admission. Any change to a lane, dependency or path
 produces a new hash and invalidates all unsubmitted packets derived from the
@@ -27,7 +27,7 @@ old plan.
 | --- | --- | --- | --- | --- |
 | L-UPSTREAM | source-input publication | `docs/end-to-end-delivery/upstreams/` | no product writer depends on it until checkpointed; may run with read-only branch disposition | all product/runtime source |
 | L-DATA | additive Payload/data compatibility | `apps/cms/src/collections/`, `apps/cms/src/globals/`, `apps/cms/src/migrations/`, `apps/cms/src/payload-types.ts`, `apps/cms/src/payload.config.ts`, `apps/cms/tests/contracts/`, `packages/factory-catalog/src/adoptionIdentities.ts`, `packages/factory-catalog/src/capabilityCredits.ts` | none; migration/generated-sensitive scope is repository-exclusive | every other writer |
-| L-TRUST | protected transition trust | `.github/workflows/linktrend-development-to-staging.yml`, `.github/workflows/linktrend-staging-to-main.yml`, `.github/workflows/linktrend-review-packager.yml`, `.github/linktrend-secret-scan-fixtures.json`, `scripts/gitops/gate_receipt.py`, `scripts/gitops/promotion_receipt_gate.py`, `scripts/gitops/receipt_seal.py`, `scripts/tests/test_gate_receipt_transition.py`, `scripts/tests/test_promotion_transition_workflows.py` | L-FACTORY, L-RENDER, L-AUTOWORK after L-DATA | all other workflow/gitops paths |
+| L-TRUST | protected transition trust | `.github/workflows/linktrend-development-to-staging.yml`, `.github/workflows/linktrend-staging-to-main.yml`, `.github/workflows/linktrend-review-packager.yml`, `.github/workflows/ci.yml`, `.github/linktrend-secret-scan-fixtures.json`, `docs/contracts/CI-SUITE.md`, `scripts/gitops/gate_receipt.py`, `scripts/gitops/promotion_receipt_gate.py`, `scripts/gitops/receipt_seal.py`, `scripts/tests/test_gate_receipt_transition.py`, `scripts/tests/test_promotion_transition_workflows.py`, `scripts/tests/test_promotion_receipt_adversarial.py` | L-FACTORY, L-RENDER, L-AUTOWORK after L-DATA | all other workflow/gitops paths |
 | L-FACTORY | provider selection, adoption and deterministic assembly | `packages/factory-catalog/src/`, `packages/factory-catalog/tests/`, `packages/factory-catalog/WORKING-CONTENT.md` | L-TRUST, L-RENDER, L-AUTOWORK after L-DATA | the two data-owned factory files until L-DATA is accepted; root package/lock files |
 | L-RENDER | Payload projection, React rendering, routes, SEO/AI, accessibility and forms | `apps/web-master/src/`, `apps/web-master/tests/`, `apps/web-master/template.config.json`, `scripts/profile-v2-quality/ls06/`, `scripts/profile-v2-quality/ls07/` | L-TRUST, L-FACTORY, L-AUTOWORK after L-DATA | root package/lock files; CMS migrations; deployment files |
 | L-AUTOWORK | canonical intake/completion and live gateway adapter | `packages/autowork-boundary/src/`, `packages/autowork-boundary/tests/`, `apps/program-orchestrator/src/`, `apps/program-orchestrator/tests/`, `apps/cms/cron/`, `apps/cms/src/payload/utils/autowork.ts`, `apps/cms/tests/contracts/autowork-composition.spec.ts` | L-TRUST, L-FACTORY, L-RENDER after L-DATA | root package/lock files; deployment files |
@@ -38,6 +38,15 @@ old plan.
 Paths above are literal files or slash-terminated directory trees. Actual
 dispatcher packets must not replace them with glob syntax or a broad root such
 as `apps/`, `packages/`, `docs/`, `scripts/`, `deploy/` or `.github/`.
+
+L-TRUST additionally owns `.github/workflows/ci.yml`,
+`docs/contracts/CI-SUITE.md` and
+`scripts/tests/test_promotion_receipt_adversarial.py` so the lane can
+incorporate and complete retained Issue 511 work recorded at commit
+`ee671c0242dd6d6f3832f8a7ed064de03dfc4b98` / tree
+`be90a36770dc429101702dbe8cc0c40629fad6e7`. Those paths are admitted to finish
+that work rather than discard or duplicate it, and they remain disjoint from
+every other lane.
 
 ## Maximum concurrency by wave
 
