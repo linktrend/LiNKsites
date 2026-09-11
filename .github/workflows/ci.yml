@@ -11,8 +11,6 @@ on:
 permissions:
   contents: read
   actions: read
-  checks: read
-  pull-requests: read
 
 # A new commit on the same PR supersedes every non-final application check.
 # The final suite is only labelled after Fast has passed, so cancelling the
