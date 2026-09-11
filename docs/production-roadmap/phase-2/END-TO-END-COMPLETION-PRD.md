@@ -48,9 +48,11 @@ releases does not create a second production installation.
    prior evidence.
 6. IDE Development 2.5.2 is the installed development process, not another
    LiNKsites product dependency. Do not edit its repository or managed package.
-7. Implementation uses the verified Cursor REST route with Grok 4.6 Medium,
-   Fast false and exact GitHub repository/ref/commit/tree binding. Independent
-   review uses Luna High. Cursor desktop/CLI login is irrelevant.
+7. Founder execution direction: every implementation, repair, source review and
+   operational review agent uses the Cursor REST/API SDK with Grok 4.6
+   Medium and Fast false, with exact GitHub repository/ref/commit/tree
+   binding. Reviews remain separate, independent, read-only agents and cannot
+   review their own implementation. Cursor desktop/CLI login is irrelevant.
 8. Founder bootstrap is permitted only when the installed protected publication
    mechanism itself cannot complete after bounded repair. It may use real
    checkpoint, test, review and protection evidence; it may never manufacture
@@ -236,8 +238,9 @@ LiNKsites is DONE only when all of the following are true.
 3. Sanitized upstream contracts used by workers are committed with exact
    provenance and compatibility; no local-only input is required.
 4. Focused packet checks pass, followed by one Full Suite on each consolidated
-   release candidate and one independent Luna High source review on its exact
-   commit/tree.
+   release candidate and one independent source review, via Cursor REST/API
+   SDK with Grok 4.6 Medium and Fast false, on its exact commit/tree. The
+   source reviewer cannot review its own implementation.
 5. The final dependency and image closure has an exact current advisory
    inventory. No unresolved exploitable critical/high finding reaches release;
    every non-applicable or deferred alert has evidence, an owner and an
@@ -298,8 +301,10 @@ LiNKsites is DONE only when all of the following are true.
 22. Functional, responsive, accessibility, metadata, privacy, tenancy,
     security, practical performance and recovery acceptance pass on the final
     live private site/release.
-23. One independent Luna High operational review returns PASS against the exact
-    deployed source, five image digests, provider identities and live evidence.
+23. One independent operational review via Cursor REST/API SDK with Grok 4.6
+    Medium and Fast false returns PASS against the exact deployed source, five
+    image digests, provider identities and live evidence. The operational
+    reviewer cannot review its own implementation.
 24. The founder handoff contains access, identity, health, logs, backup,
     restore, restart, route-disable and rollback instructions. No required
     knowledge remains only in chat or on the coordinator's Mac.

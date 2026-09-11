@@ -13,12 +13,15 @@
         ".github/workflows/linktrend-development-to-staging.yml",
         ".github/workflows/linktrend-staging-to-main.yml",
         ".github/workflows/linktrend-review-packager.yml",
+        ".github/workflows/ci.yml",
         ".github/linktrend-secret-scan-fixtures.json",
+        "docs/contracts/CI-SUITE.md",
         "scripts/gitops/gate_receipt.py",
         "scripts/gitops/promotion_receipt_gate.py",
         "scripts/gitops/receipt_seal.py",
         "scripts/tests/test_gate_receipt_transition.py",
-        "scripts/tests/test_promotion_transition_workflows.py"
+        "scripts/tests/test_promotion_transition_workflows.py",
+        "scripts/tests/test_promotion_receipt_adversarial.py"
       ]
     },
     {

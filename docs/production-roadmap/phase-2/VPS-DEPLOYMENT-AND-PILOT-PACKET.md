@@ -1,8 +1,8 @@
 # Delivery Phase 2 — VPS Deployment and One-Website Pilot Packet
 
 **Status:** Planned — separately authorized only after Delivery Phase 1 PASS. Server03 operational acceptance uses the currently admitted `marketing-smb-v1` provider with real intake and private rendering; the unfinished replacement template is deferred. The one-website pilot must inject one release-manifest-bound selectable LiNKlibraries commit plus its catalog and entry byte checksums into the orchestrator runtime contract; it must not substitute a branch name or a second ref.
-**Executor:** Terra master coordinating narrowly scoped Luna High operators/implementers
-**Independent audit:** Codex Sol Medium at deployment readiness and final pilot evidence
+**Executor:** Cursor REST/API SDK with Grok 4.6 Medium and Fast false for every implementation, repair and live operational change agent
+**Independent audit:** a separate, independent, read-only Cursor REST/API SDK agent using Grok 4.6 Medium and Fast false at deployment readiness and final pilot evidence; the auditor cannot review its own implementation
 **Live-change warning:** This packet mutates VPS services, databases, secrets, routing, and private hosting. It must not begin under Phase 1 approval.
 
 ## Objective
@@ -130,7 +130,7 @@ Use one Principal-approved `LeadResearchPackage` supplied through the manual ada
 
 ### P2-08 — Independent final audit and handoff
 
-Freeze the deployed artifact/SHA/configuration-version evidence and dispatch a fresh Sol Medium auditor in read-only mode. The auditor validates the running private site, completion/evidence chain, service health, privacy boundaries, backups, and exact deployed artifacts. Any `HOLD` finding enters a Luna correction under the smallest required authority and must be re-audited.
+Freeze the deployed artifact/SHA/configuration-version evidence and dispatch a fresh independent read-only Cursor REST/API SDK auditor using Grok 4.6 Medium and Fast false. The auditor validates the running private site, completion/evidence chain, service health, privacy boundaries, backups, and exact deployed artifacts. Any `HOLD` finding enters a Grok 4.6 Medium (Fast false) correction under the smallest required authority and must be re-audited by a separate independent reviewer that did not perform the correction.
 
 After PASS, produce the founder handoff: what is live, how to access the private site, exact test result, known limitations, operational owners, monitoring/backup status, and which capabilities remain untested/out of scope.
 
@@ -148,7 +148,7 @@ Phase 2 passes only when all of the following are evidenced:
 - duplicate/restart behavior causes no duplicate logical side effects;
 - privacy, noindex, tenancy, content, functional, visual, responsive, accessibility, SEO, performance, and security gates pass;
 - monitoring, backup/restore, rollback, and runbooks are proven on the deployed environment;
-- final Sol Medium verdict is `PASS`;
+- final independent Grok 4.6 Medium (Fast false) operational-review verdict is `PASS`;
 - payment, public launch/domain cutover, and post-sales were neither executed nor claimed.
 
 ## Stop/rollback conditions

@@ -137,11 +137,12 @@ admission fills exact branch identities, approval evidence and lane-plan hash.
 
 - Coordinator/Gate 0: current LiNKsites task using the installed repository
   process; read-only refresh and issue/branch setup after approval.
-- Implementation: Cursor REST, Grok 4.6 Medium, Fast false.
+- Implementation and repair: Cursor REST/API SDK, Grok 4.6 Medium, Fast false.
 - Source integration: repository Phase Packager/Coordinator and delivery
   controller; implementers do not open or merge PRs.
-- Independent source and final operational review: Luna High, read-only,
-  separate from implementers and exact-identity bound.
+- Independent source and final operational review: Cursor REST/API SDK,
+  Grok 4.6 Medium, Fast false; read-only, separate from implementers,
+  exact-identity bound, and forbidden from reviewing their own implementation.
 - Live Server03 mutation: one designated LiNKsites deployment owner after the
   immutable source and data-safety gates.
 
