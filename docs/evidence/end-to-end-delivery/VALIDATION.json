@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "kind": "packet-validation",
+  "packet": "LSINT-01-PREPARE",
+  "admittedBase": {
+    "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+    "tree": "109429b45870b5c648ec754f408f06ee9bea0267"
+  },
+  "commands": [
+    {
+      "command": "find docs/evidence/end-to-end-delivery -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+      "result": "pass",
+      "note": "Re-run after this file is written."
+    },
+    {
+      "command": "test -z \"$(git diff --name-only 5fbb8c12e5037c5840290f7c55a60fc16abed3a8...HEAD | rg -v '^docs/evidence/end-to-end-delivery/')\"",
+      "result": "pass",
+      "note": "No committed path outside the allowed directory. Uncommitted files are also only under docs/evidence/end-to-end-delivery/."
+    },
+    {
+      "command": "git diff --check 5fbb8c12e5037c5840290f7c55a60fc16abed3a8...HEAD",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check 5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+      "result": "pass"
+    }
+  ],
+  "internalLinks": {
+    "readmeRelativeLinks": {"count": 15, "missing": []},
+    "newEvidenceJsonRepoPaths": "resolve",
+    "preservedBranchDispositionHistoricalPaths": {
+      "file": "docs/evidence/end-to-end-delivery/branch-disposition.json",
+      "untouched": true,
+      "note": "Preserved LSG0-01 JSON may name planning-era paths that are not present on this tree. Those references were not rewritten."
+    }
+  },
+  "hashValidation": {
+    "algorithm": "sha256",
+    "record": "docs/evidence/end-to-end-delivery/CHECKSUMS.json",
+    "contentFilesHashed": true
+  },
+  "notRun": [
+    "Full Suite",
+    "browser tests",
+    "builds",
+    "Docker",
+    "deployment",
+    "live probes",
+    "GitHub Dependabot API"
+  ]
+}

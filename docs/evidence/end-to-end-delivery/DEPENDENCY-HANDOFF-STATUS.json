@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "kind": "dependency-handoff-status",
+  "LSG0-03": {
+    "status": "HOLD",
+    "record": "docs/evidence/end-to-end-delivery/LSG0-03-HANDOFF.json"
+  },
+  "LSG0-04": {
+    "status": "HOLD",
+    "record": "docs/evidence/end-to-end-delivery/LSG0-04-HANDOFF.json"
+  },
+  "LSG0-02SanitizedContracts": {
+    "status": "published-planning-source-only",
+    "path": "docs/end-to-end-delivery/upstreams/index.json"
+  },
+  "allowedConsumerModesNow": [
+    "sanitized-source-contracts",
+    "manual-file-first-site-adapter"
+  ],
+  "forbiddenNow": [
+    "live-Platform-claims",
+    "live-Autowork-claims",
+    "selectable-provider-claims",
+    "end-to-end-completion"
+  ],
+  "formalDependencies": {
+    "LSINT-01DependsOnLSG0-03": true,
+    "liveWorkLaterDependsOnLSG0-04": true,
+    "LSINT-01NotCompleted": true
+  }
+}
