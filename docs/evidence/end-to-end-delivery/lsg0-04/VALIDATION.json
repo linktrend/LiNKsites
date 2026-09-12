@@ -8,7 +8,8 @@
   "qualificationVerdict": "HOLD",
   "acceptanceCommandsPass": true,
   "leanIndependentReviewer": "not-required",
-  "evidenceHeadAtValidation": "pending-checkpoint",
+  "qualificationCommit": "66c1208b6e0043b417007c526c52019c142ae6b6",
+  "evidenceHeadAtValidation": "66c1208b6e0043b417007c526c52019c142ae6b6",
   "baseSha": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
   "checks": [
     {
@@ -19,8 +20,8 @@
     {
       "id": "scoped-diff",
       "command": "test -z \"$(git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
-      "result": "pass-pending-checkpoint",
-      "workingTreeChangedPaths": [
+      "result": "pass",
+      "changedPaths": [
         "docs/evidence/end-to-end-delivery/lsg0-04/AUTOWORK-SURFACES.json",
         "docs/evidence/end-to-end-delivery/lsg0-04/CHECKSUMS.json",
         "docs/evidence/end-to-end-delivery/lsg0-04/COORDINATOR-DEVELOPMENT-INSPECTION.json",
@@ -36,7 +37,7 @@
     {
       "id": "diff-check",
       "command": "git diff --check 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD",
-      "result": "pass-pending-checkpoint"
+      "result": "pass"
     },
     {
       "id": "changed-path-secret-scan",
