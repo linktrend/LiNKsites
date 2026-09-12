@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "lsg0-04-owner-actions",
+  "issue": 539,
+  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
   "overall": "HOLD",
   "passForbiddenUntilAllRequiredSurfacesExistInProtectedReleasedEvidence": true,
   "actions": [
