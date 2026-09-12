@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "platform.catalogue-profile.provider-handoff",
+  "externalContractId": "EXT-LCL-PLATFORM-CATALOGUE-CONTRACT",
+  "requestingWorkPacket": "LCL-WP-002",
+  "requestingConsumer": "LiNKclient",
+  "contractVersion": "platform.catalogue-profile/1.0.0",
+  "producer": {
+    "repository": "linktrend/LiNKplatform",
+    "commit": "acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062",
+    "tree": "8027697bc681085a2a1a4af029028bc76426c06a"
+  },
+  "pin": {
+    "commit": "acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062",
+    "tree": "8027697bc681085a2a1a4af029028bc76426c06a",
+    "tag": null,
+    "digest": "sha256:dc77d1929b99857a439f5530b618b09e09c0b55541ced5706a9b1b6fc5d1678d"
+  },
+  "acceptedReceipt": {
+    "receiptDigest": "sha256:4f70e542f89c15f2a620c47e4ff77249c79075e5e19fc8a443ee893d12ca4079",
+    "status": "accepted",
+    "protected": true,
+    "provider": {
+      "repository": "linktrend/LiNKplatform",
+      "commit": "acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062",
+      "tree": "8027697bc681085a2a1a4af029028bc76426c06a"
+    }
+  },
+  "artifactDigest": "sha256:0c48b7fd04e992d33bd8d06d1e1de1ad33d37ab304ce905b2061d5c827cb7083",
+  "contractDigest": "sha256:dc77d1929b99857a439f5530b618b09e09c0b55541ced5706a9b1b6fc5d1678d",
+  "verdict": "accepted",
+  "lifecycleState": "accepted",
+  "independentPreparationAllowed": true,
+  "integrationClaimed": false,
+  "consumerProofClaimed": false,
+  "production": false,
+  "publicationClass": "protected-provider"
+}
