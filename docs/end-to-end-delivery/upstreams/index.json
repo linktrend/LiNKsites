@@ -1052,6 +1052,1254 @@
       "compatibility": "Sanitized reject fixture: unresolved provenance/licence policy. Uses example.invalid locator only.",
       "owner": "linktrend/LiNKautowork",
       "evidenceLevel": "exact_source_bytes_planning_input"
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/schemas/platform-auth-claims.v1.1.0.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/schemas/platform-auth-claims.v1.1.0.json",
+      "gitBlob": "4f62d303a88e4ba8b13c62f0c3b1d1a865f91f8f",
+      "sourceSha256": "c2e8bc68b3feb9a3dacc497f5a5d497b466c400804fb4f9e41734c10772ddfa1",
+      "copiedSha256": "c2e8bc68b3feb9a3dacc497f5a5d497b466c400804fb4f9e41734c10772ddfa1",
+      "contentType": "json",
+      "compatibility": "Frozen platform.auth-claims/1.1.0 schema. Source copy only; not hosted-auth proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/schemas/platform-auth-token-envelope.v0.1.0.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/schemas/platform-auth-token-envelope.v0.1.0.json",
+      "gitBlob": "73ea06164acb6dc89ed7270c1c7b5e8167d83d5f",
+      "sourceSha256": "7173b9f9bca59ce8a0e3e3dc2b78b680dd07fdd2451215e3ecd97ff3dd463eed",
+      "copiedSha256": "7173b9f9bca59ce8a0e3e3dc2b78b680dd07fdd2451215e3ecd97ff3dd463eed",
+      "contentType": "json",
+      "compatibility": "Auth token envelope schema. Fixtures with private/stage endpoints withheld.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
+      "gitBlob": "49571e62ad17184c248baf2fbaa92be12e3cf35a",
+      "sourceSha256": "2b9961a4aeadd85a355cef49a0bdddf1097519fd420858cb9c7c2cce45baad61",
+      "copiedSha256": "2b9961a4aeadd85a355cef49a0bdddf1097519fd420858cb9c7c2cce45baad61",
+      "contentType": "json",
+      "compatibility": "Catalogue-provider handoff schema. Not a LiNKsites pin.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/schemas/platform-catalogue-profile.v1.0.0.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/schemas/platform-catalogue-profile.v1.0.0.json",
+      "gitBlob": "5558bb6b0593395724ba70ae360c9f45fc9a09fe",
+      "sourceSha256": "4a263ff73ed4740185934454f5fbdd4dc58d880e31c19c6493b44740a8c18523",
+      "copiedSha256": "4a263ff73ed4740185934454f5fbdd4dc58d880e31c19c6493b44740a8c18523",
+      "contentType": "json",
+      "compatibility": "Catalogue/Profile contract schema. Not PACI live proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "docs/contracts/platform-auth-claims-v1.md",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/docs/contracts/platform-auth-claims-v1.md",
+      "gitBlob": "c36e496b302a1f86ba108e574700854e2be973a6",
+      "sourceSha256": "5bf6595903925fe60df8e0c3959f9d11f98ae2a08cfabd9ce07ba519e6e1b655",
+      "copiedSha256": "5bf6595903925fe60df8e0c3959f9d11f98ae2a08cfabd9ce07ba519e6e1b655",
+      "contentType": "markdown",
+      "compatibility": "Auth-claims semantics contract for 1.1.0.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "docs/contracts/frozen/platform-auth-claims-v1.1.0.FROZEN.md",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/docs/contracts/frozen/platform-auth-claims-v1.1.0.FROZEN.md",
+      "gitBlob": "0c2dc8994cf4819ff00e8d00f29a8e5d67939274",
+      "sourceSha256": "3646ada287449f17d7c6ab47fe43eae17805a2e8627af133020a7f22513413a6",
+      "copiedSha256": "3646ada287449f17d7c6ab47fe43eae17805a2e8627af133020a7f22513413a6",
+      "contentType": "markdown",
+      "compatibility": "Freeze record for platform.auth-claims/1.1.0. Not live hosted-auth proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "docs/contracts/platform-auth-token-envelope-v0.1.md",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/docs/contracts/platform-auth-token-envelope-v0.1.md",
+      "gitBlob": "78f06837a819c8d435211b0748b108df4cda59d9",
+      "sourceSha256": "0f9d557285af72d92167b36d0618144d188e593dfdcf06d12fd14d68950a6c6d",
+      "copiedSha256": "0f9d557285af72d92167b36d0618144d188e593dfdcf06d12fd14d68950a6c6d",
+      "contentType": "markdown",
+      "compatibility": "Token envelope contract document. Not live issuer proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "docs/contracts/frozen/platform-auth-token-envelope-v0.1.0.FROZEN.md",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/docs/contracts/frozen/platform-auth-token-envelope-v0.1.0.FROZEN.md",
+      "gitBlob": "9030d0ef0a5c51e5f8723b523fe621c11dc7e0a6",
+      "sourceSha256": "de76dafc9cc81a3c1935ce514298527d44953e99ed39d1c74570c7695858eed3",
+      "copiedSha256": "de76dafc9cc81a3c1935ce514298527d44953e99ed39d1c74570c7695858eed3",
+      "contentType": "markdown",
+      "compatibility": "Freeze record for token envelope. Not live proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "docs/contracts/frozen/platform-catalogue-profile-v1.0.0.FROZEN.md",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/docs/contracts/frozen/platform-catalogue-profile-v1.0.0.FROZEN.md",
+      "gitBlob": "10944c0a6f1b7fdac47e156b19c5bd18a4010a4f",
+      "sourceSha256": "87f3c203490d80f38e9d24231541d6680b17b67c195ab50945f901f37361b5ea",
+      "copiedSha256": "87f3c203490d80f38e9d24231541d6680b17b67c195ab50945f901f37361b5ea",
+      "contentType": "markdown",
+      "compatibility": "Freeze record for catalogue/Profile. Not consumer/live proof.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "docs/contracts/frozen/EXT-LCL-PLATFORM-CATALOGUE-CONTRACT.provider-handoff.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/docs/contracts/frozen/EXT-LCL-PLATFORM-CATALOGUE-CONTRACT.provider-handoff.json",
+      "gitBlob": "faf053ac09e305ccc8e9ae7e2076897ae89f72f5",
+      "sourceSha256": "3ebd0e8c7e8c09a19a45e744c436ffcfc8fbf111a67848ed24576ea36d44cb36",
+      "copiedSha256": "3ebd0e8c7e8c09a19a45e744c436ffcfc8fbf111a67848ed24576ea36d44cb36",
+      "contentType": "json",
+      "compatibility": "Current frozen provider-handoff on this main: requestingConsumer=LiNKclient, producer pin is not a0058e74. Not a LiNKsites catalogue pin.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/claims/accept-valid.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/claims/accept-valid.json",
+      "gitBlob": "ac6fa4d842d48eea55daef1e7dd2e0ff99b450d5",
+      "sourceSha256": "cf9b420e090f03e09672ba12b1501417d38b8f75551c9ead1961d014caa8cdc3",
+      "copiedSha256": "cf9b420e090f03e09672ba12b1501417d38b8f75551c9ead1961d014caa8cdc3",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for auth-claims 1.1.0. Synthetic IDs only.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/claims/reject-revoked.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/claims/reject-revoked.json",
+      "gitBlob": "44c0c5385bbad3b88971dace822f389fa6eaa16d",
+      "sourceSha256": "0452cca5d565b3b937f3debb39e0020b737f4d1c4632cfdbe3738e9d19b3cf5c",
+      "copiedSha256": "0452cca5d565b3b937f3debb39e0020b737f4d1c4632cfdbe3738e9d19b3cf5c",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: revoked credential.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/claims/reject-wrong-audience.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/claims/reject-wrong-audience.json",
+      "gitBlob": "6b83e344703c872eac43789ff988e8219735d1db",
+      "sourceSha256": "64fbc63cdb14d04c583fb2a3be3974199f6b5a0e09e1204e1d5d213a44dce36d",
+      "copiedSha256": "64fbc63cdb14d04c583fb2a3be3974199f6b5a0e09e1204e1d5d213a44dce36d",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: audience mismatch.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/claims/reject-expired.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/claims/reject-expired.json",
+      "gitBlob": "6f5f66316fb858701f52c973b397f19502724411",
+      "sourceSha256": "d8146547b3a613875bc5bf16ed9bca106cf2cf085a1dc369a05aeeee05636f3a",
+      "copiedSha256": "d8146547b3a613875bc5bf16ed9bca106cf2cf085a1dc369a05aeeee05636f3a",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: expired claims.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/claims/reject-rotated.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/claims/reject-rotated.json",
+      "gitBlob": "498ca58861411c14b5f8b31eb217db58afb84125",
+      "sourceSha256": "e694ca5e15bf2672957ffc7a20ec3cdbee3bb6af2a7022d3cbc55645f08f6566",
+      "copiedSha256": "e694ca5e15bf2672957ffc7a20ec3cdbee3bb6af2a7022d3cbc55645f08f6566",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: rotated credential.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/claims/reject-wrong-service.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/claims/reject-wrong-service.json",
+      "gitBlob": "6609a8bc2a24ac2c2e71524644bd37ce7486c32f",
+      "sourceSha256": "0b0fb18bffead1cb2993342c037aac16fc990114af31921e57fc85e36db4ee34",
+      "copiedSha256": "0b0fb18bffead1cb2993342c037aac16fc990114af31921e57fc85e36db4ee34",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: service mismatch.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/claims/reject-wrong-org.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/claims/reject-wrong-org.json",
+      "gitBlob": "155993cf62ba3c812e8f664ff40c27aeafeb9b05",
+      "sourceSha256": "da2eeeb9d51a5091a235b3120201b4fd91611801f24c3dc06f2c8073a744fa5b",
+      "copiedSha256": "da2eeeb9d51a5091a235b3120201b4fd91611801f24c3dc06f2c8073a744fa5b",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: org mismatch.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/accept-valid.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-profile/accept-valid.json",
+      "gitBlob": "6d41d70b396165d59664dc0132cc9b6383eef783",
+      "sourceSha256": "bc8326fb033aece83da852f58734111b0ff237a7b6965afee94ee544409c7cf5",
+      "copiedSha256": "bc8326fb033aece83da852f58734111b0ff237a7b6965afee94ee544409c7cf5",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for catalogue/Profile contract.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/accept-client-profile.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-profile/accept-client-profile.json",
+      "gitBlob": "8dd3ce4f3433c657549e141ef3aeadfb7706306b",
+      "sourceSha256": "17a57963512a55ed390e16e8a44876507da2b7be48c1fa72ff54a854efb27217",
+      "copiedSha256": "17a57963512a55ed390e16e8a44876507da2b7be48c1fa72ff54a854efb27217",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for client Profile shape.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-extra-field.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-profile/reject-extra-field.json",
+      "gitBlob": "2a24567411de5d78060c32d740153027f717f622",
+      "sourceSha256": "53b3578342f4032c785686e877d1258810866f9a14be661df8361710bd0ad10f",
+      "copiedSha256": "53b3578342f4032c785686e877d1258810866f9a14be661df8361710bd0ad10f",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: extra field.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-wrong-version.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-profile/reject-wrong-version.json",
+      "gitBlob": "8f520b14b038bba3795e305d8a3bbc01eba5bb59",
+      "sourceSha256": "4ef905302ddfd2db34609d33935af9d07aa69e56005109a8222d99bb2a782583",
+      "copiedSha256": "4ef905302ddfd2db34609d33935af9d07aa69e56005109a8222d99bb2a782583",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: wrong version.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-unknown-status.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-profile/reject-unknown-status.json",
+      "gitBlob": "29be3e50c7fe32012aa0b75cc20c6e8ba5d02007",
+      "sourceSha256": "5c49ac4ee563c846621531b49a3cd6941cba5719321060d7c4a98364fff7eb17",
+      "copiedSha256": "5c49ac4ee563c846621531b49a3cd6941cba5719321060d7c4a98364fff7eb17",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: unknown status.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-bad-kind.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-profile/reject-bad-kind.json",
+      "gitBlob": "22c55ef63ced45d5b0a2e2d161fba74d00ca816c",
+      "sourceSha256": "1981c0346833f96d486a00cf024ebbe99abf8fd6d540f5007bdb51882bfc65fd",
+      "copiedSha256": "1981c0346833f96d486a00cf024ebbe99abf8fd6d540f5007bdb51882bfc65fd",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: bad kind.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-profile/reject-paci-capability-id.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-profile/reject-paci-capability-id.json",
+      "gitBlob": "c13ea9835e5e6f3b2a1366577a331043a20676b8",
+      "sourceSha256": "93575a17c63775059711698cda5426f4fc79631126e6526e9228c8f7cd880f63",
+      "copiedSha256": "93575a17c63775059711698cda5426f4fc79631126e6526e9228c8f7cd880f63",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: PACI capability id not allowed on this contract.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-wrong-commit.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-provider-handoff/reject-wrong-commit.json",
+      "gitBlob": "72c53fa361108354f61c0a36ca8ecf7d9eb97e9a",
+      "sourceSha256": "9c2e35211bd76f1596cc559370af0cca409c87ea98b93d0598abf7af7f00bf59",
+      "copiedSha256": "9c2e35211bd76f1596cc559370af0cca409c87ea98b93d0598abf7af7f00bf59",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: wrong commit pin.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-consumer-proof.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-provider-handoff/reject-consumer-proof.json",
+      "gitBlob": "5b14e530f2af2ef80ab10331e3acc79adf646432",
+      "sourceSha256": "4f5081dada937636c9fbb86933dc62443d63da76c85053493940710290a09e2f",
+      "copiedSha256": "4f5081dada937636c9fbb86933dc62443d63da76c85053493940710290a09e2f",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: consumer proof claimed.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-extra-field.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-provider-handoff/reject-extra-field.json",
+      "gitBlob": "336e805dc7dc9bca465e0d85dac75e34130c74f9",
+      "sourceSha256": "f8578e99f8150f950ba963198872b39abc0d001ed1b5e35e57fc04d16eabbcaf",
+      "copiedSha256": "f8578e99f8150f950ba963198872b39abc0d001ed1b5e35e57fc04d16eabbcaf",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: extra field.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-integration-claimed.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-provider-handoff/reject-integration-claimed.json",
+      "gitBlob": "64daacf03899b89c5a40ce39e0f0fdf7e87469eb",
+      "sourceSha256": "d5ee87c83006458991a3f1e7e5f5aa0465d0c611207119f7bf61a3fa48472517",
+      "copiedSha256": "d5ee87c83006458991a3f1e7e5f5aa0465d0c611207119f7bf61a3fa48472517",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: integration claimed.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKplatform",
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "originalPath": "packages/contracts/fixtures/catalogue-provider-handoff/reject-invented-tag.json",
+      "copiedPath": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/packages/contracts/fixtures/catalogue-provider-handoff/reject-invented-tag.json",
+      "gitBlob": "39c86a66f3bae75d722538a83687574c3cb2c2a1",
+      "sourceSha256": "3f59da9c7851399dbd6c707d2ac920404fa0ee6054776e7b4d9203af31c967ce",
+      "copiedSha256": "3f59da9c7851399dbd6c707d2ac920404fa0ee6054776e7b4d9203af31c967ce",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: invented tag.",
+      "owner": "linktrend/LiNKplatform",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-contract-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-contract-v1.md",
+      "gitBlob": "e23117838ce7e6dff07810d148661cb349290dbe",
+      "sourceSha256": "ac337a3596cf67729fb2dbf719225f563b14332b94bc4f9355f10713309bbc88",
+      "copiedSha256": "ac337a3596cf67729fb2dbf719225f563b14332b94bc4f9355f10713309bbc88",
+      "contentType": "markdown",
+      "compatibility": "Gateway request/receipt/event wire contract. Source copy only; not live activation.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-http-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-http-v1.md",
+      "gitBlob": "993b217a88195285d765f08fc94386b0d873e99f",
+      "sourceSha256": "dff8e1f20c72f8428de20396ca092748d27f67dcf710320f0703a3749cf5832d",
+      "copiedSha256": "dff8e1f20c72f8428de20396ca092748d27f67dcf710320f0703a3749cf5832d",
+      "contentType": "markdown",
+      "compatibility": "Gateway HTTP surface mapping. Not an admitted private endpoint.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-events-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-events-v1.md",
+      "gitBlob": "f22443ac41f336673a6aa8229aa8977903e620f8",
+      "sourceSha256": "cd5b08264691e4bd97a6df6db3e1513f40fca2912f05de6da129035f02d97933",
+      "copiedSha256": "cd5b08264691e4bd97a6df6db3e1513f40fca2912f05de6da129035f02d97933",
+      "contentType": "markdown",
+      "compatibility": "Durable event/outbox metadata contract. Not an event allowlist grant for LiNKsites.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-lifecycle-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-lifecycle-v1.md",
+      "gitBlob": "991f886d5c98995b915119bb2463e75fca6c80ee",
+      "sourceSha256": "f654412bbecd4dd20758b87a0c6f70bb44186f1ffa33d7cb19329934f7c1ef16",
+      "copiedSha256": "f654412bbecd4dd20758b87a0c6f70bb44186f1ffa33d7cb19329934f7c1ef16",
+      "contentType": "markdown",
+      "compatibility": "Run/lifecycle fail-closed transitions. No consumer-domain proof.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-status-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-status-v1.md",
+      "gitBlob": "661d726699f54c71a98346a1661851fbb996730a",
+      "sourceSha256": "aed3d817694d96d35aa60106e78931b7644233ade6e7a6534be01e66b2a63ec2",
+      "copiedSha256": "aed3d817694d96d35aa60106e78931b7644233ade6e7a6534be01e66b2a63ec2",
+      "contentType": "markdown",
+      "compatibility": "Capability status/non-authority fields. Not live health.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-dispatch-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-dispatch-v1.md",
+      "gitBlob": "6ece7c409d3aa8fdc5a2ae9dc02e89d66078803d",
+      "sourceSha256": "a469335ad4297251524dcd0a202d50299e1df15a4d9aef29027f4ca2bafca42a",
+      "copiedSha256": "a469335ad4297251524dcd0a202d50299e1df15a4d9aef29027f4ca2bafca42a",
+      "contentType": "markdown",
+      "compatibility": "Dispatch eligibility/HOLD for external assistance. Not activation.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-persistence-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-persistence-v1.md",
+      "gitBlob": "34ada12f846b454a4017a0234f6e21af2230618e",
+      "sourceSha256": "9f684a0fe69321842286631ff5bdc3f77b3fae87ccbad984bfdf4838c5629cc3",
+      "copiedSha256": "9f684a0fe69321842286631ff5bdc3f77b3fae87ccbad984bfdf4838c5629cc3",
+      "contentType": "markdown",
+      "compatibility": "Receipt/store persistence contract. Not a live org-bound receipt.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-notifications-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-notifications-v1.md",
+      "gitBlob": "b07d05a724d9f0c21e7c199a895680a2153da9f1",
+      "sourceSha256": "cf31fd87fe9880916b2cd370cadb5ebc17f3292e5eacb19d24a16dc5a18bb438",
+      "copiedSha256": "cf31fd87fe9880916b2cd370cadb5ebc17f3292e5eacb19d24a16dc5a18bb438",
+      "contentType": "markdown",
+      "compatibility": "Notification contract. Not live health or endpoint admission.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/contracts/provider-aggregation-v1.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/contracts/provider-aggregation-v1.md",
+      "gitBlob": "c2d1688fe4f84d86c9b70ca731ccf0616a7ec657",
+      "sourceSha256": "9a84a7a0038bed312a81d228145acb9e48787ffae663cafe0cfef950f8bd1613",
+      "copiedSha256": "9a84a7a0038bed312a81d228145acb9e48787ffae663cafe0cfef950f8bd1613",
+      "contentType": "markdown",
+      "compatibility": "Aggregation contract. Not live integration.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/handoffs/2026-08-13-provider-candidate-handoff.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/handoffs/2026-08-13-provider-candidate-handoff.md",
+      "gitBlob": "501d090118db1cfc8f2252313f8932b9e776102d",
+      "sourceSha256": "3993eb44fd77642aa7be0980bedbb0f6c64353f471f8b54ba1c85c5ee3e35207",
+      "copiedSha256": "3993eb44fd77642aa7be0980bedbb0f6c64353f471f8b54ba1c85c5ee3e35207",
+      "contentType": "markdown",
+      "compatibility": "Source-local provider candidate handoff. Draft/inactive candidate; not LiNKsites consumer registration.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/handoffs/2026-08-31-pkt03-xpkt03-consumer-handoff-hold.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/handoffs/2026-08-31-pkt03-xpkt03-consumer-handoff-hold.md",
+      "gitBlob": "96adb9f50629ded2b4a9d29e7d5f4a0dd704fca0",
+      "sourceSha256": "105361e1c45f1bbc805f3e8c2bcd48b1fd3aace05914dd3961dc93879fa6df33",
+      "copiedSha256": "105361e1c45f1bbc805f3e8c2bcd48b1fd3aace05914dd3961dc93879fa6df33",
+      "contentType": "markdown",
+      "compatibility": "Consumer handoff HOLD for LiNKskills/PKT-03. Not a LiNKsites consumer registration.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "docs/planning/pkt-03-xpkt-03/provider-consumer-handoff.hold.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/docs/planning/pkt-03-xpkt-03/provider-consumer-handoff.hold.json",
+      "gitBlob": "72fbd82d9bc7b6227efe9c5d294fa85bc9557bd9",
+      "sourceSha256": "cb3a4933eb60f7b00fef9ec6c5523f8e27ca36e2c7330b5115679e52461df8e8",
+      "copiedSha256": "cb3a4933eb60f7b00fef9ec6c5523f8e27ca36e2c7330b5115679e52461df8e8",
+      "contentType": "json",
+      "compatibility": "Blocked provider-consumer handoff JSON (consumer=LiNKautowork, producer=LiNKskills). Not a LiNKsites registration.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/README.md",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/README.md",
+      "gitBlob": "f979b0f0aa8698d4f5af59150cd2ff1436e4c9e5",
+      "sourceSha256": "d2a214221e5913e58e0b355d8e1aa09bcac7fcf56798b03dd22d5e5eab59aea9",
+      "copiedSha256": "d2a214221e5913e58e0b355d8e1aa09bcac7fcf56798b03dd22d5e5eab59aea9",
+      "contentType": "markdown",
+      "compatibility": "Sanitized fixture policy: no credentials.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/fixture-matrix.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/fixture-matrix.json",
+      "gitBlob": "526c550b835ed21cd19af32ad05ea36bce90b3f3",
+      "sourceSha256": "5e47d6b344d5844097cd4704b5299863f9658a836f8a7952414a826219be33a6",
+      "copiedSha256": "5e47d6b344d5844097cd4704b5299863f9658a836f8a7952414a826219be33a6",
+      "contentType": "json",
+      "compatibility": "Accept/reject fixture map. Secret-shaped reject fixture withheld.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/provider-valid-request.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/provider-valid-request.json",
+      "gitBlob": "78aaca93b525ca3e699368cd91d3624f220b5bc3",
+      "sourceSha256": "53a711b521e49de7edc7a363568c92138f63648088a22a39900c2f4b75e38057",
+      "copiedSha256": "53a711b521e49de7edc7a363568c92138f63648088a22a39900c2f4b75e38057",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for metadata-only request classification.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/package-valid.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/package-valid.json",
+      "gitBlob": "a5252852350f8fba69251846b805049639ac9656",
+      "sourceSha256": "a133bc545dbcebc5749caca2199cb09c0c43721545a79374446c884ef9045e0c",
+      "copiedSha256": "a133bc545dbcebc5749caca2199cb09c0c43721545a79374446c884ef9045e0c",
+      "contentType": "json",
+      "compatibility": "Sanitized accept fixture for automation package schema; draft/non-deployable.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/package-invalid-id.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/package-invalid-id.json",
+      "gitBlob": "5ab8a7b656f9193991fdad7d3abf1bb3b63ed0be",
+      "sourceSha256": "528b38ebc5c0a95c16e277ec88dcb92224e03b38973853007a74174a1d9cbd6f",
+      "copiedSha256": "528b38ebc5c0a95c16e277ec88dcb92224e03b38973853007a74174a1d9cbd6f",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: automation_id rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/package-invalid-semver.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/package-invalid-semver.json",
+      "gitBlob": "0f8e6c1bda5a65b686f51a9b20ad4a0495eb41fe",
+      "sourceSha256": "d0e78b78c4655a364955f3bd136ea0b81f0674c3af66ae967bef22686a4ab202",
+      "copiedSha256": "d0e78b78c4655a364955f3bd136ea0b81f0674c3af66ae967bef22686a4ab202",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: release.version rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/package-invalid-lifecycle.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/package-invalid-lifecycle.json",
+      "gitBlob": "4a694cbf44a8ccb373d94356d2b8b4d85bc5d807",
+      "sourceSha256": "fef9800d25d3062beb55d7dbdbd0b392b83a685e46bea50a25aa96d664c97c67",
+      "copiedSha256": "fef9800d25d3062beb55d7dbdbd0b392b83a685e46bea50a25aa96d664c97c67",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: release.lifecycle rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/package-invalid-engine.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/package-invalid-engine.json",
+      "gitBlob": "122416bacf1707ae6f1319eaff3275469da2798c",
+      "sourceSha256": "6e6db04e983dc6712a5f9600cee21ccbf31f0729466cebbbf2fc117a5b93e9ae",
+      "copiedSha256": "6e6db04e983dc6712a5f9600cee21ccbf31f0729466cebbbf2fc117a5b93e9ae",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: runtime.engine rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/package-missing-monitoring.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/package-missing-monitoring.json",
+      "gitBlob": "7dc47960be3924c9dc6cd3b29f5bac0d552db6cf",
+      "sourceSha256": "4cf57fc874c54bd0b0730735436bc1082a89314038d72755540cc0144d7d3d90",
+      "copiedSha256": "4cf57fc874c54bd0b0730735436bc1082a89314038d72755540cc0144d7d3d90",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: operations.monitoring_ref rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/package-missing-evaluation.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/package-missing-evaluation.json",
+      "gitBlob": "28d790981d2901bae5ee92f34cbfe4a1a03d9a6d",
+      "sourceSha256": "1944ca6842a5ab5cda0157b5545d43ffd523f1faff1999adc9964c8a545d0922",
+      "copiedSha256": "1944ca6842a5ab5cda0157b5545d43ffd523f1faff1999adc9964c8a545d0922",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: evaluation rule.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
+    },
+    {
+      "repository": "linktrend/LiNKautowork",
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "originalPath": "automations/fixtures/contracts/provenance-unresolved.json",
+      "copiedPath": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/automations/fixtures/contracts/provenance-unresolved.json",
+      "gitBlob": "35a5e3783902cd560c35711839aa2259a61687fa",
+      "sourceSha256": "552c196b18d58a5599a41db07be5cbb948921e48502f3211e7d0abdfacd4a78b",
+      "copiedSha256": "552c196b18d58a5599a41db07be5cbb948921e48502f3211e7d0abdfacd4a78b",
+      "contentType": "json",
+      "compatibility": "Sanitized reject fixture: unresolved provenance/licence policy.",
+      "owner": "linktrend/LiNKautowork",
+      "evidenceLevel": "exact_source_bytes_protected_released_copy",
+      "doesNotProve": [
+        "registration",
+        "grants",
+        "live endpoints",
+        "health",
+        "receipts",
+        "provider integration",
+        "production"
+      ]
     }
   ],
   "missingOrWithheldInputs": [
@@ -1166,6 +2414,96 @@
           "reason": "Runtime implementation; HTTP contract markdown copied instead."
         }
       ]
+    },
+    {
+      "program": "linkplatform",
+      "packet": "LSG0-04",
+      "status": "PARTIAL_WITHHOLD",
+      "requestedCommit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "requestedTree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "withheld": [
+        {
+          "originalPath": "packages/contracts/src/**",
+          "reason": "Executable TypeScript. JSON schemas and sanitized fixtures copied instead."
+        },
+        {
+          "originalPath": "packages/contracts/fixtures/auth-token-envelope/**",
+          "reason": "Accept/discovery fixtures contain private/stage issuer and token endpoints (auth.stage.linkplatform.linktrend.dev); withheld."
+        },
+        {
+          "originalPath": "packages/contracts/fixtures/provider-trust/**",
+          "reason": "Operational provider-trust fixtures; no LiNKsites registration. Not live PACI proof."
+        },
+        {
+          "originalPath": "docs/handoffs/** except 2026-08-31-platform-000017-postgres-provider-handoff.md",
+          "reason": "Historical operational evidence unrelated to current LiNKsites claim/service/migration source bundle."
+        },
+        {
+          "originalPath": "docs/contracts/platform-auth-token-envelope-v0.1.DRAFT.md",
+          "reason": "Development-only draft; withheld."
+        },
+        {
+          "originalPath": "docs/contracts/IDENTITY-OPERATIONS-DRAFT.md",
+          "reason": "Development-only draft; withheld."
+        },
+        {
+          "originalPath": "packages/contracts/schemas/platform-auth-claims.v1.0.0.json",
+          "reason": "Superseded 1.0.0 schema; LiNKsites pins 1.1.0."
+        },
+        {
+          "originalPath": "supabase/migrations/**",
+          "reason": "Executable SQL; 000017 source handoff copied instead of migration source."
+        },
+        {
+          "originalPath": "docs/evidence/**",
+          "reason": "Bulk evidence/receipts; not live proof and not copied."
+        },
+        {
+          "originalPath": "docs/contracts/CONSUMER-PIN-PACKET-catalogue-profile-1.0.0.md",
+          "reason": "Exact source markdown contains trailing whitespace; copying those bytes would fail git diff --check. Bytes were not mutated. Withheld rather than rewritten."
+        },
+        {
+          "originalPath": "docs/contracts/platform-catalogue-profile-v1.md",
+          "reason": "Exact source markdown contains trailing whitespace; copying those bytes would fail git diff --check. Bytes were not mutated. Withheld rather than rewritten."
+        },
+        {
+          "originalPath": "docs/handoffs/2026-08-31-platform-000017-postgres-provider-handoff.md",
+          "reason": "Exact source markdown contains trailing whitespace; copying those bytes would fail git diff --check. Bytes were not mutated. Withheld rather than rewritten."
+        }
+      ]
+    },
+    {
+      "program": "linkautowork",
+      "packet": "LSG0-04",
+      "status": "PARTIAL_WITHHOLD",
+      "requestedCommit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "requestedTree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "withheld": [
+        {
+          "originalPath": "automations/fixtures/contracts/package-embedded-secret-shaped.json",
+          "reason": "Reject fixture contains secret-shaped field/value; withheld."
+        },
+        {
+          "originalPath": "packages/automation-contracts/src/**",
+          "reason": "Executable implementation source; contract documentation and sanitized fixtures copied instead."
+        },
+        {
+          "originalPath": "gateway/src/**",
+          "reason": "Runtime implementation; HTTP/event contract markdown copied instead."
+        },
+        {
+          "originalPath": "automations/templates/archive/**",
+          "reason": "Archived development-only templates; withheld."
+        },
+        {
+          "originalPath": "docs/planning/pkt-03-xpkt-03/CONSUMER-HANDOFF-SPEC.md",
+          "reason": "LiNKskills planning spec; HOLD JSON copied instead."
+        },
+        {
+          "originalPath": "docs/handoffs/** except listed LSG0-04 handoffs",
+          "reason": "Historical/unrelated operational handoffs withheld."
+        }
+      ]
     }
   ],
   "holds": [
@@ -1192,6 +2530,20 @@
       "status": "HOLD",
       "kind": "not_live_activation",
       "reason": "Copied Autowork contracts/fixtures are planning/source input only; not gateway activation. Secret-shaped reject fixture and implementation source remain withheld."
+    },
+    {
+      "program": "linkplatform",
+      "packet": "LSG0-04",
+      "status": "HOLD",
+      "kind": "not_live_proof",
+      "reason": "Current protected main copies are planning/source input only. The only catalogue provider-handoff on this commit is LiNKclient (EXT-LCL) pinned to a different commit/tree. Copies do not prove LiNKsites registration, credential references, issuer/audience/scopes, applied production receipts, or live issuer/health."
+    },
+    {
+      "program": "linkautowork",
+      "packet": "LSG0-04",
+      "status": "HOLD",
+      "kind": "not_live_activation",
+      "reason": "Current protected main copies include gateway/event/receipt contracts, sanitized fixtures, a source-local candidate handoff, and a LiNKskills consumer HOLD. They do not prove LiNKsites consumer registration, event allowlists, organisation/environment grants, an admitted private endpoint, live health, or a live org-bound receipt."
     }
   ],
   "prohibitedCategoriesChecked": [
@@ -1209,5 +2561,50 @@
     "Master Website Template production admission",
     "Platform hosted auth",
     "Autowork gateway activation"
-  ]
+  ],
+  "packets": [
+    "LSG0-02",
+    "LSG0-04"
+  ],
+  "lsg004": {
+    "schemaVersion": 1,
+    "packet": "LSG0-04",
+    "consumerRepository": "linktrend/LiNKsites",
+    "consumerIssueBranch": "issue/535-refresh-lsg0-04-protected-platform-and-autowork",
+    "boundProtectedDefaultSources": {
+      "platform": {
+        "repository": "linktrend/LiNKplatform",
+        "ref": "main",
+        "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+        "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+        "directory": "linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+        "status": "PARTIAL_WITHHOLD",
+        "copiedFileCount": 29
+      },
+      "autowork": {
+        "repository": "linktrend/LiNKautowork",
+        "ref": "main",
+        "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+        "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+        "directory": "linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc",
+        "status": "PARTIAL_WITHHOLD",
+        "copiedFileCount": 23
+      }
+    },
+    "preservedPriorBoundCopies": [
+      "linkharness/7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+      "linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+      "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26"
+    ],
+    "notEvidenceOf": [
+      "registration",
+      "grants",
+      "live endpoints",
+      "health",
+      "receipts",
+      "provider integration",
+      "production"
+    ]
+  }
 }

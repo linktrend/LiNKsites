@@ -1,0 +1,6 @@
+{
+  "name": "catalogue-provider-handoff-reject-consumer-proof",
+  "expect": "reject",
+  "reason": "consumerProofClaimed",
+  "patch": { "consumerProofClaimed": true }
+}
