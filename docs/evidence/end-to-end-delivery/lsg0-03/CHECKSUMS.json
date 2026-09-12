@@ -3,6 +3,7 @@
   "kind": "lsg0-03-checksums",
   "algorithm": "SHA-256",
   "files": {
+    "docs/evidence/end-to-end-delivery/lsg0-03/CHECKS.json": "254cba49b3d46b7a619ac73d065c218d672643e405c63c1d097d930dca59f72c",
     "docs/evidence/end-to-end-delivery/lsg0-03/IDENTITY.json": "fe761890ccb74e77b5eb0d06575a7dbc75b72346abe08b322e9388f506a7a78f",
     "docs/evidence/end-to-end-delivery/lsg0-03/LEAN-REVIEW.json": "24f23b943ae5ddfac1a8d9334a7236427a67eae23a0bd0551bf4cf9ec0534027",
     "docs/evidence/end-to-end-delivery/lsg0-03/PROTECTED-LIBRARY-FACTS.json": "6810c9935041d34c249989e6f5e9b57aa1c688fa97dca789bceee8596da3866b",

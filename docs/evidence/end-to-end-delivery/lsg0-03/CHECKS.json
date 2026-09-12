@@ -5,26 +5,30 @@
   "baseSha": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
   "overall": "HOLD",
   "lsg003Pass": false,
+  "acceptancePass": true,
+  "note": "Acceptance commands prove scoped evidence quality. They do not convert LSG0-03 to PASS while providers remain non-selectable.",
   "checks": [
     {
       "id": "json-tool",
       "command": "find docs/evidence/end-to-end-delivery/lsg0-03 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-      "result": "pending-after-final-tree"
+      "result": "pass"
     },
     {
       "id": "scoped-diff",
       "command": "test -z \"$(git diff --name-only e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-03/')\"",
-      "result": "pending-after-commit"
+      "result": "pass",
+      "changedPathsOnlyUnderOwnedSubdirectory": true
     },
     {
       "id": "git-diff-check",
       "command": "git diff --check e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD",
-      "result": "pending-after-commit"
+      "result": "pass"
     },
     {
       "id": "changed-path-secret-scan",
-      "command": "python3 scripts/gitops/secret_scan.py --json-output docs/evidence/end-to-end-delivery/lsg0-03/secret-scan-working.json is full-repo; this packet uses a changed-path scan of owned files only",
-      "result": "pending-after-commit"
+      "command": "python3 scripts/gitops/secret_scan.py requested_paths=git diff --name-only base...HEAD",
+      "result": "pass",
+      "findingCount": 0
     }
   ]
 }
