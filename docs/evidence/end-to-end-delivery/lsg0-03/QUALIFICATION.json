@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "LSG0-03-admission-refresh-qualification",
+  "packet": "LSG0-03",
+  "issue": 536,
+  "overall": "HOLD",
+  "pass": false,
+  "ready": false,
+  "evidenceLevel": "exact-protected-tree-inspection",
+  "leanReview": {
+    "independentReviewerUsed": false,
+    "policy": "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json",
+    "replacementProof": [
+      "exact commit/tree",
+      "schema/JSON/link checks",
+      "changed-path secret scan",
+      "git diff --check"
+    ],
+    "namedRiskSurfacesChanged": false,
+    "selfReviewOfMaterialRiskForbiddenAndNotClaimed": true
+  },
+  "requirement": {
+    "id": "LSG0-03",
+    "title": "Obtain truthful LiNKlibraries provider handoffs",
+    "acceptance": "LiNKlibraries protected identities and receipts independently prove selectable lifecycle state and exact bytes. Current quarantined/draft state, old approved evidence or a local fixture fails.",
+    "passRule": "PASS only if protected bytes and receipts actually prove both required providers selectable/admitted"
+  },
+  "priorCoordinatorObservationNotAuthoritativeHere": {
+    "record": "docs/evidence/end-to-end-delivery/LSG0-03-HANDOFF.json",
+    "commit": "fe769fc19b3a51ed2cc0b22438afc5b0bd766950",
+    "tree": "9f993ae485c68d46ed69c824578ec3370a0be5c6",
+    "thisSessionDidNotTreatThatPinAsCurrent": true,
+    "qualitativeClaimReverifiedOnSuppliedTree": {
+      "marketingSmbV1": "quarantined and non-selectable",
+      "masterWebsiteTemplate": "draft/non_selectable/no current.json"
+    }
+  },
+  "protectedLibraryIdentityUsed": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
+    "tree": "d3c5f1e2a3450b016084ae09666ac193297ac9fc"
+  },
+  "providers": {
+    "marketing-smb-v1": {
+      "selectable": false,
+      "admitted": false,
+      "lifecycle": "quarantined",
+      "classification": "missing and needs work"
+    },
+    "master-template-type-1": {
+      "currentReleaseObserved": "2.0.0",
+      "selectable": false,
+      "admitted": false,
+      "lifecycle": "draft",
+      "currentJson": false,
+      "classification": "missing and needs work"
+    }
+  },
+  "bothRequiredProvidersSelectableAdmitted": false,
+  "didNotSubstituteFixtureProvider": true,
+  "didNotMutateLiNKlibraries": true,
+  "didNotEditParentEvidenceIndexes": true,
+  "upstreamOwnerActionsToClear": [
+    {
+      "owner": "linktrend/LiNKlibraries",
+      "action": "On a protected identity, independently qualify and admit an exact currently selectable marketing-smb-v1 release (selectable=true, governed admission performed) with immutable digests, or publish an explicit retirement that names the replacement first-website provider. Historical WP-0 candidate_nonselectable receipts are insufficient."
+    },
+    {
+      "owner": "linktrend/LiNKlibraries",
+      "action": "Admit a current Master Website Template release with current.json production pointer, catalogue/governance/release-receipt selectability selectable, admission performed, and independent qualification receipts bound to that protected commit/tree covering A1/A2/A3 plus A/B/C/L. Draft candidate handoffs and EXT-LS pending gates are not admission."
+    },
+    {
+      "owner": "LiNKsites coordinator after owner admission",
+      "action": "Re-run LSG0-03 against the new exact protected commit/tree. Do not mutate LiNKlibraries from LiNKsites."
+    }
+  ]
+}

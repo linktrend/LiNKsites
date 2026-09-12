@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "kind": "protected-linklibraries-facts",
+  "packet": "LSG0-03",
+  "protectedIdentity": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
+    "tree": "d3c5f1e2a3450b016084ae09666ac193297ac9fc",
+    "subject": "Merge pull request #431 from linktrend/phase/430-durable-ready-transition-publication"
+  },
+  "didNotUseOriginDevelopmentTip": {
+    "originDevelopmentTipCommit": "de58ffb031e13a2c200058468834875ad4dd2d92",
+    "originDevelopmentTipTree": "ddbe660a91a7a176f637e6d2a9d31897107bd951",
+    "reason": "bound branch tip is not the supplied identity"
+  },
+  "marketingSmbV1": {
+    "path": "entries/marketing-smb-v1/entry.json",
+    "entryJsonSha256": "55104945ee886889b6ec2ce1d549a2f860ff59693e3df584a4ff3c7f8c35cfe9",
+    "gitTreeObjectSha1": "fa3d10ece487cf295361b6a1900ef9dece4b570c",
+    "state": "quarantined",
+    "selectable": false,
+    "contentMode": "executable",
+    "quarantineReason": "Experimental entry: LiNKsites renderer compatibility and Payload CMS compatibility are unknown and unverified. Independent certification is required before selection or production admission.",
+    "catalogV1": {
+      "path": "indexes/catalog.json",
+      "fileSha256": "fd7b12e6e3f43c653b32aa0127291fbf335bac676183ebd18623cc66682d1144",
+      "entryId": "marketing-smb-v1",
+      "state": "quarantined",
+      "selectable": false
+    },
+    "declaredFileDigestsMatchWorkingTree": true,
+    "historicalWp0Admission": {
+      "path": "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/admission.json",
+      "admissionState": "candidate_nonselectable_pending_governed_admission",
+      "catalogRecordInThatReceipt": "deprecated",
+      "note": "Historical WP-0 receipt is not current protected admission. Live catalog/entry are quarantined/selectable=false. Treat as old candidate evidence, not selectable proof."
+    },
+    "planningPinCopyOnLiNKsites": {
+      "path": "docs/end-to-end-delivery/upstreams/linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/entries/marketing-smb-v1/entry.json",
+      "state": "quarantined",
+      "selectable": false,
+      "note": "Copied planning pin is also non-selectable. Not a substitute for current protected admission."
+    }
+  },
+  "masterWebsiteTemplate": {
+    "entryId": "master-template-type-1",
+    "currentJsonPath": "registry/v2/entries/master-template-type-1/current.json",
+    "currentJsonExists": false,
+    "governanceEnvelope": {
+      "path": "registry/v2/entries/master-template-type-1/governance.json",
+      "fileSha256": "01b97e5ffbe7502c3bf34e5f686287657e8f3a97bdb986beb6b225d698393003",
+      "envelopeId": "master-template-type-1-1.0.0-governance",
+      "version": "1.0.0",
+      "lifecycle": "draft",
+      "selectability": "non_selectable",
+      "qualificationStatus": "pending",
+      "admissionStatus": "pending"
+    },
+    "architectureHandoff": {
+      "path": "docs/architecture/master-template/LINKSITES-HANDOFF.md",
+      "fileSha256": "5c47a90758ce60f8dded0f5a67d4fff0588ef259b2355759f0d425996e483651",
+      "states": [
+        "draft",
+        "non_selectable",
+        "no current.json"
+      ],
+      "note": "Owner source/protocol handoff. Not proof of selectable provider admission."
+    },
+    "finalCandidateAddendum": {
+      "path": "docs/evidence/master-website-template-v2/final-linksites-handoff-addendum.md",
+      "fileSha256": "a3341cef08248b2af15a5bec99ea7ba986ea106e2566f69c83aacc776149d041",
+      "status": "FINAL_PROVIDER_CANDIDATE_EXTERNAL_CONSUMER_GATE_PENDING",
+      "release": "master-template-type-1@2.0.0",
+      "layouts": ["a1", "a2", "a3"],
+      "plans": ["a", "b", "c", "l"],
+      "explicitlyDraftNonSelectableNoProductionPointer": true,
+      "note": "Owner source/protocol handoff. Not proof of selectable provider admission."
+    },
+    "releasesOnProtectedTree": [
+      {
+        "version": "1.0.0",
+        "receiptType": "provider_release_candidate",
+        "lifecycle": "draft",
+        "selectability": "non_selectable",
+        "admission": "not_performed",
+        "compatibility": "unknown",
+        "productionPointer": null,
+        "artifactTreeSha1": "325c1acd35f7133bb2ba7429078075f1dc5b1e9e",
+        "manifestSha256": "fac8677186496ad2c48f50793c6b06eb8ce7312382155702b0c00021629db110",
+        "releaseReceiptSha256": "08e5c63e5a96423a0658579a6690aada8057ee531ec47dc262ff31695a7c7769",
+        "gitArtifactTreeSha1Verified": true
+      },
+      {
+        "version": "2.0.0",
+        "receiptType": "provider_release_candidate",
+        "lifecycle": "draft",
+        "selectability": "non_selectable",
+        "admission": "not_performed",
+        "compatibility": "unknown",
+        "productionPointer": false,
+        "artifactTreeSha1": "b599c0f0ee6bc2aad3484aa42ef1fd9e86a05758",
+        "manifestSha256": "f1ba6261aefd628672a4bae3333fc07827f82df1a39083e1c20ae881c2cc9916",
+        "inventorySha256": "9d94ab2d18d1c77b1a709739c38ad8ca95f1d0ef571092dd2c710573ab31cb20",
+        "dependencyLockSha256": "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
+        "payloadSha256": "fc6ed2e8748960c6cd53ac69e678a1fca8bd572105ea747941ceb9e2225c4489",
+        "releaseReceiptSha256": "d3d9a6a256b066ff2e02c3f74725c70c04c2e4b5880ac4353adfd4c6ee16e0ae",
+        "gitArtifactTreeSha1Verified": true,
+        "layoutsPresent": [
+          "layouts/a1-guided-trust.json",
+          "layouts/a2-editorial-authority.json",
+          "layouts/a3-visual-showcase.json"
+        ],
+        "plansPresent": [
+          "plans/a.json",
+          "plans/b.json",
+          "plans/c.json",
+          "plans/l.json"
+        ]
+      },
+      {
+        "version": "2.0.0-a1.1",
+        "receiptType": "provider_prerelease_candidate",
+        "lifecycle": "draft",
+        "selectability": "non_selectable",
+        "admission": "not_performed",
+        "compatibility": "unknown",
+        "productionPointer": false,
+        "artifactTreeSha1": "a8c6c23fd41a5f0eb9221276998f96862a50119f",
+        "manifestSha256": "d681e5305b611aa5247a0fa1711ce75e0a1734e121e6790e50c802b26c1c9697",
+        "releaseReceiptSha256": "3a5b2f071b3af0465553663aca3a824f45f5521be6fe471935159d3d2993de66",
+        "gitArtifactTreeSha1Verified": true
+      }
+    ],
+    "v2Catalogue": {
+      "path": "indexes/v2/catalog.json",
+      "fileSha256": "8f45b387b79032fbe37dead79440e881195b1e736f8f07d18bc6209067c684b4",
+      "recordsForEntry": [
+        {
+          "version": "1.0.0",
+          "lifecycle": "draft",
+          "selectability": "non_selectable"
+        },
+        {
+          "version": "2.0.0",
+          "lifecycle": "draft",
+          "selectability": "non_selectable"
+        },
+        {
+          "version": "2.0.0-a1.1",
+          "lifecycle": "draft",
+          "selectability": "non_selectable"
+        }
+      ]
+    },
+    "a1ProviderGateReceipt": {
+      "path": "docs/evidence/master-website-template-v2/a1-provider-gate/provider-gate-receipt.json",
+      "status": "PROVIDER_READY_EXTERNAL_CONSUMER_GATE_PENDING",
+      "lifecycleOnReceipt": "draft",
+      "selectability": "non_selectable",
+      "productionPointer": false,
+      "boundToDifferentProtectedCheckpoint": {
+        "commit": "66a90f5c8278b3954332d424a819fedb1203ab87",
+        "tree": "37dc2a7b9780990138a2380b0132ab62b4181903"
+      },
+      "note": "Real validation receipt exists for a prior protected identity. It still records draft/non_selectable and is not admission of the supplied development commit."
+    }
+  },
+  "sourceHandoffIsNotAdmissionProof": true
+}

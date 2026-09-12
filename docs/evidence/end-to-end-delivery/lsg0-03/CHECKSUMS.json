@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-03-checksums",
+  "algorithm": "SHA-256",
+  "files": {
+    "docs/evidence/end-to-end-delivery/lsg0-03/IDENTITY.json": "fe761890ccb74e77b5eb0d06575a7dbc75b72346abe08b322e9388f506a7a78f",
+    "docs/evidence/end-to-end-delivery/lsg0-03/LEAN-REVIEW.json": "24f23b943ae5ddfac1a8d9334a7236427a67eae23a0bd0551bf4cf9ec0534027",
+    "docs/evidence/end-to-end-delivery/lsg0-03/PROTECTED-LIBRARY-FACTS.json": "6810c9935041d34c249989e6f5e9b57aa1c688fa97dca789bceee8596da3866b",
+    "docs/evidence/end-to-end-delivery/lsg0-03/QUALIFICATION.json": "23918a3079891fb4804bd6203521a42e49669fa00b7d0d864b62cfe9ca1152a7",
+    "docs/evidence/end-to-end-delivery/lsg0-03/QUALIFICATION.md": "8da3904cb5ba3dda9fc55cee9fea75d97b69e373fc1a7b02cbb76774560637a1",
+    "docs/evidence/end-to-end-delivery/lsg0-03/README.md": "4aba37c68f301e6c798f6423c98bbcec30f95d49af138d377f5d0f5a4155e3a0",
+    "docs/evidence/end-to-end-delivery/lsg0-03/REQUIRED-OUTPUTS.json": "c3fd7c8e46e6296feed3279b1c4a6588e0a3a5ae0fdc316ea04f13650e883206",
+    "docs/evidence/end-to-end-delivery/lsg0-03/TOOLCHAIN.json": "755c28887b38d5a9fb31661d77419b718b77ed81274f6666b7ab1516afba85b3"
+  }
+}
