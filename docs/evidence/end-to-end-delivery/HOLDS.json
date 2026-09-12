@@ -31,6 +31,11 @@
       "action": "one Full Suite on the exact consolidated candidate"
     },
     {
+      "id": "LSREV-01-independent-source-review",
+      "owner": "LiNKsites after LSVAL-01",
+      "action": "exactly one independent review of the exact consolidated SHA/tree naming auth/authorization and secret-handling, additive Payload/Postgres migration and RLS/data-boundary, and production deployment/rollback; not a second live operational reviewer"
+    },
+    {
       "id": "github-dependabot-api-inventory",
       "owner": "LSSEC-01/coordinator with GitHub access",
       "action": "exact current alert-by-alert inventory; do not invent closures"

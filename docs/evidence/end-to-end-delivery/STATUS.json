@@ -5,7 +5,13 @@
   "overallState": "PREPARED/HOLD",
   "ready": false,
   "lsint01Completed": false,
-  "reason": "LSINT-01 formally depends on LSG0-03 exact provider handoffs. Live work later depends on LSG0-04. This record prepares consolidation evidence on issue/532 only. State is PREPARED/HOLD, never READY.",
+  "reason": "LSINT-01 formally depends on LSG0-03 exact provider handoffs. Live work later depends on LSG0-04. This record prepares consolidation evidence on issue/532 only. State is PREPARED/HOLD, never READY. Issue 533 applied the founder-approved lean review policy in docs only; it does not clear these HOLDs or complete LSINT-01.",
+  "leanReviewPolicy": {
+    "issue": 533,
+    "record": "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json",
+    "overallStateUnchanged": "PREPARED/HOLD",
+    "readyUnchanged": false
+  },
   "admittedHeadAtEvidenceAuthoring": {
     "repository": "linktrend/LiNKsites",
     "ref": "issue/532-consolidate-linksites-accepted-checkpoints-and-e",

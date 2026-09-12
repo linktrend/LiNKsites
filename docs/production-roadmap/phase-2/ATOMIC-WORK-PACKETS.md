@@ -7,13 +7,14 @@ Status: correction candidate; dispatch is not authorised
 Every packet must name its exact protected base, issue/branch, allowed and
 prohibited paths, dependencies, inputs, acceptance commands, evidence and stop
 conditions before work starts. Founder execution direction supersedes every
-other worker or reviewer model: every implementation, repair, source review and
-operational review agent uses the Cursor REST/API SDK with Grok 4.6 Medium
-and Fast false. Reviews remain separate, independent, read-only agents and
-cannot review their own implementation. Implementers commit and push
-checkpoints but do not open PRs, merge, promote or deploy. The coordinator
-preserves unrelated dirty work, uses the installed completion gate, and returns
-conflicts to the behavior owner.
+other worker model: every implementation and repair agent uses the Cursor
+REST/API SDK with Grok 4.6 Medium and Fast false. Exactly one independent
+read-only review exists at LSREV-01 for the exact consolidated source
+candidate; that reviewer cannot review its own implementation. Issue checkpoints
+do not unconditionally require independent_narrow_review. Implementers
+commit and push checkpoints but do not open PRs, merge, promote or deploy.
+The coordinator preserves unrelated dirty work, uses the installed completion
+gate, and returns conflicts to the behavior owner.
 
 Completion classes are only:
 
@@ -324,16 +325,27 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 
 ### LSREV-01 — Independent consolidated source/release review
 
-- Reviewer/type: independent read-only Cursor REST/API SDK agent using Grok
-  4.6 Medium and Fast false; cannot review its own implementation.
+- Reviewer/type: the single independent read-only Cursor REST/API SDK agent
+  using Grok 4.6 Medium and Fast false; cannot review its own implementation.
+  This is the only independent product review in the 30-packet set.
 - Dependencies: LSVAL-01.
-- Scope: exact base-to-candidate diff, all PRD requirements, preserved work,
-  upstream identities, provider lifecycle, data/migration, trust, runtime,
-  operations, test/evidence sufficiency and exclusions.
-- Required output: first line `PASS` or `FAIL`, exact repository/commit/tree and
-  concise file/line findings.
-- Acceptance: PASS with no unresolved material finding. Substantive correction
-  requires a new exact-candidate review.
+- Scope: exact base-to-candidate diff of the coherent source Phase. The receipt
+  must explicitly name these material risks: auth/authorization and
+  secret-handling logic; additive Payload/Postgres migration and RLS/data-
+  boundary safety; and production deployment/rollback configuration.
+- Required output: first line `PASS` or `FAIL`, exact repository/commit/tree,
+  named-risk coverage, and concise file/line findings.
+- Acceptance: PASS with no unresolved material finding on those named risks.
+  Do not repeat for an unchanged SHA/tree. Reviewer infrastructure, tool,
+  dependency or network failure is not a product failure and is not grounds
+  for an equivalent replacement review. A substantive change to the named
+  risk surfaces invalidates the receipt; deterministic documentation,
+  metadata, fixture, packaging, generated-manifest or controller-state
+  corrections do not.
+- Not required: independent review of evidence formatting, metadata rebinding,
+  fixture restamping, deterministic packaging, documentation-only changes,
+  generated manifests, controller-state publication, or narrow corrections
+  fully covered by deterministic tests plus secret scanning.
 
 ### LSREL-01 — Integrate and promote source once
 
@@ -477,17 +489,21 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 
 ### LSFULL-03 — Final operational acceptance and handoff
 
-- Reviewer/type: independent read-only operational review via Cursor REST/API
-  SDK with Grok 4.6 Medium and Fast false, then coordinator handoff. The
-  operational reviewer cannot review its own implementation.
+- Type: deterministic live acceptance and coordinator founder handoff. There
+  is no separate independent live operational reviewer; LSREV-01 already
+  covered the coherent source Phase.
 - Dependencies: LSFULL-01 and LSFULL-02.
 - Scope: exact protected main/tree, five deployed digests, both provider
   identities, full LS-FR matrix, one installation, site/content trace, live
   automation, health/resources, backup/restore/restart/rollback, privacy,
   tenancy, security, accessibility and performance.
-- Acceptance: reviewer first line `PASS`; every PRD DoD item maps to exact
-  evidence; founder receives private access and exact operating/recovery
-  instructions. Only then may LiNKsites be declared DONE.
+- Acceptance: deterministic PASS of exact-release identity, health, privacy,
+  backup/restore, rollback, idempotency, completion-chain and
+  controller/readback evidence; every PRD DoD item maps to exact evidence;
+  founder receives private access and exact operating/recovery
+  instructions. Corrections after this packet re-run the affected
+  deterministic proofs; they are not re-audited by another independent
+  reviewer. Only then may LiNKsites be declared DONE.
 
 ## Dependency summary
 
@@ -499,5 +515,5 @@ G0-02 + DATA-01 -> TRUST / FACTORY / RENDER / AUTOWORK (max four)
 four lanes -> SECURITY -> DEPLOY -> OPS -> INT -> FULL SUITE -> SOURCE REVIEW
 -> protected promotion -> five images -> layout -> backup/restore -> data
 -> single install -> private routes/operations -> first website -> replay/recovery
--> MWT v2 + live Autowork on same install -> final review/handoff
+-> MWT v2 + live Autowork on same install -> deterministic live acceptance/handoff
 ```

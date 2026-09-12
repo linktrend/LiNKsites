@@ -140,9 +140,11 @@ admission fills exact branch identities, approval evidence and lane-plan hash.
 - Implementation and repair: Cursor REST/API SDK, Grok 4.6 Medium, Fast false.
 - Source integration: repository Phase Packager/Coordinator and delivery
   controller; implementers do not open or merge PRs.
-- Independent source and final operational review: Cursor REST/API SDK,
+- Independent source review (LSREV-01 only): Cursor REST/API SDK,
   Grok 4.6 Medium, Fast false; read-only, separate from implementers,
-  exact-identity bound, and forbidden from reviewing their own implementation.
+  exact-identity bound, forbidden from reviewing their own implementation,
+  and required to name the three material-risk surfaces. There is no
+  second independent live operational reviewer.
 - Live Server03 mutation: one designated LiNKsites deployment owner after the
   immutable source and data-safety gates.
 
@@ -168,11 +170,16 @@ Lifecycle:
 approved packet -> validate -> submit -> bounded watch/poll
 -> retrieve exact result and GitHub checkpoint
 -> focused acceptance -> repair or accepted checkpoint
--> consolidation -> one Full Suite -> independent review
+-> consolidation -> one Full Suite -> one independent review (LSREV-01)
 -> Phase packaging/controller -> protected promotion
 ```
 
 `FINISHED` is provider status, not acceptance. A worker result counts only
 after exact branch/commit/tree readback, scoped diff inspection, focused checks
-and required review. Failed checks create a targeted correction on the owned
-branch; they do not cause blind redispatch.
+and, when risk-triggered or at LSREV-01, independent review. Failed checks
+create a targeted correction on the owned branch; they do not cause blind
+redispatch. Independent review is not required for evidence formatting,
+metadata rebinding, fixture restamping, deterministic packaging,
+documentation-only changes, generated manifests, controller-state publication,
+or narrow corrections fully covered by deterministic tests plus secret
+scanning.

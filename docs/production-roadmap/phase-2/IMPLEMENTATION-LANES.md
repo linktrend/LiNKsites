@@ -60,7 +60,7 @@ every other lane.
 | operations source | 1 | shares deployment behavior and starts after L-DEPLOY |
 | consolidation/Full/review/promotion/images | 1 | every result is identity-dependent on the preceding result |
 | Server03 mutation | 1 privileged owner | exactly one production installation; shared services must not have concurrent Sites mutation |
-| live acceptance | 1 product run plus 1 read-only reviewer after stability | avoids duplicate side effects while preserving independent review |
+| live acceptance | 1 product run; no second independent reviewer | LSREV-01 already covered the source Phase; live proof is deterministic identity/health/privacy/backup/restore/rollback/idempotency/completion-chain/controller-readback |
 
 Four is the maximum safe simultaneous LiNKsites writer count, not an arbitrary
 cap. More workers would either duplicate one of these cohesive responsibilities

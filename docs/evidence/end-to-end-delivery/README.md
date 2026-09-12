@@ -21,6 +21,7 @@ Product source, planning files, and `apps/cms/next-env.d.ts` were not modified.
 - [HOLDS.json](HOLDS.json)
 - [VALIDATION.json](VALIDATION.json)
 - [CHECKSUMS.json](CHECKSUMS.json)
+- Lean review policy (Issue 533, docs only): [LEAN-REVIEW-POLICY.json](LEAN-REVIEW-POLICY.json)
 - Preserved LSG0-01 record: [branch-disposition.json](branch-disposition.json)
 
 ## What this record does
@@ -34,6 +35,8 @@ Product source, planning files, and `apps/cms/next-env.d.ts` were not modified.
 7. Records LSG0-03 as coordinator-supplied HOLD.
 8. States PREPARED/HOLD because LSINT-01 depends on LSG0-03 and later live work depends on LSG0-04.
 9. Lists upstream owner actions required to clear each HOLD.
+10. Issue 533 records the founder-approved lean review policy in
+    [LEAN-REVIEW-POLICY.json](LEAN-REVIEW-POLICY.json) without changing PREPARED/HOLD.
 
 ## Identities at admission
 

@@ -107,8 +107,10 @@
     "dependencySecurityPacket":"one exclusive remediation/disposition pass before deployment source and Full acceptance",
     "fullSuitePerConsolidatedSourceCandidate":1,
     "independentSourceReviewPerExactCandidate":1,
-    "independentFinalOperationalReview":1,
-    "repeatOnlyAfterEvidenceInvalidatingChange":true
+    "independentFinalOperationalReview":0,
+    "independentFinalOperationalReviewWaivedFor":"LSFULL-03 deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback",
+    "independentNarrowReviewIssueCheckpoint":"risk-triggered",
+    "repeatOnlyAfterNamedRiskSurfaceChange":true
   },
   "approvalBoundary": {
     "currentFounderExecutionApproval":false,

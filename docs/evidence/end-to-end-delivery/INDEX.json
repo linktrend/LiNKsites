@@ -38,7 +38,7 @@
     {
       "path": "docs/evidence/end-to-end-delivery/HOLDS.json",
       "relativeLink": "HOLDS.json",
-      "sha256": "d7ab5a4e13e5ccc41deb40d1a74d71d04d4780788ad943ae3fcb68e187a8affe"
+      "sha256": "e308dddb34e4d43cb7e189d7d2e10cc21bf0066552cc8c0073f796b5f64a3396"
     },
     {
       "path": "docs/evidence/end-to-end-delivery/IDENTITY.json",
@@ -48,6 +48,11 @@
     {
       "path": "docs/evidence/end-to-end-delivery/INDEX.json",
       "relativeLink": "INDEX.json"
+    },
+    {
+      "path": "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json",
+      "relativeLink": "LEAN-REVIEW-POLICY.json",
+      "sha256": "c26c8eb31b458001813c219ebbf9c693f4eda26b5e599f0df6624b425704ef1c"
     },
     {
       "path": "docs/evidence/end-to-end-delivery/LSG0-03-HANDOFF.json",
@@ -62,12 +67,12 @@
     {
       "path": "docs/evidence/end-to-end-delivery/README.md",
       "relativeLink": "README.md",
-      "sha256": "c6b8011c92e2b6c13cea39ba4ea76df62a4f9979e8485b842a79f4d3cfdef691"
+      "sha256": "68dc44397e5de8357eb95d7ecb5bdb2462ff1dcbc6d8e02995c6079eee740836"
     },
     {
       "path": "docs/evidence/end-to-end-delivery/REQUIREMENT-TRACEABILITY.json",
       "relativeLink": "REQUIREMENT-TRACEABILITY.json",
-      "sha256": "7a7b4fc5884ab91ed9da3ce2ae186754735eeaa5d9ec8e62aad5de85580f52e6"
+      "sha256": "fca9ef47631c4258a9db79988f2a8e742523f58876ed87accd8604ae51083729"
     },
     {
       "path": "docs/evidence/end-to-end-delivery/SECURITY-DISPOSITIONS.json",
@@ -77,7 +82,7 @@
     {
       "path": "docs/evidence/end-to-end-delivery/STATUS.json",
       "relativeLink": "STATUS.json",
-      "sha256": "b5b1446aea88cfa2f76769493240353b04ce27e49b4e4210689c274cb7604c3b"
+      "sha256": "7b8ad25ca227943c036fb83ad8ce5bf6f49c4740aae29f3c0430e1ea00e6121d"
     },
     {
       "path": "docs/evidence/end-to-end-delivery/TOOLCHAIN.json",
@@ -87,7 +92,7 @@
     {
       "path": "docs/evidence/end-to-end-delivery/VALIDATION.json",
       "relativeLink": "VALIDATION.json",
-      "sha256": "48741e85f1064ee378fecc08818e31b57d3a7b26045bb4bb8747f5f3ed494860"
+      "sha256": "5c218d6420b5d17115951c44067849c70fd8db44068ed462fbd1771f0089a1ba"
     },
     {
       "path": "docs/evidence/end-to-end-delivery/branch-disposition.json",

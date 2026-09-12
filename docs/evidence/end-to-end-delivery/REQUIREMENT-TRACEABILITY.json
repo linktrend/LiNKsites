@@ -747,7 +747,7 @@
     {
       "id": "LSREV-01",
       "classification": "missing and needs work",
-      "note": "Independent review not requested; self-review forbidden."
+      "note": "Exactly one independent review remains, at LSREV-01 of the exact consolidated candidate, naming auth/authorization and secret-handling, additive Payload/Postgres migration and RLS/data-boundary safety, and production deployment/rollback configuration. Not requested in this documentation packet; self-review forbidden. Not repeated for unchanged SHA/tree."
     },
     {
       "id": "LSREL-01",
@@ -812,7 +812,7 @@
     {
       "id": "LSFULL-03",
       "classification": "missing and needs work",
-      "note": "Final DONE forbidden until HOLDs clear."
+      "note": "Final DONE forbidden until HOLDs clear. Independent live operational reviewer is waived; replacement is deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback. Packet remains missing."
     }
   ]
 }

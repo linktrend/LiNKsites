@@ -2,32 +2,38 @@
   "schemaVersion": 1,
   "kind": "packet-validation",
   "packet": "LSINT-01-PREPARE",
+  "overallStateUnchanged": "PREPARED/HOLD",
+  "issue533": {
+    "kind": "lean-review-policy-docs",
+    "admittedBase": {
+      "commit": "299de68c369f8c504d5ebe5ce77b1391390b930d",
+      "tree": "daf91f91e202d7eb534f81d94c87f79f75f173c6"
+    }
+  },
   "admittedBase": {
     "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
     "tree": "109429b45870b5c648ec754f408f06ee9bea0267"
   },
   "commands": [
     {
-      "command": "find docs/evidence/end-to-end-delivery -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-      "result": "pass",
-      "note": "Re-run after this file is written."
+      "command": "find docs/production-roadmap/phase-2 docs/evidence/end-to-end-delivery -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+      "result": "pending-rerun"
     },
     {
-      "command": "test -z \"$(git diff --name-only 5fbb8c12e5037c5840290f7c55a60fc16abed3a8...HEAD | rg -v '^docs/evidence/end-to-end-delivery/')\"",
-      "result": "pass",
-      "note": "No committed path outside the allowed directory. Uncommitted files are also only under docs/evidence/end-to-end-delivery/."
+      "command": "test -z \"$(git diff --name-only 299de68c369f8c504d5ebe5ce77b1391390b930d...HEAD | rg -v '^(docs/production-roadmap/phase-2/|docs/evidence/end-to-end-delivery/)')\"",
+      "result": "pending-rerun"
     },
     {
-      "command": "git diff --check 5fbb8c12e5037c5840290f7c55a60fc16abed3a8...HEAD",
-      "result": "pass"
+      "command": "BASE_SHA=299de68c369f8c504d5ebe5ce77b1391390b930d HEAD_SHA=HEAD bash scripts/ci-secret-scan.sh",
+      "result": "pending-rerun"
     },
     {
-      "command": "git diff --check 5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
-      "result": "pass"
+      "command": "git diff --check 299de68c369f8c504d5ebe5ce77b1391390b930d...HEAD",
+      "result": "pending-rerun"
     }
   ],
   "internalLinks": {
-    "readmeRelativeLinks": {"count": 15, "missing": []},
+    "readmeRelativeLinks": {"count": 17, "missing": []},
     "newEvidenceJsonRepoPaths": "resolve",
     "preservedBranchDispositionHistoricalPaths": {
       "file": "docs/evidence/end-to-end-delivery/branch-disposition.json",
@@ -47,6 +53,7 @@
     "Docker",
     "deployment",
     "live probes",
-    "GitHub Dependabot API"
+    "GitHub Dependabot API",
+    "pnpm audit re-run"
   ]
 }

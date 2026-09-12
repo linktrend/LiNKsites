@@ -43,16 +43,17 @@ releases does not create a second production installation.
    for each accepted immutable source release, and one Server03 installation.
    Later full-scope increments update that installation by immutable digest.
 5. Use focused tests per packet, one complete suite on each consolidated source
-   release candidate, one independent source review and one final independent
-   operational review. Repeat only after a substantive correction invalidates
-   prior evidence.
+   release candidate, and exactly one independent source review (LSREV-01) of
+   that exact commit/tree. There is no second independent live operational
+   reviewer. Repeat LSREV-01 only after a substantive change to named material
+   risks; deterministic documentation/metadata/packaging corrections do not.
 6. IDE Development 2.5.2 is the installed development process, not another
    LiNKsites product dependency. Do not edit its repository or managed package.
-7. Founder execution direction: every implementation, repair, source review and
-   operational review agent uses the Cursor REST/API SDK with Grok 4.6
-   Medium and Fast false, with exact GitHub repository/ref/commit/tree
-   binding. Reviews remain separate, independent, read-only agents and cannot
-   review their own implementation. Cursor desktop/CLI login is irrelevant.
+7. Founder execution direction: every implementation and repair agent uses the
+   Cursor REST/API SDK with Grok 4.6 Medium and Fast false, with exact GitHub
+   repository/ref/commit/tree binding. The one retained independent review
+   (LSREV-01) is a separate read-only agent and cannot review its own
+   implementation. Cursor desktop/CLI login is irrelevant.
 8. Founder bootstrap is permitted only when the installed protected publication
    mechanism itself cannot complete after bounded repair. It may use real
    checkpoint, test, review and protection evidence; it may never manufacture
@@ -237,10 +238,23 @@ LiNKsites is DONE only when all of the following are true.
    or an explicit founder product decision identifies a superseded requirement.
 3. Sanitized upstream contracts used by workers are committed with exact
    provenance and compatibility; no local-only input is required.
-4. Focused packet checks pass, followed by one Full Suite on each consolidated
-   release candidate and one independent source review, via Cursor REST/API
-   SDK with Grok 4.6 Medium and Fast false, on its exact commit/tree. The
-   source reviewer cannot review its own implementation.
+4. Focused packet checks pass, followed by one Full Suite (LSVAL-01) on each
+   consolidated release candidate and exactly one independent source review
+   (LSREV-01) via Cursor REST/API SDK with Grok 4.6 Medium and Fast false, on
+   that exact commit/tree. The LSREV-01 receipt must name these material risks:
+   auth/authorization and secret-handling logic; additive Payload/Postgres
+   migration and RLS/data-boundary safety; and production deployment/rollback
+   configuration. That review covers the coherent source Phase. It is not
+   repeated for an unchanged SHA/tree. Reviewer infrastructure, tool, dependency
+   or network failure is not a product failure and is not grounds for an
+   equivalent replacement review. The source reviewer cannot review its own
+   implementation. Issue checkpoints do not unconditionally require
+   independent_narrow_review; that gate is risk-triggered on the named
+   surfaces only. Independent review is not required for evidence formatting,
+   metadata rebinding, fixture restamping, deterministic packaging,
+   documentation-only changes, generated manifests, controller-state
+   publication, or narrow corrections fully covered by deterministic tests plus
+   secret scanning.
 5. The final dependency and image closure has an exact current advisory
    inventory. No unresolved exploitable critical/high finding reaches release;
    every non-applicable or deferred alert has evidence, an owner and an
@@ -301,10 +315,11 @@ LiNKsites is DONE only when all of the following are true.
 22. Functional, responsive, accessibility, metadata, privacy, tenancy,
     security, practical performance and recovery acceptance pass on the final
     live private site/release.
-23. One independent operational review via Cursor REST/API SDK with Grok 4.6
-    Medium and Fast false returns PASS against the exact deployed source, five
-    image digests, provider identities and live evidence. The operational
-    reviewer cannot review its own implementation.
+23. Final live operational acceptance (LSFULL-03) is deterministic: exact
+    protected release identity (commit/tree and five image digests), health,
+    privacy, backup/restore, rollback, idempotency, completion-chain and
+    controller/readback evidence. There is no separate independent live
+    operational reviewer.
 24. The founder handoff contains access, identity, health, logs, backup,
     restore, restart, route-disable and rollback instructions. No required
     knowledge remains only in chat or on the coordinator's Mac.
@@ -337,12 +352,12 @@ planning accepted + founder APPROVE
 -> four parallel source lanes
 -> exclusive dependency security/remediation and disposition
 -> deployment and operations source
--> consolidation + Full + independent source review
+-> consolidation + Full + one independent source review (LSREV-01)
 -> protected development/staging/main + five immutable images
 -> backup/restore + one Server03 installation
 -> first real private marketing-smb-v1 website
 -> exact MWT v2 and live LiNKautowork increments on same installation
--> full live acceptance + independent operational review + handoff
+-> full live deterministic acceptance + founder handoff
 ```
 
 `ATOMIC-WORK-PACKETS.md` is the executable dependency breakdown.
@@ -359,9 +374,10 @@ planning accepted + founder APPROVE
   not for unrelated deployment edits.
 - Live checks are limited to preflight, backup/restore, migration/grant denial,
   service/route health, one first-site acceptance, duplicate/restart, one live
-  automation acceptance and final review.
+  automation acceptance and deterministic final operational proof.
 - A failure produces the smallest corrective packet and invalidates only evidence
-  affected by changed bytes/identity.
+  affected by changed bytes/identity. A LSREV-01 receipt is invalidated only by
+  a substantive change to the named material-risk surfaces.
 - Every PASS names exact commit/tree or deployed digests, command/observation,
   timestamps, result, executor, reviewer where applicable, sanitized evidence
   checksum, exclusions and unresolved items.

@@ -130,7 +130,8 @@ contradictory:
 - an executable owner and release threshold for every current dependency alert;
 - one-source-promotion/five-image/one-installation delivery;
 - backup/restore, least privilege, private routing and rollback;
-- bounded, non-repetitive tests and independent review; or
+- bounded, non-repetitive tests and exactly one independent source review
+  (LSREV-01); or
 - a path from current HOLDs to evidence without invented PASS.
 
 ## Approval boundary

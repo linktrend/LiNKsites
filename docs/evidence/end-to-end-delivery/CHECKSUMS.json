@@ -17,16 +17,20 @@
       "bytes": 831
     },
     "HOLDS.json": {
-      "sha256": "d7ab5a4e13e5ccc41deb40d1a74d71d04d4780788ad943ae3fcb68e187a8affe",
-      "bytes": 1682
+      "sha256": "e308dddb34e4d43cb7e189d7d2e10cc21bf0066552cc8c0073f796b5f64a3396",
+      "bytes": 2053
     },
     "IDENTITY.json": {
       "sha256": "96fa5f07b9e45cd6b6ee89c7ec2220d742ffec2bb56f77da13acf76700315fea",
       "bytes": 3681
     },
     "INDEX.json": {
-      "sha256": "a6bffafc35245ca9cd92ae79e093dadbc0fc5afaca01ec789d37a6f00e56b170",
-      "bytes": 3968
+      "sha256": "350c51774ef0baeaa70cc95190bf72995e24983eb907d4756cd24b7d2134af05",
+      "bytes": 4188
+    },
+    "LEAN-REVIEW-POLICY.json": {
+      "sha256": "c26c8eb31b458001813c219ebbf9c693f4eda26b5e599f0df6624b425704ef1c",
+      "bytes": 6413
     },
     "LSG0-03-HANDOFF.json": {
       "sha256": "5f1b8077ad9b8b56edc8abd0372a6e182defb844462f4c67a9fbcb7da27be649",
@@ -37,28 +41,28 @@
       "bytes": 4997
     },
     "README.md": {
-      "sha256": "c6b8011c92e2b6c13cea39ba4ea76df62a4f9979e8485b842a79f4d3cfdef691",
-      "bytes": 2656
+      "sha256": "68dc44397e5de8357eb95d7ecb5bdb2462ff1dcbc6d8e02995c6079eee740836",
+      "bytes": 2904
     },
     "REQUIREMENT-TRACEABILITY.json": {
-      "sha256": "7a7b4fc5884ab91ed9da3ce2ae186754735eeaa5d9ec8e62aad5de85580f52e6",
-      "bytes": 23113
+      "sha256": "fca9ef47631c4258a9db79988f2a8e742523f58876ed87accd8604ae51083729",
+      "bytes": 23636
     },
     "SECURITY-DISPOSITIONS.json": {
       "sha256": "085b9f791e523ad7742dceec50244c328b81ce0f14354856edd03dee9869b3b7",
       "bytes": 2343
     },
     "STATUS.json": {
-      "sha256": "b5b1446aea88cfa2f76769493240353b04ce27e49b4e4210689c274cb7604c3b",
-      "bytes": 842
+      "sha256": "7b8ad25ca227943c036fb83ad8ce5bf6f49c4740aae29f3c0430e1ea00e6121d",
+      "bytes": 1162
     },
     "TOOLCHAIN.json": {
       "sha256": "270d083d59a7ce12f77a4c810d24e2cc556db49b3d91878b11ea642a8859ecab",
       "bytes": 2084
     },
     "VALIDATION.json": {
-      "sha256": "48741e85f1064ee378fecc08818e31b57d3a7b26045bb4bb8747f5f3ed494860",
-      "bytes": 1756
+      "sha256": "5c218d6420b5d17115951c44067849c70fd8db44068ed462fbd1771f0089a1ba",
+      "bytes": 1978
     },
     "branch-disposition.json": {
       "sha256": "c43b0a34a620f37dcb3ca4909f53d7c2b4f24d13d386ebcec25e79cb9004b319",
