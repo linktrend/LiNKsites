@@ -1,18 +1,79 @@
 #!/usr/bin/env node
 // This gate uses the W2-02 real-service harness: local Supabase/Postgres,
 // Payload, web-master and Chromium.  It never contacts a VPS or cloud system.
+// `--plan-only` is the deterministic static path when Docker is absent or when
+// Server03 must not be mutated. It never writes a restore-success receipt.
 import assert from 'node:assert/strict'
 import { randomBytes } from 'node:crypto'
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
-import { spawn } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
+import { validateMonitoringSource } from '../monitoring/validate-rules.mjs'
 
 const root = resolve(new URL('../..', import.meta.url).pathname)
 const evidenceAt = process.argv.includes('--evidence')
   ? resolve(process.cwd(), process.argv[process.argv.indexOf('--evidence') + 1] ?? '')
   : null
 if (process.argv.includes('--evidence') && !evidenceAt) throw new Error('--evidence requires a path')
+const planOnly = process.argv.includes('--plan-only')
+
+const dockerAvailable = () => {
+  try {
+    execFileSync('docker', ['version'], { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+
+const forbiddenSecret = /((?:api[_-]?key|access[_-]?token|preview[_-]?token|password|secret)\s*[:=]\s*)[^\s,}]+/i
+
+async function emitPlan({ docker, hold }) {
+  const plan = JSON.parse(await readFile(join(root, 'deploy/monitoring/isolated-restore.plan.json'), 'utf8'))
+  const compose = await readFile(join(root, 'deploy/docker-compose.deploy.yml'), 'utf8')
+  const operations = await readFile(join(root, 'deploy/OPERATIONS.md'), 'utf8')
+  const monitoring = validateMonitoringSource(root)
+  for (const service of plan.longRunningServices) {
+    if (!new RegExp(`^  ${service}:`, 'm').test(compose)) throw new Error(`compose is missing long-running service ${service}`)
+  }
+  for (const job of plan.oneShotMigrations) {
+    if (!new RegExp(`^  ${job}:`, 'm').test(compose)) throw new Error(`compose is missing one-shot job ${job}`)
+  }
+  for (const name of plan.fiveImages) {
+    if (!compose.includes(`${name}:?`)) throw new Error(`compose is missing fail-closed ${name}`)
+  }
+  if (!existsSync(join(root, 'deploy/fixtures/recovery/ledger-evidence.json'))) throw new Error('recovery fixtures are missing')
+  if (plan.restoreExecuted !== false) throw new Error('static plan must not claim restore execution')
+  if (forbiddenSecret.test(JSON.stringify(plan)) || forbiddenSecret.test(operations)) throw new Error('plan or operations contains a credential')
+  const report = {
+    schemaVersion: '1.0.0',
+    rehearsal: 'isolated-restore-plan',
+    mode: 'plan-only',
+    environment: docker ? 'docker-present-static-only' : 'docker-absent-static-only',
+    restoreExecuted: false,
+    publicActivation: false,
+    credentialsPersisted: false,
+    neverOverwriteProduction: true,
+    productionProject: plan.productionProject,
+    isolatedRestore: plan.isolatedRestore,
+    backupClasses: Object.fromEntries(plan.backupClasses.map((item) => [item.id, true])),
+    checksumBeforeRestore: true,
+    cleanupOwnResourcesOnly: true,
+    monitoring: { alerts: monitoring.alerts, promtool: monitoring.promtool },
+    server03RestoreGate: plan.server03RestoreGate,
+    hold: hold ?? (docker ? null : 'docker-absent'),
+  }
+  if (forbiddenSecret.test(JSON.stringify(report))) throw new Error('plan report contains a credential')
+  return report
+}
+
+if (planOnly || !dockerAvailable()) {
+  const report = await emitPlan({ docker: dockerAvailable(), hold: dockerAvailable() ? null : 'docker-absent' })
+  process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
+  process.exit(0)
+}
 
 const sanitize = (value) => value
   .replace(/((?:api[_-]?key|access[_-]?token|preview[_-]?token|password|secret)\s*[:=]\s*)[^\s,}]+/gi, '$1[REDACTED]')
