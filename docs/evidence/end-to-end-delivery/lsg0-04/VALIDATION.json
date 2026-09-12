@@ -4,33 +4,47 @@
   "overall": "HOLD",
   "pass": false,
   "qualificationVerdict": "HOLD",
+  "acceptanceCommandsPass": true,
   "leanIndependentReviewer": "not-required",
+  "evidenceHeadAtValidation": "a729ef72bd83d3560bdb8536fb4b3b6ef81fa328",
   "checks": [
     {
       "id": "json-tool",
       "command": "find docs/evidence/end-to-end-delivery/lsg0-04 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-      "result": "pending-after-checksums-commit"
+      "result": "pass"
     },
     {
       "id": "scoped-diff",
       "command": "test -z \"$(git diff --name-only e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
-      "result": "pending-after-commit"
+      "result": "pass",
+      "changedPaths": [
+        "docs/evidence/end-to-end-delivery/lsg0-04/AUTOWORK-SURFACES.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/CHECKSUMS.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/COORDINATOR-DEVELOPMENT-INSPECTION.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/IDENTITY.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/INDEX.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/LEAN-REVIEW.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/OWNER-ACTIONS.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/PLATFORM-SURFACES.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/QUALIFICATION.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/TOOLCHAIN.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/VALIDATION.json"
+      ]
     },
     {
       "id": "diff-check",
       "command": "git diff --check e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD",
-      "result": "pending-after-commit"
+      "result": "pass"
     },
     {
       "id": "changed-path-secret-scan",
       "tool": "rg",
       "result": "pass",
-      "matches": 0,
-      "patterns": ["BEGIN PRIVATE/CERTIFICATE blocks", "aws_secret", "slack-style tokens", "ghp_", "github_pat_", "sk-", "Bearer tokens"]
+      "matches": 0
     },
     {
       "id": "relative-index-links",
-      "result": "pass-after-this-file",
+      "result": "pass",
       "index": "INDEX.json"
     }
   ],
