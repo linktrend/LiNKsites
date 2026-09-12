@@ -17,19 +17,21 @@
   "commands": [
     {
       "command": "find docs/production-roadmap/phase-2 docs/evidence/end-to-end-delivery -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-      "result": "pending-rerun"
+      "result": "pass"
     },
     {
       "command": "test -z \"$(git diff --name-only 299de68c369f8c504d5ebe5ce77b1391390b930d...HEAD | rg -v '^(docs/production-roadmap/phase-2/|docs/evidence/end-to-end-delivery/)')\"",
-      "result": "pending-rerun"
+      "result": "pass"
     },
     {
       "command": "BASE_SHA=299de68c369f8c504d5ebe5ce77b1391390b930d HEAD_SHA=HEAD bash scripts/ci-secret-scan.sh",
-      "result": "pending-rerun"
+      "result": "bounded-replacement-pass",
+      "diagnosis": "Literal HEAD_SHA=HEAD exits 64 because the script requires a 40-character SHA. After substituting HEAD_SHA=$(git rev-parse HEAD), docker was missing (exit 127). This packet forbids product Docker/live probes.",
+      "replacement": "python3 scripts/gitops/secret_scan.py changed-range of the 16 committed paths; ok=true; findings=0"
     },
     {
       "command": "git diff --check 299de68c369f8c504d5ebe5ce77b1391390b930d...HEAD",
-      "result": "pending-rerun"
+      "result": "pass"
     }
   ],
   "internalLinks": {

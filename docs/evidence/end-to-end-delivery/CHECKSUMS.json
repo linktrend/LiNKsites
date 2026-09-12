@@ -25,7 +25,7 @@
       "bytes": 3681
     },
     "INDEX.json": {
-      "sha256": "350c51774ef0baeaa70cc95190bf72995e24983eb907d4756cd24b7d2134af05",
+      "sha256": "403d79f6f3ed37f9dc707f083d13c043e0b5a93e13506620addb63b04b523583",
       "bytes": 4188
     },
     "LEAN-REVIEW-POLICY.json": {
@@ -61,8 +61,8 @@
       "bytes": 2084
     },
     "VALIDATION.json": {
-      "sha256": "5c218d6420b5d17115951c44067849c70fd8db44068ed462fbd1771f0089a1ba",
-      "bytes": 1978
+      "sha256": "613ecac3e230ec444e63250b38dc93460d1ef8481d58d1a5323ab90345a75657",
+      "bytes": 2316
     },
     "branch-disposition.json": {
       "sha256": "c43b0a34a620f37dcb3ca4909f53d7c2b4f24d13d386ebcec25e79cb9004b319",
