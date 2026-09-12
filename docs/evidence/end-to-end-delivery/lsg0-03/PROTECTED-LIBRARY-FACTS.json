@@ -5,14 +5,20 @@
   "protectedIdentity": {
     "repository": "linktrend/LiNKlibraries",
     "ref": "development",
+    "commit": "96422a39979f6e1e4c068e871051ae45423a5967",
+    "tree": "384b428eb35ffa21c6eb1fdc1af90997379a99fb",
+    "subject": "Merge pull request #436 from linktrend/phase/435-packager-waiver-parity"
+  },
+  "supersededProtectedIdentity": {
     "commit": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
     "tree": "d3c5f1e2a3450b016084ae09666ac193297ac9fc",
-    "subject": "Merge pull request #431 from linktrend/phase/430-durable-ready-transition-publication"
+    "subject": "Merge pull request #431 from linktrend/phase/430-durable-ready-transition-publication",
+    "providerArtifactBytesUnchanged": true
   },
-  "didNotUseOriginDevelopmentTip": {
-    "originDevelopmentTipCommit": "de58ffb031e13a2c200058468834875ad4dd2d92",
-    "originDevelopmentTipTree": "ddbe660a91a7a176f637e6d2a9d31897107bd951",
-    "reason": "bound branch tip is not the supplied identity"
+  "didNotUseADifferentOriginDevelopmentTip": {
+    "originDevelopmentTipCommit": "96422a39979f6e1e4c068e871051ae45423a5967",
+    "originDevelopmentTipTree": "384b428eb35ffa21c6eb1fdc1af90997379a99fb",
+    "matchesSuppliedIdentity": true
   },
   "marketingSmbV1": {
     "path": "entries/marketing-smb-v1/entry.json",
@@ -30,6 +36,7 @@
       "selectable": false
     },
     "declaredFileDigestsMatchWorkingTree": true,
+    "declaredFileDigestMismatchCount": 0,
     "historicalWp0Admission": {
       "path": "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/admission.json",
       "admissionState": "candidate_nonselectable_pending_governed_admission",

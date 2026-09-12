@@ -4,9 +4,9 @@
   "packet": "LSG0-03",
   "sourceIdentity": {
     "repository": "linktrend/LiNKsites",
-    "ref": "issue/536-refresh-lsg0-03-protected-linklibraries-admissio",
-    "commit": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
-    "tree": "569a93f0a90cbc375db2d560329ac2895a79885c"
+    "ref": "issue/538-refresh-lsg0-03-against-current-protected-linkli",
+    "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+    "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea"
   },
   "ciPins": {
     "workflow": ".github/workflows/ci.yml",
@@ -23,7 +23,7 @@
     "fullSuiteNotRunThisPacket": true
   },
   "pinDiagnosis": {
-    "nodeCompiler": "CI pins Node major 22 only; no compiler hash/lock. PATH node remained /exec-daemon/node v22.14.0 after nvm use 22 because nvm PATH did not persist into command -v. nvm listed v22.22.2. Both are Node 22. Not a hash-locked compiler.",
+    "nodeCompiler": "CI pins Node major 22 only; no compiler hash/lock. PATH node remained /exec-daemon/node v22.14.0 after nvm use 22 because nvm PATH did not persist into command -v. nvm listed v22.22.2. Frozen install used explicit PATH=$NVM_DIR/versions/node/v22.22.2/bin. Both are Node 22. Not a hash-locked compiler.",
     "pnpm": "package.json packageManager is pnpm@10.0.0 without an integrity hash. corepack prepare pnpm@10.0.0 succeeded. Frozen lockfile exists at pnpm-lock.yaml.",
     "lockDefect": "none-observed-for-frozen-install",
     "didNotChangeLocks": true,
@@ -46,7 +46,7 @@
       "version": "10.0.0"
     },
     "frozenInstall": {
-      "command": "pnpm install --frozen-lockfile",
+      "command": "PATH=$NVM_DIR/versions/node/v22.22.2/bin:$PATH pnpm install --frozen-lockfile",
       "result": "pass",
       "lockfileUpToDate": true,
       "ignoredBuildScripts": [
@@ -58,8 +58,8 @@
   },
   "acceptanceCommandsForThisPacket": [
     "find docs/evidence/end-to-end-delivery/lsg0-03 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-    "test -z \"$(git diff --name-only e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-03/')\"",
-    "git diff --check e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD"
+    "test -z \"$(git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-03/')\"",
+    "git diff --check 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD"
   ],
   "forbiddenThisPacket": [
     "Full Suite",
