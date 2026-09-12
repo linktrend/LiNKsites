@@ -7,9 +7,11 @@
     "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
     "tree": "af6883f2b5b093e221eed5f0d033aa7647582717"
   },
+  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
   "liveProbesForbidden": true,
   "secretValuesNotRequested": true,
   "privateEndpointsNotPrinted": true,
+  "liveEvidenceAvailableToThisWorker": false,
   "overall": "HOLD",
   "surfaces": [
     {
@@ -21,6 +23,7 @@
         "gatewaySourcePresent": true,
         "signingSourcePresent": "gateway/src/lib/signing.ts",
         "lsg0-02SanitizedPlanningPin": "docs/end-to-end-delivery/upstreams/linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/",
+        "lsg0-04ProtectedMainCopy": "docs/end-to-end-delivery/upstreams/linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/",
         "planningPinEqualsBoundMain": false,
         "liveContractHandoffForLiNKsites": false
       }
@@ -40,25 +43,28 @@
         "acceptedReceipt": null,
         "namesLiNKsitesAsConsumer": false,
         "archiveLegacyProgramShellsMentionLiNKsites": true,
-        "archiveIsNotRegistration": true
+        "archiveIsNotRegistration": true,
+        "githubPublishedLiNKsitesRegistration": false
       }
     },
     {
       "id": "autowork-event-grant",
       "requiredHandoff": "event allowlist/grant admitting LiNKsites on this commit",
       "classification": "missing and needs work",
-      "evidenceLevel": "absent",
+      "evidenceLevel": "unavailable-to-this-worker",
       "observed": {
-        "currentEventAllowlistGrantingLiNKsites": false
+        "currentEventAllowlistGrantingLiNKsites": false,
+        "status": "HOLD"
       }
     },
     {
       "id": "autowork-org-environment-grant",
       "requiredHandoff": "organisation/environment grant receipt for LiNKsites",
       "classification": "missing and needs work",
-      "evidenceLevel": "absent",
+      "evidenceLevel": "unavailable-to-this-worker",
       "observed": {
-        "orgEnvironmentGrantReceiptForLiNKsites": false
+        "orgEnvironmentGrantReceiptForLiNKsites": false,
+        "status": "HOLD"
       }
     },
     {
@@ -82,28 +88,32 @@
         "sourceOrgHealthRouteSanitizedName": "/v1/operations/health",
         "admittedPrivateEndpointIdentityBound": false,
         "liveEndpointsFetched": false,
-        "endpointValuesOmitted": true
+        "endpointValuesOmitted": true,
+        "status": "HOLD"
       }
     },
     {
       "id": "autowork-health",
       "requiredHandoff": "live health evidence for an admitted LiNKsites-bound endpoint",
       "classification": "missing and needs work",
-      "evidenceLevel": "source-route-only",
+      "evidenceLevel": "unavailable-to-this-worker",
       "observed": {
         "sourceHealthHandlerPresent": true,
         "liveHealthObserved": false,
-        "probesForbidden": true
+        "probesForbidden": true,
+        "githubReleaseLiveHealth": false,
+        "status": "HOLD"
       }
     },
     {
       "id": "autowork-live-receipt",
       "requiredHandoff": "live org-bound receipt identity for LiNKsites",
       "classification": "missing and needs work",
-      "evidenceLevel": "absent",
+      "evidenceLevel": "unavailable-to-this-worker",
       "observed": {
         "liveOrgBoundReceiptIdentity": false,
-        "unitTestsAreNotLiveReceipts": true
+        "unitTestsAreNotLiveReceipts": true,
+        "status": "HOLD"
       }
     }
   ]

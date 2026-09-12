@@ -3,9 +3,33 @@
   "kind": "admitted-manifest-ci-toolchain",
   "sourceIdentity": {
     "repository": "linktrend/LiNKsites",
-    "ref": "issue/534-refresh-lsg0-04-platform-and-linkautowork-protec",
-    "commitAtInstall": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
-    "treeAtInstall": "569a93f0a90cbc375db2d560329ac2895a79885c"
+    "ref": "issue/539-refresh-lsg0-04-platform-and-autowork-live-hando",
+    "commitAtInstall": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+    "treeAtInstall": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea"
+  },
+  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
+  "cloudRuntime": {
+    "uname": "Linux cursor 6.12.94+ x86_64",
+    "python": "Python 3.12.3 (/usr/bin/python3)",
+    "cursorCloud": {
+      "bcId": "bc-4f9095a8-aaa4-4639-b445-a22b1c5fc485",
+      "environmentPublicId": "b0238f1f-ae52-11f1-bf4b-42ffb4d10ea7",
+      "buildId": "bld-20260912-b7d55b45-1315-4fcf-929a-7b4439aacd0c",
+      "gitSetup": "reuse_then_checkout",
+      "warmFork": "warm_fork"
+    },
+    "pathNodeBeforeNvm": {
+      "path": "/exec-daemon/node",
+      "version": "v22.14.0"
+    },
+    "nvm": {
+      "version": "0.40.3",
+      "use22": "v22.22.2"
+    },
+    "pnpmAfterCorepackEnableAndPrepare": {
+      "path": "/home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm",
+      "version": "10.0.0"
+    }
   },
   "ciPins": {
     "workflow": ".github/workflows/ci.yml",
@@ -16,42 +40,27 @@
     "pythonUsedByAcceptance": "python3 -m json.tool"
   },
   "pinDiagnosis": {
-    "nodeCompiler": "CI pins Node major 22 only; no compiler hash/lock. Default PATH node was /exec-daemon/node v22.14.0. nvm use 22 selected v22.22.2 but PATH still resolved /exec-daemon/node first. Both are Node 22. Not a hash-locked compiler. Did not silently pick another major.",
-    "pnpmOnFreshPath": "Before corepack prepare, PATH pnpm was 10.33.3 which is not packageManager pnpm@10.0.0. Diagnosed; did not use that unpinned CLI for install.",
-    "pnpmUsed": "corepack prepare pnpm@10.0.0 --activate; resulting pnpm 10.0.0 at /home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm. packageManager field has no integrity hash.",
-    "lockfile": "pnpm-lock.yaml present; sha256 dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175; frozen install reported lockfile up to date.",
-    "lockDefect": "none-observed-for-frozen-install",
+    "nodeCompiler": "CI pins Node major 22 only; no compiler hash/lock. Default PATH node was /exec-daemon/node v22.14.0. After nvm use 22 and PATH prepend, node was v22.22.2 at ~/.nvm/versions/node/v22.22.2/bin/node. Both are Node 22. Not a hash-locked compiler. Did not silently pick another major.",
+    "pnpmOnFreshPath": "After nvm use 22 and PATH prepend, which pnpm was 10.33.3 until corepack enable + corepack prepare pnpm@10.0.0 --activate. Diagnosed; first frozen install accidentally used 10.33.3; did not change the lockfile. Re-ran frozen install with pnpm 10.0.0.",
+    "pnpmUsed": "corepack enable; corepack prepare pnpm@10.0.0 --activate; resulting pnpm 10.0.0 at /home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm. packageManager field has no integrity hash.",
+    "lockfile": "pnpm-lock.yaml present; sha256 dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175; frozen install with pnpm 10.0.0 reported already up to date.",
+    "lockDefect": "none-observed-for-frozen-install; packageManager has no integrity hash; Node is major-only",
     "didNotChangeLocks": true,
     "didNotSilentlyUseUnpinnedPnpm12": true,
     "python": "Python 3.12.3 (/usr/bin/python3); acceptance uses stdlib json.tool only."
   },
-  "cloudRuntime": {
-    "uname": "Linux cursor 6.12.94+ x86_64",
-    "python": "Python 3.12.3 (/usr/bin/python3)",
-    "pathNode": {
-      "path": "/exec-daemon/node",
-      "version": "v22.14.0"
-    },
-    "nvm": {
-      "version": "0.40.3",
-      "use22": "v22.22.2"
-    },
-    "pnpmAfterCorepackPrepare": {
-      "path": "/home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm",
-      "version": "10.0.0"
-    },
-    "frozenInstall": {
-      "command": "pnpm install --frozen-lockfile",
-      "result": "pass",
-      "lockfileUpToDate": true,
-      "ignoredBuildScripts": ["@parcel/watcher", "@swc/core"],
-      "didNotUpgradeToPnpm12DespiteBanner": true
-    }
+  "frozenInstall": {
+    "command": "pnpm install --frozen-lockfile",
+    "pnpmVersion": "10.0.0",
+    "result": "pass",
+    "lockfileUpToDate": true,
+    "ignoredBuildScripts": ["@parcel/watcher", "@swc/core"],
+    "didNotEditLockfile": true
   },
   "acceptanceCommandsRequiredThisPacket": [
     "find docs/evidence/end-to-end-delivery/lsg0-04 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-    "test -z \"$(git diff --name-only e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
-    "git diff --check e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD"
+    "test -z \"$(git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
+    "git diff --check 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD"
   ],
   "forbiddenThisPacket": [
     "Full Suite",

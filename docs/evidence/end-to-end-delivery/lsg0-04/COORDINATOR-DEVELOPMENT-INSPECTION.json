@@ -3,11 +3,21 @@
   "kind": "coordinator-verified-development-inspection",
   "creditedAsReleasedHandoff": false,
   "creditedAsProtectedDefault": false,
+  "thisRefresh": {
+    "issue": 539,
+    "qualificationTimeUtc": "2026-09-12T22:56:23Z",
+    "didNotFetchDevelopment": true,
+    "didNotSubstituteDevelopmentForBoundMain": true,
+    "retainedPriorInspectionFromIssue": 534,
+    "reason": "Issue 539 fetch authorization is bound main only. Unbound development SHAs are not re-read. The prior inspection record is preserved as still-current historical context and remains not live proof."
+  },
   "purpose": "Inspect coordinator-supplied current protected development identities without substituting them for bound main.",
   "platform": {
     "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
     "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
     "treeVerified": true,
+    "verifiedOnIssue": 534,
+    "reverifiedOnIssue539": false,
     "subject": "2026-09-12 15:25:40 +0800 Merge pull request #266 from linktrend/phase/brain-265-secret-scan-safe",
     "divergenceFromBoundMain": {
       "boundMain": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
@@ -35,6 +45,8 @@
     "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
     "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
     "treeVerified": true,
+    "verifiedOnIssue": 534,
+    "reverifiedOnIssue539": false,
     "subject": "2026-09-04 11:45:14 +0800 Merge pull request #120 from linktrend/phase/production-readiness-20260904",
     "relationshipToBoundMain": {
       "boundMain": "2e30109acfb9510cd77e49f759648b2b6a666adc",

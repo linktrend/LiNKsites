@@ -2,11 +2,12 @@
   "schemaVersion": 1,
   "kind": "LSG0-04-protected-handoff-qualification",
   "packet": "LSG0-04",
-  "issue": 534,
+  "issue": 539,
   "title": "Obtain Platform and LiNKautowork handoffs",
+  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
   "overall": "HOLD",
   "pass": false,
-  "passRule": "PASS only if every accepted handoff requirement exists in protected/released evidence. Source contracts, fixtures, placeholders, development-only commits and unit tests do not prove live handoff.",
+  "passRule": "PASS only if every accepted handoff requirement exists in protected/released evidence. Source contracts, fixtures, placeholders, development-only commits and unit tests do not prove live handoff. Unavailable live evidence is HOLD, not guessed PASS.",
   "leanIndependentReviewer": "not-required-deterministic-qualification",
   "parentSharedEvidenceNotEdited": [
     "docs/evidence/end-to-end-delivery/LSG0-04-HANDOFF.json",
@@ -19,7 +20,16 @@
     "docs/evidence/end-to-end-delivery/HOLDS.json LSG0-04-platform and LSG0-04-autowork",
     "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json"
   ],
-  "missingUpstreamsDoc": "docs/production-roadmap/phase-2/UPSTREAM-DEPENDENCIES.md is absent on admitted LiNKsites tree e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd; qualification used HOLDS plus Phase 2 packet/PRD text.",
+  "authorityUsedThisRefresh": [
+    "admitted LiNKsites commit 7a88e6be88202fffe5a7f01526fadb517e2caeeb tree 994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea",
+    "bound LiNKplatform main a0058e749b2530c4abf8deadb09f2fd4add1ee4f tree cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+    "bound LiNKautowork main 2e30109acfb9510cd77e49f759648b2b6a666adc tree af6883f2b5b093e221eed5f0d033aa7647582717",
+    "copied upstream provenance on the admitted LiNKsites tree",
+    "GitHub issue/release lists for linktrend/LiNKplatform and linktrend/LiNKautowork",
+    "this-worker environment variable names (no matching Platform/Autowork/GSM keys)",
+    "prior still-current lsg0-04 evidence from issue 534"
+  ],
+  "missingUpstreamsDoc": "docs/production-roadmap/phase-2/UPSTREAM-DEPENDENCIES.md is absent on admitted LiNKsites tree 7a88e6be88202fffe5a7f01526fadb517e2caeeb; qualification used HOLDS plus Phase 2 packet/PRD text.",
   "classifications": {
     "completed": [],
     "doneButRequiresTestingOrFixing": [
@@ -46,9 +56,18 @@
     ]
   },
   "allowedNow": {
-    "sanitizedSourceContracts": "docs/end-to-end-delivery/upstreams/ (LSG0-02 planning pins)",
+    "sanitizedSourceContracts": "docs/end-to-end-delivery/upstreams/ (LSG0-02 planning pins plus LSG0-04 protected-main copies)",
     "manualFileFirstSiteAdapter": true,
     "livePlatformOrAutoworkClaims": false
+  },
+  "liveRefreshFinding": {
+    "protectedSourceUnchanged": true,
+    "newLiveRegistrationGrantEndpointOrHealthEvidenceAvailableToThisWorker": false,
+    "githubReleasesFound": 0,
+    "githubIssuesMatchingLiNKsitesHandoff": "none-returned",
+    "workerEnvCredentialReferenceNames": [],
+    "didNotGuessLiveState": true,
+    "didNotProbePrivateEndpoints": true
   },
   "records": {
     "identities": "IDENTITY.json",

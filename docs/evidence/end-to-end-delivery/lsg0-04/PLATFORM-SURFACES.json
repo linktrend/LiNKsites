@@ -7,8 +7,10 @@
     "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
     "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71"
   },
+  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
   "liveProbesForbidden": true,
   "secretValuesNotRequested": true,
+  "liveEvidenceAvailableToThisWorker": false,
   "overall": "HOLD",
   "surfaces": [
     {
@@ -27,7 +29,8 @@
         "namesLiNKsites": false,
         "integrationClaimed": false,
         "consumerProofClaimed": false,
-        "production": false
+        "production": false,
+        "unchangedFromIssue534": true
       },
       "schemaLocksConsumerConst": {
         "path": "packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
@@ -47,7 +50,8 @@
         "fixtureIssuersAudiences": "synthetic values such as linkplatform-issuer / lbrain-api; not a hosted LiNKsites grant",
         "providerTrustFixturePrincipal": "service-linksites-stage",
         "providerTrustFixtureAudience": "linksites-stage-api",
-        "providerTrustIsUnitFixture": true
+        "providerTrustIsUnitFixture": true,
+        "hostedClaimGrantReceiptForLiNKsites": false
       }
     },
     {
@@ -80,7 +84,10 @@
       "evidenceLevel": "absent",
       "observed": {
         "credentialByReferenceHandoffForLiNKsites": false,
-        "secretValuesInspected": false
+        "gsmInventoryOnBoundTree": "infra/secrets/gsm-inventory.md",
+        "gsmInventoryNamesLiNKsites": false,
+        "secretValuesInspected": false,
+        "workerEnvHadGsmOrPlatformSecretNames": false
       }
     },
     {
@@ -141,11 +148,16 @@
       "id": "platform-live-health",
       "requiredHandoff": "live issuer/health surface evidence for the bound protected identity",
       "classification": "missing and needs work",
-      "evidenceLevel": "source-contract-only",
+      "evidenceLevel": "unavailable-to-this-worker",
       "observed": {
         "healthContractSource": "packages/contracts/src/health.ts",
+        "boundTreeHostHealthDoc": "docs/evidence/w20-stage-readiness/host-health-and-stage-gate.md",
+        "hostHealthDocClaimsDeployed": false,
+        "hostHealthDocForbidsLiveStageCalls": true,
         "liveHealthEvidenceFilesOnBoundTree": [],
-        "liveProbePerformed": false
+        "githubReleaseLiveHealth": false,
+        "liveProbePerformed": false,
+        "status": "HOLD"
       }
     }
   ]

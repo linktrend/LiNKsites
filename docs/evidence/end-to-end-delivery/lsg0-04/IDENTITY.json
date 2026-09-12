@@ -2,27 +2,29 @@
   "schemaVersion": 1,
   "kind": "lsg0-04-qualification-identities",
   "packet": "LSG0-04",
-  "issue": 534,
+  "issue": 539,
+  "title": "Refresh LSG0-04 Platform and Autowork live handoff evidence",
+  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
   "writerRole": "implementation-evidence-only",
   "initialCachedIdentity": {
-    "note": "Cursor cached checkout before supplied-branch fetch. Reported separately from admitted starting-work identity.",
+    "note": "Cursor cached checkout before supplied-branch fetch. Reported separately from admitted starting-work identity. All three workspaces were on the cloud overlay branch at the supplied commits.",
     "linksites": {
       "originHostPath": "github.com/linktrend/LiNKsites",
-      "branch": "cursor/linksites-lsg0-04-qualification-534-0760",
-      "commit": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
-      "tree": "569a93f0a90cbc375db2d560329ac2895a79885c",
+      "branch": "cursor/linksites-lsg0-04-live-refresh-539-7e21",
+      "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+      "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea",
       "dirty": false
     },
     "platform": {
       "originHostPath": "github.com/linktrend/LiNKplatform",
-      "branch": "cursor/linksites-lsg0-04-qualification-534-0760",
+      "branch": "cursor/linksites-lsg0-04-live-refresh-539-7e21",
       "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
       "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
       "dirty": false
     },
     "autowork": {
       "originHostPath": "github.com/linktrend/LiNKautowork",
-      "branch": "cursor/linksites-lsg0-04-qualification-534-0760",
+      "branch": "cursor/linksites-lsg0-04-live-refresh-539-7e21",
       "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
       "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
       "dirty": false
@@ -31,9 +33,9 @@
   "admittedStartingWorkIdentity": {
     "primary": {
       "repository": "linktrend/LiNKsites",
-      "ref": "issue/534-refresh-lsg0-04-platform-and-linkautowork-protec",
-      "commit": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
-      "tree": "569a93f0a90cbc375db2d560329ac2895a79885c",
+      "ref": "issue/539-refresh-lsg0-04-platform-and-autowork-live-hando",
+      "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+      "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea",
       "role": "writer",
       "originMatch": true,
       "fetchedBranchCommitMatch": true,
@@ -69,28 +71,13 @@
       }
     ]
   },
-  "coordinatorVerifiedProtectedDevelopmentInspectedNotReleased": {
-    "platform": {
-      "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
-      "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
-      "treeVerified": true,
-      "creditedAsReleasedHandoff": false,
-      "ancestorOfBoundMain": false,
-      "boundMainAncestorOfThis": false,
-      "commitsOnBoundMainNotInThis": 15,
-      "commitsOnThisNotInBoundMain": 93
-    },
-    "autowork": {
-      "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
-      "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
-      "treeVerified": true,
-      "creditedAsReleasedHandoff": false,
-      "ancestorOfBoundMain": true,
-      "boundMainAncestorOfThis": false,
-      "commitsOnBoundMainNotInThis": 8,
-      "commitsOnThisNotInBoundMain": 0,
-      "note": "This development SHA is behind bound Autowork main; it is not a newer live handoff."
-    }
+  "protectedSourceCommitsUnchangedFromIssue534": true,
+  "liveSurfacesCanChangeIndependentlyOfProtectedSource": true,
+  "priorCoordinatorDevelopmentInspection": {
+    "record": "COORDINATOR-DEVELOPMENT-INSPECTION.json",
+    "retainedFromIssue": 534,
+    "thisRefreshDidNotFetchDevelopment": true,
+    "reason": "This worker was authorized to fetch/read only the supplied bound commits. Prior inspection of unbound development SHAs is preserved and is not released live handoff."
   },
   "planningPinsNotCurrentDefault": {
     "platformReviewedDevelopmentUsedByLSG0-02": {
@@ -103,13 +90,18 @@
     },
     "note": "LSG0-02 sanitized copies remain planning/source contracts. They are not the bound protected/default identities and are not live proof."
   },
+  "copiedProtectedSourcesOnAdmittedSitesTree": {
+    "platform": "docs/end-to-end-delivery/upstreams/linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/",
+    "autowork": "docs/end-to-end-delivery/upstreams/linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/",
+    "bundleRole": "immutable protected/released source copy; not live proof"
+  },
   "missingReferencedAuthorityFileOnAdmittedSitesTree": {
     "path": "docs/production-roadmap/phase-2/UPSTREAM-DEPENDENCIES.md",
-    "presentOnCommit": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
+    "presentOnCommit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
     "present": false,
     "fallbackAuthorityUsed": [
       "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md#LSG0-04",
-      "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md",
+      "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md FR-08 and full-operation item 21",
       "docs/evidence/end-to-end-delivery/HOLDS.json",
       "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json"
     ]
