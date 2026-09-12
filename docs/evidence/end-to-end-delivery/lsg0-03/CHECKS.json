@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-03-acceptance-checks",
+  "packet": "LSG0-03",
+  "baseSha": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
+  "overall": "HOLD",
+  "lsg003Pass": false,
+  "checks": [
+    {
+      "id": "json-tool",
+      "command": "find docs/evidence/end-to-end-delivery/lsg0-03 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+      "result": "pending-after-final-tree"
+    },
+    {
+      "id": "scoped-diff",
+      "command": "test -z \"$(git diff --name-only e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-03/')\"",
+      "result": "pending-after-commit"
+    },
+    {
+      "id": "git-diff-check",
+      "command": "git diff --check e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD",
+      "result": "pending-after-commit"
+    },
+    {
+      "id": "changed-path-secret-scan",
+      "command": "python3 scripts/gitops/secret_scan.py --json-output docs/evidence/end-to-end-delivery/lsg0-03/secret-scan-working.json is full-repo; this packet uses a changed-path scan of owned files only",
+      "result": "pending-after-commit"
+    }
+  ]
+}
