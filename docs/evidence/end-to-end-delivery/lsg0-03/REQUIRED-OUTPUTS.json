@@ -22,7 +22,7 @@
       },
       "missingArtifacts": [
         "protected-development selectable=true marketing-smb-v1 entry and catalog record",
-        "independent qualification receipt bound to dacdf036312462c2373afc9cc4302e3231f7e6e9 or a later admitted protected identity that this packet would have to re-verify",
+        "independent qualification receipt bound to 96422a39979f6e1e4c068e871051ae45423a5967 or a later admitted protected identity that this packet would have to re-verify",
         "governed admission receipt with admission performed, not candidate_nonselectable"
       ]
     },
@@ -30,7 +30,7 @@
       "id": "LSG0-03-R1-observation",
       "title": "inspect current marketing-smb-v1 lifecycle/selectability/admission/digest bytes on the supplied protected tree",
       "classification": "completed",
-      "note": "Inspection completed. Observation is quarantined/selectable=false with matching file SHA-256 digests. This is not the required selectable release."
+      "note": "Inspection completed on 96422a3. Observation remains quarantined/selectable=false with matching file SHA-256 digests. Provider bytes unchanged from superseded pin dacdf036. This is not the required selectable release."
     },
     {
       "id": "LSG0-03-R2",
@@ -59,7 +59,7 @@
       "id": "LSG0-03-R2-observation",
       "title": "inspect current MWT release, pointer, A1/A2/A3, A/B/C/L, digests and validation receipts",
       "classification": "completed",
-      "note": "Candidate bytes, layouts, plans, digests, and draft receipts were read from the exact tree. Owner handoffs remain input, not admission."
+      "note": "Candidate bytes, layouts, plans, digests, and draft receipts were re-read from the exact tree 384b428eb35ffa21c6eb1fdc1af90997379a99fb. Owner handoffs remain input, not admission. Bytes match the superseded dacdf036 inspection."
     },
     {
       "id": "LSG0-03-R2-candidate-bytes",

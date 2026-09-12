@@ -2,11 +2,21 @@
   "schemaVersion": 1,
   "kind": "LSG0-03-admission-refresh-qualification",
   "packet": "LSG0-03",
-  "issue": 536,
+  "issue": 538,
   "overall": "HOLD",
   "pass": false,
   "ready": false,
   "evidenceLevel": "exact-protected-tree-inspection",
+  "refreshReason": "LiNKlibraries development advanced from dacdf036312462c2373afc9cc4302e3231f7e6e9 to 96422a39979f6e1e4c068e871051ae45423a5967",
+  "supersededProtectedLibraryIdentity": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
+    "tree": "d3c5f1e2a3450b016084ae09666ac193297ac9fc",
+    "priorIssue": 536,
+    "providerFactsStillAccurate": true,
+    "note": "Superseded as the current protected pin. Provider artifact hashes on the new tree match this prior pin."
+  },
   "leanReview": {
     "independentReviewerUsed": false,
     "policy": "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json",
@@ -38,8 +48,22 @@
   "protectedLibraryIdentityUsed": {
     "repository": "linktrend/LiNKlibraries",
     "ref": "development",
-    "commit": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
-    "tree": "d3c5f1e2a3450b016084ae09666ac193297ac9fc"
+    "commit": "96422a39979f6e1e4c068e871051ae45423a5967",
+    "tree": "384b428eb35ffa21c6eb1fdc1af90997379a99fb"
+  },
+  "upstreamDeltaFromSupersededPin": {
+    "fromCommit": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
+    "toCommit": "96422a39979f6e1e4c068e871051ae45423a5967",
+    "changedPaths": [
+      ".github/linktrend-secret-scan-fixtures.json",
+      "docs/contracts/LEAN-CHECKPOINT-REVIEW-WAIVER.md",
+      "scripts/gitops/completion_gate.py",
+      "scripts/gitops/packager_coordinator.py",
+      "scripts/tests/completion_gate_review_waiver_test.py",
+      "scripts/tests/test_issue405_repair.py"
+    ],
+    "providerHandoffPathsChanged": false,
+    "didNotTreatGitopsWaiverWorkAsAdmission": true
   },
   "providers": {
     "marketing-smb-v1": {

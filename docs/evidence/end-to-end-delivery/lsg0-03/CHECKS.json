@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "lsg0-03-acceptance-checks",
   "packet": "LSG0-03",
-  "baseSha": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
+  "baseSha": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
   "overall": "HOLD",
   "lsg003Pass": false,
   "acceptancePass": true,
@@ -15,18 +15,18 @@
     },
     {
       "id": "scoped-diff",
-      "command": "test -z \"$(git diff --name-only e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-03/')\"",
+      "command": "test -z \"$(git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-03/')\"",
       "result": "pass",
       "changedPathsOnlyUnderOwnedSubdirectory": true
     },
     {
       "id": "git-diff-check",
-      "command": "git diff --check e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD",
+      "command": "git diff --check 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD",
       "result": "pass"
     },
     {
       "id": "changed-path-secret-scan",
-      "command": "python3 scripts/gitops/secret_scan.py requested_paths=git diff --name-only base...HEAD",
+      "command": "python3 scripts/gitops/secret_scan.py with paths=git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD",
       "result": "pass",
       "findingCount": 0
     }
