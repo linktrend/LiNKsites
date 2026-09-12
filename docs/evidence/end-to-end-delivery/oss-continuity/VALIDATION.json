@@ -5,6 +5,55 @@
   "overall": "HOLD",
   "pass": false,
   "continuityComplete": false,
-  "acceptanceCommandsPass": false,
-  "note": "Placeholder written before frozen install and acceptance commands. Replaced after those commands run."
+  "acceptanceCommandsPass": true,
+  "documentationCheckpoint": "f8404898d65d5aab76990a9e1ea5a3aa722b4bcd",
+  "baseSha": "2829e539855006f57563d3c0aa42985897ca29ca",
+  "checks": [
+    {
+      "id": "json-tool-oss-continuity",
+      "command": "find docs/evidence/end-to-end-delivery/oss-continuity -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+      "result": "pass"
+    },
+    {
+      "id": "json-tool-traceability",
+      "command": "python3 -m json.tool docs/evidence/end-to-end-delivery/REQUIREMENT-TRACEABILITY.json >/dev/null",
+      "result": "pass"
+    },
+    {
+      "id": "scoped-diff",
+      "command": "test -z \"$(git diff --name-only 2829e539855006f57563d3c0aa42985897ca29ca...HEAD | rg -v '^(docs/production-roadmap/phase-2/(OSS-CONTINUITY-RULE\\.md|OSS-INVENTORY\\.md|END-TO-END-COMPLETION-PRD.md|ATOMIC-WORK-PACKETS.md)|docs/evidence/end-to-end-delivery/REQUIREMENT-TRACEABILITY.json|docs/evidence/end-to-end-delivery/oss-continuity/)')\"",
+      "result": "pass"
+    },
+    {
+      "id": "diff-check",
+      "command": "git diff --check 2829e539855006f57563d3c0aa42985897ca29ca...HEAD",
+      "result": "pass"
+    },
+    {
+      "id": "changed-path-secret-scan",
+      "tool": "rg",
+      "result": "pass",
+      "matches": 0,
+      "note": "First attempt used an unquoted pattern that rg treated as flags; re-ran with -e patterns. Zero matches."
+    },
+    {
+      "id": "frozen-lockfile-install",
+      "command": "pnpm install --frozen-lockfile",
+      "result": "pass",
+      "lockUnchanged": true
+    },
+    {
+      "id": "packet-denominator",
+      "result": "pass",
+      "atomicPackets": 30,
+      "ossContinuityRequirements": 8
+    }
+  ],
+  "didNotClaimLssec01Complete": true,
+  "didNotClaimLsart01Complete": true,
+  "didNotClaimInstallationComplete": true,
+  "didNotProbeLiveSystems": true,
+  "didNotEditProtectedBranches": true,
+  "didNotCreatePr": true,
+  "didNotDispatchNestedWorkers": true
 }

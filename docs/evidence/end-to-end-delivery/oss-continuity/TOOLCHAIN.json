@@ -19,9 +19,9 @@
     "fullSuiteNotRunThisPacket": true
   },
   "pinDiagnosis": {
-    "nodeCompiler": "CI and .nvmrc pin Node major 22 only; production Dockerfiles pin node:22.17.0-alpine by digest. PATH node at session start was /exec-daemon/node v22.14.0. nvm default observed v22.22.2. Neither host binary is a hash-locked compiler and neither is the production image pin.",
-    "pnpm": "package.json packageManager is pnpm@10.0.0 without an integrity hash. Frozen lockfile exists. Did not change the lock. Did not silently switch to another pnpm major.",
-    "lockDefect": "none-observed-for-frozen-install-intent; pnpm binary itself is version-pinned not hash-locked; many manifest ranges exist but lock records exact versions",
+    "nodeCompiler": "CI and .nvmrc pin Node major 22 only; production Dockerfiles pin node:22.17.0-alpine by digest. After nvm use 22, command -v node remained /exec-daemon/node v22.14.0 because that PATH entry precedes nvm. nvm selected v22.22.2. Neither host binary is a hash-locked compiler and neither is the production image pin.",
+    "pnpm": "package.json packageManager is pnpm@10.0.0 without an integrity hash. corepack prepared pnpm@10.0.0 at /home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm. Frozen lockfile exists and was not modified.",
+    "lockDefect": "none-observed-for-frozen-install; pnpm binary is version-pinned not hash-locked; many manifest ranges exist but lock records exact versions",
     "githubActionsCi": "floating tags in ci.yml (checkout@v4, setup-node@v4, pnpm/action-setup@v4, cache@v4, setup-buildx-action@v3, supabase/setup-cli@v1)",
     "apkInDockerfiles": "unpinned apk add --no-cache libc6-compat (and git/ca-certificates on orchestrator)",
     "didNotChangeLocks": true,
@@ -36,16 +36,28 @@
     },
     "nvm": {
       "version": "0.40.3",
-      "default": "v22.22.2"
+      "use22": "v22.22.2",
+      "npm": "10.9.7"
+    },
+    "pnpmAfterCorepackPrepare": {
+      "path": "/home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm",
+      "version": "10.0.0"
     },
     "build": {
       "buildId": "bld-20260912-16700cc2-6013-4a49-b917-c2dd6554e9f8",
       "gitSetup": "reuse_then_checkout",
-      "note": "Cached checkout was main; admitted work used fetched issue/540 identity after verification."
+      "note": "Cached checkout was main 9eb995d7 / tree fa16550a; admitted work used fetched issue/540 identity after verification."
     },
     "frozenInstall": {
-      "command": "pending-before-acceptance",
-      "result": "pending"
+      "command": "pnpm install --frozen-lockfile",
+      "result": "pass",
+      "durationSeconds": 9.6,
+      "lockfileUpToDate": true,
+      "lockSha256Unchanged": "dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175",
+      "ignoredBuildScripts": [
+        "@swc/core"
+      ],
+      "note": "install reused store cache; lock not modified; this does not prove FR-13 archive continuity"
     }
   }
 }
