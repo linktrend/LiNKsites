@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-autowork-surface-qualification",
+  "boundIdentity": {
+    "repository": "linktrend/LiNKautowork",
+    "ref": "main",
+    "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+    "tree": "af6883f2b5b093e221eed5f0d033aa7647582717"
+  },
+  "liveProbesForbidden": true,
+  "secretValuesNotRequested": true,
+  "privateEndpointsNotPrinted": true,
+  "overall": "HOLD",
+  "surfaces": [
+    {
+      "id": "autowork-contract",
+      "requiredHandoff": "current LiNKautowork gateway/event/receipt contract bound for LiNKsites",
+      "classification": "done but requires testing/fixing",
+      "evidenceLevel": "source-and-planning-copies-not-live",
+      "observed": {
+        "gatewaySourcePresent": true,
+        "signingSourcePresent": "gateway/src/lib/signing.ts",
+        "lsg0-02SanitizedPlanningPin": "docs/end-to-end-delivery/upstreams/linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/",
+        "planningPinEqualsBoundMain": false,
+        "liveContractHandoffForLiNKsites": false
+      }
+    },
+    {
+      "id": "autowork-consumer-registration",
+      "requiredHandoff": "LiNKsites consumer registration on bound Autowork main",
+      "classification": "missing and needs work",
+      "evidenceLevel": "wrong-consumer-hold-only",
+      "observed": {
+        "existingHandoffPath": "docs/planning/pkt-03-xpkt-03/provider-consumer-handoff.hold.json",
+        "sha256": "cb3a4933eb60f7b00fef9ec6c5523f8e27ca36e2c7330b5115679e52461df8e8",
+        "kind": "provider-consumer-handoff",
+        "producerRepository": "linktrend/LiNKskills",
+        "consumerRepository": "linktrend/LiNKautowork",
+        "verdict": "blocked",
+        "acceptedReceipt": null,
+        "namesLiNKsitesAsConsumer": false,
+        "archiveLegacyProgramShellsMentionLiNKsites": true,
+        "archiveIsNotRegistration": true
+      }
+    },
+    {
+      "id": "autowork-event-grant",
+      "requiredHandoff": "event allowlist/grant admitting LiNKsites on this commit",
+      "classification": "missing and needs work",
+      "evidenceLevel": "absent",
+      "observed": {
+        "currentEventAllowlistGrantingLiNKsites": false
+      }
+    },
+    {
+      "id": "autowork-org-environment-grant",
+      "requiredHandoff": "organisation/environment grant receipt for LiNKsites",
+      "classification": "missing and needs work",
+      "evidenceLevel": "absent",
+      "observed": {
+        "orgEnvironmentGrantReceiptForLiNKsites": false
+      }
+    },
+    {
+      "id": "autowork-signing-reference",
+      "requiredHandoff": "admitted signing-reference for LiNKsites (no secret values)",
+      "classification": "done but requires testing/fixing",
+      "evidenceLevel": "source-hmac-helper-not-admitted-key-ref",
+      "observed": {
+        "signingHelper": "gateway/src/lib/signing.ts",
+        "admittedLiNKsitesSigningReference": false,
+        "secretValuesPrinted": false
+      }
+    },
+    {
+      "id": "autowork-private-endpoint",
+      "requiredHandoff": "admitted private endpoint identity (sanitized name/digest only)",
+      "classification": "missing and needs work",
+      "evidenceLevel": "source-routes-not-admitted-identity",
+      "observed": {
+        "sourceHealthRoute": "/health",
+        "sourceOrgHealthRouteSanitizedName": "/v1/operations/health",
+        "admittedPrivateEndpointIdentityBound": false,
+        "liveEndpointsFetched": false,
+        "endpointValuesOmitted": true
+      }
+    },
+    {
+      "id": "autowork-health",
+      "requiredHandoff": "live health evidence for an admitted LiNKsites-bound endpoint",
+      "classification": "missing and needs work",
+      "evidenceLevel": "source-route-only",
+      "observed": {
+        "sourceHealthHandlerPresent": true,
+        "liveHealthObserved": false,
+        "probesForbidden": true
+      }
+    },
+    {
+      "id": "autowork-live-receipt",
+      "requiredHandoff": "live org-bound receipt identity for LiNKsites",
+      "classification": "missing and needs work",
+      "evidenceLevel": "absent",
+      "observed": {
+        "liveOrgBoundReceiptIdentity": false,
+        "unitTestsAreNotLiveReceipts": true
+      }
+    }
+  ]
+}

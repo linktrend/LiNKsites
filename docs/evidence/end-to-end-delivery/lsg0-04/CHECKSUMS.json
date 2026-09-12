@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-evidence-checksums",
+  "algorithm": "sha256",
+  "files": {
+    "AUTOWORK-SURFACES.json": {
+      "sha256": "ad1abc05f9bbc82bdd3c2025a02a5acd98aadc829a76c1a3db3d7a1a0d8b3828"
+    },
+    "COORDINATOR-DEVELOPMENT-INSPECTION.json": {
+      "sha256": "c0862a15093425e0ba545de29701b282414a815b80e10bf1f346900008e8b053"
+    },
+    "IDENTITY.json": {
+      "sha256": "35d82bfd5bcbe6cdc9991f4a3dff1fd6a1aca161c88be80f1df82f5c9cefe051"
+    },
+    "INDEX.json": {
+      "sha256": "f0ac4f46a0318a43f34ecd935e5d4a2e2dd08c2b7613d456056fa6f8b7f5d250"
+    },
+    "LEAN-REVIEW.json": {
+      "sha256": "e15e4bfa70bd1058ac105f66a961f5fe6f976a296f781c6312b005713e2f1d4a"
+    },
+    "OWNER-ACTIONS.json": {
+      "sha256": "2a3bd1b39b7c59c285b85dc852754cb379405ab293407476de9c0591ca80242e"
+    },
+    "PLATFORM-SURFACES.json": {
+      "sha256": "a96f2cb3d8a796f90896a934df3c4483915564c56c9d0a2aef4861c2e98dc625"
+    },
+    "QUALIFICATION.json": {
+      "sha256": "e00d6312c94c96b006011dff8604eae294bac2a299da111d7edb821c5c6b1680"
+    },
+    "TOOLCHAIN.json": {
+      "sha256": "bcc17d2e41aae036610699003aeeadf55147e49a6e1574604484c951f64b30d4"
+    },
+    "VALIDATION.json": {
+      "sha256": "7496c50a6f0e9d9c50e97abe12f3ada68400ca80bb903bcaa433fc3de4ccf1cc"
+    }
+  }
+}

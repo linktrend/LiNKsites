@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-validation",
+  "overall": "HOLD",
+  "pass": false,
+  "qualificationVerdict": "HOLD",
+  "leanIndependentReviewer": "not-required",
+  "checks": [
+    {
+      "id": "json-tool",
+      "command": "find docs/evidence/end-to-end-delivery/lsg0-04 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+      "result": "pending-after-checksums-commit"
+    },
+    {
+      "id": "scoped-diff",
+      "command": "test -z \"$(git diff --name-only e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
+      "result": "pending-after-commit"
+    },
+    {
+      "id": "diff-check",
+      "command": "git diff --check e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd...HEAD",
+      "result": "pending-after-commit"
+    },
+    {
+      "id": "changed-path-secret-scan",
+      "tool": "rg",
+      "result": "pass",
+      "matches": 0,
+      "patterns": ["BEGIN PRIVATE/CERTIFICATE blocks", "aws_secret", "slack-style tokens", "ghp_", "github_pat_", "sk-", "Bearer tokens"]
+    },
+    {
+      "id": "relative-index-links",
+      "result": "pass-after-this-file",
+      "index": "INDEX.json"
+    }
+  ],
+  "didNotProbeLiveSystems": true,
+  "didNotEditProtectedBranches": true,
+  "didNotEditReadOnlySources": true,
+  "didNotCreatePr": true
+}

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "coordinator-verified-development-inspection",
+  "creditedAsReleasedHandoff": false,
+  "creditedAsProtectedDefault": false,
+  "purpose": "Inspect coordinator-supplied current protected development identities without substituting them for bound main.",
+  "platform": {
+    "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
+    "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
+    "treeVerified": true,
+    "subject": "2026-09-12 15:25:40 +0800 Merge pull request #266 from linktrend/phase/brain-265-secret-scan-safe",
+    "divergenceFromBoundMain": {
+      "boundMain": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "commitsOnMainNotInThis": 15,
+      "commitsOnThisNotInMain": 93
+    },
+    "cataloguePinStillLiNKclientOnThisSha": true,
+    "newRelativeToBoundMainNotLiNKsitesHandoff": [
+      "supabase/migrations/20260908_000019_platform_migration_receipts_schema_upgrade.sql",
+      "supabase/migrations/20260909_000020_platform_identity_registration_receipts.sql",
+      "supabase/migrations/20260909_000021_platform_paci_identity_cardinality.sql",
+      "supabase/migrations/20260910_000022_platform_svc_platform_native_login.sql",
+      "supabase/migrations/20260911_000023_platform_portal_membership_rpc.sql",
+      "packages/contracts/schemas/platform-current-memberships.v1.0.0.json"
+    ],
+    "identityRegistrationReceiptSchemaOnThisSha": {
+      "present": true,
+      "storesSecretValues": false,
+      "containsLiNKsitesActorOrServiceRow": false,
+      "note": "Schema/source only. Not an applied LiNKsites registration receipt and not on bound main."
+    },
+    "doesNotClearLSG0-04": true
+  },
+  "autowork": {
+    "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
+    "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
+    "treeVerified": true,
+    "subject": "2026-09-04 11:45:14 +0800 Merge pull request #120 from linktrend/phase/production-readiness-20260904",
+    "relationshipToBoundMain": {
+      "boundMain": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "thisIsAncestorOfBoundMain": true,
+      "commitsOnMainNotInThis": 8,
+      "commitsOnThisNotInMain": 0
+    },
+    "nonArchiveDiffVersusBoundMain": [
+      ".github/linktrend-gitops-consumer.json",
+      ".github/workflows/linktrend-review-gate.yml",
+      ".ide-development/installed-state.json"
+    ],
+    "noAdditionalLiNKsitesConsumerRegistrationOnThisSha": true,
+    "doesNotClearLSG0-04": true
+  }
+}

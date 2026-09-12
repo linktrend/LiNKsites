@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "LSG0-04-protected-handoff-qualification",
+  "packet": "LSG0-04",
+  "issue": 534,
+  "title": "Obtain Platform and LiNKautowork handoffs",
+  "overall": "HOLD",
+  "pass": false,
+  "passRule": "PASS only if every accepted handoff requirement exists in protected/released evidence. Source contracts, fixtures, placeholders, development-only commits and unit tests do not prove live handoff.",
+  "leanIndependentReviewer": "not-required-deterministic-qualification",
+  "parentSharedEvidenceNotEdited": [
+    "docs/evidence/end-to-end-delivery/LSG0-04-HANDOFF.json",
+    "docs/evidence/end-to-end-delivery/HOLDS.json",
+    "docs/evidence/end-to-end-delivery/INDEX.json"
+  ],
+  "requirementSources": [
+    "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md LSG0-04",
+    "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md FR-08 and full-operation item 21",
+    "docs/evidence/end-to-end-delivery/HOLDS.json LSG0-04-platform and LSG0-04-autowork",
+    "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json"
+  ],
+  "missingUpstreamsDoc": "docs/production-roadmap/phase-2/UPSTREAM-DEPENDENCIES.md is absent on admitted LiNKsites tree e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd; qualification used HOLDS plus Phase 2 packet/PRD text.",
+  "classifications": {
+    "completed": [],
+    "doneButRequiresTestingOrFixing": [
+      "platform-migration-receipt",
+      "autowork-contract",
+      "autowork-signing-reference"
+    ],
+    "missingAndNeedsWork": [
+      "platform-catalogue-pin",
+      "platform-claim",
+      "platform-service",
+      "platform-registration",
+      "platform-credential-reference",
+      "platform-issuer",
+      "platform-audience",
+      "platform-scope",
+      "platform-live-health",
+      "autowork-consumer-registration",
+      "autowork-event-grant",
+      "autowork-org-environment-grant",
+      "autowork-private-endpoint",
+      "autowork-health",
+      "autowork-live-receipt"
+    ]
+  },
+  "allowedNow": {
+    "sanitizedSourceContracts": "docs/end-to-end-delivery/upstreams/ (LSG0-02 planning pins)",
+    "manualFileFirstSiteAdapter": true,
+    "livePlatformOrAutoworkClaims": false
+  },
+  "records": {
+    "identities": "IDENTITY.json",
+    "platform": "PLATFORM-SURFACES.json",
+    "autowork": "AUTOWORK-SURFACES.json",
+    "developmentInspectionNotReleased": "COORDINATOR-DEVELOPMENT-INSPECTION.json",
+    "ownerActions": "OWNER-ACTIONS.json",
+    "toolchain": "TOOLCHAIN.json",
+    "leanReview": "LEAN-REVIEW.json"
+  }
+}
