@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-platform-surface-qualification",
+  "boundIdentity": {
+    "repository": "linktrend/LiNKplatform",
+    "ref": "main",
+    "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+    "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71"
+  },
+  "liveProbesForbidden": true,
+  "secretValuesNotRequested": true,
+  "overall": "HOLD",
+  "surfaces": [
+    {
+      "id": "platform-catalogue-pin",
+      "requiredHandoff": "valid LiNKsites catalogue-profile provider pin on the bound protected commit/tree",
+      "classification": "missing and needs work",
+      "evidenceLevel": "protected-source-wrong-consumer-wrong-pin",
+      "observed": {
+        "path": "docs/contracts/frozen/EXT-LCL-PLATFORM-CATALOGUE-CONTRACT.provider-handoff.json",
+        "sha256": "3ebd0e8c7e8c09a19a45e744c436ffcfc8fbf111a67848ed24576ea36d44cb36",
+        "requestingConsumer": "LiNKclient",
+        "requestingWorkPacket": "LCL-WP-002",
+        "pinCommit": "acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062",
+        "pinTree": "8027697bc681085a2a1a4af029028bc76426c06a",
+        "equalsBoundMain": false,
+        "namesLiNKsites": false,
+        "integrationClaimed": false,
+        "consumerProofClaimed": false,
+        "production": false
+      },
+      "schemaLocksConsumerConst": {
+        "path": "packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
+        "requestingConsumerConst": "LiNKclient",
+        "cannotNameLiNKsitesWithoutSchemaChangeByOwner": true
+      }
+    },
+    {
+      "id": "platform-claim",
+      "requiredHandoff": "current Platform claim grant for LiNKsites on the bound identity",
+      "classification": "missing and needs work",
+      "evidenceLevel": "synthetic-fixtures-only",
+      "observed": {
+        "authClaimsContract": "platform.auth-claims/1.1.0",
+        "repinPacketDoesNotEditLiNKsites": true,
+        "claimsFixturesPresent": true,
+        "fixtureIssuersAudiences": "synthetic values such as linkplatform-issuer / lbrain-api; not a hosted LiNKsites grant",
+        "providerTrustFixturePrincipal": "service-linksites-stage",
+        "providerTrustFixtureAudience": "linksites-stage-api",
+        "providerTrustIsUnitFixture": true
+      }
+    },
+    {
+      "id": "platform-service",
+      "requiredHandoff": "LiNKsites service identity on the bound protected identity",
+      "classification": "missing and needs work",
+      "evidenceLevel": "no-bound-service-receipt",
+      "observed": {
+        "linksitesNamedInSourceMigrationsAndDocs": true,
+        "boundServiceRegistrationReceiptForLiNKsites": false
+      }
+    },
+    {
+      "id": "platform-registration",
+      "requiredHandoff": "actor/service registration receipt for LiNKsites bound to this Platform commit",
+      "classification": "missing and needs work",
+      "evidenceLevel": "absent-on-protected-main",
+      "observed": {
+        "boundMainHasIdentityRegistrationReceiptTable": false,
+        "rlsGrantSqlIsNotCurrentRegistrationHandoff": [
+          "supabase/migrations/20260804_000017_linksites_platform_rls_grants.sql",
+          "supabase/migrations/20260804233546_linksites_platform_rls_grants.sql"
+        ]
+      }
+    },
+    {
+      "id": "platform-credential-reference",
+      "requiredHandoff": "LiNKsites credential-by-reference (no secret values)",
+      "classification": "missing and needs work",
+      "evidenceLevel": "absent",
+      "observed": {
+        "credentialByReferenceHandoffForLiNKsites": false,
+        "secretValuesInspected": false
+      }
+    },
+    {
+      "id": "platform-issuer",
+      "requiredHandoff": "current issuer identity granted to LiNKsites",
+      "classification": "missing and needs work",
+      "evidenceLevel": "source-issuer-lock-not-consumer-grant",
+      "observed": {
+        "issuerLockSourcePresent": "packages/paci/src/issuer-lock.ts",
+        "issuerMigrationsPresent": true,
+        "liNKsitesIssuerGrantDocumentOnBoundCommit": false
+      }
+    },
+    {
+      "id": "platform-audience",
+      "requiredHandoff": "current audience grant for LiNKsites",
+      "classification": "missing and needs work",
+      "evidenceLevel": "fixtures-only",
+      "observed": {
+        "claimsRejectWrongAudienceFixturePresent": true,
+        "hostedAudienceGrantForLiNKsites": false
+      }
+    },
+    {
+      "id": "platform-scope",
+      "requiredHandoff": "current scope grant for LiNKsites",
+      "classification": "missing and needs work",
+      "evidenceLevel": "capability-names-in-fixtures-not-grants",
+      "observed": {
+        "providerTrustCapabilitiesIncludeLinksitesAdvisoryProjectionRead": true,
+        "forbiddenCapabilityNamesIncludeLinksitesPublish": true,
+        "grantedScopeReceiptForLiNKsites": false
+      }
+    },
+    {
+      "id": "platform-migration-receipt",
+      "requiredHandoff": "applied production/stage migration receipts for this identity",
+      "classification": "done but requires testing/fixing",
+      "evidenceLevel": "local-nonlive-proof-wrong-tree",
+      "observed": {
+        "sourceMigrationsExist": true,
+        "localProofPath": "docs/evidence/phase-1/CURRENT-BOUND-000017-POSTGRES-PROVIDER-PROOF-2026-08-31.json",
+        "localProofSha256": "4d34c52e945e379859942368fa1ced0bb3fd3d71a97da348d52362acc2d6fcec",
+        "localProofStatus": "PASS",
+        "live": false,
+        "production": false,
+        "vps": false,
+        "staging": false,
+        "classificationAtProof": "local",
+        "headShaAtProof": "cc1ac72f23f0086ff8d63f8dda5521a1d6353413",
+        "gitTreeAtProof": "f62d6b29ace11cc2bf73e72d69e63de9c06498d1",
+        "branchAtProof": "issue/174-current-bound-000017-receipt-repair",
+        "matchesBoundMainCommitTree": false,
+        "appliedProductionOrStageReceiptForBoundIdentity": false
+      }
+    },
+    {
+      "id": "platform-live-health",
+      "requiredHandoff": "live issuer/health surface evidence for the bound protected identity",
+      "classification": "missing and needs work",
+      "evidenceLevel": "source-contract-only",
+      "observed": {
+        "healthContractSource": "packages/contracts/src/health.ts",
+        "liveHealthEvidenceFilesOnBoundTree": [],
+        "liveProbePerformed": false
+      }
+    }
+  ]
+}

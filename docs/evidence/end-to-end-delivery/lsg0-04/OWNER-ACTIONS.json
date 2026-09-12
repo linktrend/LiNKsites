@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-owner-actions",
+  "overall": "HOLD",
+  "passForbiddenUntilAllRequiredSurfacesExistInProtectedReleasedEvidence": true,
+  "actions": [
+    {
+      "owner": "linktrend/LiNKplatform",
+      "action": "Publish a valid catalogue-profile provider pin that names LiNKsites as requesting consumer against exact protected commit/tree (bound main a0058e749b2530c4abf8deadb09f2fd4add1ee4f / cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71, or a later protected identity that LiNKsites re-binds). Include actor/service registration, credential references (not secret values), issuer/audience/scopes, applied migration receipts for that identity, and live issuer/health evidence. Do not treat LiNKclient LCL-WP-002 pin acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062 as a LiNKsites pin. Development schema 8d7af99575a5498ecda6b4396431136eb7c9c213 is not released proof."
+    },
+    {
+      "owner": "linktrend/LiNKautowork",
+      "action": "Publish LiNKsites consumer registration, event grants, organisation/environment grants, an admitted signing-reference, an admitted private endpoint identity (sanitized), live health, and a live org-bound receipt against exact protected commit/tree (bound main 2e30109acfb9510cd77e49f759648b2b6a666adc / af6883f2b5b093e221eed5f0d033aa7647582717, or a later protected identity that LiNKsites re-binds). The LiNKskills PKT-03 blocked hold is not a LiNKsites registration. Source HMAC helpers, /health routes, archive templates, and unit tests are not live handoff."
+    },
+    {
+      "owner": "linktrend/LiNKsites",
+      "action": "Keep live Platform/Autowork claims disabled. Continue manual/file adapter. Do not mutate upstreams. After owners publish protected/released evidence, re-qualify LSG0-04 against those exact identities. Optionally restore missing UPSTREAM-DEPENDENCIES.md on a later packet; its absence did not invent PASS."
+    }
+  ]
+}

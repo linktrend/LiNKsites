@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-qualification-identities",
+  "packet": "LSG0-04",
+  "issue": 534,
+  "writerRole": "implementation-evidence-only",
+  "initialCachedIdentity": {
+    "note": "Cursor cached checkout before supplied-branch fetch. Reported separately from admitted starting-work identity.",
+    "linksites": {
+      "originHostPath": "github.com/linktrend/LiNKsites",
+      "branch": "cursor/linksites-lsg0-04-qualification-534-0760",
+      "commit": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
+      "tree": "569a93f0a90cbc375db2d560329ac2895a79885c",
+      "dirty": false
+    },
+    "platform": {
+      "originHostPath": "github.com/linktrend/LiNKplatform",
+      "branch": "cursor/linksites-lsg0-04-qualification-534-0760",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "dirty": false
+    },
+    "autowork": {
+      "originHostPath": "github.com/linktrend/LiNKautowork",
+      "branch": "cursor/linksites-lsg0-04-qualification-534-0760",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "dirty": false
+    }
+  },
+  "admittedStartingWorkIdentity": {
+    "primary": {
+      "repository": "linktrend/LiNKsites",
+      "ref": "issue/534-refresh-lsg0-04-platform-and-linkautowork-protec",
+      "commit": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
+      "tree": "569a93f0a90cbc375db2d560329ac2895a79885c",
+      "role": "writer",
+      "originMatch": true,
+      "fetchedBranchCommitMatch": true,
+      "fetchedBranchTreeMatch": true,
+      "checkoutDirty": false
+    },
+    "readOnlySources": [
+      {
+        "repository": "linktrend/LiNKplatform",
+        "ref": "main",
+        "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+        "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+        "role": "read-only-source",
+        "originMatch": true,
+        "fetchedBranchCommitMatch": true,
+        "fetchedBranchTreeMatch": true,
+        "detachedExactCommit": true,
+        "checkoutDirty": false,
+        "didNotSubstituteLaterTip": true
+      },
+      {
+        "repository": "linktrend/LiNKautowork",
+        "ref": "main",
+        "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+        "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+        "role": "read-only-source",
+        "originMatch": true,
+        "fetchedBranchCommitMatch": true,
+        "fetchedBranchTreeMatch": true,
+        "detachedExactCommit": true,
+        "checkoutDirty": false,
+        "didNotSubstituteLaterTip": true
+      }
+    ]
+  },
+  "coordinatorVerifiedProtectedDevelopmentInspectedNotReleased": {
+    "platform": {
+      "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
+      "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
+      "treeVerified": true,
+      "creditedAsReleasedHandoff": false,
+      "ancestorOfBoundMain": false,
+      "boundMainAncestorOfThis": false,
+      "commitsOnBoundMainNotInThis": 15,
+      "commitsOnThisNotInBoundMain": 93
+    },
+    "autowork": {
+      "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
+      "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
+      "treeVerified": true,
+      "creditedAsReleasedHandoff": false,
+      "ancestorOfBoundMain": true,
+      "boundMainAncestorOfThis": false,
+      "commitsOnBoundMainNotInThis": 8,
+      "commitsOnThisNotInBoundMain": 0,
+      "note": "This development SHA is behind bound Autowork main; it is not a newer live handoff."
+    }
+  },
+  "planningPinsNotCurrentDefault": {
+    "platformReviewedDevelopmentUsedByLSG0-02": {
+      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2"
+    },
+    "autoworkPlanningPinUsedByLSG0-02": {
+      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
+      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b"
+    },
+    "note": "LSG0-02 sanitized copies remain planning/source contracts. They are not the bound protected/default identities and are not live proof."
+  },
+  "missingReferencedAuthorityFileOnAdmittedSitesTree": {
+    "path": "docs/production-roadmap/phase-2/UPSTREAM-DEPENDENCIES.md",
+    "presentOnCommit": "e93a9fe9bda5a81abd8af65f6b2f8e8da33feecd",
+    "present": false,
+    "fallbackAuthorityUsed": [
+      "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md#LSG0-04",
+      "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md",
+      "docs/evidence/end-to-end-delivery/HOLDS.json",
+      "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json"
+    ]
+  }
+}

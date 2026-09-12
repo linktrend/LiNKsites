@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-evidence-index",
+  "directory": "docs/evidence/end-to-end-delivery/lsg0-04/",
+  "files": [
+    "IDENTITY.json",
+    "QUALIFICATION.json",
+    "PLATFORM-SURFACES.json",
+    "AUTOWORK-SURFACES.json",
+    "COORDINATOR-DEVELOPMENT-INSPECTION.json",
+    "OWNER-ACTIONS.json",
+    "TOOLCHAIN.json",
+    "LEAN-REVIEW.json",
+    "VALIDATION.json",
+    "CHECKSUMS.json",
+    "INDEX.json"
+  ]
+}
