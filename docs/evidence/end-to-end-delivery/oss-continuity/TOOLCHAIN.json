@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "oss-continuity-toolchain",
+  "sourceIdentity": {
+    "repository": "linktrend/LiNKsites",
+    "ref": "issue/540-incorporate-immutable-oss-preservation-reproduci",
+    "commit": "2829e539855006f57563d3c0aa42985897ca29ca",
+    "tree": "2deb6807587d95f0260a53b4f182dc587d6784ae"
+  },
+  "ciPinsFromAdmittedManifest": {
+    "workflow": ".github/workflows/ci.yml",
+    "runsOn": "ubuntu-24.04-arm",
+    "nodeVersion": "22",
+    "pnpmActionSetup": "10.0.0",
+    "packageManagerField": "pnpm@10.0.0",
+    "webMasterNvmrc": "22",
+    "pythonUsedByAcceptance": "python3 -m json.tool",
+    "supabaseCliPinnedInFullSuiteOnly": "2.81.3",
+    "fullSuiteNotRunThisPacket": true
+  },
+  "pinDiagnosis": {
+    "nodeCompiler": "CI and .nvmrc pin Node major 22 only; production Dockerfiles pin node:22.17.0-alpine by digest. PATH node at session start was /exec-daemon/node v22.14.0. nvm default observed v22.22.2. Neither host binary is a hash-locked compiler and neither is the production image pin.",
+    "pnpm": "package.json packageManager is pnpm@10.0.0 without an integrity hash. Frozen lockfile exists. Did not change the lock. Did not silently switch to another pnpm major.",
+    "lockDefect": "none-observed-for-frozen-install-intent; pnpm binary itself is version-pinned not hash-locked; many manifest ranges exist but lock records exact versions",
+    "githubActionsCi": "floating tags in ci.yml (checkout@v4, setup-node@v4, pnpm/action-setup@v4, cache@v4, setup-buildx-action@v3, supabase/setup-cli@v1)",
+    "apkInDockerfiles": "unpinned apk add --no-cache libc6-compat (and git/ca-certificates on orchestrator)",
+    "didNotChangeLocks": true,
+    "didNotSilentlyUseUnpinnedPnpmAsProductionIdentity": true,
+    "didNotTreatHostToolchainAsProductionPin": true
+  },
+  "cloudRuntime": {
+    "python": "Python 3.12.3 (/usr/bin/python3)",
+    "pathNodeBeforeNvmActivation": {
+      "path": "/exec-daemon/node",
+      "version": "v22.14.0"
+    },
+    "nvm": {
+      "version": "0.40.3",
+      "default": "v22.22.2"
+    },
+    "build": {
+      "buildId": "bld-20260912-16700cc2-6013-4a49-b917-c2dd6554e9f8",
+      "gitSetup": "reuse_then_checkout",
+      "note": "Cached checkout was main; admitted work used fetched issue/540 identity after verification."
+    },
+    "frozenInstall": {
+      "command": "pending-before-acceptance",
+      "result": "pending"
+    }
+  }
+}

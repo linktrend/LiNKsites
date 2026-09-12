@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "oss-continuity-identity",
+  "issue": 540,
+  "cloudRun": {
+    "url": "https://cursor.com/agents/bc-c73e81b0-c54f-43c5-ac57-83c77a73e89c",
+    "bcId": "bc-c73e81b0-c54f-43c5-ac57-83c77a73e89c",
+    "name": "LINKSITES-OSS-CONTINUITY-540",
+    "advertisedCloudBranch": "cursor/linksites-oss-continuity-540-3976",
+    "writerUsedOwnedIssueBranch": true,
+    "didNotCreateImplementerPr": true
+  },
+  "initialCachedIdentity": {
+    "note": "Cursor cached checkout before fetch/checkout. Reported separately from admitted starting-work identity.",
+    "repository": "linktrend/LiNKsites",
+    "originHost": "https://github.com/linktrend/LiNKsites",
+    "branch": "main",
+    "commit": "9eb995d7c151aab6aafabd66e91893084e1acdb2",
+    "tree": "fa16550a8d1981a37113c4ba356cbb0ff0a369f8",
+    "dirty": false,
+    "tracking": "origin/main"
+  },
+  "suppliedInput": {
+    "repos": [
+      {
+        "url": "https://github.com/linktrend/LiNKsites",
+        "startingRef": "issue/540-incorporate-immutable-oss-preservation-reproduci"
+      }
+    ],
+    "primary": {
+      "repository": "linktrend/LiNKsites",
+      "ref": "issue/540-incorporate-immutable-oss-preservation-reproduci",
+      "commit": "2829e539855006f57563d3c0aa42985897ca29ca",
+      "tree": "2deb6807587d95f0260a53b4f182dc587d6784ae"
+    },
+    "readOnlySources": []
+  },
+  "fetchedThenVerified": {
+    "fetchedRef": "origin/issue/540-incorporate-immutable-oss-preservation-reproduci",
+    "commit": "2829e539855006f57563d3c0aa42985897ca29ca",
+    "tree": "2deb6807587d95f0260a53b4f182dc587d6784ae",
+    "matchesSuppliedInput": true
+  },
+  "admittedStartingWorkIdentity": {
+    "repository": "linktrend/LiNKsites",
+    "ref": "issue/540-incorporate-immutable-oss-preservation-reproduci",
+    "commit": "2829e539855006f57563d3c0aa42985897ca29ca",
+    "tree": "2deb6807587d95f0260a53b4f182dc587d6784ae",
+    "checkout": "existing owned issue branch",
+    "dirty": false,
+    "role": "implementation-writer-allowed-paths-only",
+    "didNotSubstituteLatestMainOrDevelopment": true
+  },
+  "readOnlySources": [],
+  "denominator": {
+    "atomicPackets": 30,
+    "milestones": 3,
+    "unchanged": true
+  },
+  "prohibitedThisPacket": [
+    "download-vendor-mirror-fork-modify-external-software",
+    "dependency-or-lock-change",
+    "product-source",
+    "workflows",
+    "deployment-configuration",
+    "protected-refs",
+    "live-systems",
+    "credentials",
+    "implementer-PR",
+    "self-merge",
+    "self-review",
+    "nested-workers"
+  ]
+}

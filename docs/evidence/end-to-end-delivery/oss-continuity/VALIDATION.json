@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "kind": "oss-continuity-validation",
+  "issue": 540,
+  "overall": "HOLD",
+  "pass": false,
+  "continuityComplete": false,
+  "acceptanceCommandsPass": false,
+  "note": "Placeholder written before frozen install and acceptance commands. Replaced after those commands run."
+}

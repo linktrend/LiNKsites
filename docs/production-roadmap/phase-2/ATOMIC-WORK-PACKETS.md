@@ -27,6 +27,16 @@ Completion classes are only:
 Provider `FINISHED`, a pushed branch, a green focused test or a planning
 acceptance is not packet acceptance by itself.
 
+The denominator is exactly these 30 packets plus the three PRD milestones.
+Open-source continuity (`OSS-CONTINUITY-RULE.md`, FR-13) is a cross-cutting
+acceptance duty of the owning packets below. It does not add a packet.
+`LSACC-02`/`LSACC-03` are not in this set; licence/SBOM/supply-chain suite
+proof is LSVAL-01, and live restore/rollback proof is LSVPS-02/04 plus
+LSFULL-03. An active upstream fork is prohibited unless separately
+founder-approved for a confirmed unmet need. Local caches, locks, mutable
+tags, upstream availability or untested backup claims are not continuity
+evidence.
+
 ## Wave 0 — refresh, preserve and admit
 
 ### LSG0-00 — Refresh exact authority and runtime state
@@ -246,13 +256,20 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
   `apps/web-master/package.json` and
   `archive/paused-applications/web-company/package.json`.
 - Objective: own the current 33 open Dependabot alerts and the final
-  production dependency/image closure before Full or immutable release.
+  production dependency/image closure before Full or immutable release,
+  including FR-13 continuity for npm/pnpm artifacts (upstream use without
+  vendoring; LiNKtrend read-only archive of the exact lock-resolved
+  artifacts; immutable versions/integrity; licence/provenance/checksums;
+  reviewed updates only). Image publication remains LSART-01.
 - Actions: refresh the exact alert inventory and affected dependency graph;
   identify deployed, build/test-only and archived paths; determine
   exploitability; make the smallest compatible manifest/lock changes for every
   release-blocking finding; and record evidence, owner, reason and acceptance
   threshold for every non-applicable or explicitly deferred finding. Never use
   a green Full Suite or an archived-path label as automatic disposition.
+  Record archive location, integrity and rollback identity for every
+  production npm artifact; do not treat `pnpm-lock.yaml` or a local store as
+  that archive.
 - Acceptance commands: frozen install; CMS and web-master affected tests,
   typechecks and builds; any package directly changed for compatibility;
   repository production `pnpm audit --prod --audit-level=high`, licence/SBOM/
@@ -260,7 +277,8 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 - Acceptance: no unresolved exploitable critical/high advisory is present in
   the deployed or build-to-deploy closure; every remaining alert has an exact
   evidence-backed disposition and owner, and no security exception is accepted
-  without separate founder authority.
+  without separate founder authority. FR-13 npm clauses have named evidence
+  or a named HOLD; they are not completed by lock presence alone.
 - Recovery: compatibility failure returns to the smallest owning source lane;
   any additional required manifest/path causes a lane-plan revision before
   editing. Revert only this issue checkpoint; do not rewrite the lock manually.
@@ -270,12 +288,18 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 - Lane: L-DEPLOY, exclusive.
 - Dependencies: LSSEC-01 and current provider/Platform/Autowork handoff shapes.
 - Objective: make Compose, environment schema, preflight, migrations, smoke,
-  provider modes, exact service images and publication workflow agree.
+  provider modes, exact service images and publication workflow agree, including
+  FR-13 for container bases and production Compose (immutable digests, no
+  floating production tags, recorded licence/provenance/compatibility).
 - Actions: remove hardcoded/unproven hostname assumptions; support initial
   manual/legacy-provider and final live/MWT modes without fixture bypass;
   digest-pin all base and output images; bind five image digests, source/tree,
   providers, Profile/Harness, migrations and config; keep databases/roles
-  distinct and shared Server03 services external.
+  distinct and shared Server03 services external. Non-production floating
+  tags (for example `apps/cms/docker-compose.yml`) must remain non-production
+  and must not be selected for release. Record the LiNKtrend-controlled
+  archive identity for each production base image; a Dockerfile digest pin
+  is not the archive.
 - Acceptance commands: runtime-contract, deployment-surface and manifest tests;
   Compose render; preflight/smoke fixtures; Dockerfile digest validator;
   workflow static check; `git diff --check`.
@@ -291,7 +315,9 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
   certificates, backup age, disk/resource and restart; back up database,
   Payload/media, outbox/Program state, config/manifest and scoped Traefik file;
   restore isolated by default; separate app rollback, route disable and database
-  recovery; ensure commands name only LiNKsites project/paths.
+  recovery; ensure commands name only LiNKsites project/paths. Rollback
+  source must name the prior immutable OSS/image identities required by
+  FR-13; untested runbook text is not continuity proof.
 - Acceptance commands: monitoring rule validation, backup dry fixture,
   isolated restore rehearsal, runbook command lint and `git diff --check`.
 - Acceptance: executable commands, expected outputs, stop conditions and
@@ -315,7 +341,9 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 - Dependencies: LSINT-01.
 - Actions: run the repository Full Suite/profile once against exact candidate,
   including lint/type/build/tests, provider/browser contract checks, migration,
-  deployment, secret-fixture, supply-chain/licence and release validators.
+  deployment, secret-fixture, supply-chain/licence and release validators. The
+  licence/SBOM/supply-chain validators are the LSACC-02-equivalent acceptance
+  for FR-13 on the exact candidate; they do not create a 31st packet.
 - Acceptance: hosted run succeeds with no skipped required job and receipt binds
   candidate commit/tree/workflow/dependencies/artifacts; LSSEC-01's exact alert
   inventory and dispositions still match the candidate dependency closure.
@@ -366,10 +394,14 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 - Dependencies: LSREL-01.
 - Actions: build CMS, web-master, worker, orchestrator and migrations from exact
   protected main; publish by digest; read back registry manifests; generate the
-  release manifest/SBOM/provenance supported by current workflow.
+  release manifest/SBOM/provenance supported by current workflow. Place the
+  exact five image bytes (or registry-immutable manifests) into the
+  LiNKtrend-controlled read-only archive required by FR-13; GHCR tags and
+  local build cache are not that archive.
 - Acceptance: exactly five service entries bind immutable digests, exact
   source/tree, providers, Profile/Harness, migrations and configuration; release
-  verification passes.
+  verification passes; archive location and checksums exist; no floating tag
+  is the selected production identity.
 - Recovery: retain unselected immutable artifacts; do not deploy failed release.
 
 ## Wave 5 — one Server03 installation
@@ -381,8 +413,11 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 - Actions: snapshot shared service/proxy state; create only LiNKsites control,
   release, evidence and backup paths with restrictive ownership; install exact
   manifest/config references; validate permissions/placeholders; start nothing.
+  The release layout must be able to reference the FR-13 archives for the
+  five images and required base artifacts without mutating shared services.
 - Acceptance: path, ownership, config/manifest checksum and release identity
-  pass; all existing services remain unchanged/healthy.
+  pass; all existing services remain unchanged/healthy. Archive references
+  are present or explicitly HOLD.
 - Rollback: move only newly created unused LiNKsites paths to timestamped
   quarantine; do not delete shared or historical data.
 
@@ -391,9 +426,13 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 - Dependencies: LSVPS-01.
 - Actions: inventory and back up existing LiNKsites databases/schemas, selected
   historical data, scoped proxy config and release metadata; encrypt/store;
-  restore into isolated target; compare schema/object/data checksums.
+  restore into isolated target; compare schema/object/data checksums. Include
+  the FR-13 release/OSS archive identifiers in backup metadata so restore can
+  reselect the same immutable artifacts if upstream is gone.
 - Acceptance: backup/manifest/archive IDs, sizes, checksums, encryption,
-  retention, target and matched restore receipt pass.
+  retention, target and matched restore receipt pass. Continuity of OSS
+  artifacts is proven only by restore against the owned archive, not by
+  re-pulling upstream.
 - Stop: no migration or service start without PASS.
 
 ### LSVPS-03 — Apply least-privilege data/configuration
@@ -412,11 +451,14 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
 - Dependencies: LSVPS-03.
 - Actions: reverify five digests and manifest; render Compose; start
   `linksites-foundation` in dependency order; wait for health; inspect sanitized
-  logs; perform one controlled restart and health recovery.
+  logs; perform one controlled restart and health recovery. Production start
+  must not pull floating tags. Rollback selects a prior archived immutable
+  release (FR-13 clause 7).
 - Acceptance: intended services run exact digests, persistent state survives,
   fixture mode is absent and all other Server03 projects remain healthy.
 - Rollback: stop only LiNKsites, preserve volumes/evidence, select prior
-  compatible immutable release if available.
+  compatible immutable release if available. Untested availability of that
+  prior release is a FR-13 HOLD, not completion.
 
 ### LSVPS-05 — Enable private routes and operations
 
@@ -501,7 +543,9 @@ upstream inputs, using the literal paths in `IMPLEMENTATION-LANES.md`.
   backup/restore, rollback, idempotency, completion-chain and
   controller/readback evidence; every PRD DoD item maps to exact evidence;
   founder receives private access and exact operating/recovery
-  instructions. Corrections after this packet re-run the affected
+  instructions. FR-13 live rollback/reproducibility (LSACC-03 equivalent)
+  is proven here with LSVPS-02/04 evidence, not by source runbooks alone.
+  Corrections after this packet re-run the affected
   deterministic proofs; they are not re-audited by another independent
   reviewer. Only then may LiNKsites be declared DONE.
 

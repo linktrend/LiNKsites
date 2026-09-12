@@ -9,7 +9,25 @@
   "authority": [
     "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md",
     "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md",
-    "docs/architecture/linksites-profile-v2/CANONICAL-PRD-ROADMAP.md"
+    "docs/architecture/linksites-profile-v2/CANONICAL-PRD-ROADMAP.md",
+    "docs/production-roadmap/phase-2/OSS-CONTINUITY-RULE.md"
+  ],
+  "denominator": {
+    "atomicPackets": 30,
+    "milestones": 3,
+    "unchanged": true,
+    "milestoneNames": [
+      "initial-operational-acceptance",
+      "full-product-completion",
+      "deterministic-done-founder-handoff-LSFULL-03"
+    ],
+    "lsacc02_03": "not-in-30-packet-set; duties mapped to LSVAL-01 and LSFULL-03"
+  },
+  "ossContinuityClassificationsAllowed": [
+    "completed",
+    "completed but needs testing or fixing",
+    "missing",
+    "unknown"
   ],
   "prdFunctionalRequirements": [
     {
@@ -215,6 +233,32 @@
         "LSOPS-01"
       ],
       "note": "Source signals/runbook exist. Live health not observed."
+    },
+    {
+      "id": "FR-13",
+      "title": "Open-source continuity",
+      "classification": "missing and needs work",
+      "ossClassification": "missing",
+      "packets": [
+        "LSSEC-01",
+        "LSDEP-01",
+        "LSART-01",
+        "LSVPS-01",
+        "LSVPS-02",
+        "LSVPS-04",
+        "LSOPS-01",
+        "LSVAL-01",
+        "LSFULL-03"
+      ],
+      "files": [
+        "docs/production-roadmap/phase-2/OSS-CONTINUITY-RULE.md",
+        "docs/production-roadmap/phase-2/OSS-INVENTORY.md",
+        "docs/evidence/end-to-end-delivery/oss-continuity/COMPONENT-LEDGER.json"
+      ],
+      "checkpoints": [
+        "ISSUE-540"
+      ],
+      "note": "Rule and ledger recorded on Issue 540. No LiNKtrend-controlled OSS archive, published five-image digest set, or tested OSS rollback exists. LSACC-02/03 are not in the 30-packet set; equivalent proof is LSVAL-01 and LSFULL-03. Did not reopen FR-01..FR-12 packet completions."
     }
   ],
   "profileRequirements": [
@@ -713,7 +757,7 @@
       "checkpoints": [
         "070658ea2fb5b7abacdcf9d205e37d6f7ed61f83"
       ],
-      "note": "Compatible upgrades recorded. GitHub alert API not queried; coordinator observations recorded. Full Suite not used as disposition."
+      "note": "Compatible upgrades recorded. GitHub alert API not queried; coordinator observations recorded. Full Suite not used as disposition. FR-13 npm archive/rollback remains missing; lock presence is not continuity."
     },
     {
       "id": "LSDEP-01",
@@ -721,7 +765,7 @@
       "checkpoints": [
         "60274ade7e910f814b0816e74de011281d536dc2"
       ],
-      "note": "Release source exists. Images unpublished."
+      "note": "Release source exists. Images unpublished. FR-13 base-image archive and floating-tag prohibition for production remain owner actions."
     },
     {
       "id": "LSOPS-01",
@@ -729,7 +773,7 @@
       "checkpoints": [
         "aadb6d02f1d5d1aebb953274c09401057b1296e1"
       ],
-      "note": "Operations source exists. Live backup/restore not run."
+      "note": "Operations source exists. Live backup/restore not run. FR-13 tested rollback of OSS/image identities missing."
     },
     {
       "id": "LSINT-01",
@@ -742,7 +786,7 @@
     {
       "id": "LSVAL-01",
       "classification": "missing and needs work",
-      "note": "Full Suite not run and is forbidden in this packet."
+      "note": "Full Suite not run and is forbidden in this packet. LSACC-02-equivalent licence/SBOM/supply-chain validators therefore missing."
     },
     {
       "id": "LSREV-01",
@@ -757,17 +801,17 @@
     {
       "id": "LSART-01",
       "classification": "missing and needs work",
-      "note": "No image publication."
+      "note": "No image publication. FR-13 five-image archive missing."
     },
     {
       "id": "LSVPS-01",
       "classification": "missing and needs work",
-      "note": "No Server03 mutation."
+      "note": "No Server03 mutation. FR-13 archive layout not installed."
     },
     {
       "id": "LSVPS-02",
       "classification": "missing and needs work",
-      "note": "No live backup/restore."
+      "note": "No live backup/restore. FR-13 restore-from-owned-archive unproven."
     },
     {
       "id": "LSVPS-03",
@@ -777,7 +821,7 @@
     {
       "id": "LSVPS-04",
       "classification": "missing and needs work",
-      "note": "Installation not started."
+      "note": "Installation not started. FR-13 digest-only start and prior-release rollback unproven."
     },
     {
       "id": "LSVPS-05",
@@ -812,7 +856,65 @@
     {
       "id": "LSFULL-03",
       "classification": "missing and needs work",
-      "note": "Final DONE forbidden until HOLDs clear. Independent live operational reviewer is waived; replacement is deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback. Packet remains missing."
+      "note": "Final DONE forbidden until HOLDs clear. Independent live operational reviewer is waived; replacement is deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback. Packet remains missing. FR-13 live rollback (LSACC-03 equivalent) is not proven."
+    }
+  ],
+  "ossContinuityRequirements": [
+    {
+      "id": "FR13-UPSTREAM-NO-VENDOR",
+      "title": "external upstream use without vendoring",
+      "classification": "completed but needs testing or fixing",
+      "packets": ["LSSEC-01", "LSDEP-01"],
+      "note": "Inspected production path uses npm lock and digest-pinned Docker FROM lines; no full upstream trees vendored. Non-production cms compose and apk packages are not a fork. Completeness of 'no vendoring' for every transitive tarball was not exhaustively proven."
+    },
+    {
+      "id": "FR13-OWNED-ARCHIVE",
+      "title": "LiNKtrend-controlled read-only archive of exact source, artifact or container",
+      "classification": "missing",
+      "packets": ["LSSEC-01", "LSART-01", "LSVPS-01"],
+      "note": "No owned archive location, checksum set or restore recipe exists in this tree. Lockfile and local caches are not the archive."
+    },
+    {
+      "id": "FR13-IMMUTABLE-IDENTITY",
+      "title": "immutable version, commit or digest without floating tags",
+      "classification": "completed but needs testing or fixing",
+      "packets": ["LSDEP-01", "LSART-01", "LSTRUST-01"],
+      "note": "Production Dockerfiles pin node 22.17.0-alpine and postgres 16.8-alpine by digest; deploy Compose requires digest env vars; publish workflow commit-pins some actions. CI still uses floating action tags and Node major 22; cms local compose uses node:18-alpine, postgres:16-alpine and pnpm@latest; apk is unpinned; five service images unpublished."
+    },
+    {
+      "id": "FR13-PROVENANCE-RECORD",
+      "title": "provenance, version, licence, source location, artifact location, checksums, compatibility",
+      "classification": "missing",
+      "packets": ["LSSEC-01", "LSART-01", "LSVAL-01"],
+      "note": "Lock integrity hashes and Dockerfile digests are source records only. Licence/SBOM/release provenance and artifact archive locations are missing. Full Suite licence validators not run."
+    },
+    {
+      "id": "FR13-REVIEWED-UPDATES",
+      "title": "reviewed updates only",
+      "classification": "completed but needs testing or fixing",
+      "packets": ["LSSEC-01", "LSDEP-01"],
+      "note": "Process is allocated (LSSEC-01/LSDEP-01). No evidence that CI or production cannot still pull floating tags (actions@v4, apk, pnpm@latest in non-prod compose)."
+    },
+    {
+      "id": "FR13-REPRODUCE-IF-UPSTREAM-GONE",
+      "title": "reproducibility if upstream disappears",
+      "classification": "missing",
+      "packets": ["LSART-01", "LSVPS-01", "LSVAL-01"],
+      "note": "Cannot reproduce npm or container bytes from a LiNKtrend archive because none exists. Upstream availability was not used as proof."
+    },
+    {
+      "id": "FR13-TESTED-ROLLBACK",
+      "title": "tested rollback to a prior immutable identity",
+      "classification": "missing",
+      "packets": ["LSOPS-01", "LSVPS-02", "LSVPS-04", "LSFULL-03"],
+      "note": "deploy/OPERATIONS.md names five-digest rollback source. Isolated live restore and prior-release selection were not run. Untested runbook is not continuity."
+    },
+    {
+      "id": "FR13-NO-ACTIVE-FORK",
+      "title": "active fork prohibited unless founder-approved unmet need",
+      "classification": "completed",
+      "packets": ["LSSEC-01", "LSDEP-01"],
+      "note": "This packet created no fork and found no founder-approved active fork in inspected allowed docs/source declarations. Absence of a fork in this documentation packet is not a live-systems survey."
     }
   ]
 }

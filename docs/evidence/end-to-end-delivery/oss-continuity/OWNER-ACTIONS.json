@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "kind": "oss-continuity-owner-actions",
+  "admittedCommit": "2829e539855006f57563d3c0aa42985897ca29ca",
+  "didNotPerformTheseActionsThisPacket": true,
+  "actions": [
+    {
+      "owner": "LSSEC-01",
+      "action": "Create LiNKtrend-controlled read-only archive of every production lock-resolved npm artifact (including Next 16.3.3, React 19.1.0, Payload 3.87.1, TypeScript 5.7.3, Playwright 1.56.1, pg 8.16.3, sharp 0.35.4, turbo 2.10.5 and remaining production closure). Record licence, provenance, checksums, compatibility. Hash-lock or archive pnpm 10.0.0. Do not treat pnpm-lock.yaml as the archive."
+    },
+    {
+      "owner": "LSSEC-01",
+      "action": "Refresh exact Dependabot inventory via API and complete alert-by-alert disposition. Issue 540 did not query that API and does not close LSSEC-01."
+    },
+    {
+      "owner": "LSDEP-01",
+      "action": "Archive digest-pinned production base images (node 22.17.0-alpine fc3e945f…, postgres 16.8-alpine 3b057e1c…). Pin or snapshot Alpine APK inputs. Keep apps/cms/docker-compose.yml floating tags non-production and out of release selection. Record production Traefik/Postgres shared-service identity when live inspection is authorised."
+    },
+    {
+      "owner": "LSTRUST-01",
+      "action": "On the next allowed workflow edit, replace floating GitHub Action tags in ci.yml with immutable SHAs and record Node identity beyond major 22 if that lane owns ci.yml."
+    },
+    {
+      "owner": "LSART-01",
+      "action": "Build and publish five service images by digest from protected main; read back registry manifests; store exact bytes/manifests in the owned archive; bind SBOM/provenance."
+    },
+    {
+      "owner": "LSOPS-01",
+      "action": "Name prior immutable OSS/image identities in rollback source so rollback is more than prose."
+    },
+    {
+      "owner": "LSVPS-01",
+      "action": "Install release layout references to the FR-13 archives without starting services."
+    },
+    {
+      "owner": "LSVPS-02",
+      "action": "Back up archive identifiers with the application backup and prove isolated restore without re-pulling upstream."
+    },
+    {
+      "owner": "LSVPS-04",
+      "action": "Start only digest-pinned images. Prove rollback to a prior archived immutable release."
+    },
+    {
+      "owner": "LSVAL-01",
+      "action": "Run licence/SBOM/supply-chain validators on the exact candidate (LSACC-02 equivalent). Do not add a 31st packet."
+    },
+    {
+      "owner": "LSFULL-03",
+      "action": "Prove live FR-13 rollback/reproducibility with LSVPS-02/04 evidence (LSACC-03 equivalent)."
+    },
+    {
+      "owner": "founder",
+      "action": "Approve any active fork only for a confirmed unmet need. None requested here."
+    }
+  ]
+}

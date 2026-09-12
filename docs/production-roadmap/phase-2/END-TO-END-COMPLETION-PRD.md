@@ -30,6 +30,12 @@ The first milestone is not permission to delete or defer the second. Updating
 the same `linksites-foundation` installation with later accepted immutable
 releases does not create a second production installation.
 
+The executable denominator stays **30 atomic packets** plus **three
+milestones** (initial operational acceptance; full product completion;
+deterministic DONE / founder handoff at LSFULL-03). Open-source continuity
+is a cross-cutting requirement of those packets (`OSS-CONTINUITY-RULE.md`).
+It does not add a packet or a fourth milestone.
+
 ## 2. Governing decisions
 
 1. Preserve completed and partial work. Inspect each unique branch/file;
@@ -225,6 +231,27 @@ backlog, retries/dead letters, completion, certificate, backup age, storage,
 resource and restart signals. Evidence is sanitized, checksum-bound and states
 its exact source/live level.
 
+### FR-13 Open-source continuity
+
+Every external open-source dependency required for build, runtime,
+deployment or recovery is accepted only under
+`docs/production-roadmap/phase-2/OSS-CONTINUITY-RULE.md`: consume upstream
+without vendoring; keep a separate LiNKtrend-controlled read-only archive or
+mirror of the exact source, artifact or container; select an immutable
+version, commit or digest with no floating production tag; record
+provenance, version, licence, source location, artifact location, checksums
+and compatibility; allow reviewed updates only; remain reproducible if
+upstream disappears; and prove a tested rollback. An active fork is
+prohibited unless the founder separately approves a confirmed unmet need.
+
+These duties are owned by existing packets (LSSEC-01, LSDEP-01, LSART-01,
+LSVPS-01, LSVPS-02, LSVPS-04, LSOPS-01, LSVAL-01 and LSFULL-03). `LSACC-02`
+and `LSACC-03` are not in the 30-packet set; their equivalent proof sits on
+LSVAL-01 and LSFULL-03. Local caches, package locks, mutable tags, upstream
+availability, source-repository references or untested backup text do not
+by themselves prove continuity. This requirement does not reopen packets
+already proven compliant on other criteria.
+
 ## 6. Definition of done
 
 LiNKsites is DONE only when all of the following are true.
@@ -234,7 +261,7 @@ LiNKsites is DONE only when all of the following are true.
 1. Every identified unique issue/Phase branch and the user-owned dirty file has
    a recorded disposition; all useful work is incorporated exactly once or
    deliberately retained with reason.
-2. The final source satisfies FR-01 through FR-12 and LS-FR-01 through LS-FR-25,
+2. The final source satisfies FR-01 through FR-13 and LS-FR-01 through LS-FR-25,
    or an explicit founder product decision identifies a superseded requirement.
 3. Sanitized upstream contracts used by workers are committed with exact
    provenance and compatibility; no local-only input is required.
@@ -323,6 +350,11 @@ LiNKsites is DONE only when all of the following are true.
 24. The founder handoff contains access, identity, health, logs, backup,
     restore, restart, route-disable and rollback instructions. No required
     knowledge remains only in chat or on the coordinator's Mac.
+25. Every external open-source dependency required for build, runtime,
+    deployment or recovery has explicit evidence against FR-13 /
+    `OSS-CONTINUITY-RULE.md`, classified only as completed, completed but
+    needs testing or fixing, missing, or unknown. Continuity is not claimed
+    from cache, lock, tag, upstream uptime or untested backup alone.
 
 ## 7. Production layout and configuration
 
