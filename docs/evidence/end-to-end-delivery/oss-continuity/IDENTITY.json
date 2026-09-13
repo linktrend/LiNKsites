@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-identity",
-  "issue": 540,
+  "issue": 542,
   "cloudRun": {
-    "url": "https://cursor.com/agents/bc-c73e81b0-c54f-43c5-ac57-83c77a73e89c",
-    "bcId": "bc-c73e81b0-c54f-43c5-ac57-83c77a73e89c",
-    "name": "LINKSITES-OSS-CONTINUITY-540",
-    "advertisedCloudBranch": "cursor/linksites-oss-continuity-540-3976",
+    "url": "https://cursor.com/agents/bc-02db8582-0e2b-4061-83f1-4e4d7e5b66df",
+    "bcId": "bc-02db8582-0e2b-4061-83f1-4e4d7e5b66df",
+    "advertisedCloudBranch": "cursor/linksites-oss-archive-contract-542-295b",
     "writerUsedOwnedIssueBranch": true,
     "didNotCreateImplementerPr": true
   },
@@ -14,38 +13,38 @@
     "note": "Cursor cached checkout before fetch/checkout. Reported separately from admitted starting-work identity.",
     "repository": "linktrend/LiNKsites",
     "originHost": "https://github.com/linktrend/LiNKsites",
-    "branch": "main",
-    "commit": "9eb995d7c151aab6aafabd66e91893084e1acdb2",
-    "tree": "fa16550a8d1981a37113c4ba356cbb0ff0a369f8",
+    "branch": "cursor/linksites-oss-archive-contract-542-295b",
+    "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
+    "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0",
     "dirty": false,
-    "tracking": "origin/main"
+    "tracking": "none-reported-on-cached-cursor-branch"
   },
   "suppliedInput": {
     "repos": [
       {
         "url": "https://github.com/linktrend/LiNKsites",
-        "startingRef": "issue/540-incorporate-immutable-oss-preservation-reproduci"
+        "startingRef": "issue/542-implement-reproducible-oss-archive-manifest-and"
       }
     ],
     "primary": {
       "repository": "linktrend/LiNKsites",
-      "ref": "issue/540-incorporate-immutable-oss-preservation-reproduci",
-      "commit": "2829e539855006f57563d3c0aa42985897ca29ca",
-      "tree": "2deb6807587d95f0260a53b4f182dc587d6784ae"
+      "ref": "issue/542-implement-reproducible-oss-archive-manifest-and",
+      "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
+      "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0"
     },
     "readOnlySources": []
   },
   "fetchedThenVerified": {
-    "fetchedRef": "origin/issue/540-incorporate-immutable-oss-preservation-reproduci",
-    "commit": "2829e539855006f57563d3c0aa42985897ca29ca",
-    "tree": "2deb6807587d95f0260a53b4f182dc587d6784ae",
+    "fetchedRef": "origin/issue/542-implement-reproducible-oss-archive-manifest-and",
+    "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
+    "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0",
     "matchesSuppliedInput": true
   },
   "admittedStartingWorkIdentity": {
     "repository": "linktrend/LiNKsites",
-    "ref": "issue/540-incorporate-immutable-oss-preservation-reproduci",
-    "commit": "2829e539855006f57563d3c0aa42985897ca29ca",
-    "tree": "2deb6807587d95f0260a53b4f182dc587d6784ae",
+    "ref": "issue/542-implement-reproducible-oss-archive-manifest-and",
+    "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
+    "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0",
     "checkout": "existing owned issue branch",
     "dirty": false,
     "role": "implementation-writer-allowed-paths-only",
@@ -60,15 +59,18 @@
   "prohibitedThisPacket": [
     "download-vendor-mirror-fork-modify-external-software",
     "dependency-or-lock-change",
-    "product-source",
-    "workflows",
-    "deployment-configuration",
+    "application-behavior",
+    "provider-bindings",
+    "migrations",
+    "live-configuration",
     "protected-refs",
-    "live-systems",
+    "server03",
     "credentials",
     "implementer-PR",
     "self-merge",
     "self-review",
-    "nested-workers"
+    "nested-workers",
+    "image-build-or-publish",
+    "deployment"
   ]
 }

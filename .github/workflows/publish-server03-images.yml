@@ -14,6 +14,10 @@ on:
         description: Private CMS HTTPS origin baked into web-master (no public DNS, no placeholder)
         required: true
         type: string
+      oss_continuity_receipts_json:
+        description: Archive receipts JSON with exact checksums and LiNKtrend read-only archive locations. Use PLANNING_NOT_A_CONTINUITY_CLAIM to publish images without claiming OSS continuity. Publication cannot claim OSS continuity unless this input verifies.
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -87,6 +91,36 @@ jobs:
           host = (parsed.hostname or "").lower()
           if parsed.scheme != "https" or parsed.username or parsed.password or host in {"localhost", "127.0.0.1", "0.0.0.0", "::1"} or host.startswith("127.") or "<" in value or "example" in value.lower() or "placeholder" in value.lower():
               raise SystemExit("cms_private_https_url_must_be_a_private_https_origin")
+          PY
+
+      - name: Admit OSS continuity receipts or an explicit non-claim
+        id: oss_continuity
+        env:
+          OSS_CONTINUITY_RECEIPTS_JSON: ${{ inputs.oss_continuity_receipts_json }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          raw = os.environ["OSS_CONTINUITY_RECEIPTS_JSON"].strip()
+          sentinel = "PLANNING_NOT_A_CONTINUITY_CLAIM"
+          if not raw:
+              raise SystemExit("oss_continuity_receipts_required")
+          if raw == sentinel:
+              mode = "planning"
+          else:
+              try:
+                  payload = json.loads(raw)
+              except json.JSONDecodeError as error:
+                  raise SystemExit("oss_continuity_receipts_json_invalid") from error
+              if payload.get("kind") != "oss-continuity-archive-receipts":
+                  raise SystemExit("oss_continuity_receipts_kind_invalid")
+              Path("oss-continuity-receipts.json").write_text(raw + ("\n" if not raw.endswith("\n") else ""), encoding="utf-8")
+              mode = "archive-proof"
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"mode={mode}\n")
           PY
 
       - name: Set up Docker Buildx
@@ -248,6 +282,57 @@ jobs:
           PY
           sha256sum server03-release-manifest.json > server03-release-manifest.sha256
 
+      - name: Generate and verify OSS continuity for this publication
+        env:
+          RELEASE_SHA: ${{ steps.identity.outputs.release_sha }}
+          RELEASE_TREE: ${{ steps.identity.outputs.release_tree }}
+          CMS_DIGEST: ${{ steps.cms.outputs.digest }}
+          WEB_MASTER_DIGEST: ${{ steps.web_master.outputs.digest }}
+          WORKER_DIGEST: ${{ steps.worker.outputs.digest }}
+          ORCHESTRATOR_DIGEST: ${{ steps.orchestrator.outputs.digest }}
+          MIGRATIONS_DIGEST: ${{ steps.migrations.outputs.digest }}
+          OSS_CONTINUITY_MODE: ${{ steps.oss_continuity.outputs.mode }}
+        run: |
+          set -euo pipefail
+          export LINKSITES_RELEASE_SHA="${RELEASE_SHA}"
+          export LINKSITES_RELEASE_TREE="${RELEASE_TREE}"
+          export LINKSITES_CMS_IMAGE_DIGEST="${CMS_DIGEST}"
+          export LINKSITES_WEB_MASTER_IMAGE_DIGEST="${WEB_MASTER_DIGEST}"
+          export LINKSITES_WORKER_IMAGE_DIGEST="${WORKER_DIGEST}"
+          export LINKSITES_ORCHESTRATOR_IMAGE_DIGEST="${ORCHESTRATOR_DIGEST}"
+          export LINKSITES_MIGRATIONS_IMAGE_DIGEST="${MIGRATIONS_DIGEST}"
+          if [ "${OSS_CONTINUITY_MODE}" = planning ]; then
+            node deploy/scripts/generate-oss-continuity-manifest.mjs \
+              --output oss-continuity-manifest.json \
+              --receipts PLANNING_NOT_A_CONTINUITY_CLAIM
+            node deploy/scripts/verify-oss-continuity-manifest.mjs \
+              --manifest oss-continuity-manifest.json \
+              --allow-planning
+          else
+            node deploy/scripts/generate-oss-continuity-manifest.mjs \
+              --output oss-continuity-manifest.json \
+              --receipts oss-continuity-receipts.json \
+              --claim-continuity
+            node deploy/scripts/verify-oss-continuity-manifest.mjs \
+              --manifest oss-continuity-manifest.json \
+              --require-archive-proof
+          fi
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          manifest = json.loads(Path("oss-continuity-manifest.json").read_text())
+          if manifest.get("vendoredDependencies") or manifest.get("activeFork"):
+              raise SystemExit("oss_continuity_forbidden_vendor_or_fork")
+          mode = os.environ["OSS_CONTINUITY_MODE"]
+          claimed = manifest.get("continuityClaimed") is True
+          if mode == "planning" and (claimed or manifest.get("evidenceClass") != "planning"):
+              raise SystemExit("publication_claimed_oss_continuity_without_archive_proof")
+          if mode == "archive-proof" and not claimed:
+              raise SystemExit("archive_receipts_did_not_produce_a_verified_claim")
+          PY
+          sha256sum oss-continuity-manifest.json > oss-continuity-manifest.sha256
+
       - name: Upload immutable publication evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -256,5 +341,7 @@ jobs:
             server03-release-manifest.json
             server03-release-manifest.sha256
             server03-release.env
+            oss-continuity-manifest.json
+            oss-continuity-manifest.sha256
           if-no-files-found: error
           retention-days: 90

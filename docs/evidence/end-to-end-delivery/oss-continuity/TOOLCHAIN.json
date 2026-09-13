@@ -3,9 +3,9 @@
   "kind": "oss-continuity-toolchain",
   "sourceIdentity": {
     "repository": "linktrend/LiNKsites",
-    "ref": "issue/540-incorporate-immutable-oss-preservation-reproduci",
-    "commit": "2829e539855006f57563d3c0aa42985897ca29ca",
-    "tree": "2deb6807587d95f0260a53b4f182dc587d6784ae"
+    "ref": "issue/542-implement-reproducible-oss-archive-manifest-and",
+    "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
+    "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0"
   },
   "ciPinsFromAdmittedManifest": {
     "workflow": ".github/workflows/ci.yml",
@@ -14,15 +14,20 @@
     "pnpmActionSetup": "10.0.0",
     "packageManagerField": "pnpm@10.0.0",
     "webMasterNvmrc": "22",
-    "pythonUsedByAcceptance": "python3 -m json.tool",
-    "supabaseCliPinnedInFullSuiteOnly": "2.81.3",
-    "fullSuiteNotRunThisPacket": true
+    "pythonUsedByAcceptance": "python3",
+    "acceptanceCommands": [
+      "node --test deploy/tests/oss-continuity-manifest.test.mjs",
+      "git diff --check 9910a026996f1011fb6af1959fce212ff766d72b...HEAD"
+    ],
+    "publishWorkflow": ".github/workflows/publish-server03-images.yml",
+    "publishRunsOn": "ubuntu-24.04"
   },
   "pinDiagnosis": {
-    "nodeCompiler": "CI and .nvmrc pin Node major 22 only; production Dockerfiles pin node:22.17.0-alpine by digest. After nvm use 22, command -v node remained /exec-daemon/node v22.14.0 because that PATH entry precedes nvm. nvm selected v22.22.2. Neither host binary is a hash-locked compiler and neither is the production image pin.",
-    "pnpm": "package.json packageManager is pnpm@10.0.0 without an integrity hash. corepack prepared pnpm@10.0.0 at /home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm. Frozen lockfile exists and was not modified.",
-    "lockDefect": "none-observed-for-frozen-install; pnpm binary is version-pinned not hash-locked; many manifest ranges exist but lock records exact versions",
-    "githubActionsCi": "floating tags in ci.yml (checkout@v4, setup-node@v4, pnpm/action-setup@v4, cache@v4, setup-buildx-action@v3, supabase/setup-cli@v1)",
+    "nodeCompiler": "CI and .nvmrc pin Node major 22 only; production Dockerfiles pin node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed. Default PATH command -v node is /exec-daemon/node v22.14.0 because /exec-daemon precedes nvm. nvm use 22 selects v22.22.2. Neither host binary is a hash-locked compiler and neither is the production image pin. Acceptance tests were executed with PATH=/home/ubuntu/.nvm/versions/node/v22.22.2/bin:$PATH so node is v22.22.2; that does not change the production pin.",
+    "pnpm": "package.json packageManager is pnpm@10.0.0 without an integrity hash. corepack prepared pnpm@10.0.0. Frozen lockfile exists and was not modified.",
+    "lockDefect": "none-observed-for-frozen-install; pnpm binary is version-pinned not hash-locked; lockfile SHA-256 remains dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175",
+    "githubActionsCi": "ci.yml still uses floating @v4/@v3/@v1 tags; not edited in this issue",
+    "githubActionsPublish": "publish-server03-images.yml remains commit-pinned for checkout/buildx/login/build-push/upload-artifact; this issue added OSS continuity generate/verify without removing SBOM or provenance",
     "apkInDockerfiles": "unpinned apk add --no-cache libc6-compat (and git/ca-certificates on orchestrator)",
     "didNotChangeLocks": true,
     "didNotSilentlyUseUnpinnedPnpmAsProductionIdentity": true,
@@ -46,12 +51,11 @@
     "build": {
       "buildId": "bld-20260912-16700cc2-6013-4a49-b917-c2dd6554e9f8",
       "gitSetup": "reuse_then_checkout",
-      "note": "Cached checkout was main 9eb995d7 / tree fa16550a; admitted work used fetched issue/540 identity after verification."
+      "note": "Cached checkout was already the supplied issue/542 commit/tree on advertised cursor/* branch; admitted work used fetched origin/issue/542 after verification."
     },
     "frozenInstall": {
-      "command": "pnpm install --frozen-lockfile",
+      "command": "PATH=/home/ubuntu/.nvm/versions/node/v22.22.2/bin:$PATH pnpm install --frozen-lockfile --prefer-offline",
       "result": "pass",
-      "durationSeconds": 9.6,
       "lockfileUpToDate": true,
       "lockSha256Unchanged": "dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175",
       "ignoredBuildScripts": [

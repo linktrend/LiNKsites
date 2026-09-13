@@ -1,27 +1,18 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-inspected-source",
-  "admittedCommit": "2829e539855006f57563d3c0aa42985897ca29ca",
-  "admittedTree": "2deb6807587d95f0260a53b4f182dc587d6784ae",
+  "admittedCommit": "9910a026996f1011fb6af1959fce212ff766d72b",
+  "admittedTree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0",
   "algorithm": "sha256",
   "files": {
     "package.json": "fff6f7e126b2365465e54a9aa2ce5c1f3c0f537c0092d4293cdb9b0c166a2484",
     "pnpm-lock.yaml": "dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175",
-    "apps/cms/package.json": "fe14f6d0a75563fc0c9041afaa5ff974b901908f74822a83d78ba04742084cad",
-    "apps/web-master/package.json": "62d36346b6174ec3a5e9f70dc25df7c5e5f803a89a5f633a6db82d65642c88c8",
-    "apps/cms/Dockerfile": "54000d8d9138eef4053af01f7d14f4f3095e458f3b0aa184519e5428b7a8b6ce",
     "deploy/docker/cms.Dockerfile": "eaaa6ca5469f94139082f6de1fd54eddcac33f83df746eff8ec582de9c7f79fc",
     "deploy/docker/web-master.Dockerfile": "e9d543e1050d47b1cbb9c5960d6dff824dd2a7cf163e5ea2fa25dffd8cd651f4",
     "deploy/docker/migrations.Dockerfile": "92ec9b901e745b168567ce42bc0cd4c954217c84d6159c8fce693bf366f9edbb",
     "deploy/docker/autowork-worker.Dockerfile": "7c07d46e20d79ba201a0f16311c13d8751b8fdda5b27dfb19934697c0b79004b",
     "deploy/docker/program-orchestrator.Dockerfile": "a091cce1c3e3b7a35630e1615611dda69a5f74cbe567ef934af40ee9578911d7",
-    "deploy/docker-compose.deploy.yml": "673cad56ca6d44a518f94481f6d92b27bd58c39ece6a1bb7514fde32176fd93c",
-    "deploy/docker-compose.local-proof.yml": "29e76bafcea831fd197be47dcfea8bf06d9eb7666581cbec62337fc27cf8dd92",
-    "deploy/docker-compose.server03-foundation.yml": "22beb401422af36aa31589421220bcc4032c131781a367bb129cceda66221baa",
-    ".github/workflows/ci.yml": "0fa53f911c052000220815f45ae8be6d27291c88b679249dc329cf2008d119a9",
-    ".github/workflows/publish-server03-images.yml": "b1b405f26853c8290e231467deceddd98f3b54615b7aa70e8e22ccb53d59c815",
-    "apps/cms/docker-compose.yml": "51ab5ffd5f628623dc71d7928411f5cc93da5f8c47b7ef456e96dcc74fa76b28",
-    "apps/web-master/.nvmrc": "f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56"
+    ".github/workflows/publish-server03-images.yml": "05e6d47c38740704b6a289cdd9209dfa5535b3ac8ceaac79c703068c05d933e7"
   },
   "resolvedLockIdentities": {
     "next@16.3.3": "sha512-tuRTx1nQ/yVw83cwJBo9F+njGUgMn3UHQycreWHB8XsStvvAh1AthbI8/4IpKnFaF58F+iSiHejYOlMQ/eq83g==",
@@ -35,8 +26,8 @@
   },
   "containerDigestsDeclared": {
     "node:22.17.0-alpine": "sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed",
-    "postgres:16.8-alpine": "sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c",
-    "traefik:v3.0": "sha256:a208c74fd80a566d4ea376053bff73d31616d7af3f1465a7747b8b89ee34d97e"
+    "postgres:16.8-alpine": "sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c"
   },
-  "didNotDownloadThoseArtifacts": true
+  "didNotDownloadThoseArtifacts": true,
+  "didNotTreatLockOrDigestPinAsArchive": true
 }

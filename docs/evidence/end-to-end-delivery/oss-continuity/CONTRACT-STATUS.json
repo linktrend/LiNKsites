@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "oss-continuity-contract-status",
+  "issue": 542,
+  "continuityComplete": false,
+  "archiveAndReleaseComplete": false,
+  "lsart01Complete": false,
+  "planningSeparatedFromArchiveProof": true,
+  "tooling": {
+    "generator": "deploy/scripts/generate-oss-continuity-manifest.mjs",
+    "verifier": "deploy/scripts/verify-oss-continuity-manifest.mjs",
+    "contract": "deploy/oss-continuity/contract.mjs",
+    "tests": "deploy/tests/oss-continuity-manifest.test.mjs",
+    "fixtures": "deploy/oss-continuity/fixtures/"
+  },
+  "publicationGate": {
+    "workflow": ".github/workflows/publish-server03-images.yml",
+    "claimRequiresVerifiedReceipts": true,
+    "planningSentinel": "PLANNING_NOT_A_CONTINUITY_CLAIM",
+    "didNotWeakenImageSbomOrProvenance": true
+  },
+  "syntheticPassingFixtureIsNotALiveArchive": true,
+  "remainingBeforeLsart01": [
+    "LiNKtrend-controlled read-only archive of locked packages, base images, build tools and produced image bytes",
+    "verified archive receipts and checksums",
+    "five-image publication from protected main",
+    "registry readback and SBOM/provenance binding on the published digests",
+    "tested rollback to a prior immutable identity"
+  ]
+}

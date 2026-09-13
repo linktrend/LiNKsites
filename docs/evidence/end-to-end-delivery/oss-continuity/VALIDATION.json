@@ -1,52 +1,50 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-validation",
-  "issue": 540,
+  "issue": 542,
   "overall": "HOLD",
   "pass": false,
   "continuityComplete": false,
   "acceptanceCommandsPass": true,
-  "documentationCheckpoint": "f8404898d65d5aab76990a9e1ea5a3aa722b4bcd",
-  "baseSha": "2829e539855006f57563d3c0aa42985897ca29ca",
+  "baseSha": "9910a026996f1011fb6af1959fce212ff766d72b",
   "checks": [
     {
+      "id": "oss-continuity-manifest-tests",
+      "command": "node --test deploy/tests/oss-continuity-manifest.test.mjs",
+      "result": "pass",
+      "nodeWithNvmPath": "v22.22.2",
+      "nodeDefaultPath": "/exec-daemon/node v22.14.0 also pass"
+    },
+    {
       "id": "json-tool-oss-continuity",
-      "command": "find docs/evidence/end-to-end-delivery/oss-continuity -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-      "result": "pass"
-    },
-    {
-      "id": "json-tool-traceability",
-      "command": "python3 -m json.tool docs/evidence/end-to-end-delivery/REQUIREMENT-TRACEABILITY.json >/dev/null",
-      "result": "pass"
-    },
-    {
-      "id": "scoped-diff",
-      "command": "test -z \"$(git diff --name-only 2829e539855006f57563d3c0aa42985897ca29ca...HEAD | rg -v '^(docs/production-roadmap/phase-2/(OSS-CONTINUITY-RULE\\.md|OSS-INVENTORY\\.md|END-TO-END-COMPLETION-PRD.md|ATOMIC-WORK-PACKETS.md)|docs/evidence/end-to-end-delivery/REQUIREMENT-TRACEABILITY.json|docs/evidence/end-to-end-delivery/oss-continuity/)')\"",
+      "command": "find docs/evidence/end-to-end-delivery/oss-continuity deploy/oss-continuity/fixtures -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
       "result": "pass"
     },
     {
       "id": "diff-check",
-      "command": "git diff --check 2829e539855006f57563d3c0aa42985897ca29ca...HEAD",
-      "result": "pass"
+      "command": "git diff --check 9910a026996f1011fb6af1959fce212ff766d72b...HEAD",
+      "result": "pending-until-commit",
+      "workingTreeCheck": "pass"
     },
     {
       "id": "changed-path-secret-scan",
       "tool": "rg",
       "result": "pass",
       "matches": 0,
-      "note": "First attempt used an unquoted pattern that rg treated as flags; re-ran with -e patterns. Zero matches."
+      "note": "Scanned allowed/changed OSS-continuity paths. Full-repo secret_scan.py reported pre-existing stale fixture declarations plus one unrelated high-entropy finding in apps/cms/tests/contracts/autowork-composition.spec.ts, outside this issue scope."
+    },
+    {
+      "id": "workflow-static",
+      "result": "pass",
+      "provenanceModeMaxCount": 5,
+      "sbomTrueCount": 5,
+      "note": "PyYAML 1.1 treats GitHub `on:` as boolean; static string checks used instead of yaml.safe_load of the whole document."
     },
     {
       "id": "frozen-lockfile-install",
-      "command": "pnpm install --frozen-lockfile",
+      "command": "pnpm install --frozen-lockfile --prefer-offline",
       "result": "pass",
       "lockUnchanged": true
-    },
-    {
-      "id": "packet-denominator",
-      "result": "pass",
-      "atomicPackets": 30,
-      "ossContinuityRequirements": 8
     }
   ],
   "didNotClaimLssec01Complete": true,
@@ -55,5 +53,6 @@
   "didNotProbeLiveSystems": true,
   "didNotEditProtectedBranches": true,
   "didNotCreatePr": true,
-  "didNotDispatchNestedWorkers": true
+  "didNotDispatchNestedWorkers": true,
+  "didNotBuildOrPublishImages": true
 }

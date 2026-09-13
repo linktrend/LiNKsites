@@ -1,7 +1,10 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-component-ledger",
-  "admittedCommit": "2829e539855006f57563d3c0aa42985897ca29ca",
+  "admittedCommit": "9910a026996f1011fb6af1959fce212ff766d72b",
+  "issue": 542,
+  "contractTooling": "present-planning-only",
+  "archiveComplete": false,
   "allowedClassifications": [
     "completed",
     "completed but needs testing or fixing",
@@ -123,7 +126,7 @@
       "id": "github-actions-publish-images",
       "classification": "completed but needs testing or fixing",
       "owner": "LSART-01",
-      "why": "publish-server03-images.yml commit-pins several actions. Images not built/published. Archive missing."
+      "why": "publish-server03-images.yml commit-pins several actions and now fail-closes OSS continuity claims without verified archive receipts. Images not built/published. Owned archive missing. PLANNING_NOT_A_CONTINUITY_CLAIM is the only honest publication path until receipts exist."
     },
     {
       "id": "alpine-apk-build-packages",
