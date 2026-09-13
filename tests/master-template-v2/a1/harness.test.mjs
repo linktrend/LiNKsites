@@ -193,16 +193,18 @@ test("HTTP fixture server serves A1 HTML without provider bytes", async () => {
   }
 });
 
-test("bindings pin protected development and MWT-07 identities", () => {
+test("bindings pin protected development and protected A1 identities", () => {
   const status = JSON.parse(readFileSync(join(evidenceDir, "STATUS.json"), "utf8"));
   assert.equal(status.ls07Checkpoint.commit, PROTECTED_DEVELOPMENT.commit);
   assert.equal(status.ls07Checkpoint.tree, PROTECTED_DEVELOPMENT.tree);
-  assert.equal(status.providerA1.commit, PROVIDER_PIN.commit);
-  assert.equal(status.providerA1.tree, PROVIDER_PIN.tree);
-  assert.equal(status.providerA1.selectability, "non_selectable");
+  const providerBind = JSON.parse(readFileSync(join(evidenceDir, "bindings/provider-pin.json"), "utf8"));
+  assert.equal(providerBind.commit, PROVIDER_PIN.commit);
+  assert.equal(providerBind.tree, PROVIDER_PIN.tree);
+  assert.equal(providerBind.artifactTree, PROVIDER_PIN.artifactTree);
+  assert.equal(providerBind.selectability, "non_selectable");
   const receiptBind = JSON.parse(readFileSync(join(evidenceDir, "bindings/ext-ls-01-receipt.json"), "utf8"));
   assert.equal(receiptBind.sha256, EXT_LS_01_RECEIPT.sha256);
-  assert.equal(receiptBind.consumerCommit, EXT_LS_01_RECEIPT.consumerCommit);
+  assert.equal(receiptBind.path, EXT_LS_01_RECEIPT.path);
 });
 
 test("syntax of harness scripts is valid", () => {

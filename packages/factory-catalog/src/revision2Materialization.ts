@@ -11,6 +11,7 @@ import {
   validateExactRelease,
 } from './libraryProviderClient.ts'
 import { MASTER_TEMPLATE_SOURCE_COMMIT_SHA, MASTER_TEMPLATE_SOURCE_TREE_SHA } from './templateIdentity.ts'
+import { MASTER_TEMPLATE_PIN } from './masterTemplatePin.ts'
 import {
   MASTER_TEMPLATE_ADAPTER_ID,
   MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST,
@@ -72,7 +73,10 @@ const canonical = (value: unknown): string => value === null || typeof value !==
   : Array.isArray(value)
     ? `[${value.map(canonical).join(',')}]`
     : `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`).join(',')}}`
+const canonicalDigest = (value: unknown): string => sha256(canonical(value))
 const identity = (value: unknown): string => createHash('sha1').update(canonical(value), 'utf8').digest('hex')
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
 const SHA1 = /^[a-f0-9]{40}$/
 const SHA256 = /^[a-f0-9]{64}$/
 const EXPECTED_RECEIPT_VERDICTS: Revision2MaterializationReceipt['verdicts'] = Object.freeze({
@@ -112,6 +116,41 @@ function readProviderJson(providerRoot: string, path: string): unknown {
   return json(path)
 }
 
+function digestFields(value: Record<string, unknown>, keys: readonly string[]): Record<string, unknown> {
+  return Object.fromEntries(keys.filter((key) => key in value).map((key) => [key, value[key]]))
+}
+
+/** Keep the native prerelease receipt closed: extra catalogue/source keys are evidence, not runtime fields. */
+function normalizeCandidateReceipt(value: unknown): unknown {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value
+  const receipt = value as Record<string, unknown>
+  if (receipt.receiptType !== 'provider_prerelease_candidate' && receipt.receiptType !== 'provider_release_candidate') return value
+  const release = receipt.release && typeof receipt.release === 'object' && !Array.isArray(receipt.release)
+    ? digestFields(receipt.release as Record<string, unknown>, ['entryId', 'version', 'manifestPath', 'manifestSha256', 'artifactTreeSha1', 'payloadSha256', 'inventoryFileSha256', 'inventoryProjectionSha256', 'dependencyLockSha256', 'dependencyProjectionSha256'])
+    : receipt.release
+  const source = receipt.source && typeof receipt.source === 'object' && !Array.isArray(receipt.source)
+    ? digestFields(receipt.source as Record<string, unknown>, ['repository', 'sourceCommit', 'sourceTree', 'handoffCommit', 'handoffTree', 'sourceRoots', 'sourcePathsAreProviderCode', 'visualInventoryEntries'])
+    : receipt.source
+  const catalogue = receipt.catalogue && typeof receipt.catalogue === 'object' && !Array.isArray(receipt.catalogue)
+    ? digestFields(receipt.catalogue as Record<string, unknown>, ['fileSha256', 'recordsSha256', 'path', 'bound', 'productionPointer'])
+    : receipt.catalogue
+  const governance = receipt.governance && typeof receipt.governance === 'object' && !Array.isArray(receipt.governance)
+    ? digestFields(receipt.governance as Record<string, unknown>, ['lifecycle', 'selectability', 'compatibility', 'visualMasterClaimed', 'pairedProofRequired', 'independentQualificationRequired', 'candidateProbeOnly', 'assetRights', 'assetRightsReview', 'admission'])
+    : receipt.governance
+  const normalized: Record<string, unknown> = {
+    schemaVersion: receipt.schemaVersion,
+    schemaRevision: receipt.schemaRevision,
+    receiptType: receipt.receiptType,
+    release,
+    source,
+    catalogue,
+    governance,
+  }
+  if (receipt.staging !== undefined) normalized.staging = receipt.staging
+  if (receipt.provider !== undefined) normalized.provider = receipt.provider
+  return normalized
+}
+
 const readReceipt = (input: Revision2MaterializationInput, releaseRoot: string): unknown => {
   if (input.receiptPath) {
     const explicitPath = resolve(input.receiptPath)
@@ -119,7 +158,7 @@ const readReceipt = (input: Revision2MaterializationInput, releaseRoot: string):
       throw new Error('explicit provider receipt path is missing, non-regular, symlinked, or outside provider root')
     }
     try {
-      return json(explicitPath)
+      return normalizeCandidateReceipt(json(explicitPath))
     } catch (error) {
       throw new Error(`explicit provider receipt is invalid JSON: ${error instanceof Error ? error.message : 'invalid JSON'}`)
     }
@@ -156,7 +195,7 @@ const readReceipt = (input: Revision2MaterializationInput, releaseRoot: string):
           governance: { lifecycle: release.lifecycle, selectability: release.selectability, compatibility: 'unknown' },
         }
       }
-      return value
+      return normalizeCandidateReceipt(value)
     } catch { /* fail with one deterministic error */ }
   }
   throw new Error(`no Revision 2 receipt found for ${input.entryId}@${input.version}`)
@@ -184,29 +223,77 @@ export function materializeRevision2WebsiteTemplate(input: Revision2Materializat
   errors.push(...providerCheckoutIdentity(providerRoot, input.pin))
   if (errors.length) return failure(errors)
   let bundle: unknown
+  let inventoryFileSha256 = ''
   try {
     const cataloguePath = resolve(providerRoot, 'indexes/v2/catalog.json')
     if (!providerFileIsConfined(providerRoot, cataloguePath)) throw new Error('provider catalogue path is missing, non-regular, symlinked, or outside provider root')
     const catalogueBytes = readFileSync(cataloguePath, 'utf8')
-    const catalogue = JSON.parse(catalogueBytes) as unknown
-    const manifest = readProviderJson(providerRoot, resolve(releaseRoot, 'manifest.json'))
-    const inventory = readProviderJson(providerRoot, resolve(releaseRoot, 'inventory.json'))
+    const catalogueFileSha256 = sha256(catalogueBytes)
+    if (input.pin.catalogueFileSha256 && catalogueFileSha256 !== input.pin.catalogueFileSha256) {
+      throw new Error('catalogue file digest does not match the pinned provider checkout')
+    }
+    const catalogue = JSON.parse(catalogueBytes) as { records?: unknown[]; recordsSha256?: unknown }
+    if (typeof catalogue.recordsSha256 === 'string' && Array.isArray(catalogue.records) && canonicalDigest(catalogue.records) !== catalogue.recordsSha256) {
+      throw new Error('catalogue.recordsSha256 does not match the mounted catalogue records')
+    }
+    if (input.pin.catalogueRecordsSha256 && catalogue.recordsSha256 !== input.pin.catalogueRecordsSha256) {
+      throw new Error('catalogue records digest does not match the pinned provider checkout')
+    }
+    const manifestPath = resolve(releaseRoot, 'manifest.json')
+    const inventoryPath = resolve(releaseRoot, 'inventory.json')
+    if (!providerFileIsConfined(providerRoot, manifestPath) || !providerFileIsConfined(providerRoot, inventoryPath)) {
+      throw new Error('provider release path is missing, non-regular, symlinked, or outside provider root')
+    }
+    const manifestBytes = readFileSync(manifestPath)
+    const inventoryBytes = readFileSync(inventoryPath)
+    const computedInventoryFileSha256 = sha256(inventoryBytes)
+    inventoryFileSha256 = computedInventoryFileSha256
+    if (input.entryId === MASTER_TEMPLATE_PIN.entryId && input.version === MASTER_TEMPLATE_PIN.version) {
+      if (sha256(manifestBytes) !== MASTER_TEMPLATE_PIN.releaseManifestSha256) {
+        throw new Error('manifest file digest does not match the pinned A1 identity')
+      }
+      if (inventoryFileSha256 !== MASTER_TEMPLATE_PIN.inventorySha256) {
+        throw new Error('inventory file digest does not match the pinned A1 identity')
+      }
+    }
+    const manifest = readProviderJson(providerRoot, manifestPath)
+    const inventory = readProviderJson(providerRoot, inventoryPath) as Record<string, unknown>
     const dependencyLock = readProviderJson(providerRoot, resolve(releaseRoot, 'dependency-lock.json'))
     const candidateReceipt = readReceipt(input, releaseRoot)
     if (candidateReceipt && typeof candidateReceipt === 'object' && !Array.isArray(candidateReceipt) && (candidateReceipt as Record<string, unknown>).receiptType === 'provider_prerelease_candidate') {
       const candidate = candidateReceipt as Record<string, any>
-      const catalogRecord = catalogue as Record<string, any>
-      candidate.catalogue = { fileSha256: sha256(catalogueBytes), recordsSha256: catalogRecord.recordsSha256 }
+      candidate.catalogue = { fileSha256: catalogueFileSha256, recordsSha256: catalogue.recordsSha256 }
     }
-    const record = (catalogue as { records?: unknown[] }).records?.find((item) => (item as { entryId?: unknown })?.entryId === input.entryId && (item as { version?: unknown })?.version === input.version)
-    bundle = { source: { commitSha: input.pin.sourceCommitSha, treeSha: input.pin.sourceTreeSha }, catalogue, catalogueFileSha256: sha256(catalogueBytes), record, manifest, inventory, dependencyLock, receipt: candidateReceipt }
+    const record = catalogue.records?.find((item) => (item as { entryId?: unknown })?.entryId === input.entryId && (item as { version?: unknown })?.version === input.version)
+    const draftCandidateProbe = input.selectionPolicy === 'draft_candidate_probe'
+    const validationCatalogue = draftCandidateProbe
+      ? { schemaVersion: 2, schemaRevision: 2, catalogueType: 'catalogue', recordsSha256: canonicalDigest([]), records: [] }
+      : catalogue
+    // Native closed validation compares manifest.inventorySha256 to the
+    // inventory projection digest. Independently keep the immutable inventory
+    // file digest on the pin; do not copy provider bytes into LiNKsites.
+    let validationManifest = manifest
+    let validationReceipt = candidateReceipt
+    if (draftCandidateProbe && isRecord(manifest) && isRecord(inventory) && isRecord(candidateReceipt) && isRecord((candidateReceipt as Record<string, unknown>).release)) {
+      const inventoryProjection = inventory.inventorySha256
+      validationManifest = { ...manifest, inventorySha256: inventoryProjection }
+      const release = { ...(candidateReceipt as Record<string, any>).release, inventoryFileSha256: inventoryProjection }
+      validationReceipt = { ...(candidateReceipt as Record<string, unknown>), release }
+    }
+    bundle = { source: { commitSha: input.pin.sourceCommitSha, treeSha: input.pin.sourceTreeSha }, catalogue: validationCatalogue, catalogueFileSha256, record: draftCandidateProbe ? undefined : record, manifest: validationManifest, inventory, dependencyLock, receipt: validationReceipt }
   } catch (error) {
     return failure([error instanceof Error ? error.message : 'provider release files could not be read'])
   }
-  const validated = validateExactRelease(bundle, input.pin, { selectionPolicy: input.selectionPolicy })
+  const validationPin = input.selectionPolicy === 'draft_candidate_probe'
+    ? { ...input.pin, catalogueFileSha256: undefined, catalogueRecordsSha256: undefined }
+    : input.pin
+  const validated = validateExactRelease(bundle, validationPin, { selectionPolicy: input.selectionPolicy })
   if (!validated.ok) return validated
   const admitted = admitWebsiteTemplateMaterialization(validated, { selectionPolicy: input.selectionPolicy })
   if (!admitted.ok) return admitted
+  const reference = input.selectionPolicy === 'draft_candidate_probe' && inventoryFileSha256
+    ? Object.freeze({ ...admitted.value, inventorySha256: inventoryFileSha256 })
+    : admitted.value
   const inventory = (bundle as { inventory: { entries?: unknown[] } }).inventory
   const files: Record<string, string> = {}
   for (const item of inventory.entries ?? []) {
@@ -233,7 +320,6 @@ export function materializeRevision2WebsiteTemplate(input: Revision2Materializat
     const sourceTree = sourceInventory.sourceTree ?? sourceInventory.source?.treeSha
     if (sourceRepository !== 'LiNKsites' || sourceCommit !== MASTER_TEMPLATE_SOURCE_COMMIT_SHA || sourceTree !== MASTER_TEMPLATE_SOURCE_TREE_SHA) return failure(['provider source inventory is not bound to the preserved LiNKsites visual handoff'])
   } catch { return failure(['provider source inventory is invalid JSON']) }
-  const reference = admitted.value
   const materializationReceipt = buildMaterializationReceipt(input, reference, files, input.cacheRoot)
   if (input.cacheRoot) {
     try { writeCache(input.cacheRoot, materializationReceipt, files) } catch (error) { return failure([error instanceof Error ? error.message : 'consumer cache write failed']) }

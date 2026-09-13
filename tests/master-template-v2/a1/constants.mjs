@@ -55,37 +55,39 @@ export const PROTECTED_DEVELOPMENT = Object.freeze({
   tree: "27c5578ab1416b7a37ddf79168b91be1547eb127",
 });
 
-/** Protected LiNKlibraries MWT-07 A1 pin. Bytes are not copied. */
+/** Protected LiNKlibraries A1 pin. Bytes are not copied. */
 export const PROVIDER_PIN = Object.freeze({
   repository: "linktrend/LiNKlibraries",
   packet: "MWT-07",
-  commit: "f28fd53d454cbc33d97951d8e62826dae5a83e40",
-  tree: "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b",
+  commit: "998c02c29fae5acc429804d7e03dcc74df7e7a52",
+  tree: "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3",
   releaseEntryVersion: "master-template-type-1@2.0.0-a1.1",
   entryId: "master-template-type-1",
   version: "2.0.0-a1.1",
   lifecycle: "draft",
   selectability: "non_selectable",
   compatibility: "unknown",
-  artifactTree: "a8c6c23fd41a5f0eb9221276998f96862a50119f",
-  releaseManifestSha256: "d681e5305b611aa5247a0fa1711ce75e0a1734e121e6790e50c802b26c1c9697",
-  inventorySha256: "ad743168022139e7e70bd38ae19c56503cdfc2c4fcc912ece154f4f17b70cc98",
+  artifactTree: "6aadb2dff52efe30f512ddb2a5510a881fc027e2",
+  releaseManifestSha256: "b4e0b141631694101b8daf5494499160b31e2ba6cbe66d0ec622f9690d567026",
+  inventorySha256: "29262c08e9db2797ff292dc8179965c0ed080064a0b71d1bb477c4e0d63f0f72",
   dependencyLockSha256: "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
-  payloadProjectionSha256: "b096c013b53edf6fbb30e7794830ec462a5ff47c5b085d43218e91541e0af84a",
-  releaseReceiptSha256: "2668e0df4d317c4a0d4c9fbd1be7fe5f70f7024195bb310c8644849bf949de57",
+  payloadProjectionSha256: "884eaaa612a25167c84eb77dd271ee1413dabe6f08c56dc65464c5b464d2e4d6",
+  releaseReceiptSha256: "9e53946b4dadcec3e939bd1f42bb41b1d8851d29ac7c2de3f4a66dcdd9ce1021",
+  catalogueBindingReceiptSha256: "a1b47f09f981c4db4150ee2297a9c4cd6ca45a0f8487449ac1791147cd1aa6d3",
+  rollback: "node scripts/v2/rebind-master-template-v2-release.mjs --version 2.0.0-a1.1 --rollback",
   bytesEmbedded: false,
   conformanceClaimed: false,
   selectableClaimed: false,
   mwt08Claimed: false,
 });
 
-/** Accepted EXT-LS-01 consumer proof receipt identity. Contents are not fabricated. */
+/** EXT-LS-01 consumer proof receipt identity. Out-of-tree bytes are authoritative. */
 export const EXT_LS_01_RECEIPT = Object.freeze({
   gateId: "EXT-LS-01",
-  path: ".git/linktrend-evidence/execution-2026-08-25/ext-ls-01-issue321-966a4b0/consumer-proof-receipt.json",
-  sha256: "5422616a2db650af44d3c87253066dfc5acd80054b4a6dcd35bd83ce6ca978e3",
-  consumerCommit: "966a4b08c5fdb0fc9a9bb429a5916600b459cee9",
-  consumerTree: "fa6f3fcbd737c9954214d79b733fe9b8f5d4f68f",
+  path: ".git/linktrend-evidence/ext-ls-01-issue547/consumer-proof-receipt.json",
+  sha256: "93b3e0f40134feffb8057def2f30155d916643486516ed40cbdcfe2bbb56fea3",
+  consumerCommit: "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  consumerTree: "395d4dc07780ffee977be7f5d6469b06189f1475",
   bytesEmbedded: false,
   acceptedBinding: true,
 });
@@ -138,7 +140,7 @@ export const SATISFIED_DEPENDENCIES = Object.freeze([
     id: "exact-provider-a1-binding",
     required: true,
     satisfied: true,
-    reason: "MWT-07 A1 pin is bound by identity only. Provider bytes are not copied.",
+    reason: "Protected A1 pin is bound by independently recomputed identity only. Provider bytes are not copied.",
     identity: {
       repository: PROVIDER_PIN.repository,
       commit: PROVIDER_PIN.commit,

@@ -64,6 +64,8 @@ const site = {
 
 describe('master-template look-and-feel compatibility (LS-05 A1 pin)', () => {
   it('rejects the retired fixture until the exact A1 provider bytes are materialized', () => {
+    expect(MASTER_TEMPLATE_PIN.artifactTreeSha1).toBe('6aadb2dff52efe30f512ddb2a5510a881fc027e2')
+    expect(MASTER_TEMPLATE_PIN.selectability).toBe('non_selectable')
     expect(() => verifyMasterTemplateBundle(loadBundle())).toThrow(/Catalogue file SHA-256/)
   })
 

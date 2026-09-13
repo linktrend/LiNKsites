@@ -81,12 +81,12 @@ export function requireProtectedLs07(raw) {
 }
 
 /**
- * Bind the exact MWT-07 pin. Bound means identity match, not bytes present.
+ * Bind the exact protected A1 pin. Bound means identity match, not bytes present.
  * @param {unknown} raw
  */
 export function requireProviderPin(raw) {
   if (!isRecord(raw)) {
-    throw new ClosedFailure("provider_unbound", "providerA1 must bind the exact MWT-07 pin");
+    throw new ClosedFailure("provider_unbound", "providerA1 must bind the exact protected A1 pin");
   }
   if (raw.bound !== true) {
     throw new ClosedFailure("provider_unbound", "providerA1.bound must be true (identity pin, not bytes)");
@@ -242,8 +242,8 @@ export function assertCatalogPinFiles(repoRoot) {
   const pinText = fs.readFileSync(pinPath, "utf8");
   const clientText = fs.readFileSync(clientPath, "utf8");
   for (const [label, needle] of [
-    ["MWT-07 commit", PROVIDER_PIN.commit],
-    ["MWT-07 tree", PROVIDER_PIN.tree],
+    ["protected A1 commit", PROVIDER_PIN.commit],
+    ["protected A1 tree", PROVIDER_PIN.tree],
     ["entry version", PROVIDER_PIN.version],
   ]) {
     if (!pinText.includes(needle) && !clientText.includes(needle)) {

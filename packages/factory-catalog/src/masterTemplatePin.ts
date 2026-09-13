@@ -1,9 +1,13 @@
 /**
  * Exact LiNKlibraries master-template look-and-feel pin.
  *
+ * Independently recomputed from protected LiNKlibraries development
+ * 998c02c29fae5acc429804d7e03dcc74df7e7a52 (tree 63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3).
  * The A1 candidate is inspectable but remains draft / non_selectable. Provider
  * bytes remain external; this module stores identity and receipt coordinates.
  */
+import type { Revision2ProviderPin } from './libraryProviderClient.ts'
+
 export const LINKLIBRARIES_REPOSITORY_URL = 'https://github.com/linktrend/LiNKlibraries.git' as const
 export const MASTER_TEMPLATE_ENTRY_ID = 'master-template-type-1' as const
 export const MASTER_TEMPLATE_VERSION = '2.0.0-a1.1' as const
@@ -18,19 +22,26 @@ export const REJECTED_PROVIDER_SHA_PREFIXES = [
 export const MASTER_TEMPLATE_PIN = Object.freeze({
   repositoryUrl: LINKLIBRARIES_REPOSITORY_URL,
   branch: 'development',
-  commitSha: 'dbf749cb48ffa03bf2e702d37b608f14c63e0520',
-  providerTreeSha: 'a968c801f0fa7cbeac40edc788a4f081617e2759',
-  sourceReleaseCommitSha: 'f28fd53d454cbc33d97951d8e62826dae5a83e40',
-  sourceReleaseTreeSha: '34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b',
+  commitSha: '998c02c29fae5acc429804d7e03dcc74df7e7a52',
+  providerTreeSha: '63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3',
+  sourceReleaseCommitSha: '998c02c29fae5acc429804d7e03dcc74df7e7a52',
+  sourceReleaseTreeSha: '63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3',
   entryId: MASTER_TEMPLATE_ENTRY_ID,
   version: MASTER_TEMPLATE_VERSION,
-  artifactTreeSha1: 'a8c6c23fd41a5f0eb9221276998f96862a50119f',
-  releaseManifestSha256: 'd681e5305b611aa5247a0fa1711ce75e0a1734e121e6790e50c802b26c1c9697',
-  inventorySha256: 'ad743168022139e7e70bd38ae19c56503cdfc2c4fcc912ece154f4f17b70cc98',
-  catalogueFileSha256: 'da2178f497593c858611a29e40c53fa7798e31fa3cc3700bcf4e1c4a1f309543',
-  catalogueRecordsSha256: '66a8971e38cc9bfb06836d8427534ca96de68065d0fca3b28f992e83584c7674',
+  artifactTreeSha1: '6aadb2dff52efe30f512ddb2a5510a881fc027e2',
+  releaseManifestSha256: 'b4e0b141631694101b8daf5494499160b31e2ba6cbe66d0ec622f9690d567026',
+  inventorySha256: '29262c08e9db2797ff292dc8179965c0ed080064a0b71d1bb477c4e0d63f0f72',
+  payloadSha256: '884eaaa612a25167c84eb77dd271ee1413dabe6f08c56dc65464c5b464d2e4d6',
+  dependencyLockSha256: '59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23',
+  catalogueFileSha256: '5f9c0f6bbfcede994411f8dabe04a89809d7959550985e0a7dda8c9988be22ee',
+  catalogueRecordsSha256: '749e2d6a340fad7be1fb68bad2d03c5f472a3976275048fa7a845bf3fd99f4ee',
+  releaseReceiptSha256: '9e53946b4dadcec3e939bd1f42bb41b1d8851d29ac7c2de3f4a66dcdd9ce1021',
+  catalogueBindingReceiptSha256: 'a1b47f09f981c4db4150ee2297a9c4cd6ca45a0f8487449ac1791147cd1aa6d3',
+  retainedStagingArtifactTreeSha1: '95d0a2d168b60ba2b4afd32c71928efe3797d2bc',
   releaseSourceCommitSha: '1635a64f1d90efd049c959a7cf38ebac7ccbfdac',
   releaseSourceRepositoryTreeSha1: '873c4acc582050b416fb5a8bc59990345711df46',
+  rollback: 'node scripts/v2/rebind-master-template-v2-release.mjs --version 2.0.0-a1.1 --rollback',
+  catalogueBound: false,
   lifecycle: 'draft',
   selectability: 'non_selectable',
   compatibility: 'unknown',
@@ -38,6 +49,18 @@ export const MASTER_TEMPLATE_PIN = Object.freeze({
 })
 
 export type MasterTemplatePin = typeof MASTER_TEMPLATE_PIN
+
+export function masterTemplateRevision2Pin(): Revision2ProviderPin {
+  return Object.freeze({
+    sourceCommitSha: MASTER_TEMPLATE_PIN.sourceReleaseCommitSha,
+    sourceTreeSha: MASTER_TEMPLATE_PIN.sourceReleaseTreeSha,
+    providerCommitSha: MASTER_TEMPLATE_PIN.commitSha,
+    providerTreeSha: MASTER_TEMPLATE_PIN.providerTreeSha,
+    catalogueFileSha256: MASTER_TEMPLATE_PIN.catalogueFileSha256,
+    catalogueRecordsSha256: MASTER_TEMPLATE_PIN.catalogueRecordsSha256,
+    dependencyLockSha256: MASTER_TEMPLATE_PIN.dependencyLockSha256,
+  })
+}
 
 export class MasterTemplateConsumerError extends Error {
   constructor(message: string) {

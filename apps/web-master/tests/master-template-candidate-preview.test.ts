@@ -11,6 +11,8 @@ const PRODUCTION_REJECTION_OR_PROVIDER_PIN_MISMATCH =
 
 test("production admission still rejects the draft when the proof flag is off", () => {
   delete process.env.LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF;
+  assert.equal(MASTER_TEMPLATE_PIN.commitSha, "998c02c29fae5acc429804d7e03dcc74df7e7a52");
+  assert.equal(MASTER_TEMPLATE_PIN.artifactTreeSha1, "6aadb2dff52efe30f512ddb2a5510a881fc027e2");
   assert.throws(
     () => selectMasterTemplateForProduction(loadPinnedMasterTemplateBundle()),
     PRODUCTION_REJECTION_OR_PROVIDER_PIN_MISMATCH,
@@ -26,7 +28,7 @@ test("proof flag inspects the pinned draft without emitting approved admission e
       const receipt = assertTemplateAdmission(MASTER_TEMPLATE_PIN.entryId);
       assert.equal(receipt.entryId, "master-template-type-1");
       assert.match(receipt.receiptId, /^proof-only-not-admitted:/);
-      assert.equal(receipt.libraryCommitSha, "6b87993ddaf403aebe7bef97bd268a543a1d14eb");
+      assert.equal(receipt.libraryCommitSha, MASTER_TEMPLATE_PIN.commitSha);
     } catch (error) {
       if (!(error instanceof Error)) throw error;
       assert.match(

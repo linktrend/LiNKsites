@@ -51,7 +51,12 @@ const site = {
 }
 
 describe('master-template connection compatibility (LS-05 A1 pin)', () => {
-  it('rejects the retired 1.0.0 fixture after the exact A1 pin cutover', () => {
+  it('pins the protected uncatalogued A1 identity and refuses production selection', () => {
+    expect(MASTER_TEMPLATE_PIN.commitSha).toBe('998c02c29fae5acc429804d7e03dcc74df7e7a52')
+    expect(MASTER_TEMPLATE_PIN.artifactTreeSha1).toBe('6aadb2dff52efe30f512ddb2a5510a881fc027e2')
+    expect(MASTER_TEMPLATE_PIN.releaseManifestSha256).toBe('b4e0b141631694101b8daf5494499160b31e2ba6cbe66d0ec622f9690d567026')
+    expect(MASTER_TEMPLATE_PIN.selectability).toBe('non_selectable')
+    expect(MASTER_TEMPLATE_PIN.catalogueBound).toBe(false)
     expect(() => verifyMasterTemplateBundle(loadBundle())).toThrow(/Catalogue file SHA-256/)
     expect(MASTER_TEMPLATE_PIN.version).toBe('2.0.0-a1.1')
   })

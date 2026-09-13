@@ -6,6 +6,8 @@ import { join } from 'node:path'
 import { materializeRevision2WebsiteTemplate, offlineRestartRevision2WebsiteTemplate, rollbackRevision2WebsiteTemplate } from '../src/revision2Materialization.js'
 import { isProviderCandidateReceiptType } from '../src/libraryProviderClient.js'
 import { MASTER_TEMPLATE_ADAPTER_ID, MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST, MASTER_TEMPLATE_ADAPTER_VERSION } from '../src/masterTemplateVersionedAdapter.js'
+import { MASTER_TEMPLATE_PIN, masterTemplateRevision2Pin } from '../src/masterTemplatePin.js'
+import { existsSync } from 'node:fs'
 
 const canonical = (value: unknown): string => value === null || typeof value !== 'object'
   ? JSON.stringify(value)
@@ -200,6 +202,84 @@ describe('Revision 2 website-template materialization', () => {
       const rolledForward = rollbackRevision2WebsiteTemplate({ cacheRoot })
       expect(rolledForward.ok).toBe(true)
       if (rolledForward.ok) expect(rolledForward.value.files['manifest.json']).toBe('b'.repeat(40))
+    } finally {
+      await rm(cacheRoot, { recursive: true, force: true })
+    }
+  })
+
+  it('materializes the protected uncatalogued A1 candidate into an out-of-repo cache, then survives checkout removal, tamper, and rollback', async () => {
+    const providerRoot = process.env.LINKLIBRARIES_ROOT ?? '/agent/repos/LiNKlibraries'
+    if (!existsSync(providerRoot) || !existsSync(join(providerRoot, 'registry/v2/entries/master-template-type-1/versions/2.0.0-a1.1/release-receipt.json'))) {
+      throw new Error('EXT-LS-01 requires the exact protected LiNKlibraries checkout at LINKLIBRARIES_ROOT')
+    }
+    const cacheRoot = await mkdtemp(join(tmpdir(), 'linksites-ext-ls-01-cache-'))
+    const pin = masterTemplateRevision2Pin()
+    try {
+      const refused = materializeRevision2WebsiteTemplate({
+        providerRoot,
+        entryId: MASTER_TEMPLATE_PIN.entryId,
+        version: MASTER_TEMPLATE_PIN.version,
+        pin,
+      })
+      expect(refused.ok).toBe(false)
+
+      const first = materializeRevision2WebsiteTemplate({
+        providerRoot,
+        entryId: MASTER_TEMPLATE_PIN.entryId,
+        version: MASTER_TEMPLATE_PIN.version,
+        pin,
+        selectionPolicy: 'draft_candidate_probe',
+        cacheRoot,
+      })
+      expect(first.ok).toBe(true)
+      if (!first.ok) return
+      expect(first.value.reference.artifactTreeSha1).toBe(MASTER_TEMPLATE_PIN.artifactTreeSha1)
+      expect(first.value.reference.releaseManifestSha256).toBe(MASTER_TEMPLATE_PIN.releaseManifestSha256)
+      expect(first.value.reference.inventorySha256).toBe(MASTER_TEMPLATE_PIN.inventorySha256)
+      expect(first.value.reference.receiptType).toBe('candidate')
+      expect(first.value.materializationReceipt?.cache.providerCheckoutRequired).toBe(false)
+      expect(first.value.files['plans/a.json']).toMatch(/"id": "a"/)
+      expect(JSON.parse(first.value.files['plans/a.json']).capacity.value).toBe(30)
+      expect(JSON.parse(first.value.files['plans/b.json']).capacity.value).toBe(15)
+      expect(JSON.parse(first.value.files['plans/c.json']).capacity.value).toBe(6)
+      expect(JSON.parse(first.value.files['plans/l.json']).capacity.value).toBe(0)
+      expect(JSON.parse(first.value.files['plans/l.json']).shell.globalNavigation).toBe('none')
+      expect(first.value.files['layouts/a1-guided-trust.json']).toContain('a1')
+      expect(first.value.files['src/layouts/a1/render.mjs']).toMatch(/export/)
+
+      const offline = offlineRestartRevision2WebsiteTemplate({ cacheRoot, expected: { entryId: MASTER_TEMPLATE_PIN.entryId, version: MASTER_TEMPLATE_PIN.version, pin } })
+      expect(offline.ok).toBe(true)
+      if (offline.ok) expect(offline.value.mode).toBe('offline_cache')
+
+      const stagingCache = await mkdtemp(join(tmpdir(), 'linksites-ext-ls-01-prior-'))
+      const prior = materializeRevision2WebsiteTemplate({
+        providerRoot,
+        entryId: MASTER_TEMPLATE_PIN.entryId,
+        version: MASTER_TEMPLATE_PIN.version,
+        pin,
+        selectionPolicy: 'draft_candidate_probe',
+        cacheRoot: stagingCache,
+      })
+      expect(prior.ok).toBe(true)
+      const reselect = materializeRevision2WebsiteTemplate({
+        providerRoot,
+        entryId: MASTER_TEMPLATE_PIN.entryId,
+        version: MASTER_TEMPLATE_PIN.version,
+        pin,
+        selectionPolicy: 'draft_candidate_probe',
+        cacheRoot,
+      })
+      expect(reselect.ok).toBe(true)
+      const rolled = rollbackRevision2WebsiteTemplate({ cacheRoot })
+      expect(rolled.ok).toBe(true)
+
+      const receiptPath = join(cacheRoot, `entries/${MASTER_TEMPLATE_PIN.artifactTreeSha1}`, 'materialization-receipt.json')
+      const tampered = JSON.parse(await readFile(receiptPath, 'utf8')) as { identities: { effective: string } }
+      tampered.identities.effective = '8'.repeat(40)
+      await writeFile(receiptPath, JSON.stringify(tampered))
+      const rejected = offlineRestartRevision2WebsiteTemplate({ cacheRoot })
+      expect(rejected.ok).toBe(false)
+      await rm(stagingCache, { recursive: true, force: true })
     } finally {
       await rm(cacheRoot, { recursive: true, force: true })
     }

@@ -105,8 +105,17 @@ function readCatalogueRecord(catalogue: unknown): MasterTemplateCatalogueRecord 
   if (typeof catalogue.recordsSha256 === 'string' && catalogue.recordsSha256 !== MASTER_TEMPLATE_PIN.catalogueRecordsSha256) {
     throw new MasterTemplateConsumerError('Catalogue recordsSha256 does not match the pinned identity.')
   }
-  const record = catalogue.records.find((row) => isRecord(row) && row.entryId === MASTER_TEMPLATE_PIN.entryId)
-  if (!isRecord(record)) throw new MasterTemplateConsumerError('Catalogue does not contain master-template-type-1.')
+  const record = catalogue.records.find(
+    (row) =>
+      isRecord(row) &&
+      row.entryId === MASTER_TEMPLATE_PIN.entryId &&
+      row.version === MASTER_TEMPLATE_PIN.version,
+  )
+  if (!isRecord(record)) {
+    throw new MasterTemplateConsumerError(
+      'Catalogue does not contain an indexed master-template-type-1@2.0.0-a1.1 row; the protected A1 candidate remains uncatalogued and must be probed by exact release identity.',
+    )
+  }
   for (const field of ['version', 'artifactTreeSha1', 'releaseManifestSha256', 'inventorySha256', 'lifecycle', 'selectability', 'bundlePath']) {
     if (typeof record[field] !== 'string') throw new MasterTemplateConsumerError(`Catalogue record is missing ${field}.`)
   }

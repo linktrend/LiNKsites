@@ -2,24 +2,25 @@
   "schemaVersion": 1,
   "kind": "ext-ls-01-candidate-identity",
   "gateId": "EXT-LS-01",
-  "issue": 301,
-  "branch": "issue/301-assemble-ext-ls-01-a1-consumer-proof-validator-s",
+  "issue": 547,
+  "branch": "issue/547-prove-linksites-consumption-of-protected-master",
   "repository": "linktrend/LiNKsites",
-  "preRepairCandidate": {
-    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
-    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+  "provider": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "998c02c29fae5acc429804d7e03dcc74df7e7a52",
+    "tree": "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3",
+    "release": "master-template-type-1@2.0.0-a1.1",
+    "artifactTreeSha1": "6aadb2dff52efe30f512ddb2a5510a881fc027e2"
   },
   "ownedPaths": [
     "docs/evidence/ext-ls-01/**",
-    "scripts/profile-v2-quality/ext-ls-01/**"
-  ],
-  "prohibitedPaths": [
-    "packages/factory-catalog",
-    "registry/v2/entries/**",
-    "docs/handoffs/master-template-paired-proof-controller-handoff.md"
+    "scripts/profile-v2-quality/ext-ls-01/**",
+    "packages/factory-catalog/src/masterTemplatePin.ts",
+    "packages/factory-catalog/src/revision2Materialization.ts"
   ],
   "notes": [
-    "Identities are candidate-bound inputs to the consumer validator.",
+    "Identities are independently recomputed from the bound LiNKlibraries commit.",
     "This file does not record ACCEPT, protected integration, provider conformance, or production proof."
   ]
 }

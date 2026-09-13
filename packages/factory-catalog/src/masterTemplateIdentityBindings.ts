@@ -1,6 +1,5 @@
 /** LS-05 consumer-owned candidate/adoption/adapter/Payload/effective bindings. */
 import { createHash } from 'node:crypto'
-import { FROZEN_CANDIDATE_SHA, FROZEN_SOURCE_RELEASE_SHA, FROZEN_SOURCE_RELEASE_TREE_SHA, FROZEN_TREE_SHA } from './libraryProviderClient.ts'
 import { MASTER_TEMPLATE_PIN } from './masterTemplatePin.ts'
 import { MASTER_TEMPLATE_ADAPTER_ID, MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST, MASTER_TEMPLATE_ADAPTER_VERSION } from './masterTemplateVersionedAdapter.ts'
 
@@ -29,7 +28,7 @@ export function bindMasterTemplateIdentities(input: Readonly<{ candidate: Master
   const candidate = input.candidate
   for (const key of ['providerCommitSha', 'providerTreeSha', 'sourceReleaseCommitSha', 'sourceReleaseTreeSha', 'artifactTreeSha1'] as const) requireSha(candidate[key], `candidate.${key}`)
   if (candidate.repository !== 'https://github.com/linktrend/LiNKlibraries.git' || candidate.entryId !== 'master-template-type-1' || candidate.version !== '2.0.0-a1.1') throw new MasterTemplateIdentityError('candidate does not identify the pinned master template A1')
-  if (candidate.providerCommitSha !== FROZEN_CANDIDATE_SHA || candidate.providerTreeSha !== FROZEN_TREE_SHA || candidate.sourceReleaseCommitSha !== FROZEN_SOURCE_RELEASE_SHA || candidate.sourceReleaseTreeSha !== FROZEN_SOURCE_RELEASE_TREE_SHA || candidate.artifactTreeSha1 !== MASTER_TEMPLATE_PIN.artifactTreeSha1) throw new MasterTemplateIdentityError('candidate does not match the exact pinned provider/release identity')
+  if (candidate.providerCommitSha !== MASTER_TEMPLATE_PIN.commitSha || candidate.providerTreeSha !== MASTER_TEMPLATE_PIN.providerTreeSha || candidate.sourceReleaseCommitSha !== MASTER_TEMPLATE_PIN.sourceReleaseCommitSha || candidate.sourceReleaseTreeSha !== MASTER_TEMPLATE_PIN.sourceReleaseTreeSha || candidate.artifactTreeSha1 !== MASTER_TEMPLATE_PIN.artifactTreeSha1) throw new MasterTemplateIdentityError('candidate does not match the exact pinned provider/release identity')
   if (!input.adoption.siteId || !input.adoption.locale) throw new MasterTemplateIdentityError('adoption requires siteId and locale')
   if (input.adoption.payloadStatus !== 'draft') throw new MasterTemplateIdentityError('A1 candidate adoption must remain draft')
   if (!Array.isArray(input.payload.documentIds) || input.payload.documentIds.some((id) => typeof id !== 'string' || !id)) throw new MasterTemplateIdentityError('Payload document IDs are invalid')
