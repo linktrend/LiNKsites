@@ -102,7 +102,7 @@ export const admitLinksitesConsumerRegistration = (input: unknown, grant: Linksi
   return {
     contract_version: LINKSITES_CONSUMER_CONTRACT_VERSION,
     organisation_id: record.organisation_id,
-    environment: record.environment,
+    environment: grant.environment,
     event_grants: eventGrants,
     signing_key_ref: record.signing_key_ref,
     private_endpoint: sanitizePrivateEndpointIdentity(record.private_endpoint),
