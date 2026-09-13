@@ -2,13 +2,14 @@
   "schemaVersion": 1,
   "kind": "v25-issue-checkpoint",
   "issue": 551,
-  "branch": "cursor/linksites-ext-ls-01-a1-native-proof-551-completion-005c",
+  "branch": "issue/551-repair-exact-a1-consumer-receipt-and-native-rend",
   "ownedIssueBranch": "issue/551-repair-exact-a1-consumer-receipt-and-native-rend",
   "admittedStartingRef": "issue/551-repair-exact-a1-consumer-receipt-and-native-rend",
   "headSha": "4d7798e9f0417ffa04e8885ac4e61502fc641c84",
   "gitTree": "deb4c24c64aea298f385002a7eb91caa14af2935",
   "admittedCommit": "4d7798e9f0417ffa04e8885ac4e61502fc641c84",
   "admittedTree": "deb4c24c64aea298f385002a7eb91caa14af2935",
+  "metadataCommitNote": "Branch tip after this file is a checkpoint-metadata commit only; product bytes remain the independently reviewed 4d7798e9f0417ffa04e8885ac4e61502fc641c84 / deb4c24c64aea298f385002a7eb91caa14af2935 tree.",
   "independentNarrowReview": {
     "accepted": true,
     "runId": "run-10842fbb-f038-4ebc-8721-5bce7ddaa7d9",
@@ -24,6 +25,22 @@
       "role": "reviewer"
     },
     "implementerActor": "issue-551-completion-implementer"
+  },
+  "readOnlyProvider": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "998c02c29fae5acc429804d7e03dcc74df7e7a52",
+    "tree": "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3",
+    "linklibrariesRoot": "/agent/repos/LiNKlibraries",
+    "developmentTipNotSubstituted": "0704dbef0871216dee5c4b85b3e2783823c21edb"
+  },
+  "extLs01Receipt": {
+    "path": ".git/linktrend-evidence/ext-ls-01-issue551/consumer-proof-receipt.json",
+    "sha256": "c0f05d4e314ca62b6e83f420d1934e8ccd823d9a4399b1547abe30f92521b8a5",
+    "regenerated": true,
+    "verified": true,
+    "candidateCommit": "df53bbaf854a44ea651deb5af4f165aa9df4cccb",
+    "candidateTree": "4d08448f5e629747b0df93a6d80f52fc5402be66"
   },
   "proofClass": "local",
   "claims": {
