@@ -7,10 +7,16 @@
   "admittedStartingRef": "issue/552-consolidate-accepted-linksites-delivery-branches",
   "admittedCommit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
   "admittedTree": "e29607c43146decdf81c2f132562745f6a911780",
-  "headSha": "21e2a7ef0def4d4c6c94ced93c8fdc5366612f87",
-  "gitTree": "0b5fbb1336b67afec049a23c2a37a1789e89539e",
-  "metadataCommitNote": "Evidence/checkpoint commit after this file records the consolidation SHA; product merge ancestry is the five accepted inputs.",
-  "composeOrder": ["550", "546", "549", "551", "548"],
+  "headSha": "e3fee46e4e4f42ee1e90f5a6a4c47a03f8ae0282",
+  "gitTree": "6793972667bc2d7a065deb8a46d797c40813ad55",
+  "metadataCommitNote": "Checkpoint records the evidence commit SHA below; a metadata-only follow-up may retarget the tip.",
+  "composeOrder": [
+    "550",
+    "546",
+    "549",
+    "551",
+    "548"
+  ],
   "mergeCommits": [
     "ea29a9335acea2cd220100352e745b89a1d23d43",
     "1812a45fa9aa786f5c33cff2a9279bbc00841dfc",
