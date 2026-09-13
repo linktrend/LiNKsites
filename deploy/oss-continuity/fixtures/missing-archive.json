@@ -1,0 +1,1140 @@
+{
+  "schemaVersion": 1,
+  "kind": "linksites-oss-continuity-manifest",
+  "evidenceClass": "archive-proof",
+  "continuityClaimed": true,
+  "continuityComplete": false,
+  "archiveAndReleaseComplete": false,
+  "syntheticFixture": true,
+  "vendoredDependencies": false,
+  "activeFork": false,
+  "downloadedOrPublishedByThisWorker": false,
+  "planningSeparatedFromArchiveProof": true,
+  "repository": {
+    "name": "LiNKsites",
+    "releaseSha": "a4d451ec23463726f72c43d64c710968f6b602cd",
+    "releaseTree": "dc9c5edb8b2d479e697b4b0b8ab874f32b325138",
+    "lockfileSha256": "0c030586945fe504b604ecc2e875c38ede400cd5cd73da9730302162e6b02c6f"
+  },
+  "components": [
+    {
+      "id": "lockfile-pnpm",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "pnpm-lock.yaml",
+      "version": "9.0",
+      "identity": {
+        "type": "sha256",
+        "value": "sha256:d6f5483103ee386e1f3453bff6da949b7d95fe942218d3774a449e38bbd9317f"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/lockfile-pnpm",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/lockfile-pnpm",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/lockfile-pnpm/sha256:d6f5483103ee386e1f3453bff6da949b7d95fe942218d3774a449e38bbd9317f",
+        "checksum": "sha256:d6f5483103ee386e1f3453bff6da949b7d95fe942218d3774a449e38bbd9317f",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:d6f5483103ee386e1f3453bff6da949b7d95fe942218d3774a449e38bbd9317f",
+        "tested": true
+      }
+    },
+    {
+      "id": "pkg-next",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "next",
+      "version": "16.3.3",
+      "identity": {
+        "type": "pnpm-integrity",
+        "value": "sha512-cGtnLW5leHQ="
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/pkg-next",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/pkg-next",
+      "archive": {
+        "recorded": false,
+        "controller": null,
+        "access": null,
+        "uri": null,
+        "kind": null,
+        "checksum": null,
+        "readback": null
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha512-cGtnLW5leHQ=",
+        "tested": true
+      }
+    },
+    {
+      "id": "pkg-react",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "react",
+      "version": "19.1.0",
+      "identity": {
+        "type": "pnpm-integrity",
+        "value": "sha512-cGtnLXJlYWN0"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/pkg-react",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/pkg-react",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/pkg-react/sha512-cGtnLXJlYWN0",
+        "checksum": "sha512-cGtnLXJlYWN0",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha512-cGtnLXJlYWN0",
+        "tested": true
+      }
+    },
+    {
+      "id": "pkg-payload",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "payload",
+      "version": "3.87.1",
+      "identity": {
+        "type": "pnpm-integrity",
+        "value": "sha512-cGtnLXBheWxvYWQ="
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/pkg-payload",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/pkg-payload",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/pkg-payload/sha512-cGtnLXBheWxvYWQ=",
+        "checksum": "sha512-cGtnLXBheWxvYWQ=",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha512-cGtnLXBheWxvYWQ=",
+        "tested": true
+      }
+    },
+    {
+      "id": "pkg-pg",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "pg",
+      "version": "8.16.3",
+      "identity": {
+        "type": "pnpm-integrity",
+        "value": "sha512-cGtnLXBn"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/pkg-pg",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/pkg-pg",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/pkg-pg/sha512-cGtnLXBn",
+        "checksum": "sha512-cGtnLXBn",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha512-cGtnLXBn",
+        "tested": true
+      }
+    },
+    {
+      "id": "pkg-playwright",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "playwright",
+      "version": "1.56.1",
+      "identity": {
+        "type": "pnpm-integrity",
+        "value": "sha512-cGtnLXBsYXl3cmlnaHQ="
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/pkg-playwright",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/pkg-playwright",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/pkg-playwright/sha512-cGtnLXBsYXl3cmlnaHQ=",
+        "checksum": "sha512-cGtnLXBsYXl3cmlnaHQ=",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha512-cGtnLXBsYXl3cmlnaHQ=",
+        "tested": true
+      }
+    },
+    {
+      "id": "pkg-typescript",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "typescript",
+      "version": "5.7.3",
+      "identity": {
+        "type": "pnpm-integrity",
+        "value": "sha512-cGtnLXR5cGVzY3JpcHQ="
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/pkg-typescript",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/pkg-typescript",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/pkg-typescript/sha512-cGtnLXR5cGVzY3JpcHQ=",
+        "checksum": "sha512-cGtnLXR5cGVzY3JpcHQ=",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha512-cGtnLXR5cGVzY3JpcHQ=",
+        "tested": true
+      }
+    },
+    {
+      "id": "pkg-turbo",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "turbo",
+      "version": "2.10.5",
+      "identity": {
+        "type": "pnpm-integrity",
+        "value": "sha512-cGtnLXR1cmJv"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/pkg-turbo",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/pkg-turbo",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/pkg-turbo/sha512-cGtnLXR1cmJv",
+        "checksum": "sha512-cGtnLXR1cmJv",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha512-cGtnLXR1cmJv",
+        "tested": true
+      }
+    },
+    {
+      "id": "pkg-sharp",
+      "class": "locked-package",
+      "owner": "LSSEC-01",
+      "name": "sharp",
+      "version": "0.35.4",
+      "identity": {
+        "type": "pnpm-integrity",
+        "value": "sha512-cGtnLXNoYXJw"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/pkg-sharp",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/pkg-sharp",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/pkg-sharp/sha512-cGtnLXNoYXJw",
+        "checksum": "sha512-cGtnLXNoYXJw",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha512-cGtnLXNoYXJw",
+        "tested": true
+      }
+    },
+    {
+      "id": "tool-pnpm",
+      "class": "build-tool",
+      "owner": "LSSEC-01",
+      "name": "pnpm",
+      "version": "10.0.0",
+      "identity": {
+        "type": "sha256",
+        "value": "sha256:81249e4cf8189f27bbb61c3df7f153e1c7f9a008b8ea08078752e38a4eda1095"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/tool-pnpm",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/tool-pnpm",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/tool-pnpm/sha256:81249e4cf8189f27bbb61c3df7f153e1c7f9a008b8ea08078752e38a4eda1095",
+        "checksum": "sha256:81249e4cf8189f27bbb61c3df7f153e1c7f9a008b8ea08078752e38a4eda1095",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSSEC-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:81249e4cf8189f27bbb61c3df7f153e1c7f9a008b8ea08078752e38a4eda1095",
+        "tested": true
+      }
+    },
+    {
+      "id": "img-base-node",
+      "class": "base-image",
+      "owner": "LSDEP-01",
+      "name": "node:22.17.0-alpine",
+      "version": "22.17.0-alpine",
+      "identity": {
+        "type": "oci-digest",
+        "value": "sha256:545ea538461003efdc8c81c244531b003f6f26cfccf6c0073b3239fdedf49446"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/img-base-node",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/img-base-node",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/img-base-node/sha256:545ea538461003efdc8c81c244531b003f6f26cfccf6c0073b3239fdedf49446",
+        "checksum": "sha256:545ea538461003efdc8c81c244531b003f6f26cfccf6c0073b3239fdedf49446",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSDEP-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:545ea538461003efdc8c81c244531b003f6f26cfccf6c0073b3239fdedf49446",
+        "tested": true
+      }
+    },
+    {
+      "id": "img-base-postgres",
+      "class": "base-image",
+      "owner": "LSDEP-01",
+      "name": "postgres:16.8-alpine",
+      "version": "16.8-alpine",
+      "identity": {
+        "type": "oci-digest",
+        "value": "sha256:a942b37ccfaf5a813b1432caa209a43b9d144e47ad0de1549c289c253e556cd5"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/img-base-postgres",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/img-base-postgres",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/img-base-postgres/sha256:a942b37ccfaf5a813b1432caa209a43b9d144e47ad0de1549c289c253e556cd5",
+        "checksum": "sha256:a942b37ccfaf5a813b1432caa209a43b9d144e47ad0de1549c289c253e556cd5",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSDEP-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:a942b37ccfaf5a813b1432caa209a43b9d144e47ad0de1549c289c253e556cd5",
+        "tested": true
+      }
+    },
+    {
+      "id": "action-actions-checkout",
+      "class": "build-action",
+      "owner": "LSART-01",
+      "name": "actions/checkout",
+      "version": "v4",
+      "identity": {
+        "type": "git-commit",
+        "value": "c7761e58969f7edd498186641b2021e8477e1bcd"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/action-actions-checkout",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/action-actions-checkout",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/action-actions-checkout/c7761e58969f7edd498186641b2021e8477e1bcd",
+        "checksum": "c7761e58969f7edd498186641b2021e8477e1bcd",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "c7761e58969f7edd498186641b2021e8477e1bcd",
+        "tested": true
+      }
+    },
+    {
+      "id": "action-docker-setup-buildx-action",
+      "class": "build-action",
+      "owner": "LSART-01",
+      "name": "docker/setup-buildx-action",
+      "version": "v3",
+      "identity": {
+        "type": "git-commit",
+        "value": "079c74d28ca387be38f5fa43c12a8699ac94ef51"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/action-docker-setup-buildx-action",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/action-docker-setup-buildx-action",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/action-docker-setup-buildx-action/079c74d28ca387be38f5fa43c12a8699ac94ef51",
+        "checksum": "079c74d28ca387be38f5fa43c12a8699ac94ef51",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "079c74d28ca387be38f5fa43c12a8699ac94ef51",
+        "tested": true
+      }
+    },
+    {
+      "id": "action-docker-login-action",
+      "class": "build-action",
+      "owner": "LSART-01",
+      "name": "docker/login-action",
+      "version": "v3",
+      "identity": {
+        "type": "git-commit",
+        "value": "428821350e9691491f616b754cd8315fb86d797a"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/action-docker-login-action",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/action-docker-login-action",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/action-docker-login-action/428821350e9691491f616b754cd8315fb86d797a",
+        "checksum": "428821350e9691491f616b754cd8315fb86d797a",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "428821350e9691491f616b754cd8315fb86d797a",
+        "tested": true
+      }
+    },
+    {
+      "id": "action-docker-build-push-action",
+      "class": "build-action",
+      "owner": "LSART-01",
+      "name": "docker/build-push-action",
+      "version": "v6",
+      "identity": {
+        "type": "git-commit",
+        "value": "da51b5508a8510e704f883422b38285d130e5d34"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/action-docker-build-push-action",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/action-docker-build-push-action",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/action-docker-build-push-action/da51b5508a8510e704f883422b38285d130e5d34",
+        "checksum": "da51b5508a8510e704f883422b38285d130e5d34",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "da51b5508a8510e704f883422b38285d130e5d34",
+        "tested": true
+      }
+    },
+    {
+      "id": "action-actions-upload-artifact",
+      "class": "build-action",
+      "owner": "LSART-01",
+      "name": "actions/upload-artifact",
+      "version": "v4",
+      "identity": {
+        "type": "git-commit",
+        "value": "ff4085ad157354dc8ea67a848e7c2270b4a19282"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/action-actions-upload-artifact",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/action-actions-upload-artifact",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/action-actions-upload-artifact/ff4085ad157354dc8ea67a848e7c2270b4a19282",
+        "checksum": "ff4085ad157354dc8ea67a848e7c2270b4a19282",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "ff4085ad157354dc8ea67a848e7c2270b4a19282",
+        "tested": true
+      }
+    },
+    {
+      "id": "image-cms",
+      "class": "produced-image",
+      "owner": "LSART-01",
+      "name": "ghcr.io/linktrend/linksites-cms",
+      "version": "sha-synthetic",
+      "identity": {
+        "type": "oci-digest",
+        "value": "sha256:c1cc8442a975c672522bfc30505f7ad00f5559321026520946af5605fc45ac9e"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/image-cms",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/image-cms",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/image-cms/sha256:c1cc8442a975c672522bfc30505f7ad00f5559321026520946af5605fc45ac9e",
+        "checksum": "sha256:c1cc8442a975c672522bfc30505f7ad00f5559321026520946af5605fc45ac9e",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:c1cc8442a975c672522bfc30505f7ad00f5559321026520946af5605fc45ac9e",
+        "tested": true
+      }
+    },
+    {
+      "id": "image-web-master",
+      "class": "produced-image",
+      "owner": "LSART-01",
+      "name": "ghcr.io/linktrend/linksites-web-master",
+      "version": "sha-synthetic",
+      "identity": {
+        "type": "oci-digest",
+        "value": "sha256:edda5e7f1d1a33c1d41ac16369ac47bccf7995858ccbfdae261d4f45c30b8f56"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/image-web-master",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/image-web-master",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/image-web-master/sha256:edda5e7f1d1a33c1d41ac16369ac47bccf7995858ccbfdae261d4f45c30b8f56",
+        "checksum": "sha256:edda5e7f1d1a33c1d41ac16369ac47bccf7995858ccbfdae261d4f45c30b8f56",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:edda5e7f1d1a33c1d41ac16369ac47bccf7995858ccbfdae261d4f45c30b8f56",
+        "tested": true
+      }
+    },
+    {
+      "id": "image-worker",
+      "class": "produced-image",
+      "owner": "LSART-01",
+      "name": "ghcr.io/linktrend/linksites-autowork-worker",
+      "version": "sha-synthetic",
+      "identity": {
+        "type": "oci-digest",
+        "value": "sha256:0ec4997e8ce8722a966a22c737db9130bf5a7522e04662cd2e634f4008ff6e89"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/image-worker",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/image-worker",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/image-worker/sha256:0ec4997e8ce8722a966a22c737db9130bf5a7522e04662cd2e634f4008ff6e89",
+        "checksum": "sha256:0ec4997e8ce8722a966a22c737db9130bf5a7522e04662cd2e634f4008ff6e89",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:0ec4997e8ce8722a966a22c737db9130bf5a7522e04662cd2e634f4008ff6e89",
+        "tested": true
+      }
+    },
+    {
+      "id": "image-orchestrator",
+      "class": "produced-image",
+      "owner": "LSART-01",
+      "name": "ghcr.io/linktrend/linksites-program-orchestrator",
+      "version": "sha-synthetic",
+      "identity": {
+        "type": "oci-digest",
+        "value": "sha256:2b3a56ce016bd71330912cc201800ce59a701327c372a93e6bc393a70c8db717"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/image-orchestrator",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/image-orchestrator",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/image-orchestrator/sha256:2b3a56ce016bd71330912cc201800ce59a701327c372a93e6bc393a70c8db717",
+        "checksum": "sha256:2b3a56ce016bd71330912cc201800ce59a701327c372a93e6bc393a70c8db717",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:2b3a56ce016bd71330912cc201800ce59a701327c372a93e6bc393a70c8db717",
+        "tested": true
+      }
+    },
+    {
+      "id": "image-migrations",
+      "class": "produced-image",
+      "owner": "LSART-01",
+      "name": "ghcr.io/linktrend/linksites-migrations",
+      "version": "sha-synthetic",
+      "identity": {
+        "type": "oci-digest",
+        "value": "sha256:ddf9ce31c3d19e75f23a34a0ae19d3bb6585d25c24c89c2813cd08d4202e94de"
+      },
+      "licence": {
+        "recorded": true,
+        "spdx": "MIT",
+        "name": "MIT"
+      },
+      "originalSourceLocation": "https://source.linktrend.example.invalid/image-migrations",
+      "originalArtifactLocation": "https://artifacts.linktrend.example.invalid/image-migrations",
+      "archive": {
+        "recorded": true,
+        "controller": "LiNKtrend",
+        "access": "read-only",
+        "kind": "object-store-replica",
+        "uri": "https://oss-archive.linktrend.example.invalid/readonly/image-migrations/sha256:ddf9ce31c3d19e75f23a34a0ae19d3bb6585d25c24c89c2813cd08d4202e94de",
+        "checksum": "sha256:ddf9ce31c3d19e75f23a34a0ae19d3bb6585d25c24c89c2813cd08d4202e94de",
+        "readback": {
+          "verified": true,
+          "method": "synthetic-fixture-only",
+          "notALiveArchive": true
+        }
+      },
+      "compatibility": {
+        "compatible": true,
+        "withAdmittedSource": true,
+        "tested": true,
+        "note": "synthetic fixture"
+      },
+      "reviewedUpdate": {
+        "recorded": true,
+        "packet": "LSART-01",
+        "evidence": "synthetic-reviewed-update-fixture"
+      },
+      "reproduction": {
+        "recorded": true,
+        "instructions": "Restore archived bytes; rebuild from admitted commit/tree."
+      },
+      "rollbackTarget": {
+        "recorded": true,
+        "identity": "sha256:ddf9ce31c3d19e75f23a34a0ae19d3bb6585d25c24c89c2813cd08d4202e94de",
+        "tested": true
+      }
+    }
+  ],
+  "note": "Fully synthetic passing fixture. Not a live archive and not a complete five-image release."
+}

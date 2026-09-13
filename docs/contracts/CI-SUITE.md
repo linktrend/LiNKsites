@@ -13,13 +13,14 @@ The workflow is intentionally split by event:
 | --- | --- | --- | --- |
 | Phase PR opened, updated, reopened, or marked ready | `LiNKsites CI` | `scripts/ci-fast.sh` and its artifact | W2-08 pre-VPS source certification, lint, type, runtime-configuration contract, receipt-verifier, active-surface, and changed-range secret checks. The script fails after 300 seconds. |
 | Final Phase PR labelled `linktrend-full-suite` | `full-production-suite` | `scripts/ci-required.sh` and `linksites-full-suite-<head>` | Exact-Fast receipt, application tests/builds, Supabase RLS, focused browser proof, Docker, deployment contract, and recovery rehearsal. The checkout and receipt use the exact Phase head SHA. |
-| Promotion PR to `staging` or `main` | `LiNKsites Promotion Receipt` | `scripts/ci_full_suite_receipt.py verify` | Reuses an unexpired successful `full-production-suite` artifact only when the Git tree and lockfile identity match. It never runs the Full application suite. |
+| Promotion PR to `staging` or `main` | `Linktrend Receipt Gate` and `Linktrend Branch Source Policy` | Independently produced `pull_request_target` workflows (`.github/workflows/linktrend-development-to-staging.yml`, `.github/workflows/linktrend-staging-to-main.yml`) | Candidate `pull_request` workflow content cannot mint or rename a promotion check. The managed path checks out the trusted default branch, treats the candidate as data, reuses the retained `linktrend-integrator-merge.yml` Full receipt, and never reruns the application Full suite. Every accepted transition is bound by the trusted producer to repository, transition, current protected base commit/tree, exact candidate head commit/tree, workflow/check identity, required Full test result, independent reviewer identity/result, issuance/expiry, and one-time consumption. Candidate-authored, synthetic, copied, stale/expired, self-reviewed, replayed, duplicate-name, and untrusted check-name-collision evidence fail closed. Founder bootstrap is only an explicit real founder-authorized transition that already has truthful identities and actual test/review evidence; it never manufactures a check, receipt, review, test result, identity, or success. |
 
 The managed `Linktrend Fast Checks`, `Linktrend Full Suite`, `Linktrend Receipt
-Gate`, and `Linktrend Branch Source Policy` remain separate required delivery
-controls. In particular, the managed receipt is still the authority for the
-managed delivery identity. The LiNKsites promotion receipt additionally proves
-that the application-specific Full suite passed for the identical tree.
+Gate`, and `Linktrend Branch Source Policy` remain the required delivery
+controls. Promotion authority is only those independently produced managed
+checks. Repository-owned `CI` does not publish a promotion job, does not run on
+`staging` or `main` pull requests, and must not be named as a promotion
+context.
 
 ## Inventory and classification (2026-08-14)
 
@@ -27,7 +28,7 @@ that the application-specific Full suite passed for the identical tree.
 | --- | --- | --- | --- |
 | `CI / required-production-gate` | Push to `development`, `staging`, `main`; all PRs | MOVE | Becomes `LiNKsites CI`, Phase PR only. It protects source quality, runtime configuration, receipt-parser correctness, retired-surface exclusion, and changed-range secrets. Checkpoint pushes and promotions provided duplicate or irrelevant execution. |
 | `CI / full-production-suite` | `ready_for_review` on any PR to `development` | MOVE | Runs once only on the final Phase label and exact head. It protects application, data/RLS, migration dependency, browser, Docker, deployment, recovery, and dependency risks. |
-| `CI / required-production-gate` on promotion | Promotion PRs | CONSOLIDATE | Replaced by `LiNKsites Promotion Receipt`. Fast and secret checks are already proven by the final Phase candidate; the new job verifies the retained application Full receipt instead. |
+| `CI / required-production-gate` on promotion | Promotion PRs | REMOVE | Candidate-controlled `CI` never authorizes promotion. Fast and secret checks remain proven by the final Phase candidate; same-tree promotion is authorized only by managed `Linktrend Receipt Gate` and `Linktrend Branch Source Policy`. |
 | `CI / full-production-suite` on promotion | Not selected, but a skipped required check remained | REMOVE | The Full suite is never executed during promotion; exact-tree receipt verification is required instead. |
 | `Linktrend Fast Checks` | Phase PR updates / reconciled manual canary | KEEP | Managed exact-head Phase and cancellation control. It remains a distinct managed delivery check. |
 | `Linktrend Full Suite` | Final Phase label / reconciled manual canary | KEEP | Managed exact-head receipt and final-candidate lifecycle. It is not modified here. |
@@ -69,8 +70,8 @@ The branch rules must name only checks that active workflows actually produce:
 | Branch | Required contexts |
 | --- | --- |
 | `development` | `Linktrend Branch Source Policy`, `Linktrend Fast Checks`, `LiNKsites CI`, `Linktrend Full Suite`, `full-production-suite`, `Cursor Bugbot` |
-| `staging` | `Linktrend Branch Source Policy`, `Linktrend Receipt Gate`, `LiNKsites Promotion Receipt` |
-| `main` | `Linktrend Branch Source Policy`, `Linktrend Receipt Gate`, `LiNKsites Promotion Receipt` |
+| `staging` | `Linktrend Branch Source Policy`, `Linktrend Receipt Gate` |
+| `main` | `Linktrend Branch Source Policy`, `Linktrend Receipt Gate` |
 
 Cancelled, skipped, missing, or neutral checks are not accepted as successful.
 `Cursor Bugbot` belongs only to the final Phase candidate; requiring it on a
@@ -89,10 +90,10 @@ Expected per accepted Phase candidate: one Fast application run (maximum five
 minutes, historically about 41 seconds), one final Full application run, and
 no application Full rerun on the two promotions. Relative to the prior flow,
 this removes the three branch-push Fast/secret executions and replaces the two
-promotion Fast executions with short receipt checks. Exact GitHub billed
-minutes are unavailable from the GitHub Actions timing endpoint for these
-ARM-hosted runs, so this is an elapsed-time estimate rather than a billing
-claim.
+promotion Fast executions with the independently produced managed receipt
+gates. Exact GitHub billed minutes are unavailable from the GitHub Actions
+timing endpoint for these ARM-hosted runs, so this is an elapsed-time estimate
+rather than a billing claim.
 
 Rollback is surgical: restore `.github/workflows/ci.yml`,
 `scripts/ci-fast.sh`, and `scripts/ci-secret-scan.sh` from the preceding

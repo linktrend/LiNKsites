@@ -1,6 +1,13 @@
 # LS-10 ISS-33 configuration evidence (dependency-safe engineering)
 
-GitHub issue `#370`. Branch `issue/370-ls-10-iss-33-evidence-rebind-for-successor-ident`.
+GitHub issue `#541` repairs the ISS-33 committed-template check so the
+admitted first-site manual/pending example remains truthful: live
+Platform and LiNKautowork names may stay commented and unset, required
+active-mode names stay present as placeholders, and operations wording
+still denies deployment/VPS mutation when Markdown emphasis is used.
+
+Earlier identity rebind: GitHub issue `#370`. Branch
+`issue/370-ls-10-iss-33-evidence-rebind-for-successor-ident`.
 
 This packet is an evidence-only identity rebind of the accepted ISS-33
 configuration slice. Functional templates, isolated migrate/rollback, and

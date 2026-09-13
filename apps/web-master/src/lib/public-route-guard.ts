@@ -3,12 +3,15 @@ import { NextResponse } from "next/server";
 
 import { getSiteIdFromRequest } from "@/lib/site-context";
 import {
+  PLAN_COLLECTION_ROOTS,
   resolveFamilyRoute,
   tenantSafeWhere,
   type FamilyId,
   type FamilyRouteDecision,
 } from "@/lib/routes";
 import type { SupportedLanguage } from "@/config";
+import { loadAcceptedLayoutRuntime } from "@/components/page-renderer/accepted-identities";
+import { collectionActive, type PlanCollectionId } from "@/components/page-renderer/plan-behavior";
 
 /**
  * Public content routes must share the same host-to-published-site proof as
@@ -56,6 +59,16 @@ export async function requirePublicFamilyPage(input: {
 
   const tenant = tenantSafeWhere(siteId, decision.locale);
   if (decision.locale !== input.lang) {
+    notFound();
+  }
+
+  try {
+    const runtime = loadAcceptedLayoutRuntime();
+    const head = decision.pathname.split("/").filter(Boolean)[1];
+    if (head && PLAN_COLLECTION_ROOTS.has(head) && !collectionActive(runtime.planId, head as PlanCollectionId)) {
+      notFound();
+    }
+  } catch {
     notFound();
   }
 

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "conflict-resolution-record",
+  "preferIncomingForbidden": true,
+  "discardedSource": false,
+  "planning": {
+    "acceptedPlan": {
+      "commit": "87ae0a7029eae7c877f08ef24cda0bdc54041aed",
+      "tree": "87448dec5b60a60773975c48439aceb71fb8806e",
+      "subject": "docs: close advisor planning controls",
+      "verified": true
+    },
+    "acceptedCorrection": {
+      "commit": "665233e61fca49e2a64f3d0f000a311d873b4429",
+      "tree": "63d6031e8021ee6f6b284d82c30a5358c7fcd372",
+      "subject": "Admit Issue 511 trust paths and Grok 4.6 Medium routing.",
+      "parent": "87ae0a7029eae7c877f08ef24cda0bdc54041aed",
+      "verified": true
+    },
+    "restoredOntoLinearHistory": {
+      "restoreCommit": "e2663a3ffdab9867a531643e94bca082eea8bce6",
+      "restoreTree": "1f6934a680e8da649d93cb94480bbb19be4fc03d",
+      "note": "Whole-commit patch-id differs from 87ae0a7029eae7c877f08ef24cda0bdc54041aed because the parent is aadb6d02f1d5d1aebb953274c09401057b1296e1 rather than the planning-only parent. Every planning file blob at restore equals 87ae0a7029eae7c877f08ef24cda0bdc54041aed.",
+      "fileBlobsMatchAcceptedPlan": true
+    },
+    "correctionAppliedOntoLinearHistory": {
+      "correctionCommit": "685e1267fc4718eaea808afc0c36459e9d739e14",
+      "correctionTree": "321bf8e8ef076771e73e0c410f63011225d21d94",
+      "stablePatchIdEqualToAcceptedCorrection": true,
+      "stablePatchId": "4721b72e972ecfe670e1c4d1055fd0d916f5e80f",
+      "admittedHeadPlanningFilesEqualCorrection": true
+    },
+    "supersession": "Planning documents were restored from accepted plan 87ae0a7029eae7c877f08ef24cda0bdc54041aed and then superseded where applicable by accepted correction 665233e61fca49e2a64f3d0f000a311d873b4429. Unchanged files (CERTAINTY-REPORT.md, OSS-INVENTORY.md, STARTING-POSITION.md) retain plan-87ae0a70 blobs. No planning file was discarded.",
+    "relativePlanPaths": [
+      "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md",
+      "docs/production-roadmap/phase-2/CERTAINTY-REPORT.md",
+      "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md",
+      "docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json",
+      "docs/production-roadmap/phase-2/EXECUTION-ROUTE.md",
+      "docs/production-roadmap/phase-2/IMPLEMENTATION-LANES.md",
+      "docs/production-roadmap/phase-2/LANE-PLAN.json",
+      "docs/production-roadmap/phase-2/OSS-INVENTORY.md",
+      "docs/production-roadmap/phase-2/PLANNING-CONTROL-MANIFEST.json",
+      "docs/production-roadmap/phase-2/STARTING-POSITION.md",
+      "docs/production-roadmap/phase-2/VPS-DEPLOYMENT-AND-PILOT-PACKET.md"
+    ]
+  },
+  "sourceLanes": {
+    "method": "linear replay in dependency order LSDATA -> LSTRUST -> LSFACT -> LSRENDER -> LSAUTO -> LSSEC -> LSDEP -> LSOPS then planning restore/correction then LSG0-01/LSG0-02",
+    "preferIncoming": false,
+    "unresolvedOverlap": false,
+    "userDirtyFile": {
+      "path": "apps/cms/next-env.d.ts",
+      "copiedOrStagedThisSession": false,
+      "status": "untouched-HOLD-from-LSG0-01"
+    }
+  }
+}

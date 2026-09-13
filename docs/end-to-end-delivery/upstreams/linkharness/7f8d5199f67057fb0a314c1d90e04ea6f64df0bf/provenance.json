@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "program": "linkharness",
+  "repository": "linktrend/LiNKharness",
+  "commit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+  "tree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+  "directory": "linkharness/7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+  "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+  "status": "PARTIAL_WITHHOLD",
+  "copiedFileCount": 3,
+  "copiedOriginalPaths": [
+    "packages/contracts/fixtures/linksites-profile.json",
+    "packages/profile-sdk/fixtures/minimal-profile.json",
+    "docs/guides/profile-authoring.md"
+  ],
+  "withheldFromReadableSource": [
+    {
+      "originalPath": "packages/contracts/src/schemas.ts",
+      "reason": "JSON Schema objects exist only as TypeScript implementation; executable implementation source withheld. Profile fixture plus authoring contract copied instead."
+    },
+    {
+      "originalPath": "packages/contracts/src/ports.ts",
+      "reason": "Executable adapter/Profile/event port implementation; withheld per prohibited-categories."
+    },
+    {
+      "originalPath": "packages/contracts/src/events.ts",
+      "reason": "Executable event-port implementation; withheld per prohibited-categories."
+    },
+    {
+      "originalPath": "packages/contracts/src/validate.ts",
+      "reason": "Executable validator; withheld per prohibited-categories."
+    },
+    {
+      "originalPath": "docs/evidence/consumer-conformance/**",
+      "reason": "Historical bulk conformance evidence; not live proof and not required to interpret the Profile fixture."
+    },
+    {
+      "originalPath": "packages/profile-sdk/vendor/linkharness-contracts/**",
+      "reason": "Vendored implementation duplicate of contracts package; canonical fixture copied from packages/contracts/fixtures."
+    }
+  ],
+  "byteCompare": "each copiedPath sha256 equals git object bytes at exact bound source commit before commit",
+  "sourceBinding": {
+    "role": "read-only",
+    "checkedOutCommit": "7f8d5199f67057fb0a314c1d90e04ea6f64df0bf",
+    "checkedOutTree": "2ce580d54ffa7abbee77fe3710130b9e37c3c31f",
+    "developmentTipNotUsed": true
+  },
+  "copyPolicy": "do_not_copy_harness_source; fixture and authoring contract only"
+}

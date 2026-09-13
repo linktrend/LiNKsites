@@ -1,0 +1,27 @@
+{
+  "name": "catalogue-profile-reject-unknown-status",
+  "expect": "reject",
+  "reason": "unsupported catalogue status",
+  "document": {
+    "contractVersion": "platform.catalogue-profile/1.0.0",
+    "catalogue": [
+      {
+        "id": "cap.plane.execution_tracking",
+        "displayName": "Plane execution tracking",
+        "owningSystem": "link-plane",
+        "licensable": true,
+        "minContractTier": "standard",
+        "commercialUseRequires": null,
+        "status": "retired"
+      }
+    ],
+    "profile": {
+      "id": "org-linktrend-internal",
+      "name": "LiNKtrend",
+      "kind": "internal",
+      "status": "active",
+      "createdAt": "2026-07-14T00:00:00.000Z",
+      "updatedAt": "2026-07-14T00:00:00.000Z"
+    }
+  }
+}

@@ -62,6 +62,7 @@ const acceptedLayout = {
 test("ISS-19 A1/A2/A3 PageRenderer compositions are structurally distinct", () => {
   assertStructurallyDistinctCompositions();
   assert.equal(LAYOUT_COMPOSITIONS.A1.pageRenderer, "composition-a1-linear-shell");
+  assert.equal(LAYOUT_COMPOSITIONS.A1.architectureReady, true);
   assert.equal(LAYOUT_COMPOSITIONS.A2.architectureReady, true);
   assert.equal(LAYOUT_COMPOSITIONS.A3.architectureReady, true);
   assert.deepEqual([...LAYOUT_PACK_IDS], ["A1", "A2", "A3"]);

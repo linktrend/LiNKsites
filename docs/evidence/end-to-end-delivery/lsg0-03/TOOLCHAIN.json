@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "admitted-manifest-ci-toolchain",
+  "packet": "LSG0-03",
+  "sourceIdentity": {
+    "repository": "linktrend/LiNKsites",
+    "ref": "issue/538-refresh-lsg0-03-against-current-protected-linkli",
+    "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+    "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea"
+  },
+  "ciPins": {
+    "workflow": ".github/workflows/ci.yml",
+    "runsOn": "ubuntu-24.04-arm",
+    "nodeVersion": "22",
+    "pnpmActionSetup": "10.0.0",
+    "packageManagerField": "pnpm@10.0.0",
+    "webMasterNvmrc": {
+      "path": "apps/web-master/.nvmrc",
+      "value": "22"
+    },
+    "pythonUsedByAcceptance": "python3 -m json.tool",
+    "supabaseCliPinnedInFullSuiteOnly": "2.81.3",
+    "fullSuiteNotRunThisPacket": true
+  },
+  "pinDiagnosis": {
+    "nodeCompiler": "CI pins Node major 22 only; no compiler hash/lock. PATH node remained /exec-daemon/node v22.14.0 after nvm use 22 because nvm PATH did not persist into command -v. nvm listed v22.22.2. Frozen install used explicit PATH=$NVM_DIR/versions/node/v22.22.2/bin. Both are Node 22. Not a hash-locked compiler.",
+    "pnpm": "package.json packageManager is pnpm@10.0.0 without an integrity hash. corepack prepare pnpm@10.0.0 succeeded. Frozen lockfile exists at pnpm-lock.yaml.",
+    "lockDefect": "none-observed-for-frozen-install",
+    "didNotChangeLocks": true,
+    "didNotSilentlyUseUnpinnedPnpm12": true,
+    "didNotChangeCompilerOrLocksInReadOnlyRole": true
+  },
+  "cloudRuntime": {
+    "python": "Python 3.12.3 (/usr/bin/python3)",
+    "uname": "Linux cursor 6.12.94+ x86_64",
+    "pathNodeBeforeNvmActivation": {
+      "path": "/exec-daemon/node",
+      "version": "v22.14.0"
+    },
+    "nvm": {
+      "version": "0.40.3",
+      "default": "v22.22.2"
+    },
+    "pnpmAfterCorepackPrepare": {
+      "path": "/home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm",
+      "version": "10.0.0"
+    },
+    "frozenInstall": {
+      "command": "PATH=$NVM_DIR/versions/node/v22.22.2/bin:$PATH pnpm install --frozen-lockfile",
+      "result": "pass",
+      "lockfileUpToDate": true,
+      "ignoredBuildScripts": [
+        "@parcel/watcher",
+        "@swc/core"
+      ],
+      "note": "install reused store/download cache; lock not modified; this packet acceptance is JSON/git only"
+    }
+  },
+  "acceptanceCommandsForThisPacket": [
+    "find docs/evidence/end-to-end-delivery/lsg0-03 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+    "test -z \"$(git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-03/')\"",
+    "git diff --check 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD"
+  ],
+  "forbiddenThisPacket": [
+    "Full Suite",
+    "browser tests",
+    "product builds as acceptance",
+    "Docker",
+    "deployment",
+    "live probes",
+    "independent reviewer",
+    "lockfile mutation"
+  ]
+}

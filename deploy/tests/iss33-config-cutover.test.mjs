@@ -16,8 +16,10 @@ import {
   injectDrift,
   loadSurfaceCatalog,
   offlineRehearsal,
+  operationsDeniesDeploymentAndVps,
   persistStore,
   planMigration,
+  parseEnvTemplate,
   readbackStore,
   refuseLiveCanary,
   rollbackMigration,
@@ -133,13 +135,92 @@ test('scope classifier refuses ledger, orchestrator, execution and release docs'
 
 test('committed deploy templates remain fail-closed and placeholder-only', async () => {
   const catalog = await loadSurfaceCatalog()
+  const productionExample = await readFile(resolve(root, 'deploy/config/production.env.example'), 'utf8')
+  const parsed = parseEnvTemplate(productionExample)
+  assert.equal(parsed.assigned.includes('LINKSITES_AUTOWORK_MODE'), true)
+  assert.equal(parsed.assigned.includes('LINKAUTOWORK_GATEWAY_URL'), false)
+  assert.equal(parsed.commented.includes('LINKAUTOWORK_GATEWAY_URL'), true)
+  assert.equal(parsed.commented.includes('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA'), true)
   const result = committedTemplateDrift({
     catalog,
-    productionExample: await readFile(resolve(root, 'deploy/config/production.env.example'), 'utf8'),
+    productionExample,
     compose: await readFile(resolve(root, 'deploy/docker-compose.deploy.yml'), 'utf8'),
     operations: await readFile(resolve(root, 'deploy/OPERATIONS.md'), 'utf8'),
   })
   assert.equal(result.ok, true, result.errors.join('; '))
+})
+
+test('commented optional live fields may be named unset; required fields must stay assigned', async () => {
+  const catalog = await loadSurfaceCatalog()
+  const productionExample = await readFile(resolve(root, 'deploy/config/production.env.example'), 'utf8')
+  const compose = await readFile(resolve(root, 'deploy/docker-compose.deploy.yml'), 'utf8')
+  const operations = await readFile(resolve(root, 'deploy/OPERATIONS.md'), 'utf8')
+
+  const requiredCommented = productionExample.replace(/^DATABASE_URI=/m, '# DATABASE_URI=')
+  const requiredResult = committedTemplateDrift({
+    catalog,
+    productionExample: requiredCommented,
+    compose,
+    operations,
+  })
+  assert.equal(requiredCommented.includes('# DATABASE_URI='), true)
+  assert.equal(requiredResult.ok, false)
+  assert.ok(requiredResult.errors.some((error) => error.includes('DATABASE_URI') && error.includes('must not be commented')))
+
+  const liveUncommented = productionExample.replace(
+    /^# LINKAUTOWORK_GATEWAY_URL=/m,
+    'LINKAUTOWORK_GATEWAY_URL=',
+  )
+  const liveSetResult = committedTemplateDrift({
+    catalog,
+    productionExample: liveUncommented,
+    compose,
+    operations,
+  })
+  assert.equal(liveSetResult.ok, false)
+  assert.ok(liveSetResult.errors.some((error) => error.includes('LINKAUTOWORK_GATEWAY_URL') && error.includes('commented and unset')))
+
+  const liveMissing = productionExample.replace(/^# LINKAUTOWORK_GATEWAY_URL=.*\n/m, '')
+  const liveMissingResult = committedTemplateDrift({
+    catalog,
+    productionExample: liveMissing,
+    compose,
+    operations,
+  })
+  assert.equal(liveMissingResult.ok, false)
+  assert.ok(liveMissingResult.errors.some((error) => error.includes('LINKAUTOWORK_GATEWAY_URL') && error.includes('missing')))
+})
+
+test('operations wording still fail-closes VPS mutation when Markdown emphasis is used', async () => {
+  const catalog = await loadSurfaceCatalog()
+  const productionExample = await readFile(resolve(root, 'deploy/config/production.env.example'), 'utf8')
+  const compose = await readFile(resolve(root, 'deploy/docker-compose.deploy.yml'), 'utf8')
+  const emphasized = [
+    '## 7. Rollback to the prior five-digest manifest',
+    '',
+    'This document does **not** authorize or perform deployment, VPS mutation.',
+    '',
+  ].join('\n')
+  assert.equal(operationsDeniesDeploymentAndVps(emphasized), true)
+  assert.equal(emphasized.includes('does not authorize or perform VPS'), false)
+  const emphasizedResult = committedTemplateDrift({
+    catalog,
+    productionExample,
+    compose,
+    operations: emphasized,
+  })
+  assert.equal(emphasizedResult.ok, true, emphasizedResult.errors.join('; '))
+
+  const missingDenial = '## Rollback\nLater authorized work may mutate a VPS.\n'
+  assert.equal(operationsDeniesDeploymentAndVps(missingDenial), false)
+  const missingResult = committedTemplateDrift({
+    catalog,
+    productionExample,
+    compose,
+    operations: missingDenial,
+  })
+  assert.equal(missingResult.ok, false)
+  assert.ok(missingResult.errors.includes('operations manual no longer fail-closes VPS mutation'))
 })
 
 test('CLI rehearsal writes an isolated receipt without secret values', async () => {

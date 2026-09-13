@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-03-lean-review-application",
+  "packet": "LSG0-03",
+  "issue": 538,
+  "policyRecord": "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json",
+  "policyId": "founder-approved-lean-review",
+  "independentReviewer": {
+    "used": false,
+    "reason": "documentation-only evidence refresh; independent_narrow_review is risk-triggered and waived for this packet"
+  },
+  "namedRiskSurfacesChanged": {
+    "authAuthorizationSecretHandlingLogic": false,
+    "additivePayloadPostgresMigrationRls": false,
+    "productionDeploymentRollbackConfiguration": false
+  },
+  "replacementProofCommands": [
+    "python3 -m json.tool on every JSON file under docs/evidence/end-to-end-delivery/lsg0-03",
+    "git diff --name-only scoped to docs/evidence/end-to-end-delivery/lsg0-03/",
+    "git diff --check",
+    "python3 scripts/gitops/secret_scan.py change-scoped against BASE_SHA...HEAD"
+  ],
+  "selfReviewForbiddenForMaterialRisk": true,
+  "didNotClaimIndependentReview": true
+}

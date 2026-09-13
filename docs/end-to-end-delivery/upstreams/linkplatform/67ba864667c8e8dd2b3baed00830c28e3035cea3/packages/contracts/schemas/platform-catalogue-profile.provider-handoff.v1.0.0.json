@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.dev/schemas/platform-catalogue-profile-provider-handoff/1.0.0",
+  "title": "Platform-owned catalogue provider handoff",
+  "description": "Immutable LiNKplatform provider receipt for EXT-LCL-PLATFORM-CATALOGUE-CONTRACT. Binds the frozen catalogue/Profile contract to an exact protected Platform commit, tree, optional tag, and digest. Does not name a consumer git identity, claim LiNKclient proof, or authorize live/production use. additionalProperties is false.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "externalContractId",
+    "requestingWorkPacket",
+    "requestingConsumer",
+    "contractVersion",
+    "producer",
+    "pin",
+    "acceptedReceipt",
+    "artifactDigest",
+    "contractDigest",
+    "verdict",
+    "lifecycleState",
+    "independentPreparationAllowed",
+    "integrationClaimed",
+    "consumerProofClaimed",
+    "production",
+    "publicationClass"
+  ],
+  "$defs": {
+    "sha40": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "repository": { "type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$" },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "tree"],
+      "properties": {
+        "repository": { "$ref": "#/$defs/repository" },
+        "commit": { "$ref": "#/$defs/sha40" },
+        "tree": { "$ref": "#/$defs/sha40" }
+      }
+    },
+    "acceptedReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receiptDigest", "status", "protected", "provider"],
+      "properties": {
+        "receiptDigest": { "$ref": "#/$defs/digest" },
+        "status": { "type": "string", "const": "accepted" },
+        "protected": { "type": "boolean", "const": true },
+        "provider": { "$ref": "#/$defs/identity" }
+      }
+    }
+  },
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "kind": {
+      "type": "string",
+      "const": "platform.catalogue-profile.provider-handoff"
+    },
+    "externalContractId": {
+      "type": "string",
+      "const": "EXT-LCL-PLATFORM-CATALOGUE-CONTRACT"
+    },
+    "requestingWorkPacket": { "type": "string", "const": "LCL-WP-002" },
+    "requestingConsumer": { "type": "string", "const": "LiNKclient" },
+    "contractVersion": {
+      "type": "string",
+      "const": "platform.catalogue-profile/1.0.0"
+    },
+    "producer": { "$ref": "#/$defs/identity" },
+    "pin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "tree", "tag", "digest"],
+      "properties": {
+        "commit": { "$ref": "#/$defs/sha40" },
+        "tree": { "$ref": "#/$defs/sha40" },
+        "tag": {
+          "description": "No Platform release tag exists on the protected catalogue identity. Must stay null; inventing a tag fails closed.",
+          "type": "null"
+        },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "acceptedReceipt": { "$ref": "#/$defs/acceptedReceipt" },
+    "artifactDigest": { "$ref": "#/$defs/digest" },
+    "contractDigest": { "$ref": "#/$defs/digest" },
+    "verdict": { "type": "string", "const": "accepted" },
+    "lifecycleState": { "type": "string", "const": "accepted" },
+    "independentPreparationAllowed": { "type": "boolean", "const": true },
+    "integrationClaimed": { "type": "boolean", "const": false },
+    "consumerProofClaimed": { "type": "boolean", "const": false },
+    "production": { "type": "boolean", "const": false },
+    "publicationClass": { "type": "string", "const": "protected-provider" }
+  }
+}

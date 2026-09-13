@@ -1,27 +1,35 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CONFIG_SCHEMA_VERSION, SERVICE_CONFIGURATION, validateRuntimeConfig } from '../config/runtime-contract.mjs'
+import { CONFIG_SCHEMA_VERSION, SERVICE_CONFIGURATION, validateRuntimeConfig, HARNESS_RELEASE_PIN, PROFILE_RELEASE_PIN } from '../config/runtime-contract.mjs'
 import { readFile } from 'node:fs/promises'
 
 const secret = 'aB9!'.repeat(10)
 const databaseUri = ['postgresql:', '//runtime@postgres.example.test:5432/linksites'].join('')
 const orchestratorDatabaseUri = ['postgresql:', '//orchestrator@postgres.example.test:5432/linksites'].join('')
+const image = (name, character) => `ghcr.io/linktrend/linksites-${name}@sha256:${character.repeat(64)}`
 const base = {
   LINKSITES_DEPLOYMENT_ENV: 'production',
   LINKSITES_CONFIG_SCHEMA_VERSION: CONFIG_SCHEMA_VERSION,
   LINKSITES_RELEASE_SHA: 'f'.repeat(40),
   LINKSITES_ORG_ID: 'linksites-test',
+  LINKSITES_AUTOWORK_MODE: 'manual',
+  LINKSITES_PLATFORM_STATE: 'pending',
+  LINKSITES_HARNESS_COMMIT: HARNESS_RELEASE_PIN.commit,
+  LINKSITES_HARNESS_TREE: HARNESS_RELEASE_PIN.tree,
+  LINKSITES_HARNESS_RANGE: HARNESS_RELEASE_PIN.compatibleRange,
+  LINKSITES_PROFILE_ID: PROFILE_RELEASE_PIN.id,
+  LINKSITES_PROFILE_VERSION: PROFILE_RELEASE_PIN.version,
+  LINKSITES_CMS_IMAGE: image('cms', '1'),
+  LINKSITES_WEB_MASTER_IMAGE: image('web-master', '2'),
+  LINKSITES_WORKER_IMAGE: image('autowork-worker', '4'),
+  LINKSITES_ORCHESTRATOR_IMAGE: image('program-orchestrator', '3'),
+  LINKSITES_MIGRATIONS_IMAGE: image('migrations', '5'),
   DATABASE_URI: databaseUri,
   W2_02_DATABASE_URI: orchestratorDatabaseUri,
   PAYLOAD_SECRET: secret,
   PAYLOAD_PUBLIC_SERVER_URL: 'https://cms.example.test',
-  LINKAUTOWORK_GATEWAY_URL: 'https://autowork.example.test',
-  LINKAUTOWORK_SIGNING_SECRET: secret,
-  LINKAUTOWORK_SIGNING_KEY_ID: 'linksites-production',
-  LINKAUTOWORK_ENVIRONMENT: 'production',
   LINKAUTOWORK_OUTBOX_PATH: '/var/lib/linksites/outbox.json',
   LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: secret,
-  LINKAUTOWORK_EVENT_GRANTS: JSON.stringify([{ eventName: 'demo.completed', environments: ['production'], orgIds: ['linksites-test'] }]),
   LINKSITES_TEMPLATE_RELEASE_STATE: 'deferred',
   LINKSITES_TEMPLATE_FORMAT: 'revision2',
   LINKSITES_TEMPLATE_ID: 'master-template-type-1',
@@ -136,4 +144,56 @@ test('accepts a valid first numeric Payload document ID and rejects an invalid o
 test('configuration reference documents every executable runtime name', async () => {
   const reference = await readFile(new URL('../config/README.md', import.meta.url), 'utf8')
   for (const requirement of Object.values(SERVICE_CONFIGURATION).flat()) assert.ok(reference.includes(`\`${requirement.name}\``), requirement.name)
+})
+
+test('manual Autowork rejects live gateway or admission fields', () => {
+  const result = validateRuntimeConfig({ ...base, LINKAUTOWORK_GATEWAY_URL: 'https://autowork.example.test' }, 'cms')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKAUTOWORK_GATEWAY_URL'))
+})
+
+test('live Autowork requires an exact handoff and key reference', () => {
+  const live = {
+    ...base,
+    LINKSITES_AUTOWORK_MODE: 'live',
+    LINKAUTOWORK_GATEWAY_URL: 'https://autowork.example.test',
+    LINKAUTOWORK_SIGNING_SECRET: secret,
+    LINKAUTOWORK_SIGNING_KEY_ID: 'linksites-production',
+    LINKAUTOWORK_ENVIRONMENT: 'production',
+    LINKAUTOWORK_EVENT_GRANTS: JSON.stringify([{ eventName: 'demo.completed', environments: ['production'], orgIds: ['linksites-test'] }]),
+    LINKAUTOWORK_ISSUER: 'linkplatform-issuer',
+    LINKAUTOWORK_AUDIENCE: 'linksites',
+    LINKAUTOWORK_RECEIPT_CONTRACT: '2026-08-13.v1',
+  }
+  assert.equal(validateRuntimeConfig(live, 'cms').ok, true)
+  const secretRef = validateRuntimeConfig({ ...live, LINKAUTOWORK_SIGNING_KEY_ID: 'ltfx-not-a-reference' }, 'cms')
+  assert.equal(secretRef.ok, false)
+})
+
+test('pending Platform state rejects a fake applied SHA', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: 'a'.repeat(40) }, 'cms')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA'))
+})
+
+test('ready Platform state requires the applied SHA and distinct database credentials', () => {
+  const ready = { ...base, LINKSITES_PLATFORM_STATE: 'ready', LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: '6'.repeat(40) }
+  assert.equal(validateRuntimeConfig(ready, 'cms').ok, true)
+  const same = validateRuntimeConfig({ ...ready, W2_02_DATABASE_URI: databaseUri }, 'program-orchestrator')
+  assert.equal(same.ok, false)
+  assert.ok(same.errors.some((error) => error.name === 'W2_02_DATABASE_URI'))
+})
+
+test('mutable image tags are rejected', () => {
+  const result = validateRuntimeConfig({ ...base, LINKSITES_CMS_IMAGE: 'ghcr.io/linktrend/linksites-cms:latest' }, 'cms')
+  assert.equal(result.ok, false)
+  assert.ok(result.errors.some((error) => error.name === 'LINKSITES_CMS_IMAGE'))
+})
+
+test('Harness and Profile pins match the admitted source pin module', async () => {
+  const pin = await readFile(new URL('../../packages/linkharness-profile/src/pin.ts', import.meta.url), 'utf8')
+  assert.ok(pin.includes(`commit: "${HARNESS_RELEASE_PIN.commit}"`))
+  assert.ok(pin.includes(`tree: "${HARNESS_RELEASE_PIN.tree}"`))
+  assert.ok(pin.includes(`id: "${PROFILE_RELEASE_PIN.id}"`))
+  assert.ok(pin.includes(`version: "${PROFILE_RELEASE_PIN.version}"`))
 })

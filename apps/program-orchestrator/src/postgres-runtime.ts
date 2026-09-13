@@ -139,7 +139,7 @@ export class PostgresWorkIntakePort implements WorkIntakePort {
    * Invalid packages are rejected before they can enter the ready queue; the
    * unique idempotency key makes a retry of the same accepted package safe.
    */
-  async submit(envelope: LeadResearchPackage): Promise<{ itemId: string; accepted: boolean }> {
+  async submit(envelope: LeadResearchPackage): Promise<{ itemId: string; accepted: boolean; replay: boolean; lead: LeadResearchPackage }> {
     if (!isLeadResearchPackage(envelope)) throw new Error('W2-02 intake submission failed canonical LeadResearchPackage validation')
     if (envelope.org_id !== this.orgId) throw new Error('W2-02 intake submission org does not match the runtime tenant')
     const itemId = `intake:${createHash('sha256').update(`${envelope.org_id}:${envelope.idempotency_key}`).digest('hex')}`
@@ -150,12 +150,21 @@ export class PostgresWorkIntakePort implements WorkIntakePort {
        returning item_id`,
       [this.orgId, itemId, envelope.lead_id, envelope.idempotency_key, JSON.stringify(envelope)],
     )
-    return { itemId, accepted: result.rows.length === 1 }
+    if (result.rows.length === 1) return { itemId, accepted: true, replay: false, lead: envelope }
+    const existing = await this.db.query(
+      `select item_id, envelope from lsites_ledger.program_intake where org_id = $1 and idempotency_key = $2`,
+      [this.orgId, envelope.idempotency_key],
+    )
+    const row = existing.rows[0]
+    if (!row || typeof row.item_id !== 'string') throw new Error('W2-02 intake replay could not load the original durable result')
+    const stored = typeof row.envelope === 'string' ? JSON.parse(row.envelope) : row.envelope
+    if (!isLeadResearchPackage(stored)) throw new Error('W2-02 intake replay stored an invalid canonical package')
+    return { itemId: row.item_id, accepted: true, replay: true, lead: stored }
   }
 }
 
 export class PostgresCompletionSink implements CompletionSink {
-  constructor(private readonly db: PostgresExecutor, private readonly orgId: string, private readonly gateway: LiNKautoworkGateway) {}
+  constructor(private readonly db: PostgresExecutor, private readonly orgId: string, private readonly gateway: LiNKautoworkGateway | null) {}
 
   async write(envelope: DemoCompletionEnvelope): Promise<void> {
     await this.db.query(
@@ -164,9 +173,7 @@ export class PostgresCompletionSink implements CompletionSink {
        values ($1,$2,$3,$4,now()) on conflict (org_id, idempotency_key) do nothing`,
       [this.orgId, envelope.idempotency_key, JSON.stringify(envelope), safeHash(envelope)],
     )
-    // The database delivery record is the durable outbox boundary. A gateway
-    // failure leaves it available for ProgramRuntime's idempotent retry; only
-    // a signed LiNKautowork acknowledgement lets the Program emit.
+    if (!this.gateway) return
     await this.gateway.send('demo.completed', envelope.org_id, envelope.correlation_id, envelope.idempotency_key, {
       lead_id: envelope.lead_id,
       site_id: envelope.site_id,

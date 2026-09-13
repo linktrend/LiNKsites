@@ -60,19 +60,20 @@ async function findPublishedDocs(collection: string, siteId: string): Promise<In
   return result?.docs ?? [];
 }
 
-export async function requestBaseUrl(): Promise<string> {
+export async function requestBaseUrl(): Promise<string | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "https";
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
-  return host ? `${proto}://${host}` : "https://example.com";
+  if (!host.trim()) return null;
+  return `${proto}://${host}`;
 }
 
 export async function loadPublishedAuthority(): Promise<PublishedAuthority> {
   const baseUrl = await requestBaseUrl();
   const siteId = await getSiteIdFromRequest().catch(() => null);
-  if (!siteId) {
+  if (!siteId || !baseUrl) {
     return projectPublishedAuthority({
-      baseUrl,
+      baseUrl: "https://invalid.invalid",
       locales: SUPPORTED_LANGUAGES,
       defaultLocale: DEFAULT_LANGUAGE,
       records: [],
@@ -81,7 +82,7 @@ export async function loadPublishedAuthority(): Promise<PublishedAuthority> {
     });
   }
 
-  const [pages, offers, articles, videos, cases, privacy, terms, cookies, faqs] = await Promise.all([
+  const [pages, offers, articles, videos, cases, privacy, terms, cookies, faqs, products, services, team, locations] = await Promise.all([
     findPublishedDocs("pages", siteId),
     findPublishedDocs("offer-pages", siteId),
     findPublishedDocs("articles", siteId),
@@ -91,6 +92,10 @@ export async function loadPublishedAuthority(): Promise<PublishedAuthority> {
     findPublishedDocs("terms-pages", siteId),
     findPublishedDocs("cookie-policy-pages", siteId),
     findPublishedDocs("faq-pages", siteId),
+    findPublishedDocs("product-pages", siteId),
+    findPublishedDocs("service-pages", siteId),
+    findPublishedDocs("team-pages", siteId),
+    findPublishedDocs("location-pages", siteId),
   ]);
 
   const publishedPageCount = pages.filter((page) => statusFor(page) === "published").length;
@@ -106,6 +111,10 @@ export async function loadPublishedAuthority(): Promise<PublishedAuthority> {
     ...toRecords("legal", terms, (doc) => `/${doc.locale}/legal/${doc.slug}`),
     ...toRecords("legal", cookies, (doc) => `/${doc.locale}/legal/${doc.slug}`),
     ...toRecords("faq", faqs, (doc) => `/${doc.locale}/resources/faq/${doc.slug}`),
+    ...toRecords("product", products, (doc) => `/${doc.locale}/products/${doc.slug}`),
+    ...toRecords("service", services, (doc) => `/${doc.locale}/services/${doc.slug}`),
+    ...toRecords("person", team, (doc) => `/${doc.locale}/team/${doc.slug}`),
+    ...toRecords("location", locations, (doc) => `/${doc.locale}/locations/${doc.slug}`),
   ];
 
   return projectPublishedAuthority({

@@ -11,7 +11,7 @@ import { ProgramRuntime } from './runtime.ts'
 import { ExecutorRegistry } from './executors.ts'
 import { FileWorkIntakePort, type CompletionSink, type WorkIntakePort } from '@linksites/intake-orchestrator'
 import { closeLocalDatabase, openLocalDatabase } from './local-database.ts'
-import { LiNKautoworkGateway, parseGatewayEventPolicies, type GatewayTransport } from '@linksites/autowork-boundary'
+import { LiNKautoworkGateway, envSigningMaterialResolver, parseGatewayEventPolicies, requireLiveMode, resolveLiveModeFromEnv, type GatewayTransport } from '@linksites/autowork-boundary'
 import { createFileLifecycleStore, createPostgresLifecycleStore, SiteLifecycleService, type LifecycleEvidenceVerifier, type VerifiedRecycleEvidence } from '@linksites/factory-catalog'
 import { CommercialOutcomeIngress, VerifiedGatewayOutcomeAuthorization } from './commercial-outcome-ingress.ts'
 import { LeadResearchIngress } from './lead-research-ingress.ts'
@@ -97,14 +97,34 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   const adapters = new LocalBoundaryAdaptersImpl(runtimeConfig, db)
   adapters.bindLeaseVerifier(({ runId, fencingToken }) => ledger.assertLeaseActive(runId, fencingToken))
   const executors = new ExecutorRegistry(runtimeConfig)
-  const outboundPolicies = production ? parseGatewayEventPolicies(runtimeConfig.linkautoworkEventGrants) : []
-  if (production && (!runtimeConfig.linkautoworkGatewayUrl || !runtimeConfig.linkautoworkSigningSecret || !runtimeConfig.linkautoworkSigningKeyId || !outboundPolicies.some((policy) => policy.eventName === 'demo.completed' && policy.orgIds.includes(runtimeConfig.orgId) && policy.environments.includes('production')))) throw new Error('W2-05 production requires an authorized LiNKautowork demo.completed delivery grant')
+  const live = resolveLiveModeFromEnv({
+    ...process.env,
+    LINKAUTOWORK_GATEWAY_URL: runtimeConfig.linkautoworkGatewayUrl || process.env.LINKAUTOWORK_GATEWAY_URL,
+    LINKAUTOWORK_SIGNING_KEY_ID: runtimeConfig.linkautoworkSigningKeyId || process.env.LINKAUTOWORK_SIGNING_KEY_ID,
+    LINKAUTOWORK_EVENT_GRANTS: runtimeConfig.linkautoworkEventGrants || process.env.LINKAUTOWORK_EVENT_GRANTS,
+    W2_02_ORG_ID: runtimeConfig.orgId,
+    LINKAUTOWORK_ORG_ID: process.env.LINKAUTOWORK_ORG_ID ?? runtimeConfig.orgId,
+  })
+  const liveHandoff = live.enabled ? requireLiveMode(live) : null
+  if (liveHandoff && liveHandoff.orgId !== runtimeConfig.orgId) throw new Error('W2-05 live handoff organisation does not match the runtime tenant')
+  const outboundPolicies = liveHandoff?.grants ?? (production && runtimeConfig.linkautoworkEventGrants ? parseGatewayEventPolicies(runtimeConfig.linkautoworkEventGrants) : [])
   const outboundTransport: GatewayTransport = async (request) => {
-    const response = await fetch(runtimeConfig.linkautoworkGatewayUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) })
-    return { status: response.status, receiptId: response.headers.get('x-linkautowork-receipt') ?? 'missing', receiptSignature: response.headers.get('x-linkautowork-receipt-signature') ?? 'missing', acknowledgedAt: response.headers.get('x-linkautowork-acknowledged-at') ?? new Date().toISOString() }
+    if (!liveHandoff) throw new Error('live Autowork endpoint is disabled')
+    const response = await fetch(liveHandoff.endpoint, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) })
+    const acknowledgedAt = response.headers.get('x-linkautowork-acknowledged-at')
+    const receiptId = response.headers.get('x-linkautowork-receipt')
+    const receiptSignature = response.headers.get('x-linkautowork-receipt-signature')
+    if (!receiptId || !receiptSignature || !acknowledgedAt) throw new Error('live Autowork acknowledgement or receipt proof is missing')
+    return { status: response.status, receiptId, receiptSignature, acknowledgedAt }
   }
-  const completionGateway = production ? new LiNKautoworkGateway({ secret: runtimeConfig.linkautoworkSigningSecret, keyId: runtimeConfig.linkautoworkSigningKeyId, environment: 'production', transport: outboundTransport, policies: outboundPolicies }) : null
-  const completionSink = production ? new PostgresCompletionSink(postgres!.db, runtimeConfig.orgId, completionGateway!) : new DurableCompletionSink(runtimeConfig, adapters)
+  const completionGateway = liveHandoff ? new LiNKautoworkGateway({
+    secret: runtimeConfig.linkautoworkSigningSecret || envSigningMaterialResolver().resolve(liveHandoff.signingKeyRef),
+    keyId: liveHandoff.signingKeyRef,
+    environment: liveHandoff.environment,
+    transport: outboundTransport,
+    policies: outboundPolicies,
+  }) : null
+  const completionSink = production ? new PostgresCompletionSink(postgres!.db, runtimeConfig.orgId, completionGateway) : new DurableCompletionSink(runtimeConfig, adapters)
   const intake = production ? new PostgresWorkIntakePort(postgres!.db, runtimeConfig.orgId, runtimeConfig.leaseDurationMs) : new FileWorkIntakePort(runtimeConfig.intakePath, `${runtimeConfig.statePath}.intake.json`, { claimLeaseMs: runtimeConfig.leaseDurationMs })
   const dependencies = createLocalDependencyPorts(adapters, completionSink)
   const noOutboundTransport: GatewayTransport = async () => { throw new Error('W2-06 inbound verifier does not send gateway events') }
@@ -139,7 +159,7 @@ export async function createProductionComposition(config: RuntimeConfig, outcome
   const gatewayAuthorization = new VerifiedGatewayOutcomeAuthorization(outcomeDependencies?.outcomeAuthorization)
   const lifecycle = new SiteLifecycleService(lifecycleStore, gatewayAuthorization, undefined, lifecycleEvidence)
   const commercialOutcomeIngress = new CommercialOutcomeIngress(lifecycle, gateway, gatewayAuthorization)
-  const leadResearchIngress = production ? new LeadResearchIngress(gateway, intake as PostgresWorkIntakePort) : undefined
+  const leadResearchIngress = production ? new LeadResearchIngress(gateway, intake as PostgresWorkIntakePort, runtimeConfig.orgId) : undefined
   const runtime = new ProgramRuntime(runtimeConfig, ledger, adapters, executors, dependencies)
   runtime.bindCommercialOutcomeIngress(commercialOutcomeIngress)
   if (!(await ledger.isAvailable())) throw new Error('W2-02 durable ledger is unavailable')

@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "kind": "checkpoint-ledger",
+  "protectedDevelopment": {
+    "ref": "origin/development",
+    "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+    "tree": "e29607c43146decdf81c2f132562745f6a911780"
+  },
+  "integratedCandidateAtAdmission": {
+    "repository": "linktrend/LiNKsites",
+    "ref": "issue/532-consolidate-linksites-accepted-checkpoints-and-e",
+    "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+    "tree": "109429b45870b5c648ec754f408f06ee9bea0267"
+  },
+  "verificationMethod": "git cat-file + rev-parse commit/tree + git patch-id --stable against origin/development..HEAD",
+  "packets": [
+    {
+      "packet": "LSDATA-01",
+      "originalAccepted": {
+        "commit": "888be026b5a57a698b4d70643e6184f3c2ac74b8",
+        "tree": "f49b52829995bc588b38a2d914e31d80e6be9f3c",
+        "subject": "feat(cms): freeze LSDATA-01 additive Payload data compatibility",
+        "parent": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+      },
+      "verifiedOriginalTreeMatch": true,
+      "ancestorOfAdmittedHead": false,
+      "integratedReplay": {
+        "commit": "95663b9ada61cb63c25b210b7de586252c1ef442",
+        "tree": "f49b52829995bc588b38a2d914e31d80e6be9f3c",
+        "ancestorOfAdmittedHead": true
+      },
+      "stablePatchId": "49962a52c5144d5ef77b7d5edd21a813de3651b3",
+      "patchEqualToIntegratedReplay": true,
+      "identicalTreeOnIntegratedReplay": true,
+      "files": [
+        "apps/cms/src/collections/EntitlementSnapshots.ts",
+        "apps/cms/src/collections/Products.ts",
+        "apps/cms/src/collections/Services.ts",
+        "apps/cms/src/collections/Sites.ts",
+        "apps/cms/src/collections/TemplateAdoptions.ts",
+        "apps/cms/src/migrations/20260911_000001_lsdata01_payload_data_compatibility.ts",
+        "apps/cms/src/migrations/index.ts",
+        "apps/cms/src/payload-types.ts",
+        "apps/cms/src/payload.config.ts",
+        "apps/cms/tests/contracts/ls03-migrations.spec.ts",
+        "apps/cms/tests/contracts/lsdata01-payload-data-compatibility.spec.ts",
+        "packages/factory-catalog/src/adoptionIdentities.ts",
+        "packages/factory-catalog/src/capabilityCredits.ts"
+      ],
+      "mapping": "Original accepted commit is not an ancestor of HEAD. Identical tree and stable patch-id replay as 95663b9ada61cb63c25b210b7de586252c1ef442 on the linear issue/532 history. Source not discarded."
+    },
+    {
+      "packet": "LSTRUST-01",
+      "originalAccepted": {
+        "commit": "06fe044c74fb92bf731de9297592d08f78e252a2",
+        "tree": "80f35022a2b6b468cde4f0fa40d2e0dd9035c1dd",
+        "subject": "fix(ci): bind promotions to an external trusted producer"
+      },
+      "verifiedOriginalTreeMatch": true,
+      "ancestorOfAdmittedHead": false,
+      "originalChain": [
+        {
+          "commit": "0c405df226d6773ebeaf4bf6d29ae30c198077e8",
+          "tree": "df3cf24b0f862c15a23f100f4405e3c5a3512433",
+          "subject": "fix(ci): align promotion receipt transition gate"
+        },
+        {
+          "commit": "68070ababe15b54ae281ea6454e9c60246ed37a7",
+          "tree": "34a42e3c3bf7ec1910df9fca8a71cb55ec979c8b",
+          "subject": "fix(ci): stop candidate CI from authorizing promotion"
+        },
+        {
+          "commit": "06fe044c74fb92bf731de9297592d08f78e252a2",
+          "tree": "80f35022a2b6b468cde4f0fa40d2e0dd9035c1dd",
+          "subject": "fix(ci): bind promotions to an external trusted producer"
+        }
+      ],
+      "integratedReplayChain": [
+        {
+          "commit": "81e7be20e6b563453ae78f278b45dba48fa455a7",
+          "tree": "ddccc0fa2c28b6ea2374b87387fad3945a540aa2",
+          "stablePatchIdMatchTo": "0c405df226d6773ebeaf4bf6d29ae30c198077e8"
+        },
+        {
+          "commit": "a47ea8fd80089bec4fde614f06bf43798d99a33a",
+          "tree": "f320157ec512896d39a663b76c729a644a1c3aeb",
+          "stablePatchIdMatchTo": "68070ababe15b54ae281ea6454e9c60246ed37a7"
+        },
+        {
+          "commit": "ce8507afee8cbf2e0c138db1a39fa6228cb396d4",
+          "tree": "4fdce4152f235062edbd47b815c06af6627b91fa",
+          "stablePatchIdMatchTo": "06fe044c74fb92bf731de9297592d08f78e252a2"
+        }
+      ],
+      "tipStablePatchId": "2eefc798f54cb7a3ad1c04395f32edc7df5bb69a",
+      "patchEqualToIntegratedReplay": true,
+      "laneFileBlobsAtAdmittedHeadMatchOriginalTip": true,
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/linktrend-development-to-staging.yml",
+        ".github/workflows/linktrend-staging-to-main.yml",
+        "docs/contracts/CI-SUITE.md",
+        "scripts/gitops/gate_receipt.py",
+        "scripts/gitops/promotion_receipt_gate.py",
+        "scripts/gitops/receipt_seal.py",
+        "scripts/tests/test_gate_receipt_transition.py",
+        "scripts/tests/test_promotion_receipt_adversarial.py",
+        "scripts/tests/test_promotion_transition_workflows.py"
+      ],
+      "mapping": "Original tip tree differs from integrated tree because LSDATA-01 bytes already exist on the linear parent. All LSTRUST-01 lane file blobs at HEAD equal original tip 06fe044c74fb92bf731de9297592d08f78e252a2. Three-commit chain replayed with equal stable patch-ids. No prefer-incoming."
+    },
+    {
+      "packet": "LSFACT-01",
+      "originalAccepted": {
+        "commit": "e492f78ed00255de48311115e20a6682afc6697c",
+        "tree": "1ab7ed30420ed838395465e16762f38104c6def4",
+        "subject": "feat(factory-catalog): complete LSFACT-01 exact provider adoption"
+      },
+      "verifiedOriginalTreeMatch": true,
+      "ancestorOfAdmittedHead": false,
+      "integratedReplay": {
+        "commit": "cb6233ba695ed5a83de44545386fe7ec5cb0fb61",
+        "tree": "5c2be50c96d489aaa55a013a3134d42f42ef557a",
+        "ancestorOfAdmittedHead": true
+      },
+      "stablePatchId": "94c438610d10091ea524aa13d44a1a5a22b2cc6f",
+      "patchEqualToIntegratedReplay": true,
+      "files": [
+        "packages/factory-catalog/WORKING-CONTENT.md",
+        "packages/factory-catalog/src/exactProviderAdoption.ts",
+        "packages/factory-catalog/src/index.ts",
+        "packages/factory-catalog/tests/lsfact01ExactProviderAdoption.spec.ts"
+      ],
+      "mapping": "Replay onto linear history after LSTRUST-01. Whole-tree hash differs from original because parent already contains LSDATA/LSTRUST. Patch-id equal; files preserved."
+    },
+    {
+      "packet": "LSRENDER-01",
+      "originalAccepted": {
+        "commit": "f22680d05684d7d3cbbbe4a4622b9f2d7d15a74a",
+        "tree": "52860390204fac51fec92c1274bc651f1ba7217b",
+        "subject": "feat(web-master): complete LSRENDER-01 rendering routes and quality"
+      },
+      "verifiedOriginalTreeMatch": true,
+      "ancestorOfAdmittedHead": false,
+      "integratedReplay": {
+        "commit": "30b64b5c0393617b3e4517af83081bc7f18e0aa8",
+        "tree": "e0f34aa0bf547d5966415545428b50e97d309878",
+        "ancestorOfAdmittedHead": true
+      },
+      "stablePatchId": "71d7dfac0cfae8418910f534403515038282ef04",
+      "patchEqualToIntegratedReplay": true,
+      "files": [
+        "apps/web-master/src/app/(public)/[lang]/[[...slug]]/page.tsx",
+        "apps/web-master/src/app/(public)/[lang]/error.tsx",
+        "apps/web-master/src/app/(public)/[lang]/layout.tsx",
+        "apps/web-master/src/app/api/contact/route.ts",
+        "apps/web-master/src/app/error.tsx",
+        "apps/web-master/src/components/contact/ContactForm.tsx",
+        "apps/web-master/src/components/layouts/MarketingLayoutClient.tsx",
+        "apps/web-master/src/components/page-renderer.tsx",
+        "apps/web-master/src/components/page-renderer/adapter-surface.ts",
+        "apps/web-master/src/components/page-renderer/compose-layout.ts",
+        "apps/web-master/src/components/page-renderer/layout-packs.ts",
+        "apps/web-master/src/components/page-renderer/plan-behavior.ts",
+        "apps/web-master/src/components/page-renderer/runtime-proof.ts",
+        "apps/web-master/src/components/page-renderer/semantic-map.ts",
+        "apps/web-master/src/layouts/AboutLayout.tsx",
+        "apps/web-master/src/lib/forms/contact-policy.ts",
+        "apps/web-master/src/lib/public-route-guard.ts",
+        "apps/web-master/src/lib/routes.ts",
+        "apps/web-master/src/lib/seo/family-jsonld.ts",
+        "apps/web-master/src/lib/seo/published-catalog.ts",
+        "apps/web-master/src/lib/seo/quality-matrix.ts",
+        "apps/web-master/src/lib/slotRenderer.tsx",
+        "apps/web-master/src/lib/validation/contactSchemas.ts",
+        "apps/web-master/src/styles/globals.css",
+        "apps/web-master/template.config.json",
+        "apps/web-master/tests/ls06-iss-19-21.test.ts",
+        "apps/web-master/tests/ls07-iss-22-24.test.ts",
+        "apps/web-master/tests/lsrender-01.test.ts",
+        "scripts/profile-v2-quality/ls06/fixtures/pass-injected-identities/contract.json",
+        "scripts/profile-v2-quality/ls07/implementation-matrix.mjs"
+      ],
+      "mapping": "Replay onto linear history. Patch-id equal. Original whole-tree not expected to equal integrated tree."
+    },
+    {
+      "packet": "LSAUTO-01",
+      "originalAccepted": {
+        "commit": "cb6c0da3d0091815ef891ed925e10e0da99ca7cc",
+        "tree": "228dadaf4981c9b93b6c0f6f3c02d54e9f4f18f6",
+        "subject": "Complete LSAUTO-01 canonical intake and fail-closed live Autowork."
+      },
+      "verifiedOriginalTreeMatch": true,
+      "ancestorOfAdmittedHead": false,
+      "integratedReplay": {
+        "commit": "d94850babb8841ba0836ec05beafa29e989bfc5f",
+        "tree": "6a30a045852b0363e02fce9db72b8ec06a2e8e9c",
+        "ancestorOfAdmittedHead": true
+      },
+      "stablePatchId": "291bcbb5c94ea8302cb62ed6c7553e3fd965f72c",
+      "patchEqualToIntegratedReplay": true,
+      "files": [
+        "apps/cms/src/payload/utils/autowork.ts",
+        "apps/cms/tests/contracts/autowork-composition.spec.ts",
+        "apps/program-orchestrator/src/autoworkClient.ts",
+        "apps/program-orchestrator/src/composition.ts",
+        "apps/program-orchestrator/src/index.ts",
+        "apps/program-orchestrator/src/intake.ts",
+        "apps/program-orchestrator/src/lead-research-ingress.ts",
+        "apps/program-orchestrator/src/postgres-runtime.ts",
+        "apps/program-orchestrator/src/runtime.ts",
+        "apps/program-orchestrator/tests/autowork-client.test.ts",
+        "apps/program-orchestrator/tests/canonical-intake.test.ts",
+        "packages/autowork-boundary/src/canonical-boundary.ts",
+        "packages/autowork-boundary/src/index.ts",
+        "packages/autowork-boundary/src/live-handoff.ts",
+        "packages/autowork-boundary/tests/canonical-boundary.test.ts",
+        "packages/autowork-boundary/tests/live-handoff.test.ts"
+      ],
+      "mapping": "Replay onto linear history. Patch-id equal. Manual/file adapter remains the only admitted live-shaped intake until LSG0-04 clears."
+    },
+    {
+      "packet": "LSSEC-01",
+      "originalAccepted": {
+        "commit": "070658ea2fb5b7abacdcf9d205e37d6f7ed61f83",
+        "tree": "4ac275e48e6321010f3b77597882d35f2464aa94",
+        "subject": "fix(deps): close Next, sharp, and js-yaml release-blocking advisories"
+      },
+      "verifiedOriginalTreeMatch": true,
+      "ancestorOfAdmittedHead": true,
+      "integratedReplay": {
+        "commit": "070658ea2fb5b7abacdcf9d205e37d6f7ed61f83",
+        "tree": "4ac275e48e6321010f3b77597882d35f2464aa94",
+        "ancestorOfAdmittedHead": true
+      },
+      "files": [
+        "apps/cms/package.json",
+        "apps/web-master/package.json",
+        "archive/paused-applications/web-company/package.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "mapping": "Accepted checkpoint commit/tree is already on origin/development..HEAD. No replay required."
+    },
+    {
+      "packet": "LSDEP-01",
+      "originalAccepted": {
+        "commit": "60274ade7e910f814b0816e74de011281d536dc2",
+        "tree": "12ffa4ecf895e75e65c30b9f7257af0a6398c1e3",
+        "subject": "Reconcile LSDEP-01 five-image release configuration."
+      },
+      "verifiedOriginalTreeMatch": true,
+      "ancestorOfAdmittedHead": true,
+      "integratedReplay": {
+        "commit": "60274ade7e910f814b0816e74de011281d536dc2",
+        "tree": "12ffa4ecf895e75e65c30b9f7257af0a6398c1e3",
+        "ancestorOfAdmittedHead": true
+      },
+      "files": [
+        ".github/workflows/publish-server03-images.yml",
+        "apps/cms/Dockerfile",
+        "deploy/config/README.md",
+        "deploy/config/production.env.example",
+        "deploy/config/runtime-contract.mjs",
+        "deploy/docker-compose.deploy.yml",
+        "deploy/docker/cms.Dockerfile",
+        "deploy/docker/migrations.Dockerfile",
+        "deploy/docker/web-master.Dockerfile",
+        "deploy/manifests/README.md",
+        "deploy/scripts/generate-deployment-manifest.mjs",
+        "deploy/tests/deployment-manifest.test.mjs",
+        "deploy/tests/deployment-surface.test.mjs",
+        "deploy/tests/runtime-contract.test.mjs"
+      ],
+      "mapping": "Accepted checkpoint commit/tree is already on HEAD ancestry."
+    },
+    {
+      "packet": "LSOPS-01",
+      "originalAccepted": {
+        "commit": "aadb6d02f1d5d1aebb953274c09401057b1296e1",
+        "tree": "4ae523b8bf0237cdda652fc99f6ec448759c83a0",
+        "subject": "Complete LSOPS-01 monitoring, backup, restore and operations source."
+      },
+      "verifiedOriginalTreeMatch": true,
+      "ancestorOfAdmittedHead": true,
+      "integratedReplay": {
+        "commit": "aadb6d02f1d5d1aebb953274c09401057b1296e1",
+        "tree": "4ae523b8bf0237cdda652fc99f6ec448759c83a0",
+        "ancestorOfAdmittedHead": true
+      },
+      "files": [
+        "deploy/OPERATIONS.md",
+        "deploy/monitoring/SIGNALS.md",
+        "deploy/monitoring/isolated-restore.plan.json",
+        "deploy/monitoring/server03-foundation.rules.yml",
+        "deploy/monitoring/validate-rules.mjs",
+        "deploy/scripts/rehearse-local-restore.mjs"
+      ],
+      "mapping": "Accepted checkpoint commit/tree is already on HEAD ancestry."
+    }
+  ],
+  "supportingIntegratedCommitsNotLaneCheckpoints": [
+    {
+      "commit": "e2663a3ffdab9867a531643e94bca082eea8bce6",
+      "tree": "1f6934a680e8da649d93cb94480bbb19be4fc03d",
+      "role": "restore-accepted-plan-87ae0a70-onto-linear-history"
+    },
+    {
+      "commit": "685e1267fc4718eaea808afc0c36459e9d739e14",
+      "tree": "321bf8e8ef076771e73e0c410f63011225d21d94",
+      "role": "apply-accepted-correction-665233e6"
+    },
+    {
+      "commit": "d0d199afdd310be5df944ff343627ba110e0998b",
+      "tree": "b088d3bef76af8a7bc109d7257f3aa515ed3c091",
+      "role": "LSG0-01-branch-disposition-evidence",
+      "path": "docs/evidence/end-to-end-delivery/branch-disposition.json"
+    },
+    {
+      "commit": "6996444f85f312bf1d5770357120adfb0b15b5ee",
+      "tree": "382e089c74b7c6032a1928c8eeebee3cf8120daa",
+      "role": "LSG0-02-upstream-bundle"
+    },
+    {
+      "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+      "tree": "109429b45870b5c648ec754f408f06ee9bea0267",
+      "role": "LSG0-02-bound-source-copies-completing-issue-523"
+    }
+  ]
+}
