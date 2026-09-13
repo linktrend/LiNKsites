@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
   "kind": "lsg0-04-owner-actions",
-  "issue": 543,
-  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
+  "issue": 550,
+  "qualificationTimeUtc": "2026-09-13T07:18:59Z",
   "overall": "HOLD",
   "passForbiddenUntilAllRequiredSurfacesExistInProtectedReleasedEvidence": true,
   "actions": [
     {
       "owner": "linktrend/LiNKplatform",
-      "action": "Publish a valid catalogue-profile provider pin that names LiNKsites as requesting consumer against exact protected commit/tree (bound development 8d7af99575a5498ecda6b4396431136eb7c9c213 / db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb, or a later protected identity that LiNKsites re-binds). Include actor/service registration row (schema 000020 exists; LiNKsites row does not), credential references (not secret values), issuer/audience/scopes, applied stage/prod migration receipts for that identity, and live issuer/health evidence. Do not treat the LiNKclient LCL-WP-002 pin acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062 as a LiNKsites pin. Do not treat Advisor 2 'Platform is complete' or Phase PR 266 as that handoff."
+      "action": "Publish a valid catalogue-profile provider pin that names LiNKsites as requestingConsumer against exact protected commit/tree 91388934b226a61cfa7be0fe5e271846ee55206f / b11ea485a3b3f69c32baac5eed62a180fca79ae3 (or a later protected identity LiNKsites re-binds). Keep the sites-service.yaml slot disabled until hosted apply. Add actor/service registration row, create GSM names without git values, issuer/audience/scopes for LiNKsites, applied stage-then-prod 000017 receipts, and live issuer/health. Do not treat the LiNKclient LCL-WP-002 pin, sites-service placeholders, or Full Suite source receipt as those hosted surfaces. Make the supplied transition receipt digest retrievable as sealed bytes if it is part of the protected identity."
     },
     {
       "owner": "linktrend/LiNKautowork",
-      "action": "Publish LiNKsites consumer registration, event grants, organisation/environment grants, an admitted LiNKsites signing-reference, an admitted private endpoint identity (sanitized), live health, and a live org-bound receipt against exact protected commit/tree (bound development a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd / 10e6b59394bfd57703d6f3cee5d7bcda3aa7342f, or a later protected identity that LiNKsites re-binds). The LiNKskills PKT-03 blocked hold is not a LiNKsites registration. Source HMAC helpers, generic LINKAUTOWORK_LINK_HMAC_SHARED_SECRETS_PROD, /health routes, archive templates, disposable-db fixtures, and unit tests are not live handoff. Protected development documentation of remaining production work is not live operation."
+      "action": "Wire a live LiNKsites consumer grant (organisation, environment, named events, signing-key reference, admitted private endpoint), live health, and a live org-bound receipt against d5c626ba7e1bdbf783dc8df1654e33e0b70b873c / 9018eec98a9bafefe3a638b25fb191ee454917a9. The source-only linksites-consumer-registration.v1 contract and production PACI ES256/JWKS verifier source are not that live handoff. Align Autowork named events with LiNKsites PRE_INTEGRATED_EVENTS if those events are the intended grant."
     },
     {
       "owner": "linktrend/LiNKsites",
-      "action": "Keep live Platform/Autowork claims disabled. Continue manual/file adapter. Do not mutate upstreams. After owners publish protected/released evidence, re-qualify LSG0-04 against those exact identities. Optionally restore missing UPSTREAM-DEPENDENCIES.md on a later packet; its absence did not invent PASS."
+      "action": "Keep live Platform/Autowork claims disabled. Continue manual/file plus fail-closed signed-gateway adapters. After owners publish protected/released live evidence, re-qualify LSG0-04 against those exact identities."
     }
   ]
 }

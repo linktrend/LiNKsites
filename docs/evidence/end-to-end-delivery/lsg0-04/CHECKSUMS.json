@@ -4,34 +4,34 @@
   "algorithm": "sha256",
   "files": {
     "AUTOWORK-SURFACES.json": {
-      "sha256": "26a7b355f4e31e7f20ecbf0f6bb2206d323f54f4dfb15da1d42d63ba083697f2"
+      "sha256": "090a8855e1aa2b1f597941e64f19a9f181655300887da64bd12e6b02234e13f6"
     },
     "COORDINATOR-DEVELOPMENT-INSPECTION.json": {
-      "sha256": "cec3b2f6821533369240223822a6b662f9067c10e54a6650524b812cff447df4"
+      "sha256": "f0382434dc59bba40954ee62a4002f84975d6354127d131e79e84a7dc8ceb88d"
     },
     "IDENTITY.json": {
-      "sha256": "5fbd675d82631c6b703e34dc3d21073e03e95cbb7c2ed935d1e5de117a1506b9"
+      "sha256": "aa0217a8524d70b7cd2ecd2832ab3435b7dd11d7755c046a297d444cb1bdbd6e"
     },
     "INDEX.json": {
       "sha256": "f0ac4f46a0318a43f34ecd935e5d4a2e2dd08c2b7613d456056fa6f8b7f5d250"
     },
     "LEAN-REVIEW.json": {
-      "sha256": "4e84fc7c0306e0068b4d418c9874f32ba45319c3d6aa48990f159aca34bcd077"
+      "sha256": "0ff51f529cef36d55d7049628059e6eb5f59e881118360f1bf1b46a02b74bddd"
     },
     "OWNER-ACTIONS.json": {
-      "sha256": "ee1f6997707d36ba3d141becc655c2bb14474b90870deeecf0f8c2630de6e807"
+      "sha256": "3df0b2abdf38294f5af68a0778a19acc4dc39bb63c2e54c4af52add77861af4f"
     },
     "PLATFORM-SURFACES.json": {
-      "sha256": "d38681dcee6c5e8b22a0f0f0e31c3b500405e205e7846bb913e1c759f03c2188"
+      "sha256": "2cd1a42375f509dee24d39538a66497114b57e4ea29056d30caa4daf1b071191"
     },
     "QUALIFICATION.json": {
-      "sha256": "fb0411ba69001fd01530a06d18358597251adca125bae42f1baf896b8a30885d"
+      "sha256": "73156a2cd4761a0fa0bcb8e569aa291c2c1af3f39e20effe20332d00c47f92e0"
     },
     "TOOLCHAIN.json": {
-      "sha256": "1cca72eeaad8f32d411e5e928dd5ea7c0dd336147ccda8268a72dccf9f9dc406"
+      "sha256": "40c13556546da30b5e034496a083060ca64e7fca98020c4f55da787bd0fe2b7f"
     },
     "VALIDATION.json": {
-      "sha256": "9aecbab12136352f03a6732320f65766aa644385af063fa7dc1c8ca8c9ee4aaa"
+      "sha256": "8519d20960ea6c390e652b03c62aeee5d56e01f2e34720f2936a4ff53e2d8922"
     }
   }
 }

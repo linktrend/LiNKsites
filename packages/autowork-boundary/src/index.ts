@@ -307,3 +307,23 @@ export {
   type CompletionStore,
   type SignedIntakeVerifier,
 } from './canonical-boundary.ts'
+/** Source-only LiNKsites consumer-registration admission against copied Autowork contracts. */
+export {
+  LINKSITES_CONSUMER_CONTRACT_VERSION,
+  LINKSITES_CONSUMER_ENVIRONMENTS,
+  LINKSITES_CONSUMER_EVENT_GRANTS,
+  LINKSITES_SIGNING_KEY_REF_PATTERN,
+  LinksitesConsumerAdmissionError,
+  admitLinksitesConsumerRegistration,
+  sanitizePrivateEndpointIdentity,
+  type LinksitesConsumerAdmissionCode,
+  type LinksitesConsumerGrant,
+  type LinksitesConsumerRegistration,
+  type LinksitesPrivateEndpointIdentity,
+} from './linksites-consumer-admission.ts'
+/** Copied Autowork production PACI ES256/JWKS verifier source inspection. Not a live JWKS call. */
+export {
+  AUTOWORK_PACI_VERIFIER_SOURCE,
+  inspectCopiedPaciVerifierSource,
+  type PaciSourceCompatFinding,
+} from './paci-source-compat.ts'

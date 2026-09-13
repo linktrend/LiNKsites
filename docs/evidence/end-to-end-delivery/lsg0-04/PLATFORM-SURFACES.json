@@ -4,13 +4,13 @@
   "boundIdentity": {
     "repository": "linktrend/LiNKplatform",
     "ref": "development",
-    "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
-    "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
-    "subject": "Merge pull request #266 from linktrend/phase/brain-265-secret-scan-safe",
-    "mergedAtUtc": "2026-09-12T07:25:41Z",
+    "commit": "91388934b226a61cfa7be0fe5e271846ee55206f",
+    "tree": "b11ea485a3b3f69c32baac5eed62a180fca79ae3",
+    "subject": "Merge pull request #276 from linktrend/phase/linksites-platform-handoff-20260913",
+    "mergedAtUtc": "2026-09-13T06:59:41Z",
     "role": "protected-integration-branch-not-staging-main-not-live"
   },
-  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
+  "qualificationTimeUtc": "2026-09-13T07:18:59Z",
   "liveProbesForbidden": true,
   "secretValuesNotRequested": true,
   "liveEvidenceAvailableToThisWorker": false,
@@ -36,7 +36,22 @@
         "integrationClaimed": false,
         "consumerProofClaimed": false,
         "production": false,
-        "sameBytesAsIssue539Inspection": true
+        "sameBytesAsIssue539Inspection": true,
+        "sitesServiceCatalogueSlotOnBoundIdentity": {
+          "path": "infra/services/sites-service.yaml",
+          "labelsConsumer": "LiNKsites",
+          "enabledByDefault": false,
+          "endpointsArePlaceholders": true,
+          "notACatalogueProfileProviderPin": true,
+          "copiedTo": "docs/end-to-end-delivery/upstreams/linkplatform/91388934b226a61cfa7be0fe5e271846ee55206f/infra/services/sites-service.yaml"
+        },
+        "linksitesCatalogueGrantsHandoff": {
+          "path": "docs/handoffs/2026-09-13-platform-linksites-catalogue-grants-handoff.json",
+          "lifecycleState": "source-complete-hosted-hold",
+          "stageMigrationApplied": false,
+          "productionMigrationApplied": false,
+          "liveHealthClaimed": false
+        }
       },
       "schemaLocksConsumerConst": {
         "path": "packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
@@ -104,8 +119,9 @@
       "reverifiedOnBoundDevelopment": true,
       "observed": {
         "credentialByReferenceHandoffForLiNKsites": false,
-        "gsmInventoryOnBoundTree": "infra/secrets/gsm-inventory.md",
-        "gsmInventoryNamesLiNKsites": false,
+        "gsmInventoryOnBoundTree": "docs/operations/gsm-inventory.md",
+        "gsmInventoryNamesLiNKsites": true,
+        "gsmInventoryCreatesSecrets": false,
         "gsmNamedConsumersOnBoundTree": [
           "LINKTREND_PLATFORM_STAGE_BRAIN_RUNTIME_CREDENTIAL_REF",
           "LINKTREND_PLATFORM_STAGE_SKILLS_RUNTIME_CREDENTIAL_REF",

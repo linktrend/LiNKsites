@@ -5,52 +5,39 @@
   "creditedAsStagingOrMain": false,
   "creditedAsLiveOperation": false,
   "thisRefresh": {
-    "issue": 543,
-    "qualificationTimeUtc": "2026-09-13T03:47:37Z",
+    "issue": 550,
+    "qualificationTimeUtc": "2026-09-13T07:18:59Z",
     "fetchedOnlySuppliedDevelopmentCommits": true,
     "didNotFetchMainOrStaging": true,
     "didNotSubstituteUnboundTips": true,
-    "reason": "Issue 543 fetch authorization binds protected development at exact supplied commits. Those SHAs are the admitted read-only sources. They are not staging/main promotion and not live operation."
+    "reason": "Issue 550 fetch authorization binds protected development at exact supplied commits. Those SHAs are the admitted read-only sources. They are not staging/main promotion and not live operation."
   },
-  "purpose": "Record that the former coordinator-inspected development identities are now the bound protected sources, without converting advisor narrative or Phase merges into LSG0-04 PASS.",
   "platform": {
-    "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
-    "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
+    "commit": "91388934b226a61cfa7be0fe5e271846ee55206f",
+    "tree": "b11ea485a3b3f69c32baac5eed62a180fca79ae3",
     "treeVerified": true,
-    "verifiedOnIssue": 543,
-    "subject": "Merge pull request #266 from linktrend/phase/brain-265-secret-scan-safe",
+    "verifiedOnIssue": 550,
+    "subject": "Merge pull request #276 from linktrend/phase/linksites-platform-handoff-20260913",
     "protectedIntegration": true,
-    "advisor2Narrative": "Platform is complete",
-    "advisor2NarrativeTreatedAs": "narrative-not-receipt",
-    "openIssuesChronologyClaim": "docs/OPEN-ISSUES.md 2026-08-11 reconciliation claims Platform production deployment and related items complete as chronology; that file still requires real apply receipts and sibling consumer wiring and is not a LiNKsites LSG0-04 handoff.",
+    "sourceFullReceiptDigest": "sha256:9d576f1e567bebf0664a0a6a90086536754684df47ae4e59f4462c1828df3eb8",
+    "sourceFullReceiptVerified": true,
+    "transitionReceiptDigest": "sha256:617a3f8581c9da9e933fc6c62860b31f37ea7b7f0af6b062e3b4e54a8a8ff25a",
+    "transitionReceiptVerified": false,
     "cataloguePinStillLiNKclientOnThisSha": true,
-    "identityRegistrationReceiptSchemaOnThisSha": {
-      "present": true,
-      "storesSecretValues": false,
-      "containsLiNKsitesActorOrServiceRow": false,
-      "note": "Schema/source only. Not an applied LiNKsites registration receipt."
-    },
-    "portalMembershipCandidateHandoff": {
-      "consumer": "LiNKportal",
-      "lifecycleState": "candidate-draft",
-      "notLiNKsites": true,
-      "notProtectedLiveHandoff": true
-    },
+    "sitesServiceSlotPresentDisabled": true,
+    "hostedApplyHold": "LINKTREND_PLATFORM_STAGE_THEN_PROD_APPLY_AUTHORITY_ABSENT",
     "doesNotClearLSG0-04": true
   },
   "autowork": {
-    "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
-    "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
+    "commit": "d5c626ba7e1bdbf783dc8df1654e33e0b70b873c",
+    "tree": "9018eec98a9bafefe3a638b25fb191ee454917a9",
     "treeVerified": true,
-    "verifiedOnIssue": 543,
-    "subject": "Merge pull request #120 from linktrend/phase/production-readiness-20260904",
+    "verifiedOnIssue": 550,
+    "subject": "Merge pull request #158 from linktrend/phase/aw08-production-paci-verifier-r2",
     "protectedIntegration": true,
-    "finishedIssueCheckpoint": "production-readiness documentation merged to development",
-    "liveConfiguration": "pending",
-    "stagingValidation": "pending",
-    "productionRollout": "pending",
-    "operationalAcceptance": "pending",
-    "noAdditionalLiNKsitesConsumerRegistrationOnThisSha": true,
+    "productionPaciEs256JwksVerifierOnThisSha": true,
+    "liveJwksOrHostedTokenProof": false,
+    "sourceOnlyLinksitesConsumerRegistrationPresent": true,
     "doesNotClearLSG0-04": true
   }
 }

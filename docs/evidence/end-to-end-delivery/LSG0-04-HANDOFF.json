@@ -1,113 +1,74 @@
 {
-  "schemaVersion": 1,
-  "kind": "LSG0-04-handoff-status",
-  "overall": "HOLD",
-  "boundProtectedDefaultSources": {
-    "platform": {
+  "schemaVersion": "lsg0-04-handoff.v1",
+  "generatedAt": "2026-09-13T07:30:00Z",
+  "linksitesIdentity": {
+    "repository": "linktrend/LiNKsites",
+    "ref": "issue/550-refresh-protected-platform-and-linkautowork-cons",
+    "commit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+    "tree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+    "note": "admitted starting identity; this working tree is a later commit on the same owned issue branch"
+  },
+  "protectedSources": {
+    "linkplatform": {
       "repository": "linktrend/LiNKplatform",
-      "ref": "main",
-      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
-      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
-      "role": "read-only-source"
+      "ref": "development",
+      "commit": "91388934b226a61cfa7be0fe5e271846ee55206f",
+      "tree": "b11ea485a3b3f69c32baac5eed62a180fca79ae3",
+      "merge": "PR #276 phase/linksites-platform-handoff-20260913",
+      "fullReceiptSha256": "9d576f1e567bebf0664a0a6a90086536754684df47ae4e59f4462c1828df3eb8",
+      "fullReceiptVerified": true,
+      "transitionReceiptSha256": "617a3f8581c9da9e933fc6c62860b31f37ea7b7f0af6b062e3b4e54a8a8ff25a",
+      "transitionReceiptVerified": false,
+      "transitionReceiptHold": "HOLD_TRANSITION_RECEIPT_NOT_FOUND"
     },
-    "autowork": {
+    "linkautowork": {
       "repository": "linktrend/LiNKautowork",
-      "ref": "main",
-      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
-      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
-      "role": "read-only-source"
+      "ref": "development",
+      "commit": "d5c626ba7e1bdbf783dc8df1654e33e0b70b873c",
+      "tree": "9018eec98a9bafefe3a638b25fb191ee454917a9",
+      "merge": "PR #158 phase/aw08-production-paci-verifier-r2",
+      "productionPaciVerifierPresent": true
     }
   },
-  "planningPinsNotCurrentDefault": {
-    "platformReviewedDevelopmentUsedByLSG0-02": {
-      "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
-      "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
-      "ancestorOfSuppliedMain": false
-    },
-    "autoworkPlanningPinUsedByLSG0-02": {
-      "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
-      "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b",
-      "ancestorOfSuppliedMain": false
-    },
-    "note": "LSG0-02 sanitized copies remain valid planning/source contracts for those exact pins. They are not the current protected/default identities bound here and are not live proof."
+  "qualification": "HOLD",
+  "liveClaims": {
+    "staging": false,
+    "production": false,
+    "server01": false,
+    "server03": false,
+    "databaseApply": false,
+    "liveHealth": false,
+    "credentialAccess": false
   },
-  "platformHolds": [
-    {
-      "id": "platform-catalogue-pin",
-      "status": "HOLD",
-      "finding": "No valid LiNKsites catalogue pin on supplied main. docs/contracts/frozen/EXT-LCL-PLATFORM-CATALOGUE-CONTRACT.provider-handoff.json is a LiNKclient pin to commit acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062 / tree 8027697bc681085a2a1a4af029028bc76426c06a, which is not a0058e749b2530c4abf8deadb09f2fd4add1ee4f / cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71 and does not name LiNKsites as requesting consumer."
-    },
-    {
-      "id": "platform-linksites-actor-service-registration",
-      "status": "HOLD",
-      "finding": "No LiNKsites actor/service registration receipt bound to this Platform commit was found. Existing RLS grant SQL and stage fixtures are not a current registration handoff."
-    },
-    {
-      "id": "platform-credential-references",
-      "status": "HOLD",
-      "finding": "No LiNKsites credential-by-reference handoff is present. Secret values were not requested and must not be."
-    },
-    {
-      "id": "platform-issuer-audience-scopes",
-      "status": "HOLD",
-      "finding": "No current issuer/audience/scope grant document for LiNKsites on this commit. Sanitized claims fixtures are synthetic and not hosted-auth proof."
-    },
-    {
-      "id": "platform-applied-migration-receipts",
-      "status": "HOLD",
-      "finding": "Source migrations exist (including supabase/migrations/20260804_000017_linksites_platform_rls_grants.sql) but applied production/stage receipts for this identity were not produced or consumed."
-    },
-    {
-      "id": "platform-live-issuer-health",
-      "status": "HOLD",
-      "finding": "Live issuer/health was not probed and is forbidden in this packet."
-    }
+  "consumerPathsExercised": {
+    "signedGatewayHmac": "packages/autowork-boundary/tests/boundary.test.ts (existing HMAC; PACI ES256 live not claimed)",
+    "eventReceiptIdempotencyReplayRestart": "packages/autowork-boundary/tests/canonical-boundary.test.ts",
+    "cmsComposition": "apps/cms/tests/contracts/autowork-composition.spec.ts",
+    "protectedSourceFixtures": [
+      "packages/autowork-boundary/tests/protected-source-compat.test.ts",
+      "apps/program-orchestrator/tests/protected-source-compat.test.ts",
+      "apps/cms/tests/contracts/protected-source-compat.spec.ts"
+    ]
+  },
+  "holds": [
+    "HOLD_TRANSITION_RECEIPT_NOT_FOUND",
+    "HOLD_CATALOGUE_FROZEN_PIN_IS_LINKCLIENT",
+    "HOLD_SITES_SERVICE_DISABLED_PLACEHOLDER",
+    "HOLD_LINKSITES_CATALOGUE_HANDOFF_HOSTED_APPLY",
+    "HOLD_GSM_SITES_SECRET_NAMES_ONLY",
+    "HOLD_EVENT_CATALOGUE_MISMATCH",
+    "HOLD_NO_LIVE_JWKS_PACI_ES256",
+    "HOLD_NO_HOSTED_ENDPOINT",
+    "HOLD_NO_REAL_GRANT_OR_MIGRATION",
+    "HOLD_ORCHESTRATOR_SUITE_LIBRARY_PATH_AND_ISS32_PHASE_GATE",
+    "HOLD_CMS_E2E_DATABASE_URI_UNSET"
   ],
-  "autoworkHolds": [
-    {
-      "id": "autowork-linksites-consumer-registration",
-      "status": "HOLD",
-      "finding": "No LiNKsites consumer registration on supplied Autowork main. Archive templates and a LiNKskills consumer-handoff HOLD are not a LiNKsites registration."
-    },
-    {
-      "id": "autowork-event-allowlists",
-      "status": "HOLD",
-      "finding": "No current event allowlist granting LiNKsites on this commit."
-    },
-    {
-      "id": "autowork-organisation-environment-grants",
-      "status": "HOLD",
-      "finding": "No organisation/environment grant receipt for LiNKsites."
-    },
-    {
-      "id": "autowork-admitted-private-endpoint",
-      "status": "HOLD",
-      "finding": "No admitted private endpoint identity is bound. Live endpoints were not fetched."
-    },
-    {
-      "id": "autowork-live-health",
-      "status": "HOLD",
-      "finding": "Live health not observed; probes forbidden."
-    },
-    {
-      "id": "autowork-live-org-bound-receipt",
-      "status": "HOLD",
-      "finding": "No live org-bound receipt identity is bound."
-    }
-  ],
-  "allowedNow": {
-    "sanitizedSourceContracts": "docs/end-to-end-delivery/upstreams/ (LSG0-02)",
-    "manualFileFirstSiteAdapter": "packages/autowork-boundary/src/canonical-boundary.ts and tests stating manual/file and signed-gateway share the canonical contract",
-    "livePlatformOrAutoworkClaims": false
-  },
-  "upstreamOwnerActionsToClear": [
-    {
-      "owner": "linktrend/LiNKplatform",
-      "action": "Publish a valid catalogue-profile provider pin for LiNKsites against exact protected commit/tree, plus actor/service registration, credential references (not secret values), issuer/audience/scopes, applied migration receipts, and live issuer/health evidence."
-    },
-    {
-      "owner": "linktrend/LiNKautowork",
-      "action": "Publish LiNKsites consumer registration, event allowlists, organisation/environment grants, an admitted private endpoint, live health, and a live org-bound receipt."
-    }
+  "ownerActions": [
+    "Locate or produce transition receipt sha256 617a3f8581c9da9e933fc6c62860b31f37ea7b7f0af6b062e3b4e54a8a8ff25a",
+    "Unfreeze Platform catalogue to a LiNKsites pin after hosted apply",
+    "Enable sites-service.yaml with real endpoints after apply",
+    "Create GSM SITES_* secret versions",
+    "Reconcile Autowork vs LiNKsites event catalogue",
+    "Provision JWKS + grant + hosted endpoint for live PACI ES256"
   ]
 }

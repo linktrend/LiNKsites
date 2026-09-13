@@ -3,16 +3,16 @@
   "kind": "admitted-manifest-ci-toolchain",
   "sourceIdentity": {
     "repository": "linktrend/LiNKsites",
-    "ref": "issue/543-refresh-lsg0-04-current-platform-and-autowork-ha",
-    "commitAtInstall": "a3a8834dee19c83dec9c19051ca4519a7ff51565",
-    "treeAtInstall": "a24add76b5fa4a3f9522bf12fe1e90be62b7b4a1"
+    "ref": "issue/550-refresh-protected-platform-and-linkautowork-cons",
+    "commitAtInstall": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+    "treeAtInstall": "395d4dc07780ffee977be7f5d6469b06189f1475"
   },
-  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
+  "qualificationTimeUtc": "2026-09-13T07:18:59Z",
   "cloudRuntime": {
     "uname": "Linux cursor 6.12.94+ x86_64",
     "python": "Python 3.12.3 (/usr/bin/python3)",
     "cursorCloud": {
-      "bcId": "bc-d6d2655e-d351-4533-934a-f8d201ab2053",
+      "bcId": "bc-4ef3aecf-a716-4614-a075-f68fefcc1dbc",
       "environmentPublicId": "b0238f1f-ae52-11f1-bf4b-42ffb4d10ea7",
       "buildId": "bld-20260913-b8ef1b67-c85f-4345-9e87-7751d7c96c77",
       "gitSetup": "reuse_then_checkout",
@@ -24,27 +24,28 @@
     },
     "nvm": {
       "version": "0.40.3",
-      "use22": "v22.22.2"
+      "use": "v22.17.0"
     },
     "pnpmAfterCorepackEnableAndPrepare": {
-      "path": "/home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm",
+      "path": "/home/ubuntu/.nvm/versions/node/v22.17.0/bin/pnpm",
       "version": "10.0.0"
     }
   },
   "ciPins": {
     "workflow": ".github/workflows/ci.yml",
     "runsOn": "ubuntu-24.04-arm",
-    "nodeVersion": "22",
+    "nodeVersion": "22.17.0",
+    "nvmrc": "22.17.0",
     "pnpmActionSetup": "10.0.0",
-    "packageManagerField": "pnpm@10.0.0",
+    "packageManagerField": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
     "pythonUsedByAcceptance": "python3 -m json.tool"
   },
   "pinDiagnosis": {
-    "nodeCompiler": "CI pins Node major 22 only; no compiler hash/lock. Default PATH node was /exec-daemon/node v22.14.0. After nvm use 22 and PATH prepend, node was v22.22.2 at ~/.nvm/versions/node/v22.22.2/bin/node. Both are Node 22. Not a hash-locked compiler. Did not silently pick another major.",
-    "pnpmOnFreshPath": "which pnpm after nvm use 22 was already 10.0.0 at ~/.nvm/versions/node/v22.22.2/bin/pnpm. Still ran corepack enable + corepack prepare pnpm@10.0.0 --activate. Did not use the 10.33.3 binary that was visible before nvm PATH prepend.",
-    "pnpmUsed": "corepack enable; corepack prepare pnpm@10.0.0 --activate; resulting pnpm 10.0.0 at /home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm. packageManager field has no integrity hash.",
+    "nodeCompiler": "CI pins Node 22.17.0 via actions/setup-node and .nvmrc. Default PATH node was /exec-daemon/node v22.14.0 (also major 22). After nvm use 22.17.0 and PATH prepend, node was v22.17.0 at ~/.nvm/versions/node/v22.17.0/bin/node. Did not silently pick another major. Node is version-pinned in CI, not a compiler hash-lock.",
+    "pnpmOnFreshPath": "Before nvm PATH prepend, pnpm 10.33.3 was visible at ~/.nvm/versions/node/v22.22.2/bin/pnpm. After nvm use 22.17.0, ran corepack enable + corepack prepare pnpm@10.0.0 --activate. Did not use 10.33.3 or 12.x for install.",
+    "pnpmUsed": "pnpm 10.0.0 at /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pnpm. packageManager field includes an integrity hash.",
     "lockfile": "pnpm-lock.yaml present; sha256 dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175; frozen install with pnpm 10.0.0 reported lockfile up to date.",
-    "lockDefect": "none-observed-for-frozen-install; packageManager has no integrity hash; Node is major-only",
+    "lockDefect": "none-observed-for-frozen-install; Node is version-pinned not compiler-hash-locked",
     "didNotChangeLocks": true,
     "didNotSilentlyUseUnpinnedPnpm12": true,
     "python": "Python 3.12.3 (/usr/bin/python3); acceptance uses stdlib json.tool only."
@@ -58,16 +59,25 @@
     "didNotEditLockfile": true
   },
   "acceptanceCommandsRequiredThisPacket": [
-    "find docs/evidence/end-to-end-delivery/lsg0-04 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-    "test -z \"$(git diff --name-only a3a8834dee19c83dec9c19051ca4519a7ff51565...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
-    "git diff --check a3a8834dee19c83dec9c19051ca4519a7ff51565...HEAD"
+    "pnpm --filter @linksites/autowork-boundary test",
+    "pnpm --filter @linksites/program-orchestrator test",
+    "pnpm --filter @linksites/cms test",
+    "git diff --check fba2ed08d5cf3a16ca691da6eec707d584153a7f...HEAD"
   ],
+  "acceptanceCommandResults": {
+    "autowork-boundary": "pass (19 tests)",
+    "program-orchestrator-focused": "pass (protected-source-compat, canonical-intake, autowork-client)",
+    "program-orchestrator-full-suite": "HOLD: library.verify uses default W2_02_LIBRARY_REPOSITORY_PATH=/Users/linktrend/Projects/LiNKlibraries which is absent on this Linux cloud VM; ISS-32 scope test diffs against pin 7542cb3b and requires GITHUB_HEAD_REF phase/ to avoid scanning the whole issue-550 tree. Not corrected by inventing a library checkout or changing ISS-32 ownership.",
+    "cms-test-int": "pass (106 passed, 1 skipped)",
+    "cms-test-e2e": "HOLD: Playwright webServer timed out because DATABASE_URI is unset. No database apply and no invented credential."
+  },
   "forbiddenThisPacket": [
-    "Full Suite",
+    "invented live proof",
     "live Platform or Autowork probes",
     "upstream mutation",
     "lockfile edit",
     "implementer PR",
-    "nested workers"
+    "nested workers",
+    "staging/production/Server01/Server03 claims"
   ]
 }

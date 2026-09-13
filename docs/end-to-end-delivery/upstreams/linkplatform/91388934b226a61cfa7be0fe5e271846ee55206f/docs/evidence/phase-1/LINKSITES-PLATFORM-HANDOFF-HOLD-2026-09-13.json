@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "platform.linksites-catalogue-grants.hold",
+  "code": "LINKTREND_PLATFORM_STAGE_THEN_PROD_APPLY_AUTHORITY_ABSENT",
+  "classification": "hosted-hold",
+  "live": false,
+  "staging": false,
+  "production": false,
+  "fabricatedHostedResult": false,
+  "missingAuthority": "No LINKTREND_PLATFORM_STAGE_* or PROD database/API credential is present in this executor environment. gcloud is not installed, so GSM names LINKTREND_PLATFORM_STAGE_PACI_DATABASE_URL and LINKTREND_PLATFORM_PROD_PACI_DATABASE_URL cannot be resolved. The four SITES_* GSM names are inventoried as references only and were not created. infra/environments/production.yaml remains enabled: false. platform-migrate apply was not invoked.",
+  "requiredBeforeHostedCompletion": [
+    "GSM or approved injector values for stage then production database URLs whose login role is svc_platform",
+    "GSM create/verify of the four inventoried LINKTREND_PLATFORM_{STAGE,PROD}_SITES_{RUNTIME,LEDGER}_CREDENTIAL_REF names without storing values in git",
+    "Principal-approved stage apply of sequential 000017 with encrypted backup checkpoint and isolated restore",
+    "Sanitized stage receipt plus verification SQL true for svc_linksites_runtime and svc_linksites_ledger",
+    "Separate Principal production approval after stage receipts",
+    "Live health evidence against the registered sites-service endpoints without enabling the service by default"
+  ]
+}

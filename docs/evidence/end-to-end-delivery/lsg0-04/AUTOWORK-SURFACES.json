@@ -4,22 +4,22 @@
   "boundIdentity": {
     "repository": "linktrend/LiNKautowork",
     "ref": "development",
-    "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
-    "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
-    "subject": "Merge pull request #120 from linktrend/phase/production-readiness-20260904",
-    "mergedAtUtc": "2026-09-04T03:45:14Z",
+    "commit": "d5c626ba7e1bdbf783dc8df1654e33e0b70b873c",
+    "tree": "9018eec98a9bafefe3a638b25fb191ee454917a9",
+    "subject": "Merge pull request #158 from linktrend/phase/aw08-production-paci-verifier-r2",
+    "mergedAtUtc": "2026-09-13T06:59:13Z",
     "role": "protected-integration-branch-not-staging-main-not-live"
   },
-  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
+  "qualificationTimeUtc": "2026-09-13T07:18:59Z",
   "liveProbesForbidden": true,
   "secretValuesNotRequested": true,
   "privateEndpointsNotPrinted": true,
   "liveEvidenceAvailableToThisWorker": false,
   "lifecycleDistinction": {
-    "finishedIssueCheckpointOnThisSha": "Phase PR 120 merged documentation of production-readiness remaining work into protected development",
-    "reviewedPhaseCandidate": "phase/production-readiness-20260904 was merged; this SHA is protected development, not an unintegrated candidate",
-    "protectedIntegration": "development a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
-    "liveOperation": "pending per docs/PRODUCTION-READINESS.md and docs/PRD.md",
+    "finishedIssueCheckpointOnThisSha": "Phase PR 158 merged production PACI ES256/JWKS verifier into protected development",
+    "reviewedPhaseCandidate": "phase/aw08-production-paci-verifier-r2 was merged; this SHA is protected development, not an unintegrated candidate",
+    "protectedIntegration": "development d5c626ba7e1bdbf783dc8df1654e33e0b70b873c",
+    "liveOperation": "pending; source verifier is not a live JWKS or hosted token proof",
     "didNotClaimReviewedUnintegratedCandidateAsProtected": true,
     "didNotClaimProtectedDevelopmentAsLiveOperation": true
   },
@@ -37,6 +37,8 @@
         "signingSourcePresent": "gateway/src/lib/signing.ts",
         "lsg0-02SanitizedPlanningPin": "docs/end-to-end-delivery/upstreams/linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/",
         "priorMainCopyOnSitesTree": "docs/end-to-end-delivery/upstreams/linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/",
+        "thisPacketBoundDevelopmentCopy": "docs/end-to-end-delivery/upstreams/linkautowork/d5c626ba7e1bdbf783dc8df1654e33e0b70b873c/",
+        "productionPaciEs256JwksVerifierSource": "gateway/src/middleware/auth.ts",
         "planningPinEqualsBoundDevelopment": false,
         "priorMainCopyEqualsBoundDevelopment": false,
         "liveContractHandoffForLiNKsites": false
@@ -45,11 +47,15 @@
     {
       "id": "autowork-consumer-registration",
       "requiredHandoff": "LiNKsites consumer registration on bound Autowork development",
-      "classification": "missing and needs work",
-      "evidenceLevel": "wrong-consumer-hold-only",
+      "classification": "done but requires testing/fixing",
+      "evidenceLevel": "source-only-consumer-registration-not-live",
       "status": "HOLD",
       "reverifiedOnBoundDevelopment": true,
       "observed": {
+        "sourceContractPath": "packages/automation-contracts/src/linksites-consumer-registration.ts",
+        "sourceHandoffPath": "docs/contracts/linksites-consumer-handoff-v1.md",
+        "gatewayAdmissionPath": "gateway/src/services/linksites-consumer-registration.ts",
+        "copiedTo": "docs/end-to-end-delivery/upstreams/linkautowork/d5c626ba7e1bdbf783dc8df1654e33e0b70b873c/",
         "existingHandoffPath": "docs/planning/pkt-03-xpkt-03/provider-consumer-handoff.hold.json",
         "sha256": "cb3a4933eb60f7b00fef9ec6c5523f8e27ca36e2c7330b5115679e52461df8e8",
         "kind": "provider-consumer-handoff",
@@ -62,7 +68,8 @@
         "archiveIsNotRegistration": true,
         "disposableDbFixturesUseLinksitesSlug": true,
         "disposableDbFixturesAreNotRegistration": true,
-        "githubPublishedLiNKsitesRegistration": false
+        "githubPublishedLiNKsitesRegistration": false,
+        "sourceContractDoesNotIssueLiveReceipt": true
       }
     },
     {
@@ -100,6 +107,10 @@
       "reverifiedOnBoundDevelopment": true,
       "observed": {
         "signingHelper": "gateway/src/lib/signing.ts",
+        "productionPaciVerifier": "gateway/src/middleware/auth.ts",
+        "productionPaciRequiresEs256AndKid": true,
+        "productionPaciHs256IsTestOnly": true,
+        "liveJwksCalledByThisWorker": false,
         "genericProdHmacSecretName": "LINKAUTOWORK_LINK_HMAC_SHARED_SECRETS_PROD",
         "genericProdHmacSecretNameIsNotLiNKsitesSpecific": true,
         "admittedLiNKsitesSigningReference": false,
