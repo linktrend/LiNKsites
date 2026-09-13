@@ -16,6 +16,7 @@ import {
   ExactProviderAdoptionError,
   LSFACT01_HOLD,
   LSFACT01_LIBRARIES_PROVENANCE,
+  LSFACT01_PROTECTED_MARKETING_SMB,
   assembleBoundSite,
   bindExactProviderHandoff,
   createExactProviderRuntime,
@@ -28,6 +29,7 @@ import {
   selectExactProviderForProduction,
   type ExactProviderHandoff,
 } from '../src/exactProviderAdoption.js'
+import { loadProtectedMarketingSmbHandoff } from '../src/protectedMarketingSmbHandoff.js'
 import { canonicalJsonChecksum } from '../src/libraryConsumer.js'
 import { MASTER_TEMPLATE_PIN } from '../src/masterTemplatePin.js'
 import type { ReusableSiteFoundation } from '../src/reusableFoundation.js'
@@ -455,5 +457,49 @@ describe('LSFACT-01 adoption, entitlements, assembly, and pins', () => {
       .flatMap((item) => Array.isArray(item.data.content) ? item.data.content as Array<Record<string, unknown>> : [])
     expect(pageBlocks.some((block) => block.blockType === 'hero')).toBe(true)
     expect(new Set(pageBlocks.map((block) => String(block.blockType))).size).toBeGreaterThan(1)
+  })
+})
+
+describe('LSFACT-01 protected marketing-smb-v1 consumer bind', () => {
+  it('binds the GitHub-copied protected identity as library-local selectable without production admission', () => {
+    const handoff = loadProtectedMarketingSmbHandoff()
+    const bound = bindExactProviderHandoff(handoff)
+    expect(bound.family).toBe('marketing-smb-v1')
+    expect(bound.handoff.lifecycle).toBe('selectable')
+    expect(bound.handoff.selectability).toBe('selectable')
+    expect(bound.handoff.compatibility).toBe('unknown')
+    expect(bound.productionSelectable).toBe(false)
+    expect(bound.hold).toBe(LSFACT01_HOLD.marketingSmbV1Protected)
+    expect(bound.handoff.producer).toEqual({
+      repository: LSFACT01_PROTECTED_MARKETING_SMB.repository,
+      commit: LSFACT01_PROTECTED_MARKETING_SMB.commit,
+      tree: LSFACT01_PROTECTED_MARKETING_SMB.tree,
+    })
+    expect(bound.handoff.files.map((file) => file.path)).toEqual([
+      'entry.json',
+      'indexes/catalog.json',
+      'content/content.schema.json',
+    ])
+    expect(bound.handoff.files[0].sha256).toBe(LSFACT01_PROTECTED_MARKETING_SMB.entryJsonSha256)
+    expect(bound.handoff.files[1].sha256).toBe(LSFACT01_PROTECTED_MARKETING_SMB.catalogSha256)
+  })
+
+  it('materializes, restarts, and rejects tamper and production selection', () => {
+    const bound = bindExactProviderHandoff(loadProtectedMarketingSmbHandoff())
+    const cacheRoot = cacheDir()
+    const receipt = materializeExactProvider(bound, cacheRoot)
+    expect(receipt.providerCheckoutRequired).toBe(false)
+    expect(restartExactProviderFromCache(cacheRoot, bound.digest).digest).toBe(bound.digest)
+    const tampered = loadProtectedMarketingSmbHandoff()
+    const files = [...tampered.files]
+    files[0] = { ...files[0], bytes: `${files[0].bytes}\n` }
+    expect(() => bindExactProviderHandoff({ ...tampered, files })).toThrow(/digest mismatch/)
+    expect(() => selectExactProviderForProduction(loadProtectedMarketingSmbHandoff())).toThrow(
+      /Production selection fail-closed/,
+    )
+    expect(() => bindExactProviderHandoff(relabel(loadProtectedMarketingSmbHandoff(), 'selectable', 'selectable', 'compatible'))).toThrow(
+      /unproven for LiNKsites renderer/,
+    )
+    expect(() => bindExactProviderHandoff(relabel(smbHandoff(), 'selectable', 'selectable', 'unknown'))).toThrow(/quarantine/)
   })
 })

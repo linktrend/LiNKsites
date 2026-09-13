@@ -1,11 +1,9 @@
-# LSG0-03 owned evidence (Issue 538)
+# LSG0-03 owned evidence (Issue 549)
 
-Self-contained qualification for packet LSG0-03 against the supplied protected LiNKlibraries identity `96422a39979f6e1e4c068e871051ae45423a5967`. Parent indexes under `docs/evidence/end-to-end-delivery/` were not edited.
+Consumer proof for packet LSG0-03 against protected LiNKlibraries `0704dbef0871216dee5c4b85b3e2783823c21edb`. Parent indexes under `docs/evidence/end-to-end-delivery/` other than `LSG0-03-HANDOFF.json` were not edited.
 
-Issue 536 evidence against superseded pin `dacdf036312462c2373afc9cc4302e3231f7e6e9` / tree `d3c5f1e2a3450b016084ae09666ac193297ac9fc` remains historically accurate for provider bytes; this refresh re-binds identity and confirms those provider bytes did not change.
-
-- [QUALIFICATION.md](QUALIFICATION.md) — human-readable HOLD
-- [QUALIFICATION.json](QUALIFICATION.json) — machine-readable HOLD
+- [QUALIFICATION.md](QUALIFICATION.md) — HOLD (marketing-smb-v1 Library-local selectable; MWT still missing)
+- [QUALIFICATION.json](QUALIFICATION.json)
 - [REQUIRED-OUTPUTS.json](REQUIRED-OUTPUTS.json)
 - [PROTECTED-LIBRARY-FACTS.json](PROTECTED-LIBRARY-FACTS.json)
 - [IDENTITY.json](IDENTITY.json)

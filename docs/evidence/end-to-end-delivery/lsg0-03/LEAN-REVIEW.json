@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "kind": "lsg0-03-lean-review-application",
   "packet": "LSG0-03",
-  "issue": 538,
+  "issue": 549,
   "policyRecord": "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json",
   "policyId": "founder-approved-lean-review",
   "independentReviewer": {
     "used": false,
-    "reason": "documentation-only evidence refresh; independent_narrow_review is risk-triggered and waived for this packet"
+    "reason": "founder-approved lean replacement proof: exact identities, GitHub byte hashes, focused tests, provider tests on read-only checkout, secret scan, git diff --check"
   },
   "namedRiskSurfacesChanged": {
     "authAuthorizationSecretHandlingLogic": false,
@@ -15,10 +15,11 @@
     "productionDeploymentRollbackConfiguration": false
   },
   "replacementProofCommands": [
-    "python3 -m json.tool on every JSON file under docs/evidence/end-to-end-delivery/lsg0-03",
-    "git diff --name-only scoped to docs/evidence/end-to-end-delivery/lsg0-03/",
-    "git diff --check",
-    "python3 scripts/gitops/secret_scan.py change-scoped against BASE_SHA...HEAD"
+    "pnpm --filter @linksites/factory-catalog test",
+    "pnpm --filter @linksites/web-master test",
+    "node --test entries/marketing-smb-v1/tests/marketing-smb-v1.test.mjs (read-only LiNKlibraries checkout)",
+    "git diff --check fba2ed08d5cf3a16ca691da6eec707d584153a7f...HEAD",
+    "python3 scripts/gitops/secret_scan.py change-scoped"
   ],
   "selfReviewForbiddenForMaterialRisk": true,
   "didNotClaimIndependentReview": true

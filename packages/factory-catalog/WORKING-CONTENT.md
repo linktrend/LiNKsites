@@ -41,9 +41,12 @@ LSFACT-01 binds that same promotion boundary to an injected exact provider
 handoff. Semantic IDs still map to provider component/page, Payload
 collection/block, and React symbols without flattening to Hero. Products and
 Services remain distinct records. Current truthful identities stay
-fail-closed: `marketing-smb-v1` is quarantined/non-selectable and Master
-Website Template remains a planning/candidate. Tests may inject shaped
-handoffs; they must not relabel fixtures as production admission.
+fail-closed for production: the protected LiNKlibraries `0704dbe`
+`marketing-smb-v1` identity is Library-local selectable with unknown LiNKsites
+renderer and Payload compatibility, and Master Website Template remains a
+planning/candidate. The older `5188aaf` planning pin stays
+quarantined/non-selectable. Tests may inject shaped handoffs; they must not
+relabel fixtures as production admission.
 
 RLS grants the private tables only to `svc_linksites_runtime`, with
 `platform.has_org_access(..., 'client_viewer')` on every operation. Browser and

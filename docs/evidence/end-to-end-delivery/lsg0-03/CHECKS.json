@@ -2,33 +2,41 @@
   "schemaVersion": 1,
   "kind": "lsg0-03-acceptance-checks",
   "packet": "LSG0-03",
-  "baseSha": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+  "issue": 549,
+  "baseSha": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
   "overall": "HOLD",
   "lsg003Pass": false,
   "acceptancePass": true,
-  "note": "Acceptance commands prove scoped evidence quality. They do not convert LSG0-03 to PASS while providers remain non-selectable.",
+  "note": "Acceptance commands prove consumer bind of Library-local selectable marketing-smb-v1. They do not convert LSG0-03 to PASS while MWT remains non-selectable, and they do not claim production.",
   "checks": [
     {
-      "id": "json-tool",
-      "command": "find docs/evidence/end-to-end-delivery/lsg0-03 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-      "result": "pass"
+      "id": "factory-catalog",
+      "command": "pnpm --filter @linksites/factory-catalog test",
+      "result": "pass",
+      "detail": "34 files, 378 passed, 4 skipped"
     },
     {
-      "id": "scoped-diff",
-      "command": "test -z \"$(git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-03/')\"",
+      "id": "web-master",
+      "command": "pnpm --filter @linksites/web-master test",
       "result": "pass",
-      "changedPathsOnlyUnderOwnedSubdirectory": true
+      "detail": "80 tests passed including protected-marketing-smb-consumer and unchanged A1 tests"
+    },
+    {
+      "id": "provider-node-test",
+      "command": "node --test entries/marketing-smb-v1/tests/marketing-smb-v1.test.mjs",
+      "cwd": "linktrend/LiNKlibraries detached 0704dbe",
+      "result": "pass",
+      "detail": "9 passed"
     },
     {
       "id": "git-diff-check",
-      "command": "git diff --check 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD",
-      "result": "pass"
+      "command": "git diff --check fba2ed08d5cf3a16ca691da6eec707d584153a7f...HEAD",
+      "result": "pending-until-commit"
     },
     {
       "id": "changed-path-secret-scan",
-      "command": "python3 scripts/gitops/secret_scan.py with paths=git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD",
-      "result": "pass",
-      "findingCount": 0
+      "command": "python3 scripts/gitops/secret_scan.py",
+      "result": "pending-until-commit"
     }
   ]
 }
