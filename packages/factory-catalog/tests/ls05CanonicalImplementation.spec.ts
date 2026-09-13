@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FROZEN_PROVIDER_PIN, validateExactRelease } from '../src/libraryProviderClient.js'
+import { MASTER_TEMPLATE_PIN } from '../src/masterTemplatePin.js'
 import {
   A1_PROVIDER_SEMANTIC_MAP,
   MASTER_TEMPLATE_ADAPTER_ID,
@@ -23,14 +24,14 @@ describe('LS-05 canonical A1 adapter and identity bindings', () => {
   it('binds exact candidate, adoption, adapter, Payload, and effective identities', () => {
     const bindings = bindMasterTemplateIdentities({
       candidate: {
-        repository: 'https://github.com/linktrend/LiNKlibraries.git',
-        entryId: 'master-template-type-1',
-        version: '2.0.0-a1.1',
-        providerCommitSha: FROZEN_PROVIDER_PIN.providerCommitSha!,
-        providerTreeSha: FROZEN_PROVIDER_PIN.providerTreeSha!,
-        sourceReleaseCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
-        sourceReleaseTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
-        artifactTreeSha1: 'a8c6c23fd41a5f0eb9221276998f96862a50119f',
+        repository: MASTER_TEMPLATE_PIN.repositoryUrl,
+        entryId: MASTER_TEMPLATE_PIN.entryId,
+        version: MASTER_TEMPLATE_PIN.version,
+        providerCommitSha: MASTER_TEMPLATE_PIN.commitSha,
+        providerTreeSha: MASTER_TEMPLATE_PIN.providerTreeSha,
+        sourceReleaseCommitSha: MASTER_TEMPLATE_PIN.sourceReleaseCommitSha,
+        sourceReleaseTreeSha: MASTER_TEMPLATE_PIN.sourceReleaseTreeSha,
+        artifactTreeSha1: MASTER_TEMPLATE_PIN.artifactTreeSha1,
       },
       adoption: { siteId: 'site-ls05', locale: 'en-US', payloadStatus: 'draft' },
       payload: { siteId: 'site-ls05', locale: 'en-US', documentIds: ['pages:home', 'pages:contact'] },
@@ -47,14 +48,14 @@ describe('LS-05 canonical A1 adapter and identity bindings', () => {
 
   it('rejects provider identity tampering and publication of the draft candidate', () => {
     const candidate = {
-      repository: 'https://github.com/linktrend/LiNKlibraries.git',
-      entryId: 'master-template-type-1',
-      version: '2.0.0-a1.1',
-      providerCommitSha: FROZEN_PROVIDER_PIN.providerCommitSha!,
-      providerTreeSha: FROZEN_PROVIDER_PIN.providerTreeSha!,
-      sourceReleaseCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
-      sourceReleaseTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
-      artifactTreeSha1: 'a8c6c23fd41a5f0eb9221276998f96862a50119f',
+      repository: MASTER_TEMPLATE_PIN.repositoryUrl,
+      entryId: MASTER_TEMPLATE_PIN.entryId,
+      version: MASTER_TEMPLATE_PIN.version,
+      providerCommitSha: MASTER_TEMPLATE_PIN.commitSha,
+      providerTreeSha: MASTER_TEMPLATE_PIN.providerTreeSha,
+      sourceReleaseCommitSha: MASTER_TEMPLATE_PIN.sourceReleaseCommitSha,
+      sourceReleaseTreeSha: MASTER_TEMPLATE_PIN.sourceReleaseTreeSha,
+      artifactTreeSha1: MASTER_TEMPLATE_PIN.artifactTreeSha1,
     } as const
     expect(() => bindMasterTemplateIdentities({
       candidate: { ...candidate, providerTreeSha: 'f'.repeat(40) },
