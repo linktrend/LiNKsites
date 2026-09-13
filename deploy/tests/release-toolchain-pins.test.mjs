@@ -228,4 +228,4 @@ test('package.json packageManager is the only pnpm version source in release wor
     [],
     `pnpm/action-setup must not declare a second version; package.json packageManager is authoritative. ${duplicates.join('; ')}`,
   )
-}))
+})
