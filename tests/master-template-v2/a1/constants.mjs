@@ -84,12 +84,12 @@ export const PROVIDER_PIN = Object.freeze({
 /** EXT-LS-01 consumer proof receipt identity. Out-of-tree bytes are authoritative. */
 export const EXT_LS_01_RECEIPT = Object.freeze({
   gateId: "EXT-LS-01",
-  path: ".git/linktrend-evidence/ext-ls-01-issue547/consumer-proof-receipt.json",
-  sha256: "03e6006e533afdc77a4ed7e83b10259cc8d5d9da896833106cf322ef9c46f5ed",
-  consumerCommit: "f973999c8a16d2dcadb4b2e506da6392f5571cae",
-  consumerTree: "34a6937eeaceaa5a4b66c6c77c27551d1337548d",
+  path: ".git/linktrend-evidence/ext-ls-01-issue551/consumer-proof-receipt.json",
+  sha256: "c0f05d4e314ca62b6e83f420d1934e8ccd823d9a4399b1547abe30f92521b8a5",
+  consumerCommit: "df53bbaf854a44ea651deb5af4f165aa9df4cccb",
+  consumerTree: "4d08448f5e629747b0df93a6d80f52fc5402be66",
   bytesEmbedded: false,
-  acceptedBinding: true,
+  acceptedBinding: false,
 });
 
 export const CHECK_IDS = Object.freeze({
@@ -154,7 +154,7 @@ export const SATISFIED_DEPENDENCIES = Object.freeze([
     id: "ext-ls-01-consumer-proof-receipt",
     required: true,
     satisfied: true,
-    reason: "EXT-LS-01 receipt is bound by exact path and SHA-256. Receipt bytes are not fabricated.",
+    reason: "EXT-LS-01 receipt is bound only when out-of-tree bytes exist and the SHA-256 recomputes. Missing receipt cannot report bound=true.",
     identity: { ...EXT_LS_01_RECEIPT },
   },
 ]);

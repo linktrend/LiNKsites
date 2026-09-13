@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import {
   admitWebsiteTemplateMaterialization,
   type Revision2ProviderPin,
@@ -480,6 +481,126 @@ export function offlineRestartRevision2WebsiteTemplate(input: Revision2OfflineRe
   if (!result.ok || !input.expected) return result
   if (result.value.reference.entryId !== input.expected.entryId || result.value.reference.version !== input.expected.version || result.value.reference.sourceCommitSha !== input.expected.pin.sourceCommitSha || result.value.reference.sourceTreeSha !== input.expected.pin.sourceTreeSha) return failure(['consumer cache identity does not match the requested provider release pin'])
   return result
+}
+
+export type NativeA1PlanId = 'a' | 'b' | 'c' | 'l'
+
+export type NativeA1Structure = Readonly<{
+  layoutPackA1: boolean
+  skipLink: boolean
+  main: boolean
+  footer: boolean
+  typeLMinimal: boolean
+  standardShell: boolean
+  primaryNav: boolean
+  placeholderCopy: boolean
+}>
+
+export type NativeA1RenderResult = Readonly<{
+  planId: NativeA1PlanId
+  mix: string
+  shellKind: string
+  html: string
+  documents: Readonly<Record<string, string>>
+  htmlSha256: string
+  structure: NativeA1Structure
+}>
+
+export function consumerCacheTreeFromInventory(
+  inventory: ReadonlyArray<{ path: string; sha256: string; byteLength: number }>,
+): string {
+  return identity(
+    [...inventory].sort((left, right) => left.path.localeCompare(right.path)).map((item) => ({
+      path: item.path,
+      sha256: item.sha256,
+      byteLength: item.byteLength,
+    })),
+  )
+}
+
+export function inspectNativeA1Html(html: string, planId: NativeA1PlanId): NativeA1Structure {
+  const typeLMinimal = html.includes('data-shell="type_l_minimal"')
+  const standardShell = html.includes('data-shell="standard"')
+  return Object.freeze({
+    layoutPackA1: html.includes('data-layout-pack="a1"'),
+    skipLink: html.includes('id="skip-link"') || html.includes('data-semantic-id="skip-link"'),
+    main: /<main[\s>]/i.test(html) && html.includes('id="main"'),
+    footer: html.includes('id="site-footer"'),
+    typeLMinimal,
+    standardShell,
+    primaryNav: html.includes('id="primary-nav"'),
+    placeholderCopy: html.includes('Neutral placeholder copy. No customer claim.'),
+  })
+}
+
+function nativeStructureOk(planId: NativeA1PlanId, structure: NativeA1Structure): readonly string[] {
+  const errors: string[] = []
+  if (!structure.layoutPackA1) errors.push('native A1 HTML is missing data-layout-pack="a1"')
+  if (!structure.skipLink) errors.push('native A1 HTML is missing skip-link')
+  if (!structure.main) errors.push('native A1 HTML is missing main')
+  if (!structure.footer) errors.push('native A1 HTML is missing site-footer')
+  if (!structure.placeholderCopy) errors.push('native A1 HTML is not the provider placeholder copy')
+  if (planId === 'l') {
+    if (!structure.typeLMinimal) errors.push('native Type L HTML is missing type_l_minimal shell')
+    if (structure.primaryNav) errors.push('native Type L HTML must not expose primary-nav')
+    if (structure.standardShell) errors.push('native Type L HTML must not use the standard shell')
+  } else {
+    if (!structure.standardShell) errors.push(`native plan ${planId} HTML is missing the standard shell`)
+    if (!structure.primaryNav) errors.push(`native plan ${planId} HTML is missing primary-nav`)
+  }
+  return errors
+}
+
+/** Execute the materialized native A1 renderer from the consumer cache only. */
+export async function renderNativeA1FromCache(input: {
+  cacheRoot: string
+  planId: NativeA1PlanId
+  expected?: Pick<Revision2MaterializationInput, 'entryId' | 'version' | 'pin'>
+}): Promise<Revision2Result<NativeA1RenderResult>> {
+  const restarted = offlineRestartRevision2WebsiteTemplate({ cacheRoot: input.cacheRoot, expected: input.expected })
+  if (!restarted.ok) return restarted
+  const renderModulePath = join(restarted.value.artifactRoot, 'src/layouts/a1/index.mjs')
+  if (!existsSync(renderModulePath)) return failure(['consumer cache is missing src/layouts/a1/index.mjs'])
+  let native: {
+    composeAssembly: (args: Record<string, unknown>) => { navigation?: { shell?: { kind?: string } }; pages: unknown[]; pageInstanceIds: string[] }
+    renderA1Site: (composed: unknown) => { html: string; documents: Record<string, string>; shellKind: string }
+    SCENARIO_REQUESTS: Record<string, { request: unknown; mix: string; overlayId: string | null }>
+    PLAN_PROBE_REQUEST: unknown
+  }
+  try {
+    native = await import(pathToFileURL(renderModulePath).href) as typeof native
+  } catch (error) {
+    return failure([error instanceof Error ? error.message : 'native A1 renderer could not be imported from the consumer cache'])
+  }
+  const mix = input.planId === 'l' ? 'type_l' : 'hybrid'
+  const scenario = input.planId === 'l' ? native.SCENARIO_REQUESTS.type_l : null
+  let composed: unknown
+  try {
+    composed = native.composeAssembly({
+      planId: input.planId,
+      overlayId: scenario ? scenario.overlayId : null,
+      request: scenario?.request ?? native.PLAN_PROBE_REQUEST,
+      mix: scenario?.mix ?? mix,
+    })
+  } catch (error) {
+    return failure([error instanceof Error ? error.message : 'native A1 composeAssembly failed'])
+  }
+  const rendered = native.renderA1Site(composed)
+  const structure = inspectNativeA1Html(rendered.html, input.planId)
+  const errors = nativeStructureOk(input.planId, structure)
+  if (errors.length) return failure(errors)
+  return {
+    ok: true,
+    value: Object.freeze({
+      planId: input.planId,
+      mix: scenario?.mix ?? mix,
+      shellKind: rendered.shellKind,
+      html: rendered.html,
+      documents: Object.freeze({ ...rendered.documents }),
+      htmlSha256: sha256(rendered.html),
+      structure,
+    }),
+  }
 }
 
 /** Activate the previous complete cache entry, leaving its bytes untouched. */

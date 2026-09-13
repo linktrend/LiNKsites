@@ -159,6 +159,7 @@ export function requireExtLs01Receipt(raw, paths = {}) {
     candidates.push(path.join(paths.gitCommonDir, relative));
   }
   let bytesPresent = false;
+  let matchedPath = "";
   for (const candidate of candidates) {
     if (!fs.existsSync(candidate)) continue;
     const digest = sha256Hex(fs.readFileSync(candidate));
@@ -169,7 +170,15 @@ export function requireExtLs01Receipt(raw, paths = {}) {
       );
     }
     bytesPresent = true;
+    matchedPath = candidate;
     break;
+  }
+
+  if (!bytesPresent) {
+    throw new ClosedFailure(
+      "ext_ls01_unbound",
+      `EXT-LS-01 out-of-tree receipt is missing; bound=true is forbidden without bytes at ${raw.path}`,
+    );
   }
 
   return {
@@ -178,9 +187,21 @@ export function requireExtLs01Receipt(raw, paths = {}) {
     path: EXT_LS_01_RECEIPT.path,
     consumerCommit: EXT_LS_01_RECEIPT.consumerCommit,
     consumerTree: EXT_LS_01_RECEIPT.consumerTree,
-    bytesPresent,
+    bytesPresent: true,
     bytesEmbedded: false,
+    verifiedPath: matchedPath,
   };
+}
+
+/**
+ * Read verified out-of-tree EXT-LS-01 receipt bytes. Missing files fail closed.
+ *
+ * @param {unknown} raw
+ * @param {{ repoRoot?: string, gitCommonDir?: string }} [paths]
+ */
+export function loadExtLs01ReceiptBytes(raw, paths = {}) {
+  const bound = requireExtLs01Receipt(raw, paths);
+  return JSON.parse(fs.readFileSync(bound.verifiedPath, "utf8"));
 }
 
 /**

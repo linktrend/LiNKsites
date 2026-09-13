@@ -28,13 +28,14 @@ production selectability, or MWT-08.
 - LiNKlibraries protected development `998c02c29fae5acc429804d7e03dcc74df7e7a52` /
   tree `63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3`
 - Entry `master-template-type-1@2.0.0-a1.1` artifact tree `6aadb2dff52efe30f512ddb2a5510a881fc027e2`, lifecycle `draft` / `non_selectable`, catalogue.bound=false
-- EXT-LS-01 receipt is out-of-tree at `.git/linktrend-evidence/ext-ls-01-issue547/consumer-proof-receipt.json`
-  (bytes are not fabricated into LiNKsites source)
+- EXT-LS-01 receipt is out-of-tree at `.git/linktrend-evidence/ext-ls-01-issue551/consumer-proof-receipt.json`
+  (bytes are generated/verified by `scripts/profile-v2-quality/ext-ls-01/generate-consumer-proof.mjs`; missing bytes fail closed)
 
 ## Commands
 
 ```bash
-node tests/master-template-v2/a1/scripts/generate.mjs
+node scripts/profile-v2-quality/ext-ls-01/generate-consumer-proof.mjs --clean
+node scripts/profile-v2-quality/ext-ls-01/generate-consumer-proof.mjs --verify
 node --test tests/master-template-v2/a1/*.test.mjs
 node tests/master-template-v2/a1/scripts/validate.mjs
 node tests/master-template-v2/a1/scripts/run.mjs --evidence docs/evidence/master-v2/a1

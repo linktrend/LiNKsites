@@ -31,6 +31,7 @@ import {
   requireExtLs01Receipt,
   requireProtectedLs07,
   requireProviderPin,
+  loadExtLs01ReceiptBytes,
 } from "./identities.mjs";
 import { evaluateSlot } from "./slot-proof.mjs";
 import { renderSlotHtml, slotHtmlPath } from "./html-fixtures.mjs";
@@ -162,6 +163,15 @@ function evaluateIntegrity(status, scope, dependencies, providerPin, extLs01, re
       throw new ClosedFailure("provider_bytes", "STATUS must not present provider A1 bytes");
     }
     requireExtLs01Receipt(extLs01, { repoRoot, gitCommonDir });
+    const receiptBytes = loadExtLs01ReceiptBytes(extLs01, { repoRoot, gitCommonDir });
+    if (!isRecord(receiptBytes.nativeRender) || receiptBytes.nativeRender.executedFrom !== "consumer_cache") {
+      throw new ClosedFailure("ext_ls01_unbound", "EXT-LS-01 receipt must execute native A1 from the consumer cache");
+    }
+    for (const planId of ["a", "b", "c", "l"]) {
+      if (!isRecord(receiptBytes.nativeRender.plans?.[planId])) {
+        throw new ClosedFailure("ext_ls01_unbound", `EXT-LS-01 receipt is missing native render for plan ${planId}`);
+      }
+    }
     if (repoRoot) assertCatalogPinFiles(repoRoot);
     checks.push(check(CHECK_IDS.LS07_BOUND, true, `LS-07 bound at ${PROTECTED_DEVELOPMENT.commit}`));
     checks.push(check(CHECK_IDS.PROVIDER_PIN_BOUND, true, `protected A1 pin bound at ${PROVIDER_PIN.commit}`));

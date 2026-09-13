@@ -1,9 +1,9 @@
 {
   "candidate": {
     "repository": "linktrend/LiNKsites",
-    "issue": 301,
-    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
-    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+    "issue": 551,
+    "commit": "df53bbaf854a44ea651deb5af4f165aa9df4cccb",
+    "tree": "4d08448f5e629747b0df93a6d80f52fc5402be66"
   },
   "consumerReceipt": {
     "entryId": "master-template-type-1",

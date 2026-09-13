@@ -74,8 +74,8 @@ const identityErrors = (candidate) => {
   if (candidate.repository != null && candidate.repository !== 'linktrend/LiNKsites') {
     errors.push('candidate.repository must be linktrend/LiNKsites')
   }
-  if (candidate.issue != null && ![301, 547].includes(Number(candidate.issue))) {
-    errors.push('candidate.issue must be 301 or 547 for this validator')
+  if (candidate.issue != null && ![547, 551].includes(Number(candidate.issue))) {
+    errors.push('candidate.issue must be 547 or 551 for this validator')
   }
   return errors
 }
@@ -368,7 +368,7 @@ const main = () => {
       candidate: {
         ...(isRecord(input.candidate) ? input.candidate : {}),
         repository: 'linktrend/LiNKsites',
-        issue: 301,
+        issue: 551,
         commit: args['candidate-commit'] || input.candidate?.commit,
         tree: args['candidate-tree'] || input.candidate?.tree,
       },

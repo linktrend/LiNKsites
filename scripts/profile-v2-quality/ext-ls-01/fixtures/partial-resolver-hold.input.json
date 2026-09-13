@@ -1,15 +1,15 @@
 {
   "candidate": {
     "repository": "linktrend/LiNKsites",
-    "issue": 301,
-    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
-    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+    "issue": 551,
+    "commit": "df53bbaf854a44ea651deb5af4f165aa9df4cccb",
+    "tree": "4d08448f5e629747b0df93a6d80f52fc5402be66"
   },
   "a1Receipt": {
     "entryId": "master-template-type-1",
     "version": "2.0.0-a1.1",
     "providerCheckoutRemoved": true,
-    "consumerCacheTree": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "consumerCacheTree": "6aadb2dff52efe30f512ddb2a5510a881fc027e2",
     "resolver": {
       "layoutId": "a1",
       "plans": {

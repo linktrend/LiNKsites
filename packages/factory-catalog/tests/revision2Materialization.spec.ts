@@ -3,11 +3,12 @@ import { createHash } from 'node:crypto'
 import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { materializeRevision2WebsiteTemplate, offlineRestartRevision2WebsiteTemplate, rollbackRevision2WebsiteTemplate } from '../src/revision2Materialization.js'
+import { execFileSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { materializeRevision2WebsiteTemplate, offlineRestartRevision2WebsiteTemplate, rollbackRevision2WebsiteTemplate, renderNativeA1FromCache, consumerCacheTreeFromInventory } from '../src/revision2Materialization.js'
 import { isProviderCandidateReceiptType } from '../src/libraryProviderClient.js'
 import { MASTER_TEMPLATE_ADAPTER_ID, MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST, MASTER_TEMPLATE_ADAPTER_VERSION } from '../src/masterTemplateVersionedAdapter.js'
 import { MASTER_TEMPLATE_PIN, masterTemplateRevision2Pin } from '../src/masterTemplatePin.js'
-import { existsSync } from 'node:fs'
 
 const canonical = (value: unknown): string => value === null || typeof value !== 'object'
   ? JSON.stringify(value)
@@ -207,16 +208,18 @@ describe('Revision 2 website-template materialization', () => {
     }
   })
 
-  it('materializes the protected uncatalogued A1 candidate into an out-of-repo cache, then survives checkout removal, tamper, and rollback', async () => {
+  it('materializes the protected uncatalogued A1 candidate, executes native render.mjs, then survives checkout removal, tamper, and rollback', async () => {
     const providerRoot = process.env.LINKLIBRARIES_ROOT ?? '/agent/repos/LiNKlibraries'
     if (!existsSync(providerRoot) || !existsSync(join(providerRoot, 'registry/v2/entries/master-template-type-1/versions/2.0.0-a1.1/release-receipt.json'))) {
       throw new Error('EXT-LS-01 requires the exact protected LiNKlibraries checkout at LINKLIBRARIES_ROOT')
     }
+    const worktree = await mkdtemp(join(tmpdir(), 'linksites-ext-ls-01-provider-'))
     const cacheRoot = await mkdtemp(join(tmpdir(), 'linksites-ext-ls-01-cache-'))
     const pin = masterTemplateRevision2Pin()
     try {
+      execFileSync('git', ['-C', providerRoot, 'worktree', 'add', '--detach', worktree, MASTER_TEMPLATE_PIN.commitSha])
       const refused = materializeRevision2WebsiteTemplate({
-        providerRoot,
+        providerRoot: worktree,
         entryId: MASTER_TEMPLATE_PIN.entryId,
         version: MASTER_TEMPLATE_PIN.version,
         pin,
@@ -224,7 +227,7 @@ describe('Revision 2 website-template materialization', () => {
       expect(refused.ok).toBe(false)
 
       const first = materializeRevision2WebsiteTemplate({
-        providerRoot,
+        providerRoot: worktree,
         entryId: MASTER_TEMPLATE_PIN.entryId,
         version: MASTER_TEMPLATE_PIN.version,
         pin,
@@ -245,15 +248,26 @@ describe('Revision 2 website-template materialization', () => {
       expect(JSON.parse(first.value.files['plans/l.json']).capacity.value).toBe(0)
       expect(JSON.parse(first.value.files['plans/l.json']).shell.globalNavigation).toBe('none')
       expect(first.value.files['layouts/a1-guided-trust.json']).toContain('a1')
-      expect(first.value.files['src/layouts/a1/render.mjs']).toMatch(/export/)
+      expect(first.value.files['src/layouts/a1/render.mjs']).toMatch(/export function renderA1Page/)
+      const cacheTree = consumerCacheTreeFromInventory(first.value.materializationReceipt?.cache.inventory ?? [])
+      expect(cacheTree).toMatch(/^[a-f0-9]{40}$/)
+      expect(cacheTree).not.toBe('a'.repeat(40))
 
-      const offline = offlineRestartRevision2WebsiteTemplate({ cacheRoot, expected: { entryId: MASTER_TEMPLATE_PIN.entryId, version: MASTER_TEMPLATE_PIN.version, pin } })
-      expect(offline.ok).toBe(true)
-      if (offline.ok) expect(offline.value.mode).toBe('offline_cache')
+      const nativeA = await renderNativeA1FromCache({ cacheRoot, planId: 'a', expected: { entryId: MASTER_TEMPLATE_PIN.entryId, version: MASTER_TEMPLATE_PIN.version, pin } })
+      expect(nativeA.ok).toBe(true)
+      if (!nativeA.ok) return
+      expect(nativeA.value.structure.layoutPackA1).toBe(true)
+      expect(nativeA.value.structure.standardShell).toBe(true)
+      const nativeL = await renderNativeA1FromCache({ cacheRoot, planId: 'l', expected: { entryId: MASTER_TEMPLATE_PIN.entryId, version: MASTER_TEMPLATE_PIN.version, pin } })
+      expect(nativeL.ok).toBe(true)
+      if (nativeL.ok) {
+        expect(nativeL.value.structure.typeLMinimal).toBe(true)
+        expect(nativeL.value.structure.primaryNav).toBe(false)
+      }
 
       const stagingCache = await mkdtemp(join(tmpdir(), 'linksites-ext-ls-01-prior-'))
       const prior = materializeRevision2WebsiteTemplate({
-        providerRoot,
+        providerRoot: worktree,
         entryId: MASTER_TEMPLATE_PIN.entryId,
         version: MASTER_TEMPLATE_PIN.version,
         pin,
@@ -262,7 +276,7 @@ describe('Revision 2 website-template materialization', () => {
       })
       expect(prior.ok).toBe(true)
       const reselect = materializeRevision2WebsiteTemplate({
-        providerRoot,
+        providerRoot: worktree,
         entryId: MASTER_TEMPLATE_PIN.entryId,
         version: MASTER_TEMPLATE_PIN.version,
         pin,
@@ -272,6 +286,17 @@ describe('Revision 2 website-template materialization', () => {
       expect(reselect.ok).toBe(true)
       const rolled = rollbackRevision2WebsiteTemplate({ cacheRoot })
       expect(rolled.ok).toBe(true)
+      await rm(stagingCache, { recursive: true, force: true })
+
+      execFileSync('git', ['-C', providerRoot, 'worktree', 'remove', '--force', worktree])
+      expect(existsSync(join(worktree, 'registry'))).toBe(false)
+
+      const offline = offlineRestartRevision2WebsiteTemplate({ cacheRoot, expected: { entryId: MASTER_TEMPLATE_PIN.entryId, version: MASTER_TEMPLATE_PIN.version, pin } })
+      expect(offline.ok).toBe(true)
+      if (offline.ok) expect(offline.value.mode).toBe('offline_cache')
+      const nativeRestart = await renderNativeA1FromCache({ cacheRoot, planId: 'a', expected: { entryId: MASTER_TEMPLATE_PIN.entryId, version: MASTER_TEMPLATE_PIN.version, pin } })
+      expect(nativeRestart.ok).toBe(true)
+      if (nativeRestart.ok) expect(nativeRestart.value.htmlSha256).toBe(nativeA.value.htmlSha256)
 
       const receiptPath = join(cacheRoot, `entries/${MASTER_TEMPLATE_PIN.artifactTreeSha1}`, 'materialization-receipt.json')
       const tampered = JSON.parse(await readFile(receiptPath, 'utf8')) as { identities: { effective: string } }
@@ -279,9 +304,10 @@ describe('Revision 2 website-template materialization', () => {
       await writeFile(receiptPath, JSON.stringify(tampered))
       const rejected = offlineRestartRevision2WebsiteTemplate({ cacheRoot })
       expect(rejected.ok).toBe(false)
-      await rm(stagingCache, { recursive: true, force: true })
     } finally {
+      try { execFileSync('git', ['-C', providerRoot, 'worktree', 'remove', '--force', worktree], { stdio: ['ignore', 'pipe', 'pipe'] }) } catch { /* already removed */ }
       await rm(cacheRoot, { recursive: true, force: true })
+      await rm(worktree, { recursive: true, force: true })
     }
   })
 })
