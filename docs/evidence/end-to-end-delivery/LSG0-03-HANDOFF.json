@@ -2,29 +2,41 @@
   "schemaVersion": 1,
   "kind": "LSG0-03-handoff-status",
   "overall": "HOLD",
-  "evidenceLevel": "coordinator-supplied-observation",
-  "independentFindingAsSupplied": {
+  "issue": 549,
+  "evidenceLevel": "consumer-proof-against-protected-library-identity",
+  "protectedLibraryIdentity": {
     "repository": "linktrend/LiNKlibraries",
     "ref": "development",
-    "commit": "fe769fc19b3a51ed2cc0b22438afc5b0bd766950",
-    "tree": "9f993ae485c68d46ed69c824578ec3370a0be5c6",
-    "marketingSmbV1": "quarantined and non-selectable",
-    "masterWebsiteTemplateVersions": "all observed versions draft/non-selectable/unknown",
-    "exactAdmittedProviderHandoffs": "missing"
+    "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+    "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42"
   },
+  "marketingSmbV1": {
+    "state": "usable",
+    "selectable": true,
+    "admissionClass": "library-local-selectable",
+    "entryJsonSha256": "bf7efdbe2cc281bbfb193aab4554a660648da5c2c4baeb40f078d7ad110bb9b7",
+    "catalogSha256": "d8e9b6d7616d98f08890bb5db08a1c0aad93775c54f7eac880380285ff1ba23e",
+    "entryGitTreeObjectSha1": "d146699d8d03d6f4821fe7aa57d449678c3ea170",
+    "productionSelectable": false,
+    "consumerBound": true
+  },
+  "masterWebsiteTemplateVersions": "draft/non-selectable; current.json absent; A1 lane preserved separately",
+  "exactAdmittedProviderHandoffs": "marketing-smb-v1 library-local selectable present; MWT admitted handoffs missing",
   "planningPinAlsoNonSelectable": {
     "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
     "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
     "copiedEntry": "docs/end-to-end-delivery/upstreams/linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/entries/marketing-smb-v1/entry.json",
     "state": "quarantined",
-    "selectable": false
+    "selectable": false,
+    "note": "Not this protected identity. Not relabeled."
   },
-  "thisSessionDidNotFetchLiNKlibraries": true,
+  "thisSessionFetchedLiNKlibraries": true,
   "didNotSubstituteFixtureProvider": true,
+  "didNotClaimDeploymentOrProduction": true,
   "upstreamOwnerActionsToClear": [
     {
       "owner": "linktrend/LiNKlibraries",
-      "action": "Admit an exact currently selectable marketing-smb-v1 release with qualification/admission and immutable digests on a protected identity, and admit Master Website Template A1/A2/A3 and A/B/C/L provider handoffs that are selectable rather than draft/unknown."
+      "action": "Admit Master Website Template A1/A2/A3 and A/B/C/L provider handoffs that are selectable rather than draft/unknown, with current.json and immutable digests on a protected identity."
     }
   ]
 }

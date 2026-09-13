@@ -3,14 +3,15 @@
   "kind": "lsg0-03-checksums",
   "algorithm": "SHA-256",
   "files": {
-    "docs/evidence/end-to-end-delivery/lsg0-03/CHECKS.json": "df3153af36c50b8cd9cf87f287dcf3d851f428e710b4bcd329b5c442df6a75c0",
-    "docs/evidence/end-to-end-delivery/lsg0-03/IDENTITY.json": "1de0f6c413f5d93dfa0830aa7c945377763e538c0476aed40383b4fc7a4b4232",
-    "docs/evidence/end-to-end-delivery/lsg0-03/LEAN-REVIEW.json": "d2cf821a9600c23e7c7418a9f855b76383b7eb0b8f0bb641193a3bff98eea89b",
-    "docs/evidence/end-to-end-delivery/lsg0-03/PROTECTED-LIBRARY-FACTS.json": "967d044d605280c2014b5287b93bdce3c249cf0bb612aecc41ea95b077989303",
-    "docs/evidence/end-to-end-delivery/lsg0-03/QUALIFICATION.json": "fb050b534d0122d8e60c957654fc93670f864486d144f3dce8ca89dd4f836f20",
-    "docs/evidence/end-to-end-delivery/lsg0-03/QUALIFICATION.md": "4990cc6293a2a33cc7447f2e1f1f5e67d10e4af39502842eb6017e54ba76dbed",
-    "docs/evidence/end-to-end-delivery/lsg0-03/README.md": "48e98a1e2940bcea986f06bd70dcbfccc89abdc7733763d7d2d431880c0f8154",
-    "docs/evidence/end-to-end-delivery/lsg0-03/REQUIRED-OUTPUTS.json": "807ffa158b78822551fcfff9768431b7b31421fc4d0f51539edfa8a5d5fbecc3",
-    "docs/evidence/end-to-end-delivery/lsg0-03/TOOLCHAIN.json": "3c023d77a295d9cf7b6688ccab194f05f346a8cadecf124e413f2661e70e3b4f"
+    "docs/evidence/end-to-end-delivery/lsg0-03/CHECKS.json": "3f1076751df9d58ad20802da81e9a4a41f5d4bbf520456485088e405e318afdc",
+    "docs/evidence/end-to-end-delivery/lsg0-03/CONSUMER-RECEIPT.json": "e361a8581b4332d8121c921500056c9ae01083226c43640324d17053b61f8d7d",
+    "docs/evidence/end-to-end-delivery/lsg0-03/IDENTITY.json": "2eef33c2c44c524b7f4e3794c62aeb717bccbd9defbfed6d7b1714ec6eca7284",
+    "docs/evidence/end-to-end-delivery/lsg0-03/LEAN-REVIEW.json": "be5e5d6ab72be4a924dc2f31442bdbc0afd52e6c4acdc99e648e79efe5926e3f",
+    "docs/evidence/end-to-end-delivery/lsg0-03/PROTECTED-LIBRARY-FACTS.json": "c43b743290f4f39ffa0a30a4ece04c55e6a38a801c540d5ae8587faaac1d2cbc",
+    "docs/evidence/end-to-end-delivery/lsg0-03/QUALIFICATION.json": "c4d0a6f65c667191d7f6c42b6113cb1be574f113e7f82cdcc7693b52fa3fbffe",
+    "docs/evidence/end-to-end-delivery/lsg0-03/QUALIFICATION.md": "eed990b0afe24db019630e2ac04032458a5f10141ef3f918bf2699e227e27e60",
+    "docs/evidence/end-to-end-delivery/lsg0-03/README.md": "b00ed0631e641740ea76d83b89f07c9d0239f021d80e317474fe8c0f206e189b",
+    "docs/evidence/end-to-end-delivery/lsg0-03/REQUIRED-OUTPUTS.json": "504c8d9091899e843a4eb8cd5d4e507b5f4a1f45a8c83b5c9ff83ec18f1f05e4",
+    "docs/evidence/end-to-end-delivery/lsg0-03/TOOLCHAIN.json": "3cbc44a6364891b4dc39d8eda5d3de26f30b920d11d0dd90449425d160df1352"
   }
 }

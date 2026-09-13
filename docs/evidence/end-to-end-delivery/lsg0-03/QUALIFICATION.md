@@ -1,49 +1,41 @@
-# LSG0-03 qualification (Issue 538)
+# LSG0-03 qualification (Issue 549)
 
-**Status: HOLD** (not PASS)
+**Status: HOLD** (not packet PASS)
 
-This packet re-qualified LSG0-03 against the newly advanced protected LiNKlibraries `development` identity. It inspected only facts that could have changed because that identity moved from `dacdf036312462c2373afc9cc4302e3231f7e6e9` to `96422a39979f6e1e4c068e871051ae45423a5967`. Source bytes, draft or prerelease artifacts, tests, and owner statements were not treated as admitted selectable production providers. LiNKlibraries was not edited.
+This packet consumed the protected LiNKlibraries `marketing-smb-v1` identity `0704dbef0871216dee5c4b85b3e2783823c21edb` / tree `183e834bf7888a5a6e675a1232a1f979c8991a42`. Provider publication (Library-local selectable admission on LiNKlibraries) is distinct from this consumer proof. LiNKlibraries was not edited. Deployment, production, Server03, and image publication are not claimed.
 
 ## Identities
 
 | Role | Repository | Ref / checkout | Commit | Tree |
 | --- | --- | --- | --- | --- |
-| Writer start | linktrend/LiNKsites | issue/538-refresh-lsg0-03-against-current-protected-linkli | `7a88e6be88202fffe5a7f01526fadb517e2caeeb` | `994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea` |
-| Read-only source (this refresh) | linktrend/LiNKlibraries | `development` at supplied commit (detached; not substituted) | `96422a39979f6e1e4c068e871051ae45423a5967` | `384b428eb35ffa21c6eb1fdc1af90997379a99fb` |
-| Superseded prior LSG0-03 pin (Issue 536) | linktrend/LiNKlibraries | `development` at previous supplied commit | `dacdf036312462c2373afc9cc4302e3231f7e6e9` | `d3c5f1e2a3450b016084ae09666ac193297ac9fc` |
+| Writer start | linktrend/LiNKsites | issue/549… (cloud writer `cursor/linksites-protected-marketing-smb-consumer-549-4259` at the same SHA) | `fba2ed08d5cf3a16ca691da6eec707d584153a7f` | `395d4dc07780ffee977be7f5d6469b06189f1475` |
+| Read-only source | linktrend/LiNKlibraries | `development` at supplied commit (detached) | `0704dbef0871216dee5c4b85b3e2783823c21edb` | `183e834bf7888a5a6e675a1232a1f979c8991a42` |
 
-Cached LiNKsites checkout was already at the supplied Issue 538 commit/tree on `cursor/linksites-lsg0-03-admission-refresh-538-85ea`. Cached LiNKlibraries checkout was already at the supplied commit/tree. Fetched `origin/development` matched the supplied identity; the bound branch tip was not substituted.
-
-## What changed upstream
-
-`git log` / `git diff` from `dacdf036` to `96422a3` touches only lean-review waiver / packager / completion-gate GitOps files (PRs #434 and #436). No `marketing-smb-v1`, Master Website Template registry, catalogue, receipt, layout, plan, or handoff path changed. Re-hashed provider artifacts on `96422a3` match the Issue 536 SHA-256 and git tree values.
+Cached checkouts already matched the supplied commits/trees. Fetched `origin/issue/549-consume-protected-marketing-smb-provider-handoff` and `origin/development` matched. The bound libraries tip was not substituted.
 
 ## Required outputs
 
 | ID | Required output | Classification |
 | --- | --- | --- |
-| LSG0-03-R1 | Current exact **selectable** `marketing-smb-v1` with qualification/admission and immutable digests | **missing and needs work** |
+| LSG0-03-R1 | Current exact **selectable** `marketing-smb-v1` with qualification/admission and immutable digests | **completed** (Library-local selectable on protected 0704dbe; not production) |
 | LSG0-03-R1-observation | Inspect lifecycle/selectability/admission/digests on the supplied tree | **completed** |
+| LSG0-03-R1-consumer | Materialize/bind/restart/tamper through the LiNKsites consumer boundary | **completed** (production selection still fail-closed) |
 | LSG0-03-R2 | Exact **admitted** Master Website Template A1/A2/A3 and A/B/C/L handoff | **missing and needs work** |
-| LSG0-03-R2-observation | Inspect current release, pointer, layouts/plans, digests, receipts | **completed** |
+| LSG0-03-R2-observation | Inspect current release, pointer, layouts/plans, digests, receipts | **completed** (`current.json` absent; draft/non-selectable) |
 | LSG0-03-R2-candidate-bytes | 2.0.0 A1/A2/A3 packs and A/B/C/L plans as source input | **done but requires testing/fixing** |
 
-## Protected facts (unchanged provider bytes)
+## Protected facts
 
-`marketing-smb-v1` on `entries/marketing-smb-v1/entry.json` and `indexes/catalog.json` is `state=quarantined`, `selectable=false`. Declared file SHA-256 values match the working tree (0 mismatches). Historical WP-0 admission is `candidate_nonselectable_pending_governed_admission` and is not current admission.
+`marketing-smb-v1` `entry.json` SHA-256 `bf7efdbe2cc281bbfb193aab4554a660648da5c2c4baeb40f078d7ad110bb9b7`, git tree `d146699d8d03d6f4821fe7aa57d449678c3ea170`, catalog SHA-256 `d8e9b6d7616d98f08890bb5db08a1c0aad93775c54f7eac880380285ff1ba23e`. `state=usable`, `selectable=true`. Library admission is `library_local_selectable`. LiNKsites renderer and Payload compatibility remain unproven.
 
-Master Website Template entry `master-template-type-1` has **no** `current.json`. Governance for 1.0.0 is `draft` / `non_selectable` with qualification and admission `pending`. Catalogue and release receipts for `1.0.0`, `2.0.0`, and `2.0.0-a1.1` are all `draft` / `non_selectable` with `admission=not_performed`. Current candidate `2.0.0` has A1/A2/A3 layouts and A/B/C/L plans; git artifact tree `b599c0f0ee6bc2aad3484aa42ef1fd9e86a05758` matches the receipt. `docs/architecture/master-template/LINKSITES-HANDOFF.md` still says draft / non_selectable / no `current.json`. The final 2.0.0 addendum is an external-consumer-gate-pending candidate, not admission.
+The obsolete quarantined/non-selectable assumption is replaced **only** for this protected identity. The 5188aaf planning pin copy stays quarantined/non-selectable.
+
+Master Website Template still has no `current.json` on this tree. A1 remains a separate lane and was not claimed as admitted by this packet.
 
 ## Why HOLD
 
-LSG0-03 PASS requires protected bytes and receipts that prove **both** providers selectable and admitted. This tree still proves the opposite: quarantined legacy template and draft MWT candidate without a production pointer. GitOps waiver work on LiNKlibraries does not admit providers.
-
-## Owner actions
-
-1. LiNKlibraries: independently qualify and admit selectable `marketing-smb-v1` on a protected identity, or retire it in favor of an admitted replacement first-website provider.
-2. LiNKlibraries: publish `current.json`, set selectable/admitted governance and receipts for the current MWT release covering A1/A2/A3 and A/B/C/L.
-3. LiNKsites coordinator: refresh LSG0-03 against that new exact commit/tree. Do not mutate LiNKlibraries from this repo.
+LSG0-03 packet PASS requires both providers selectable/admitted for their intended consumer use. `marketing-smb-v1` is now Library-local selectable with consumer bind proof. MWT A1/A2/A3 and A/B/C/L remain draft/non-selectable.
 
 ## Lean review
 
-Founder-approved lean policy applies. No independent reviewer for this evidence-only refresh. Replacement proof: exact commit/tree, JSON validity, scoped path check, changed-path secret scan, `git diff --check`.
+Founder-approved lean policy applies. No independent reviewer. Replacement proof: exact identities, GitHub byte hashes, focused tests, provider tests on the read-only checkout, secret scan, `git diff --check`.

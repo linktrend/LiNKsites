@@ -4,7 +4,9 @@
  * Accepts only injected provenance-bearing handoffs. Provider implementation
  * source is never copied; only declared metadata bytes supplied by the caller
  * are cached. Production selection stays fail-closed for the current truthful
- * identities: marketing-smb-v1 remains quarantined/non-selectable and
+ * identities: marketing-smb-v1 is Library-local selectable only on the
+ * protected 0704dbe identity (LiNKsites renderer/Payload/production remain
+ * unproven). The 5188aaf planning pin stays quarantined/non-selectable.
  * master-template-type-1 remains planning/candidate.
  */
 
@@ -39,6 +41,8 @@ export const LSFACT01_PACKET = 'LSFACT-01' as const
 
 export const LSFACT01_HOLD = Object.freeze({
   marketingSmbV1: 'quarantined/non-selectable; not production admission',
+  marketingSmbV1Protected:
+    'library-local selectable on protected 0704dbe; LiNKsites renderer/Payload/production remain unproven',
   masterTemplateType1: 'planning/candidate; draft/non_selectable/unknown; not production admission',
   selectableHandoffs: 'exact selectable Library releases remain a later source-release and live-acceptance gate',
 })
@@ -47,6 +51,18 @@ export const LSFACT01_LIBRARIES_PROVENANCE = Object.freeze({
   repository: 'linktrend/LiNKlibraries',
   commit: '5188aaf1a9313a3746075cd6ccea0937c05f7a32',
   tree: 'e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139',
+})
+
+export const LSFACT01_PROTECTED_MARKETING_SMB = Object.freeze({
+  repository: 'linktrend/LiNKlibraries',
+  ref: 'development',
+  commit: '0704dbef0871216dee5c4b85b3e2783823c21edb',
+  tree: '183e834bf7888a5a6e675a1232a1f979c8991a42',
+  entryPath: 'entries/marketing-smb-v1',
+  entryGitTree: 'd146699d8d03d6f4821fe7aa57d449678c3ea170',
+  catalogSha256: 'd8e9b6d7616d98f08890bb5db08a1c0aad93775c54f7eac880380285ff1ba23e',
+  entryJsonSha256: 'bf7efdbe2cc281bbfb193aab4554a660648da5c2c4baeb40f078d7ad110bb9b7',
+  contentSchemaSha256: 'b6d809f845f8bd5c0fecfd3815209ecb6d7afb325c034bdd468197ac6088c0dd',
 })
 
 const SHA1 = /^[a-f0-9]{40}$/
@@ -199,8 +215,18 @@ function confined(root: string, candidate: string): boolean {
   return candidate === root || candidate.startsWith(prefix)
 }
 
-function familyHold(family: ProviderFamilyId): string {
-  return family === 'marketing-smb-v1' ? LSFACT01_HOLD.marketingSmbV1 : LSFACT01_HOLD.masterTemplateType1
+export function isProtectedMarketingSmbIdentity(identity: { commit: string; tree: string }): boolean {
+  return (
+    identity.commit === LSFACT01_PROTECTED_MARKETING_SMB.commit &&
+    identity.tree === LSFACT01_PROTECTED_MARKETING_SMB.tree
+  )
+}
+
+function familyHold(family: ProviderFamilyId, producer?: { commit: string; tree: string }): string {
+  if (family === 'master-template-type-1') return LSFACT01_HOLD.masterTemplateType1
+  return producer && isProtectedMarketingSmbIdentity(producer)
+    ? LSFACT01_HOLD.marketingSmbV1Protected
+    : LSFACT01_HOLD.marketingSmbV1
 }
 
 function inventoryDigest(files: readonly ExactProviderFile[]): string {
@@ -223,8 +249,18 @@ function assertSha256(value: unknown, label: string): asserts value is string {
   if (typeof value !== 'string' || !SHA256.test(value)) deny('invalid_handoff', `${label} must be a lowercase SHA-256.`)
 }
 
-function truthfulLifecycle(family: ProviderFamilyId): { lifecycle: ExactHandoffLifecycle; selectability: ExactHandoffSelectability; compatibility: ExactHandoffCompatibility } {
+function truthfulLifecycle(
+  family: ProviderFamilyId,
+  producer?: { commit: string; tree: string },
+  pin?: { commit: string; tree: string },
+): { lifecycle: ExactHandoffLifecycle; selectability: ExactHandoffSelectability; compatibility: ExactHandoffCompatibility } {
   if (family === 'marketing-smb-v1') {
+    const protectedIdentity =
+      Boolean(producer && isProtectedMarketingSmbIdentity(producer)) &&
+      (!pin || isProtectedMarketingSmbIdentity(pin))
+    if (protectedIdentity) {
+      return { lifecycle: 'selectable', selectability: 'selectable', compatibility: 'unknown' }
+    }
     return { lifecycle: 'quarantined', selectability: 'non_selectable', compatibility: 'unknown' }
   }
   return { lifecycle: 'draft', selectability: 'non_selectable', compatibility: 'unknown' }
@@ -282,11 +318,11 @@ export function sealExactProviderHandoff(input: {
   files: ReadonlyArray<{ path: string; bytes: string }>
   dependencyLock?: unknown
 }): ExactProviderHandoff {
-  const truth = truthfulLifecycle(input.family)
-  const files = input.files.map((file) => ({ path: file.path, bytes: file.bytes, sha256: sha256Utf8(file.bytes) }))
   const producer = input.producer ?? LSFACT01_LIBRARIES_PROVENANCE
   const pinCommit = input.pinCommit ?? producer.commit
   const pinTree = input.pinTree ?? producer.tree
+  const truth = truthfulLifecycle(input.family, producer, { commit: pinCommit, tree: pinTree })
+  const files = input.files.map((file) => ({ path: file.path, bytes: file.bytes, sha256: sha256Utf8(file.bytes) }))
   const lock = input.dependencyLock ?? { packages: [], services: [] }
   const pinBase = {
     repositoryUrl: LINKLIBRARIES_REPOSITORY_URL,
@@ -391,18 +427,32 @@ export function assertExactProviderHandoff(value: unknown): ExactProviderHandoff
   ) {
     deny('invalid_handoff', 'Handoff lifecycle fields are not bound to the pin.')
   }
-  const truth = truthfulLifecycle(value.family)
+  const truth = truthfulLifecycle(value.family, value.producer, { commit: value.pin.commit, tree: value.pin.tree })
   if (value.family === 'marketing-smb-v1') {
-    if (
-      value.lifecycle === 'admitted' ||
-      value.lifecycle === 'selectable' ||
-      value.selectability === 'selectable' ||
-      value.compatibility === 'compatible'
-    ) {
-      rejectStaleMarketingSmbAuthority({ entryId: value.entryId, status: 'approved', selectability: value.selectability })
-    }
-    if (value.lifecycle !== truth.lifecycle || value.selectability !== truth.selectability || value.compatibility !== truth.compatibility) {
-      deny('lifecycle_denied', 'marketing-smb-v1 remains quarantined/non-selectable; relabeling fixtures is rejected.')
+    const protectedIdentity =
+      isProtectedMarketingSmbIdentity(value.producer) && isProtectedMarketingSmbIdentity(value.pin)
+    if (protectedIdentity) {
+      if (value.compatibility === 'compatible') {
+        deny('lifecycle_denied', 'protected marketing-smb-v1 remains unproven for LiNKsites renderer and Payload CMS; relabeling as compatible is rejected.')
+      }
+      if (value.lifecycle !== truth.lifecycle || value.selectability !== truth.selectability || value.compatibility !== truth.compatibility) {
+        deny(
+          'lifecycle_denied',
+          'protected marketing-smb-v1 is library-local selectable with unknown LiNKsites compatibility; other labels are rejected.',
+        )
+      }
+    } else {
+      if (
+        value.lifecycle === 'admitted' ||
+        value.lifecycle === 'selectable' ||
+        value.selectability === 'selectable' ||
+        value.compatibility === 'compatible'
+      ) {
+        rejectStaleMarketingSmbAuthority({ entryId: value.entryId, status: 'approved', selectability: value.selectability })
+      }
+      if (value.lifecycle !== truth.lifecycle || value.selectability !== truth.selectability || value.compatibility !== truth.compatibility) {
+        deny('lifecycle_denied', 'marketing-smb-v1 remains quarantined/non-selectable; relabeling fixtures is rejected.')
+      }
     }
   }
   if (value.family === 'master-template-type-1') {
@@ -437,7 +487,7 @@ export function bindExactProviderHandoff(value: unknown): BoundExactProvider {
       artifactDigest: handoff.pin.artifactDigest,
     }),
     productionSelectable: false,
-    hold: familyHold(handoff.family),
+    hold: familyHold(handoff.family, handoff.producer),
   })
 }
 
