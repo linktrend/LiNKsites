@@ -8,8 +8,8 @@
   "qualificationVerdict": "HOLD",
   "acceptanceCommandsPass": true,
   "leanIndependentReviewer": "not-required",
-  "qualificationCommit": "PENDING_LOCAL_COMMIT",
-  "evidenceHeadAtValidation": "PENDING_LOCAL_COMMIT",
+  "qualificationCommit": "662a3a9e4388f676cb2413c857aad76164fe37ac",
+  "evidenceHeadAtValidation": "662a3a9e4388f676cb2413c857aad76164fe37ac",
   "baseSha": "a3a8834dee19c83dec9c19051ca4519a7ff51565",
   "checks": [
     {
