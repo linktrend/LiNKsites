@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue-checkpoint",
+  "issue": 548,
+  "branch": "issue/548-remove-duplicate-pnpm-version-declaration-so-pro",
+  "admittedCommit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+  "admittedTree": "e29607c43146decdf81c2f132562745f6a911780",
+  "implementationCommit": "c3f36453d69cd619218d0a019b1487ff8d28d9f1",
+  "at": "2026-09-13T07:04:08Z",
+  "didNotCreatePr": true
+}
