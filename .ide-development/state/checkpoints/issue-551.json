@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "v25-issue-checkpoint",
+  "issue": 551,
+  "branch": "cursor/linksites-ext-ls-01-a1-native-proof-repair-551-154d",
+  "admittedStartingRef": "issue/551-repair-exact-a1-consumer-receipt-and-native-rend",
+  "headSha": "abe2447356107eddbf8358d950bc97e7290d2a3e",
+  "gitTree": "92fe6f1750ffcf6edbe98ce64bd0805f3149ac96",
+  "proofClass": "local",
+  "claims": {
+    "accept": false,
+    "catalogueSelectable": false,
+    "production": false,
+    "mwt08": false,
+    "deployment": false
+  }
+}
