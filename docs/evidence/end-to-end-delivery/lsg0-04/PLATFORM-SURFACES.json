@@ -3,14 +3,18 @@
   "kind": "lsg0-04-platform-surface-qualification",
   "boundIdentity": {
     "repository": "linktrend/LiNKplatform",
-    "ref": "main",
-    "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
-    "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71"
+    "ref": "development",
+    "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
+    "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
+    "subject": "Merge pull request #266 from linktrend/phase/brain-265-secret-scan-safe",
+    "mergedAtUtc": "2026-09-12T07:25:41Z",
+    "role": "protected-integration-branch-not-staging-main-not-live"
   },
-  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
+  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
   "liveProbesForbidden": true,
   "secretValuesNotRequested": true,
   "liveEvidenceAvailableToThisWorker": false,
+  "advisor2NarrativeNotUsedAsReceipt": true,
   "overall": "HOLD",
   "surfaces": [
     {
@@ -18,6 +22,8 @@
       "requiredHandoff": "valid LiNKsites catalogue-profile provider pin on the bound protected commit/tree",
       "classification": "missing and needs work",
       "evidenceLevel": "protected-source-wrong-consumer-wrong-pin",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
         "path": "docs/contracts/frozen/EXT-LCL-PLATFORM-CATALOGUE-CONTRACT.provider-handoff.json",
         "sha256": "3ebd0e8c7e8c09a19a45e744c436ffcfc8fbf111a67848ed24576ea36d44cb36",
@@ -25,12 +31,12 @@
         "requestingWorkPacket": "LCL-WP-002",
         "pinCommit": "acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062",
         "pinTree": "8027697bc681085a2a1a4af029028bc76426c06a",
-        "equalsBoundMain": false,
+        "equalsBoundDevelopment": false,
         "namesLiNKsites": false,
         "integrationClaimed": false,
         "consumerProofClaimed": false,
         "production": false,
-        "unchangedFromIssue534": true
+        "sameBytesAsIssue539Inspection": true
       },
       "schemaLocksConsumerConst": {
         "path": "packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
@@ -43,6 +49,8 @@
       "requiredHandoff": "current Platform claim grant for LiNKsites on the bound identity",
       "classification": "missing and needs work",
       "evidenceLevel": "synthetic-fixtures-only",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
         "authClaimsContract": "platform.auth-claims/1.1.0",
         "repinPacketDoesNotEditLiNKsites": true,
@@ -59,6 +67,8 @@
       "requiredHandoff": "LiNKsites service identity on the bound protected identity",
       "classification": "missing and needs work",
       "evidenceLevel": "no-bound-service-receipt",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
         "linksitesNamedInSourceMigrationsAndDocs": true,
         "boundServiceRegistrationReceiptForLiNKsites": false
@@ -68,13 +78,21 @@
       "id": "platform-registration",
       "requiredHandoff": "actor/service registration receipt for LiNKsites bound to this Platform commit",
       "classification": "missing and needs work",
-      "evidenceLevel": "absent-on-protected-main",
+      "evidenceLevel": "schema-on-bound-protected-development-no-linksites-row",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
-        "boundMainHasIdentityRegistrationReceiptTable": false,
+        "identityRegistrationReceiptTableOnBoundIdentity": true,
+        "migration": "supabase/migrations/20260909_000020_platform_identity_registration_receipts.sql",
+        "storesSecretValues": false,
+        "containsLiNKsitesActorOrServiceRow": false,
+        "operatorWriterOnly": "svc_platform",
+        "unitTestsAreNotHostedReceipts": true,
         "rlsGrantSqlIsNotCurrentRegistrationHandoff": [
           "supabase/migrations/20260804_000017_linksites_platform_rls_grants.sql",
           "supabase/migrations/20260804233546_linksites_platform_rls_grants.sql"
-        ]
+        ],
+        "note": "Schema/source is now on the bound protected development identity. That does not publish a LiNKsites registration receipt."
       }
     },
     {
@@ -82,10 +100,20 @@
       "requiredHandoff": "LiNKsites credential-by-reference (no secret values)",
       "classification": "missing and needs work",
       "evidenceLevel": "absent",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
         "credentialByReferenceHandoffForLiNKsites": false,
         "gsmInventoryOnBoundTree": "infra/secrets/gsm-inventory.md",
         "gsmInventoryNamesLiNKsites": false,
+        "gsmNamedConsumersOnBoundTree": [
+          "LINKTREND_PLATFORM_STAGE_BRAIN_RUNTIME_CREDENTIAL_REF",
+          "LINKTREND_PLATFORM_STAGE_SKILLS_RUNTIME_CREDENTIAL_REF",
+          "LINKTREND_PLATFORM_PROD_BRAIN_RUNTIME_CREDENTIAL_REF",
+          "LINKTREND_PLATFORM_PROD_SKILLS_RUNTIME_CREDENTIAL_REF"
+        ],
+        "paciClientAssertionPattern": "LINKTREND_PLATFORM_{STAGE|PROD}_PACI_CLIENT_ASSERTION_KEY_REF__{CLIENT_ID}",
+        "paciClientAssertionExamplesNameLiNKsites": false,
         "secretValuesInspected": false,
         "workerEnvHadGsmOrPlatformSecretNames": false
       }
@@ -95,6 +123,8 @@
       "requiredHandoff": "current issuer identity granted to LiNKsites",
       "classification": "missing and needs work",
       "evidenceLevel": "source-issuer-lock-not-consumer-grant",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
         "issuerLockSourcePresent": "packages/paci/src/issuer-lock.ts",
         "issuerMigrationsPresent": true,
@@ -106,6 +136,8 @@
       "requiredHandoff": "current audience grant for LiNKsites",
       "classification": "missing and needs work",
       "evidenceLevel": "fixtures-only",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
         "claimsRejectWrongAudienceFixturePresent": true,
         "hostedAudienceGrantForLiNKsites": false
@@ -116,6 +148,8 @@
       "requiredHandoff": "current scope grant for LiNKsites",
       "classification": "missing and needs work",
       "evidenceLevel": "capability-names-in-fixtures-not-grants",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
         "providerTrustCapabilitiesIncludeLinksitesAdvisoryProjectionRead": true,
         "forbiddenCapabilityNamesIncludeLinksitesPublish": true,
@@ -127,8 +161,19 @@
       "requiredHandoff": "applied production/stage migration receipts for this identity",
       "classification": "done but requires testing/fixing",
       "evidenceLevel": "local-nonlive-proof-wrong-tree",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
-        "sourceMigrationsExist": true,
+        "sourceMigrationsExistOnBoundIdentity": true,
+        "linksitesRlsGrantMigrationPresent": "supabase/migrations/20260804_000017_linksites_platform_rls_grants.sql",
+        "additionalSourceMigrationsOnThisIdentityNotProvenApplied": [
+          "supabase/migrations/20260908_000018_platform_linkconsole_authority.sql",
+          "supabase/migrations/20260908_000019_platform_migration_receipts_schema_upgrade.sql",
+          "supabase/migrations/20260909_000020_platform_identity_registration_receipts.sql",
+          "supabase/migrations/20260909_000021_platform_paci_identity_cardinality.sql",
+          "supabase/migrations/20260910_000022_platform_svc_platform_native_login.sql",
+          "supabase/migrations/20260911_000023_platform_portal_membership_rpc.sql"
+        ],
         "localProofPath": "docs/evidence/phase-1/CURRENT-BOUND-000017-POSTGRES-PROVIDER-PROOF-2026-08-31.json",
         "localProofSha256": "4d34c52e945e379859942368fa1ced0bb3fd3d71a97da348d52362acc2d6fcec",
         "localProofStatus": "PASS",
@@ -140,7 +185,7 @@
         "headShaAtProof": "cc1ac72f23f0086ff8d63f8dda5521a1d6353413",
         "gitTreeAtProof": "f62d6b29ace11cc2bf73e72d69e63de9c06498d1",
         "branchAtProof": "issue/174-current-bound-000017-receipt-repair",
-        "matchesBoundMainCommitTree": false,
+        "matchesBoundDevelopmentCommitTree": false,
         "appliedProductionOrStageReceiptForBoundIdentity": false
       }
     },
@@ -149,6 +194,8 @@
       "requiredHandoff": "live issuer/health surface evidence for the bound protected identity",
       "classification": "missing and needs work",
       "evidenceLevel": "unavailable-to-this-worker",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
       "observed": {
         "healthContractSource": "packages/contracts/src/health.ts",
         "boundTreeHostHealthDoc": "docs/evidence/w20-stage-readiness/host-health-and-stage-gate.md",
@@ -156,9 +203,19 @@
         "hostHealthDocForbidsLiveStageCalls": true,
         "liveHealthEvidenceFilesOnBoundTree": [],
         "githubReleaseLiveHealth": false,
-        "liveProbePerformed": false,
-        "status": "HOLD"
+        "liveProbePerformed": false
       }
+    }
+  ],
+  "nonLiNKsitesHandoffsOnBoundTreeNotSubstituted": [
+    {
+      "path": "docs/handoffs/2026-09-11-platform-portal-membership-rpc-candidate-return-handoff.json",
+      "requestingConsumer": "LiNKportal",
+      "lifecycleState": "candidate-draft",
+      "protectedIntegrationClaimed": false,
+      "liveMigrationApplied": false,
+      "notALiNKsitesHandoff": true,
+      "notCreditedAsProtectedLiveHandoff": true
     }
   ]
 }

@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
   "kind": "lsg0-04-owner-actions",
-  "issue": 539,
-  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
+  "issue": 543,
+  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
   "overall": "HOLD",
   "passForbiddenUntilAllRequiredSurfacesExistInProtectedReleasedEvidence": true,
   "actions": [
     {
       "owner": "linktrend/LiNKplatform",
-      "action": "Publish a valid catalogue-profile provider pin that names LiNKsites as requesting consumer against exact protected commit/tree (bound main a0058e749b2530c4abf8deadb09f2fd4add1ee4f / cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71, or a later protected identity that LiNKsites re-binds). Include actor/service registration, credential references (not secret values), issuer/audience/scopes, applied migration receipts for that identity, and live issuer/health evidence. Do not treat LiNKclient LCL-WP-002 pin acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062 as a LiNKsites pin. Development schema 8d7af99575a5498ecda6b4396431136eb7c9c213 is not released proof."
+      "action": "Publish a valid catalogue-profile provider pin that names LiNKsites as requesting consumer against exact protected commit/tree (bound development 8d7af99575a5498ecda6b4396431136eb7c9c213 / db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb, or a later protected identity that LiNKsites re-binds). Include actor/service registration row (schema 000020 exists; LiNKsites row does not), credential references (not secret values), issuer/audience/scopes, applied stage/prod migration receipts for that identity, and live issuer/health evidence. Do not treat the LiNKclient LCL-WP-002 pin acd86e1d264f9b7ee34ae4bae3c3114cc5d4a062 as a LiNKsites pin. Do not treat Advisor 2 'Platform is complete' or Phase PR 266 as that handoff."
     },
     {
       "owner": "linktrend/LiNKautowork",
-      "action": "Publish LiNKsites consumer registration, event grants, organisation/environment grants, an admitted signing-reference, an admitted private endpoint identity (sanitized), live health, and a live org-bound receipt against exact protected commit/tree (bound main 2e30109acfb9510cd77e49f759648b2b6a666adc / af6883f2b5b093e221eed5f0d033aa7647582717, or a later protected identity that LiNKsites re-binds). The LiNKskills PKT-03 blocked hold is not a LiNKsites registration. Source HMAC helpers, /health routes, archive templates, and unit tests are not live handoff."
+      "action": "Publish LiNKsites consumer registration, event grants, organisation/environment grants, an admitted LiNKsites signing-reference, an admitted private endpoint identity (sanitized), live health, and a live org-bound receipt against exact protected commit/tree (bound development a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd / 10e6b59394bfd57703d6f3cee5d7bcda3aa7342f, or a later protected identity that LiNKsites re-binds). The LiNKskills PKT-03 blocked hold is not a LiNKsites registration. Source HMAC helpers, generic LINKAUTOWORK_LINK_HMAC_SHARED_SECRETS_PROD, /health routes, archive templates, disposable-db fixtures, and unit tests are not live handoff. Protected development documentation of remaining production work is not live operation."
     },
     {
       "owner": "linktrend/LiNKsites",

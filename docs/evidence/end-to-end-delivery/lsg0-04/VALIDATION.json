@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "kind": "lsg0-04-validation",
-  "issue": 539,
-  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
+  "issue": 543,
+  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
   "overall": "HOLD",
   "pass": false,
   "qualificationVerdict": "HOLD",
   "acceptanceCommandsPass": true,
   "leanIndependentReviewer": "not-required",
-  "qualificationCommit": "66c1208b6e0043b417007c526c52019c142ae6b6",
-  "evidenceHeadAtValidation": "66c1208b6e0043b417007c526c52019c142ae6b6",
-  "baseSha": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+  "qualificationCommit": "PENDING_LOCAL_COMMIT",
+  "evidenceHeadAtValidation": "PENDING_LOCAL_COMMIT",
+  "baseSha": "a3a8834dee19c83dec9c19051ca4519a7ff51565",
   "checks": [
     {
       "id": "json-tool",
@@ -19,7 +19,7 @@
     },
     {
       "id": "scoped-diff",
-      "command": "test -z \"$(git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
+      "command": "test -z \"$(git diff --name-only a3a8834dee19c83dec9c19051ca4519a7ff51565...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
       "result": "pass",
       "changedPaths": [
         "docs/evidence/end-to-end-delivery/lsg0-04/AUTOWORK-SURFACES.json",
@@ -36,7 +36,7 @@
     },
     {
       "id": "diff-check",
-      "command": "git diff --check 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD",
+      "command": "git diff --check a3a8834dee19c83dec9c19051ca4519a7ff51565...HEAD",
       "result": "pass"
     },
     {

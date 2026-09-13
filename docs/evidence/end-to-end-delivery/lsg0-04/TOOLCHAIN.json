@@ -3,18 +3,18 @@
   "kind": "admitted-manifest-ci-toolchain",
   "sourceIdentity": {
     "repository": "linktrend/LiNKsites",
-    "ref": "issue/539-refresh-lsg0-04-platform-and-autowork-live-hando",
-    "commitAtInstall": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
-    "treeAtInstall": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea"
+    "ref": "issue/543-refresh-lsg0-04-current-platform-and-autowork-ha",
+    "commitAtInstall": "a3a8834dee19c83dec9c19051ca4519a7ff51565",
+    "treeAtInstall": "a24add76b5fa4a3f9522bf12fe1e90be62b7b4a1"
   },
-  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
+  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
   "cloudRuntime": {
     "uname": "Linux cursor 6.12.94+ x86_64",
     "python": "Python 3.12.3 (/usr/bin/python3)",
     "cursorCloud": {
-      "bcId": "bc-4f9095a8-aaa4-4639-b445-a22b1c5fc485",
+      "bcId": "bc-d6d2655e-d351-4533-934a-f8d201ab2053",
       "environmentPublicId": "b0238f1f-ae52-11f1-bf4b-42ffb4d10ea7",
-      "buildId": "bld-20260912-b7d55b45-1315-4fcf-929a-7b4439aacd0c",
+      "buildId": "bld-20260913-b8ef1b67-c85f-4345-9e87-7751d7c96c77",
       "gitSetup": "reuse_then_checkout",
       "warmFork": "warm_fork"
     },
@@ -41,9 +41,9 @@
   },
   "pinDiagnosis": {
     "nodeCompiler": "CI pins Node major 22 only; no compiler hash/lock. Default PATH node was /exec-daemon/node v22.14.0. After nvm use 22 and PATH prepend, node was v22.22.2 at ~/.nvm/versions/node/v22.22.2/bin/node. Both are Node 22. Not a hash-locked compiler. Did not silently pick another major.",
-    "pnpmOnFreshPath": "After nvm use 22 and PATH prepend, which pnpm was 10.33.3 until corepack enable + corepack prepare pnpm@10.0.0 --activate. Diagnosed; first frozen install accidentally used 10.33.3; did not change the lockfile. Re-ran frozen install with pnpm 10.0.0.",
+    "pnpmOnFreshPath": "which pnpm after nvm use 22 was already 10.0.0 at ~/.nvm/versions/node/v22.22.2/bin/pnpm. Still ran corepack enable + corepack prepare pnpm@10.0.0 --activate. Did not use the 10.33.3 binary that was visible before nvm PATH prepend.",
     "pnpmUsed": "corepack enable; corepack prepare pnpm@10.0.0 --activate; resulting pnpm 10.0.0 at /home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm. packageManager field has no integrity hash.",
-    "lockfile": "pnpm-lock.yaml present; sha256 dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175; frozen install with pnpm 10.0.0 reported already up to date.",
+    "lockfile": "pnpm-lock.yaml present; sha256 dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175; frozen install with pnpm 10.0.0 reported lockfile up to date.",
     "lockDefect": "none-observed-for-frozen-install; packageManager has no integrity hash; Node is major-only",
     "didNotChangeLocks": true,
     "didNotSilentlyUseUnpinnedPnpm12": true,
@@ -59,8 +59,8 @@
   },
   "acceptanceCommandsRequiredThisPacket": [
     "find docs/evidence/end-to-end-delivery/lsg0-04 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-    "test -z \"$(git diff --name-only 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
-    "git diff --check 7a88e6be88202fffe5a7f01526fadb517e2caeeb...HEAD"
+    "test -z \"$(git diff --name-only a3a8834dee19c83dec9c19051ca4519a7ff51565...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
+    "git diff --check a3a8834dee19c83dec9c19051ca4519a7ff51565...HEAD"
   ],
   "forbiddenThisPacket": [
     "Full Suite",

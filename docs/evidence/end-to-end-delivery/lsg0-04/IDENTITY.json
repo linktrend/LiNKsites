@@ -2,40 +2,40 @@
   "schemaVersion": 1,
   "kind": "lsg0-04-qualification-identities",
   "packet": "LSG0-04",
-  "issue": 539,
-  "title": "Refresh LSG0-04 Platform and Autowork live handoff evidence",
-  "qualificationTimeUtc": "2026-09-12T22:56:23Z",
+  "issue": 543,
+  "title": "Refresh LSG0-04 current Platform and Autowork handoffs",
+  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
   "writerRole": "implementation-evidence-only",
   "initialCachedIdentity": {
-    "note": "Cursor cached checkout before supplied-branch fetch. Reported separately from admitted starting-work identity. All three workspaces were on the cloud overlay branch at the supplied commits.",
+    "note": "Cursor cached checkout before supplied-branch fetch. Reported separately from admitted starting-work identity. All three workspaces were already on the cloud overlay branch at the supplied commits; origin host paths matched.",
     "linksites": {
       "originHostPath": "github.com/linktrend/LiNKsites",
-      "branch": "cursor/linksites-lsg0-04-live-refresh-539-7e21",
-      "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
-      "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea",
+      "branch": "cursor/linksites-lsg0-04-current-handoff-543-0a6e",
+      "commit": "a3a8834dee19c83dec9c19051ca4519a7ff51565",
+      "tree": "a24add76b5fa4a3f9522bf12fe1e90be62b7b4a1",
       "dirty": false
     },
     "platform": {
       "originHostPath": "github.com/linktrend/LiNKplatform",
-      "branch": "cursor/linksites-lsg0-04-live-refresh-539-7e21",
-      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
-      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "branch": "cursor/linksites-lsg0-04-current-handoff-543-0a6e",
+      "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
+      "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
       "dirty": false
     },
     "autowork": {
       "originHostPath": "github.com/linktrend/LiNKautowork",
-      "branch": "cursor/linksites-lsg0-04-live-refresh-539-7e21",
-      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
-      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "branch": "cursor/linksites-lsg0-04-current-handoff-543-0a6e",
+      "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
+      "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
       "dirty": false
     }
   },
   "admittedStartingWorkIdentity": {
     "primary": {
       "repository": "linktrend/LiNKsites",
-      "ref": "issue/539-refresh-lsg0-04-platform-and-autowork-live-hando",
-      "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
-      "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea",
+      "ref": "issue/543-refresh-lsg0-04-current-platform-and-autowork-ha",
+      "commit": "a3a8834dee19c83dec9c19051ca4519a7ff51565",
+      "tree": "a24add76b5fa4a3f9522bf12fe1e90be62b7b4a1",
       "role": "writer",
       "originMatch": true,
       "fetchedBranchCommitMatch": true,
@@ -45,39 +45,54 @@
     "readOnlySources": [
       {
         "repository": "linktrend/LiNKplatform",
-        "ref": "main",
-        "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
-        "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+        "ref": "development",
+        "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
+        "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
         "role": "read-only-source",
         "originMatch": true,
         "fetchedBranchCommitMatch": true,
         "fetchedBranchTreeMatch": true,
         "detachedExactCommit": true,
         "checkoutDirty": false,
-        "didNotSubstituteLaterTip": true
+        "didNotSubstituteLaterTip": true,
+        "didNotFetchMainOrStaging": true
       },
       {
         "repository": "linktrend/LiNKautowork",
-        "ref": "main",
-        "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
-        "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+        "ref": "development",
+        "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
+        "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
         "role": "read-only-source",
         "originMatch": true,
         "fetchedBranchCommitMatch": true,
         "fetchedBranchTreeMatch": true,
         "detachedExactCommit": true,
         "checkoutDirty": false,
-        "didNotSubstituteLaterTip": true
+        "didNotSubstituteLaterTip": true,
+        "didNotFetchMainOrStaging": true
       }
     ]
   },
-  "protectedSourceCommitsUnchangedFromIssue534": true,
-  "liveSurfacesCanChangeIndependentlyOfProtectedSource": true,
-  "priorCoordinatorDevelopmentInspection": {
-    "record": "COORDINATOR-DEVELOPMENT-INSPECTION.json",
-    "retainedFromIssue": 534,
-    "thisRefreshDidNotFetchDevelopment": true,
-    "reason": "This worker was authorized to fetch/read only the supplied bound commits. Prior inspection of unbound development SHAs is preserved and is not released live handoff."
+  "bindingChangeFromIssue539": {
+    "issue539BoundPlatform": {
+      "ref": "main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71"
+    },
+    "issue539BoundAutowork": {
+      "ref": "main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717"
+    },
+    "thisPacketBindsProtectedDevelopmentNotMain": true,
+    "didNotPreserveOldHoldOnlyBecauseOlderCommit": true,
+    "reverifiedEveryRequiredSurfaceOnNewBoundIdentities": true
+  },
+  "advisor2Narrative": {
+    "statement": "Platform is complete",
+    "treatedAs": "narrative-not-receipt",
+    "didNotFabricateEvidenceFromNarrative": true,
+    "inspectionOutcome": "Protected LiNKplatform development 8d7af99575a5498ecda6b4396431136eb7c9c213 contains merged Phase PR 266 and identity-registration schema source. That is not a LiNKsites catalogue pin, hosted grant, applied stage/prod receipt, or live health proof."
   },
   "planningPinsNotCurrentDefault": {
     "platformReviewedDevelopmentUsedByLSG0-02": {
@@ -88,16 +103,17 @@
       "commit": "605c8281997e4793a826ce4c82b8dcbd6017ba26",
       "tree": "c03f9c65879c0195416cc0699c1caa346d9bb63b"
     },
-    "note": "LSG0-02 sanitized copies remain planning/source contracts. They are not the bound protected/default identities and are not live proof."
+    "note": "LSG0-02 sanitized copies remain planning/source contracts. They are not the bound protected/development identities and are not live proof."
   },
-  "copiedProtectedSourcesOnAdmittedSitesTree": {
-    "platform": "docs/end-to-end-delivery/upstreams/linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/",
-    "autowork": "docs/end-to-end-delivery/upstreams/linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/",
-    "bundleRole": "immutable protected/released source copy; not live proof"
+  "copiedSourcesOnAdmittedSitesTree": {
+    "platformMainCopyFromPriorPacket": "docs/end-to-end-delivery/upstreams/linkplatform/a0058e749b2530c4abf8deadb09f2fd4add1ee4f/",
+    "autoworkMainCopyFromPriorPacket": "docs/end-to-end-delivery/upstreams/linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/",
+    "bundleRole": "immutable prior-main sanitized copy on the LiNKsites tree; not this packet's bound development identity and not live proof",
+    "thisPacketDidNotCopyBoundDevelopmentIntoUpstreams": true
   },
   "missingReferencedAuthorityFileOnAdmittedSitesTree": {
     "path": "docs/production-roadmap/phase-2/UPSTREAM-DEPENDENCIES.md",
-    "presentOnCommit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+    "presentOnCommit": "a3a8834dee19c83dec9c19051ca4519a7ff51565",
     "present": false,
     "fallbackAuthorityUsed": [
       "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md#LSG0-04",
