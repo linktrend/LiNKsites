@@ -2,10 +2,29 @@
   "schemaVersion": 1,
   "kind": "v25-issue-checkpoint",
   "issue": 551,
-  "branch": "cursor/linksites-ext-ls-01-a1-native-proof-repair-551-154d",
+  "branch": "cursor/linksites-ext-ls-01-a1-native-proof-551-completion-005c",
+  "ownedIssueBranch": "issue/551-repair-exact-a1-consumer-receipt-and-native-rend",
   "admittedStartingRef": "issue/551-repair-exact-a1-consumer-receipt-and-native-rend",
-  "headSha": "abe2447356107eddbf8358d950bc97e7290d2a3e",
-  "gitTree": "92fe6f1750ffcf6edbe98ce64bd0805f3149ac96",
+  "headSha": "4d7798e9f0417ffa04e8885ac4e61502fc641c84",
+  "gitTree": "deb4c24c64aea298f385002a7eb91caa14af2935",
+  "admittedCommit": "4d7798e9f0417ffa04e8885ac4e61502fc641c84",
+  "admittedTree": "deb4c24c64aea298f385002a7eb91caa14af2935",
+  "independentNarrowReview": {
+    "accepted": true,
+    "runId": "run-10842fbb-f038-4ebc-8721-5bce7ddaa7d9",
+    "headSha": "4d7798e9f0417ffa04e8885ac4e61502fc641c84",
+    "gitTree": "deb4c24c64aea298f385002a7eb91caa14af2935",
+    "paths": [
+      "tests/master-template-v2/a1",
+      "packages/factory-catalog/tests/revision2Materialization.spec.ts",
+      "scripts/profile-v2-quality/ext-ls-01"
+    ],
+    "reviewer": {
+      "actor": "run-10842fbb-f038-4ebc-8721-5bce7ddaa7d9",
+      "role": "reviewer"
+    },
+    "implementerActor": "issue-551-completion-implementer"
+  },
   "proofClass": "local",
   "claims": {
     "accept": false,
