@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-contract-status",
-  "issue": 544,
+  "issue": 546,
   "continuityComplete": false,
   "archiveAndReleaseComplete": false,
   "lsart01Complete": false,
@@ -9,15 +9,28 @@
   "sourceLevelReproducibilityGapsClosed": [
     "floating third-party Actions in .github/workflows/ci.yml",
     "CI Node major-only 22",
-    "packageManager pnpm@10.0.0 without Corepack integrity hash"
+    "packageManager pnpm@10.0.0 without Corepack integrity hash",
+    "unversioned production apk add of libc6-compat, git and ca-certificates"
   ],
   "externalProofStillMissing": [
-    "owned archive download/publication of locked packages, pnpm tarball, base images, APK snapshots and produced image bytes",
+    "owned archive download/publication of locked packages, pnpm tarball, base images, APKINDEX snapshots plus architecture-specific .apk blobs, and produced image bytes",
     "five-image build and publication from protected main",
     "registry readback and SBOM/provenance on published digests",
     "Server03 deployment",
     "live FR-13 restore/rollback proof"
   ],
+  "apkRemainingArchiveRequirement": {
+    "whyNotAFalsePin": "Package versions are equal on x86_64 and aarch64, so name=version pins are valid for multi-arch builds. APK file hashes and APKINDEX tarball hashes already differ by architecture. Live Alpine v3.22 main indexes can drop or replace those versions. Transitive git/ca-certificates dependencies remain unlisted. Therefore this issue records an owned dual-arch APKINDEX plus .apk snapshot as the remaining fail-closed requirement instead of claiming an apk-snapshot identity.",
+    "indexesToArchive": [
+      "alpine v3.22 main x86_64 APKINDEX.tar.gz",
+      "alpine v3.22 main aarch64 APKINDEX.tar.gz"
+    ],
+    "namedPackages": [
+      "gcompat 1.1.0-r4 (provides libc6-compat=1.1.0-r4)",
+      "git 2.49.1-r0",
+      "ca-certificates 20260611-r0"
+    ]
+  },
   "tooling": {
     "generator": "deploy/scripts/generate-oss-continuity-manifest.mjs",
     "verifier": "deploy/scripts/verify-oss-continuity-manifest.mjs",
@@ -37,7 +50,7 @@
   },
   "syntheticPassingFixtureIsNotALiveArchive": true,
   "remainingBeforeLsart01": [
-    "LiNKtrend-controlled read-only archive of locked packages, base images, build tools and produced image bytes",
+    "LiNKtrend-controlled read-only archive of locked packages, base images, APK snapshots and produced image bytes",
     "verified archive receipts and checksums",
     "five-image publication from protected main",
     "registry readback and SBOM/provenance binding on the published digests",

@@ -1,7 +1,8 @@
 FROM node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed AS base
 WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-RUN apk add --no-cache libc6-compat git ca-certificates \
+# Alpine v3.22 main versions equal on x86_64 and aarch64. Live APKINDEX remains mutable.
+RUN apk add --no-cache libc6-compat=1.1.0-r4 git=2.49.1-r0 ca-certificates=20260611-r0 \
  && git config --system --add safe.directory /opt/linksites/linklibraries \
  && corepack enable \
  && corepack prepare pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b --activate

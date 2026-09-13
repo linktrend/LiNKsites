@@ -1,20 +1,19 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-validation",
-  "issue": 544,
+  "issue": 546,
   "overall": "HOLD",
   "pass": false,
   "continuityComplete": false,
   "acceptanceCommandsPass": true,
-  "baseSha": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
-  "implementationCommit": "a4fc7dd4d780009e0eec6ac1927ecee5937354e7",
+  "baseSha": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  "implementationCommit": "acbdeb9f0874cfb00ad3c736e4de51206abf71e1",
   "checks": [
     {
       "id": "release-toolchain-pins-tests",
       "command": "node --test deploy/tests/release-toolchain-pins.test.mjs",
       "result": "pass",
-      "nodeWithNvmPath": "v22.17.0",
-      "repair": "First run failed because FROM base stage aliases were treated as unpinned images. Test now excludes named build stages. Bounded one-cycle correction, not a repeat of the unchanged attempt."
+      "nodeWithNvmPath": "v22.17.0"
     },
     {
       "id": "oss-continuity-manifest-tests",
@@ -23,8 +22,14 @@
       "nodeWithNvmPath": "v22.17.0"
     },
     {
+      "id": "dockerfile-static-validation",
+      "command": "python3 FROM-digest check excluding named build stages; apk name=version parser in release-toolchain-pins.test.mjs",
+      "result": "pass",
+      "repair": "First FROM regex treated stage aliases (FROM base AS deps) as unpinned images. Recheck excluded named stages, same diagnosis as issue 544, not a repeat of the unchanged attempt."
+    },
+    {
       "id": "diff-check",
-      "command": "git diff --check 9220b01458a293663ecca7a110410b3b7c8ac9f4...HEAD",
+      "command": "git diff --check fba2ed08d5cf3a16ca691da6eec707d584153a7f...HEAD",
       "result": "pass"
     },
     {
@@ -32,7 +37,7 @@
       "tool": "rg",
       "result": "pass",
       "matches": 0,
-      "note": "Scanned git diff names from 9220b014...HEAD. Did not treat full-repo secret_scan.py pre-existing findings as this issue."
+      "note": "Scanned git diff names from fba2ed08... working tree. Did not treat full-repo secret_scan.py pre-existing candidateTree mismatch as this issue. Fixtures file not rewritten."
     },
     {
       "id": "frozen-lockfile-install",
@@ -48,5 +53,11 @@
   "didNotEditProtectedBranches": true,
   "didNotCreatePr": true,
   "didNotDispatchNestedWorkers": true,
-  "didNotBuildOrPublishImages": true
+  "didNotBuildOrPublishImages": true,
+  "remainingExternalArchiveProof": [
+    "owned dual-arch Alpine v3.22 APKINDEX plus .apk blobs (named packages and transitive closure)",
+    "owned archive of lock-resolved npm artifacts, pnpm tarball and base images",
+    "five published image digests with SBOM/provenance",
+    "Server03 deployment and live FR-13 rollback"
+  ]
 }

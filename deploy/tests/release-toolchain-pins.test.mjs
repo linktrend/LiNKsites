@@ -17,6 +17,48 @@ const PRODUCTION_DOCKERFILES = [
   'deploy/docker/migrations.Dockerfile',
 ]
 const NODE_IMAGE = 'node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed'
+const APK_PACKAGE = /^[A-Za-z0-9._+-]+$/
+const APK_EXACT_VERSION = /^[0-9][A-Za-z0-9._+~-]*$/
+const ALPINE_322_MAIN_DUAL_ARCH_EQUAL = {
+  'libc6-compat': '1.1.0-r4',
+  git: '2.49.1-r0',
+  'ca-certificates': '20260611-r0',
+}
+
+function dockerfileWithoutComments(text) {
+  return text
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*#/.test(line))
+    .map((line) => line.replace(/\s+#.*$/, ''))
+    .join('\n')
+}
+
+function dockerfileLogicalText(text) {
+  return dockerfileWithoutComments(text).replace(/\\\r?\n/g, ' ')
+}
+
+function parseApkAddPackages(text) {
+  const packages = []
+  const apkAdd = /\bapk add\b([^&\n]*)/g
+  let match
+  const logical = dockerfileLogicalText(text)
+  while ((match = apkAdd.exec(logical))) {
+    const tokens = match[1].trim().split(/\s+/).filter(Boolean)
+    const names = tokens.filter((token) => !token.startsWith('-'))
+    for (const token of names) {
+      const eq = token.indexOf('=')
+      if (eq <= 0) {
+        packages.push({ raw: token, name: token, version: null, pinned: false })
+        continue
+      }
+      const name = token.slice(0, eq)
+      const version = token.slice(eq + 1)
+      const pinned = APK_PACKAGE.test(name) && APK_EXACT_VERSION.test(version) && !version.startsWith('>') && !version.startsWith('<')
+      packages.push({ raw: token, name, version, pinned })
+    }
+  }
+  return packages
+}
 const PNPM_PACKAGE_MANAGER =
   /^pnpm@10\.0\.0\+sha512\.[a-f0-9]{128}$/
 const USES_LINE = /^\s+uses:\s+(\S+?)@([^\s#]+)(?:\s+#\s*(.*))?$/gm
@@ -84,4 +126,37 @@ test('production Dockerfiles remain digest-pinned and Corepack uses the integrit
   const cmsInApp = await readFile(resolve(root, 'apps/cms/Dockerfile'), 'utf8')
   assert.match(cmsInApp, /^FROM node:22\.17\.0-alpine@sha256:[a-f0-9]{64}$/m)
   assert.ok(cmsInApp.includes(NODE_IMAGE.split('@')[1]))
+})
+
+test('production Dockerfiles version-pin apk installs and the checker allows Docker continuation syntax', async () => {
+  const expectedByFile = {
+    'deploy/docker/cms.Dockerfile': ['libc6-compat'],
+    'deploy/docker/web-master.Dockerfile': ['libc6-compat'],
+    'deploy/docker/autowork-worker.Dockerfile': ['libc6-compat'],
+    'deploy/docker/program-orchestrator.Dockerfile': ['libc6-compat', 'git', 'ca-certificates'],
+    'deploy/docker/migrations.Dockerfile': [],
+  }
+  for (const rel of PRODUCTION_DOCKERFILES) {
+    const text = await readFile(resolve(root, rel), 'utf8')
+    const packages = parseApkAddPackages(text)
+    const unversioned = packages.filter((row) => !row.pinned).map((row) => row.raw)
+    assert.deepEqual(unversioned, [], `${rel} unversioned apk: ${unversioned.join(', ')}`)
+    assert.deepEqual(packages.map((row) => row.name), expectedByFile[rel], `${rel} apk package set`)
+    for (const row of packages) {
+      assert.equal(row.version, ALPINE_322_MAIN_DUAL_ARCH_EQUAL[row.name], `${rel} ${row.name} must use the dual-arch Alpine v3.22 main version`)
+    }
+  }
+  const cmsInApp = await readFile(resolve(root, 'apps/cms/Dockerfile'), 'utf8')
+  assert.deepEqual(parseApkAddPackages(cmsInApp), [], 'in-app CMS Dockerfile is not a publication apk source')
+
+  assert.deepEqual(
+    parseApkAddPackages('RUN apk add --no-cache libc6-compat=1.1.0-r4 \\\n && corepack enable\n').map((row) => row.raw),
+    ['libc6-compat=1.1.0-r4'],
+  )
+  assert.deepEqual(parseApkAddPackages('# RUN apk add --no-cache libc6-compat\nFROM scratch\n'), [])
+  assert.deepEqual(
+    parseApkAddPackages('RUN apk add --no-cache libc6-compat\n').filter((row) => !row.pinned).map((row) => row.name),
+    ['libc6-compat'],
+  )
+  assert.equal(parseApkAddPackages('RUN apk add --no-cache libc6-compat>=1.1.0-r4\n')[0].pinned, false)
 })
