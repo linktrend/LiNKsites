@@ -129,3 +129,40 @@ test('factory table covers every required fail-closed mode', () => {
     'passing.json',
   ])
 })
+
+test('source apk version pins are not an owned Alpine archive or continuity claim', async () => {
+  const apkPin = /^[A-Za-z0-9._+-]+=[0-9][A-Za-z0-9._+~-]*$/
+  const files = [
+    ['deploy/docker/cms.Dockerfile', ['libc6-compat=1.1.0-r4']],
+    ['deploy/docker/web-master.Dockerfile', ['libc6-compat=1.1.0-r4']],
+    ['deploy/docker/autowork-worker.Dockerfile', ['libc6-compat=1.1.0-r4']],
+    ['deploy/docker/program-orchestrator.Dockerfile', ['libc6-compat=1.1.0-r4', 'git=2.49.1-r0', 'ca-certificates=20260611-r0']],
+    ['deploy/docker/migrations.Dockerfile', []],
+  ]
+  for (const [rel, expected] of files) {
+    const text = await readFile(resolve(root, rel), 'utf8')
+    const joined = text
+      .split(/\r?\n/)
+      .filter((line) => !/^\s*#/.test(line))
+      .join('\n')
+      .replace(/\\\r?\n/g, ' ')
+    const found = []
+    const apkAdd = /\bapk add\b([^&\n]*)/g
+    let match
+    while ((match = apkAdd.exec(joined))) {
+      found.push(...match[1].trim().split(/\s+/).filter((token) => token && !token.startsWith('-')))
+    }
+    assert.deepEqual(found, expected, rel)
+    assert.ok(found.every((token) => apkPin.test(token)), `${rel} apk tokens must be name=version`)
+  }
+  const manifest = generateManifest(root, { env: { ...process.env }, receipts: null, claimContinuity: false })
+  assert.equal(manifest.evidenceClass, 'planning')
+  assert.equal(manifest.continuityComplete, false)
+  assert.equal(manifest.archiveAndReleaseComplete, false)
+  const apk = manifest.components.find((row) => row.id === 'apk-build-packages')
+  assert.equal(apk.originalArtifactLocation, null)
+  assert.notEqual(apk.identity.type, 'oci-digest')
+  const proof = verifyManifest(manifest, { requireArchiveProof: true, allowPlanning: false })
+  assert.equal(proof.ok, false)
+  assert.ok(proof.errors.some((row) => row.code === 'missing_archive'))
+})
