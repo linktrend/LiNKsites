@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "oss-continuity-owner-actions",
+  "admittedCommit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
+  "issue": 544,
+  "didNotPerformTheseActionsThisPacket": true,
+  "contractReady": true,
+  "archiveComplete": false,
+  "fiveImageReleaseComplete": false,
+  "sourcePinsClosedThisIssue": true,
+  "actions": [
+    {
+      "owner": "LSSEC-01",
+      "action": "Create LiNKtrend-controlled read-only archive of every production lock-resolved npm artifact (including Next 16.3.3, React 19.1.0, Payload 3.87.1, TypeScript 5.7.3, Playwright 1.56.1, pg 8.16.3, sharp 0.35.4, turbo 2.10.5 and remaining production closure). Record licence, provenance, checksums, compatibility. Archive the Corepack-hashed pnpm 10.0.0 tarball. Do not treat pnpm-lock.yaml or packageManager as the archive. Supply verified receipts to the publication workflow instead of PLANNING_NOT_A_CONTINUITY_CLAIM."
+    },
+    {
+      "owner": "LSDEP-01",
+      "action": "Archive digest-pinned production base images (node 22.17.0-alpine fc3e945f…, postgres 16.8-alpine 3b057e1c…). Pin or snapshot Alpine APK inputs. Keep apps/cms/docker-compose.yml floating tags non-production and out of release selection."
+    },
+    {
+      "owner": "LSTRUST-01",
+      "action": "Issue 544 replaced floating tags in .github/workflows/ci.yml with verified commit SHAs. Remaining: hosted Fast/Full on a Phase head after packager packaging. Other workflows outside this issue scope may still float."
+    },
+    {
+      "owner": "LSART-01",
+      "action": "Build and publish five service images by digest from protected main; read back registry manifests; store exact bytes/manifests in the owned archive; bind SBOM/provenance. Publication still cannot claim OSS continuity without archive receipts. Images remain unpublished in this tree."
+    },
+    {
+      "owner": "LSOPS-01",
+      "action": "Name prior immutable OSS/image identities in rollback source so rollback is more than prose. The contract refuses absent rollback when a continuity claim is made."
+    },
+    {
+      "owner": "LSVPS-01",
+      "action": "Install release layout references to the FR-13 archives without starting services."
+    },
+    {
+      "owner": "LSVPS-02",
+      "action": "Back up archive identifiers with the application backup and prove isolated restore without re-pulling upstream."
+    },
+    {
+      "owner": "LSVPS-04",
+      "action": "Start only digest-pinned images. Prove rollback to a prior archived immutable release."
+    },
+    {
+      "owner": "LSVAL-01",
+      "action": "Run licence/SBOM/supply-chain validators on the exact candidate (LSACC-02 equivalent)."
+    },
+    {
+      "owner": "LSFULL-03",
+      "action": "Prove live FR-13 rollback/reproducibility with LSVPS-02/04 evidence (LSACC-03 equivalent)."
+    },
+    {
+      "owner": "founder",
+      "action": "Approve any active fork only for a confirmed unmet need. None requested here."
+    }
+  ]
+}

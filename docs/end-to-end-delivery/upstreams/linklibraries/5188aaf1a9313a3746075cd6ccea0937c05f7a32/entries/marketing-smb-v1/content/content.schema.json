@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.internal/library/marketing-smb-v1/content.schema.json",
+  "title": "Marketing SMB v1 consumer input and assembled draft contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["siteId", "locale", "businessName", "audience", "primaryOffer", "valueProposition", "primaryCtaLabel"],
+  "properties": {
+    "siteId": { "type": "string", "minLength": 1, "description": "Consumer-owned tenant/site identifier." },
+    "locale": { "type": "string", "pattern": "^[a-z]{2}(?:-[A-Z]{2})?$" },
+    "businessName": { "type": "string", "minLength": 1 },
+    "audience": { "type": "string", "minLength": 1 },
+    "primaryOffer": { "type": "string", "minLength": 1 },
+    "valueProposition": { "type": "string", "minLength": 1 },
+    "primaryCtaLabel": { "type": "string", "minLength": 1 },
+    "aboutSummary": { "type": "string", "minLength": 1 },
+    "aboutStory": { "type": "string", "minLength": 1 },
+    "contactIntro": { "type": "string", "minLength": 1 },
+    "status": { "const": "draft" }
+  },
+  "$defs": {
+    "assembledDraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["templateId", "templateVersion", "status", "designTokens", "assetInventory", "site", "navigation", "routes", "collections"],
+      "properties": {
+        "templateId": { "const": "marketing-smb-v1" },
+        "templateVersion": { "const": 1 },
+        "status": { "const": "draft" },
+        "designTokens": { "type": "object", "minProperties": 1 },
+        "assetInventory": { "type": "object", "minProperties": 1 },
+        "site": { "$ref": "#/$defs/site" },
+        "navigation": { "$ref": "#/$defs/navigation" },
+        "routes": { "type": "array", "minItems": 12, "maxItems": 12, "items": { "$ref": "#/$defs/route" } },
+        "collections": { "type": "array", "minItems": 7, "maxItems": 7, "items": { "$ref": "#/$defs/collection" } }
+      }
+    },
+    "route": {
+      "type": "object", "additionalProperties": false,
+      "required": ["slug", "pageType", "status", "layout", "components"],
+      "properties": { "slug": { "type": "string", "minLength": 1 }, "pageType": { "type": "string", "minLength": 1 }, "status": { "const": "draft" }, "layout": { "const": "marketing-page" }, "components": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/component" } } }
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siteId", "locale", "status"],
+      "properties": {
+        "siteId": { "type": "string", "minLength": 1 },
+        "locale": { "type": "string", "pattern": "^[a-z]{2}(?:-[A-Z]{2})?$" },
+        "status": { "const": "draft" }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "footer"],
+      "properties": {
+        "primary": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/navigationItem" } },
+        "footer": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/navigationItem" } }
+      }
+    },
+    "navigationItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "href": { "type": "string", "minLength": 1 },
+        "children": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/navigationItem" } }
+      },
+      "oneOf": [
+        { "required": ["href"] },
+        { "required": ["children"] }
+      ]
+    },
+    "component": {
+      "type": "object", "additionalProperties": false, "required": ["type", "props"],
+      "properties": {
+        "type": { "enum": ["Hero", "Features", "Offers", "Testimonials", "CaseStudies", "Faq", "CallToAction", "Newsletter", "RichText", "TeamMembers", "Locations", "Articles", "Videos", "Contact"] },
+        "props": { "$ref": "#/$defs/componentProps" }
+      }
+    },
+    "componentProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1 },
+        "media": { "type": "string", "minLength": 1 }
+      }
+    },
+    "collection": {
+      "oneOf": [
+        { "$ref": "#/$defs/offersCollection" },
+        { "$ref": "#/$defs/articlesCollection" },
+        { "$ref": "#/$defs/caseStudiesCollection" },
+        { "$ref": "#/$defs/testimonialsCollection" },
+        { "$ref": "#/$defs/videosCollection" },
+        { "$ref": "#/$defs/locationsCollection" },
+        { "$ref": "#/$defs/teamMembersCollection" }
+      ]
+    },
+    "collectionBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "status", "records"],
+      "properties": {
+        "name": { "type": "string" },
+        "status": { "const": "draft" },
+        "records": { "type": "array", "minItems": 1 }
+      }
+    },
+    "offersCollection": { "allOf": [{ "$ref": "#/$defs/collectionBase" }, { "properties": { "name": { "const": "offers" }, "records": { "items": { "$ref": "#/$defs/offerRecord" } } } }] },
+    "articlesCollection": { "allOf": [{ "$ref": "#/$defs/collectionBase" }, { "properties": { "name": { "const": "articles" }, "records": { "items": { "$ref": "#/$defs/articleRecord" } } } }] },
+    "caseStudiesCollection": { "allOf": [{ "$ref": "#/$defs/collectionBase" }, { "properties": { "name": { "const": "caseStudies" }, "records": { "items": { "$ref": "#/$defs/caseStudyRecord" } } } }] },
+    "testimonialsCollection": { "allOf": [{ "$ref": "#/$defs/collectionBase" }, { "properties": { "name": { "const": "testimonials" }, "records": { "items": { "$ref": "#/$defs/testimonialRecord" } } } }] },
+    "videosCollection": { "allOf": [{ "$ref": "#/$defs/collectionBase" }, { "properties": { "name": { "const": "videos" }, "records": { "items": { "$ref": "#/$defs/videoRecord" } } } }] },
+    "locationsCollection": { "allOf": [{ "$ref": "#/$defs/collectionBase" }, { "properties": { "name": { "const": "locations" }, "records": { "items": { "$ref": "#/$defs/locationRecord" } } } }] },
+    "teamMembersCollection": { "allOf": [{ "$ref": "#/$defs/collectionBase" }, { "properties": { "name": { "const": "teamMembers" }, "records": { "items": { "$ref": "#/$defs/teamMemberRecord" } } } }] },
+    "offerRecord": { "type": "object", "additionalProperties": false, "required": ["title", "summary"], "properties": { "title": { "type": "string", "minLength": 1 }, "summary": { "type": "string", "minLength": 1 } } },
+    "articleRecord": { "type": "object", "additionalProperties": false, "required": ["title", "excerpt"], "properties": { "title": { "type": "string", "minLength": 1 }, "excerpt": { "type": "string", "minLength": 1 } } },
+    "caseStudyRecord": { "type": "object", "additionalProperties": false, "required": ["title", "summary", "media"], "properties": { "title": { "type": "string", "minLength": 1 }, "summary": { "type": "string", "minLength": 1 }, "media": { "type": "string", "minLength": 1 } } },
+    "testimonialRecord": { "type": "object", "additionalProperties": false, "required": ["quote", "attribution", "media"], "properties": { "quote": { "type": "string", "minLength": 1 }, "attribution": { "type": "string", "minLength": 1 }, "media": { "type": "string", "minLength": 1 } } },
+    "videoRecord": { "type": "object", "additionalProperties": false, "required": ["title", "media"], "properties": { "title": { "type": "string", "minLength": 1 }, "media": { "type": "string", "minLength": 1 } } },
+    "locationRecord": { "type": "object", "additionalProperties": false, "required": ["name", "address", "phone"], "properties": { "name": { "type": "string", "minLength": 1 }, "address": { "type": "string", "minLength": 1 }, "phone": { "type": "string", "minLength": 1 } } },
+    "teamMemberRecord": { "type": "object", "additionalProperties": false, "required": ["name", "role", "bio"], "properties": { "name": { "type": "string", "minLength": 1 }, "role": { "type": "string", "minLength": 1 }, "bio": { "type": "string", "minLength": 1 } } }
+  }
+}

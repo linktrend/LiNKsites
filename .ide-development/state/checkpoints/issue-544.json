@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue-checkpoint",
+  "issue": 544,
+  "branch": "issue/544-pin-release-build-toolchain-and-actions-immutabl",
+  "admittedCommit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
+  "admittedTree": "9c43e8a3c3ceb824ad9d8cbc7904335595b5520e",
+  "implementationCommit": "a4fc7dd4d780009e0eec6ac1927ecee5937354e7",
+  "at": "2026-09-13T04:10:53Z",
+  "didNotCreatePr": true
+}

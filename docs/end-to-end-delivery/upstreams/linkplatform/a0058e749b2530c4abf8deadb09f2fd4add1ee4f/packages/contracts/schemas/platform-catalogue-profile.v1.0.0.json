@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linktrend.dev/schemas/platform-catalogue-profile/1.0.0",
+  "title": "Platform Catalogue and Client Profile",
+  "description": "Immutable LiNKplatform catalogue (`platform.capabilities`) plus client Profile (`platform.organizations`) document for consumer pin (platform.catalogue-profile/1.0.0). CamelCase only; additionalProperties false. Does not include grants, PACI provider-trust strings, entitlement, or handoff envelopes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "catalogue", "profile"],
+  "properties": {
+    "contractVersion": {
+      "type": "string",
+      "const": "platform.catalogue-profile/1.0.0"
+    },
+    "catalogue": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/catalogueEntry" }
+    },
+    "profile": { "$ref": "#/$defs/clientProfile" }
+  },
+  "$defs": {
+    "catalogueEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "displayName",
+        "owningSystem",
+        "licensable",
+        "minContractTier",
+        "commercialUseRequires",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^cap\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9_]*)+$",
+          "description": "platform.capabilities id; PACI dotted capability strings are rejected"
+        },
+        "displayName": { "type": "string", "minLength": 1 },
+        "owningSystem": { "type": ["string", "null"], "minLength": 1 },
+        "licensable": { "type": "boolean" },
+        "minContractTier": { "type": ["string", "null"], "minLength": 1 },
+        "commercialUseRequires": { "type": ["string", "null"], "minLength": 1 },
+        "status": { "type": "string", "enum": ["active", "deprecated"] }
+      }
+    },
+    "clientProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "kind", "status", "createdAt", "updatedAt"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "enum": ["internal", "client"] },
+        "status": { "type": "string", "enum": ["active", "suspended", "archived"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

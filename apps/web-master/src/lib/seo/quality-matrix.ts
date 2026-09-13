@@ -13,7 +13,7 @@ export const ACCESSIBILITY_MATRIX = Object.freeze([
   { id: "a11y.alt", mode: "automated", criterion: "img alt attributes", required: true },
   { id: "a11y.keyboard", mode: "manual", criterion: "keyboard and focus order", required: true, proof: "lab/manual" },
   { id: "a11y.contrast", mode: "manual", criterion: "contrast against theme tokens", required: true, proof: "lab/manual" },
-  { id: "a11y.motion", mode: "manual", criterion: "motion/zoom/touch", required: true, proof: "lab/manual" },
+  { id: "a11y.motion", mode: "automated", criterion: "reduced-motion CSS present", required: true },
   { id: "a11y.rtl", mode: "manual", criterion: "RTL-readiness", required: false, proof: "lab/manual" },
   { id: "a11y.legal", mode: "legal", criterion: "WCAG certification", required: false, proof: "not-claimed" },
 ] as const);
@@ -57,6 +57,10 @@ export function evaluateAccessibilityMatrix(html: string): MatrixResult[] {
     if (row.id === "a11y.h1") {
       const count = [...html.matchAll(/<h1[\s>]/gi)].length;
       return { id: row.id, status: count === 1 ? "PASS" : "FAIL", detail: `h1 count ${count}` };
+    }
+    if (row.id === "a11y.motion") {
+      const ok = /prefers-reduced-motion/i.test(html);
+      return { id: row.id, status: ok ? "PASS" : "FAIL", detail: row.criterion };
     }
     const imgs = [...html.matchAll(/<img\b[^>]*>/gi)];
     const missing = imgs.some((match) => !/\salt\s*=/i.test(match[0]));

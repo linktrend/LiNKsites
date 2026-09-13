@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "evidence-checksums",
+  "algorithm": "sha256",
+  "pathsAreRelativeTo": "docs/evidence/end-to-end-delivery/",
+  "files": {
+    "CHECKPOINT-LEDGER.json": {
+      "sha256": "5be3b6a487f1d98bbf189825a1b2d1c4a12aabc0d90f43708b122f42212f33b4",
+      "bytes": 15051
+    },
+    "CONFLICT-RESOLUTION.json": {
+      "sha256": "771dcbdff094ec870ee657cee2f909bdd835cbdc8a1d9a24837b433577cd2b15",
+      "bytes": 3070
+    },
+    "DEPENDENCY-HANDOFF-STATUS.json": {
+      "sha256": "28f10803119730a873309ded54220cd884ee3bea807b1cdca5bb85c74eb43469",
+      "bytes": 831
+    },
+    "HOLDS.json": {
+      "sha256": "e308dddb34e4d43cb7e189d7d2e10cc21bf0066552cc8c0073f796b5f64a3396",
+      "bytes": 2053
+    },
+    "IDENTITY.json": {
+      "sha256": "96fa5f07b9e45cd6b6ee89c7ec2220d742ffec2bb56f77da13acf76700315fea",
+      "bytes": 3681
+    },
+    "INDEX.json": {
+      "sha256": "403d79f6f3ed37f9dc707f083d13c043e0b5a93e13506620addb63b04b523583",
+      "bytes": 4188
+    },
+    "LEAN-REVIEW-POLICY.json": {
+      "sha256": "c26c8eb31b458001813c219ebbf9c693f4eda26b5e599f0df6624b425704ef1c",
+      "bytes": 6413
+    },
+    "LSG0-03-HANDOFF.json": {
+      "sha256": "5f1b8077ad9b8b56edc8abd0372a6e182defb844462f4c67a9fbcb7da27be649",
+      "bytes": 1371
+    },
+    "LSG0-04-HANDOFF.json": {
+      "sha256": "f0bf42905cd6d4f343c7476f77073571f797b2c5e74b2f316f62d0be8f3be0c1",
+      "bytes": 4997
+    },
+    "README.md": {
+      "sha256": "68dc44397e5de8357eb95d7ecb5bdb2462ff1dcbc6d8e02995c6079eee740836",
+      "bytes": 2904
+    },
+    "REQUIREMENT-TRACEABILITY.json": {
+      "sha256": "fca9ef47631c4258a9db79988f2a8e742523f58876ed87accd8604ae51083729",
+      "bytes": 23636
+    },
+    "SECURITY-DISPOSITIONS.json": {
+      "sha256": "085b9f791e523ad7742dceec50244c328b81ce0f14354856edd03dee9869b3b7",
+      "bytes": 2343
+    },
+    "STATUS.json": {
+      "sha256": "7b8ad25ca227943c036fb83ad8ce5bf6f49c4740aae29f3c0430e1ea00e6121d",
+      "bytes": 1162
+    },
+    "TOOLCHAIN.json": {
+      "sha256": "270d083d59a7ce12f77a4c810d24e2cc556db49b3d91878b11ea642a8859ecab",
+      "bytes": 2084
+    },
+    "VALIDATION.json": {
+      "sha256": "613ecac3e230ec444e63250b38dc93460d1ef8481d58d1a5323ab90345a75657",
+      "bytes": 2316
+    },
+    "branch-disposition.json": {
+      "sha256": "c43b0a34a620f37dcb3ca4909f53d7c2b4f24d13d386ebcec25e79cb9004b319",
+      "bytes": 146425
+    }
+  }
+}

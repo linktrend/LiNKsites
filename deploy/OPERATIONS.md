@@ -1,127 +1,201 @@
-# LiNKsites Phase 2 deployment and operations manual
+# LiNKsites Server03 operations (one production installation)
 
-This document prepares a deployment. It does not authorize or perform VPS,
-DNS, public-domain, Cloudflare, Traefik, or customer-data changes.
+This document is sequential source for operating and recovering exactly one
+LiNKsites Server03 installation named `linksites-foundation`. It prepares
+later authorized work. It does **not** authorize or perform deployment, VPS
+mutation, DNS, Cloudflare, Traefik edits, database writes, or image pulls
+from this packet.
 
-## Server03 operational acceptance with template publishing deferred
+Signal names, thresholds, inspection commands, healthy state, and
+alert responses are in [`monitoring/SIGNALS.md`](./monitoring/SIGNALS.md).
+Validate rules with `node deploy/monitoring/validate-rules.mjs` and, when
+present, `promtool check rules deploy/monitoring/server03-foundation.rules.yml`.
+Import those rules only after the `linksites-server03-foundation` scrape
+target and `/var/lib/linksites/metrics/linksites.prom` textfile exist.
 
-Use a manifest whose native v2 template state is `deferred` with the real
-production services. `docker-compose.server03-foundation.yml` includes the
-canonical production Compose definition under the `linksites-foundation`
-project name; its preflight and smoke entrypoints reuse the same production
-checks. Deferred acceptance requires no provider checkout, receipt, or artifact
-mount. The unfinished `master-template-type-1` release remains non-selectable;
-template-dependent rendering, Program intake, and publishing are blocked while
-the infrastructure and service runtime are accepted. The provider checkout and
-ready-only Compose overlay are added only after complete native Revision 2
-catalogue, selectability, manifest, inventory, lock, and receipt admission.
+## STOP conditions
 
-Require exact image and migration identities, CMS/worker operation, a complete
-private one-site Program run, real rendered preview with noindex, delivered
-completion, health, resource limits, restart behavior, logs/metrics and a tested
-backup/restore and rollback. Readiness-only staging cannot earn operational
-acceptance. Private routes use existing named Traefik privacy middleware;
-public/customer launch and replacement-template adoption remain separately gated.
+STOP and do not continue the current step when any of the following is true:
 
-Import `deploy/monitoring/server03-foundation.rules.yml` into the existing
-Server03 Prometheus rule set only after its `linksites-server03-foundation`
-scrape target and backup textfile metrics exist. Validate with `promtool check
-rules` before reload. Runtime attention, absent metrics, failed health and stale
-backup/restore evidence must alert; normal intake is expected.
+1. This session is LSOPS-01 source work: do not start Compose, Docker, Traefik,
+   databases, or Server03 services.
+2. Founder/Phase 2 authority for live change is absent.
+3. The five image references are missing, mutable (`latest`), or do not match
+   the bound release manifest.
+4. `LINKSITES_PLATFORM_STATE` is not `ready` or
+   `LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA` is missing or fabricated.
+5. CMS and orchestrator database URIs are the same identity, loopback, or not
+   LiNKsites.
+6. A command would target a Docker project other than `linksites-foundation`
+   (production) or `linksites-restore-rehearsal-<UTC>` (isolated restore).
+7. A restore would attach `linksites-foundation_linksites-runtime` or overwrite
+   production Postgres.
+8. Backup encryption secret `LINKSITES_BACKUP_ENCRYPTION_SECRET` is absent, or
+   a checksum does not match `identity.json` before restore.
+9. Privacy middleware, TLS, or noindex cannot be proven; or a URL would be
+   logged with a token or query credential.
+10. Disk is below 15 percent on `/`, `/var/lib/linksites`, or `/var/lib/docker`
+    and the only remaining space would require deleting production volumes.
+11. Mixed five-digest images, an unknown digest, or a failed migration job.
+12. Cross-tenant data, public activation, or unrelated database/project names
+    appear in the command.
 
-Generate a new immutable manifest for later native-v2 template adoption and
-repeat provider admission, preview and rollback verification. Never alter a
-released manifest in place. Missing production Platform authority still blocks
-production migration and startup; disposable proof does not supply that authority.
+## 1. Startup (later authorized Server03 gate only)
 
-## Topology and privacy
+Do not run these commands during LSOPS-01. They are the ordered later sequence.
 
-The `edge` network is the existing Traefik network; `internal` is a Docker
-internal network. Only Traefik may reach CMS and web-master. CMS has a named
-private middleware. Preview has a different named private middleware and must
-also enforce its application-level preview token. Neither router is a wildcard
-public route. Private preview responses retain `noindex, nofollow`; DNS/domain
-activation is a separate LiNKreach-authorized Phase 2 operation.
+1. Confirm STOP conditions 1–12 are clear.
+2. Render the protected runtime environment file outside Git. Never commit it.
+3. `bash deploy/scripts/preflight-server03-foundation.sh <protected-runtime-env-file> <release-manifest.json>`
+4. Apply one-shot migrations, never bypassed, never in parallel with serving:
 
-## Ordered deployment
+   `docker compose --project-name linksites-foundation --env-file <protected-runtime-env-file> -f deploy/docker-compose.server03-foundation.yml run --rm supabase-migrate`
 
-1. Build all four images from an exact Git revision and record registry digest.
-2. Generate and review the release manifest.
-3. Render the protected runtime environment file outside Git. Run preflight.
-4. Confirm the named Traefik network and privacy middlewares already exist.
-5. Run the one-shot `supabase-migrate`, then `payload-migrate`; neither may be
-   bypassed. The first requires a verified Platform migration SHA. The
-   migration job records each filename and SHA-256 checksum, refuses altered
-   applied files, and executes each new file plus its history receipt in one
-   transaction. This source contract is VPS-only proof; no local migration is
-   performed in Phase 1.
-6. Start the long-running services and run
-   `deploy/scripts/postdeploy-smoke.sh <protected-runtime-env-file>`. The
-   script executes from `web-master` over Compose service DNS and localhost;
-   it reads the protected preview token inside the container and never accepts
-   or logs a token-bearing URL.
+   then
 
-The orchestrator must run with `W2_02_MODE=production`, a UUID
-`W2_02_ORG_ID`, a UUID `W2_02_SITE_ID`, explicit `W2_02_DATABASE_ROLE`,
-absolute `W2_02_APPROVED_FACTS_PATH`, the distinct `W2_02_DATABASE_URI`
-least-privilege credential, and the exact packaged
-`W2_02_POSTGRES_ADAPTER_MODULE=@linksites/program-orchestrator/postgres-adapter`,
-and, only for a ready template release, the release-pinned
-`LINKLIBRARIES_ARTIFACT_PATH` Git checkout. Compose
-passes the distinct URI to the adapter's `DATABASE_URI` name only inside the
-orchestrator container; CMS/worker/migration services retain their separate
-`DATABASE_URI`. No credential or preview token belongs in the image or this document. The
-orchestrator's `W2_02_PREVIEW_ACCESS_TOKEN` is distinct from the web-master
-variable name and is required by the production orchestrator path; it must match
-the protected token web-master receives so the internal preview proof can
-authenticate.
-7. Do not expose a public DNS name or publish Payload content in this procedure.
+   `docker compose --project-name linksites-foundation --env-file <protected-runtime-env-file> -f deploy/docker-compose.server03-foundation.yml run --rm payload-migrate`
 
-## Backup, retention, and restore
+5. Start only the four long-running services from the same five-digest
+   manifest: `payload`, `web-master`, `autowork-worker`, `program-orchestrator`.
+6. `bash deploy/scripts/postdeploy-server03-foundation-smoke.sh <protected-runtime-env-file>`
+7. STOP before public DNS, customer launch, or template-dependent publishing
+   while `LINKSITES_TEMPLATE_RELEASE_STATE=deferred`.
+8. `LINKSITES_AUTOWORK_MODE` remains `manual` until an admitted live handoff
+   exists. Do not set fake live Autowork fields.
 
-Back up four classes together: Payload/Postgres data and migrations, Supabase
-working content and Ledger/evidence, durable LiNKautowork outbox, and media
-with checksums/provenance. Encrypt backups at rest with a separately managed
-key, retain daily 35 days/monthly 12 months unless a customer/legal policy is
-stricter, and verify every backup using an isolated restore. `pnpm
-deploy:restore-rehearsal` is the committed disposable local fixture rehearsal;
-it proves file-class integrity, noindex private serving, and no public
-activation. It does **not** claim to restore a hosted production database.
+## 2. Health
 
-## Alerts and runbooks
+From the `linksites-foundation` project only:
 
-The orchestrator's `/metrics` exposes backlog (`active_issues`), retries,
-dead letters, manual attention, and completion delivery counts. Alert when a
-dead letter/manual-attention value is nonzero, retry count increases for 15
-minutes, readiness is non-200 for 5 minutes, or a backup checksum/rehearsal
-fails. Use structured JSON logs with correlation ID; do not place content,
-tokens, secrets, credentials, or URL query tokens in logs.
+1. `docker compose --project-name linksites-foundation ps`
+   Expected: `payload`, `web-master`, `autowork-worker`, `program-orchestrator`
+   healthy; migrate jobs exited 0.
+2. Internal HTTP only: Payload `/api/readyz`, web-master `/api/readyz`,
+   orchestrator `/readyz` and `/metrics`. Worker has no HTTP ready endpoint;
+   use Docker health.
+3. Confirm running `name@sha256` values match the five image fields on the
+   bound manifest. Write `linksites_release_digest_match 1`.
+4. Confirm private Traefik routers still name the existing CMS and preview
+   privacy middleware, TLS is on, and preview `x-robots-tag` includes
+   noindex. Record only 0/1 metrics, never the URL or token.
+5. Confirm Platform/provider HOLD metrics: deferred provider is healthy;
+   pending Platform after intended run is HOLD.
+
+## 3. Alerts
+
+1. Group by `installation=linksites-foundation` and `service`. Inhibit
+   downstream HTTP alerts when the foundation target is down.
+2. Treat dead letters and manual attention as critical even if intake is
+   otherwise normal. Do not add an alert that fires merely because intake is
+   enabled.
+3. On alert: capture the alert name, `release_sha` if present, service, and
+   time. Do not copy log bodies that may contain customer content.
+4. Follow the Response / rollback column in `monitoring/SIGNALS.md`.
+5. After two failed bounded recreates of the same service, escalate. Do not
+   invent a second installation.
+
+## 4. Backup
+
+Back up only LiNKsites-authorized classes for this installation. Encrypt with
+restic using the runtime-provided `LINKSITES_BACKUP_ENCRYPTION_SECRET`. Write
+SHA-256 checksums for every artifact. Do not dump `platform`, `auth`,
+`storage`, `vault`, other Supabase projects, or unrelated Docker volumes.
+
+1. STOP if the encryption secret reference is unset (check the name only).
+2. Write `identity.json` with release SHA/tree, config schema version, five
+   image digests, Platform migration SHA, Payload/LiNKsites migration
+   checksums, and Autowork/template states. No secret values.
+3. Logical dump of Payload `public` tables plus `lsites_sites` and
+   `lsites_ledger` from the CMS URI host/database only.
+4. Archive `/var/lib/linksites/program`, the Autowork outbox path, media under
+   `/var/lib/linksites`, and the release manifest.
+5. `restic backup` those files into the configured repository. Record snapshot
+   ID and SHA-256.
+6. `restic check`.
+7. Apply retention: keep daily copies 35 days and monthly copies 12 months
+   unless a stricter customer/legal policy exists. `restic forget` must not
+   run against a repository that failed `check`.
+8. Emit textfile metrics `linksites_backup_last_success_timestamp_seconds` and
+   `linksites_backup_last_attempt_result`. Failed attempts set result `0` and
+   must not pretend success.
+
+## 5. Isolated restore rehearsal
+
+Production is never the restore target. Real end-to-end restore against
+Server03 is a later gate. This repository's `node
+deploy/scripts/rehearse-local-restore.mjs --plan-only` is the deterministic
+static plan. A missing Docker engine is an environment HOLD, not a restore
+receipt.
+
+When Docker and an authorized disposable target exist:
+
+1. Create `RESTORE_ID=linksites-restore-rehearsal-$(date -u +%Y%m%dT%H%M%SZ)`.
+   STOP unless it matches `^linksites-restore-rehearsal-[0-9]{8}T[0-9]{6}Z$`.
+2. Create a separate database name matching
+   `linksites_restore_<same-stamp>` and a disposable runtime env that points
+   only at that database and at volume `${RESTORE_ID}_linksites-runtime`.
+3. Verify checksums and `identity.json` **before** any restore write.
+4. Restore into `--project-name "$RESTORE_ID"` only. Prove migrations, Payload
+   data, site pins, completion, outbox, media, and noindex.
+5. Never run `docker compose --project-name linksites-foundation down --volumes`.
+6. Clean up only `$RESTORE_ID`:
+
+   `docker compose --project-name "$RESTORE_ID" down --volumes --remove-orphans`
+
+7. Write `linksites_restore_rehearsal_last_success_timestamp_seconds` only
+   after those proofs. Plan-only output must keep `restoreExecuted: false`.
+
+## 6. Incident
 
 | Incident | Safe response |
 |---|---|
-| Stalled Program / retries | Pause intake, preserve Ledger/outbox, inspect run and gate evidence by correlation ID, then retry only the ready Issue. |
-| Dead letter | Do not replay blindly. Preserve receipt, classify boundary failure, obtain owner decision, and create a new fenced attempt. |
-| Payload failure | Keep preview private, check CMS readiness/migration state, restore only after checksum verification. |
-| Working-store failure | Pause promotion; restore working content and Ledger together, then rerun content gates. |
-| Migration failure | Stop before app services. Diagnose the exact migration; never edit an already-applied migration. Use a compatible forward migration. |
-| Preview failure | Keep Traefik privacy middleware enabled, check token/noindex and Payload draft readback, then rerun private preview validation. |
-| Credential rotation | Use gateway/CMS dual-key overlap, stop/drain outbox as required, rotate one service group, run readiness and signed-boundary proof, then revoke old key. |
-| Privacy incident | Immediately disable affected Traefik router, revoke preview token/API key, preserve evidence, assess exposure, and restore only private draft state. |
+| Stalled Program / retries | Pause intake, preserve Ledger/outbox, inspect by correlation ID, retry only the ready Issue. |
+| Dead letter | Do not replay blindly. Preserve receipt, classify, owner decision, new fenced attempt. |
+| Payload / Postgres failure | Keep preview private. Restore only after checksum verification into isolation. |
+| Working-store failure | Pause promotion. Restore `lsites_sites` and `lsites_ledger` together. Do not restore `platform`. |
+| Migration failure | STOP before app services. Never edit an applied migration. Forward-only or isolated restore. |
+| Preview / noindex / private route | Keep Traefik privacy middleware. Disable the affected router if exposure is possible. |
+| TLS | Keep private. Do not publish DNS. |
+| Autowork live without admission | STOP. Return `LINKSITES_AUTOWORK_MODE=manual`. |
+| Provider HOLD + publish attempt | STOP intake and publishing. Deferred provider is the expected first state. |
+| Disk / memory pressure | Recreate the named LiNKsites service or free restore leftovers. Never delete production volumes. |
+| Backup failure / stale restore proof | Re-run backup or isolated restore. Do not claim production recovery. |
+| Privacy incident | Disable the affected router, revoke preview token/API key through the secret channel, preserve evidence, restore only private draft state. |
+| Credential rotation | Dual-key overlap, drain outbox, rotate one service group, prove readiness, revoke the old key. Never print values. |
 
-## ISS-33 configuration cutover (offline)
+## 7. Rollback to the prior five-digest manifest
 
-Configuration templates, redacted readback, isolated migrate/rollback and
-permanent drift checks for CMS, web-master, provider, hosting, database,
-queue, secrets, monitoring and deployment are in
-[`config/cutover/README.md`](./config/cutover/README.md). That rehearsal is
-local and name-only. Production, VPS and live canary remain external; the
-cutover CLI fails closed if those targets are requested.
+Roll back application images only when the target revision is compatible with
+the already-applied database schema. Every migration is forward-only.
 
-## Rollback
+1. STOP intake and disable the private routers if serving mixed or unknown
+   digests.
+2. Identify the previous accepted release manifest with five `sha256:` digests.
+3. Confirm schema compatibility. If the current schema is newer than the
+   prior images, STOP image rollback and use isolated restore of a compatible
+   backup instead of in-place downgrade.
+4. `docker compose --project-name linksites-foundation --env-file <protected-runtime-env-file> -f deploy/docker-compose.server03-foundation.yml up -d`
+   using the prior five digest environment values only. Do not change
+   Dockerfiles here.
+5. Re-run the Server03 smoke script. Confirm digest match, health, noindex,
+   and privacy middleware.
+6. Record the prior and current release SHAs. Do not alter a released
+   manifest in place.
 
-Roll back the application image only when the target revision is compatible
-with the already-applied database schema. Every migration is forward-only:
-after an irreversible data transformation, the point of no return is the
-successful migration job. Restore from a verified backup into an isolated
-environment first; do not roll a database backward in place. Record release
-SHA, migration list, manifest digest, and evidence before declaring recovery.
+## 8. Escalation
+
+Escalate to the Principal when STOP conditions remain after the bounded
+response, when data integrity is uncertain, when privacy may have failed, when
+backup/restore cannot be proven, or when authority for live Autowork,
+Platform, DNS, or public launch is required. Include alert name, release SHA,
+service, time, and redacted fingerprints only.
+
+OpenClaw may explain the incident. It does not replace Prometheus evaluation or
+this runbook.
+
+## Environment-only HOLD (this cloud workspace)
+
+- Docker is not present: do not execute Compose or claim a restore receipt.
+- `promtool` is absent: repository YAML validation still runs; Server03 must
+  re-run `promtool check rules` before reload.
+- Deployment remains a later one-time Server03 gate.

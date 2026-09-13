@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "program": "linkplatform",
+  "repository": "linktrend/LiNKplatform",
+  "commit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+  "tree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+  "directory": "linkplatform/67ba864667c8e8dd2b3baed00830c28e3035cea3",
+  "bundleRole": "immutable planning/source input; later exact handoffs produce a new version directory keyed by the new source commit",
+  "status": "PARTIAL_WITHHOLD",
+  "copiedFileCount": 28,
+  "copiedOriginalPaths": [
+    "packages/contracts/schemas/platform-auth-claims.v1.1.0.json",
+    "packages/contracts/schemas/platform-auth-token-envelope.v0.1.0.json",
+    "packages/contracts/schemas/platform-catalogue-profile.provider-handoff.v1.0.0.json",
+    "packages/contracts/schemas/platform-catalogue-profile.v1.0.0.json",
+    "docs/contracts/platform-auth-claims-v1.md",
+    "docs/contracts/frozen/platform-auth-claims-v1.1.0.FROZEN.md",
+    "docs/contracts/platform-auth-token-envelope-v0.1.md",
+    "docs/contracts/frozen/platform-auth-token-envelope-v0.1.0.FROZEN.md",
+    "docs/contracts/frozen/platform-catalogue-profile-v1.0.0.FROZEN.md",
+    "packages/contracts/fixtures/claims/accept-valid.json",
+    "packages/contracts/fixtures/claims/reject-revoked.json",
+    "packages/contracts/fixtures/claims/reject-wrong-audience.json",
+    "packages/contracts/fixtures/claims/reject-expired.json",
+    "packages/contracts/fixtures/claims/reject-rotated.json",
+    "packages/contracts/fixtures/claims/reject-wrong-service.json",
+    "packages/contracts/fixtures/claims/reject-wrong-org.json",
+    "packages/contracts/fixtures/catalogue-profile/accept-valid.json",
+    "packages/contracts/fixtures/catalogue-profile/accept-client-profile.json",
+    "packages/contracts/fixtures/catalogue-profile/reject-extra-field.json",
+    "packages/contracts/fixtures/catalogue-profile/reject-wrong-version.json",
+    "packages/contracts/fixtures/catalogue-profile/reject-unknown-status.json",
+    "packages/contracts/fixtures/catalogue-profile/reject-bad-kind.json",
+    "packages/contracts/fixtures/catalogue-profile/reject-paci-capability-id.json",
+    "packages/contracts/fixtures/catalogue-provider-handoff/reject-wrong-commit.json",
+    "packages/contracts/fixtures/catalogue-provider-handoff/reject-consumer-proof.json",
+    "packages/contracts/fixtures/catalogue-provider-handoff/reject-extra-field.json",
+    "packages/contracts/fixtures/catalogue-provider-handoff/reject-integration-claimed.json",
+    "packages/contracts/fixtures/catalogue-provider-handoff/reject-invented-tag.json"
+  ],
+  "withheldFromReadableSource": [
+    {
+      "originalPath": "packages/contracts/src/**",
+      "reason": "Executable TypeScript (claims/token/provider-trust). JSON schemas and sanitized fixtures copied instead."
+    },
+    {
+      "originalPath": "packages/contracts/fixtures/auth-token-envelope/**",
+      "reason": "Accept/discovery fixtures contain private/stage issuer and token endpoints (auth.stage.linkplatform.linktrend.dev); withheld."
+    },
+    {
+      "originalPath": "packages/contracts/fixtures/provider-trust/**",
+      "reason": "Provider-trust exists only as implementation plus operational fixtures; no JSON schema at this pin. Not live PACI proof."
+    },
+    {
+      "originalPath": "docs/handoffs/**",
+      "reason": "Historical operational evidence; not live hosted-auth proof."
+    },
+    {
+      "originalPath": "packages/contracts/schemas/platform-auth-claims.v1.0.0.json",
+      "reason": "Superseded 1.0.0 schema; LiNKsites pins 1.1.0."
+    }
+  ],
+  "byteCompare": "each copiedPath sha256 equals git object bytes at exact bound source commit before commit",
+  "sourceBinding": {
+    "role": "read-only",
+    "checkedOutCommit": "67ba864667c8e8dd2b3baed00830c28e3035cea3",
+    "checkedOutTree": "863e6b1f40def2df99aeb748dd9be570d28b1fb2",
+    "developmentTipNotUsed": true
+  },
+  "notLiveProof": "Copied freeze records and sanitized fixtures are not hosted-auth, PACI, or production proof. Historical handoffs withheld."
+}

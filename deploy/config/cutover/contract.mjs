@@ -306,53 +306,106 @@ export function refuseLiveCanary(argv = process.argv.slice(2), env = process.env
   }
 }
 
+export const DOCUMENTATION_ONLY_EXAMPLE_KEYS = Object.freeze([
+  'PROVIDER_SELECTABILITY',
+  'PROVIDER_LIVE_CATALOGUE_PROBE',
+  'HOSTING_LIVE_HOST',
+  'DATABASE_CREDENTIAL_DISTINCTNESS',
+  'MONITORING_METRICS_PATH',
+  'MONITORING_ALERT_DEAD_LETTER_NONZERO',
+  'MONITORING_ALERT_RETRY_GROWTH_MINUTES',
+  'MONITORING_ALERT_READINESS_NON_200_MINUTES',
+  'MONITORING_ALERT_BACKUP_CHECKSUM_FAILURE',
+  'MONITORING_LOG_REDACTION',
+  'MONITORING_LIVE_SCRAPE',
+  'DEPLOYMENT_LIVE_CANARY',
+  'LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH',
+  'LINKSITES_ADMITTED_TEMPLATE_SHA',
+  'LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON',
+  'LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON',
+  'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON',
+  'LINKSITES_LINKLIBRARIES_ROOT',
+  'LINKSITES_LINKLIBRARIES_COMMIT_SHA',
+  'LINKSITES_LINKLIBRARIES_TREE_SHA',
+  'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256',
+  'LINKSITES_LINKLIBRARIES_RECEIPT_PATH',
+  'LINKLIBRARIES_ARTIFACT_PATH',
+  'LINKLIBRARIES_CATALOG_SHA',
+  'LINKLIBRARIES_ENTRY_SHA',
+  'LINKLIBRARIES_CATALOG_CONTENT_SHA256',
+  'LINKLIBRARIES_ENTRY_CONTENT_SHA256',
+])
+
+export const COMMENTED_OPTIONAL_WHILE_PENDING_OR_MANUAL = Object.freeze([
+  'LINKAUTOWORK_GATEWAY_URL',
+  'LINKAUTOWORK_SIGNING_SECRET',
+  'LINKAUTOWORK_SIGNING_KEY_ID',
+  'LINKAUTOWORK_ENVIRONMENT',
+  'LINKAUTOWORK_EVENT_GRANTS',
+  'LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA',
+])
+
 export function parseEnvTemplate(source) {
-  const names = []
+  const assigned = []
+  const commented = []
   for (const line of source.split('\n')) {
-    if (!line || line.startsWith('#')) continue
+    if (!line) continue
+    const commentedMatch = line.match(/^#\s*([A-Z0-9_]+)=/)
+    if (commentedMatch) {
+      commented.push(commentedMatch[1])
+      continue
+    }
+    if (line.startsWith('#')) continue
     const match = line.match(/^([A-Z0-9_]+)=/)
-    if (match) names.push(match[1])
+    if (match) assigned.push(match[1])
   }
-  return names
+  return { assigned, commented }
+}
+
+export function stripMarkdownEmphasis(source) {
+  return String(source).replace(/\*+/g, '')
+}
+
+export function operationsDeniesDeploymentAndVps(operations) {
+  const normalized = stripMarkdownEmphasis(operations)
+  return /Rollback/i.test(operations)
+    && /does\s+not\s+authorize\s+or\s+perform(?:\s+deployment,?)?\s+VPS/i.test(normalized)
+}
+
+function catalogEnvNameExpectedInExample(name) {
+  return name.includes('_') && name === name.toUpperCase()
+}
+
+function documentationOnlyExampleKey(name) {
+  return DOCUMENTATION_ONLY_EXAMPLE_KEYS.includes(name)
+    || name.startsWith('MONITORING_')
+    || name.startsWith('PROVIDER_')
+    || name.startsWith('HOSTING_')
+    || name.startsWith('DATABASE_CREDENTIAL')
+    || name.startsWith('DEPLOYMENT_')
 }
 
 export function committedTemplateDrift({ catalog, productionExample, compose, operations }) {
   const errors = []
-  const exampleNames = new Set(parseEnvTemplate(productionExample))
+  const { assigned, commented } = parseEnvTemplate(productionExample)
+  const assignedNames = new Set(assigned)
+  const commentedNames = new Set(commented)
   for (const surface of catalog.surfaces) {
     for (const key of surface.keys) {
-      if (key.name.includes('_') && key.name === key.name.toUpperCase() && !exampleNames.has(key.name)) {
-        const documented = [
-          'PROVIDER_SELECTABILITY',
-          'PROVIDER_LIVE_CATALOGUE_PROBE',
-          'HOSTING_LIVE_HOST',
-          'DATABASE_CREDENTIAL_DISTINCTNESS',
-          'MONITORING_METRICS_PATH',
-          'MONITORING_ALERT_DEAD_LETTER_NONZERO',
-          'MONITORING_ALERT_RETRY_GROWTH_MINUTES',
-          'MONITORING_ALERT_READINESS_NON_200_MINUTES',
-          'MONITORING_ALERT_BACKUP_CHECKSUM_FAILURE',
-          'MONITORING_LOG_REDACTION',
-          'MONITORING_LIVE_SCRAPE',
-          'DEPLOYMENT_LIVE_CANARY',
-          'LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH',
-          'LINKSITES_ADMITTED_TEMPLATE_SHA',
-          'LINKSITES_ADMITTED_TEMPLATE_RECEIPT_JSON',
-          'LINKSITES_ADMITTED_TEMPLATE_EVIDENCE_JSON',
-          'LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON',
-          'LINKSITES_LINKLIBRARIES_ROOT',
-          'LINKSITES_LINKLIBRARIES_COMMIT_SHA',
-          'LINKSITES_LINKLIBRARIES_TREE_SHA',
-          'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256',
-          'LINKSITES_LINKLIBRARIES_RECEIPT_PATH',
-          'LINKLIBRARIES_ARTIFACT_PATH',
-          'LINKLIBRARIES_CATALOG_SHA',
-          'LINKLIBRARIES_ENTRY_SHA',
-          'LINKLIBRARIES_CATALOG_CONTENT_SHA256',
-          'LINKLIBRARIES_ENTRY_CONTENT_SHA256',
-        ]
-        if (!documented.includes(key.name) && !key.name.startsWith('MONITORING_') && !key.name.startsWith('PROVIDER_') && !key.name.startsWith('HOSTING_') && !key.name.startsWith('DATABASE_CREDENTIAL') && !key.name.startsWith('DEPLOYMENT_')) {
-          errors.push(`${surface.id}:${key.name} is missing from production.env.example`)
+      if (catalogEnvNameExpectedInExample(key.name) && !documentationOnlyExampleKey(key.name)) {
+        const liveForbiddenWhilePendingOrManual = COMMENTED_OPTIONAL_WHILE_PENDING_OR_MANUAL.includes(key.name)
+        if (liveForbiddenWhilePendingOrManual) {
+          if (assignedNames.has(key.name)) {
+            errors.push(`${surface.id}:${key.name} must remain commented and unset while pending/manual`)
+          } else if (!commentedNames.has(key.name)) {
+            errors.push(`${surface.id}:${key.name} is missing from production.env.example`)
+          }
+        } else if (!assignedNames.has(key.name)) {
+          if (commentedNames.has(key.name)) {
+            errors.push(`${surface.id}:${key.name} is required for the admitted first-site mode and must not be commented`)
+          } else {
+            errors.push(`${surface.id}:${key.name} is missing from production.env.example`)
+          }
         }
       }
       if (placeholderPattern.test(templateValue(key)) === false) {
@@ -367,7 +420,7 @@ export function committedTemplateDrift({ catalog, productionExample, compose, op
       errors.push(`compose missing ${token}`)
     }
   }
-  if (!operations.includes('Rollback') || !operations.includes('does not authorize or perform VPS')) {
+  if (!operationsDeniesDeploymentAndVps(operations)) {
     errors.push('operations manual no longer fail-closes VPS mutation')
   }
   return { ok: errors.length === 0, errors, liveMutation: false }

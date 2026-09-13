@@ -1,0 +1,2720 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-11T09:29:35Z",
+  "analysisRefreshedFrom": "git fetch origin --prune",
+  "protectedDevelopment": {
+    "ref": "refs/heads/development",
+    "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+    "tree": "e29607c43146decdf81c2f132562745f6a911780",
+    "originDevelopmentEqualsProtected": true
+  },
+  "acceptedPlan": {
+    "ref": "origin/issue/515-create-canonical-end-to-end-linksites-production",
+    "commit": "87ae0a7029eae7c877f08ef24cda0bdc54041aed",
+    "tree": "87448dec5b60a60773975c48439aceb71fb8806e",
+    "packet": "LSG0-01"
+  },
+  "coordinatorInputs": {
+    "evidenceLevel": "coordinator_attributed_readback_preserved_verbatim",
+    "localBranchPointersAlreadyAncestorsOfProtectedDevelopment": [
+      {
+        "localPointer": "issue/457",
+        "commit": "59b7cec43331521a19e5c9240657ac46b4c7ea3e",
+        "verifiedAncestorOfProtectedInThisVm": true
+      },
+      {
+        "localPointer": "issue/471",
+        "commit": "15278295016f2f4c74bd1a87ea85534f860e3f63",
+        "verifiedAncestorOfProtectedInThisVm": true
+      }
+    ],
+    "issue511LocalCheckout": {
+      "statement": "Issue 511 local checkout is behind remote and has no local-only commit.",
+      "remoteTipVerifiedInThisVm": "56125fc5e83cc0f223a085561bcadfe32e4f2652",
+      "localCheckoutReplicatedInThisVm": false
+    },
+    "founderOwnedUnstaged": {
+      "path": "apps/cms/next-env.d.ts",
+      "contentSha256": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b",
+      "gitBlob": "ce4e94a6b10f160ee021fe18939af160d2927dcf",
+      "protectedBlob": "9edff1c7cacb3bfac9a1eadcf6f51eaa99565e38",
+      "classification": "user_owned_hold",
+      "copiedOrStagedInThisSession": false
+    },
+    "issue470GeneratedLocalArtifacts": [
+      {
+        "source": "coordinator_attributed_readback",
+        "issue": 470,
+        "paths": [
+          ".ci-artifacts",
+          "apps/cms/AGENTS.md",
+          "apps/cms/CLAUDE.md"
+        ],
+        "classification": "preserved_excluded_local_artifact",
+        "reason": "Issue 470 untracked .ci-artifacts and apps/cms AGENTS.md/CLAUDE.md are generated local artifacts, not candidate source. They must not be committed. Nothing was deleted.",
+        "evidenceLevel": "coordinator_attributed_readback_not_present_in_this_vm"
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "commit": "99a3285da7330e2a7440efc9934459021c92f2d1",
+      "tree": "69b550d9b0c1fff50fbad4e9fba736153d5bdcaf",
+      "mergeBaseWithProtectedDevelopment": "99a3285da7330e2a7440efc9934459021c92f2d1",
+      "mergeBaseTree": "69b550d9b0c1fff50fbad4e9fba736153d5bdcaf",
+      "ahead": 0,
+      "behind": 29,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null,
+      "refs": [
+        "origin/issue/480-repair-issue-480-deferred-server03-provider-iden"
+      ],
+      "relatedSameTreeRefs": [
+        {
+          "ref": "origin/phase/linksites-server03-20260908-r1",
+          "commit": "9b988dcd9fb77fcabf0777fa3b9cf70723fe514f",
+          "tree": "69b550d9b0c1fff50fbad4e9fba736153d5bdcaf",
+          "note": "Same tree as this Issue 480 ancestor tip; recorded separately as a unique Phase commit."
+        }
+      ]
+    },
+    {
+      "refs": [
+        "origin/issue/480-repair-server03-deployment-template-release-stat"
+      ],
+      "commit": "205377db5e659a48a845c4630301178e2f220971",
+      "tree": "8c714cfd87b0c116ffd64196a880915d11875de7",
+      "mergeBaseWithProtectedDevelopment": "4b2997709d8a0805f904a665ad3ee3b77fbdd888",
+      "mergeBaseTree": "ee868c5bcf555487e6edd864106773edaeb6cf38",
+      "ahead": 8,
+      "behind": 47,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "205377db5e659a48a845c4630301178e2f220971",
+        "6bc32ec0c02128d12bcec1332feb3e615517f9cf",
+        "1a70b7b1b0075cfff4e5f954ca5cc991459e4067",
+        "db22982c29d43fc04d8e362fa49800cb95fbc3f9",
+        "5f4d26292862463b36f5138973bbe5b30a48eec8",
+        "8b7eb4a49f4bd7ca6f332477c8a74b4573211d01",
+        "3ec1693dc35408701fade9191709f8675eff1c3d",
+        "2a1ebc93d39dd77a444eee19cf6decc48872b90e"
+      ],
+      "rangePatchId": "87c95936a21098fb70cac5dfacf98225d0ebe370",
+      "classification": "superseded_by_stronger_exact_behavior",
+      "reason": "Strict ancestor of the validator tip (ahead 8 vs 11 on the same merge-base). Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+      "changedPaths": [
+        {
+          "path": "apps/program-orchestrator/src/adapters.ts",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "705bd9f5bad53bfc662923aaaa7e35246307204d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "7fb9c9d4142be7e70c158ab5cd23bb0aa922a88d",
+            "candidateBlob": "705bd9f5bad53bfc662923aaaa7e35246307204d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "2878912da1d5d058ece98cacecc69491191897de",
+            "mergeBaseToProtected": "0e42ecf355e38fa3d12284a8a12222a4780541a8",
+            "protectedToCandidate": "e1adc55bcb5b6c3aff8634d32ead686ae50927eb"
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/composition.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob f8380686ab3b8215790033055d69dc126d46ea43; unique three-dot change for this path is already present.",
+          "candidateBlob": "f8380686ab3b8215790033055d69dc126d46ea43",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "f8380686ab3b8215790033055d69dc126d46ea43",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "9eb099c8ff463c1fba1ccd7bb153ec50bfc5ce56",
+            "mergeBaseToProtected": "9eb099c8ff463c1fba1ccd7bb153ec50bfc5ce56",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/src/lib/template-admission.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 4f06ab4650b29ba2fca556f55cb33ced9602a441; unique three-dot change for this path is already present.",
+          "candidateBlob": "4f06ab4650b29ba2fca556f55cb33ced9602a441",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "4f06ab4650b29ba2fca556f55cb33ced9602a441",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "5ab42633a889283462710287678af65bd6b27634",
+            "mergeBaseToProtected": "5ab42633a889283462710287678af65bd6b27634",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/src/templates/registry.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob ad42cd183a9fe486d04b2f53143142342596fc07; unique three-dot change for this path is already present.",
+          "candidateBlob": "ad42cd183a9fe486d04b2f53143142342596fc07",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "ad42cd183a9fe486d04b2f53143142342596fc07",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "865254d82a70833dc12349b77c4f173ddafdf1ab",
+            "mergeBaseToProtected": "865254d82a70833dc12349b77c4f173ddafdf1ab",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/tests/production-template-release-readiness.test.ts",
+          "diffStatus": "A",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 55200a741af8f708ff3232b320b6f673c269f09d; unique three-dot change for this path is already present.",
+          "candidateBlob": "55200a741af8f708ff3232b320b6f673c269f09d",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "55200a741af8f708ff3232b320b6f673c269f09d",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "d0e2c7d7ed9d12a82f8b7e0dc072248d948b6afe",
+            "mergeBaseToProtected": "d0e2c7d7ed9d12a82f8b7e0dc072248d948b6afe",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/OPERATIONS.md",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "2743a28036e8d51f3ccb523a7985792d85a684c2",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "bcb8c9ece1b720d846458c5b9552bb8cba9e2dab",
+            "candidateBlob": "2743a28036e8d51f3ccb523a7985792d85a684c2"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "296d24f2cc22e02e42fe2d272fdb36f4a0cd3653",
+            "mergeBaseToProtected": "5a3b25b78b2774a9637b5c6853cc643252e08b53",
+            "protectedToCandidate": "118d8a991c41d67bc5832037b2d42a4643d3b376"
+          }
+        },
+        {
+          "path": "deploy/README.md",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "24243c4e8f1787e019a1b4b07a28453fbb6576a3",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "2d66abeba39485cf3eec9c6a0fe29b60b930862b",
+            "candidateBlob": "24243c4e8f1787e019a1b4b07a28453fbb6576a3"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "69794043a64d03d3e71490e463c247a96510b6d1",
+            "mergeBaseToProtected": "6d1ea19953a224f4082367c29b4fa96122be963e",
+            "protectedToCandidate": "c552ff6e43b24043367dfe8007f875df347b0498"
+          }
+        },
+        {
+          "path": "deploy/config/README.md",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "dd8a4db0f74477786d56bab985815b3cf2a8cabb",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "5281bbf19d43fbaa28b2aa102df72786753a15c4",
+            "candidateBlob": "dd8a4db0f74477786d56bab985815b3cf2a8cabb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "586646d7f56d9f6a6cb2c474a38832c6464a0d57",
+            "mergeBaseToProtected": "0c841e536439b16d1ca805c51e75f7b3c3eb0483",
+            "protectedToCandidate": "3525b9524fdd6472b32b16c2ec5810f2f8bae357"
+          }
+        },
+        {
+          "path": "deploy/config/production.env.example",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "719291df6e83ba2d131703aa10a93d08f6a90c0d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "7b365320b1bc0fdaf69d0a9cbd612fe80001d4fe",
+            "candidateBlob": "719291df6e83ba2d131703aa10a93d08f6a90c0d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "77e0e9549d4bf48ca7a52d656a62dfdd7a2fa2c0",
+            "mergeBaseToProtected": "62c35608ab4fbf9d7663e8545becce54941c3d60",
+            "protectedToCandidate": "8cf8cc15b995dd160ec720416fcef116f9893670"
+          }
+        },
+        {
+          "path": "deploy/config/runtime-contract.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "139cb5fed9d76c7b06164ef2efe7583d176286bd",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "e4579aa0038be028a4c87dde1a47945df820941f",
+            "candidateBlob": "139cb5fed9d76c7b06164ef2efe7583d176286bd"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "cb5a973d3276da57e195ea4f46483cc9439f256e",
+            "mergeBaseToProtected": "57f9deb4bffe8cb9fe92a03f870e70e9e7ce0fb1",
+            "protectedToCandidate": "97b007396de236c4a55ce884042ea96a66c3114b"
+          }
+        },
+        {
+          "path": "deploy/docker-compose.deploy.yml",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "0265d5eacd15cab9ee9c2b2ab2ecd101fcaa055a",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "034d24799b341b2e7a63b5850dec2795099bb778",
+            "candidateBlob": "0265d5eacd15cab9ee9c2b2ab2ecd101fcaa055a"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "6699f3a03d3c85d9afabd2807f9f1873cc473f68",
+            "mergeBaseToProtected": "43a00cf6931c03920a1e8715f4548dcbe7666e69",
+            "protectedToCandidate": "10225da2b0edde9c5acdcf7cc42a6cefad61f7fe"
+          }
+        },
+        {
+          "path": "deploy/docker-compose.server03-foundation.yml",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 720476dec102726e9dc6b008ce9d3ceafbbbc73e; unique three-dot change for this path is already present.",
+          "candidateBlob": "720476dec102726e9dc6b008ce9d3ceafbbbc73e",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "720476dec102726e9dc6b008ce9d3ceafbbbc73e",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "f57c5ea638a9c11edeb9e5984be5a7d13b6ed32b",
+            "mergeBaseToProtected": "f57c5ea638a9c11edeb9e5984be5a7d13b6ed32b",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/manifests/README.md",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "24578d89db7cac024a3d78b94ac83cd48272fa25",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "a2ddb8746a0d2aa9ec45a0c96a6e4abb06c260ec",
+            "candidateBlob": "24578d89db7cac024a3d78b94ac83cd48272fa25"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "028a2c1108187dec3257f5d76e8c8dadfb0f675a",
+            "mergeBaseToProtected": "de48c155cf5fcb83aaa7eb40e308e110c6d9d691",
+            "protectedToCandidate": "2c124d0fe06866df724261110844a7afaba83a00"
+          }
+        },
+        {
+          "path": "deploy/scripts/generate-deployment-manifest.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "da6acf9e5ee04ed98633b97073351aa1e3d69ac5",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "c78dbbbb627f45b54da1f71f64651763a091ebfd",
+            "candidateBlob": "da6acf9e5ee04ed98633b97073351aa1e3d69ac5"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "0641ab0c81577f2785aeb01834d31ccbd865a6fe",
+            "mergeBaseToProtected": "d5e7d22e4b58d5d05005ff2232b09fba7a9defb2",
+            "protectedToCandidate": "0911de0b40d105b45c963f5000d38155e3c143c1"
+          }
+        },
+        {
+          "path": "deploy/scripts/preflight.sh",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "c75342f1e4ea31cbe302c234de258cb00305b1d7",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "57ea2d668284ecf0e9775dc8fc424753fbd1f5df",
+            "candidateBlob": "c75342f1e4ea31cbe302c234de258cb00305b1d7"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "516f554882d659cceeb91a811e66a6332f943ed8",
+            "mergeBaseToProtected": "9516f45035ed8b3b9b503380c3825528b2132ade",
+            "protectedToCandidate": "8b0dbdad17da0e9d336083a22f170edb19ab3468"
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-manifest.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "98ce29b9e1af3dd690e18ea3c1657a09d4716e36",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "db740e6a5332aa12ee6a961e915e269f7f290a8d",
+            "candidateBlob": "98ce29b9e1af3dd690e18ea3c1657a09d4716e36"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "017a0fe271a9a31f52e86bfa70a765183fcebaec",
+            "mergeBaseToProtected": "878344e4ac60c452d8d62c2f8907b336754edb1b",
+            "protectedToCandidate": "60049b9346f75f8497bcb90611516ab0bb00b5a2"
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-surface.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "c5380b632f727b8ccb4e3bea066f1bd61d7b8242",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "934161c0fbb0c464c8ce3572c9acd9b04cfffee6",
+            "candidateBlob": "c5380b632f727b8ccb4e3bea066f1bd61d7b8242"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "6613a403a6b9e3d375cd7c0092cc0148bd41188a",
+            "mergeBaseToProtected": "b2d966c43bd5a3efbb973c1bdb3eba96be07e281",
+            "protectedToCandidate": "f087713f8380df723f6ee4957bbc1e1d98a44399"
+          }
+        },
+        {
+          "path": "deploy/tests/runtime-contract.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "9ba47915a0c7c2ededf2a51392b3389ee914b95c",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "94f5e6821f0333498bf6c53dd798758bec7eecb7",
+            "candidateBlob": "9ba47915a0c7c2ededf2a51392b3389ee914b95c"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "42e5f0da9cf4322d0b9f8a5ae0ae6161e660473a",
+            "mergeBaseToProtected": "a9cec45b134cc53712c0600c912675bef141751a",
+            "protectedToCandidate": "3b3a877372a0190a5b879fceeed3129a122eb784"
+          }
+        },
+        {
+          "path": "docs/handoffs/issue-480-server03-receipt-binding-successor.md",
+          "diffStatus": "A",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "ce6eae80ba78efc10d61ae95e31fc63dfa3bc1d5",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "f0a287a85c8518d10c64c802e40128a3bb0f12bf",
+            "candidateBlob": "ce6eae80ba78efc10d61ae95e31fc63dfa3bc1d5"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "24078e9025f33277d91a53c3c235f7a67aebb11c",
+            "mergeBaseToProtected": "06babaa85a52d6f796a1eaf9ac348e2177380f99",
+            "protectedToCandidate": "e92ad58d14f8964ab45cba2ab491f52901b8ec2a"
+          }
+        },
+        {
+          "path": "packages/factory-catalog/src/revision2Materialization.ts",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "c429e7a400c42fb48e60453300a34c482e9e0e7c",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "9d8b8eeffda65e9e4d4db2991b3977bb71c6c0df",
+            "candidateBlob": "c429e7a400c42fb48e60453300a34c482e9e0e7c"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "64640dbfab45f0a7760dc791501e31b83cbebd1e",
+            "mergeBaseToProtected": "9314a32bf6f2368a013c11b931745296f92bf841",
+            "protectedToCandidate": "86c1e59e89f40e4a85811d42e68688706629d2d6"
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "supersededBy": {
+        "commit": "55f0e2f89eff5472f2698221d6b305a1477667ad",
+        "also": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+        "ref": "origin/issue/480-repair-server03-deployment-template-release-stat-validator"
+      },
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/issue/480-repair-server03-deployment-template-release-stat-successor"
+      ],
+      "commit": "b49dadbee2f3cfa04033bf58640a5acfe4b1588e",
+      "tree": "2da3aac57d6e5574e60cbee07a1acdabe17612f7",
+      "mergeBaseWithProtectedDevelopment": "4b2997709d8a0805f904a665ad3ee3b77fbdd888",
+      "mergeBaseTree": "ee868c5bcf555487e6edd864106773edaeb6cf38",
+      "ahead": 10,
+      "behind": 47,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "b49dadbee2f3cfa04033bf58640a5acfe4b1588e",
+        "de5d90c467f77bd873cae6a2edbf7b24923b52b3",
+        "205377db5e659a48a845c4630301178e2f220971",
+        "6bc32ec0c02128d12bcec1332feb3e615517f9cf",
+        "1a70b7b1b0075cfff4e5f954ca5cc991459e4067",
+        "db22982c29d43fc04d8e362fa49800cb95fbc3f9",
+        "5f4d26292862463b36f5138973bbe5b30a48eec8",
+        "8b7eb4a49f4bd7ca6f332477c8a74b4573211d01",
+        "3ec1693dc35408701fade9191709f8675eff1c3d",
+        "2a1ebc93d39dd77a444eee19cf6decc48872b90e"
+      ],
+      "rangePatchId": "e656b4f26394c2b7e37553f59e49ef64a0ed9b5e",
+      "classification": "superseded_by_stronger_exact_behavior",
+      "reason": "Strict ancestor of the validator tip (one commit behind validator). Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+      "changedPaths": [
+        {
+          "path": "apps/cms/src/hooks/validatePublishPermissions.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob a9f68a413724aacf9aca46c53b98cd1c3afc3be9; unique three-dot change for this path is already present.",
+          "candidateBlob": "a9f68a413724aacf9aca46c53b98cd1c3afc3be9",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "a9f68a413724aacf9aca46c53b98cd1c3afc3be9",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "1b0ca72e99f9e0a5ea5e0cce7318a1f5ada0b94b",
+            "mergeBaseToProtected": "1b0ca72e99f9e0a5ea5e0cce7318a1f5ada0b94b",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/cms/tests/contracts/publish-permissions.spec.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 7c1bc5f1623e9d8d13d6414c21816b424490235c; unique three-dot change for this path is already present.",
+          "candidateBlob": "7c1bc5f1623e9d8d13d6414c21816b424490235c",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "7c1bc5f1623e9d8d13d6414c21816b424490235c",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "02dea8ffe2687ae16211241281c8c2f6c0c1b122",
+            "mergeBaseToProtected": "02dea8ffe2687ae16211241281c8c2f6c0c1b122",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/adapters.ts",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "705bd9f5bad53bfc662923aaaa7e35246307204d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "7fb9c9d4142be7e70c158ab5cd23bb0aa922a88d",
+            "candidateBlob": "705bd9f5bad53bfc662923aaaa7e35246307204d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "2878912da1d5d058ece98cacecc69491191897de",
+            "mergeBaseToProtected": "0e42ecf355e38fa3d12284a8a12222a4780541a8",
+            "protectedToCandidate": "e1adc55bcb5b6c3aff8634d32ead686ae50927eb"
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/composition.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob f8380686ab3b8215790033055d69dc126d46ea43; unique three-dot change for this path is already present.",
+          "candidateBlob": "f8380686ab3b8215790033055d69dc126d46ea43",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "f8380686ab3b8215790033055d69dc126d46ea43",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "9eb099c8ff463c1fba1ccd7bb153ec50bfc5ce56",
+            "mergeBaseToProtected": "9eb099c8ff463c1fba1ccd7bb153ec50bfc5ce56",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/intake.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 850d204b24499c27464219a5f954cc3ae28cf1f8; unique three-dot change for this path is already present.",
+          "candidateBlob": "850d204b24499c27464219a5f954cc3ae28cf1f8",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "850d204b24499c27464219a5f954cc3ae28cf1f8",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "8f13bf58024ed22c7d08fad538d1d86345d74f35",
+            "mergeBaseToProtected": "8f13bf58024ed22c7d08fad538d1d86345d74f35",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/service.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob f09bf0e9e41808bc16db0984cf59e2662da3cdc6; unique three-dot change for this path is already present.",
+          "candidateBlob": "f09bf0e9e41808bc16db0984cf59e2662da3cdc6",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "f09bf0e9e41808bc16db0984cf59e2662da3cdc6",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "84eef4b0b61dd2b68ee6897a899060c49d8d3bac",
+            "mergeBaseToProtected": "84eef4b0b61dd2b68ee6897a899060c49d8d3bac",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/tests/program-orchestrator.test.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 2aea104db73f1f3f66c8d1a70b9f93556a3200be; unique three-dot change for this path is already present.",
+          "candidateBlob": "2aea104db73f1f3f66c8d1a70b9f93556a3200be",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "2aea104db73f1f3f66c8d1a70b9f93556a3200be",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "01dd4b273fd54199455e45b63fbe46839d597bd9",
+            "mergeBaseToProtected": "01dd4b273fd54199455e45b63fbe46839d597bd9",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/src/lib/template-admission.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 4f06ab4650b29ba2fca556f55cb33ced9602a441; unique three-dot change for this path is already present.",
+          "candidateBlob": "4f06ab4650b29ba2fca556f55cb33ced9602a441",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "4f06ab4650b29ba2fca556f55cb33ced9602a441",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "5ab42633a889283462710287678af65bd6b27634",
+            "mergeBaseToProtected": "5ab42633a889283462710287678af65bd6b27634",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/src/templates/registry.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob ad42cd183a9fe486d04b2f53143142342596fc07; unique three-dot change for this path is already present.",
+          "candidateBlob": "ad42cd183a9fe486d04b2f53143142342596fc07",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "ad42cd183a9fe486d04b2f53143142342596fc07",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "865254d82a70833dc12349b77c4f173ddafdf1ab",
+            "mergeBaseToProtected": "865254d82a70833dc12349b77c4f173ddafdf1ab",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/tests/production-template-release-readiness.test.ts",
+          "diffStatus": "A",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 55200a741af8f708ff3232b320b6f673c269f09d; unique three-dot change for this path is already present.",
+          "candidateBlob": "55200a741af8f708ff3232b320b6f673c269f09d",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "55200a741af8f708ff3232b320b6f673c269f09d",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "d0e2c7d7ed9d12a82f8b7e0dc072248d948b6afe",
+            "mergeBaseToProtected": "d0e2c7d7ed9d12a82f8b7e0dc072248d948b6afe",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/OPERATIONS.md",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob bcb8c9ece1b720d846458c5b9552bb8cba9e2dab; unique three-dot change for this path is already present.",
+          "candidateBlob": "bcb8c9ece1b720d846458c5b9552bb8cba9e2dab",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "bcb8c9ece1b720d846458c5b9552bb8cba9e2dab",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "5a3b25b78b2774a9637b5c6853cc643252e08b53",
+            "mergeBaseToProtected": "5a3b25b78b2774a9637b5c6853cc643252e08b53",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/README.md",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "24243c4e8f1787e019a1b4b07a28453fbb6576a3",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "2d66abeba39485cf3eec9c6a0fe29b60b930862b",
+            "candidateBlob": "24243c4e8f1787e019a1b4b07a28453fbb6576a3"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "69794043a64d03d3e71490e463c247a96510b6d1",
+            "mergeBaseToProtected": "6d1ea19953a224f4082367c29b4fa96122be963e",
+            "protectedToCandidate": "c552ff6e43b24043367dfe8007f875df347b0498"
+          }
+        },
+        {
+          "path": "deploy/config/README.md",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 5281bbf19d43fbaa28b2aa102df72786753a15c4; unique three-dot change for this path is already present.",
+          "candidateBlob": "5281bbf19d43fbaa28b2aa102df72786753a15c4",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "5281bbf19d43fbaa28b2aa102df72786753a15c4",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "0c841e536439b16d1ca805c51e75f7b3c3eb0483",
+            "mergeBaseToProtected": "0c841e536439b16d1ca805c51e75f7b3c3eb0483",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/config/production.env.example",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "719291df6e83ba2d131703aa10a93d08f6a90c0d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "7b365320b1bc0fdaf69d0a9cbd612fe80001d4fe",
+            "candidateBlob": "719291df6e83ba2d131703aa10a93d08f6a90c0d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "77e0e9549d4bf48ca7a52d656a62dfdd7a2fa2c0",
+            "mergeBaseToProtected": "62c35608ab4fbf9d7663e8545becce54941c3d60",
+            "protectedToCandidate": "8cf8cc15b995dd160ec720416fcef116f9893670"
+          }
+        },
+        {
+          "path": "deploy/config/runtime-contract.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "758998d6ab2d027d62b4c37e50a454c34c4eeb79",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "e4579aa0038be028a4c87dde1a47945df820941f",
+            "candidateBlob": "758998d6ab2d027d62b4c37e50a454c34c4eeb79"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "5b96556a4e2ed6c5e016e882a91b8c89c9f93176",
+            "mergeBaseToProtected": "57f9deb4bffe8cb9fe92a03f870e70e9e7ce0fb1",
+            "protectedToCandidate": "c14c2eb5c6dc3d208cd67ad6eec3f7bdd4f7eec5"
+          }
+        },
+        {
+          "path": "deploy/docker-compose.deploy.yml",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 034d24799b341b2e7a63b5850dec2795099bb778; unique three-dot change for this path is already present.",
+          "candidateBlob": "034d24799b341b2e7a63b5850dec2795099bb778",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "034d24799b341b2e7a63b5850dec2795099bb778",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "43a00cf6931c03920a1e8715f4548dcbe7666e69",
+            "mergeBaseToProtected": "43a00cf6931c03920a1e8715f4548dcbe7666e69",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/docker-compose.server03-foundation.yml",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 720476dec102726e9dc6b008ce9d3ceafbbbc73e; unique three-dot change for this path is already present.",
+          "candidateBlob": "720476dec102726e9dc6b008ce9d3ceafbbbc73e",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "720476dec102726e9dc6b008ce9d3ceafbbbc73e",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "f57c5ea638a9c11edeb9e5984be5a7d13b6ed32b",
+            "mergeBaseToProtected": "f57c5ea638a9c11edeb9e5984be5a7d13b6ed32b",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/docker-compose.template-ready.yml",
+          "diffStatus": "A",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 20637155d41bcbba504497c699c670c087fbd36f; unique three-dot change for this path is already present.",
+          "candidateBlob": "20637155d41bcbba504497c699c670c087fbd36f",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "20637155d41bcbba504497c699c670c087fbd36f",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "02d6e9614b177ad447d0acafd1e00d8b959ada2c",
+            "mergeBaseToProtected": "02d6e9614b177ad447d0acafd1e00d8b959ada2c",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/manifests/README.md",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "119524b050ab5e0b0c285570d96cf8432a440783",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "a2ddb8746a0d2aa9ec45a0c96a6e4abb06c260ec",
+            "candidateBlob": "119524b050ab5e0b0c285570d96cf8432a440783"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "f6d921753c2a142bad1d5290c338c100fc0e0903",
+            "mergeBaseToProtected": "de48c155cf5fcb83aaa7eb40e308e110c6d9d691",
+            "protectedToCandidate": "9bd563cd94d9ecb4ad586403f45809fc62851382"
+          }
+        },
+        {
+          "path": "deploy/scripts/generate-deployment-manifest.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "bbc96880c03462d24a19d85154bb8bb814aeda46",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "c78dbbbb627f45b54da1f71f64651763a091ebfd",
+            "candidateBlob": "bbc96880c03462d24a19d85154bb8bb814aeda46"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "87a624e0cdff4fedec368ad8746dd8985f47c9cf",
+            "mergeBaseToProtected": "d5e7d22e4b58d5d05005ff2232b09fba7a9defb2",
+            "protectedToCandidate": "512dbd155d68e9d0e27fee4f58585243bc24f525"
+          }
+        },
+        {
+          "path": "deploy/scripts/postdeploy-smoke.sh",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 8e7eb152936d31039abc2ff208481d25ab3eb021; unique three-dot change for this path is already present.",
+          "candidateBlob": "8e7eb152936d31039abc2ff208481d25ab3eb021",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "8e7eb152936d31039abc2ff208481d25ab3eb021",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "70a7f289cb041351433b7f52908b14197c620e51",
+            "mergeBaseToProtected": "70a7f289cb041351433b7f52908b14197c620e51",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/scripts/preflight-server03-foundation.sh",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 5f90db59c397924c3b766e8d9d4af132774d188d; unique three-dot change for this path is already present.",
+          "candidateBlob": "5f90db59c397924c3b766e8d9d4af132774d188d",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "5f90db59c397924c3b766e8d9d4af132774d188d",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "3dcb3e09d6383b587d229d2e1dc675c0f6ef9fee",
+            "mergeBaseToProtected": "3dcb3e09d6383b587d229d2e1dc675c0f6ef9fee",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/scripts/preflight.sh",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 57ea2d668284ecf0e9775dc8fc424753fbd1f5df; unique three-dot change for this path is already present.",
+          "candidateBlob": "57ea2d668284ecf0e9775dc8fc424753fbd1f5df",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "57ea2d668284ecf0e9775dc8fc424753fbd1f5df",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "9516f45035ed8b3b9b503380c3825528b2132ade",
+            "mergeBaseToProtected": "9516f45035ed8b3b9b503380c3825528b2132ade",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-manifest.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "e6e673e9b11e85ddbe3ef87b8a943e2c3260c0b4",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "db740e6a5332aa12ee6a961e915e269f7f290a8d",
+            "candidateBlob": "e6e673e9b11e85ddbe3ef87b8a943e2c3260c0b4"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "ec795cd288e6ee22b12377d6cd543542db78e706",
+            "mergeBaseToProtected": "878344e4ac60c452d8d62c2f8907b336754edb1b",
+            "protectedToCandidate": "b51add6025121cf2475b96aefe6f068b570ad517"
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-surface.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "50983cee0700d8e59ede3c759deb2303d030b199",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "934161c0fbb0c464c8ce3572c9acd9b04cfffee6",
+            "candidateBlob": "50983cee0700d8e59ede3c759deb2303d030b199"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "d2d4c11b90745f93b1d9e9b82462e0480ef0cbd9",
+            "mergeBaseToProtected": "b2d966c43bd5a3efbb973c1bdb3eba96be07e281",
+            "protectedToCandidate": "933db9660915f2c12f2a7b10cda59f4f0275b9a0"
+          }
+        },
+        {
+          "path": "deploy/tests/runtime-contract.test.mjs",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 94f5e6821f0333498bf6c53dd798758bec7eecb7; unique three-dot change for this path is already present.",
+          "candidateBlob": "94f5e6821f0333498bf6c53dd798758bec7eecb7",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "94f5e6821f0333498bf6c53dd798758bec7eecb7",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "a9cec45b134cc53712c0600c912675bef141751a",
+            "mergeBaseToProtected": "a9cec45b134cc53712c0600c912675bef141751a",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "docs/handoffs/issue-480-server03-receipt-binding-successor.md",
+          "diffStatus": "A",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "5a07a8ad38d49118c71f46c46f941d2fa55deec9",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "f0a287a85c8518d10c64c802e40128a3bb0f12bf",
+            "candidateBlob": "5a07a8ad38d49118c71f46c46f941d2fa55deec9"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "da4c816c3af540cc48265faaeccdcf0781172875",
+            "mergeBaseToProtected": "06babaa85a52d6f796a1eaf9ac348e2177380f99",
+            "protectedToCandidate": "ee464969a749851206fe272f2159afedc6697d68"
+          }
+        },
+        {
+          "path": "packages/factory-catalog/src/revision2Materialization.ts",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "c429e7a400c42fb48e60453300a34c482e9e0e7c",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "9d8b8eeffda65e9e4d4db2991b3977bb71c6c0df",
+            "candidateBlob": "c429e7a400c42fb48e60453300a34c482e9e0e7c"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "64640dbfab45f0a7760dc791501e31b83cbebd1e",
+            "mergeBaseToProtected": "9314a32bf6f2368a013c11b931745296f92bf841",
+            "protectedToCandidate": "86c1e59e89f40e4a85811d42e68688706629d2d6"
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "supersededBy": {
+        "commit": "55f0e2f89eff5472f2698221d6b305a1477667ad",
+        "also": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+        "ref": "origin/issue/480-repair-server03-deployment-template-release-stat-validator"
+      },
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/issue/480-repair-server03-deployment-template-release-stat-validator"
+      ],
+      "commit": "55f0e2f89eff5472f2698221d6b305a1477667ad",
+      "tree": "dc9216dbd4ee433516b20b13315b195ef8fd8b2a",
+      "mergeBaseWithProtectedDevelopment": "4b2997709d8a0805f904a665ad3ee3b77fbdd888",
+      "mergeBaseTree": "ee868c5bcf555487e6edd864106773edaeb6cf38",
+      "ahead": 11,
+      "behind": 47,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "55f0e2f89eff5472f2698221d6b305a1477667ad",
+        "b49dadbee2f3cfa04033bf58640a5acfe4b1588e",
+        "de5d90c467f77bd873cae6a2edbf7b24923b52b3",
+        "205377db5e659a48a845c4630301178e2f220971",
+        "6bc32ec0c02128d12bcec1332feb3e615517f9cf",
+        "1a70b7b1b0075cfff4e5f954ca5cc991459e4067",
+        "db22982c29d43fc04d8e362fa49800cb95fbc3f9",
+        "5f4d26292862463b36f5138973bbe5b30a48eec8",
+        "8b7eb4a49f4bd7ca6f332477c8a74b4573211d01",
+        "3ec1693dc35408701fade9191709f8675eff1c3d",
+        "2a1ebc93d39dd77a444eee19cf6decc48872b90e"
+      ],
+      "rangePatchId": "c969c82808bd04197c598a9d89f483ac7773d941",
+      "classification": "superseded_by_stronger_exact_behavior",
+      "reason": "Strongest Issue 480 variant by exact ancestry, but every path that still differs from protected development is a weaker pin/preflight/publication contract. Paths whose blobs already match protected development are recorded as integrated at path level. Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+      "changedPaths": [
+        {
+          "path": "apps/cms/src/hooks/validatePublishPermissions.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob a9f68a413724aacf9aca46c53b98cd1c3afc3be9; unique three-dot change for this path is already present.",
+          "candidateBlob": "a9f68a413724aacf9aca46c53b98cd1c3afc3be9",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "a9f68a413724aacf9aca46c53b98cd1c3afc3be9",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "1b0ca72e99f9e0a5ea5e0cce7318a1f5ada0b94b",
+            "mergeBaseToProtected": "1b0ca72e99f9e0a5ea5e0cce7318a1f5ada0b94b",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/cms/tests/contracts/publish-permissions.spec.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 7c1bc5f1623e9d8d13d6414c21816b424490235c; unique three-dot change for this path is already present.",
+          "candidateBlob": "7c1bc5f1623e9d8d13d6414c21816b424490235c",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "7c1bc5f1623e9d8d13d6414c21816b424490235c",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "02dea8ffe2687ae16211241281c8c2f6c0c1b122",
+            "mergeBaseToProtected": "02dea8ffe2687ae16211241281c8c2f6c0c1b122",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/adapters.ts",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "705bd9f5bad53bfc662923aaaa7e35246307204d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "7fb9c9d4142be7e70c158ab5cd23bb0aa922a88d",
+            "candidateBlob": "705bd9f5bad53bfc662923aaaa7e35246307204d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "2878912da1d5d058ece98cacecc69491191897de",
+            "mergeBaseToProtected": "0e42ecf355e38fa3d12284a8a12222a4780541a8",
+            "protectedToCandidate": "e1adc55bcb5b6c3aff8634d32ead686ae50927eb"
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/composition.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob f8380686ab3b8215790033055d69dc126d46ea43; unique three-dot change for this path is already present.",
+          "candidateBlob": "f8380686ab3b8215790033055d69dc126d46ea43",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "f8380686ab3b8215790033055d69dc126d46ea43",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "9eb099c8ff463c1fba1ccd7bb153ec50bfc5ce56",
+            "mergeBaseToProtected": "9eb099c8ff463c1fba1ccd7bb153ec50bfc5ce56",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/intake.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 850d204b24499c27464219a5f954cc3ae28cf1f8; unique three-dot change for this path is already present.",
+          "candidateBlob": "850d204b24499c27464219a5f954cc3ae28cf1f8",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "850d204b24499c27464219a5f954cc3ae28cf1f8",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "8f13bf58024ed22c7d08fad538d1d86345d74f35",
+            "mergeBaseToProtected": "8f13bf58024ed22c7d08fad538d1d86345d74f35",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/src/service.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob f09bf0e9e41808bc16db0984cf59e2662da3cdc6; unique three-dot change for this path is already present.",
+          "candidateBlob": "f09bf0e9e41808bc16db0984cf59e2662da3cdc6",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "f09bf0e9e41808bc16db0984cf59e2662da3cdc6",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "84eef4b0b61dd2b68ee6897a899060c49d8d3bac",
+            "mergeBaseToProtected": "84eef4b0b61dd2b68ee6897a899060c49d8d3bac",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/program-orchestrator/tests/program-orchestrator.test.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 2aea104db73f1f3f66c8d1a70b9f93556a3200be; unique three-dot change for this path is already present.",
+          "candidateBlob": "2aea104db73f1f3f66c8d1a70b9f93556a3200be",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "2aea104db73f1f3f66c8d1a70b9f93556a3200be",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "01dd4b273fd54199455e45b63fbe46839d597bd9",
+            "mergeBaseToProtected": "01dd4b273fd54199455e45b63fbe46839d597bd9",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/src/lib/template-admission.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 4f06ab4650b29ba2fca556f55cb33ced9602a441; unique three-dot change for this path is already present.",
+          "candidateBlob": "4f06ab4650b29ba2fca556f55cb33ced9602a441",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "4f06ab4650b29ba2fca556f55cb33ced9602a441",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "5ab42633a889283462710287678af65bd6b27634",
+            "mergeBaseToProtected": "5ab42633a889283462710287678af65bd6b27634",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/src/templates/registry.ts",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob ad42cd183a9fe486d04b2f53143142342596fc07; unique three-dot change for this path is already present.",
+          "candidateBlob": "ad42cd183a9fe486d04b2f53143142342596fc07",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "ad42cd183a9fe486d04b2f53143142342596fc07",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "865254d82a70833dc12349b77c4f173ddafdf1ab",
+            "mergeBaseToProtected": "865254d82a70833dc12349b77c4f173ddafdf1ab",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "apps/web-master/tests/production-template-release-readiness.test.ts",
+          "diffStatus": "A",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 55200a741af8f708ff3232b320b6f673c269f09d; unique three-dot change for this path is already present.",
+          "candidateBlob": "55200a741af8f708ff3232b320b6f673c269f09d",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "55200a741af8f708ff3232b320b6f673c269f09d",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "d0e2c7d7ed9d12a82f8b7e0dc072248d948b6afe",
+            "mergeBaseToProtected": "d0e2c7d7ed9d12a82f8b7e0dc072248d948b6afe",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/OPERATIONS.md",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob bcb8c9ece1b720d846458c5b9552bb8cba9e2dab; unique three-dot change for this path is already present.",
+          "candidateBlob": "bcb8c9ece1b720d846458c5b9552bb8cba9e2dab",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "bcb8c9ece1b720d846458c5b9552bb8cba9e2dab",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "5a3b25b78b2774a9637b5c6853cc643252e08b53",
+            "mergeBaseToProtected": "5a3b25b78b2774a9637b5c6853cc643252e08b53",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/README.md",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "24243c4e8f1787e019a1b4b07a28453fbb6576a3",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "2d66abeba39485cf3eec9c6a0fe29b60b930862b",
+            "candidateBlob": "24243c4e8f1787e019a1b4b07a28453fbb6576a3"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "69794043a64d03d3e71490e463c247a96510b6d1",
+            "mergeBaseToProtected": "6d1ea19953a224f4082367c29b4fa96122be963e",
+            "protectedToCandidate": "c552ff6e43b24043367dfe8007f875df347b0498"
+          }
+        },
+        {
+          "path": "deploy/config/README.md",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 5281bbf19d43fbaa28b2aa102df72786753a15c4; unique three-dot change for this path is already present.",
+          "candidateBlob": "5281bbf19d43fbaa28b2aa102df72786753a15c4",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "5281bbf19d43fbaa28b2aa102df72786753a15c4",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "0c841e536439b16d1ca805c51e75f7b3c3eb0483",
+            "mergeBaseToProtected": "0c841e536439b16d1ca805c51e75f7b3c3eb0483",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/config/production.env.example",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "719291df6e83ba2d131703aa10a93d08f6a90c0d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "7b365320b1bc0fdaf69d0a9cbd612fe80001d4fe",
+            "candidateBlob": "719291df6e83ba2d131703aa10a93d08f6a90c0d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "77e0e9549d4bf48ca7a52d656a62dfdd7a2fa2c0",
+            "mergeBaseToProtected": "62c35608ab4fbf9d7663e8545becce54941c3d60",
+            "protectedToCandidate": "8cf8cc15b995dd160ec720416fcef116f9893670"
+          }
+        },
+        {
+          "path": "deploy/config/runtime-contract.mjs",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob e4579aa0038be028a4c87dde1a47945df820941f; unique three-dot change for this path is already present.",
+          "candidateBlob": "e4579aa0038be028a4c87dde1a47945df820941f",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "e4579aa0038be028a4c87dde1a47945df820941f",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "57f9deb4bffe8cb9fe92a03f870e70e9e7ce0fb1",
+            "mergeBaseToProtected": "57f9deb4bffe8cb9fe92a03f870e70e9e7ce0fb1",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/docker-compose.deploy.yml",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 034d24799b341b2e7a63b5850dec2795099bb778; unique three-dot change for this path is already present.",
+          "candidateBlob": "034d24799b341b2e7a63b5850dec2795099bb778",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "034d24799b341b2e7a63b5850dec2795099bb778",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "43a00cf6931c03920a1e8715f4548dcbe7666e69",
+            "mergeBaseToProtected": "43a00cf6931c03920a1e8715f4548dcbe7666e69",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/docker-compose.server03-foundation.yml",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 720476dec102726e9dc6b008ce9d3ceafbbbc73e; unique three-dot change for this path is already present.",
+          "candidateBlob": "720476dec102726e9dc6b008ce9d3ceafbbbc73e",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "720476dec102726e9dc6b008ce9d3ceafbbbc73e",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "f57c5ea638a9c11edeb9e5984be5a7d13b6ed32b",
+            "mergeBaseToProtected": "f57c5ea638a9c11edeb9e5984be5a7d13b6ed32b",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/docker-compose.template-ready.yml",
+          "diffStatus": "A",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 20637155d41bcbba504497c699c670c087fbd36f; unique three-dot change for this path is already present.",
+          "candidateBlob": "20637155d41bcbba504497c699c670c087fbd36f",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "20637155d41bcbba504497c699c670c087fbd36f",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "02d6e9614b177ad447d0acafd1e00d8b959ada2c",
+            "mergeBaseToProtected": "02d6e9614b177ad447d0acafd1e00d8b959ada2c",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/manifests/README.md",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "119524b050ab5e0b0c285570d96cf8432a440783",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "a2ddb8746a0d2aa9ec45a0c96a6e4abb06c260ec",
+            "candidateBlob": "119524b050ab5e0b0c285570d96cf8432a440783"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "f6d921753c2a142bad1d5290c338c100fc0e0903",
+            "mergeBaseToProtected": "de48c155cf5fcb83aaa7eb40e308e110c6d9d691",
+            "protectedToCandidate": "9bd563cd94d9ecb4ad586403f45809fc62851382"
+          }
+        },
+        {
+          "path": "deploy/scripts/generate-deployment-manifest.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "bbc96880c03462d24a19d85154bb8bb814aeda46",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "c78dbbbb627f45b54da1f71f64651763a091ebfd",
+            "candidateBlob": "bbc96880c03462d24a19d85154bb8bb814aeda46"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "87a624e0cdff4fedec368ad8746dd8985f47c9cf",
+            "mergeBaseToProtected": "d5e7d22e4b58d5d05005ff2232b09fba7a9defb2",
+            "protectedToCandidate": "512dbd155d68e9d0e27fee4f58585243bc24f525"
+          }
+        },
+        {
+          "path": "deploy/scripts/postdeploy-smoke.sh",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 8e7eb152936d31039abc2ff208481d25ab3eb021; unique three-dot change for this path is already present.",
+          "candidateBlob": "8e7eb152936d31039abc2ff208481d25ab3eb021",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "8e7eb152936d31039abc2ff208481d25ab3eb021",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "70a7f289cb041351433b7f52908b14197c620e51",
+            "mergeBaseToProtected": "70a7f289cb041351433b7f52908b14197c620e51",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/scripts/preflight-server03-foundation.sh",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 5f90db59c397924c3b766e8d9d4af132774d188d; unique three-dot change for this path is already present.",
+          "candidateBlob": "5f90db59c397924c3b766e8d9d4af132774d188d",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "5f90db59c397924c3b766e8d9d4af132774d188d",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "3dcb3e09d6383b587d229d2e1dc675c0f6ef9fee",
+            "mergeBaseToProtected": "3dcb3e09d6383b587d229d2e1dc675c0f6ef9fee",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/scripts/preflight.sh",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 57ea2d668284ecf0e9775dc8fc424753fbd1f5df; unique three-dot change for this path is already present.",
+          "candidateBlob": "57ea2d668284ecf0e9775dc8fc424753fbd1f5df",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "57ea2d668284ecf0e9775dc8fc424753fbd1f5df",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "9516f45035ed8b3b9b503380c3825528b2132ade",
+            "mergeBaseToProtected": "9516f45035ed8b3b9b503380c3825528b2132ade",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-manifest.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "5ce569f00aa0c698ae46be0aea2818110c3e6dc0",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "db740e6a5332aa12ee6a961e915e269f7f290a8d",
+            "candidateBlob": "5ce569f00aa0c698ae46be0aea2818110c3e6dc0"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "4b86958339d823066a63b3fb623a5c05260a1386",
+            "mergeBaseToProtected": "878344e4ac60c452d8d62c2f8907b336754edb1b",
+            "protectedToCandidate": "d64653417c5448825bbdf3f5250f29f47571b3ee"
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-surface.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "50983cee0700d8e59ede3c759deb2303d030b199",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "934161c0fbb0c464c8ce3572c9acd9b04cfffee6",
+            "candidateBlob": "50983cee0700d8e59ede3c759deb2303d030b199"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "d2d4c11b90745f93b1d9e9b82462e0480ef0cbd9",
+            "mergeBaseToProtected": "b2d966c43bd5a3efbb973c1bdb3eba96be07e281",
+            "protectedToCandidate": "933db9660915f2c12f2a7b10cda59f4f0275b9a0"
+          }
+        },
+        {
+          "path": "deploy/tests/runtime-contract.test.mjs",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 94f5e6821f0333498bf6c53dd798758bec7eecb7; unique three-dot change for this path is already present.",
+          "candidateBlob": "94f5e6821f0333498bf6c53dd798758bec7eecb7",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "94f5e6821f0333498bf6c53dd798758bec7eecb7",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "a9cec45b134cc53712c0600c912675bef141751a",
+            "mergeBaseToProtected": "a9cec45b134cc53712c0600c912675bef141751a",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "docs/handoffs/issue-480-native-v2-validator-repair.md",
+          "diffStatus": "A",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 4c15b9ff059144becb87261d27acfe7260979ba4; unique three-dot change for this path is already present.",
+          "candidateBlob": "4c15b9ff059144becb87261d27acfe7260979ba4",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "4c15b9ff059144becb87261d27acfe7260979ba4",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "9a538260f7bc74d900ff481b71a388431a138374",
+            "mergeBaseToProtected": "9a538260f7bc74d900ff481b71a388431a138374",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "docs/handoffs/issue-480-server03-receipt-binding-successor.md",
+          "diffStatus": "A",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "5a07a8ad38d49118c71f46c46f941d2fa55deec9",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "f0a287a85c8518d10c64c802e40128a3bb0f12bf",
+            "candidateBlob": "5a07a8ad38d49118c71f46c46f941d2fa55deec9"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "da4c816c3af540cc48265faaeccdcf0781172875",
+            "mergeBaseToProtected": "06babaa85a52d6f796a1eaf9ac348e2177380f99",
+            "protectedToCandidate": "ee464969a749851206fe272f2159afedc6697d68"
+          }
+        },
+        {
+          "path": "packages/factory-catalog/src/libraryProviderClient.ts",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "150429f0d442add3c189a778c3a883e573ed087d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "e94cc6be6d363d24209543fa027ac80a6034c9fc",
+            "candidateBlob": "150429f0d442add3c189a778c3a883e573ed087d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "6ecd34854d5b36ecefa036f817ffde31f08377c3",
+            "mergeBaseToProtected": "aa389bc85d4bfcc2ed507b49c8eb325f8a65b58a",
+            "protectedToCandidate": "ce4e089b6bdad6d72453e53f60f71ef0673c24c6"
+          }
+        },
+        {
+          "path": "packages/factory-catalog/src/nativeRevision2Validator.d.ts",
+          "diffStatus": "A",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob f941793f747fabff58039d1c10b8bc23051b80bb; unique three-dot change for this path is already present.",
+          "candidateBlob": "f941793f747fabff58039d1c10b8bc23051b80bb",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "f941793f747fabff58039d1c10b8bc23051b80bb",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "a732fae4fc959e3ed2ccaec0d689418dc448ad68",
+            "mergeBaseToProtected": "a732fae4fc959e3ed2ccaec0d689418dc448ad68",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "packages/factory-catalog/src/nativeRevision2Validator.js",
+          "diffStatus": "A",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 3e001cd90704c14f58ff574c63ecb5cbd3f9e280; unique three-dot change for this path is already present.",
+          "candidateBlob": "3e001cd90704c14f58ff574c63ecb5cbd3f9e280",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "3e001cd90704c14f58ff574c63ecb5cbd3f9e280",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "d94fa06f40b80c86feba13f217a6e0219f3f8c88",
+            "mergeBaseToProtected": "d94fa06f40b80c86feba13f217a6e0219f3f8c88",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "packages/factory-catalog/src/revision2Materialization.ts",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes versus protected development weaken native-v2 pinning (optional provider pin, deferred env values populated, pending manifests treated as preflight-eligible, missing artifactOnly/deploymentEligible/sha256 publication guards). Protected development already contains the later stronger exact behavior plus the validator sources that this family added.",
+          "candidateBlob": "c429e7a400c42fb48e60453300a34c482e9e0e7c",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "9d8b8eeffda65e9e4d4db2991b3977bb71c6c0df",
+            "candidateBlob": "c429e7a400c42fb48e60453300a34c482e9e0e7c"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "64640dbfab45f0a7760dc791501e31b83cbebd1e",
+            "mergeBaseToProtected": "9314a32bf6f2368a013c11b931745296f92bf841",
+            "protectedToCandidate": "86c1e59e89f40e4a85811d42e68688706629d2d6"
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "supersededBy": {
+        "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+        "ref": "refs/heads/development"
+      },
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/issue/490-fix-promotion-receipt-runtime-config-validation"
+      ],
+      "commit": "8b39b96e7d0b48d6d14a03176890d4ed15a62466",
+      "tree": "bbc65c770b58b00a5ce183489fedbd16cdac7aaa",
+      "mergeBaseWithProtectedDevelopment": "a816119b70aed1a153f9aa91a7d82c08635ee008",
+      "mergeBaseTree": "cb4b8c5edef3057614d1796d272cf4789fa0816a",
+      "ahead": 2,
+      "behind": 23,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "8b39b96e7d0b48d6d14a03176890d4ed15a62466",
+        "6c07fb62c6a1941a20fac7c26ed917871345ac2a"
+      ],
+      "rangePatchId": "997012d4217f3f9473af41860f1434ae8f5994b3",
+      "classification": "not_applicable_with_reason",
+      "reason": "ci.yml blob already equals protected development. Remaining unique change is a stale secret-scan candidateTree bind. The only remaining unique bytes versus protected development are secret-scan fixture candidateTree bindings for an older source tree. Applying them would rebind fixtures away from protected tree 54c334c68e7b80f6a49f9f5a549c5968068cb495. This is not current product behavior to port.",
+      "changedPaths": [
+        {
+          "path": ".github/linktrend-secret-scan-fixtures.json",
+          "diffStatus": "M",
+          "classification": "not_applicable_with_reason",
+          "reason": "The only remaining unique bytes versus protected development are secret-scan fixture candidateTree bindings for an older source tree. Applying them would rebind fixtures away from protected tree 54c334c68e7b80f6a49f9f5a549c5968068cb495. This is not current product behavior to port.",
+          "candidateBlob": "aa85d86cc7767505def109197bb43b170be6f27f",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "dae700dfc4e4672e6213799aff1b8761c46bca14",
+            "candidateBlob": "aa85d86cc7767505def109197bb43b170be6f27f"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "5a69440b5e0617762905dbc5a0b8288e9a69c957",
+            "mergeBaseToProtected": "660073066ca492d5000dec91036c7197d478d629",
+            "protectedToCandidate": "71919bbfecfd5b4638a1168b8c0267ed12b46ec0"
+          }
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 0c153e7bea4447fc3cec639b1c4f26e40052c91f; unique three-dot change for this path is already present.",
+          "candidateBlob": "0c153e7bea4447fc3cec639b1c4f26e40052c91f",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "0c153e7bea4447fc3cec639b1c4f26e40052c91f",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "3f07cec8c378281e4aaa66c06e5b0b20f5efca5b",
+            "mergeBaseToProtected": "3f07cec8c378281e4aaa66c06e5b0b20f5efca5b",
+            "protectedToCandidate": null
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/issue/492-refresh-secret-scan-fixture-source-tree-binding"
+      ],
+      "commit": "1d7ad88187a67271b3da79c4d0c647f8066e3d15",
+      "tree": "95cb20044017f36140d5452fb2548df67fc1aab7",
+      "mergeBaseWithProtectedDevelopment": "a816119b70aed1a153f9aa91a7d82c08635ee008",
+      "mergeBaseTree": "cb4b8c5edef3057614d1796d272cf4789fa0816a",
+      "ahead": 1,
+      "behind": 23,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "1d7ad88187a67271b3da79c4d0c647f8066e3d15"
+      ],
+      "rangePatchId": "79d1604472bbe51f30da2569cf6dcb083ea3c646",
+      "classification": "not_applicable_with_reason",
+      "reason": "The only remaining unique bytes versus protected development are secret-scan fixture candidateTree bindings for an older source tree. Applying them would rebind fixtures away from protected tree 54c334c68e7b80f6a49f9f5a549c5968068cb495. This is not current product behavior to port.",
+      "changedPaths": [
+        {
+          "path": ".github/linktrend-secret-scan-fixtures.json",
+          "diffStatus": "M",
+          "classification": "not_applicable_with_reason",
+          "reason": "The only remaining unique bytes versus protected development are secret-scan fixture candidateTree bindings for an older source tree. Applying them would rebind fixtures away from protected tree 54c334c68e7b80f6a49f9f5a549c5968068cb495. This is not current product behavior to port.",
+          "candidateBlob": "7e97c303befe77b5914a326d7d0d510c445f9022",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "dae700dfc4e4672e6213799aff1b8761c46bca14",
+            "candidateBlob": "7e97c303befe77b5914a326d7d0d510c445f9022"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "79d1604472bbe51f30da2569cf6dcb083ea3c646",
+            "mergeBaseToProtected": "660073066ca492d5000dec91036c7197d478d629",
+            "protectedToCandidate": "ac438bf79d51a81a2fc6f55111719ed828f914a4"
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/issue/508-repair-server03-immutable-publication-deployment"
+      ],
+      "commit": "8ddd22147f9e58f5b2a4e5da0325857d437fada1",
+      "tree": "80cf0986a16647abb934ca41c339b5c6e308c3d2",
+      "mergeBaseWithProtectedDevelopment": "e1ea2b8934dbe4b991a80c6a91b467aee0aaf990",
+      "mergeBaseTree": "fa16550a8d1981a37113c4ba356cbb0ff0a369f8",
+      "ahead": 1,
+      "behind": 6,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "8ddd22147f9e58f5b2a4e5da0325857d437fada1"
+      ],
+      "rangePatchId": "2b2b7f115ec807a8839b4e40cbf24916b082acab",
+      "classification": "superseded_by_stronger_exact_behavior",
+      "reason": "Remaining unique bytes remove the protected-main release-manifest SHA-256 sidecar and its tests, and restore weaker pending-manifest README wording. Protected development already has the stronger publication contract (PR #510 / phase linksites-server03-publication-contract-20260908).",
+      "changedPaths": [
+        {
+          "path": ".github/workflows/publish-server03-images.yml",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes remove the protected-main release-manifest SHA-256 sidecar and its tests, and restore weaker pending-manifest README wording. Protected development already has the stronger publication contract (PR #510 / phase linksites-server03-publication-contract-20260908).",
+          "candidateBlob": "aec5158566a7288708c84b7e22f1104d06daf662",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "617fcfcafa1f882b1dae76925c216cfb2be51ba5",
+            "candidateBlob": "aec5158566a7288708c84b7e22f1104d06daf662"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "eb7e026ef8b4fcc989e8cce34a812176453f92f2",
+            "mergeBaseToProtected": "659aa168a6bd9667223c4db6237cc8900ab693db",
+            "protectedToCandidate": "f64cbd12156941d1e34591bf26f0891bcc568f0a"
+          }
+        },
+        {
+          "path": "deploy/manifests/README.md",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob a2ddb8746a0d2aa9ec45a0c96a6e4abb06c260ec; unique three-dot change for this path is already present.",
+          "candidateBlob": "a2ddb8746a0d2aa9ec45a0c96a6e4abb06c260ec",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "a2ddb8746a0d2aa9ec45a0c96a6e4abb06c260ec",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "ebeb9ab1a44c77d79f6d4fc51fd691b294d1c3e0",
+            "mergeBaseToProtected": "ebeb9ab1a44c77d79f6d4fc51fd691b294d1c3e0",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/scripts/generate-deployment-manifest.mjs",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob c78dbbbb627f45b54da1f71f64651763a091ebfd; unique three-dot change for this path is already present.",
+          "candidateBlob": "c78dbbbb627f45b54da1f71f64651763a091ebfd",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "c78dbbbb627f45b54da1f71f64651763a091ebfd",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "23cbc1e347a335449fd00c020da25156ae0ac515",
+            "mergeBaseToProtected": "23cbc1e347a335449fd00c020da25156ae0ac515",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-manifest.test.mjs",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob db740e6a5332aa12ee6a961e915e269f7f290a8d; unique three-dot change for this path is already present.",
+          "candidateBlob": "db740e6a5332aa12ee6a961e915e269f7f290a8d",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "db740e6a5332aa12ee6a961e915e269f7f290a8d",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "578f7422664496d4040e53b26f23feda3d01435c",
+            "mergeBaseToProtected": "578f7422664496d4040e53b26f23feda3d01435c",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-surface.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Remaining unique bytes remove the protected-main release-manifest SHA-256 sidecar and its tests, and restore weaker pending-manifest README wording. Protected development already has the stronger publication contract (PR #510 / phase linksites-server03-publication-contract-20260908).",
+          "candidateBlob": "bbc4073e1291fb646520e3cb65317197b8bd428f",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "934161c0fbb0c464c8ce3572c9acd9b04cfffee6",
+            "candidateBlob": "bbc4073e1291fb646520e3cb65317197b8bd428f"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "db65abeb12dfc7edb566d2e2e3d546bce9654e66",
+            "mergeBaseToProtected": "c9129bceb94c0c3aec1b2dc66722b27d45c604d0",
+            "protectedToCandidate": "dd8208dcf95d2425f0325fbf02548093be7dfccd"
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "supersededBy": {
+        "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+        "ref": "refs/heads/development"
+      },
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/issue/511-complete-canonical-linksites-server03-s03-36-thr"
+      ],
+      "commit": "56125fc5e83cc0f223a085561bcadfe32e4f2652",
+      "tree": "34a42e3c3bf7ec1910df9fca8a71cb55ec979c8b",
+      "mergeBaseWithProtectedDevelopment": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+      "mergeBaseTree": "e29607c43146decdf81c2f132562745f6a911780",
+      "ahead": 2,
+      "behind": 0,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": true,
+      "commitsAhead": [
+        "56125fc5e83cc0f223a085561bcadfe32e4f2652",
+        "d7f064a6556465139f2d47d3bf8dae2701248312"
+      ],
+      "rangePatchId": "5274a4cd8d5e6e6da59213799a2e71541e5959d6",
+      "classification": "retain_reuse",
+      "reason": "Exactly two commits ahead of protected development with protected as ancestor. Unique behavior stops candidate CI from authorizing promotion, adds adversarial promotion-receipt tests, and tightens transition-workflow tests. An open or pushed branch is not treated as accepted; this is retain/reuse for LSTRUST-01. ATOMIC-WORK-PACKETS LSTRUST-01 names Issue 511. IMPLEMENTATION-LANES currently omits ci.yml, CI-SUITE.md, and test_promotion_receipt_adversarial.py; coordinator must admit those paths or fold them at LSINT-01 without inventing equivalence.",
+      "changedPaths": [
+        {
+          "path": ".github/linktrend-secret-scan-fixtures.json",
+          "diffStatus": "M",
+          "classification": "retain_reuse",
+          "reason": "Unique versus protected; required for LSTRUST-01 Issue 511 close-out.",
+          "candidateBlob": "3964f99072f932ebc075e086997515bccb12aaac",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "dae700dfc4e4672e6213799aff1b8761c46bca14",
+            "candidateBlob": "3964f99072f932ebc075e086997515bccb12aaac"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "381955e21cc3f7e135cdbaca0b11f599d31e8059",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "381955e21cc3f7e135cdbaca0b11f599d31e8059"
+          },
+          "deliveryPacket": "LSTRUST-01"
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "diffStatus": "M",
+          "classification": "retain_reuse",
+          "reason": "Unique versus protected; required for LSTRUST-01 Issue 511 close-out.",
+          "candidateBlob": "f14a039985376db31dd1be361f4e516d9173826d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "0c153e7bea4447fc3cec639b1c4f26e40052c91f",
+            "candidateBlob": "f14a039985376db31dd1be361f4e516d9173826d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "e0b074e3aed04cf12ea49647d94a10b35355ecd0",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "e0b074e3aed04cf12ea49647d94a10b35355ecd0"
+          },
+          "deliveryPacket": "LSTRUST-01"
+        },
+        {
+          "path": "docs/contracts/CI-SUITE.md",
+          "diffStatus": "M",
+          "classification": "retain_reuse",
+          "reason": "Unique versus protected; required for LSTRUST-01 Issue 511 close-out.",
+          "candidateBlob": "9e24c0297f2f88e39cbcecfe9801dd96a640bfce",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "56fcaf0744fd85f900ada614ea5f3445b9cf3868",
+            "candidateBlob": "9e24c0297f2f88e39cbcecfe9801dd96a640bfce"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "0043a4135fda9c6d9a3d7e094ab96d41fe1687f3",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "0043a4135fda9c6d9a3d7e094ab96d41fe1687f3"
+          },
+          "deliveryPacket": "LSTRUST-01"
+        },
+        {
+          "path": "scripts/tests/test_promotion_receipt_adversarial.py",
+          "diffStatus": "A",
+          "classification": "retain_reuse",
+          "reason": "Unique versus protected; required for LSTRUST-01 Issue 511 close-out.",
+          "candidateBlob": "4072a0fa99708075e0703cbee76f66a9f43692b3",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "4072a0fa99708075e0703cbee76f66a9f43692b3"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "cb24192f7bff110d6a3edd7aca57c26b797d4cf7",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "cb24192f7bff110d6a3edd7aca57c26b797d4cf7"
+          },
+          "deliveryPacket": "LSTRUST-01"
+        },
+        {
+          "path": "scripts/tests/test_promotion_transition_workflows.py",
+          "diffStatus": "M",
+          "classification": "retain_reuse",
+          "reason": "Unique versus protected; required for LSTRUST-01 Issue 511 close-out.",
+          "candidateBlob": "cb8df858b22d5d36e8abf842f0ebefd26d111d88",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "e7be452839e3db7012ccdde9266fecb13876d88a",
+            "candidateBlob": "cb8df858b22d5d36e8abf842f0ebefd26d111d88"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "6f421dc5e7f07a1f3ca566e2a0c13b5a7f5019c1",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "6f421dc5e7f07a1f3ca566e2a0c13b5a7f5019c1"
+          },
+          "deliveryPacket": "LSTRUST-01"
+        }
+      ],
+      "deliveryPacket": "LSTRUST-01",
+      "cherryPickOrManualPortOrder": 1,
+      "mappedPrdOrDeliveryPacket": "LSTRUST-01"
+    },
+    {
+      "refs": [
+        "origin/issue/515-create-canonical-end-to-end-linksites-production"
+      ],
+      "commit": "87ae0a7029eae7c877f08ef24cda0bdc54041aed",
+      "tree": "87448dec5b60a60773975c48439aceb71fb8806e",
+      "mergeBaseWithProtectedDevelopment": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+      "mergeBaseTree": "e29607c43146decdf81c2f132562745f6a911780",
+      "ahead": 3,
+      "behind": 0,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": true,
+      "commitsAhead": [
+        "87ae0a7029eae7c877f08ef24cda0bdc54041aed",
+        "4a3fd2304d9d837ad874914169e37f427370b572",
+        "61a55a6c7bf96710c380dd0f8459fbc34530c8bf"
+      ],
+      "rangePatchId": "373105fc8392515142393d73e701bef09c589e43",
+      "classification": "not_applicable_with_reason",
+      "reason": "Accepted planning checkpoint (commit 87ae0a7029eae7c877f08ef24cda0bdc54041aed / tree 87448dec5b60a60773975c48439aceb71fb8806e). Adds delivery-plan documents only; not product implementation and not a cherry-pick into protected development for LSG0-01. Recorded as acceptedPlan identity, not retained product behavior.",
+      "changedPaths": [
+        {
+          "path": "docs/end-to-end-delivery/README.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "bfb23f03903ffb934a34289d810e1e9db6e9f97e",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "bfb23f03903ffb934a34289d810e1e9db6e9f97e"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "6c36dcb2bc1ca2df757928d631323b881a1b41bb",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "6c36dcb2bc1ca2df757928d631323b881a1b41bb"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "af31c1c4a07517db9c9d056e369069662dcf649b",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "af31c1c4a07517db9c9d056e369069662dcf649b"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "3c70df00c1003f054b09b240ced965149358b2d5",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "3c70df00c1003f054b09b240ced965149358b2d5"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/CERTAINTY-REPORT.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "25c1f5e79a415ea05e422d44793a9de0fe25d078",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "25c1f5e79a415ea05e422d44793a9de0fe25d078"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "0fc34107b148942fcf933754fee40cd5e8e8eee5",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "0fc34107b148942fcf933754fee40cd5e8e8eee5"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/DISPATCH-PACKET.template.json",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "fcf5d280d93a3aee2cdb24e76ab224177bb47508",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "fcf5d280d93a3aee2cdb24e76ab224177bb47508"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "262fa5e05602149a43e9256ed02b09579e9083b5",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "262fa5e05602149a43e9256ed02b09579e9083b5"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "708179a6c336f51babc4beffb64d136481281ca6",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "708179a6c336f51babc4beffb64d136481281ca6"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "7fa616f9996d498c30fc51678685364ad1aad0a6",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "7fa616f9996d498c30fc51678685364ad1aad0a6"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "401cac7966a2de1bcb0c523fa109de65cba510a2",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "401cac7966a2de1bcb0c523fa109de65cba510a2"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "e031b8559eab6226924379772c88d6b5db247b78",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "e031b8559eab6226924379772c88d6b5db247b78"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/EXECUTION-ROUTE.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "d3b7325b21f36fe8977ae900a7658c01ea1c75e8",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "d3b7325b21f36fe8977ae900a7658c01ea1c75e8"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "af5c3d1fd61654bf725e3272fbf8de3d54db97cf",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "af5c3d1fd61654bf725e3272fbf8de3d54db97cf"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/IMPLEMENTATION-LANES.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "8101a6ef09866ec8481597e50edd905a31cd081b",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "8101a6ef09866ec8481597e50edd905a31cd081b"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "42e48d66c7d1797da57de9b9bfc70fdbee587d23",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "42e48d66c7d1797da57de9b9bfc70fdbee587d23"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/LANE-PLAN.json",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "9317ec37b61edaf55004add44eee5e7c4cefd0bb",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "9317ec37b61edaf55004add44eee5e7c4cefd0bb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "7f77a01a679e3a8ffcf99e1aeb0b01f1e48d3290",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "7f77a01a679e3a8ffcf99e1aeb0b01f1e48d3290"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/OSS-INVENTORY.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "83906aeb3a0fcf50d2f726ff931dac4e2270a563",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "83906aeb3a0fcf50d2f726ff931dac4e2270a563"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "04ba4f07e436547a413a586690413762b214d8aa",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "04ba4f07e436547a413a586690413762b214d8aa"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/PLANNING-CONTROL-MANIFEST.json",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "2d4a7bf043d385cd7a7c06d7f89ee0850caecb92",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "2d4a7bf043d385cd7a7c06d7f89ee0850caecb92"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "80e6ffe56bbc85261855e3489a765f17e172c5f6",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "80e6ffe56bbc85261855e3489a765f17e172c5f6"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/README.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "ef824d2b7a8961d87097bca842ef0c44c54c9087",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "ef824d2b7a8961d87097bca842ef0c44c54c9087"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "e5f477f3dfe75c0c1d3f17cb50f8661dfb9311f2",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "e5f477f3dfe75c0c1d3f17cb50f8661dfb9311f2"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/STARTING-POSITION.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "82521d873b9657199c509a1221b9b4c58d928fc7",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "82521d873b9657199c509a1221b9b4c58d928fc7"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "9ad190279e7768c234a3b482d5240300a8e6db8e",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "9ad190279e7768c234a3b482d5240300a8e6db8e"
+          }
+        },
+        {
+          "path": "docs/production-roadmap/phase-2/UPSTREAM-DEPENDENCIES.md",
+          "diffStatus": "A",
+          "classification": "not_applicable_with_reason",
+          "reason": "Planning document absent from protected development by design; not a product packet.",
+          "candidateBlob": "0c66e4c6e6876fb29d6203d6c09f8bd1e325b97d",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": null,
+            "candidateBlob": "0c66e4c6e6876fb29d6203d6c09f8bd1e325b97d"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "88a0cf68f33674b4ebb177776e3509875cd71952",
+            "mergeBaseToProtected": null,
+            "protectedToCandidate": "88a0cf68f33674b4ebb177776e3509875cd71952"
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/issue/522-preserve-and-disposition-existing-linksites-work"
+      ],
+      "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+      "tree": "e29607c43146decdf81c2f132562745f6a911780",
+      "mergeBaseWithProtectedDevelopment": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+      "mergeBaseTree": "e29607c43146decdf81c2f132562745f6a911780",
+      "ahead": 0,
+      "behind": 0,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": true,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "not_applicable_with_reason",
+      "reason": "Owned LSG0-01 writer branch currently identical to protected development (ahead=0 behind=0). No unique product behavior. This evidence file is the only authorized addition on this branch.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "working-tree:primary-checkout"
+      ],
+      "commit": null,
+      "tree": null,
+      "mergeBaseWithProtectedDevelopment": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+      "mergeBaseTree": "e29607c43146decdf81c2f132562745f6a911780",
+      "ahead": null,
+      "behind": null,
+      "isAncestorOfProtectedDevelopment": null,
+      "protectedDevelopmentIsAncestor": null,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "user_owned_hold",
+      "reason": "Coordinator-attributed founder-owned unstaged change at apps/cms/next-env.d.ts. Content was not copied, staged, or modified in this isolated VM. SHA-256 1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b; git blob ce4e94a6b10f160ee021fe18939af160d2927dcf versus protected blob 9edff1c7cacb3bfac9a1eadcf6f51eaa99565e38. LSG0-01 prohibited path.",
+      "changedPaths": [
+        {
+          "path": "apps/cms/next-env.d.ts",
+          "diffStatus": "unstaged",
+          "classification": "user_owned_hold",
+          "reason": "Founder-owned working-tree HOLD; byte-identical preservation required; out of LSG0-01 write scope.",
+          "candidateBlob": "ce4e94a6b10f160ee021fe18939af160d2927dcf",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "9edff1c7cacb3bfac9a1eadcf6f51eaa99565e38",
+            "candidateBlob": "ce4e94a6b10f160ee021fe18939af160d2927dcf"
+          },
+          "contentSha256": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b",
+          "patchIdentity": null
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null,
+      "deliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-security-20260907"
+      ],
+      "commit": "0c360f43708e7e71d2f3ac2d615c7628770d00f3",
+      "tree": "ee868c5bcf555487e6edd864106773edaeb6cf38",
+      "mergeBaseWithProtectedDevelopment": "0c360f43708e7e71d2f3ac2d615c7628770d00f3",
+      "mergeBaseTree": "ee868c5bcf555487e6edd864106773edaeb6cf38",
+      "ahead": 0,
+      "behind": 48,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260907"
+      ],
+      "commit": "532776daad7f752409c737adc87208ca14d2dddb",
+      "tree": "062a1b3773a215a0095dcafe0cc98e312cdf9632",
+      "mergeBaseWithProtectedDevelopment": "566e6fc93a0262c84442947a0716e75be6d9ec88",
+      "mergeBaseTree": "062a1b3773a215a0095dcafe0cc98e312cdf9632",
+      "ahead": 1,
+      "behind": 52,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "532776daad7f752409c737adc87208ca14d2dddb"
+      ],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Unique commit is a Phase packaging merge with empty three-dot diff versus merge-base (tree equals merge-base). Merge-base is an ancestor of protected development, so no file behavior is absent from protected development. An open or historical Phase ref is not treated as accepted integration by itself; acceptance is the ancestor relationship plus empty unique tree delta.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260908"
+      ],
+      "commit": "8e8dba8a36ffd417cd65eab2abd7b0247384dec1",
+      "tree": "0d05d598a7d28891262b62b970e7c98d24b1832a",
+      "mergeBaseWithProtectedDevelopment": "52c9e44237d35154958bd0d72e30da8d4ed6158d",
+      "mergeBaseTree": "0d05d598a7d28891262b62b970e7c98d24b1832a",
+      "ahead": 1,
+      "behind": 30,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "8e8dba8a36ffd417cd65eab2abd7b0247384dec1"
+      ],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Unique commit is a Phase packaging merge with empty three-dot diff versus merge-base (tree equals merge-base). Merge-base is an ancestor of protected development, so no file behavior is absent from protected development. An open or historical Phase ref is not treated as accepted integration by itself; acceptance is the ancestor relationship plus empty unique tree delta.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260908-r1"
+      ],
+      "commit": "9b988dcd9fb77fcabf0777fa3b9cf70723fe514f",
+      "tree": "69b550d9b0c1fff50fbad4e9fba736153d5bdcaf",
+      "mergeBaseWithProtectedDevelopment": "9b988dcd9fb77fcabf0777fa3b9cf70723fe514f",
+      "mergeBaseTree": "69b550d9b0c1fff50fbad4e9fba736153d5bdcaf",
+      "ahead": 0,
+      "behind": 28,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260908-r2"
+      ],
+      "commit": "24429f32a7a374c75c330d903b35f723b884c3b5",
+      "tree": "a9e687d5e6bb5ba3360042d87d9828197adfe66e",
+      "mergeBaseWithProtectedDevelopment": "c36a0f09ee453da44013d01e61d5189a653bd67d",
+      "mergeBaseTree": "a9e687d5e6bb5ba3360042d87d9828197adfe66e",
+      "ahead": 1,
+      "behind": 26,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "24429f32a7a374c75c330d903b35f723b884c3b5"
+      ],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Unique commit is a Phase packaging merge with empty three-dot diff versus merge-base (tree equals merge-base). Merge-base is an ancestor of protected development, so no file behavior is absent from protected development. An open or historical Phase ref is not treated as accepted integration by itself; acceptance is the ancestor relationship plus empty unique tree delta.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260908-r3"
+      ],
+      "commit": "625b3420a3b69576112088685afe4312b2a4a30e",
+      "tree": "cb4b8c5edef3057614d1796d272cf4789fa0816a",
+      "mergeBaseWithProtectedDevelopment": "625b3420a3b69576112088685afe4312b2a4a30e",
+      "mergeBaseTree": "cb4b8c5edef3057614d1796d272cf4789fa0816a",
+      "ahead": 0,
+      "behind": 24,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260908-r4"
+      ],
+      "commit": "f87320a9d214b1e27f9d36d93634f54f33b02a9d",
+      "tree": "e79400bb50205dbc6089b688654fc1a96d332ed4",
+      "mergeBaseWithProtectedDevelopment": "a816119b70aed1a153f9aa91a7d82c08635ee008",
+      "mergeBaseTree": "cb4b8c5edef3057614d1796d272cf4789fa0816a",
+      "ahead": 1,
+      "behind": 19,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "f87320a9d214b1e27f9d36d93634f54f33b02a9d",
+        "b37f8ae63e3a7b8436cba1a1005b6868e6f9068c",
+        "0fcf8a4b96520966a17c6658fda4a3466915765c",
+        "6193c2a587456c7149ac68e0bd3a7199f7bd5045",
+        "3e3b388c862aff4310ae30115dda96bc3ab018fd"
+      ],
+      "rangePatchId": "06cc584b135ea64ab4ce598d7d85942eeb61c047",
+      "classification": "superseded_by_stronger_exact_behavior",
+      "reason": "Three-dot unique paths are either already the protected blob (cutover contract, production.env.example) or an older deployment-surface test file that lacks the later protected publication assertions. No unique stronger behavior remains.",
+      "changedPaths": [
+        {
+          "path": "deploy/config/cutover/contract.mjs",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 7e29403cb82a9d79d3976864fc83b06e31e1bf46; unique three-dot change for this path is already present.",
+          "candidateBlob": "7e29403cb82a9d79d3976864fc83b06e31e1bf46",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "7e29403cb82a9d79d3976864fc83b06e31e1bf46",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "a4bb49c9f1f1f355e8536970a3e959541caf247d",
+            "mergeBaseToProtected": "a4bb49c9f1f1f355e8536970a3e959541caf247d",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/config/production.env.example",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 7b365320b1bc0fdaf69d0a9cbd612fe80001d4fe; unique three-dot change for this path is already present.",
+          "candidateBlob": "7b365320b1bc0fdaf69d0a9cbd612fe80001d4fe",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "7b365320b1bc0fdaf69d0a9cbd612fe80001d4fe",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "625b3ab2a5cf7096466560312722eb14263a3e24",
+            "mergeBaseToProtected": "625b3ab2a5cf7096466560312722eb14263a3e24",
+            "protectedToCandidate": null
+          }
+        },
+        {
+          "path": "deploy/tests/deployment-surface.test.mjs",
+          "diffStatus": "M",
+          "classification": "superseded_by_stronger_exact_behavior",
+          "reason": "Three-dot unique paths are either already the protected blob (cutover contract, production.env.example) or an older deployment-surface test file that lacks the later protected publication assertions. No unique stronger behavior remains.",
+          "candidateBlob": "16b60eb008c27b7067cdbce82aff870490251cef",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "934161c0fbb0c464c8ce3572c9acd9b04cfffee6",
+            "candidateBlob": "16b60eb008c27b7067cdbce82aff870490251cef"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "00b5d4cf7b9c415e851590ebb2794fc5a8785da6",
+            "mergeBaseToProtected": "f27731f261fb128a74ecc2f5487f0a392cfe13ce",
+            "protectedToCandidate": "ecc62773c42c699ef72d36b1a1cd3e2348af3dcb"
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "supersededBy": {
+        "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+        "ref": "refs/heads/development"
+      },
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260908-r5"
+      ],
+      "commit": "886e3c7382ed428f5bd14b1cc6fec4a813f2b963",
+      "tree": "bbc65c770b58b00a5ce183489fedbd16cdac7aaa",
+      "mergeBaseWithProtectedDevelopment": "a816119b70aed1a153f9aa91a7d82c08635ee008",
+      "mergeBaseTree": "cb4b8c5edef3057614d1796d272cf4789fa0816a",
+      "ahead": 3,
+      "behind": 23,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "886e3c7382ed428f5bd14b1cc6fec4a813f2b963",
+        "8b39b96e7d0b48d6d14a03176890d4ed15a62466",
+        "6c07fb62c6a1941a20fac7c26ed917871345ac2a"
+      ],
+      "rangePatchId": "997012d4217f3f9473af41860f1434ae8f5994b3",
+      "classification": "not_applicable_with_reason",
+      "reason": "Phase wrapper of Issue 490 (identical tree bbc65c770b58b00a5ce183489fedbd16cdac7aaa and identical range patch-id). Disposition follows Issue 490: stale fixture bind, ci.yml already in protected development. A Phase tip is not accepted integration.",
+      "changedPaths": [
+        {
+          "path": ".github/linktrend-secret-scan-fixtures.json",
+          "diffStatus": "M",
+          "classification": "not_applicable_with_reason",
+          "reason": "The only remaining unique bytes versus protected development are secret-scan fixture candidateTree bindings for an older source tree. Applying them would rebind fixtures away from protected tree 54c334c68e7b80f6a49f9f5a549c5968068cb495. This is not current product behavior to port.",
+          "candidateBlob": "aa85d86cc7767505def109197bb43b170be6f27f",
+          "protectedEquivalent": {
+            "kind": "different_blob",
+            "protectedBlob": "dae700dfc4e4672e6213799aff1b8761c46bca14",
+            "candidateBlob": "aa85d86cc7767505def109197bb43b170be6f27f"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "5a69440b5e0617762905dbc5a0b8288e9a69c957",
+            "mergeBaseToProtected": "660073066ca492d5000dec91036c7197d478d629",
+            "protectedToCandidate": "71919bbfecfd5b4638a1168b8c0267ed12b46ec0"
+          }
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "diffStatus": "M",
+          "classification": "integrated",
+          "reason": "Candidate blob equals protected development blob 0c153e7bea4447fc3cec639b1c4f26e40052c91f; unique three-dot change for this path is already present.",
+          "candidateBlob": "0c153e7bea4447fc3cec639b1c4f26e40052c91f",
+          "protectedEquivalent": {
+            "kind": "same_blob",
+            "blob": "0c153e7bea4447fc3cec639b1c4f26e40052c91f",
+            "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb"
+          },
+          "patchIdentity": {
+            "mergeBaseToCandidate": "3f07cec8c378281e4aaa66c06e5b0b20f5efca5b",
+            "mergeBaseToProtected": "3f07cec8c378281e4aaa66c06e5b0b20f5efca5b",
+            "protectedToCandidate": null
+          }
+        }
+      ],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260908-r6"
+      ],
+      "commit": "287659b3412086957939b008ca270e54a10736ed",
+      "tree": "7451847bdf7f7cb1a8f15aa906be2925596a7b85",
+      "mergeBaseWithProtectedDevelopment": "287659b3412086957939b008ca270e54a10736ed",
+      "mergeBaseTree": "7451847bdf7f7cb1a8f15aa906be2925596a7b85",
+      "ahead": 0,
+      "behind": 16,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-20260908-r7"
+      ],
+      "commit": "44e53b020c6bbf798036336f8e79c386884d6ba1",
+      "tree": "4b66d6d587bf36c46bfebd3337c5bb8fb86b60a8",
+      "mergeBaseWithProtectedDevelopment": "44e53b020c6bbf798036336f8e79c386884d6ba1",
+      "mergeBaseTree": "4b66d6d587bf36c46bfebd3337c5bb8fb86b60a8",
+      "ahead": 0,
+      "behind": 13,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-ci-20260907"
+      ],
+      "commit": "7bfc8092b4792b7a7a4e7908f1be1adcce08b12e",
+      "tree": "1938e4a26f2041c473f1329078e980acbb6a8df9",
+      "mergeBaseWithProtectedDevelopment": "1132e63c2de8ad9597b39e9ddbefdfb02430c8d8",
+      "mergeBaseTree": "1938e4a26f2041c473f1329078e980acbb6a8df9",
+      "ahead": 1,
+      "behind": 51,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "7bfc8092b4792b7a7a4e7908f1be1adcce08b12e"
+      ],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Unique commit is a Phase packaging merge with empty three-dot diff versus merge-base (tree equals merge-base). Merge-base is an ancestor of protected development, so no file behavior is absent from protected development. An open or historical Phase ref is not treated as accepted integration by itself; acceptance is the ancestor relationship plus empty unique tree delta.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-publication-20260908-r2"
+      ],
+      "commit": "2fbc8af4bc767e0fac1f3f5e396572fabd66d2e4",
+      "tree": "fa16550a8d1981a37113c4ba356cbb0ff0a369f8",
+      "mergeBaseWithProtectedDevelopment": "2fbc8af4bc767e0fac1f3f5e396572fabd66d2e4",
+      "mergeBaseTree": "fa16550a8d1981a37113c4ba356cbb0ff0a369f8",
+      "ahead": 0,
+      "behind": 7,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/linksites-server03-publication-contract-20260908"
+      ],
+      "commit": "6bf85741e9b0881e0cf0a15e14a6ef8540ce410f",
+      "tree": "e29607c43146decdf81c2f132562745f6a911780",
+      "mergeBaseWithProtectedDevelopment": "6bf85741e9b0881e0cf0a15e14a6ef8540ce410f",
+      "mergeBaseTree": "e29607c43146decdf81c2f132562745f6a911780",
+      "ahead": 0,
+      "behind": 1,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/next"
+      ],
+      "commit": "5d2b33805bd3fb0195a23e50fb77464205bcd52d",
+      "tree": "5ad0545494ab6dcec52d9f8e344d74b7bb3ee5e8",
+      "mergeBaseWithProtectedDevelopment": "5d2b33805bd3fb0195a23e50fb77464205bcd52d",
+      "mergeBaseTree": "5ad0545494ab6dcec52d9f8e344d74b7bb3ee5e8",
+      "ahead": 0,
+      "behind": 99,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/protected-transition-receipts-20260905"
+      ],
+      "commit": "055824f393ab4a075d8faf837ff31be9df24fc43",
+      "tree": "225aca6807db715471b061dcce3d03f06f416c59",
+      "mergeBaseWithProtectedDevelopment": "055824f393ab4a075d8faf837ff31be9df24fc43",
+      "mergeBaseTree": "225aca6807db715471b061dcce3d03f06f416c59",
+      "ahead": 0,
+      "behind": 91,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/receipt-gate-repair-20260905"
+      ],
+      "commit": "49268b39e771f1572f84741403bbfd61c54ef249",
+      "tree": "ff46d705ab071ef1fc6a27fb4a80a39bb67254b7",
+      "mergeBaseWithProtectedDevelopment": "fae1b214c18673664c37fc8e14c3add63a4f5fb3",
+      "mergeBaseTree": "ff46d705ab071ef1fc6a27fb4a80a39bb67254b7",
+      "ahead": 1,
+      "behind": 96,
+      "isAncestorOfProtectedDevelopment": false,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [
+        "49268b39e771f1572f84741403bbfd61c54ef249"
+      ],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Unique commit is a Phase packaging merge with empty three-dot diff versus merge-base (tree equals merge-base). Merge-base is an ancestor of protected development, so no file behavior is absent from protected development. An open or historical Phase ref is not treated as accepted integration by itself; acceptance is the ancestor relationship plus empty unique tree delta.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    },
+    {
+      "refs": [
+        "origin/phase/receipt-gate-repair-20260905-r2"
+      ],
+      "commit": "42495337d70f79e62f8e848265990b0e9ba77e3f",
+      "tree": "82d4e8de0bb6fa74699a3fcacfa23362a27f01b9",
+      "mergeBaseWithProtectedDevelopment": "42495337d70f79e62f8e848265990b0e9ba77e3f",
+      "mergeBaseTree": "82d4e8de0bb6fa74699a3fcacfa23362a27f01b9",
+      "ahead": 0,
+      "behind": 94,
+      "isAncestorOfProtectedDevelopment": true,
+      "protectedDevelopmentIsAncestor": false,
+      "commitsAhead": [],
+      "rangePatchId": null,
+      "classification": "integrated",
+      "reason": "Tip is a git ancestor of protected development (ahead=0). Unique three-dot path set is empty. Behavior is already in protected development; the ref is not independently accepted merely because it exists remotely.",
+      "changedPaths": [],
+      "cherryPickOrManualPortOrder": null,
+      "mappedPrdOrDeliveryPacket": null
+    }
+  ],
+  "retainedIntegrationOrder": [
+    {
+      "order": 1,
+      "method": "cherry-pick-or-manual-port-onto-protected-development",
+      "fromRef": "origin/issue/511-complete-canonical-linksites-server03-s03-36-thr",
+      "commitsInOrder": [
+        "d7f064a6556465139f2d47d3bf8dae2701248312",
+        "56125fc5e83cc0f223a085561bcadfe32e4f2652"
+      ],
+      "commit": "56125fc5e83cc0f223a085561bcadfe32e4f2652",
+      "tree": "34a42e3c3bf7ec1910df9fca8a71cb55ec979c8b",
+      "deliveryPacket": "LSTRUST-01",
+      "note": "Cherry-pick d7f064a then 56125fc onto protected 4b2dbaf. Do not prefer-incoming. Do not treat the pushed branch as already accepted."
+    }
+  ],
+  "excludedLocalArtifacts": [
+    {
+      "source": "coordinator_attributed_readback",
+      "issue": 470,
+      "paths": [
+        ".ci-artifacts",
+        "apps/cms/AGENTS.md",
+        "apps/cms/CLAUDE.md"
+      ],
+      "classification": "preserved_excluded_local_artifact",
+      "reason": "Issue 470 untracked .ci-artifacts and apps/cms AGENTS.md/CLAUDE.md are generated local artifacts, not candidate source. They must not be committed. Nothing was deleted.",
+      "evidenceLevel": "coordinator_attributed_readback_not_present_in_this_vm"
+    }
+  ],
+  "unresolvedUnknowns": [
+    {
+      "id": "lstrust-01-lane-path-admission",
+      "evidenceLevel": "proven_conflict_between_authorities",
+      "detail": "Retained Issue 511 behavior maps to packet LSTRUST-01 per ATOMIC-WORK-PACKETS.md, but IMPLEMENTATION-LANES.md / LANE-PLAN.json literal allowed paths omit .github/workflows/ci.yml, docs/contracts/CI-SUITE.md, and scripts/tests/test_promotion_receipt_adversarial.py. Classification of the commits is retain_reuse; how LSG0-05 admits those paths is unresolved and must not be invented."
+    },
+    {
+      "id": "issue-511-foreign-local-checkout",
+      "evidenceLevel": "coordinator_attributed_readback_not_replicated_in_this_vm",
+      "detail": "Coordinator readback states the Issue 511 local checkout is behind remote and has no local-only commit. This VM has only origin/issue/511 at 56125fc5e83cc0f223a085561bcadfe32e4f2652 and no separate local 511 worktree to re-verify."
+    },
+    {
+      "id": "founder-next-env-bytes-not-materialized-here",
+      "evidenceLevel": "coordinator_attributed_readback",
+      "detail": "Protected blob 9edff1c7cacb3bfac9a1eadcf6f51eaa99565e38 and attributed dirty blob ce4e94a6b10f160ee021fe18939af160d2927dcf exist in the object store. This VM working tree is clean; the unstaged founder file was not materialized or hashed here. HOLD recorded without copying content."
+    }
+  ],
+  "summary": {
+    "candidates": 28,
+    "integrated": 16,
+    "retain_reuse": 1,
+    "superseded_by_stronger_exact_behavior": 5,
+    "not_applicable_with_reason": 5,
+    "user_owned_hold": 1,
+    "changedPaths": 113,
+    "retainedIntegrationSteps": 1,
+    "excludedLocalArtifacts": 1,
+    "unresolvedUnknowns": 3
+  },
+  "toolchainObservedForThisIdentity": {
+    "ciNode": "22 (major-only pin in .github/workflows/ci.yml; no root .nvmrc)",
+    "webMasterNvmrc": "22",
+    "packageManager": "pnpm@10.0.0",
+    "lockfile": "pnpm-lock.yaml (frozen install succeeded)",
+    "python": "unpinned; CI uses ubuntu-24.04-arm system python3; this VM python3 3.12.3",
+    "thisVmNodeOnPath": "v22.14.0 (/exec-daemon/node) with nvm v22.22.2 also installed",
+    "acceptanceCommandsUse": "python3 stdlib json + git only"
+  }
+}

@@ -11,7 +11,7 @@
     "A1": {
       "pageRenderer": "composition-a1-linear-shell",
       "regions": ["site-header", "main", "site-footer"],
-      "architectureReady": false
+      "architectureReady": true
     },
     "A2": {
       "pageRenderer": "composition-a2-split-shell",

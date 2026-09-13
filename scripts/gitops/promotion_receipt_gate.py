@@ -14,10 +14,12 @@ custom-App token here.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -34,11 +36,46 @@ from coordinator.receipts import (  # noqa: E402
     load_json,
     receipt_lookup_key,
     verify_receipt,
+    verify_transition_receipt,
 )
 
 
 SHA40 = set("0123456789abcdef")
 PROMOTION_STATES = {"queued", "in_progress", "waiting", "requested"}
+TRUSTED_PRODUCERS = frozenset({"delivery-controller", "linktrend-receipt-gate"})
+TRUSTED_EVENTS = frozenset({"pull_request_target"})
+TRUSTED_CHECK_NAMES = frozenset({"Linktrend Receipt Gate", "Linktrend Branch Source Policy"})
+TRUSTED_WORKFLOW_FILES = frozenset(
+    {
+        ".github/workflows/linktrend-development-to-staging.yml",
+        ".github/workflows/linktrend-staging-to-main.yml",
+    }
+)
+UNTRUSTED_WORKFLOW_FILES = frozenset({".github/workflows/ci.yml", ".github/workflows/linktrend-review-packager.yml"})
+ALLOWED_TRANSITIONS = {
+    "development-to-staging": ("development", "staging"),
+    "staging-to-main": ("staging", "main"),
+}
+AUTHORITATIVE_LIVE_FIELDS = (
+    "repository",
+    "transition",
+    "protectedBaseCommit",
+    "protectedBaseTree",
+    "candidateHeadCommit",
+    "candidateHeadTree",
+    "workflowFile",
+    "checkName",
+    "requiredTest",
+    "reviewer",
+    "issuedAt",
+    "expiresAt",
+    "now",
+    "consumptionId",
+    "producer",
+    "eventName",
+)
+REQUIRED_TEST_FIELDS = ("gate", "conclusion", "workflowPath", "runId", "runAttempt", "headCommit", "tree")
+REVIEWER_FIELDS = ("identity", "result", "candidateAuthor")
 
 
 @dataclass(frozen=True)
@@ -339,6 +376,434 @@ def cancel_obsolete(repository: str, branch: str, live_sha: str) -> list[str]:
     return cancelled
 
 
+def _parse_utc(value: Any) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def canonical_consumption_id(payload: Mapping[str, Any]) -> str:
+    identity = {
+        "repository": payload.get("repository"),
+        "transition": payload.get("transition"),
+        "protectedBaseCommit": payload.get("protectedBaseCommit"),
+        "protectedBaseTree": payload.get("protectedBaseTree"),
+        "candidateHeadCommit": payload.get("candidateHeadCommit"),
+        "candidateHeadTree": payload.get("candidateHeadTree"),
+        "sourceReceiptDigest": payload.get("sourceReceiptDigest"),
+        "transitionDigest": payload.get("transitionDigest"),
+        "workflowFile": payload.get("workflowFile"),
+        "checkName": payload.get("checkName"),
+    }
+    digest = hashlib.sha256(
+        json.dumps(identity, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return f"sha256:{digest}"
+
+
+def assemble_live_facts(
+    *,
+    repository: str,
+    transition: str,
+    protected_base_commit: str,
+    protected_base_tree: str,
+    candidate_head_commit: str,
+    candidate_head_tree: str,
+    workflow_file: str,
+    check_name: str,
+    required_test: Mapping[str, Any],
+    reviewer: Mapping[str, Any],
+    issued_at: str,
+    expires_at: str,
+    now: str,
+    producer: str,
+    event_name: str,
+    source_receipt: Mapping[str, Any],
+    transition_receipt: Mapping[str, Any],
+    observed_checks: Sequence[Mapping[str, Any]] = (),
+    founder_authorized: bool = False,
+    extra: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build trusted-producer live facts.  Does not invent success or identities."""
+
+    facts: dict[str, Any] = {
+        "repository": repository,
+        "transition": transition,
+        "protectedBaseCommit": protected_base_commit,
+        "protectedBaseTree": protected_base_tree,
+        "candidateHeadCommit": candidate_head_commit,
+        "candidateHeadTree": candidate_head_tree,
+        "workflowFile": workflow_file,
+        "checkName": check_name,
+        "requiredTest": dict(required_test),
+        "reviewer": dict(reviewer),
+        "issuedAt": issued_at,
+        "expiresAt": expires_at,
+        "now": now,
+        "producer": producer,
+        "eventName": event_name,
+        "producerCredentialsAvailableToCandidate": False,
+        "candidateAuthored": False,
+        "observedChecks": [dict(row) for row in observed_checks],
+        "founderAuthorized": bool(founder_authorized),
+        "consumptionId": canonical_consumption_id(
+            {
+                "repository": repository,
+                "transition": transition,
+                "protectedBaseCommit": protected_base_commit,
+                "protectedBaseTree": protected_base_tree,
+                "candidateHeadCommit": candidate_head_commit,
+                "candidateHeadTree": candidate_head_tree,
+                "sourceReceiptDigest": source_receipt.get("receiptDigest"),
+                "transitionDigest": transition_receipt.get("receiptDigest"),
+                "workflowFile": workflow_file,
+                "checkName": check_name,
+            }
+        ),
+    }
+    if extra:
+        for key, value in extra.items():
+            if key in facts and key != "founderAuthorized":
+                continue
+            facts[key] = value
+    return facts
+
+
+def write_live_facts_from_workspace(
+    *,
+    repository: str,
+    transition: str,
+    protected_base_commit: str,
+    protected_base_tree: str,
+    candidate_head_commit: str,
+    candidate_head_tree: str,
+    workflow_file: str,
+    event_name: str,
+    current_pr: str,
+    receipt_path: str | Path,
+    transition_path: str | Path,
+    source_pr_path: str | Path,
+    run_path: str | Path,
+    reviews_path: str | Path,
+    checks_path: str | Path,
+    merged_path: str | Path,
+    output_path: str | Path,
+    consumed_ids_path: str | Path,
+    consumed_receipts_path: str | Path,
+    now: str | None = None,
+) -> dict[str, Any]:
+    """Assemble live facts from independently observed GitHub payloads."""
+
+    receipt = load_json(receipt_path)
+    transition_receipt = load_json(transition_path)
+    source_pr = load_json(source_pr_path)
+    run = load_json(run_path)
+    reviews = load_json(reviews_path)
+    checks = load_json(checks_path)
+    merged = load_json(merged_path)
+    author = str(((source_pr.get("user") or {}) if isinstance(source_pr, Mapping) else {}).get("login") or "")
+    independent = None
+    for row in reviews if isinstance(reviews, list) else []:
+        if not isinstance(row, Mapping):
+            continue
+        login = str(((row.get("user") or {}) if isinstance(row.get("user"), Mapping) else {}).get("login") or "")
+        state = str(row.get("state") or "").upper()
+        body = str(row.get("body") or "").strip().upper()
+        if login and login != author and (state == "APPROVED" or body.startswith("PASS")):
+            independent = {"identity": login, "result": "PASS" if body.startswith("PASS") else "APPROVED", "candidateAuthor": author}
+            break
+    if independent is None:
+        raise ReceiptError("independent_review_missing", "no independent reviewer result is present")
+    clock = _parse_utc(now) or datetime.now(timezone.utc)
+    issued = str(run.get("updated_at") or run.get("created_at") or clock.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    expires = (clock + timedelta(days=14)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    observed = [
+        {"name": "Linktrend Receipt Gate", "producer": workflow_file},
+        {"name": "Linktrend Branch Source Policy", "producer": workflow_file},
+    ]
+    for row in (checks.get("check_runs") or []) if isinstance(checks, Mapping) else []:
+        if not isinstance(row, Mapping):
+            continue
+        name = str(row.get("name") or "")
+        path = str(row.get("path") or row.get("details_url") or "")
+        if ".github/workflows/ci.yml" in path or str(((row.get("app") or {}) if isinstance(row.get("app"), Mapping) else {}).get("name") or "") == "GitHub Actions":
+            if name in TRUSTED_CHECK_NAMES or str(row.get("name") or "") in {"LiNKsites CI", "full-production-suite"}:
+                path = ".github/workflows/ci.yml"
+        if name in TRUSTED_CHECK_NAMES:
+            if path in UNTRUSTED_WORKFLOW_FILES:
+                observed.append({"name": name, "producer": path})
+            continue
+        observed.append({"name": name, "producer": path})
+    consumed_receipts = []
+    receipt_digest = str(receipt.get("receiptDigest") or "")
+    for item in (merged.get("items") or []) if isinstance(merged, Mapping) else []:
+        if not isinstance(item, Mapping):
+            continue
+        number = str(item.get("number") or "")
+        if number and number != str(current_pr or "") and receipt_digest:
+            consumed_receipts.append(receipt_digest)
+    facts = assemble_live_facts(
+        repository=repository,
+        transition=transition,
+        protected_base_commit=protected_base_commit,
+        protected_base_tree=protected_base_tree,
+        candidate_head_commit=candidate_head_commit,
+        candidate_head_tree=candidate_head_tree,
+        workflow_file=workflow_file,
+        check_name="Linktrend Receipt Gate",
+        required_test={
+            "gate": "full-gate",
+            "conclusion": "success" if str(run.get("conclusion") or "") == "success" else str(run.get("conclusion") or ""),
+            "workflowPath": str(run.get("path") or ""),
+            "runId": run.get("id"),
+            "runAttempt": run.get("run_attempt"),
+            "headCommit": str(((receipt.get("candidateIdentity") or {}) if isinstance(receipt.get("candidateIdentity"), Mapping) else {}).get("headCommit") or ""),
+            "tree": candidate_head_tree,
+        },
+        reviewer=independent,
+        issued_at=issued,
+        expires_at=expires,
+        now=clock.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        producer="linktrend-receipt-gate",
+        event_name=event_name,
+        source_receipt=receipt,
+        transition_receipt=transition_receipt,
+        observed_checks=observed,
+    )
+    Path(output_path).write_text(json.dumps(facts, sort_keys=True), encoding="utf-8")
+    Path(consumed_ids_path).write_text("[]", encoding="utf-8")
+    Path(consumed_receipts_path).write_text(json.dumps(consumed_receipts), encoding="utf-8")
+    return facts
+
+
+def evaluate_authoritative_promotion(
+    *,
+    live: Mapping[str, Any],
+    source_receipt: Mapping[str, Any],
+    transition_receipt: Mapping[str, Any],
+    consumed_ids: Sequence[str] = (),
+    consumed_receipt_digests: Sequence[str] = (),
+) -> Decision:
+    """Accept only independently produced, once-consumed promotion evidence.
+
+    Candidate code cannot mint this decision.  Founder bootstrap is admitted
+    only when every identity and test/review result is already truthful.
+    """
+
+    missing = [name for name in AUTHORITATIVE_LIVE_FIELDS if name not in live or live.get(name) in (None, "")]
+    if missing:
+        return Decision(False, "missing_field", f"authoritative live fields missing: {','.join(missing)}")
+
+    required_test = live.get("requiredTest")
+    reviewer = live.get("reviewer")
+    if not isinstance(required_test, Mapping):
+        return Decision(False, "missing_field", "requiredTest is missing")
+    if not isinstance(reviewer, Mapping):
+        return Decision(False, "missing_field", "reviewer is missing")
+    missing_test = [name for name in REQUIRED_TEST_FIELDS if name not in required_test or required_test.get(name) in (None, "")]
+    missing_review = [name for name in REVIEWER_FIELDS if name not in reviewer or reviewer.get(name) in (None, "")]
+    if missing_test or missing_review:
+        return Decision(False, "missing_field", "required test or reviewer fields missing")
+
+    if bool(live.get("candidateAuthored")) or bool(live.get("producerCredentialsAvailableToCandidate")):
+        return Decision(False, "candidate_authored", "candidate-authored evidence cannot authorize promotion")
+    if str(live.get("eventName") or "") not in TRUSTED_EVENTS:
+        return Decision(False, "candidate_authored", "authoritative evidence must come from pull_request_target")
+    producer = str(live.get("producer") or "")
+    workflow_file = str(live.get("workflowFile") or "")
+    check_name = str(live.get("checkName") or "")
+    if producer not in TRUSTED_PRODUCERS or workflow_file not in TRUSTED_WORKFLOW_FILES:
+        return Decision(False, "producer_untrusted", "approval producer is not the trusted receipt-gate workflow")
+    if check_name not in TRUSTED_CHECK_NAMES:
+        return Decision(False, "producer_untrusted", "check identity is not a trusted promotion context")
+
+    if any(bool(required_test.get(flag)) for flag in ("manufactured", "synthetic", "invented")):
+        return Decision(False, "synthetic_evidence", "required test result was manufactured")
+    if any(bool(reviewer.get(flag)) for flag in ("manufactured", "synthetic", "invented")):
+        return Decision(False, "synthetic_evidence", "review evidence was manufactured")
+    if any(bool(live.get(flag)) for flag in ("manufacturedCheck", "syntheticReceipt", "inventedIdentity")):
+        return Decision(False, "synthetic_evidence", "synthetic promotion evidence is rejected")
+    if bool(live.get("founderAuthorized")) and any(
+        bool(live.get(flag)) for flag in ("manufactureSuccess", "inventedCheck", "inventedReview", "inventedTest")
+    ):
+        return Decision(False, "founder_bootstrap_manufactured", "founder bootstrap cannot manufacture evidence")
+
+    repository = str(live.get("repository") or "")
+    transition_name = str(live.get("transition") or "")
+    if transition_name not in ALLOWED_TRANSITIONS:
+        return Decision(False, "transition_mismatch", "transition is not a protected promotion")
+    source_branch, target_branch = ALLOWED_TRANSITIONS[transition_name]
+    if repository != str(transition_receipt.get("repository") or "") or repository != str(
+        (source_receipt.get("candidateIdentity") or {}).get("repository") or ""
+    ):
+        return Decision(False, "repository_mismatch", "live repository does not match receipt identities")
+    if str(transition_receipt.get("targetBranch") or "") != target_branch:
+        return Decision(False, "transition_mismatch", "transition receipt target is not the live protected ref")
+    if str((source_receipt.get("candidateIdentity") or {}).get("sourceBranch") or "") != source_branch:
+        return Decision(False, "transition_mismatch", "source receipt branch does not match the named transition")
+
+    live_base = _sha(live.get("protectedBaseCommit"))
+    live_base_tree = _sha(live.get("protectedBaseTree"))
+    live_head = _sha(live.get("candidateHeadCommit"))
+    live_tree = _sha(live.get("candidateHeadTree"))
+    if not all((live_base, live_base_tree, live_head, live_tree)):
+        return Decision(False, "missing_field", "protected base or candidate identity is malformed")
+    if _sha(transition_receipt.get("protectedBaseCommit")) != live_base:
+        return Decision(False, "protected_base_mismatch", "transition protected base is not the current protected commit")
+    if _sha(transition_receipt.get("targetCommit")) != live_head or _sha(transition_receipt.get("targetTree")) != live_tree:
+        return Decision(False, "transition_target_mismatch", "transition target is not the live candidate head/tree")
+    source_identity = source_receipt.get("candidateIdentity") if isinstance(source_receipt.get("candidateIdentity"), Mapping) else {}
+    if _sha(source_identity.get("gitTree")) != live_tree:
+        return Decision(False, "tree_mismatch", "audited tree is not the live candidate tree")
+    if _sha(required_test.get("headCommit")) != _sha(source_identity.get("headCommit")):
+        return Decision(False, "head_mismatch", "required test is not bound to the audited source head")
+    if _sha(required_test.get("tree")) != live_tree:
+        return Decision(False, "tree_mismatch", "required test is not bound to the live candidate tree")
+
+    if str(required_test.get("gate") or "") != "full-gate":
+        return Decision(False, "required_test_not_passed", "required test gate is not full-gate")
+    conclusion = str(required_test.get("conclusion") or "").strip().lower()
+    if conclusion not in {"success", "passed"}:
+        return Decision(False, "required_test_not_passed", "required test did not pass")
+    if str(required_test.get("workflowPath") or "") != ".github/workflows/linktrend-integrator-merge.yml":
+        return Decision(False, "workflow_mismatch", "required test workflow identity is not the trusted Full producer")
+    if required_test.get("runId") != source_receipt.get("workflowRunId") or required_test.get("runAttempt") != source_receipt.get(
+        "workflowRunAttempt"
+    ):
+        return Decision(False, "run_mismatch", "required test run is not the retained Full receipt run")
+
+    reviewer_identity = str(reviewer.get("identity") or "").strip()
+    candidate_author = str(reviewer.get("candidateAuthor") or "").strip()
+    review_result = str(reviewer.get("result") or "").strip().upper()
+    if not reviewer_identity or not candidate_author:
+        return Decision(False, "independent_review_missing", "reviewer or candidate author identity is missing")
+    if reviewer_identity == candidate_author:
+        return Decision(False, "self_review", "candidate author cannot supply the independent review")
+    if review_result not in {"PASS", "APPROVED"}:
+        return Decision(False, "independent_review_missing", "independent reviewer result is not PASS")
+
+    issued = _parse_utc(live.get("issuedAt"))
+    expires = _parse_utc(live.get("expiresAt"))
+    now = _parse_utc(live.get("now"))
+    if issued is None or expires is None or now is None:
+        return Decision(False, "missing_field", "issuance or expiry timestamp is invalid")
+    if issued > now or now >= expires or issued >= expires:
+        return Decision(False, "stale_or_expired", "approval evidence is stale, expired, or not yet issued")
+
+    source_digest = str(source_receipt.get("receiptDigest") or "")
+    transition_digest = str(transition_receipt.get("receiptDigest") or "")
+    expected_consumption = canonical_consumption_id(
+        {
+            "repository": repository,
+            "transition": transition_name,
+            "protectedBaseCommit": live_base,
+            "protectedBaseTree": live_base_tree,
+            "candidateHeadCommit": live_head,
+            "candidateHeadTree": live_tree,
+            "sourceReceiptDigest": source_digest,
+            "transitionDigest": transition_digest,
+            "workflowFile": workflow_file,
+            "checkName": check_name,
+        }
+    )
+    offered_consumption = str(live.get("consumptionId") or "")
+    if offered_consumption != expected_consumption:
+        return Decision(False, "copied_receipt", "consumption identity does not match the exact live binding")
+    if offered_consumption in {str(item) for item in consumed_ids}:
+        return Decision(False, "replay_or_reuse", "approval evidence was already consumed")
+    if source_digest and source_digest in {str(item) for item in consumed_receipt_digests}:
+        return Decision(False, "copied_receipt", "source receipt was copied from a prior consumed promotion")
+    if bool(live.get("replay")):
+        return Decision(False, "replay_or_reuse", "replayed promotion evidence is rejected")
+
+    observed_checks = live.get("observedChecks") or []
+    if not isinstance(observed_checks, list):
+        return Decision(False, "missing_field", "observedChecks must be an array")
+    seen_names: dict[str, str] = {}
+    for row in observed_checks:
+        if not isinstance(row, Mapping):
+            return Decision(False, "synthetic_evidence", "observed check row is not an object")
+        name = str(row.get("name") or "")
+        producer_path = str(row.get("producer") or row.get("workflow") or "")
+        if name in TRUSTED_CHECK_NAMES and producer_path in UNTRUSTED_WORKFLOW_FILES:
+            return Decision(
+                False,
+                "untrusted_check_collision",
+                f"untrusted producer {producer_path} published trusted check name {name}",
+            )
+        if name in TRUSTED_CHECK_NAMES and producer_path and producer_path not in TRUSTED_WORKFLOW_FILES:
+            return Decision(False, "untrusted_check_collision", f"check-name collision from untrusted producer {producer_path}")
+        if name and name in seen_names and seen_names[name] != producer_path:
+            return Decision(False, "duplicate_check_name", f"duplicate check name {name} from multiple producers")
+        if name in seen_names and name in TRUSTED_CHECK_NAMES:
+            return Decision(False, "duplicate_check_name", f"duplicate trusted check name {name}")
+        if name:
+            seen_names[name] = producer_path
+
+    transition_verdict = verify_transition_receipt(
+        transition_receipt,
+        source_receipt,
+        {
+            "repository": repository,
+            "sourceBranch": target_branch,
+            "headCommit": live_head,
+            "gitTree": live_tree,
+            "dependencyDigest": source_identity.get("dependencyDigest"),
+            "profileDigest": source_identity.get("profileDigest"),
+            "workflowDigest": source_identity.get("workflowDigest"),
+        },
+        expected_workflow_run_id=required_test.get("runId"),
+        expected_workflow_run_attempt=required_test.get("runAttempt"),
+        expected_base_commit=live_base,
+    )
+    if not transition_verdict.accepted:
+        return Decision(False, transition_verdict.code, transition_verdict.message or transition_verdict.code)
+
+    return Decision(
+        True,
+        "accepted",
+        "trusted producer authorized the exact bound one-time promotion",
+        source_commit=_sha(source_identity.get("headCommit")),
+        promotion_commit=live_head,
+        receipt_lookup_key=receipt_lookup_key(source_receipt),
+    )
+
+
+def authorize_promotion_files(
+    *,
+    receipt_path: str | Path,
+    transition_path: str | Path,
+    live_path: str | Path,
+    consumed_ids_path: str | Path | None = None,
+    consumed_receipts_path: str | Path | None = None,
+) -> Decision:
+    try:
+        live = load_json(live_path)
+        consumed_ids = load_json(consumed_ids_path) if consumed_ids_path is not None else []
+        consumed_receipts = load_json(consumed_receipts_path) if consumed_receipts_path is not None else []
+        if not isinstance(consumed_ids, list) or not isinstance(consumed_receipts, list):
+            return Decision(False, "invalid_receipt", "consumed identity lists must be arrays")
+        return evaluate_authoritative_promotion(
+            live=live,
+            source_receipt=load_json(receipt_path),
+            transition_receipt=load_json(transition_path),
+            consumed_ids=[str(item) for item in consumed_ids],
+            consumed_receipt_digests=[str(item) for item in consumed_receipts],
+        )
+    except (ReceiptError, OSError, ValueError) as exc:
+        code = getattr(exc, "code", "invalid_receipt")
+        return Decision(False, str(code), str(exc))
+
+
 def _print(value: Any) -> None:
     print(json.dumps(value, sort_keys=True, separators=(",", ":")))
 
@@ -362,6 +827,34 @@ def main(argv: list[str] | None = None) -> int:
     verify.add_argument("--expected-workflow-digest")
     verify.add_argument("--transition-receipt", type=Path)
     verify.add_argument("--gate", required=True)
+
+    authorize = commands.add_parser("authorize")
+    authorize.add_argument("--receipt", required=True, type=Path)
+    authorize.add_argument("--transition-receipt", required=True, type=Path)
+    authorize.add_argument("--live-facts", required=True, type=Path)
+    authorize.add_argument("--consumed-ids", type=Path)
+    authorize.add_argument("--consumed-receipts", type=Path)
+
+    assemble = commands.add_parser("write-live-facts")
+    assemble.add_argument("--repository", required=True)
+    assemble.add_argument("--transition", required=True)
+    assemble.add_argument("--protected-base-commit", required=True)
+    assemble.add_argument("--protected-base-tree", required=True)
+    assemble.add_argument("--candidate-head-commit", required=True)
+    assemble.add_argument("--candidate-head-tree", required=True)
+    assemble.add_argument("--workflow-file", required=True)
+    assemble.add_argument("--event-name", required=True)
+    assemble.add_argument("--current-pr", default="")
+    assemble.add_argument("--receipt", required=True, type=Path)
+    assemble.add_argument("--transition-receipt", required=True, type=Path)
+    assemble.add_argument("--source-pr-json", required=True, type=Path)
+    assemble.add_argument("--run-json", required=True, type=Path)
+    assemble.add_argument("--reviews-json", required=True, type=Path)
+    assemble.add_argument("--checks-json", required=True, type=Path)
+    assemble.add_argument("--merged-json", required=True, type=Path)
+    assemble.add_argument("--output", required=True, type=Path)
+    assemble.add_argument("--consumed-ids", required=True, type=Path)
+    assemble.add_argument("--consumed-receipts", required=True, type=Path)
 
     development = commands.add_parser("development")
     development.add_argument("--input", required=True, type=Path)
@@ -397,6 +890,38 @@ def main(argv: list[str] | None = None) -> int:
                 expected_workflow_digest=args.expected_workflow_digest,
                 transition_receipt_path=args.transition_receipt,
             )
+        elif args.command == "authorize":
+            decision = authorize_promotion_files(
+                receipt_path=args.receipt,
+                transition_path=args.transition_receipt,
+                live_path=args.live_facts,
+                consumed_ids_path=args.consumed_ids,
+                consumed_receipts_path=args.consumed_receipts,
+            )
+        elif args.command == "write-live-facts":
+            facts = write_live_facts_from_workspace(
+                repository=args.repository,
+                transition=args.transition,
+                protected_base_commit=args.protected_base_commit,
+                protected_base_tree=args.protected_base_tree,
+                candidate_head_commit=args.candidate_head_commit,
+                candidate_head_tree=args.candidate_head_tree,
+                workflow_file=args.workflow_file,
+                event_name=args.event_name,
+                current_pr=args.current_pr,
+                receipt_path=args.receipt,
+                transition_path=args.transition_receipt,
+                source_pr_path=args.source_pr_json,
+                run_path=args.run_json,
+                reviews_path=args.reviews_json,
+                checks_path=args.checks_json,
+                merged_path=args.merged_path,
+                output_path=args.output,
+                consumed_ids_path=args.consumed_ids,
+                consumed_receipts_path=args.consumed_receipts,
+            )
+            _print({"accepted": True, "code": "live_facts_written", "consumptionId": facts.get("consumptionId")})
+            return 0
         elif args.command == "development":
             decision = evaluate_development_gates(load_json(args.input), args.head_sha)
         elif args.command == "main-approval":
@@ -410,8 +935,8 @@ def main(argv: list[str] | None = None) -> int:
             cancelled = cancel_obsolete(args.repository, args.branch, args.live_sha)
             _print({"accepted": True, "code": "cancel_requested", "cancelled": cancelled})
             return 0
-    except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
-        decision = Decision(False, "blocked", str(exc))
+    except (OSError, ValueError, RuntimeError, json.JSONDecodeError, ReceiptError) as exc:
+        decision = Decision(False, getattr(exc, "code", "blocked"), str(exc))
     _print(decision.to_dict())
     return 0 if decision.accepted else 1
 

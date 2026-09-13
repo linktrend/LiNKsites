@@ -9,7 +9,11 @@ import {
 export function composeLayoutBody(runtime: LayoutRuntime, main: ReactNode, title: string): ReactNode {
   switch (runtime.layoutPackId) {
     case "A1":
-      return main;
+      return createElement(
+        "div",
+        { className: "flex flex-col", "data-layout-axis": "linear", "data-plan-id": runtime.planId },
+        main,
+      );
     case "A2":
       return createElement(
         "div",

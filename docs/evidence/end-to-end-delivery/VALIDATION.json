@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "packet-validation",
+  "packet": "LSINT-01-PREPARE",
+  "overallStateUnchanged": "PREPARED/HOLD",
+  "issue533": {
+    "kind": "lean-review-policy-docs",
+    "admittedBase": {
+      "commit": "299de68c369f8c504d5ebe5ce77b1391390b930d",
+      "tree": "daf91f91e202d7eb534f81d94c87f79f75f173c6"
+    }
+  },
+  "admittedBase": {
+    "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+    "tree": "109429b45870b5c648ec754f408f06ee9bea0267"
+  },
+  "commands": [
+    {
+      "command": "find docs/production-roadmap/phase-2 docs/evidence/end-to-end-delivery -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+      "result": "pass"
+    },
+    {
+      "command": "test -z \"$(git diff --name-only 299de68c369f8c504d5ebe5ce77b1391390b930d...HEAD | rg -v '^(docs/production-roadmap/phase-2/|docs/evidence/end-to-end-delivery/)')\"",
+      "result": "pass"
+    },
+    {
+      "command": "BASE_SHA=299de68c369f8c504d5ebe5ce77b1391390b930d HEAD_SHA=HEAD bash scripts/ci-secret-scan.sh",
+      "result": "bounded-replacement-pass",
+      "diagnosis": "Literal HEAD_SHA=HEAD exits 64 because the script requires a 40-character SHA. After substituting HEAD_SHA=$(git rev-parse HEAD), docker was missing (exit 127). This packet forbids product Docker/live probes.",
+      "replacement": "python3 scripts/gitops/secret_scan.py changed-range of the 16 committed paths; ok=true; findings=0"
+    },
+    {
+      "command": "git diff --check 299de68c369f8c504d5ebe5ce77b1391390b930d...HEAD",
+      "result": "pass"
+    }
+  ],
+  "internalLinks": {
+    "readmeRelativeLinks": {"count": 17, "missing": []},
+    "newEvidenceJsonRepoPaths": "resolve",
+    "preservedBranchDispositionHistoricalPaths": {
+      "file": "docs/evidence/end-to-end-delivery/branch-disposition.json",
+      "untouched": true,
+      "note": "Preserved LSG0-01 JSON may name planning-era paths that are not present on this tree. Those references were not rewritten."
+    }
+  },
+  "hashValidation": {
+    "algorithm": "sha256",
+    "record": "docs/evidence/end-to-end-delivery/CHECKSUMS.json",
+    "contentFilesHashed": true
+  },
+  "notRun": [
+    "Full Suite",
+    "browser tests",
+    "builds",
+    "Docker",
+    "deployment",
+    "live probes",
+    "GitHub Dependabot API",
+    "pnpm audit re-run"
+  ]
+}

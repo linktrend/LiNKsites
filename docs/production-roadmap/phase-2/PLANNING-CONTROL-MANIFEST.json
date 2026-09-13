@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 2,
+  "manifestId": "linksites-end-to-end-delivery-plan-2026-09-10-r2",
+  "status": "DEPLOYMENT_ADVISOR_REVIEW_PENDING",
+  "executionAuthorized": false,
+  "productionMutationAuthorized": false,
+  "planningIssue": 515,
+  "planningBranch": "issue/515-create-canonical-end-to-end-linksites-production",
+  "stableEntrypoint": "docs/end-to-end-delivery/README.md",
+  "reviewTask": "01a08b39-78ca-7491-a246-c6123972fdb9",
+  "executionOwnerTask": "01a088ee-0886-78f2-97af-1924d73ac079",
+  "target": {
+    "product": "LiNKsites",
+    "host": "linkserver-03",
+    "installationCount": 1,
+    "composeProject": "linksites-foundation",
+    "separateStagingServer": false,
+    "initialAcceptance": "one real private marketing-smb-v1 website after truthful provider admission",
+    "finalAcceptance": "full Profile v2 and Master Website Template plus live Platform/Autowork operation on the same installation"
+  },
+  "verifiedAt": "2026-09-10T20:56:30+08:00",
+  "protectedBaseline": {
+    "development": {"commit":"4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb","tree":"e29607c43146decdf81c2f132562745f6a911780"},
+    "staging": {"commit":"b67221f90c1eff6a96592cc7be74390c9b843da2","tree":"e29607c43146decdf81c2f132562745f6a911780"},
+    "main": {"commit":"9eb995d7c151aab6aafabd66e91893084e1acdb2","tree":"fa16550a8d1981a37113c4ba356cbb0ff0a369f8"},
+    "acceptedFullSuite": {"runId":34165549526,"headCommit":"6bf85741e9b0881e0cf0a15e14a6ef8540ce410f","conclusion":"success"}
+  },
+  "upstreamPlanningInputs": [
+    {"repository":"linktrend/LiNKbrain","commit":"6a11a3e832de538d9907a746abadb895b3497314","tree":"250b6ede24afda9d2294a7a98c6300ecf6127533","runtimeProof":false},
+    {"repository":"linktrend/LiNKskills","commit":"8f27a179c891c0fdcbe0ccc5c010f5de1b08b275","tree":"911626f69484df0f8b82a5872844492983242979","runtimeProof":false},
+    {"repository":"linktrend/LiNKautowork","commit":"605c8281997e4793a826ce4c82b8dcbd6017ba26","tree":"c03f9c65879c0195416cc0699c1caa346d9bb63b","runtimeProof":false},
+    {"repository":"linktrend/LiNKlibraries","commit":"5188aaf1a9313a3746075cd6ccea0937c05f7a32","tree":"e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139","runtimeProof":false},
+    {"repository":"linktrend/openclaw_prime","commit":"c2d161883f796e568b8a13dc8face7997d23d413","tree":"d5caa266aa16af1ca0460f7368e340649aaec09f","runtimeProof":false},
+    {"repository":"linktrend/LiNKconsole","commit":"7c106b05235d77004dbd6a8ee1c8fda3b089fcbc","tree":"87df3891b17511c0c0cf50af8461119310e8c881","runtimeProof":false},
+    {"repository":"linktrend/LiNKportal","commit":"13e65266f41113aca6da3fe9490374729d630281","tree":"c18e00ad2ebca0338afebc5118f59a09a26df063","runtimeProof":false},
+    {"repository":"linktrend/LiNKresearch","commit":"51ed267545a90d07eb92f1da2bb7c13d47d8e54f","tree":"d4c28fa1be6654fc6abb76a79b33ce4b01c19922","runtimeProof":false},
+    {"repository":"linktrend/LiNKeditorial","commit":"e00441491cb1108aa5e104ccf5bd2932057118f9","tree":"eb20777f96fe5bb313b2d7c5377003f9b81cb45e","runtimeProof":false},
+    {"repository":"linktrend/LiNKchannel","commit":"15202c44f01a37f9082994a77a3657b4eb1028ca","tree":"2541df785ee387c8095f37ad27833933da0ec19e","runtimeProof":false},
+    {"repository":"linktrend/LiNKclient","commit":"de332c01cdc22076dcc97067e17cf8ef296b6e7f","tree":"d4e4a5224b075a7ca3ed8265f584b38fc1d76a19","runtimeProof":false},
+    {"repository":"linktrend/LiNKdeveloper","commit":"bea8a525bb3b4bff94e35a304b52c27075918fae","tree":"96ee8e3ce419c897c36bbdf11605d126c15121d9","runtimeProof":false}
+  ],
+  "directDependencies": {
+    "linkharness": {"acceptedCommit":"7f8d5199f67057fb0a314c1d90e04ea6f64df0bf","tree":"2ce580d54ffa7abbee77fe3710130b9e37c3c31f","required":"exact Profile/conformance handoff"},
+    "linklibraries": {"planningCommit":"5188aaf1a9313a3746075cd6ccea0937c05f7a32","tree":"e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139","marketingSmbV1CurrentState":"quarantined_non_selectable","masterTemplateCurrentState":"source_draft_non_selectable","required":"truthful protected selectable provider handoffs"},
+    "linkplatform": {"reviewedDevelopmentCommit":"67ba864667c8e8dd2b3baed00830c28e3035cea3","tree":"863e6b1f40def2df99aeb748dd9be570d28b1fb2","ownerTask":"01a0843c-0df9-74e2-907a-05c5f736d6ed","required":"current contracts and live receipts","mutationByLiNKsites":false},
+    "linkautowork": {"planningCommit":"605c8281997e4793a826ce4c82b8dcbd6017ba26","tree":"c03f9c65879c0195416cc0699c1caa346d9bb63b","required":"gateway registration grants endpoint health and receipt handoff","manualInitialAdapterAllowed":true}
+  },
+  "cursorRoute": {
+    "dispatcher":"/Users/linktrend/Documents/Codex/2026-09-09/files-pasted-by-the-user-i/outputs/cursor-cloud/cursor_cloud.py",
+    "sha256":"9c5b5486842e695e47f32896728ec15568237f304ea86115cde50997e419c260",
+    "account":"cursor-001@linktrend.one",
+    "apiKeyName":"Codex-001",
+    "model":"grok-4.6",
+    "effort":"medium",
+    "fast":false,
+    "repositoryVisible":true,
+    "checkPassed":true,
+    "workerCreated":false,
+    "desktopOrCliLoginRequired":false
+  },
+  "queueState": {
+    "suspendedMarkerPresent":true,
+    "resumeScopePresent":true,
+    "currentOwnerMembershipPresent":false,
+    "transactionLockRegularFileObserved":true,
+    "scopeFileRegularNonSymlinkObserved":true,
+    "scopeFileModeObserved":"0600",
+    "transactionLock":"/Users/linktrend/Documents/Codex/2026-09-09/files-pasted-by-the-user-i/outputs/cursor-cloud/state/.dispatch.lock",
+    "scopeFile":"/Users/linktrend/Documents/Codex/2026-09-09/files-pasted-by-the-user-i/outputs/queue-control/RESUME-SCOPE.json",
+    "postApprovalTransition":"hold persistent dispatch lock through latest regular-file read, mode and owner-preexistence capture, additive union, same-directory flushed atomic replace, directory sync where supported, parse/readback and capacity reconciliation",
+    "rollback":"under the same persistent lock reread latest state and remove only membership this task actually added; preserve intervening grants, unknown fields, current mode, global SUSPENDED and any pre-existing empty owner key; never restore a stale backup",
+    "maximumOutstanding":20,
+    "maximumWriters":16,
+    "reservedForReviewOrDownstream":4,
+    "maximumSafeLiNKsitesParallelWriters":4
+  },
+  "dependencyAdvisoryBaseline": {
+    "source":"GitHub Dependabot API open alerts",
+    "observedDate":"2026-09-10",
+    "total":33,
+    "severity":{"high":13,"medium":20},
+    "packages":{"next":27,"payload":2,"qs":2,"sharp":1,"@vitest/mocker":1},
+    "manifestLocations":{"apps/cms/package.json":11,"apps/web-master/package.json":9,"archive/paused-applications/web-company/package.json":9,"pnpm-lock.yaml":4},
+    "executionOwner":"LSSEC-01",
+    "releaseThreshold":"no unresolved exploitable critical/high finding in deployed or build-to-deploy closure; every remainder explicitly dispositioned; founder authority required for exception"
+  },
+  "lanePlan": {
+    "path":"docs/production-roadmap/phase-2/LANE-PLAN.json",
+    "candidateSha256":"608e332e0475037accf43ed37c7acb33af96f6513692ee5d20087dd1126c37a0",
+    "recalculateAfterAdvisorAcceptance":true
+  },
+  "serverBaseline": {
+    "ssh":"PASS","dockerVersion":"29.8.0","runningHealthyContainersObserved":17,
+    "sharedNetworks":["linktrend-s03-proxy","linktrend-s03-core-private","linktrend-s03-data"],
+    "databasesObserved":["linksites","linksites_payload_baseline"],
+    "rolesObserved":["linksites","linksites_payload_baseline"],
+    "composeProjectPresent":false,"applicationRootPresent":false,"backupRootPresent":false,
+    "privateMiddlewaresPresent":true,"routersPresent":false
+  },
+  "preservation": {
+    "userOwnedDirtyPaths":["apps/cms/next-env.d.ts"],
+    "uniqueWorkRequiringDisposition":["Issue 480 variants","Issue 490","Issue 492","Issue 508","Issue 511","unique Phase tips"],
+    "deletionAuthorized":false
+  },
+  "qualityBudget": {
+    "focusedTestsPerChangedPacket":true,
+    "dependencySecurityPacket":"one exclusive remediation/disposition pass before deployment source and Full acceptance",
+    "fullSuitePerConsolidatedSourceCandidate":1,
+    "independentSourceReviewPerExactCandidate":1,
+    "independentFinalOperationalReview":0,
+    "independentFinalOperationalReviewWaivedFor":"LSFULL-03 deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback",
+    "independentNarrowReviewIssueCheckpoint":"risk-triggered",
+    "repeatOnlyAfterNamedRiskSurfaceChange":true
+  },
+  "approvalBoundary": {
+    "currentFounderExecutionApproval":false,
+    "allowedNow":["read-only verification","planning documentation","Issue 515 planning commit and push","one substantive Deployment Advisor review handoff per superseding exact planning candidate"],
+    "forbiddenNow":["product implementation","worker dispatch","paid Cursor job","queue-control mutation","pull request creation or mutation","protected merge or promotion","image publication","Server03 or database mutation","deployment"],
+    "advisorAcceptanceIsExecutionApproval":false
+  }
+}

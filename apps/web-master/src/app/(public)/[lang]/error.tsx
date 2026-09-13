@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 export default function Error({
@@ -21,20 +20,12 @@ export default function Error({
       <div className="max-w-md text-center space-y-6">
         <div className="space-y-2">
           <h2 className="text-3xl font-bold text-foreground">
-            Something went wrong!
+            This page could not be displayed.
           </h2>
           <p className="text-muted-foreground">
-            We apologize for the inconvenience. An error occurred while loading this page.
+            Please try again.
           </p>
         </div>
-        
-        {process.env.NODE_ENV === 'development' && error.message && (
-          <div className="rounded-md bg-muted p-4 text-left">
-            <p className="text-sm font-mono text-muted-foreground break-all">
-              {error.message}
-            </p>
-          </div>
-        )}
 
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Button onClick={() => reset()} variant="default">

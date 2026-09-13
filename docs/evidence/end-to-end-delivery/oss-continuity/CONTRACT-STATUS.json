@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "oss-continuity-contract-status",
+  "issue": 544,
+  "continuityComplete": false,
+  "archiveAndReleaseComplete": false,
+  "lsart01Complete": false,
+  "planningSeparatedFromArchiveProof": true,
+  "sourceLevelReproducibilityGapsClosed": [
+    "floating third-party Actions in .github/workflows/ci.yml",
+    "CI Node major-only 22",
+    "packageManager pnpm@10.0.0 without Corepack integrity hash"
+  ],
+  "externalProofStillMissing": [
+    "owned archive download/publication of locked packages, pnpm tarball, base images, APK snapshots and produced image bytes",
+    "five-image build and publication from protected main",
+    "registry readback and SBOM/provenance on published digests",
+    "Server03 deployment",
+    "live FR-13 restore/rollback proof"
+  ],
+  "tooling": {
+    "generator": "deploy/scripts/generate-oss-continuity-manifest.mjs",
+    "verifier": "deploy/scripts/verify-oss-continuity-manifest.mjs",
+    "contract": "deploy/oss-continuity/contract.mjs",
+    "tests": [
+      "deploy/tests/oss-continuity-manifest.test.mjs",
+      "deploy/tests/release-toolchain-pins.test.mjs"
+    ],
+    "fixtures": "deploy/oss-continuity/fixtures/"
+  },
+  "publicationGate": {
+    "workflow": ".github/workflows/publish-server03-images.yml",
+    "claimRequiresVerifiedReceipts": true,
+    "planningSentinel": "PLANNING_NOT_A_CONTINUITY_CLAIM",
+    "didNotWeakenImageSbomOrProvenance": true,
+    "didNotEditPublishWorkflowThisIssue": true
+  },
+  "syntheticPassingFixtureIsNotALiveArchive": true,
+  "remainingBeforeLsart01": [
+    "LiNKtrend-controlled read-only archive of locked packages, base images, build tools and produced image bytes",
+    "verified archive receipts and checksums",
+    "five-image publication from protected main",
+    "registry readback and SBOM/provenance binding on the published digests",
+    "tested rollback to a prior immutable identity"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "kind": "admitted-manifest-ci-toolchain",
+  "sourceIdentity": {
+    "repository": "linktrend/LiNKsites",
+    "ref": "issue/532-consolidate-linksites-accepted-checkpoints-and-e",
+    "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+    "tree": "109429b45870b5c648ec754f408f06ee9bea0267"
+  },
+  "ciPins": {
+    "workflow": ".github/workflows/ci.yml",
+    "runsOn": "ubuntu-24.04-arm",
+    "nodeVersion": "22",
+    "pnpmActionSetup": "10.0.0",
+    "packageManagerField": "pnpm@10.0.0",
+    "webMasterNvmrc": {
+      "path": "apps/web-master/.nvmrc",
+      "value": "22"
+    },
+    "pythonUsedByAcceptance": "python3 -m json.tool",
+    "supabaseCliPinnedInFullSuiteOnly": "2.81.3",
+    "fullSuiteNotRunThisPacket": true
+  },
+  "pinDiagnosis": {
+    "nodeCompiler": "CI pins Node major 22 only; no compiler hash/lock. PATH node was /exec-daemon/node v22.14.0. nvm listed v22.22.2. Both are Node 22. Not a hash-locked compiler.",
+    "pnpm": "package.json packageManager is pnpm@10.0.0 without an integrity hash. Corepack prepared pnpm@10.0.0. Frozen lockfile exists at pnpm-lock.yaml.",
+    "lockDefect": "none-observed-for-frozen-install",
+    "didNotChangeLocks": true,
+    "didNotSilentlyUseUnpinnedPnpm12": true
+  },
+  "cloudRuntime": {
+    "python": "Python 3.12.3 (/usr/bin/python3)",
+    "pathNodeBeforeNvmActivation": {
+      "path": "/exec-daemon/node",
+      "version": "v22.14.0"
+    },
+    "nvm": {
+      "version": "0.40.3",
+      "default": "v22.22.2"
+    },
+    "pnpmAfterCorepackPrepare": {
+      "path": "/home/ubuntu/.nvm/versions/node/v22.22.2/bin/pnpm",
+      "version": "10.0.0"
+    },
+    "frozenInstall": {
+      "command": "pnpm install --frozen-lockfile",
+      "result": "pass",
+      "lockfileUpToDate": true,
+      "ignoredBuildScripts": [
+        "@parcel/watcher",
+        "@swc/core"
+      ],
+      "note": "install reused store cache; lock not modified"
+    }
+  },
+  "forbiddenThisPacket": [
+    "Full Suite",
+    "browser tests",
+    "builds",
+    "Docker",
+    "deployment",
+    "live probes",
+    "pnpm audit re-run"
+  ]
+}
