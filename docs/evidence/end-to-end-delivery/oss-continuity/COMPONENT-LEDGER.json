@@ -1,21 +1,20 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-component-ledger",
-  "admittedCommit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
-  "issue": 544,
+  "admittedCommit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  "issue": 546,
   "contractTooling": "present-planning-only",
   "archiveComplete": false,
   "sourceLevelGapsClosedThisIssue": [
-    "ci.yml floating GitHub Action tags replaced with verified commit SHAs plus version comments",
-    "CI node-version and new root .nvmrc pinned to 22.17.0 matching production node:22.17.0-alpine digest",
-    "packageManager and production Dockerfile corepack prepare now use Corepack sha512-qualified pnpm@10.0.0",
-    "fail-closed static test deploy/tests/release-toolchain-pins.test.mjs refuses floating actions and major-only Node"
+    "production five-image apk add packages version-pinned to Alpine v3.22 main versions equal on x86_64 and aarch64",
+    "fail-closed static test rejects unversioned production apk installs while allowing Docker comment and continuation syntax"
   ],
   "stillMissing": [
-    "LiNKtrend-controlled read-only archive of locked packages, pnpm binary, base images, APK inputs and produced image bytes",
+    "LiNKtrend-controlled read-only archive of locked packages, pnpm binary, base images, APKINDEX snapshots plus .apk bytes for both architectures, and produced image bytes",
     "five-image publication, registry readback, SBOM/provenance binding on published digests",
     "deployment and live proof",
-    "tested rollback to a prior immutable identity"
+    "tested rollback to a prior immutable identity",
+    "transitive apk dependency closure of git and ca-certificates (unpinned unless the owned APKINDEX snapshot is used)"
   ],
   "allowedClassifications": [
     "completed",
@@ -29,26 +28,27 @@
     "mutable-registry-tag",
     "upstream-availability",
     "source-repository-reference",
-    "untested-backup-or-rollback-text"
+    "untested-backup-or-rollback-text",
+    "live-apkindex-version-pin-alone"
   ],
   "components": [
     {
       "id": "nodejs-production-base",
       "classification": "completed but needs testing or fixing",
       "owner": "LSDEP-01",
-      "why": "Production Dockerfiles remain digest-pinned node:22.17.0-alpine@sha256:fc3e945f…. CI and root .nvmrc now pin 22.17.0. Host/default PATH may still be another 22.x. No owned archive. APK layer unpinned."
+      "why": "Production Dockerfiles remain digest-pinned node:22.17.0-alpine@sha256:fc3e945f…. CI and root .nvmrc pin 22.17.0. No owned archive. Base digest unchanged this issue."
     },
     {
       "id": "pnpm",
       "classification": "completed but needs testing or fixing",
       "owner": "LSSEC-01",
-      "why": "packageManager is now pnpm@10.0.0+sha512.<hex> from registry dist.integrity via Corepack. Frozen lock unchanged. Non-production compose pnpm@latest remains out of release. No owned pnpm binary archive."
+      "why": "packageManager remains Corepack-hashed pnpm@10.0.0. Frozen lock unchanged. No owned pnpm binary archive."
     },
     {
       "id": "nextjs",
       "classification": "missing",
       "owner": "LSSEC-01",
-      "why": "Lock records 16.3.3 integrity. No LiNKtrend archive, licence bundle or rollback identity."
+      "why": "Lock records 16.3.3 integrity. No LiNKtrend archive."
     },
     {
       "id": "react",
@@ -60,13 +60,13 @@
       "id": "payload",
       "classification": "missing",
       "owner": "LSSEC-01",
-      "why": "Manifest 3.87.1 with lock integrity. No owned archive. Advisory closure is separate and not claimed."
+      "why": "Manifest 3.87.1 with lock integrity. No owned archive."
     },
     {
       "id": "postgresql-image",
       "classification": "completed but needs testing or fixing",
       "owner": "LSDEP-01",
-      "why": "migrations Dockerfile pin 16.8-alpine digest unchanged. Live Server03 shared Postgres unknown. Floating postgres:16-alpine remains in apps/cms/docker-compose.yml."
+      "why": "migrations Dockerfile pin 16.8-alpine digest unchanged. No apk add in that image. Live Server03 shared Postgres unknown."
     },
     {
       "id": "pg-client",
@@ -78,13 +78,13 @@
       "id": "traefik",
       "classification": "unknown",
       "owner": "LSDEP-01",
-      "why": "Local-proof digest exists. Production shared Traefik identity not inspected this session."
+      "why": "Not re-inspected this session."
     },
     {
       "id": "redis",
       "classification": "unknown",
       "owner": "LSDEP-01",
-      "why": "Not present in inspected production Compose. Runtime contract use not proven."
+      "why": "Not present in inspected production Compose."
     },
     {
       "id": "minio",
@@ -102,49 +102,49 @@
       "id": "docker-engine",
       "classification": "unknown",
       "owner": "LSVPS-04",
-      "why": "Planning text cited Docker 29.8.0; not re-verified on Server03."
+      "why": "Not re-verified on Server03."
     },
     {
       "id": "compose-production-images",
       "classification": "missing",
       "owner": "LSART-01",
-      "why": "Compose requires digest env vars. Five images unpublished. No archive."
+      "why": "Five images unpublished. No archive. This issue did not build or publish images."
     },
     {
       "id": "playwright",
       "classification": "missing",
       "owner": "LSSEC-01",
-      "why": "Lock records 1.56.1. Browser bits and archive missing. Not run here."
+      "why": "Lock records 1.56.1. Archive missing. Not run here."
     },
     {
       "id": "typescript",
       "classification": "missing",
       "owner": "LSSEC-01",
-      "why": "Lock records 5.7.3. Host Node is not this compiler pin. No archive."
+      "why": "Lock records 5.7.3. No archive."
     },
     {
       "id": "turbo",
       "classification": "missing",
       "owner": "LSSEC-01",
-      "why": "Manifest caret ^2.10.5; lock 2.10.5. No archive."
+      "why": "Lock 2.10.5. No archive."
     },
     {
       "id": "github-actions-ci",
       "classification": "completed but needs testing or fixing",
       "owner": "LSTRUST-01",
-      "why": "ci.yml Fast/Full now commit-pin checkout, pnpm/action-setup, setup-node, cache restore/save, upload-artifact, setup-buildx and supabase/setup-cli. Node 22.17.0. Hosted Fast/Full not executed in this packet."
+      "why": "ci.yml commit pins unchanged this issue. Hosted Fast/Full not executed in this packet."
     },
     {
       "id": "github-actions-publish-images",
       "classification": "completed but needs testing or fixing",
       "owner": "LSART-01",
-      "why": "publish-server03-images.yml already commit-pinned; unchanged this issue. Images not built/published. Owned archive missing."
+      "why": "publish-server03-images.yml unchanged. Images not built or published."
     },
     {
       "id": "alpine-apk-build-packages",
-      "classification": "missing",
+      "classification": "completed but needs testing or fixing",
       "owner": "LSDEP-01",
-      "why": "apk add --no-cache without versions in production Dockerfiles. Not repaired here; not a GitHub Action or Node/pnpm pin."
+      "why": "cms, web-master and autowork-worker apk-install libc6-compat=1.1.0-r4. program-orchestrator also git=2.49.1-r0 and ca-certificates=20260611-r0. migrations and apps/cms/Dockerfile install no apk packages. Versions taken from Alpine v3.22 main APKINDEX for both x86_64 and aarch64; apk blob hashes/sizes differ by architecture so a single content digest pin is not claimed. Live APKINDEX tarball hashes already differ by architecture and remain mutable. Transitive apk dependencies are not listed. No owned APKINDEX or .apk archive. contract.mjs still types this component as unpinned-apk unless it sees '==', which is not Alpine syntax and must not be treated as an archive snapshot."
     },
     {
       "id": "tailscale",

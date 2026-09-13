@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-inspected-source",
-  "admittedCommit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
-  "admittedTree": "9c43e8a3c3ceb824ad9d8cbc7904335595b5520e",
+  "admittedCommit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  "admittedTree": "395d4dc07780ffee977be7f5d6469b06189f1475",
   "algorithm": "sha256",
   "files": {
     "package.json": "9c0617e873cf1f78add85efbe079688995a5c4680e26f591598c228f8b849ddf",
@@ -10,13 +10,14 @@
     ".nvmrc": "157c2eb0de1187ac028e89bcff580f1feab7eea2a280b110998c9472e19b4d98",
     ".github/workflows/ci.yml": "f75deb3efb9372d6b3f45cec9a3cfa173f5b1f44a76da134a7c5b5adf96ec620",
     ".github/workflows/publish-server03-images.yml": "05e6d47c38740704b6a289cdd9209dfa5535b3ac8ceaac79c703068c05d933e7",
-    "deploy/docker/cms.Dockerfile": "e097f0109f7f8361fb1c7d848f98d2b0d99ccae860a09413100d908716be838a",
-    "deploy/docker/web-master.Dockerfile": "bc849c957a69a6b342f1676b45f62f239a938624e784b39817ad048407d9aa67",
+    "deploy/docker/cms.Dockerfile": "8993c6fb4da43f9c9417e0c34ea0df5091d29bd0084e9284fd827067ebf67098",
+    "deploy/docker/web-master.Dockerfile": "f2128b1cf1a2544912853287ae60f951b0375f9631ff149b8e63e24707553218",
     "deploy/docker/migrations.Dockerfile": "92ec9b901e745b168567ce42bc0cd4c954217c84d6159c8fce693bf366f9edbb",
-    "deploy/docker/autowork-worker.Dockerfile": "a785ea9caff0b28c9431b4a625ce5b9ec1b9081f4706aa50901b510fb42338b8",
-    "deploy/docker/program-orchestrator.Dockerfile": "4bd4a0950936585927dc7d2cfd17e551851970a23e1c600e1a3ecf8231d42cbe",
+    "deploy/docker/autowork-worker.Dockerfile": "3fa83b154f4ca2ed8d0e4d41c0493922f3fb25f0b00e3e3c03ee3ceb0577abd7",
+    "deploy/docker/program-orchestrator.Dockerfile": "9bc5e86b6a6ec40d760d3c92ff14e51c4b9e15343d3624d50784926add748103",
     "apps/cms/Dockerfile": "54000d8d9138eef4053af01f7d14f4f3095e458f3b0aa184519e5428b7a8b6ce",
-    "deploy/tests/release-toolchain-pins.test.mjs": "5dfa1785d7673ff8cb6655c8372010374f761a15d21b39e13e3838c927c1d3e2"
+    "deploy/tests/release-toolchain-pins.test.mjs": "d6fbb754780a5c79e421e94dc0153285b82db599f6516957057f00b74268c89b",
+    "deploy/tests/oss-continuity-manifest.test.mjs": "310765bc30a10830f523fb1bf3869ffbf7eaf773e42f59ca6e3e6bfb9ecb0d39"
   },
   "resolvedLockIdentities": {
     "next@16.3.3": "sha512-tuRTx1nQ/yVw83cwJBo9F+njGUgMn3UHQycreWHB8XsStvvAh1AthbI8/4IpKnFaF58F+iSiHejYOlMQ/eq83g==",
@@ -32,8 +33,28 @@
     "node:22.17.0-alpine": "sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed",
     "postgres:16.8-alpine": "sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c"
   },
+  "apkPinsFromAlpineV322Main": {
+    "baseImageAlpine": "3.22 (node:22.17.0-alpine index digest fc3e945f…; Docker Hub also-known-as alpine3.22)",
+    "retrieved": "2026-09-13T04:55:00Z",
+    "repositories": [
+      "https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz",
+      "https://dl-cdn.alpinelinux.org/alpine/v3.22/main/aarch64/APKINDEX.tar.gz"
+    ],
+    "apkindexTarGzSha256": {
+      "x86_64": "948759c222f6d46409bdbcee7d1ea64a7a79ed6be37e2c0ad80bf392a4a97834",
+      "aarch64": "6f7b53707d9476f1f1cdacaa50e8dce2692431d70a6cb3319780b408d36f8032"
+    },
+    "packageVersionsEqualOnX86_64AndAarch64": {
+      "libc6-compat": "1.1.0-r4 (virtual provide from gcompat=1.1.0-r4; no real libc6-compat package in v3.22 main)",
+      "git": "2.49.1-r0",
+      "ca-certificates": "20260611-r0"
+    },
+    "apkFileSizesDifferByArchitecture": true,
+    "didNotInventVersions": true,
+    "didNotChangeBaseImageDigest": true
+  },
   "packageManagerField": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
-  "packageManagerHashSource": "npm registry metadata dist.integrity for pnpm@10.0.0 converted to Corepack sha512.<hex>; tarball was not downloaded by this packet to invent a checksum",
   "didNotDownloadThoseArtifacts": true,
-  "didNotTreatLockOrDigestPinAsArchive": true
+  "didNotTreatLockOrDigestPinAsArchive": true,
+  "didNotTreatApkVersionPinAsArchive": true
 }

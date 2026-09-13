@@ -3,9 +3,9 @@
   "kind": "oss-continuity-toolchain",
   "sourceIdentity": {
     "repository": "linktrend/LiNKsites",
-    "ref": "issue/544-pin-release-build-toolchain-and-actions-immutabl",
-    "commit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
-    "tree": "9c43e8a3c3ceb824ad9d8cbc7904335595b5520e"
+    "ref": "issue/546-pin-production-alpine-packages-for-reproducible",
+    "commit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+    "tree": "395d4dc07780ffee977be7f5d6469b06189f1475"
   },
   "ciPinsFromAdmittedManifest": {
     "workflow": ".github/workflows/ci.yml",
@@ -16,33 +16,22 @@
     "packageManagerField": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
     "pythonUsedByAcceptance": "python3",
     "acceptanceCommands": [
+      "node --test deploy/tests/release-toolchain-pins.test.mjs",
       "node --test deploy/tests/oss-continuity-manifest.test.mjs",
-      "git diff --check 9220b01458a293663ecca7a110410b3b7c8ac9f4...HEAD"
+      "git diff --check fba2ed08d5cf3a16ca691da6eec707d584153a7f...HEAD"
     ],
-    "additionalFocusedCommand": "node --test deploy/tests/release-toolchain-pins.test.mjs",
     "publishWorkflow": ".github/workflows/publish-server03-images.yml",
-    "publishRunsOn": "ubuntu-24.04",
-    "verifiedActionCommits": {
-      "actions/checkout": "11d5960a326750d5838078e36cf38b85af677262",
-      "pnpm/action-setup": "b906affcce14559ad1aafd4ab0e942779e9f58b1",
-      "actions/setup-node": "49933ea5288caeca8642d1e84afbd3f7d6820020",
-      "actions/cache": "0057852bfaa89a56745cba8c7296529d2fc39830",
-      "actions/upload-artifact": "ea165f8d65b6e75b540449e92b4886f43607fa02",
-      "docker/setup-buildx-action": "8d2750c68a42422c14e847fe6c8ac0403b4cbd6f",
-      "supabase/setup-cli": "ab058987d8d6c725971f6cf9d0b5c98467e30bd1"
-    },
-    "actionCommitVerification": "Resolved 2026-09-13 via GitHub git refs for tags v4, v3, and supabase/setup-cli v1.7.1 (v1 is a branch at the same commit as tag v1.7.1)."
+    "publishRunsOn": "ubuntu-24.04"
   },
   "pinDiagnosis": {
-    "nodeCompiler": "CI and root .nvmrc now pin Node 22.17.0 to match production Dockerfiles node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed. Cached cloud PATH command -v node is /exec-daemon/node v22.14.0 because /exec-daemon precedes nvm. nvm did not have 22.17.0 until this session installed it for acceptance; nvm use 22 still selects v22.22.2. Host binaries are not the production image pin. Acceptance tests used PATH=/home/ubuntu/.nvm/versions/node/v22.17.0/bin:$PATH. apps/web-master/.nvmrc remains major-only 22 and was outside allowed paths.",
-    "pnpm": "package.json packageManager now includes Corepack sha512 hex derived from npm dist.integrity sha512-uP71SUvT/ky9Ttq9B0XfLuW+PksLiwj6ZDqj5MZwLMwPANaPqKjJhYpzWgAySFpEmQ7SgQUmyHXkFvABsX3xKw==. Corepack 0.34.6 prepare of that spec succeeded. Frozen lockfile exists and was not modified.",
+    "nodeCompiler": "Admitted production/CI pin is Node 22.17.0 matching node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed. Cached cloud PATH command -v node is /exec-daemon/node v22.14.0. nvm default/cached 22.* is v22.22.2. This session installed nvm v22.17.0 for frozen install and acceptance. Host binaries are not the production image pin.",
+    "pnpm": "packageManager Corepack sha512 identity unchanged. Frozen lockfile unchanged.",
     "lockDefect": "none-observed-for-frozen-install; lockfile SHA-256 remains dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175",
-    "githubActionsCi": "ci.yml Fast/Full uses are commit-pinned with version comments. supabase/setup-cli had no moving v1 tag; pinned to tag v1.7.1 commit.",
-    "githubActionsPublish": "publish-server03-images.yml remains commit-pinned; not edited. Its docker/setup-buildx-action SHA 37fe6310… differs from current v3 tag 8d2750c6… used in ci.yml; both are immutable commits, not floating tags.",
-    "apkInDockerfiles": "unpinned apk add --no-cache libc6-compat (and git/ca-certificates on orchestrator) — remaining genuine gap, not a floating Action",
+    "apkInDockerfiles": "source-level name=version pins applied from Alpine v3.22 main APKINDEX for x86_64 and aarch64. Remaining genuine gap is owned APKINDEX/.apk snapshot, not an unversioned apk add line.",
     "didNotChangeLocks": true,
-    "didNotSilentlyUseUnpinnedPnpmAsProductionIdentity": true,
-    "didNotTreatHostToolchainAsProductionPin": true
+    "didNotSilentlyUseUnpinnedCompilerAsProductionIdentity": true,
+    "didNotTreatHostToolchainAsProductionPin": true,
+    "didNotChangeBaseImage": true
   },
   "cloudRuntime": {
     "python": "Python 3.12.3 (/usr/bin/python3)",
@@ -63,11 +52,11 @@
     "build": {
       "buildId": "bld-20260912-16700cc2-6013-4a49-b917-c2dd6554e9f8",
       "gitSetup": "reuse_then_checkout",
-      "note": "Cached checkout was origin/main 9eb995d7 / tree fa16550a. Admitted work used fetched origin/issue/544 at 9220b014 / tree 9c43e8a3 after verification."
+      "warmFork": "warm_fork",
+      "note": "Cached checkout HEAD was already cursor/linksites-alpine-package-pins-546-4d46 at fba2ed08 / tree 395d4dc, matching the supplied issue/546 identity. Local main 9eb995d was present and unused."
     },
     "frozenInstall": {
       "command": "PATH=/home/ubuntu/.nvm/versions/node/v22.17.0/bin:$PATH pnpm install --frozen-lockfile --prefer-offline",
-      "firstInstallNode": "corepack/pnpm 10.0.0 under nvm v22.22.2 because v22.17.0 was not cached; lock unchanged; then nvm install 22.17.0 for acceptance",
       "result": "pass",
       "lockfileUpToDate": true,
       "lockSha256Unchanged": "dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175",

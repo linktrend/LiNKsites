@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-owner-actions",
-  "admittedCommit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
-  "issue": 544,
+  "admittedCommit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  "issue": 546,
   "didNotPerformTheseActionsThisPacket": true,
   "contractReady": true,
   "archiveComplete": false,
@@ -11,23 +11,23 @@
   "actions": [
     {
       "owner": "LSSEC-01",
-      "action": "Create LiNKtrend-controlled read-only archive of every production lock-resolved npm artifact (including Next 16.3.3, React 19.1.0, Payload 3.87.1, TypeScript 5.7.3, Playwright 1.56.1, pg 8.16.3, sharp 0.35.4, turbo 2.10.5 and remaining production closure). Record licence, provenance, checksums, compatibility. Archive the Corepack-hashed pnpm 10.0.0 tarball. Do not treat pnpm-lock.yaml or packageManager as the archive. Supply verified receipts to the publication workflow instead of PLANNING_NOT_A_CONTINUITY_CLAIM."
+      "action": "Create LiNKtrend-controlled read-only archive of every production lock-resolved npm artifact and the Corepack-hashed pnpm 10.0.0 tarball. Do not treat pnpm-lock.yaml or packageManager as the archive. Supply verified receipts to the publication workflow instead of PLANNING_NOT_A_CONTINUITY_CLAIM."
     },
     {
       "owner": "LSDEP-01",
-      "action": "Archive digest-pinned production base images (node 22.17.0-alpine fc3e945f…, postgres 16.8-alpine 3b057e1c…). Pin or snapshot Alpine APK inputs. Keep apps/cms/docker-compose.yml floating tags non-production and out of release selection."
+      "action": "Archive digest-pinned production base images (node 22.17.0-alpine fc3e945f…, postgres 16.8-alpine 3b057e1c…). Remaining Alpine requirement: snapshot both architecture APKINDEX files plus the exact .apk blobs (named packages and transitive closure) because live v3.22 main indexes remain mutable and apk file hashes differ by architecture. Source Dockerfiles now version-pin libc6-compat=1.1.0-r4, git=2.49.1-r0 and ca-certificates=20260611-r0. Keep apps/cms/docker-compose.yml floating tags non-production."
     },
     {
       "owner": "LSTRUST-01",
-      "action": "Issue 544 replaced floating tags in .github/workflows/ci.yml with verified commit SHAs. Remaining: hosted Fast/Full on a Phase head after packager packaging. Other workflows outside this issue scope may still float."
+      "action": "Issue 544 commit-pinned ci.yml. Remaining: hosted Fast/Full on a Phase head after packager packaging."
     },
     {
       "owner": "LSART-01",
-      "action": "Build and publish five service images by digest from protected main; read back registry manifests; store exact bytes/manifests in the owned archive; bind SBOM/provenance. Publication still cannot claim OSS continuity without archive receipts. Images remain unpublished in this tree."
+      "action": "Build and publish five service images by digest from protected main; read back registry manifests; store exact bytes/manifests in the owned archive; bind SBOM/provenance. Publication still cannot claim OSS continuity without archive receipts. Images remain unpublished in this tree. This issue did not build or publish images."
     },
     {
       "owner": "LSOPS-01",
-      "action": "Name prior immutable OSS/image identities in rollback source so rollback is more than prose. The contract refuses absent rollback when a continuity claim is made."
+      "action": "Name prior immutable OSS/image identities in rollback source so rollback is more than prose."
     },
     {
       "owner": "LSVPS-01",
