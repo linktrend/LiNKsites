@@ -6,6 +6,8 @@
   "pass": false,
   "continuityComplete": false,
   "acceptanceCommandsPass": true,
+  "documentationCheckpoint": "0f9d38d5045a322f8912b06dff175ce7c6f75652",
+  "documentationTree": "65d4dc056bdbb7ab8ae988bc407fb4a539b200c7",
   "baseSha": "9910a026996f1011fb6af1959fce212ff766d72b",
   "checks": [
     {
@@ -23,8 +25,7 @@
     {
       "id": "diff-check",
       "command": "git diff --check 9910a026996f1011fb6af1959fce212ff766d72b...HEAD",
-      "result": "pending-until-commit",
-      "workingTreeCheck": "pass"
+      "result": "pass",
     },
     {
       "id": "changed-path-secret-scan",
