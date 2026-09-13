@@ -3,13 +3,14 @@
   "kind": "lsg0-03-checksums",
   "algorithm": "SHA-256",
   "files": {
-    "docs/evidence/end-to-end-delivery/lsg0-03/CHECKS.json": "dee89b931d51e9ba5a4b0c9aa3d08d75dd11e2f125dd32e17835de623335436d",
+    "docs/evidence/end-to-end-delivery/lsg0-03/CHECKS.json": "3f1076751df9d58ad20802da81e9a4a41f5d4bbf520456485088e405e318afdc",
+    "docs/evidence/end-to-end-delivery/lsg0-03/CONSUMER-RECEIPT.json": "e361a8581b4332d8121c921500056c9ae01083226c43640324d17053b61f8d7d",
     "docs/evidence/end-to-end-delivery/lsg0-03/IDENTITY.json": "2eef33c2c44c524b7f4e3794c62aeb717bccbd9defbfed6d7b1714ec6eca7284",
     "docs/evidence/end-to-end-delivery/lsg0-03/LEAN-REVIEW.json": "be5e5d6ab72be4a924dc2f31442bdbc0afd52e6c4acdc99e648e79efe5926e3f",
     "docs/evidence/end-to-end-delivery/lsg0-03/PROTECTED-LIBRARY-FACTS.json": "c43b743290f4f39ffa0a30a4ece04c55e6a38a801c540d5ae8587faaac1d2cbc",
     "docs/evidence/end-to-end-delivery/lsg0-03/QUALIFICATION.json": "c4d0a6f65c667191d7f6c42b6113cb1be574f113e7f82cdcc7693b52fa3fbffe",
     "docs/evidence/end-to-end-delivery/lsg0-03/QUALIFICATION.md": "eed990b0afe24db019630e2ac04032458a5f10141ef3f918bf2699e227e27e60",
-    "docs/evidence/end-to-end-delivery/lsg0-03/README.md": "76c33f35cce6eaeae0f02399bff28b39778dcbd1aab3d1b4fc16640bcee0e2ba",
+    "docs/evidence/end-to-end-delivery/lsg0-03/README.md": "b00ed0631e641740ea76d83b89f07c9d0239f021d80e317474fe8c0f206e189b",
     "docs/evidence/end-to-end-delivery/lsg0-03/REQUIRED-OUTPUTS.json": "504c8d9091899e843a4eb8cd5d4e507b5f4a1f45a8c83b5c9ff83ec18f1f05e4",
     "docs/evidence/end-to-end-delivery/lsg0-03/TOOLCHAIN.json": "3cbc44a6364891b4dc39d8eda5d3de26f30b920d11d0dd90449425d160df1352"
   }

@@ -4,6 +4,8 @@
   "packet": "LSG0-03",
   "issue": 549,
   "baseSha": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  "implementationCommit": "962104ea031ff3fbd412f977fdf031c255b6a18b",
+  "implementationTree": "bf70d00764d2106a19d44282b9a9fee3290fac9e",
   "overall": "HOLD",
   "lsg003Pass": false,
   "acceptancePass": true,
@@ -31,12 +33,20 @@
     {
       "id": "git-diff-check",
       "command": "git diff --check fba2ed08d5cf3a16ca691da6eec707d584153a7f...HEAD",
-      "result": "pending-until-commit"
+      "result": "pass"
     },
     {
       "id": "changed-path-secret-scan",
+      "command": "python3 scripts/gitops/secret_scan.py scan_repository(paths=git diff --name-only fba2ed08...HEAD)",
+      "result": "pass",
+      "findingCount": 0,
+      "blocking": 0
+    },
+    {
+      "id": "full-repo-secret-scan",
       "command": "python3 scripts/gitops/secret_scan.py",
-      "result": "pending-until-commit"
+      "result": "pre-existing-stale-fixture-declarations",
+      "note": "Full-tree scan fails on stale fixture candidateTree bindings outside this packet. Change-scoped scan of the 26 Issue 549 paths found 0 findings."
     }
   ]
 }

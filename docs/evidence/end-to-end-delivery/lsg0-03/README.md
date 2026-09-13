@@ -11,3 +11,4 @@ Consumer proof for packet LSG0-03 against protected LiNKlibraries `0704dbef08712
 - [LEAN-REVIEW.json](LEAN-REVIEW.json)
 - [CHECKS.json](CHECKS.json)
 - [CHECKSUMS.json](CHECKSUMS.json)
+- [CONSUMER-RECEIPT.json](CONSUMER-RECEIPT.json) — consumer proof bound to implementation commit `962104ea031ff3fbd412f977fdf031c255b6a18b` (also written out-of-tree at `/tmp/linksites-issue-549-consumer-receipt.json`)
