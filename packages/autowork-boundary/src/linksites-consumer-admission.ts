@@ -43,7 +43,9 @@ const isRfc1918Ipv4 = (host: string): boolean => {
   if (!match) return false
   const octets = match.slice(1).map(Number)
   if (octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) return false
-  const [a, b] = octets
+  const a = octets[0]
+  const b = octets[1]
+  if (a === undefined || b === undefined) return false
   return a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168)
 }
 
