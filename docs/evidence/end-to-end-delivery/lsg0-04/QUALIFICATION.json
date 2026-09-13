@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "kind": "LSG0-04-protected-handoff-qualification",
+  "packet": "LSG0-04",
+  "issue": 550,
+  "title": "Refresh protected Platform and LiNKautowork consumer handoffs",
+  "qualificationTimeUtc": "2026-09-13T07:18:59Z",
+  "overall": "HOLD",
+  "pass": false,
+  "passRule": "PASS only if every accepted handoff requirement exists in protected/released evidence on the bound identities. Source contracts, fixtures, placeholders, development-only schema, merged Phase documentation, unit tests, Full Suite source receipts, and PACI verifier source do not prove live handoff. Unavailable live evidence is HOLD, not guessed PASS.",
+  "leanIndependentReviewer": "not-required-issue-checkpoint-lsrev-01-later-if-named-risk-on-consolidated-candidate",
+  "requirementSources": [
+    "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md LSG0-04",
+    "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md FR-08 and full-operation item 21",
+    "docs/evidence/end-to-end-delivery/HOLDS.json LSG0-04-platform and LSG0-04-autowork",
+    "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json"
+  ],
+  "authorityUsedThisRefresh": [
+    "admitted LiNKsites commit fba2ed08d5cf3a16ca691da6eec707d584153a7f tree 395d4dc07780ffee977be7f5d6469b06189f1475",
+    "bound LiNKplatform development 91388934b226a61cfa7be0fe5e271846ee55206f tree b11ea485a3b3f69c32baac5eed62a180fca79ae3",
+    "bound LiNKautowork development d5c626ba7e1bdbf783dc8df1654e33e0b70b873c tree 9018eec98a9bafefe3a638b25fb191ee454917a9",
+    "GitHub git/trees blob verification for copied files",
+    "GitHub Actions Full Suite artifact 10312688155 receiptDigest sha256:9d576f1e567bebf0664a0a6a90086536754684df47ae4e59f4462c1828df3eb8",
+    "transition receipt sha256:617a3f8581c9da9e933fc6c62860b31f37ea7b7f0af6b062e3b4e54a8a8ff25a not retrievable"
+  ],
+  "classifications": {
+    "completed": [],
+    "doneButRequiresTestingOrFixing": [
+      "platform-migration-receipt",
+      "platform-credential-reference",
+      "autowork-contract",
+      "autowork-consumer-registration",
+      "autowork-signing-reference"
+    ],
+    "missingAndNeedsWork": [
+      "platform-catalogue-pin",
+      "platform-claim",
+      "platform-service",
+      "platform-registration",
+      "platform-issuer",
+      "platform-audience",
+      "platform-scope",
+      "platform-live-health",
+      "platform-transition-receipt",
+      "autowork-event-grant",
+      "autowork-org-environment-grant",
+      "autowork-private-endpoint",
+      "autowork-health",
+      "autowork-live-receipt"
+    ]
+  },
+  "allowedNow": {
+    "sanitizedSourceContracts": "docs/end-to-end-delivery/upstreams/linkplatform/91388934b226a61cfa7be0fe5e271846ee55206f/ and linkautowork/d5c626ba7e1bdbf783dc8df1654e33e0b70b873c/",
+    "manualFileFirstSiteAdapter": true,
+    "signedGatewayAndFailClosedConsumerTests": true,
+    "livePlatformOrAutoworkClaims": false
+  },
+  "liveRefreshFinding": {
+    "boundIdentitiesAreProtectedDevelopment": true,
+    "sourceFullReceiptVerifiedOnMatchingGitTree": true,
+    "transitionReceiptBytesUnavailable": true,
+    "newLiveRegistrationGrantEndpointOrHealthEvidenceAvailableToThisWorker": false,
+    "didNotGuessLiveState": true,
+    "didNotProbePrivateEndpoints": true,
+    "didNotClaimStagingProductionServer01Server03DatabaseApplyOrCredentialAccess": true
+  }
+}

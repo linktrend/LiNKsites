@@ -1,8 +1,8 @@
 # Delivery Phase 2 — VPS Deployment and One-Website Pilot Packet
 
 **Status:** Planned — separately authorized only after Delivery Phase 1 PASS. Server03 operational acceptance uses the currently admitted `marketing-smb-v1` provider with real intake and private rendering; the unfinished replacement template is deferred. The one-website pilot must inject one release-manifest-bound selectable LiNKlibraries commit plus its catalog and entry byte checksums into the orchestrator runtime contract; it must not substitute a branch name or a second ref.
-**Executor:** Terra master coordinating narrowly scoped Luna High operators/implementers
-**Independent audit:** Codex Sol Medium at deployment readiness and final pilot evidence
+**Executor:** Cursor REST/API SDK with Grok 4.6 Medium and Fast false for every implementation, repair and live operational change agent
+**Independent review:** exactly one, at LSREV-01 of the exact consolidated source candidate; this packet does not dispatch a second live operational auditor
 **Live-change warning:** This packet mutates VPS services, databases, secrets, routing, and private hosting. It must not begin under Phase 1 approval.
 
 ## Objective
@@ -15,7 +15,7 @@ This pilot excludes payment, sales, public customer launch, customer-domain acti
 
 Do not proceed unless all are true:
 
-1. Phase 1 exact SHA and image/artifact digests have a final independent `PASS`. Use the existing admitted provider for the pilot; an unfinished replacement does not block setup or operational acceptance.
+1. Phase 1 exact SHA and image/artifact digests have LSREV-01 `PASS` on that exact source candidate. Use the existing admitted provider for the pilot; an unfinished replacement does not block setup or operational acceptance.
 2. The repository and release worktrees are clean and the exact commits are pushed/available.
 3. The Principal explicitly authorizes this Phase 2 packet and names the target VPS/environment.
 4. Target inventory, access method, maintenance window, change owner, and rollback decision-maker are recorded.
@@ -128,9 +128,9 @@ Use one Principal-approved `LeadResearchPackage` supplied through the manual ada
 
 **Gate:** every final success condition below passes. A visible homepage alone is not completion.
 
-### P2-08 — Independent final audit and handoff
+### P2-08 — Deterministic final operational acceptance and handoff
 
-Freeze the deployed artifact/SHA/configuration-version evidence and dispatch a fresh Sol Medium auditor in read-only mode. The auditor validates the running private site, completion/evidence chain, service health, privacy boundaries, backups, and exact deployed artifacts. Any `HOLD` finding enters a Luna correction under the smallest required authority and must be re-audited.
+Freeze the deployed artifact/SHA/configuration-version evidence. Prove the running private site with deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback evidence. Do not dispatch a second independent live reviewer. Any `HOLD` finding enters a Grok 4.6 Medium (Fast false) correction under the smallest required authority and is re-proven with the same deterministic commands; it is not re-audited by another independent reviewer.
 
 After PASS, produce the founder handoff: what is live, how to access the private site, exact test result, known limitations, operational owners, monitoring/backup status, and which capabilities remain untested/out of scope.
 
@@ -138,7 +138,7 @@ After PASS, produce the founder handoff: what is live, how to access the private
 
 Phase 2 passes only when all of the following are evidenced:
 
-- audited exact artifacts are running on the named VPS;
+- exact SHA/digest-bound artifacts are running on the named VPS;
 - service/data/proxy/TLS/private-access configuration is healthy and reproducible;
 - one canonical manual lead package was pulled and processed by the real Program without bypass;
 - one complete private Home Services / Standard website is served by `web-master` from published Payload content;
@@ -148,7 +148,7 @@ Phase 2 passes only when all of the following are evidenced:
 - duplicate/restart behavior causes no duplicate logical side effects;
 - privacy, noindex, tenancy, content, functional, visual, responsive, accessibility, SEO, performance, and security gates pass;
 - monitoring, backup/restore, rollback, and runbooks are proven on the deployed environment;
-- final Sol Medium verdict is `PASS`;
+- deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback evidence is `PASS`;
 - payment, public launch/domain cutover, and post-sales were neither executed nor claimed.
 
 ## Stop/rollback conditions
@@ -164,5 +164,5 @@ Stop new work and follow the approved rollback/restore procedure on data integri
 - redacted Program/Ledger/content/promotion/publication/deployment/completion trace
 - website screenshots and quality reports
 - monitoring snapshot and post-test backup proof
-- audit findings/corrections/final PASS
+- deterministic operational proofs, corrections and final PASS
 - exclusions and unresolved non-pilot work
