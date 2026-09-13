@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-identity",
-  "issue": 542,
+  "issue": 544,
   "cloudRun": {
-    "url": "https://cursor.com/agents/bc-02db8582-0e2b-4061-83f1-4e4d7e5b66df",
-    "bcId": "bc-02db8582-0e2b-4061-83f1-4e4d7e5b66df",
-    "advertisedCloudBranch": "cursor/linksites-oss-archive-contract-542-295b",
+    "url": "https://cursor.com/agents/bc-9808842b-466d-474c-b853-b766694e66ae",
+    "bcId": "bc-9808842b-466d-474c-b853-b766694e66ae",
+    "advertisedCloudBranch": "cursor/linksites-immutable-toolchain-544-f16e",
     "writerUsedOwnedIssueBranch": true,
     "didNotCreateImplementerPr": true
   },
@@ -13,38 +13,38 @@
     "note": "Cursor cached checkout before fetch/checkout. Reported separately from admitted starting-work identity.",
     "repository": "linktrend/LiNKsites",
     "originHost": "https://github.com/linktrend/LiNKsites",
-    "branch": "cursor/linksites-oss-archive-contract-542-295b",
-    "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
-    "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0",
+    "branch": "main",
+    "commit": "9eb995d7c151aab6aafabd66e91893084e1acdb2",
+    "tree": "fa16550a8d1981a37113c4ba356cbb0ff0a369f8",
     "dirty": false,
-    "tracking": "none-reported-on-cached-cursor-branch"
+    "tracking": "origin/main"
   },
   "suppliedInput": {
     "repos": [
       {
         "url": "https://github.com/linktrend/LiNKsites",
-        "startingRef": "issue/542-implement-reproducible-oss-archive-manifest-and"
+        "startingRef": "issue/544-pin-release-build-toolchain-and-actions-immutabl"
       }
     ],
     "primary": {
       "repository": "linktrend/LiNKsites",
-      "ref": "issue/542-implement-reproducible-oss-archive-manifest-and",
-      "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
-      "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0"
+      "ref": "issue/544-pin-release-build-toolchain-and-actions-immutabl",
+      "commit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
+      "tree": "9c43e8a3c3ceb824ad9d8cbc7904335595b5520e"
     },
     "readOnlySources": []
   },
   "fetchedThenVerified": {
-    "fetchedRef": "origin/issue/542-implement-reproducible-oss-archive-manifest-and",
-    "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
-    "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0",
+    "fetchedRef": "FETCH_HEAD after git fetch --no-tags origin issue/544-pin-release-build-toolchain-and-actions-immutabl",
+    "commit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
+    "tree": "9c43e8a3c3ceb824ad9d8cbc7904335595b5520e",
     "matchesSuppliedInput": true
   },
   "admittedStartingWorkIdentity": {
     "repository": "linktrend/LiNKsites",
-    "ref": "issue/542-implement-reproducible-oss-archive-manifest-and",
-    "commit": "9910a026996f1011fb6af1959fce212ff766d72b",
-    "tree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0",
+    "ref": "issue/544-pin-release-build-toolchain-and-actions-immutabl",
+    "commit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
+    "tree": "9c43e8a3c3ceb824ad9d8cbc7904335595b5520e",
     "checkout": "existing owned issue branch",
     "dirty": false,
     "role": "implementation-writer-allowed-paths-only",

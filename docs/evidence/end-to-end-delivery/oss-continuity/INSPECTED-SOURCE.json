@@ -1,18 +1,22 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-inspected-source",
-  "admittedCommit": "9910a026996f1011fb6af1959fce212ff766d72b",
-  "admittedTree": "c08ab7eb0a52cdaa3fcb878b511e8f1baa42b1f0",
+  "admittedCommit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
+  "admittedTree": "9c43e8a3c3ceb824ad9d8cbc7904335595b5520e",
   "algorithm": "sha256",
   "files": {
-    "package.json": "fff6f7e126b2365465e54a9aa2ce5c1f3c0f537c0092d4293cdb9b0c166a2484",
+    "package.json": "9c0617e873cf1f78add85efbe079688995a5c4680e26f591598c228f8b849ddf",
     "pnpm-lock.yaml": "dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175",
-    "deploy/docker/cms.Dockerfile": "eaaa6ca5469f94139082f6de1fd54eddcac33f83df746eff8ec582de9c7f79fc",
-    "deploy/docker/web-master.Dockerfile": "e9d543e1050d47b1cbb9c5960d6dff824dd2a7cf163e5ea2fa25dffd8cd651f4",
+    ".nvmrc": "157c2eb0de1187ac028e89bcff580f1feab7eea2a280b110998c9472e19b4d98",
+    ".github/workflows/ci.yml": "f75deb3efb9372d6b3f45cec9a3cfa173f5b1f44a76da134a7c5b5adf96ec620",
+    ".github/workflows/publish-server03-images.yml": "05e6d47c38740704b6a289cdd9209dfa5535b3ac8ceaac79c703068c05d933e7",
+    "deploy/docker/cms.Dockerfile": "e097f0109f7f8361fb1c7d848f98d2b0d99ccae860a09413100d908716be838a",
+    "deploy/docker/web-master.Dockerfile": "bc849c957a69a6b342f1676b45f62f239a938624e784b39817ad048407d9aa67",
     "deploy/docker/migrations.Dockerfile": "92ec9b901e745b168567ce42bc0cd4c954217c84d6159c8fce693bf366f9edbb",
-    "deploy/docker/autowork-worker.Dockerfile": "7c07d46e20d79ba201a0f16311c13d8751b8fdda5b27dfb19934697c0b79004b",
-    "deploy/docker/program-orchestrator.Dockerfile": "a091cce1c3e3b7a35630e1615611dda69a5f74cbe567ef934af40ee9578911d7",
-    ".github/workflows/publish-server03-images.yml": "05e6d47c38740704b6a289cdd9209dfa5535b3ac8ceaac79c703068c05d933e7"
+    "deploy/docker/autowork-worker.Dockerfile": "a785ea9caff0b28c9431b4a625ce5b9ec1b9081f4706aa50901b510fb42338b8",
+    "deploy/docker/program-orchestrator.Dockerfile": "4bd4a0950936585927dc7d2cfd17e551851970a23e1c600e1a3ecf8231d42cbe",
+    "apps/cms/Dockerfile": "54000d8d9138eef4053af01f7d14f4f3095e458f3b0aa184519e5428b7a8b6ce",
+    "deploy/tests/release-toolchain-pins.test.mjs": "5dfa1785d7673ff8cb6655c8372010374f761a15d21b39e13e3838c927c1d3e2"
   },
   "resolvedLockIdentities": {
     "next@16.3.3": "sha512-tuRTx1nQ/yVw83cwJBo9F+njGUgMn3UHQycreWHB8XsStvvAh1AthbI8/4IpKnFaF58F+iSiHejYOlMQ/eq83g==",
@@ -28,6 +32,8 @@
     "node:22.17.0-alpine": "sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed",
     "postgres:16.8-alpine": "sha256:3b057e1c2c6dfee60a30950096f3fab33be141dbb0fdd7af3d477083de94166c"
   },
+  "packageManagerField": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
+  "packageManagerHashSource": "npm registry metadata dist.integrity for pnpm@10.0.0 converted to Corepack sha512.<hex>; tarball was not downloaded by this packet to invent a checksum",
   "didNotDownloadThoseArtifacts": true,
   "didNotTreatLockOrDigestPinAsArchive": true
 }

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "oss-continuity-index",
   "directory": "docs/evidence/end-to-end-delivery/oss-continuity/",
-  "issue": 542,
+  "issue": 544,
   "files": [
     "IDENTITY.json",
     "INSPECTED-SOURCE.json",

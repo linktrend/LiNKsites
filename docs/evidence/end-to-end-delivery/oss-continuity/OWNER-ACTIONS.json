@@ -1,16 +1,17 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-owner-actions",
-  "admittedCommit": "9910a026996f1011fb6af1959fce212ff766d72b",
-  "issue": 542,
+  "admittedCommit": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
+  "issue": 544,
   "didNotPerformTheseActionsThisPacket": true,
   "contractReady": true,
   "archiveComplete": false,
   "fiveImageReleaseComplete": false,
+  "sourcePinsClosedThisIssue": true,
   "actions": [
     {
       "owner": "LSSEC-01",
-      "action": "Create LiNKtrend-controlled read-only archive of every production lock-resolved npm artifact (including Next 16.3.3, React 19.1.0, Payload 3.87.1, TypeScript 5.7.3, Playwright 1.56.1, pg 8.16.3, sharp 0.35.4, turbo 2.10.5 and remaining production closure). Record licence, provenance, checksums, compatibility. Hash-lock or archive pnpm 10.0.0. Do not treat pnpm-lock.yaml as the archive. Supply verified receipts to the publication workflow instead of PLANNING_NOT_A_CONTINUITY_CLAIM."
+      "action": "Create LiNKtrend-controlled read-only archive of every production lock-resolved npm artifact (including Next 16.3.3, React 19.1.0, Payload 3.87.1, TypeScript 5.7.3, Playwright 1.56.1, pg 8.16.3, sharp 0.35.4, turbo 2.10.5 and remaining production closure). Record licence, provenance, checksums, compatibility. Archive the Corepack-hashed pnpm 10.0.0 tarball. Do not treat pnpm-lock.yaml or packageManager as the archive. Supply verified receipts to the publication workflow instead of PLANNING_NOT_A_CONTINUITY_CLAIM."
     },
     {
       "owner": "LSDEP-01",
@@ -18,11 +19,11 @@
     },
     {
       "owner": "LSTRUST-01",
-      "action": "On the next allowed ci.yml edit, replace floating GitHub Action tags with immutable SHAs. Issue 542 did not edit ci.yml."
+      "action": "Issue 544 replaced floating tags in .github/workflows/ci.yml with verified commit SHAs. Remaining: hosted Fast/Full on a Phase head after packager packaging. Other workflows outside this issue scope may still float."
     },
     {
       "owner": "LSART-01",
-      "action": "Build and publish five service images by digest from protected main; read back registry manifests; store exact bytes/manifests in the owned archive; bind SBOM/provenance. Issue 542 added generate/verify gates so publication cannot claim OSS continuity without those receipts. Images remain unpublished in this tree."
+      "action": "Build and publish five service images by digest from protected main; read back registry manifests; store exact bytes/manifests in the owned archive; bind SBOM/provenance. Publication still cannot claim OSS continuity without archive receipts. Images remain unpublished in this tree."
     },
     {
       "owner": "LSOPS-01",

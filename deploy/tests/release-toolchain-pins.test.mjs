@@ -70,7 +70,12 @@ test('production Dockerfiles remain digest-pinned and Corepack uses the integrit
     const text = await readFile(resolve(root, rel), 'utf8')
     const images = parsePinnedFromLines(text)
     assert.ok(images.length > 0, `${rel} has no digest-pinned FROM`)
-    const unpinnedFrom = [...text.matchAll(/^FROM\s+(\S+)/gm)].map((row) => row[1]).filter((ref) => !/@sha256:[a-f0-9]{64}/.test(ref))
+    const stageNames = new Set(
+      [...text.matchAll(/^FROM\s+\S+\s+AS\s+(\S+)/gim)].map((row) => row[1]),
+    )
+    const unpinnedFrom = [...text.matchAll(/^FROM\s+(\S+)/gm)]
+      .map((row) => row[1])
+      .filter((ref) => !stageNames.has(ref) && !/@sha256:[a-f0-9]{64}/.test(ref))
     assert.deepEqual(unpinnedFrom, [], `${rel} unpinned FROM: ${unpinnedFrom.join(', ')}`)
     if (rel !== 'deploy/docker/migrations.Dockerfile') {
       assert.ok(text.includes(expectedPrepare), `${rel} must prepare the hashed pnpm identity`)

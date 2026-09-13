@@ -1,45 +1,38 @@
 {
   "schemaVersion": 1,
   "kind": "oss-continuity-validation",
-  "issue": 542,
+  "issue": 544,
   "overall": "HOLD",
   "pass": false,
   "continuityComplete": false,
   "acceptanceCommandsPass": true,
-  "documentationCheckpoint": "0f9d38d5045a322f8912b06dff175ce7c6f75652",
-  "documentationTree": "65d4dc056bdbb7ab8ae988bc407fb4a539b200c7",
-  "baseSha": "9910a026996f1011fb6af1959fce212ff766d72b",
+  "baseSha": "9220b01458a293663ecca7a110410b3b7c8ac9f4",
+  "implementationCommit": "a4fc7dd4d780009e0eec6ac1927ecee5937354e7",
   "checks": [
+    {
+      "id": "release-toolchain-pins-tests",
+      "command": "node --test deploy/tests/release-toolchain-pins.test.mjs",
+      "result": "pass",
+      "nodeWithNvmPath": "v22.17.0",
+      "repair": "First run failed because FROM base stage aliases were treated as unpinned images. Test now excludes named build stages. Bounded one-cycle correction, not a repeat of the unchanged attempt."
+    },
     {
       "id": "oss-continuity-manifest-tests",
       "command": "node --test deploy/tests/oss-continuity-manifest.test.mjs",
       "result": "pass",
-      "nodeWithNvmPath": "v22.22.2",
-      "nodeDefaultPath": "/exec-daemon/node v22.14.0 also pass"
-    },
-    {
-      "id": "json-tool-oss-continuity",
-      "command": "find docs/evidence/end-to-end-delivery/oss-continuity deploy/oss-continuity/fixtures -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
-      "result": "pass"
+      "nodeWithNvmPath": "v22.17.0"
     },
     {
       "id": "diff-check",
-      "command": "git diff --check 9910a026996f1011fb6af1959fce212ff766d72b...HEAD",
-      "result": "pass",
+      "command": "git diff --check 9220b01458a293663ecca7a110410b3b7c8ac9f4...HEAD",
+      "result": "pass"
     },
     {
       "id": "changed-path-secret-scan",
       "tool": "rg",
       "result": "pass",
       "matches": 0,
-      "note": "Scanned allowed/changed OSS-continuity paths. Full-repo secret_scan.py reported pre-existing stale fixture declarations plus one unrelated high-entropy finding in apps/cms/tests/contracts/autowork-composition.spec.ts, outside this issue scope."
-    },
-    {
-      "id": "workflow-static",
-      "result": "pass",
-      "provenanceModeMaxCount": 5,
-      "sbomTrueCount": 5,
-      "note": "PyYAML 1.1 treats GitHub `on:` as boolean; static string checks used instead of yaml.safe_load of the whole document."
+      "note": "Scanned git diff names from 9220b014...HEAD. Did not treat full-repo secret_scan.py pre-existing findings as this issue."
     },
     {
       "id": "frozen-lockfile-install",
