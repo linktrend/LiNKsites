@@ -4,9 +4,9 @@
   "bound": true,
   "gateId": "EXT-LS-01",
   "path": ".git/linktrend-evidence/ext-ls-01-issue547/consumer-proof-receipt.json",
-  "sha256": "93b3e0f40134feffb8057def2f30155d916643486516ed40cbdcfe2bbb56fea3",
-  "consumerCommit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
-  "consumerTree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+  "sha256": "03e6006e533afdc77a4ed7e83b10259cc8d5d9da896833106cf322ef9c46f5ed",
+  "consumerCommit": "f973999c8a16d2dcadb4b2e506da6392f5571cae",
+  "consumerTree": "34a6937eeaceaa5a4b66c6c77c27551d1337548d",
   "bytesEmbedded": false,
   "acceptedBinding": true
 }
