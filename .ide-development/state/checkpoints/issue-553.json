@@ -23,6 +23,9 @@
     "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
     "25033a0cb6979c06aeedea5b9d94090e15372e14"
   ],
+  "headSha": "b14fd05d29cbe1af4ac9c6fec190bb910f1dd75d",
+  "gitTree": "2a65310d300d4c395785c2703e3f913018daff43",
+  "metadataCommitNote": "Branch tip after this file is a checkpoint-metadata commit; evidence bytes remain b14fd05d29cbe1af4ac9c6fec190bb910f1dd75d / 2a65310d300d4c395785c2703e3f913018daff43 plus this retarget.",
   "readOnlyProvider": {
     "repository": "linktrend/LiNKlibraries",
     "ref": "development",
