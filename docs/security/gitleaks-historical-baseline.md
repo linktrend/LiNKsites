@@ -42,3 +42,8 @@ The CI gate continues to scan every commit introduced by a pull request or
 push. New findings fail closed unless they are separately investigated and
 added as an exact fingerprint or an equally tight documented string regex
 through a reviewed change.
+
+The first Issue 556 repair commit `f232d3819f940576388999b1c750876ed721ab52`
+is also fingerprinted: it temporarily inlined a higher-entropy review-route
+placeholder and quoted the historical Autowork example assignment. The
+follow-up commit removes those strings from the current tree.
