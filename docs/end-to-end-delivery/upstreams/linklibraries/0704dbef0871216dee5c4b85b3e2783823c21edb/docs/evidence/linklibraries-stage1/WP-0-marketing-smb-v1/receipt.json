@@ -1,0 +1,60 @@
+{
+  "receiptVersion": 5,
+  "packet": "LSG0-03-marketing-smb-v1-qualify-admit-publish",
+  "entryId": "marketing-smb-v1",
+  "baseSha": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
+  "baseTree": "d3c5f1e2a3450b016084ae09666ac193297ac9fc",
+  "candidateSha": "4f1aed3e4e6b630a6249eb33ab7e88e2bc3e978b",
+  "candidateTree": "b1966bfa8d6b333ad687474e63651bb9b3a8baac",
+  "branch": "issue/432-qualify-admit-and-publish-selectable-marketing-s",
+  "localProofs": {
+    "structural": "pass",
+    "schema": "pass",
+    "provenance": "pass",
+    "asset": "pass",
+    "secretScan": "pass",
+    "deterministicCatalogue": "pass"
+  },
+  "evidenceGaps": [
+    "LiNKsites renderer compatibility is unproven and out of scope",
+    "Payload CMS compatibility is unproven and out of scope",
+    "consumer integration, provider live state, deployment, and production publication are not claimed"
+  ],
+  "entry": {
+    "path": "entries/marketing-smb-v1",
+    "files": {
+      "README.md": "040d76fc928d843fbe6ba57a5f7aeafde557d8dc468c71d905d746724b8183f0",
+      "assets/marketing-smb-v1.template.json": "3905706daba65269bd927da42eeb39bcfa777a2973f2f1072852804e156fae42",
+      "assets/brand-placeholder.svg": "2ccb51329af51c498418e0b096973870d9150beed44717f08db8938c0f7d5552",
+      "assets/asset-inventory.json": "f84ae8a8e9c290420858e60d08261a3f7ca0c25d89573579e052a4e72142e895",
+      "assets/hero-illustration.svg": "49d79ca0d4eaebdd1051fb5865b029721c7cb0a3bf1495a7b8ae28dd3f0fe457",
+      "assets/video-placeholder.svg": "3ffa202bd8310e00fa9e7f3ab3aacd56e7e8342dca7b1e37bf129be31a6ca213",
+      "assets/case-study-placeholder.svg": "bc977c9ba047cf1c4d8aefee4e4917ee1a294c21e95369a886c5243472654961",
+      "assets/testimonial-placeholder.svg": "d3f3455af1ffd662b816dba12fab95f69f72286c835d3f3e348af0541bde39b2",
+      "content/content.schema.json": "b6d809f845f8bd5c0fecfd3815209ecb6d7afb325c034bdd468197ac6088c0dd",
+      "content/baseline-copy.json": "a42c47b598e66e34765067373a69336dcfee1d78eceb2b4ac1ec0b7400b0b132",
+      "design/tokens.json": "ea0415a8c9478ef8d9e829247800f3ed56c2602a0fb12cd6287b7fd8c0a8120a",
+      "src/index.mjs": "5c8530b48deea20c6db282489062d9a4bdff0d55a4b74831d80e13abe0954013",
+      "tests/marketing-smb-v1.test.mjs": "c4740a837a64f81b94fe7b7b3ed3953811a9f4be5b7fd84e5621ea482d6847c0",
+      "entry.json": "bf7efdbe2cc281bbfb193aab4554a660648da5c2c4baeb40f078d7ad110bb9b7"
+    },
+    "gitTreeObjectSha1": "d146699d8d03d6f4821fe7aa57d449678c3ea170"
+  },
+  "catalog": {
+    "path": "indexes/catalog.json",
+    "sha256": "d8e9b6d7616d98f08890bb5db08a1c0aad93775c54f7eac880380285ff1ba23e",
+    "entryRecord": {
+      "entryId": "marketing-smb-v1",
+      "kind": "template",
+      "state": "usable",
+      "selectable": true,
+      "path": "entries/marketing-smb-v1"
+    }
+  },
+  "binding": {
+    "treeObjectAlgorithm": "git SHA-1 tree object; this is not SHA-256",
+    "contentDigestAlgorithm": "SHA-256 for every named file and catalog",
+    "verification": "git ls-tree <commit> entries/marketing-smb-v1; sha256sum <named-file>; git show <commit>:indexes/catalog.json",
+    "note": "Library-local selectable admission only. Does not prove LiNKsites, Payload, consumer, live, deployment, or production proof."
+  }
+}

@@ -73,6 +73,9 @@ jobs:
               raise SystemExit("receipt_gate_transition_digest_invalid")
           if transition.get("receiptDigest") != transition_digest:
               raise SystemExit("receipt_gate_transition_digest_mismatch")
+          protected_base = str(transition.get("protectedBaseCommit") or "").strip()
+          if not re.fullmatch(r"[0-9a-f]{40}", protected_base):
+              raise SystemExit("receipt_gate_protected_base_missing")
           with open("promotion-marker.json", "w", encoding="utf-8") as handle:
               json.dump(marker, handle)
           with open("transition-receipt.json", "w", encoding="utf-8") as handle:
@@ -128,14 +131,22 @@ jobs:
       - name: Verify receipt identity and branch policy result
         env:
           RECEIPT_RUN_ID: ${{ steps.receipt.outputs.run_id }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          SOURCE_PR: ${{ steps.receipt.outputs.source_pr }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           candidate_dir="$(cat candidate-dir.txt)"
           source_head="$(jq -r .sourceIdentity.headCommit transition-receipt.json)"
+          test -n "${BASE_SHA}" || { echo "receipt_gate_base_missing"; exit 1; }
+          git fetch --no-tags origin "${BASE_SHA}"
+          base_tree="$(git rev-parse "${BASE_SHA}^{tree}")"
+          candidate_tree="$(git -C "${candidate_dir}" rev-parse HEAD^{tree}")"
           python3 scripts/gitops/validate_reusable_full_run.py \
             --run-json full-run.json --source-pr-json source-pr.json \
             --repo "${GITHUB_REPOSITORY}" --head "${source_head}" \
-            --source-pr "${{ steps.receipt.outputs.source_pr }}"
+            --source-pr "${SOURCE_PR}"
           python3 "$GITHUB_WORKSPACE/scripts/gitops/gate_receipt.py" verify \
             --receipt receipt-artifact/full-suite-receipt.json \
             --repo "${candidate_dir}" \
@@ -145,6 +156,8 @@ jobs:
             --workflow-head-commit "${source_head}" \
             --source-branch development \
             --transition-receipt transition-receipt.json \
+            --expected-base-commit "${BASE_SHA}" \
+            --expected-base-tree "${base_tree}" \
             --gate full-gate
           receipt_digest="$(python3 - <<'PY'
           import json
@@ -154,4 +167,33 @@ jobs:
           PY
           )"
           test "${receipt_digest}" = "${{ steps.receipt.outputs.receipt_digest }}" || { echo "receipt_gate_digest_mismatch"; exit 1; }
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}/reviews" > source-reviews.json
+          gh api "repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs?per_page=100" > observed-checks.json
+          gh api "search/issues?q=repo:${GITHUB_REPOSITORY}+is:pr+is:merged+${receipt_digest}" > consumed-search.json
+          python3 "$GITHUB_WORKSPACE/scripts/gitops/promotion_receipt_gate.py" write-live-facts \
+            --repository "${GITHUB_REPOSITORY}" \
+            --transition development-to-staging \
+            --protected-base-commit "${BASE_SHA}" \
+            --protected-base-tree "${base_tree}" \
+            --candidate-head-commit "${HEAD_SHA}" \
+            --candidate-head-tree "${candidate_tree}" \
+            --workflow-file .github/workflows/linktrend-development-to-staging.yml \
+            --event-name "${EVENT_NAME}" \
+            --current-pr "${PR_NUMBER}" \
+            --receipt receipt-artifact/full-suite-receipt.json \
+            --transition-receipt transition-receipt.json \
+            --source-pr-json source-pr.json \
+            --run-json full-run.json \
+            --reviews-json source-reviews.json \
+            --checks-json observed-checks.json \
+            --merged-json consumed-search.json \
+            --output live-facts.json \
+            --consumed-ids consumed-ids.json \
+            --consumed-receipts consumed-receipts.json
+          python3 "$GITHUB_WORKSPACE/scripts/gitops/promotion_receipt_gate.py" authorize \
+            --receipt receipt-artifact/full-suite-receipt.json \
+            --transition-receipt transition-receipt.json \
+            --live-facts live-facts.json \
+            --consumed-ids consumed-ids.json \
+            --consumed-receipts consumed-receipts.json
           echo "Linktrend Receipt Gate passed: exact tree/dependency/profile/workflow identity reused; no full suite rerun."

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "oss-continuity-evidence-checksums",
+  "algorithm": "sha256",
+  "files": {
+    "COMPONENT-LEDGER.json": "857539ebad37da1fbd78b6a17030d3118840366bebc2023a8cbaff8485f5f24c",
+    "CONTRACT-STATUS.json": "fadb423967f9454ad0c863b2884f81d0131742d8be49f7a1097bb03aef02b0aa",
+    "IDENTITY.json": "dec94c6a1f3015307caa1cce1e9e3cde2b02e4b195fcb73df67c9fd35ccf716a",
+    "INDEX.json": "7689168f35766e4ecb8c52584a72a9029170404ae74182d25a128f4b65b1390f",
+    "INSPECTED-SOURCE.json": "e814ff04265dec01586d296ddffa086e4b29b86eff1a9a38087d9f599b685665",
+    "OWNER-ACTIONS.json": "f26b4d8a420e6f304df821755175384112eb6b2a46d1f85cd3d85246265d3aa5",
+    "TOOLCHAIN.json": "d213805b38f104305814b61a728586531a6968003ca5272d3db285fec6d97db2",
+    "VALIDATION.json": "9da4a916240255198fbca43e61a85085983a8ad777048b31d31b9d33829ca43b"
+  }
+}

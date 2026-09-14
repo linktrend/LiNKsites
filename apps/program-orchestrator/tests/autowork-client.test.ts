@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { AutoworkClient, AutoworkPolicyError, AUTOWORK_CONTRACT_VERSION, type AutoworkCallback, type AutoworkDetails, type AutoworkPin, type AutoworkReceipt, type AutoworkRequest, type AutoworkSummary } from '../src/autoworkClient.ts'
+import { AutoworkClient, AutoworkPolicyError, AUTOWORK_CONTRACT_VERSION, type AutoworkCallback, type AutoworkDetails, type AutoworkObservation, type AutoworkPin, type AutoworkReceipt, type AutoworkRequest, type AutoworkSummary } from '../src/autoworkClient.ts'
 import { createHash, randomUUID } from 'node:crypto'
 import { providerBaseline } from '@linksites/types'
 
@@ -91,7 +91,17 @@ test('acknowledges a bound callback once and rejects replay, stale, or handoff m
   }, () => new Date('2026-08-13T12:00:00.000Z'), providerBaseline('autowork'))
   const first = await client.acknowledgeCallback(callback(), request, issued, 'development')
   assert.equal(first.value.terminal, true)
-  await assert.rejects(client.acknowledgeCallback(callback(), request, issued, 'development'), /callbackReplay/)
+  const replayed = await client.acknowledgeCallback(callback(), request, issued, 'development')
+  assert.equal(replayed.value.acknowledgedAt, first.value.acknowledgedAt)
+  const late = new AutoworkClient({
+    ...transport(),
+    callback: async () => { throw new Error('late callback must not re-dispatch') },
+  }, () => new Date('2026-08-13T12:10:00.000Z'), providerBaseline('autowork'), { callbacks: {
+    get: async () => first,
+    set: async () => undefined,
+  } })
+  const lateResult = await late.acknowledgeCallback(callback({ timestamp: '2026-08-13T11:00:00.000Z' }), request, issued, 'development')
+  assert.equal(lateResult.value.acknowledgedAt, first.value.acknowledgedAt)
   const fresh = new AutoworkClient({
     ...transport(),
     callback: async (value) => ({ callbackId: value.callbackId, requestId: value.requestId, receiptId: value.receiptId, acknowledgedAt: '2026-08-13T12:00:01.000Z', exactHandoffId: value.exactHandoffId, terminal: true as const }),
@@ -146,4 +156,21 @@ test('rejects an Autowork callback baseline with stale or extra fields', async (
   }
   await assert.rejects(client.acknowledgeCallback({ ...bound, providerBaseline: { ...JSON.parse(JSON.stringify(providerBaseline('autowork'))), commit: '0'.repeat(40) } }, request, issued, 'development'), /commitMismatch/)
   await assert.rejects(client.acknowledgeCallback({ ...bound, nonce: 'nonce-extra', providerBaseline: { ...JSON.parse(JSON.stringify(providerBaseline('autowork'))), extra: true } }, request, issued, 'development'), /unexpectedOrMissingKey/)
+})
+
+test('persists the request before dispatch and returns the original receipt on replay', async () => {
+  const stored = new Map<string, AutoworkObservation<AutoworkReceipt>>()
+  let calls = 0
+  const request = requestBase()
+  const client = new AutoworkClient({
+    ...transport(),
+    request: async (value) => { calls += 1; return receipt(value) },
+  }, () => new Date('2026-08-13T12:00:00.000Z'), providerBaseline('autowork'), {
+    receipts: { get: (key) => stored.get(key), set: (key, value) => { stored.set(key, value) } },
+  })
+  const first = await client.request(request)
+  const second = await client.request(request)
+  assert.equal(calls, 1)
+  assert.equal(second.value.receiptId, first.value.receiptId)
+  assert.equal(client.observeReceipt(first.value).localAuthorityUnchanged, true)
 })

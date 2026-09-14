@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue-552-validation",
+  "overallState": "PREPARED/HOLD",
+  "ready": false,
+  "toolchain": {
+    "admittedNode": "22.17.0",
+    "nvmrc": "22.17.0",
+    "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
+    "pnpmUsed": "10.0.0 at /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pnpm",
+    "python": "Python 3.12.3 (/usr/bin/python3)",
+    "cachedPathNode": "/exec-daemon/node v22.14.0",
+    "cachedNvmNode": "v22.22.2",
+    "didNotSilentlyUseUnpinnedCompiler": true,
+    "lockSha256": "dd59517f5cdd414fd1d3de314397178e42a14de5a536fb26c79c8948ca419175",
+    "frozenInstall": "pass",
+    "didNotEditLockfile": true
+  },
+  "acceptanceCommands": [
+    {
+      "command": "node --test deploy/tests/release-toolchain-pins.test.mjs",
+      "result": "pass 5"
+    },
+    {
+      "command": "node --test deploy/tests/oss-continuity-manifest.test.mjs",
+      "result": "pass 8"
+    },
+    {
+      "command": "pnpm --filter @linksites/factory-catalog test",
+      "result": "pass 379 / skip 4 after LS-05 pin bind"
+    },
+    {
+      "command": "pnpm --filter @linksites/web-master test",
+      "result": "pass 80"
+    },
+    {
+      "command": "node --test tests/master-template-v2/a1/harness.test.mjs",
+      "result": "pass 16; EXT-LS-01 receipt digest c0f05d4e314ca62b6e83f420d1934e8ccd823d9a4399b1547abe30f92521b8a5; LINKLIBRARIES_ROOT=/tmp/linklibraries-998c02c at 998c02c29fae5acc429804d7e03dcc74df7e7a52 / 63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3; development pin 0704dbe not substituted"
+    },
+    {
+      "command": "pnpm --filter @linksites/autowork-boundary test",
+      "result": "pass 19"
+    },
+    {
+      "command": "python3 scripts/gitops/secret_scan.py",
+      "result": "ok true; 187 approved synthetic fixtures"
+    },
+    {
+      "command": "git diff --check 4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb...HEAD",
+      "result": "pass"
+    }
+  ],
+  "combinedConsumerChecks": {
+    "cmsProtectedSourceCompat": "pass 2",
+    "programOrchestratorProtectedSourceCompat": "pass 2",
+    "ciFast": "HOLD — typecheck/lint/w2-08/runtime-contract passed after admission type narrowing; scripts/ci-secret-scan.sh requires docker run of pinned gitleaks; docker is absent on this VM. python3 scripts/gitops/secret_scan.py passed. Did not invent a gitleaks success."
+  },
+  "remainingHolds": [
+    "LSG0-03-provider-admission",
+    "LSG0-04-platform live issuer/health/credentials/migrations",
+    "LSG0-04-autowork live endpoint/health/org-bound receipt",
+    "LSINT-01-completion",
+    "LSVAL-01-full-suite",
+    "LSREV-01-independent-source-review",
+    "github-dependabot-api-inventory",
+    "user-owned-next-env",
+    "cms Playwright e2e DATABASE_URI unset",
+    "program-orchestrator full suite ISS-32/library.verify path",
+    "ci-fast gitleaks docker",
+    "A2/A3",
+    "deployment/production/image publication"
+  ]
+}
