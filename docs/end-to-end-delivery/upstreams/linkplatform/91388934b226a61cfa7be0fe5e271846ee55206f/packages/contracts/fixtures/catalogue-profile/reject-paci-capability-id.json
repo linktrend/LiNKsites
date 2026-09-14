@@ -1,0 +1,27 @@
+{
+  "name": "catalogue-profile-reject-paci-capability-id",
+  "expect": "reject",
+  "reason": "catalogue entry id is not a platform.capabilities id",
+  "document": {
+    "contractVersion": "platform.catalogue-profile/1.0.0",
+    "catalogue": [
+      {
+        "id": "skills.catalogue.read",
+        "displayName": "PACI skills catalogue read",
+        "owningSystem": "link-skills",
+        "licensable": false,
+        "minContractTier": "none",
+        "commercialUseRequires": null,
+        "status": "active"
+      }
+    ],
+    "profile": {
+      "id": "org-linktrend-internal",
+      "name": "LiNKtrend",
+      "kind": "internal",
+      "status": "active",
+      "createdAt": "2026-07-14T00:00:00.000Z",
+      "updatedAt": "2026-07-14T00:00:00.000Z"
+    }
+  }
+}

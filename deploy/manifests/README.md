@@ -48,10 +48,13 @@ preflight. `pending`, unknown, quarantined, and missing template states are
 rejected by the runtime contract.
 
 The generator always reads the Payload migration index and records every
-imported migration with its checksum. In ready mode it records the exact native
-v2 provider commit/tree and passing consumption or verified-cache receipt. Full
-preflight repeats those identity checks against the VPS-mounted checkout; a
-directory that is not a Git repository is not a valid ready artifact. Commit the generated release
-manifest with its release evidence in the immutable release store; do not add a
-post-build manifest to the source commit whose identity it records, because
-that would change the release SHA. Never place secrets in it.
+imported migration with its checksum. The migrations image copies and verifies
+those ordered Supabase and Payload inputs at build time. In ready mode it
+records the exact native v2 provider commit/tree and passing consumption or
+verified-cache receipt. Full preflight repeats those identity checks against the
+VPS-mounted checkout; a directory that is not a Git repository is not a valid
+ready artifact. Rollback is a new Compose apply of the previous immutable
+five-digest manifest; do not mutate a published digest. Commit the generated
+release manifest with its release evidence in the immutable release store; do
+not add a post-build manifest to the source commit whose identity it records,
+because that would change the release SHA. Never place secrets in it.

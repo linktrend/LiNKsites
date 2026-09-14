@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue-552-consolidation",
+  "overallState": "PREPARED/HOLD",
+  "ready": false,
+  "didNotCreatePr": true,
+  "didNotSelfMerge": true,
+  "didNotPromote": true,
+  "qualificationRun": "run-0188fe3e-8f86-41c5-a5b2-9c6dde70ecd3",
+  "protectedDevelopment": {
+    "ref": "origin/development",
+    "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+    "tree": "e29607c43146decdf81c2f132562745f6a911780"
+  },
+  "composeOrder": ["550", "546", "549", "551", "548"],
+  "acceptedInputs": [
+    {
+      "issue": 550,
+      "commit": "52f006a251665e8d7949ea1e4469b8c5b8ba0bc6",
+      "tree": "c53c165db9952a0ec2283ff37eb66f779d2b174f",
+      "mergeCommit": "ea29a9335acea2cd220100352e745b89a1d23d43",
+      "mergeTree": "c53c165db9952a0ec2283ff37eb66f779d2b174f",
+      "parents": [
+        "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+        "52f006a251665e8d7949ea1e4469b8c5b8ba0bc6"
+      ],
+      "ancestorOfHead": true
+    },
+    {
+      "issue": 546,
+      "commit": "c61c766db06e063086b817608a273f4dc535ec72",
+      "tree": "f2095fbf63bfc7883f14fb1e831fa305d6c2e522",
+      "mergeCommit": "1812a45fa9aa786f5c33cff2a9279bbc00841dfc",
+      "mergeTree": "3d0d4cc8bd62b6a65f2df0b654fc4f2265f7b6a9",
+      "parents": [
+        "ea29a9335acea2cd220100352e745b89a1d23d43",
+        "c61c766db06e063086b817608a273f4dc535ec72"
+      ],
+      "ancestorOfHead": true
+    },
+    {
+      "issue": 549,
+      "commit": "8b067ea2766fa3e1e3b5a37d8e449577c8ae1b91",
+      "tree": "5fafc478f47718bd6e5b01bf884ef90d721f1c29",
+      "mergeCommit": "831a3c04ca26b19eae1d43dadc5f7e353ec5cc34",
+      "mergeTree": "ffcc279d8c31adac8937424f173a5c87aadb3910",
+      "parents": [
+        "1812a45fa9aa786f5c33cff2a9279bbc00841dfc",
+        "8b067ea2766fa3e1e3b5a37d8e449577c8ae1b91"
+      ],
+      "ancestorOfHead": true
+    },
+    {
+      "issue": 551,
+      "commit": "f8a0c1ba586d143ea5a239334ffe0c92afbf3d38",
+      "tree": "8a31020c1407ba5c0443df9e570e3a912ec5ad9d",
+      "mergeCommit": "3523429db46064105dcb064c78fe52f122c0d368",
+      "mergeTree": "5226b8bf2c9a67fbf7eca3e0210951b6941b2964",
+      "parents": [
+        "831a3c04ca26b19eae1d43dadc5f7e353ec5cc34",
+        "f8a0c1ba586d143ea5a239334ffe0c92afbf3d38"
+      ],
+      "ancestorOfHead": true
+    },
+    {
+      "issue": 548,
+      "commit": "2832f4432940e485ea4ae8d02c8bb91ecb7258e8",
+      "tree": "db2f09bb9c7ae39bf8b5959862ae4a8b36fb9aa9",
+      "mergeCommit": "694de83ecd20bf41843a7591ba1e2632e6f4acc6",
+      "mergeTree": "fe198422d6826d395d7395bf06ca454c3227b7a4",
+      "parents": [
+        "3523429db46064105dcb064c78fe52f122c0d368",
+        "2832f4432940e485ea4ae8d02c8bb91ecb7258e8"
+      ],
+      "conflicts": [
+        ".github/workflows/ci.yml",
+        "deploy/tests/release-toolchain-pins.test.mjs"
+      ],
+      "resolution": {
+        "preferIncoming": false,
+        "ciYml": "keep pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4; delete with/version 10.0.0",
+        "toolchainTest": "keep 544 immutable action/Node checks, 546 dual-arch Alpine checks, and 548 pnpm version-input detector; no workflow pnpm version assertion",
+        "otherWorkflows": "Issue 548 version-input removals merged; floating action tags on those three files were not restored"
+      },
+      "ancestorOfHead": true
+    }
+  ],
+  "platformDevelopmentTipNotSubstituted": {
+    "fetchedDevelopmentTip": "21feaf798056bbe023a7eef81f3d7562073ffbe6",
+    "fetchedDevelopmentTree": "a8353c2ec5e9ddd3315714aba740192c8af976c1",
+    "admittedExactCommit": "91388934b226a61cfa7be0fe5e271846ee55206f",
+    "admittedTree": "b11ea485a3b3f69c32baac5eed62a180fca79ae3"
+  },
+  "nextEnvDts": {
+    "path": "apps/cms/next-env.d.ts",
+    "copiedOrStagedThisSession": false,
+    "committedSha256": "7b550dda9686c16f36a17bf9051d5dbf31e98555b30d114ac49fc49a1e712651",
+    "userOwnedLocalSha256": "1862ac4bbbc5192d4bf562161df66ea547ed3e67173100656ab606ae9797db2b",
+    "note": "Committed bytes were left byte-identical to protected development. User-owned local bytes were not copied."
+  },
+  "claimsRefused": [
+    "live endpoints",
+    "credentials",
+    "migrations applied",
+    "A2/A3",
+    "deployment",
+    "production",
+    "image publication",
+    "Server03 action"
+  ]
+}

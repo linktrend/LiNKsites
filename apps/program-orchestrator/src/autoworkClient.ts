@@ -188,13 +188,30 @@ function validateStatus(status: AutoworkCapabilityStatus, requestedCapability: s
 }
 
 /** Thin, injected LiNKsites consumer. It retrieves and coordinates only; it never executes provider work. */
+export type AutoworkDurableStore<T> = {
+  get(key: string): Promise<T | undefined> | T | undefined
+  set(key: string, value: T): Promise<void> | void
+}
+
+export type AutoworkClientOptions = {
+  requests?: AutoworkDurableStore<AutoworkRequest>
+  receipts?: AutoworkDurableStore<AutoworkObservation<AutoworkReceipt>>
+  callbacks?: AutoworkDurableStore<AutoworkObservation<AutoworkCallbackAcknowledgement>>
+}
+
 export class AutoworkClient {
   private readonly baseline: AutoworkBaseline
   private readonly now: () => Date
   private readonly seenCallbackNonces = new Set<string>()
-  constructor(private readonly transport: AutoworkTransport, now: (() => Date) | undefined = undefined, baseline: unknown) {
+  private readonly requests: AutoworkDurableStore<AutoworkRequest>
+  private readonly receipts: AutoworkDurableStore<AutoworkObservation<AutoworkReceipt>>
+  private readonly callbacks: AutoworkDurableStore<AutoworkObservation<AutoworkCallbackAcknowledgement>>
+  constructor(private readonly transport: AutoworkTransport, now: (() => Date) | undefined = undefined, baseline: unknown, stores: AutoworkClientOptions = {}) {
     this.now = now ?? (() => new Date())
     this.baseline = bindProviderBaseline('autowork', baseline)
+    this.requests = stores.requests ?? new MapStore()
+    this.receipts = stores.receipts ?? new MapStore()
+    this.callbacks = stores.callbacks ?? new MapStore()
   }
 
   async summary(pin: AutoworkPin & { automationId: string }): Promise<AutoworkObservation<AutoworkSummary>> {
@@ -214,11 +231,24 @@ export class AutoworkClient {
     if (request.scope.operationKind === 'external_assistance' && !request.exactHandoffId) throw new AutoworkPolicyError('missingExactHandoff')
     requireDate(request.expiresAt, 'expiresAt', this.now()); requireDate(request.platform.expiresAt, 'expiresAt', this.now())
     if (request.platform.revocationRef.endsWith('/revoked')) throw new AutoworkPolicyError('revoked')
+    await this.requests.set(request.idempotencyKey, request)
+    const prior = await this.receipts.get(request.idempotencyKey)
+    if (prior) return prior
     const receipt = await this.transport.request(request)
-    return { authority: 'linkautowork', value: validateReceipt(receipt, request, this.now()), localAuthorityUnchanged: true, conflict: 'provider_observation_only' }
+    const observation: AutoworkObservation<AutoworkReceipt> = { authority: 'linkautowork', value: validateReceipt(receipt, request, this.now()), localAuthorityUnchanged: true, conflict: 'provider_observation_only' }
+    await this.receipts.set(request.idempotencyKey, observation)
+    return observation
+  }
+
+  observeReceipt(receipt: AutoworkReceipt): AutoworkObservation<AutoworkReceipt> {
+    rejectSensitive(receipt)
+    return { authority: 'linkautowork', value: receipt, localAuthorityUnchanged: true, conflict: 'provider_observation_only' }
   }
 
   async acknowledgeCallback(callback: AutoworkCallback, request: AutoworkRequest, receipt: AutoworkReceipt, expectedEnvironment: AutoworkCallback['environment']): Promise<AutoworkObservation<AutoworkCallbackAcknowledgement>> {
+    const durableKey = `${request.requestId}:${callback.callbackId}`
+    const prior = await this.callbacks.get(durableKey)
+    if (prior) return prior
     rejectSensitive(callback)
     bindProviderBaseline('autowork', callback.providerBaseline)
     if (callback.contractVersion !== AUTOWORK_CONTRACT_VERSION) throw new AutoworkPolicyError('callbackBindingMismatch')
@@ -238,6 +268,14 @@ export class AutoworkClient {
     if (acknowledgement.callbackId !== callback.callbackId || acknowledgement.requestId !== request.requestId || acknowledgement.receiptId !== receipt.receiptId || acknowledgement.exactHandoffId !== callback.exactHandoffId || acknowledgement.terminal !== true) {
       throw new AutoworkPolicyError('callbackReceiptMismatch')
     }
-    return { authority: 'linkautowork', value: acknowledgement, localAuthorityUnchanged: true, conflict: 'provider_observation_only' }
+    const observation: AutoworkObservation<AutoworkCallbackAcknowledgement> = { authority: 'linkautowork', value: acknowledgement, localAuthorityUnchanged: true, conflict: 'provider_observation_only' }
+    await this.callbacks.set(durableKey, observation)
+    return observation
   }
+}
+
+class MapStore<T> implements AutoworkDurableStore<T> {
+  private readonly values = new Map<string, T>()
+  get(key: string): T | undefined { return this.values.get(key) }
+  set(key: string, value: T): void { this.values.set(key, value) }
 }

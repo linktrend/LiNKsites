@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-qualification-identities",
+  "packet": "LSG0-04",
+  "issue": 550,
+  "title": "Refresh protected Platform and LiNKautowork consumer handoffs",
+  "qualificationTimeUtc": "2026-09-13T07:18:59Z",
+  "writerRole": "implementation",
+  "initialCachedIdentity": {
+    "note": "Cursor cached checkout before supplied-branch fetch. Reported separately from admitted starting-work identity. All three workspaces were already on the cloud overlay branch at the supplied commits; origin host paths matched github.com/linktrend/*.",
+    "linksites": {
+      "originHostPath": "github.com/linktrend/LiNKsites",
+      "branch": "cursor/linksites-protected-platform-autowork-handoff-550-c26d",
+      "commit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+      "tree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+      "dirty": false
+    },
+    "platform": {
+      "originHostPath": "github.com/linktrend/LiNKplatform",
+      "branch": "cursor/linksites-protected-platform-autowork-handoff-550-c26d",
+      "commit": "91388934b226a61cfa7be0fe5e271846ee55206f",
+      "tree": "b11ea485a3b3f69c32baac5eed62a180fca79ae3",
+      "dirty": false
+    },
+    "autowork": {
+      "originHostPath": "github.com/linktrend/LiNKautowork",
+      "branch": "cursor/linksites-protected-platform-autowork-handoff-550-c26d",
+      "commit": "d5c626ba7e1bdbf783dc8df1654e33e0b70b873c",
+      "tree": "9018eec98a9bafefe3a638b25fb191ee454917a9",
+      "dirty": false
+    }
+  },
+  "admittedStartingWorkIdentity": {
+    "primary": {
+      "repository": "linktrend/LiNKsites",
+      "ref": "issue/550-refresh-protected-platform-and-linkautowork-cons",
+      "commit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+      "tree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+      "role": "writer",
+      "originMatch": true,
+      "fetchedBranchCommitMatch": true,
+      "fetchedBranchTreeMatch": true,
+      "checkoutDirty": false
+    },
+    "readOnlySources": [
+      {
+        "repository": "linktrend/LiNKplatform",
+        "ref": "development",
+        "commit": "91388934b226a61cfa7be0fe5e271846ee55206f",
+        "tree": "b11ea485a3b3f69c32baac5eed62a180fca79ae3",
+        "role": "read-only-source",
+        "originMatch": true,
+        "fetchedBranchCommitMatch": true,
+        "fetchedBranchTreeMatch": true,
+        "detachedExactCommit": true,
+        "checkoutDirty": false,
+        "didNotSubstituteLaterTip": true,
+        "didNotFetchMainOrStaging": true
+      },
+      {
+        "repository": "linktrend/LiNKautowork",
+        "ref": "development",
+        "commit": "d5c626ba7e1bdbf783dc8df1654e33e0b70b873c",
+        "tree": "9018eec98a9bafefe3a638b25fb191ee454917a9",
+        "role": "read-only-source",
+        "originMatch": true,
+        "fetchedBranchCommitMatch": true,
+        "fetchedBranchTreeMatch": true,
+        "detachedExactCommit": true,
+        "checkoutDirty": false,
+        "didNotSubstituteLaterTip": true,
+        "didNotFetchMainOrStaging": true
+      }
+    ]
+  },
+  "bindingChangeFromIssue543": {
+    "issue543BoundPlatform": {
+      "ref": "development",
+      "commit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
+      "tree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb"
+    },
+    "issue543BoundAutowork": {
+      "ref": "development",
+      "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
+      "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f"
+    },
+    "thisPacketBindsNewlyProtectedDevelopment": true,
+    "platformMerge": "Merge pull request #276 from linktrend/phase/linksites-platform-handoff-20260913",
+    "autoworkMerge": "Merge pull request #158 from linktrend/phase/aw08-production-paci-verifier-r2",
+    "didNotPreserveOldHoldOnlyBecauseOlderCommit": true,
+    "reverifiedEveryRequiredSurfaceOnNewBoundIdentities": true
+  },
+  "platformSourceFullReceipt": {
+    "receiptDigest": "sha256:9d576f1e567bebf0664a0a6a90086536754684df47ae4e59f4462c1828df3eb8",
+    "verified": true,
+    "source": "GitHub Actions artifact linktrend-full-suite-receipt-276-34744037379 id 10312688155",
+    "workflowRunId": 34744037379,
+    "candidateHeadCommit": "c495a81cdad8e019a4e0aba011adad7b1e844b45",
+    "candidateGitTree": "b11ea485a3b3f69c32baac5eed62a180fca79ae3",
+    "equalsBoundProtectedDevelopmentTree": true,
+    "equalsBoundProtectedDevelopmentMergeCommit": false,
+    "mergeCommit": "91388934b226a61cfa7be0fe5e271846ee55206f",
+    "note": "Full Suite receipt is for the phase candidate whose gitTree equals the protected development merge tree. It is not staging, production, Server01, Server03, or live health proof."
+  },
+  "platformTransitionReceipt": {
+    "suppliedDigest": "sha256:617a3f8581c9da9e933fc6c62860b31f37ea7b7f0af6b062e3b4e54a8a8ff25a",
+    "verified": false,
+    "status": "HOLD",
+    "finding": "GitHub contents, commit comments, commit statuses, PR 276 comments, and Actions artifacts for linktrend/LiNKplatform did not return a transition-receipt.json whose receiptDigest equals 617a3f8581c9da9e933fc6c62860b31f37ea7b7f0af6b062e3b4e54a8a8ff25a. Development-to-staging/staging-to-main transition workflows did not run for this merge. The digest was not fabricated."
+  },
+  "copiedSourcesOnThisPacket": {
+    "platform": "docs/end-to-end-delivery/upstreams/linkplatform/91388934b226a61cfa7be0fe5e271846ee55206f/",
+    "autowork": "docs/end-to-end-delivery/upstreams/linkautowork/d5c626ba7e1bdbf783dc8df1654e33e0b70b873c/",
+    "githubTreeApiVerified": true,
+    "bundleRole": "immutable protected-development source copies; not live proof"
+  }
+}
