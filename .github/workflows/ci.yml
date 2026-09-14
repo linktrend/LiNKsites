@@ -177,6 +177,7 @@ jobs:
         env:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
           W2_02_LIBRARY_REPOSITORY_PATH: ${{ github.workspace }}/.ci/linklibraries
+          LINKLIBRARIES_ROOT: ${{ github.workspace }}/.ci/linklibraries
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           # The hosted runner already proves the image build and recovery
           # profile. Do not export the multi-GB local layer cache on this gate.
