@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "protected-linklibraries-facts",
+  "packet": "LSG0-03",
+  "issue": 549,
+  "protectedIdentity": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+    "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+    "subject": "Merge pull request #450 from linktrend/phase/432-marketing-smb-selectable-admission"
+  },
+  "bytesSource": "GitHub contents API at the exact supplied commit; SHA-256 compared to git objects at that commit",
+  "didNotUseADifferentOriginDevelopmentTip": {
+    "originDevelopmentTipCommit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+    "originDevelopmentTipTree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+    "matchesSuppliedIdentity": true
+  },
+  "marketingSmbV1": {
+    "path": "entries/marketing-smb-v1/entry.json",
+    "entryJsonSha256": "bf7efdbe2cc281bbfb193aab4554a660648da5c2c4baeb40f078d7ad110bb9b7",
+    "gitTreeObjectSha1": "d146699d8d03d6f4821fe7aa57d449678c3ea170",
+    "state": "usable",
+    "selectable": true,
+    "contentMode": "executable",
+    "admissionClass": "library-local-selectable",
+    "catalogV1": {
+      "path": "indexes/catalog.json",
+      "fileSha256": "d8e9b6d7616d98f08890bb5db08a1c0aad93775c54f7eac880380285ff1ba23e",
+      "entryId": "marketing-smb-v1",
+      "state": "usable",
+      "selectable": true
+    },
+    "v2CatalogueRecord": "absent",
+    "declaredFileDigestsMatchWorkingTree": true,
+    "libraryLocalAdmission": {
+      "path": "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/admission.json",
+      "admissionState": "library_local_selectable",
+      "unprovenAndOutOfScope": [
+        "LiNKsites renderer compatibility",
+        "Payload CMS compatibility",
+        "consumer integration",
+        "provider live state",
+        "deployment",
+        "production publication"
+      ]
+    },
+    "planningPinCopyOnLiNKsites": {
+      "path": "docs/end-to-end-delivery/upstreams/linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/entries/marketing-smb-v1/entry.json",
+      "state": "quarantined",
+      "selectable": false,
+      "note": "Historical planning pin remains quarantined. It is not this protected identity and was not relabeled."
+    },
+    "consumerBundle": {
+      "path": "docs/end-to-end-delivery/upstreams/linklibraries/0704dbef0871216dee5c4b85b3e2783823c21edb/",
+      "provenance": "docs/end-to-end-delivery/upstreams/linklibraries/0704dbef0871216dee5c4b85b3e2783823c21edb/provenance.json"
+    }
+  },
+  "masterWebsiteTemplate": {
+    "entryId": "master-template-type-1",
+    "currentJsonPath": "registry/v2/entries/master-template-type-1/current.json",
+    "currentJsonExists": false,
+    "note": "A1/A2/A3 and A/B/C/L remain a separate lane. This packet did not admit MWT. current.json is absent on 0704dbe. Consumer proof below is marketing-smb-v1 only.",
+    "selectability": "non_selectable",
+    "lifecycleObserved": "draft"
+  },
+  "sourceHandoffIsNotAdmissionProof": false,
+  "libraryLocalSelectableIsNotProduction": true
+}

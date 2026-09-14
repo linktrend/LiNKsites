@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "kind": "session-and-source-identity",
+  "recordedAt": "2026-09-12T03:20:00Z",
+  "cloudRun": {
+    "url": "https://cursor.com/agents/bc-0e549c20-57ce-48ca-abb4-9f03bfac7c84",
+    "bcId": "bc-0e549c20-57ce-48ca-abb4-9f03bfac7c84",
+    "name": "LINKSITES-LSG0-04-HOLD-EVIDENCE-532"
+  },
+  "initialCachedIdentity": {
+    "note": "Cursor cached checkout before fetch/checkout. Reported separately from admitted starting-work identity.",
+    "linktrend/LiNKsites": {
+      "originHost": "https://github.com/linktrend/LiNKsites",
+      "branch": "cursor/linksites-lsg0-04-hold-evidence-532-e253",
+      "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+      "tree": "109429b45870b5c648ec754f408f06ee9bea0267",
+      "dirty": false
+    },
+    "linktrend/LiNKplatform": {
+      "originHost": "https://github.com/linktrend/LiNKplatform",
+      "branch": "cursor/linksites-lsg0-04-hold-evidence-532-e253",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "dirty": false
+    },
+    "linktrend/LiNKautowork": {
+      "originHost": "https://github.com/linktrend/LiNKautowork",
+      "branch": "cursor/linksites-lsg0-04-hold-evidence-532-e253",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "dirty": false
+    }
+  },
+  "fetchedThenVerified": {
+    "linktrend/LiNKsites": {
+      "fetchedRef": "origin/issue/532-consolidate-linksites-accepted-checkpoints-and-e",
+      "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+      "tree": "109429b45870b5c648ec754f408f06ee9bea0267",
+      "matchesSuppliedInput": true
+    },
+    "linktrend/LiNKplatform": {
+      "fetchedRef": "origin/main",
+      "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+      "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+      "matchesSuppliedInput": true
+    },
+    "linktrend/LiNKautowork": {
+      "fetchedRef": "origin/main",
+      "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+      "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+      "matchesSuppliedInput": true
+    }
+  },
+  "admittedStartingWorkIdentity": {
+    "writer": {
+      "repository": "linktrend/LiNKsites",
+      "ref": "issue/532-consolidate-linksites-accepted-checkpoints-and-e",
+      "commit": "5fbb8c12e5037c5840290f7c55a60fc16abed3a8",
+      "tree": "109429b45870b5c648ec754f408f06ee9bea0267",
+      "checkout": "existing owned issue branch origin/issue/532-consolidate-linksites-accepted-checkpoints-and-e",
+      "dirty": false,
+      "role": "integration-writer-allowed-paths-only"
+    },
+    "readOnlySources": [
+      {
+        "repository": "linktrend/LiNKplatform",
+        "ref": "main",
+        "commit": "a0058e749b2530c4abf8deadb09f2fd4add1ee4f",
+        "tree": "cc3ac1e0436a0a15a3ce790c4b0ca6d8e2541b71",
+        "role": "read-only-source"
+      },
+      {
+        "repository": "linktrend/LiNKautowork",
+        "ref": "main",
+        "commit": "2e30109acfb9510cd77e49f759648b2b6a666adc",
+        "tree": "af6883f2b5b093e221eed5f0d033aa7647582717",
+        "role": "read-only-source"
+      }
+    ],
+    "protectedDevelopmentObservedForHistoryOnly": {
+      "ref": "origin/development",
+      "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+      "tree": "e29607c43146decdf81c2f132562745f6a911780"
+    },
+    "didNotSubstituteLatestMainOrDevelopmentForWriter": true
+  },
+  "allowedPaths": [
+    "docs/evidence/end-to-end-delivery/"
+  ],
+  "prohibited": [
+    "apps/cms/next-env.d.ts",
+    "product-source-rewrite",
+    "implementer-PR",
+    "self-merge",
+    "promotion",
+    "live-probes",
+    "nested-workers"
+  ]
+}

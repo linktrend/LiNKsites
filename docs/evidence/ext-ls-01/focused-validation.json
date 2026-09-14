@@ -2,22 +2,25 @@
   "schemaVersion": 1,
   "kind": "ext-ls-01-focused-validation",
   "gateId": "EXT-LS-01",
-  "issue": 301,
+  "issue": 551,
   "inputCandidate": {
-    "commit": "2ba3bd70244061985a3896e748fb75e92dfb6c69",
-    "tree": "606fcb986b8eb9af476aea369d94990357ff9681"
+    "commit": "df53bbaf854a44ea651deb5af4f165aa9df4cccb",
+    "tree": "4d08448f5e629747b0df93a6d80f52fc5402be66"
   },
   "commands": {
-    "nodeTest": "node --test scripts/profile-v2-quality/ext-ls-01/tests/consumer-proof-validator.test.mjs",
-    "nodeTestResult": "10/10 pass",
-    "cli": "node scripts/profile-v2-quality/ext-ls-01/consumer-proof-validator.mjs --input scripts/profile-v2-quality/ext-ls-01/fixtures/absent-receipt.input.json --candidate-commit 2ba3bd70244061985a3896e748fb75e92dfb6c69 --candidate-tree 606fcb986b8eb9af476aea369d94990357ff9681",
-    "cliOverall": "HOLD",
-    "diffCheck": "pass"
+    "nodeTest": "node --test tests/master-template-v2/a1/harness.test.mjs",
+    "factoryCatalog": "pnpm --filter @linksites/factory-catalog exec vitest run tests/revision2Materialization.spec.ts",
+    "receiptGenerate": "node scripts/profile-v2-quality/ext-ls-01/generate-consumer-proof.mjs --clean",
+    "receiptVerify": "node scripts/profile-v2-quality/ext-ls-01/generate-consumer-proof.mjs --verify",
+    "diffCheck": "git diff --check df53bbaf854a44ea651deb5af4f165aa9df4cccb...HEAD"
   },
   "claims": {
     "accept": false,
     "protectedIntegration": false,
     "providerConformance": false,
-    "productionProof": false
+    "productionProof": false,
+    "catalogueSelectable": false,
+    "mwt08": false,
+    "deployment": false
   }
 }
