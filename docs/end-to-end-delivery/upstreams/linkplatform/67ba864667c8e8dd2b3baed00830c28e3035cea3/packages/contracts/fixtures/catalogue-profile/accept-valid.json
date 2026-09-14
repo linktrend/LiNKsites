@@ -1,0 +1,35 @@
+{
+  "name": "catalogue-profile-accept-valid",
+  "expect": "accept",
+  "document": {
+    "contractVersion": "platform.catalogue-profile/1.0.0",
+    "catalogue": [
+      {
+        "id": "cap.plane.execution_tracking",
+        "displayName": "Plane execution tracking",
+        "owningSystem": "link-plane",
+        "licensable": true,
+        "minContractTier": "standard",
+        "commercialUseRequires": null,
+        "status": "active"
+      },
+      {
+        "id": "cap.reddit.analytics",
+        "displayName": "Reddit post/engagement analytics",
+        "owningSystem": "link-postiz-app",
+        "licensable": false,
+        "minContractTier": "none",
+        "commercialUseRequires": "Reddit Data API Terms require a negotiated commercial contract before any client-facing/commercial use.",
+        "status": "active"
+      }
+    ],
+    "profile": {
+      "id": "org-linktrend-internal",
+      "name": "LiNKtrend",
+      "kind": "internal",
+      "status": "active",
+      "createdAt": "2026-07-14T00:00:00.000Z",
+      "updatedAt": "2026-07-14T00:00:00.000Z"
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "kind": "v25-issue-checkpoint",
+  "issue": 556,
+  "branch": "issue/556-align-hosted-secret-scanning-with-verified-links",
+  "ownedIssueBranch": "issue/556-align-hosted-secret-scanning-with-verified-links",
+  "admittedStartingRef": "issue/556-align-hosted-secret-scanning-with-verified-links",
+  "admittedCommit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+  "admittedTree": "e29607c43146decdf81c2f132562745f6a911780",
+  "protectedDevelopment": {
+    "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+    "tree": "e29607c43146decdf81c2f132562745f6a911780"
+  },
+  "issue554Parent": {
+    "commit": "0fc603312bb62ef4bd94302e603c33ff55a8b8da",
+    "tree": "6dea8be37e4fc33f954f25c85caee7af5be96d4b",
+    "merge": "no-ff",
+    "recreated": false,
+    "altered": false
+  },
+  "mergeCommit": "50d78844d9b2a649cddccf795d72f6da07267114",
+  "mergeParents": [
+    "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+    "0fc603312bb62ef4bd94302e603c33ff55a8b8da"
+  ],
+  "headSha": "f9609506eaaf0d2b4d39e63ad1e67d74c236d911",
+  "gitTree": "ece51c14b91c78e602599c2d230d1ce78d674294",
+  "metadataCommitNote": "Branch tip after this file is a checkpoint-metadata commit; evidence bytes remain f9609506eaaf0d2b4d39e63ad1e67d74c236d911 / ece51c14b91c78e602599c2d230d1ce78d674294 plus this checkpoint.",
+  "phasePr555GitleaksFindings": [
+    {
+      "fingerprint": "962104ea031ff3fbd412f977fdf031c255b6a18b:docs/end-to-end-delivery/upstreams/linklibraries/0704dbef0871216dee5c4b85b3e2783823c21edb/docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/receipt.json:generic-api-key:36",
+      "classification": "copied A1 file digest for design/tokens.json; receipt bytes unchanged",
+      "treatment": "exact SHA-256 regex in .github/gitleaks.toml plus introducing-commit fingerprint"
+    },
+    {
+      "fingerprint": "106b33f54e376cdf5842da50d6cec528b18f5adb:docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json:generic-api-key:32",
+      "classification": "public review-route model name next to Cursor-REST-API-SDK",
+      "treatment": "current tip uses review-route-grok-medium; introducing-commit fingerprint"
+    },
+    {
+      "fingerprint": "685e1267fc4718eaea808afc0c36459e9d739e14:docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json:generic-api-key:32",
+      "classification": "same model-name false positive on an earlier manifest revision",
+      "treatment": "introducing-commit fingerprint"
+    },
+    {
+      "fingerprint": "685e1267fc4718eaea808afc0c36459e9d739e14:docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json:generic-api-key:45",
+      "classification": "second historical model-name occurrence in the same commit",
+      "treatment": "introducing-commit fingerprint"
+    },
+    {
+      "fingerprint": "60274ade7e910f814b0816e74de011281d536dc2:deploy/config/production.env.example:generic-api-key:30",
+      "classification": "commented ltfx synthetic example assignment, not a live secret",
+      "treatment": "current tip does not assign a Git value; introducing-commit fingerprint"
+    }
+  ],
+  "a1ReceiptUnchangedVsIssue554": true,
+  "cmsNextEnvUnchangedVsIssue554": true,
+  "didNotCreatePr": true,
+  "didNotAlterIssue554": true,
+  "didNotAlterPhasePr555": true,
+  "proofClass": "local",
+  "claims": {
+    "accept": false,
+    "production": false,
+    "deployment": false,
+    "hostedCi": false
+  }
+}

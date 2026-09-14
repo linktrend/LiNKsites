@@ -699,6 +699,49 @@ def validate_recovery_dispatch(
     }
 
 
+def admit_founder_authorized_transition(
+    *,
+    live: Mapping[str, Any],
+    source_receipt: Mapping[str, Any],
+    transition_receipt: Mapping[str, Any],
+    consumed_ids: Sequence[str] = (),
+    consumed_receipt_digests: Sequence[str] = (),
+) -> dict[str, Any]:
+    """Admit founder bootstrap only with truthful exact evidence already in hand.
+
+    This helper never creates a check, receipt, review, test result, identity,
+    or success.  Missing or manufactured inputs fail closed.
+    """
+
+    if any(
+        bool((live or {}).get(flag))
+        for flag in ("manufactureSuccess", "inventedCheck", "inventedReview", "inventedTest", "syntheticReceipt")
+    ):
+        raise SealError("founder_bootstrap_manufactured", "founder bootstrap cannot manufacture evidence")
+    required_test = live.get("requiredTest") if isinstance(live.get("requiredTest"), Mapping) else None
+    reviewer = live.get("reviewer") if isinstance(live.get("reviewer"), Mapping) else None
+    if required_test is None or reviewer is None:
+        raise SealError("founder_bootstrap_missing_evidence", "founder bootstrap requires actual test and review evidence")
+    if any(bool(required_test.get(flag)) for flag in ("manufactured", "synthetic", "invented")):
+        raise SealError("founder_bootstrap_manufactured", "founder bootstrap cannot invent a test result")
+    if any(bool(reviewer.get(flag)) for flag in ("manufactured", "synthetic", "invented")):
+        raise SealError("founder_bootstrap_manufactured", "founder bootstrap cannot invent a review")
+    from promotion_receipt_gate import evaluate_authoritative_promotion
+
+    facts = dict(live)
+    facts["founderAuthorized"] = True
+    decision = evaluate_authoritative_promotion(
+        live=facts,
+        source_receipt=source_receipt,
+        transition_receipt=transition_receipt,
+        consumed_ids=consumed_ids,
+        consumed_receipt_digests=consumed_receipt_digests,
+    )
+    if not decision.accepted:
+        raise SealError(decision.code, decision.detail)
+    return decision.to_dict()
+
+
 def evaluate_recovered_receipt_for_promotion(
     receipt: Mapping[str, Any],
     candidate_identity: Mapping[str, Any] | CandidateIdentity,
@@ -769,6 +812,14 @@ def main(argv: list[str] | None = None) -> int:
     promote.add_argument("--identity", type=Path, required=True)
     promote.add_argument("--gate", default="full-gate")
 
+    founder = commands.add_parser(
+        "admit-founder-authorized-transition",
+        help="admit founder bootstrap only with truthful exact identities and actual evidence",
+    )
+    founder.add_argument("--receipt", type=Path, required=True)
+    founder.add_argument("--transition-receipt", type=Path, required=True)
+    founder.add_argument("--live-facts", type=Path, required=True)
+
     args = parser.parse_args(argv)
     try:
         if args.command == "resolve-head":
@@ -813,6 +864,14 @@ def main(argv: list[str] | None = None) -> int:
             receipt = json.loads(args.receipt.read_text(encoding="utf-8"))
             identity = json.loads(args.identity.read_text(encoding="utf-8"))
             result = evaluate_recovered_receipt_for_promotion(receipt, identity, required_gate=args.gate)
+            _json_print(result)
+            return 0 if result.get("accepted") else 1
+        if args.command == "admit-founder-authorized-transition":
+            result = admit_founder_authorized_transition(
+                live=json.loads(args.live_facts.read_text(encoding="utf-8")),
+                source_receipt=json.loads(args.receipt.read_text(encoding="utf-8")),
+                transition_receipt=json.loads(args.transition_receipt.read_text(encoding="utf-8")),
+            )
             _json_print(result)
             return 0 if result.get("accepted") else 1
     except (SealError, RecoveryError) as exc:
