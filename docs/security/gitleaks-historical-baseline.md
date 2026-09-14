@@ -30,13 +30,13 @@ unchanged. Path-wide and rule-wide disables are not used.
 
 The same Phase PR #555 `generic-api-key` report also named:
 
-- `Grok-4.6-Medium` in `docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json`
-  (public model name next to `Cursor-REST-API-SDK`). Current tip uses
-  `ltfx.route.grok-4-6-medium`. Introducing-commit fingerprints remain in
-  `.gitleaksignore`.
-- `# LINKAUTOWORK_SIGNING_SECRET=ltfx.placeholder.5e0a9b3c2eac.v1` in
-  `deploy/config/production.env.example`. Current tip does not assign a value
-  in Git. The introducing-commit fingerprint remains in `.gitleaksignore`.
+- The public review-route model name previously inlined next to
+  `Cursor-REST-API-SDK` in `docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json`.
+  Current tip uses the low-entropy placeholder `review-route-grok-medium`.
+  Introducing-commit fingerprints remain in `.gitleaksignore`.
+- The historical commented Autowork signing-secret example assignment in
+  `deploy/config/production.env.example`. Current tip does not assign that
+  value in Git. The introducing-commit fingerprint remains in `.gitleaksignore`.
 
 The CI gate continues to scan every commit introduced by a pull request or
 push. New findings fail closed unless they are separately investigated and
