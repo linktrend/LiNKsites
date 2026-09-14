@@ -85,9 +85,10 @@ export const PROVIDER_PIN = Object.freeze({
 export const EXT_LS_01_RECEIPT = Object.freeze({
   gateId: "EXT-LS-01",
   path: ".git/linktrend-evidence/ext-ls-01-issue551/consumer-proof-receipt.json",
-  sha256: "c0f05d4e314ca62b6e83f420d1934e8ccd823d9a4399b1547abe30f92521b8a5",
-  consumerCommit: "df53bbaf854a44ea651deb5af4f165aa9df4cccb",
-  consumerTree: "4d08448f5e629747b0df93a6d80f52fc5402be66",
+  sha256: "94fc8b3e9a5739aa7419f3ece03c660e8a8c696940c119f7cdb17b4cdcf3296f",
+  consumerCommit: "25033a0cb6979c06aeedea5b9d94090e15372e14",
+  consumerTree: "355c23879d8360fe344a11d09cab441a4fb3a450",
+  consumerCacheTree: "8cc18abd172cc075e5615457b8b2711d67f7ff04",
   bytesEmbedded: false,
   acceptedBinding: false,
 });

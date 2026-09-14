@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "v25-issue-checkpoint",
+  "issue": 553,
+  "branch": "issue/553-retarget-ext-ls-01-consumer-evidence-to-the-veri",
+  "ownedIssueBranch": "issue/553-retarget-ext-ls-01-consumer-evidence-to-the-veri",
+  "admittedStartingRef": "issue/553-retarget-ext-ls-01-consumer-evidence-to-the-veri",
+  "admittedCommit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+  "admittedTree": "e29607c43146decdf81c2f132562745f6a911780",
+  "protectedDevelopment": {
+    "commit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+    "tree": "e29607c43146decdf81c2f132562745f6a911780"
+  },
+  "issue552Parent": {
+    "commit": "25033a0cb6979c06aeedea5b9d94090e15372e14",
+    "tree": "355c23879d8360fe344a11d09cab441a4fb3a450",
+    "merge": "no-ff",
+    "recreated": false,
+    "altered": false
+  },
+  "mergeCommit": "df79ffc286c427feb7f7e85ce8303a07ecca75a5",
+  "mergeParents": [
+    "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+    "25033a0cb6979c06aeedea5b9d94090e15372e14"
+  ],
+  "readOnlyProvider": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "998c02c29fae5acc429804d7e03dcc74df7e7a52",
+    "tree": "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3",
+    "linklibrariesRoot": "/agent/repos/LiNKlibraries",
+    "developmentTipNotSubstituted": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+    "artifactTree": "6aadb2dff52efe30f512ddb2a5510a881fc027e2",
+    "releaseManifestSha256": "b4e0b141631694101b8daf5494499160b31e2ba6cbe66d0ec622f9690d567026",
+    "inventorySha256": "29262c08e9db2797ff292dc8179965c0ed080064a0b71d1bb477c4e0d63f0f72",
+    "dependencyLockSha256": "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
+    "releaseReceiptSha256": "9e53946b4dadcec3e939bd1f42bb41b1d8851d29ac7c2de3f4a66dcdd9ce1021"
+  },
+  "extLs01Receipt": {
+    "path": ".git/linktrend-evidence/ext-ls-01-issue551/consumer-proof-receipt.json",
+    "sha256": "94fc8b3e9a5739aa7419f3ece03c660e8a8c696940c119f7cdb17b4cdcf3296f",
+    "consumerCommit": "25033a0cb6979c06aeedea5b9d94090e15372e14",
+    "consumerTree": "355c23879d8360fe344a11d09cab441a4fb3a450",
+    "consumerCacheTree": "8cc18abd172cc075e5615457b8b2711d67f7ff04",
+    "regenerated": true,
+    "verified": true,
+    "providerCheckoutRemoved": true,
+    "tamperRejected": true,
+    "rollback": true,
+    "cacheReadback": true
+  },
+  "didNotCreatePr": true,
+  "proofClass": "local",
+  "claims": {
+    "accept": false,
+    "catalogueSelectable": false,
+    "providerConformance": false,
+    "mwt08": false,
+    "production": false,
+    "deployment": false,
+    "a2": false,
+    "a3": false
+  }
+}

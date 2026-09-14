@@ -30,6 +30,9 @@ production selectability, or MWT-08.
 - Entry `master-template-type-1@2.0.0-a1.1` artifact tree `6aadb2dff52efe30f512ddb2a5510a881fc027e2`, lifecycle `draft` / `non_selectable`, catalogue.bound=false
 - EXT-LS-01 receipt is out-of-tree at `.git/linktrend-evidence/ext-ls-01-issue551/consumer-proof-receipt.json`
   (bytes are generated/verified by `scripts/profile-v2-quality/ext-ls-01/generate-consumer-proof.mjs`; missing bytes fail closed)
+- Admitted LiNKsites candidate `25033a0cb6979c06aeedea5b9d94090e15372e14` / tree `355c23879d8360fe344a11d09cab441a4fb3a450`
+- Receipt SHA-256 `94fc8b3e9a5739aa7419f3ece03c660e8a8c696940c119f7cdb17b4cdcf3296f`
+- Consumer cache tree `8cc18abd172cc075e5615457b8b2711d67f7ff04`
 
 ## Commands
 

@@ -163,8 +163,10 @@ test("native A1 renderer executes from consumer cache after provider checkout re
   assert.equal(generated.ok, true);
   assert.equal(generated.bound, true);
   assert.equal(generated.verified, true);
-  assert.notEqual(generated.consumerCacheTree, "a".repeat(40));
-  assert.match(generated.sha256, /^[0-9a-f]{64}$/);
+  assert.equal(generated.sha256, EXT_LS_01_RECEIPT.sha256);
+  assert.equal(generated.consumerCacheTree, EXT_LS_01_RECEIPT.consumerCacheTree);
+  assert.equal(generated.candidate.commit, EXT_LS_01_RECEIPT.consumerCommit);
+  assert.equal(generated.candidate.tree, EXT_LS_01_RECEIPT.consumerTree);
 });
 
 test("wrong EXT-LS-01 digest fails closed", async () => {
@@ -247,6 +249,9 @@ test("bindings pin protected development and protected A1 identities", () => {
   const receiptBind = JSON.parse(readFileSync(join(evidenceDir, "bindings/ext-ls-01-receipt.json"), "utf8"));
   assert.equal(receiptBind.sha256, EXT_LS_01_RECEIPT.sha256);
   assert.equal(receiptBind.path, EXT_LS_01_RECEIPT.path);
+  assert.equal(receiptBind.consumerCommit, EXT_LS_01_RECEIPT.consumerCommit);
+  assert.equal(receiptBind.consumerTree, EXT_LS_01_RECEIPT.consumerTree);
+  assert.equal(receiptBind.consumerCacheTree, EXT_LS_01_RECEIPT.consumerCacheTree);
 });
 
 test("syntax of harness scripts is valid", () => {
