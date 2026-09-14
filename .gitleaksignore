@@ -38,4 +38,3 @@ cf39aedcff7d65200b50e260f93b10ac62cf8b23:sites_projects/old_linktrend/app/resour
 60274ade7e910f814b0816e74de011281d536dc2:deploy/config/production.env.example:generic-api-key:30
 f232d3819f940576388999b1c750876ed721ab52:docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json:generic-api-key:32
 f232d3819f940576388999b1c750876ed721ab52:docs/security/gitleaks-historical-baseline.md:generic-api-key:37
-
