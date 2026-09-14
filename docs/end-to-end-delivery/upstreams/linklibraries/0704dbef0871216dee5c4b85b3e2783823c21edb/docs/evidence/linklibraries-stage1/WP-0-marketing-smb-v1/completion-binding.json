@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "v25-issue-checkpoint-binding",
+  "amendment": "V25_BOOTSTRAP_LEAN",
+  "packet": "LSG0-03-marketing-smb-v1-qualify-admit-publish",
+  "entryId": "marketing-smb-v1",
+  "issueNumber": 432,
+  "branch": "issue/432-qualify-admit-and-publish-selectable-marketing-s",
+  "proofClass": "local",
+  "selfApproval": false,
+  "classification": "tests",
+  "productCandidate": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "issue/432-qualify-admit-and-publish-selectable-marketing-s",
+    "commit": "4f1aed3e4e6b630a6249eb33ab7e88e2bc3e978b",
+    "tree": "b1966bfa8d6b333ad687474e63651bb9b3a8baac",
+    "note": "Existing marketing-smb-v1 candidate this issue is completing. This JSON cannot contain the SHA of the commit that adds it."
+  },
+  "branchStart": {
+    "commit": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
+    "tree": "d3c5f1e2a3450b016084ae09666ac193297ac9fc",
+    "note": "Historical issue-branch starting identity recorded by admission.json/receipt.json"
+  },
+  "scopedDiff": {
+    "allowedPaths": [
+      "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/",
+      ".ide-development/state/checkpoints/",
+      ".github/linktrend-secret-scan-fixtures.json"
+    ],
+    "baseline": "4f1aed3e4e6b630a6249eb33ab7e88e2bc3e978b",
+    "observedAtWrite": "this-commit-cannot-name-its-own-sha",
+    "productBytesPreserved": true
+  },
+  "focusedTests": {
+    "passed": true,
+    "runtime": {
+      "node": "v22.23.2",
+      "npm": "10.9.8",
+      "python": "3.12.3",
+      "ciNodePin": "22.23.2",
+      "packageEnginesNode": ">=20",
+      "packageLockSha256": "2b574a346a0b6932b17114085bcbdfa3a94468392901c51f729fbd9ca6747146",
+      "install": "npm ci",
+      "pinDefect": "package.json engines.node is >=20 while Validate Library CI pins actions/setup-node node-version 22.23.2. Acceptance used the CI pin. Locks were not changed."
+    },
+    "commands": [
+      {
+        "cmd": "node --test entries/marketing-smb-v1/tests/marketing-smb-v1.test.mjs",
+        "exitCode": 0,
+        "tests": 9,
+        "fail": 0
+      },
+      {
+        "cmd": "node --test tests/entries/selectability-admission.test.mjs",
+        "exitCode": 0,
+        "tests": 3,
+        "fail": 0
+      },
+      {
+        "cmd": "git diff --check 4f1aed3e4e6b630a6249eb33ab7e88e2bc3e978b...HEAD",
+        "exitCode": 0,
+        "note": "Re-run after the evidence commit; empty at candidate tip."
+      }
+    ]
+  },
+  "manifestEvidence": {
+    "present": true,
+    "packageName": "ide-development-managed-core",
+    "packageVersion": "2.5.2",
+    "path": ".ide-development/MANIFEST.json",
+    "sha256": "ce6bd8db02cc8c7386272d4536d19b2d973ae22dbb6988fbc8783617db9bbef9",
+    "versionFile": ".ide-development/VERSION",
+    "versionFileSha256": "8d093f990bc0fd8fc1299c6ddf1bd203e5ea75d208a6d38f8733a9c9b6f48c6a"
+  },
+  "existingAdmissionReceipt": {
+    "admissionPath": "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/admission.json",
+    "receiptPath": "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/receipt.json",
+    "entryFileHashesVerified": true,
+    "catalogSha256Verified": true,
+    "entryGitTreeObjectSha1": "d146699d8d03d6f4821fe7aa57d449678c3ea170",
+    "libraryLocalSelectable": true,
+    "notClaimed": [
+      "LiNKsites renderer compatibility",
+      "Payload CMS compatibility",
+      "consumer integration",
+      "provider live state",
+      "deployment",
+      "production publication",
+      "Phase PR",
+      "hosted gate",
+      "live use"
+    ]
+  },
+  "independentNarrowReview": null,
+  "independentReviewWaiver": null,
+  "githubObservation": {
+    "commitComments": 0,
+    "checkRuns": 0,
+    "commitStatuses": 0,
+    "issue432": "HTTP 403 Resource not accessible by integration"
+  },
+  "holds": [
+    {
+      "id": "HOLD-independent-narrow-review",
+      "required": "one provider-independent narrow review bound to exact candidate commit 4f1aed3e4e6b630a6249eb33ab7e88e2bc3e978b and tree b1966bfa8d6b333ad687474e63651bb9b3a8baac, or an existing durable non-material lean waiver bound to that identity",
+      "status": "HOLD",
+      "reason": "No independentNarrowReview object and no independentReviewWaiver exist in the repository for this candidate. GitHub commit 4f1aed3e4e6b630a6249eb33ab7e88e2bc3e978b has zero commit comments, zero check-runs, and zero commit statuses. Issue 432 could not be read (HTTP 403). Implementer did not invent a review or waiver. admission.json requires independentApprovalRequired=true and selfApproval=false."
+    }
+  ],
+  "phase2LinksitesRequirement": {
+    "authority": "docs/architecture/master-website-template-v2/LINKSITES-DETAILED-REQUIREMENTS.md",
+    "requirement": "LS-FR-01",
+    "boundProvider": "marketing-smb-v1 is the Library-local catalogue identity; LiNKsites must discover only catalogue-permitted entries and must not let stale marketing-smb-v1 fixtures override current Library governance.",
+    "phase2": "docs/architecture/master-website-template-v2/CANONICAL-PRD-ROADMAP.md Phase 2 is A1 provider implementation (G2), not LiNKsites consumption. Phase 3 is LiNKsites A1 consumption against the exact A1 provider candidate, not this marketing-smb-v1 portable template.",
+    "notProvenHere": true
+  }
+}

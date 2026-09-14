@@ -1,0 +1,17 @@
+{
+  "issue": 549,
+  "branch": "issue/549-consume-protected-marketing-smb-provider-handoff",
+  "writerCheckout": "cursor/linksites-protected-marketing-smb-consumer-549-4259",
+  "startingCommit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  "startingTree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+  "implementationCommit": "962104ea031ff3fbd412f977fdf031c255b6a18b",
+  "implementationTree": "bf70d00764d2106a19d44282b9a9fee3290fac9e",
+  "provider": {
+    "repository": "linktrend/LiNKlibraries",
+    "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+    "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42"
+  },
+  "status": "consumer-proof-recorded",
+  "packetPass": false,
+  "note": "marketing-smb-v1 Library-local selectable consumed. MWT A1/A2/A3 and A/B/C/L remain later gaps. No implementer PR."
+}

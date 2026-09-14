@@ -5,10 +5,11 @@ import http from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { test } from "node:test";
+import { before, test } from "node:test";
 import { CHECK_IDS, EXT_LS_01_RECEIPT, PROVIDER_PIN, PROTECTED_DEVELOPMENT, requiredMatrixSlots } from "./constants.mjs";
 import { evaluatePairedProof, evaluateIss25Matrix, runIss25Matrix } from "./harness.mjs";
-import { ClosedFailure } from "./identities.mjs";
+import { ClosedFailure, requireExtLs01Receipt } from "./identities.mjs";
+import { runExactCandidateConsumerProof } from "./native-proof.mjs";
 import { emitConsumerReceipt } from "./receipt.mjs";
 import { renderSlotHtml } from "./html-fixtures.mjs";
 import { evaluateSlot } from "./slot-proof.mjs";
@@ -20,6 +21,18 @@ const evidenceDir = join(repoRoot, "docs/evidence/master-v2/a1");
 const validateCli = join(here, "scripts/validate.mjs");
 const runCli = join(here, "scripts/run.mjs");
 const gitCommonDir = execFileSync("git", ["rev-parse", "--git-common-dir"], { cwd: repoRoot, encoding: "utf8" }).trim();
+
+before(() => {
+  runExactCandidateConsumerProof([
+    "--clean",
+    "--repo-root",
+    repoRoot,
+    "--candidate-commit",
+    EXT_LS_01_RECEIPT.consumerCommit,
+    "--candidate-tree",
+    EXT_LS_01_RECEIPT.consumerTree,
+  ], { repoRoot });
+});
 
 function failedIds(report) {
   return report.checks.filter((item) => item.status === "FAIL").map((item) => item.id);
@@ -125,6 +138,35 @@ test("provider bytes fabrication fails closed", async () => {
   }
 });
 
+test("missing EXT-LS-01 receipt bytes fail closed and cannot report bound=true", async () => {
+  const temp = mkdtempSync(join(tmpdir(), "ls08-iss-missing-receipt-"));
+  try {
+    assert.throws(
+      () => requireExtLs01Receipt(EXT_LS_01_RECEIPT, { repoRoot: temp, gitCommonDir: temp }),
+      (error) => error instanceof ClosedFailure && error.code === "ext_ls01_unbound" && /bound=true is forbidden/i.test(error.message),
+    );
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
+});
+
+test("native A1 renderer executes from consumer cache after provider checkout removal", () => {
+  const generated = runExactCandidateConsumerProof([
+    "--clean",
+    "--repo-root",
+    repoRoot,
+    "--candidate-commit",
+    EXT_LS_01_RECEIPT.consumerCommit,
+    "--candidate-tree",
+    EXT_LS_01_RECEIPT.consumerTree,
+  ], { repoRoot });
+  assert.equal(generated.ok, true);
+  assert.equal(generated.bound, true);
+  assert.equal(generated.verified, true);
+  assert.notEqual(generated.consumerCacheTree, "a".repeat(40));
+  assert.match(generated.sha256, /^[0-9a-f]{64}$/);
+});
+
 test("wrong EXT-LS-01 digest fails closed", async () => {
   const temp = mkdtempSync(join(tmpdir(), "ls08-iss-receipt-"));
   try {
@@ -193,16 +235,18 @@ test("HTTP fixture server serves A1 HTML without provider bytes", async () => {
   }
 });
 
-test("bindings pin protected development and MWT-07 identities", () => {
+test("bindings pin protected development and protected A1 identities", () => {
   const status = JSON.parse(readFileSync(join(evidenceDir, "STATUS.json"), "utf8"));
   assert.equal(status.ls07Checkpoint.commit, PROTECTED_DEVELOPMENT.commit);
   assert.equal(status.ls07Checkpoint.tree, PROTECTED_DEVELOPMENT.tree);
-  assert.equal(status.providerA1.commit, PROVIDER_PIN.commit);
-  assert.equal(status.providerA1.tree, PROVIDER_PIN.tree);
-  assert.equal(status.providerA1.selectability, "non_selectable");
+  const providerBind = JSON.parse(readFileSync(join(evidenceDir, "bindings/provider-pin.json"), "utf8"));
+  assert.equal(providerBind.commit, PROVIDER_PIN.commit);
+  assert.equal(providerBind.tree, PROVIDER_PIN.tree);
+  assert.equal(providerBind.artifactTree, PROVIDER_PIN.artifactTree);
+  assert.equal(providerBind.selectability, "non_selectable");
   const receiptBind = JSON.parse(readFileSync(join(evidenceDir, "bindings/ext-ls-01-receipt.json"), "utf8"));
   assert.equal(receiptBind.sha256, EXT_LS_01_RECEIPT.sha256);
-  assert.equal(receiptBind.consumerCommit, EXT_LS_01_RECEIPT.consumerCommit);
+  assert.equal(receiptBind.path, EXT_LS_01_RECEIPT.path);
 });
 
 test("syntax of harness scripts is valid", () => {
@@ -214,6 +258,7 @@ test("syntax of harness scripts is valid", () => {
     "slot-proof.mjs",
     "html-fixtures.mjs",
     "iss26.mjs",
+    "native-proof.mjs",
     "scripts/run.mjs",
     "scripts/validate.mjs",
     "scripts/generate.mjs",
