@@ -1,0 +1,107 @@
+# DEFINITIONS ONLY — LiNKsites service catalogue slot on Platform.
+# Separately deployable and independently disableable from Brain and Skills.
+# No live endpoint, identity, or cloud resource is created by this file.
+# Role ownership of svc_linksites_runtime / svc_linksites_ledger remains with
+# LiNKsites. Platform sequential migration 000017 grants those roles only
+# platform USAGE and platform.has_org_access EXECUTE.
+
+apiVersion: linkplatform.infra/v0
+kind: DomainServiceDefinition
+metadata:
+  name: sites-service
+  labels:
+    linktrend.io/program: linkplatform
+    linktrend.io/domain: lsites
+    linktrend.io/cost-center: studio-shared-foundation
+    linktrend.io/service: sites-service
+    linktrend.io/consumer: LiNKsites
+  annotations:
+    linkplatform.io/definition-only: "true"
+    linkplatform.io/live-claim: "false"
+    linkplatform.io/authority: "ADR-0006,ADR-0010,000017-linksites-grants"
+    linkplatform.io/grant-migration: "supabase/migrations/20260804_000017_linksites_platform_rls_grants.sql"
+
+spec:
+  domain: linksites
+  enabled_by_default: false
+  independent_of: brain-service
+  independent_of_skills_service: true
+
+  endpoints:
+    stage: PLACEHOLDER_SITES_STAGE_URL
+    production: PLACEHOLDER_SITES_PROD_URL
+    health:
+      liveness: /healthz
+      readiness: /readyz
+    dns_name: PLACEHOLDER_SITES_DNS
+
+  identity:
+    stage_service_id: sites-runtime-stage
+    production_service_id: sites-runtime-prod
+    stage_ledger_id: sites-ledger-stage
+    production_ledger_id: sites-ledger-prod
+    database_roles:
+      runtime: svc_linksites_runtime
+      ledger: svc_linksites_ledger
+    credential_secret_refs:
+      stage: LINKTREND_PLATFORM_STAGE_SITES_RUNTIME_CREDENTIAL_REF
+      production: LINKTREND_PLATFORM_PROD_SITES_RUNTIME_CREDENTIAL_REF
+      stage_ledger: LINKTREND_PLATFORM_STAGE_SITES_LEDGER_CREDENTIAL_REF
+      production_ledger: LINKTREND_PLATFORM_PROD_SITES_LEDGER_CREDENTIAL_REF
+    broad_service_role_in_production: forbidden
+
+  artifacts:
+    release_channel_stage: sites-stage
+    release_channel_production: sites-prod
+    descriptor_contract: PLACEHOLDER_ARTIFACT_DESCRIPTOR_CONTRACT
+    owner_repo: LiNKsites
+
+  network:
+    rate_limit_slot: PLACEHOLDER_SITES_RATE_LIMIT
+    policy_slot: PLACEHOLDER_SITES_NETWORK_POLICY
+    may_not_read_brain_private_objects: true
+    may_not_read_skills_objects: true
+
+  cache: PLACEHOLDER_SITES_CACHE_SLOT
+  queue: PLACEHOLDER_SITES_QUEUE_SLOT
+
+  grants:
+    sequential_migration: "000017"
+    migration_path: supabase/migrations/20260804_000017_linksites_platform_rls_grants.sql
+    schema_usage: platform
+    execute:
+      - platform.has_org_access(uuid, platform.member_role)
+    table_privileges: none
+    service_role: forbidden
+    environments:
+      - stage
+      - production
+
+  feature_flags:
+    sites_service_enabled: false
+    sites_writes_enabled: false
+    actor_adapter_enabled: false
+
+  telemetry:
+    service_name: sites-service
+    log_labels:
+      domain: lsites
+    metric_prefix: linkplatform.sites
+    trace_service_name: sites-service
+    alerts_channel_slot: PLACEHOLDER_SITES_ALERTS
+    distinguishable_from_brain: true
+    distinguishable_from_skills: true
+
+  retention:
+    operational_logs: PLACEHOLDER
+    private_payload_in_platform_telemetry: forbidden
+
+  failure_rollback:
+    disable_flag: sites_service_enabled
+    rollback_order_ref: docs/runbooks/rollback-domain-service.md
+    must_not_disable: brain-service
+
+  health_dependencies:
+    - platform_database
+    - sites_credential_ref
+    - linksites_000017_grants

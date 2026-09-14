@@ -13,8 +13,8 @@ const root = join(here, '..')
 const fixture = (name) => JSON.parse(readFileSync(join(root, 'fixtures', name), 'utf8'))
 const cli = join(root, 'consumer-proof-validator.mjs')
 
-const CANDIDATE_COMMIT = '2ba3bd70244061985a3896e748fb75e92dfb6c69'
-const CANDIDATE_TREE = '606fcb986b8eb9af476aea369d94990357ff9681'
+const CANDIDATE_COMMIT = 'df53bbaf854a44ea651deb5af4f165aa9df4cccb'
+const CANDIDATE_TREE = '4d08448f5e629747b0df93a6d80f52fc5402be66'
 
 test('missing candidate identity fails closed', () => {
   const result = evaluateConsumerProof({})
@@ -70,7 +70,12 @@ test('partial A1 receipt HOLDs missing plans and surfaces', () => {
 })
 
 test('complete candidate evidence is not ACCEPT or protected integration', () => {
-  const result = evaluateConsumerProof(fixture('complete-candidate-evidence.input.json'))
+  const input = fixture('complete-candidate-evidence.input.json')
+  assert.equal(input.candidate.issue, 551)
+  assert.equal(input.candidate.commit, CANDIDATE_COMMIT)
+  assert.notEqual(input.a1Receipt.consumerCacheTree, 'a'.repeat(40))
+  assert.doesNotMatch(JSON.stringify(input), /2ba3bd70/)
+  const result = evaluateConsumerProof(input)
   assert.equal(result.overall, 'CANDIDATE_EVIDENCE_COMPLETE')
   assert.ok(result.lanes.every((lane) => lane.status === 'PASS'))
   assert.equal(result.claims.accept, false)

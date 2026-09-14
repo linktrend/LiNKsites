@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "platform.linksites-catalogue-grants.handoff",
+  "lifecycleState": "source-complete-hosted-hold",
+  "issueBranch": "issue/273-complete-linksites-platform-registration-grants",
+  "admittedStartingCommit": "8d7af99575a5498ecda6b4396431136eb7c9c213",
+  "admittedStartingTree": "db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
+  "migration000017": {
+    "path": "supabase/migrations/20260804_000017_linksites_platform_rls_grants.sql",
+    "sha256": "e42ff4bc6486111c3779398379c3b2a0cc1b3f9ef95b08e81677d0cc8a66cf42",
+    "replaced": false
+  },
+  "cataloguePath": "infra/services/sites-service.yaml",
+  "verificationPath": "supabase/verification/20260804_000017_linksites_platform_rls_grants.verify.sql",
+  "providerTrustFixture": "packages/contracts/fixtures/provider-trust/valid-v1.json",
+  "stageMigrationApplied": false,
+  "productionMigrationApplied": false,
+  "liveHealthClaimed": false,
+  "productionReceipt": "not-claimed",
+  "hold": {
+    "code": "LINKTREND_PLATFORM_STAGE_THEN_PROD_APPLY_AUTHORITY_ABSENT",
+    "missingAuthority": "No LINKTREND_PLATFORM_STAGE_* or PROD database/API credential is present in this environment, gcloud/GSM is unavailable, and infra/environments/production.yaml remains enabled: false. Stage-then-production apply of 000017, live grant readback, and live health evidence cannot be performed."
+  }
+}

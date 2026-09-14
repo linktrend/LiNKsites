@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 2,
+  "entryId": "marketing-smb-v1",
+  "kind": "template",
+  "name": "Marketing SMB v1",
+  "summary": "Portable, draft-only CMS template export with a formal content contract, neutral copy, and local asset inventory for small-business marketing sites.",
+  "problemDomains": [
+    "small-business marketing sites",
+    "CMS content modeling",
+    "reusable site templates"
+  ],
+  "tags": [
+    "marketing",
+    "smb",
+    "template",
+    "cms"
+  ],
+  "languages": [
+    "json",
+    "javascript"
+  ],
+  "frameworks": [],
+  "state": "usable",
+  "contentMode": "executable",
+  "selectable": true,
+  "compatibility": {
+    "node": ">=20",
+    "runtimes": [
+      "node"
+    ]
+  },
+  "dependencies": {
+    "packages": [],
+    "services": []
+  },
+  "testContract": {
+    "runner": "node:test",
+    "files": [
+      "tests/marketing-smb-v1.test.mjs"
+    ],
+    "timeoutMs": 30000
+  },
+  "license": {
+    "spdx": "LicenseRef-LiNKtrend-Proprietary",
+    "redistributionAllowed": false,
+    "notes": "Internal LiNKtrend reusable content. Cross-repository reuse is permitted for LiNKtrend systems; external redistribution requires Principal authorization."
+  },
+  "securityReview": {
+    "reviewedAt": "2026-09-12T00:00:00.000Z",
+    "reviewedBy": "lsg0-03-implementation",
+    "notes": "Library-local admission scanned payload files for secret-like material, verified declared SHA-256 inventory, and required deterministic catalogue proof. No credentials, customer data, live endpoints, or production integration settings are present. This review does not prove LiNKsites renderer or Payload CMS compatibility, consumer integration, provider live state, deployment, or production publication."
+  },
+  "usage": {
+    "howToUse": "Import the portable src/index.mjs export, validate the strict content input, and render or adapt its complete draft site tree while preserving its ownership, scoping, and publication boundaries.",
+    "examples": [
+      "Use the pageTemplates array to plan CMS Pages records for a new SMB site.",
+      "Use the navigationTemplate and complete executable draft output after validating consumer input."
+    ]
+  },
+  "integrationNotes": "This entry is admitted as a Library-local selectable template. It supplies its own portable component, layout, design-system, media, and draft-content implementation. Admission does not prove LiNKsites renderer compatibility, Payload CMS compatibility, consumer integration, provider live state, deployment, or production publication. A consumer may adapt the returned tree, but must not install it automatically, create a customer site, select an endpoint, or publish content from the Library consumer.",
+  "gotchas": [
+    "Keep every CMS read and seed record scoped by siteId and locale, with status explicitly controlled.",
+    "The executable draft output is draft-only and uses substitution markers; validate business copy, links, and required records before preview or publication.",
+    "Do not treat Library selection as proof that a live site, webhook, analytics property, domain, or deployment exists.",
+    "LiNKsites renderer and Payload CMS compatibility remain unproven and are outside this Library admission.",
+    "Consumers must not silently extend the validated component or content contract; any new capability requires a new Library artifact revision.",
+    "Unknown or unqualified Library entries must remain non-selectable even when this entry is selectable."
+  ],
+  "provenance": {
+    "sourceSystem": "manual",
+    "sourceRevisionSha": "a7193d40152747db2a03e094fa263f324a971a0b",
+    "contributedAt": "2026-08-05T00:00:00.000Z",
+    "versionOrRange": "marketing-smb-v1"
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "040d76fc928d843fbe6ba57a5f7aeafde557d8dc468c71d905d746724b8183f0"
+    },
+    {
+      "path": "assets/marketing-smb-v1.template.json",
+      "sha256": "3905706daba65269bd927da42eeb39bcfa777a2973f2f1072852804e156fae42"
+    },
+    {
+      "path": "assets/brand-placeholder.svg",
+      "sha256": "2ccb51329af51c498418e0b096973870d9150beed44717f08db8938c0f7d5552"
+    },
+    {
+      "path": "assets/asset-inventory.json",
+      "sha256": "f84ae8a8e9c290420858e60d08261a3f7ca0c25d89573579e052a4e72142e895"
+    },
+    {
+      "path": "assets/hero-illustration.svg",
+      "sha256": "49d79ca0d4eaebdd1051fb5865b029721c7cb0a3bf1495a7b8ae28dd3f0fe457"
+    },
+    {
+      "path": "assets/video-placeholder.svg",
+      "sha256": "3ffa202bd8310e00fa9e7f3ab3aacd56e7e8342dca7b1e37bf129be31a6ca213"
+    },
+    {
+      "path": "assets/case-study-placeholder.svg",
+      "sha256": "bc977c9ba047cf1c4d8aefee4e4917ee1a294c21e95369a886c5243472654961"
+    },
+    {
+      "path": "assets/testimonial-placeholder.svg",
+      "sha256": "d3f3455af1ffd662b816dba12fab95f69f72286c835d3f3e348af0541bde39b2"
+    },
+    {
+      "path": "content/content.schema.json",
+      "sha256": "b6d809f845f8bd5c0fecfd3815209ecb6d7afb325c034bdd468197ac6088c0dd"
+    },
+    {
+      "path": "content/baseline-copy.json",
+      "sha256": "a42c47b598e66e34765067373a69336dcfee1d78eceb2b4ac1ec0b7400b0b132"
+    },
+    {
+      "path": "design/tokens.json",
+      "sha256": "ea0415a8c9478ef8d9e829247800f3ed56c2602a0fb12cd6287b7fd8c0a8120a"
+    },
+    {
+      "path": "src/index.mjs",
+      "sha256": "5c8530b48deea20c6db282489062d9a4bdff0d55a4b74831d80e13abe0954013"
+    },
+    {
+      "path": "tests/marketing-smb-v1.test.mjs",
+      "sha256": "c4740a837a64f81b94fe7b7b3ed3953811a9f4be5b7fd84e5621ea482d6847c0"
+    }
+  ]
+}

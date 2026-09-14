@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "LSG0-03-admission-refresh-qualification",
+  "packet": "LSG0-03",
+  "issue": 549,
+  "overall": "HOLD",
+  "pass": false,
+  "ready": false,
+  "evidenceLevel": "exact-protected-tree-inspection-and-consumer-bind",
+  "refreshReason": "Consume protected LiNKlibraries marketing-smb-v1 at 0704dbef0871216dee5c4b85b3e2783823c21edb after Library-local selectable admission (PR #450).",
+  "leanReview": {
+    "independentReviewerUsed": false,
+    "policy": "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json",
+    "replacementProof": [
+      "exact commit/tree",
+      "GitHub byte fetch + SHA-256",
+      "focused factory-catalog and web-master tests",
+      "provider node:test on read-only checkout",
+      "changed-path secret scan",
+      "git diff --check"
+    ],
+    "namedRiskSurfacesChanged": false,
+    "selfReviewOfMaterialRiskForbiddenAndNotClaimed": true
+  },
+  "requirement": {
+    "id": "LSG0-03",
+    "title": "Obtain truthful LiNKlibraries provider handoffs",
+    "acceptance": "LiNKlibraries protected identities and receipts independently prove selectable lifecycle state and exact bytes. Old quarantined planning pins, local fixtures, or production claims fail.",
+    "passRule": "Packet PASS only if both required providers are selectable/admitted for their intended consumer use. marketing-smb-v1 is now Library-local selectable; Master Website Template A1/A2/A3 and A/B/C/L remain draft/non-selectable. Overall HOLD remains."
+  },
+  "protectedLibraryIdentityUsed": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+    "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42"
+  },
+  "providers": {
+    "marketing-smb-v1": {
+      "selectable": true,
+      "admitted": true,
+      "admissionClass": "library-local-selectable",
+      "lifecycle": "usable",
+      "compatibilityForLiNKsitesRenderer": "unknown",
+      "productionSelectable": false,
+      "classification": "completed"
+    },
+    "master-template-type-1": {
+      "selectable": false,
+      "admitted": false,
+      "lifecycle": "draft",
+      "currentJson": false,
+      "classification": "missing and needs work",
+      "lane": "separate A1/A2/A3 and A/B/C/L; preserved, not mixed with marketing-smb-v1 consumer proof"
+    }
+  },
+  "bothRequiredProvidersSelectableAdmitted": false,
+  "didNotSubstituteFixtureProvider": true,
+  "didNotMutateLiNKlibraries": true,
+  "didNotClaimDeploymentOrProduction": true,
+  "didNotClaimProviderPublicationAsConsumerProof": true,
+  "upstreamOwnerActionsToClear": [
+    {
+      "owner": "linktrend/LiNKlibraries",
+      "action": "Admit a current Master Website Template release with current.json production pointer, catalogue/governance/release-receipt selectability selectable, admission performed, and independent qualification receipts bound to a protected commit/tree covering A1/A2/A3 plus A/B/C/L."
+    },
+    {
+      "owner": "LiNKsites later packets",
+      "action": "A2/A3/A/B/C/L consumer lanes and any LiNKsites renderer/Payload compatibility proof remain later work. Do not treat this marketing-smb-v1 Library-local bind as production."
+    }
+  ]
+}
