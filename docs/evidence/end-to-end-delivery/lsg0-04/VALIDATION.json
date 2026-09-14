@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-validation",
+  "generatedAt": "2026-09-13T07:35:00Z",
+  "jsonTool": "python3 -m json.tool on all lsg0-04 JSON plus LSG0-04-HANDOFF.json",
+  "secretScan": "ISS-32 scoped-diff policy: no PEM or vendor-token substrings in packet-owned files; new tests use GSM-style key references only",
+  "gitDiffCheck": "git diff --check fba2ed08d5cf3a16ca691da6eec707d584153a7f...HEAD",
+  "relativeIndex": true,
+  "acceptance": {
+    "autoworkBoundary": "pnpm --filter @linksites/autowork-boundary test — PASS 19",
+    "programOrchestratorFocused": "protected-source-compat + canonical-intake + autowork-client — PASS 21",
+    "programOrchestratorFull": "HOLD — 64 pass / 15 fail. ISS-32 scope scans the whole issue-550 tree because GITHUB_HEAD_REF is not phase/. library.verify defaults to /Users/linktrend/Projects/LiNKlibraries which is absent on this Linux cloud VM. Not corrected by inventing a library checkout, forging GITHUB_HEAD_REF, or changing ISS-32 ownership.",
+    "cmsInt": "pnpm --filter @linksites/cms test:int — PASS 106, 1 skipped",
+    "cmsFull": "HOLD — full `test` also runs Playwright e2e; DATABASE_URI is unset so the Next webServer cannot start. No database apply and no invented credential."
+  }
+}

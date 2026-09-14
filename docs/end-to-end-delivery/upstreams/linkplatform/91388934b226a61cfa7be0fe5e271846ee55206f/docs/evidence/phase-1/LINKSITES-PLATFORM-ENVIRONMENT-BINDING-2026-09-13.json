@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "platform.linksites-environment-binding.source",
+  "lifecycleState": "source-complete-hosted-hold",
+  "issueBranch": "issue/273-complete-linksites-platform-registration-grants",
+  "admittedStartingCommit": "4c8eda0415473594ca9502377ff5e5fd23f95c15",
+  "admittedStartingTree": "9c942ff1af63d9f745a0ded2bf00a370499cea5e",
+  "cataloguePath": "infra/services/sites-service.yaml",
+  "stagePath": "infra/environments/stage.yaml",
+  "productionPath": "infra/environments/production.yaml",
+  "gsmInventoryPath": "docs/operations/gsm-inventory.md",
+  "assertPath": "scripts/assert-linksites-platform-environment-binding.py",
+  "requiredSitesSecretNames": [
+    "LINKTREND_PLATFORM_STAGE_SITES_RUNTIME_CREDENTIAL_REF",
+    "LINKTREND_PLATFORM_STAGE_SITES_LEDGER_CREDENTIAL_REF",
+    "LINKTREND_PLATFORM_PROD_SITES_RUNTIME_CREDENTIAL_REF",
+    "LINKTREND_PLATFORM_PROD_SITES_LEDGER_CREDENTIAL_REF"
+  ],
+  "productionEnabled": false,
+  "stageEnabled": false,
+  "gsmSecretsCreated": false,
+  "stageMigrationApplied": false,
+  "productionMigrationApplied": false,
+  "liveHealthClaimed": false,
+  "inventedCredentials": false,
+  "hold": {
+    "code": "LINKTREND_PLATFORM_STAGE_THEN_PROD_APPLY_AUTHORITY_ABSENT",
+    "remainingHostedApplyAuthority": "A later worker with Principal-approved stage then production gates, GSM or approved injector values for LINKTREND_PLATFORM_STAGE_PACI_DATABASE_URL then LINKTREND_PLATFORM_PROD_PACI_DATABASE_URL (login role svc_platform), and GSM write for the four SITES_* names. This source worker must not apply 000017, create GSM secrets, or enable production."
+  }
+}
