@@ -1,5 +1,7 @@
 import { mapProviderSemantic, SEMANTIC_COMPONENT_MAP } from "@linksites/factory-catalog";
 
+import { CONSUMER_RENDERABLE_BLOCK_TYPES } from "@/components/page-renderer/adapter-surface";
+
 export class ProviderSemanticError extends Error {
   constructor(message: string) {
     super(message);
@@ -7,28 +9,7 @@ export class ProviderSemanticError extends Error {
   }
 }
 
-const PAYLOAD_BLOCK_TYPES = new Set([
-  "hero",
-  "features",
-  "pricing",
-  "testimonials",
-  "cta",
-  "faq",
-  "richText",
-  "content",
-  "media",
-  "callout",
-  "videoEmbed",
-  "relatedContent",
-  "testimonial",
-  "trustFeed",
-  "locations",
-  "teamMembers",
-  "offerShowcase",
-  "caseStudies",
-  "articles",
-  "newsletter",
-]);
+const PAYLOAD_BLOCK_TYPES = CONSUMER_RENDERABLE_BLOCK_TYPES;
 
 export type MappedBlock = Readonly<{
   payloadBlockType: string;

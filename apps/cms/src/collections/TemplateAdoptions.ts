@@ -5,6 +5,18 @@ import { localeField } from '@/fields/localeField'
 import { siteField } from '@/fields/siteField'
 import { LS03_ADOPTION_STATES, SHA1_IDENTITY } from '@/payload/ls03/semanticContract'
 import { ImmutableRecordError, rejectImmutableDelete, rejectImmutableUpdate } from '@/hooks/enforceImmutableRecord'
+import { assertOwningSiteTenantBoundary } from '@/payload/lsdata01/tenantBoundary'
+
+/** Frozen LSG0-02 / LS-02 pins mirrored from factory-catalog; CMS cannot depend on that package. */
+export const LSDATA01_RETAINED_PROVIDER = '0178894d6ce718bb7dff3c141892f82144e2d18c'
+export const LSDATA01_RETAINED_ADAPTER = '6cab53da19ba390d392157dbcc38979f1a6c86b5'
+export const LSDATA01_SCHEMA_PROVIDER_TREES = [
+  'e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139',
+  '2ce580d54ffa7abbee77fe3710130b9e37c3c31f',
+  '863e6b1f40def2df99aeb748dd9be570d28b1fb2',
+] as const
+export const LSDATA01_SCHEMA_ADAPTER = '2ce580d54ffa7abbee77fe3710130b9e37c3c31f'
+export const LSDATA01_NON_ADMITTED_FIXTURE = 'b599c0f0ee6bc2aad3484aa42ef1fd9e86a05758'
 
 const identityField = (name: string, label: string): Field => ({
   name,
@@ -16,8 +28,28 @@ const identityField = (name: string, label: string): Field => ({
   },
 })
 
-const assertAdoptionIdentities: CollectionBeforeChangeHook = ({ data }) => {
-  const identities = data?.identities as Record<string, unknown> | undefined
+export const assertLsdata01TenantBoundary: CollectionBeforeChangeHook = async ({ data, req }) => {
+  try {
+    await assertOwningSiteTenantBoundary({
+      data,
+      user: req.user,
+      findOwningSite: async (siteId, authenticatedUser) =>
+        (await req.payload.findByID({
+          collection: 'sites',
+          id: siteId,
+          depth: 0,
+          overrideAccess: false,
+          user: authenticatedUser as typeof req.user,
+        })) as unknown as { id?: string | number; orgId?: unknown },
+    })
+  } catch (error) {
+    throw new ImmutableRecordError(error instanceof Error ? error.message : 'Tenant authorization denied.')
+  }
+}
+
+export const assertAdoptionIdentities: CollectionBeforeChangeHook = ({ data }) => {
+  if (!data) return
+  const identities = data.identities as Record<string, unknown> | undefined
   const keys = ['provider', 'layout', 'plan', 'overlay', 'config', 'content', 'adapter', 'effective'] as const
   if (!identities) {
     throw new ImmutableRecordError('Template adoption identities are required.')
@@ -28,6 +60,30 @@ const assertAdoptionIdentities: CollectionBeforeChangeHook = ({ data }) => {
       throw new ImmutableRecordError(`${key} must be an exact lowercase 40-character SHA-1 identity.`)
     }
   }
+  const provider = identities.provider as string
+  if (provider === LSDATA01_NON_ADMITTED_FIXTURE) {
+    throw new ImmutableRecordError('Provider fixture trees are not production admission and cannot be activated.')
+  }
+  if (provider === LSDATA01_RETAINED_PROVIDER) {
+    if (identities.adapter !== LSDATA01_RETAINED_ADAPTER) {
+      throw new ImmutableRecordError('Retained production adapter pin does not match the H-09 tree.')
+    }
+    data.compatibilityClass = 'retained-production-pin'
+    data.activationState = 'active'
+    return
+  }
+  if ((LSDATA01_SCHEMA_PROVIDER_TREES as readonly string[]).includes(provider)) {
+    if (identities.adapter !== LSDATA01_SCHEMA_ADAPTER) {
+      throw new ImmutableRecordError('Schema-compatibility adapter identity must equal the frozen LSG0-02 Harness tree.')
+    }
+    if (data.activationState === 'active' || data.adoptionState === 'adopted') {
+      throw new ImmutableRecordError('Frozen schema identities cannot activate production; rejected without partial activation.')
+    }
+    data.compatibilityClass = 'schema-compatibility-copy'
+    data.activationState = 'inactive'
+    return
+  }
+  throw new ImmutableRecordError('Unknown provider identity rejected without partial activation.')
 }
 
 export const TemplateAdoptions: CollectionConfig = {
@@ -44,7 +100,7 @@ export const TemplateAdoptions: CollectionConfig = {
     delete: () => false,
   },
   hooks: {
-    beforeChange: [assertAdoptionIdentities, rejectImmutableUpdate],
+    beforeChange: [assertLsdata01TenantBoundary, assertAdoptionIdentities, rejectImmutableUpdate],
     beforeDelete: [rejectImmutableDelete],
   },
   fields: [
@@ -57,6 +113,37 @@ export const TemplateAdoptions: CollectionConfig = {
     },
     siteField,
     localeField,
+    {
+      name: 'tenantOrgId',
+      type: 'text',
+      required: true,
+      index: true,
+      admin: {
+        description: 'Fail-closed tenant org boundary copied from the owning site.',
+      },
+    },
+    {
+      name: 'compatibilityClass',
+      type: 'select',
+      required: true,
+      defaultValue: 'unverified',
+      options: [
+        { label: 'Unverified', value: 'unverified' },
+        { label: 'Retained production pin', value: 'retained-production-pin' },
+        { label: 'Schema compatibility copy', value: 'schema-compatibility-copy' },
+      ],
+    },
+    {
+      name: 'activationState',
+      type: 'select',
+      required: true,
+      defaultValue: 'rejected',
+      options: [
+        { label: 'Inactive', value: 'inactive' },
+        { label: 'Active', value: 'active' },
+        { label: 'Rejected', value: 'rejected' },
+      ],
+    },
     {
       name: 'adoptionState',
       type: 'select',
