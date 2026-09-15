@@ -31,6 +31,7 @@ import {
   requireExtLs01Receipt,
   requireProtectedLs07,
   requireProviderPin,
+  loadExtLs01ReceiptBytes,
 } from "./identities.mjs";
 import { evaluateSlot } from "./slot-proof.mjs";
 import { renderSlotHtml, slotHtmlPath } from "./html-fixtures.mjs";
@@ -157,11 +158,23 @@ function evaluateIntegrity(status, scope, dependencies, providerPin, extLs01, re
     assertNoFabricationKeys(dependencies);
     assertNoSelectabilityOrMwt08(status);
     requireProtectedLs07(isRecord(status) ? status.ls07Checkpoint : undefined);
-    requireProviderPin(isRecord(status) ? status.providerA1 : providerPin);
+    requireProviderPin(providerPin);
+    if (isRecord(status) && isRecord(status.providerA1) && (status.providerA1.bytesPresent === true || status.providerA1.providerBytes != null)) {
+      throw new ClosedFailure("provider_bytes", "STATUS must not present provider A1 bytes");
+    }
     requireExtLs01Receipt(extLs01, { repoRoot, gitCommonDir });
+    const receiptBytes = loadExtLs01ReceiptBytes(extLs01, { repoRoot, gitCommonDir });
+    if (!isRecord(receiptBytes.nativeRender) || receiptBytes.nativeRender.executedFrom !== "consumer_cache") {
+      throw new ClosedFailure("ext_ls01_unbound", "EXT-LS-01 receipt must execute native A1 from the consumer cache");
+    }
+    for (const planId of ["a", "b", "c", "l"]) {
+      if (!isRecord(receiptBytes.nativeRender.plans?.[planId])) {
+        throw new ClosedFailure("ext_ls01_unbound", `EXT-LS-01 receipt is missing native render for plan ${planId}`);
+      }
+    }
     if (repoRoot) assertCatalogPinFiles(repoRoot);
     checks.push(check(CHECK_IDS.LS07_BOUND, true, `LS-07 bound at ${PROTECTED_DEVELOPMENT.commit}`));
-    checks.push(check(CHECK_IDS.PROVIDER_PIN_BOUND, true, `MWT-07 pin bound at ${PROVIDER_PIN.commit}`));
+    checks.push(check(CHECK_IDS.PROVIDER_PIN_BOUND, true, `protected A1 pin bound at ${PROVIDER_PIN.commit}`));
     checks.push(check(CHECK_IDS.EXT_LS01_BOUND, true, `EXT-LS-01 receipt digest ${EXT_LS_01_RECEIPT.sha256}`));
     checks.push(check(CHECK_IDS.NO_PROVIDER_BYTES, true, "provider A1 bytes remain absent (identity pin only)"));
   } catch (error) {
@@ -211,7 +224,7 @@ function evaluateIntegrity(status, scope, dependencies, providerPin, extLs01, re
         unsatisfied.length === 0,
       unsatisfied.length
         ? `required bindings must be satisfied: ${unsatisfied.join(", ")}`
-        : "scope names LS-08 ISS-25..27 with bound LS-07, MWT-07, and EXT-LS-01",
+        : "scope names LS-08 ISS-25..27 with bound LS-07, protected A1, and EXT-LS-01",
     ),
   );
   return checks;

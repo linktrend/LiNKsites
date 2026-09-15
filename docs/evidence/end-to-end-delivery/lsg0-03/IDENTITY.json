@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-03-session-and-source-identity",
+  "packet": "LSG0-03",
+  "issue": 549,
+  "recordedAt": "2026-09-13T08:30:00Z",
+  "cloudRun": {
+    "url": "https://cursor.com/agents/bc-87a02277-fb0c-427f-982e-55dc5aa26d13",
+    "bcId": "bc-87a02277-fb0c-427f-982e-55dc5aa26d13",
+    "name": "LINKSITES-PROTECTED-MARKETING-SMB-CONSUMER-549"
+  },
+  "initialCachedIdentity": {
+    "note": "Cursor cached checkout before fetch/checkout. Reported separately from admitted starting-work identity.",
+    "linktrend/LiNKsites": {
+      "originHost": "https://github.com/linktrend/LiNKsites",
+      "branch": "cursor/linksites-protected-marketing-smb-consumer-549-4259",
+      "commit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+      "tree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+      "dirty": false
+    },
+    "linktrend/LiNKlibraries": {
+      "originHost": "https://github.com/linktrend/LiNKlibraries",
+      "branch": "cursor/linksites-protected-marketing-smb-consumer-549-4259",
+      "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+      "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+      "dirty": false,
+      "note": "Cached checkout already matched the supplied read-only commit/tree; still fetched origin/development and the exact commit object before use."
+    }
+  },
+  "fetchedThenVerified": {
+    "linktrend/LiNKsites": {
+      "fetchedRef": "origin/issue/549-consume-protected-marketing-smb-provider-handoff",
+      "commit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+      "tree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+      "matchesSuppliedInput": true
+    },
+    "linktrend/LiNKlibraries": {
+      "fetchedRef": "origin/development",
+      "fetchedTipCommit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+      "fetchedTipTree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+      "fetchedTipMatchesSuppliedInput": true,
+      "exactSuppliedCommitFetched": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+      "exactSuppliedTree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+      "exactCommitMatchesSuppliedInput": true,
+      "didNotSubstituteBoundBranchTip": true
+    }
+  },
+  "admittedStartingWorkIdentity": {
+    "writer": {
+      "repository": "linktrend/LiNKsites",
+      "ownedIssueBranch": "issue/549-consume-protected-marketing-smb-provider-handoff",
+      "writerCheckout": "cursor/linksites-protected-marketing-smb-consumer-549-4259",
+      "commit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+      "tree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+      "dirty": false,
+      "role": "implementation-writer-allowed-paths-only",
+      "note": "Cloud writer branch tip equalled the owned Issue 549 starting commit/tree. create_issue_branch.py was not used because it would reset from origin/development and replace the supplied identity."
+    },
+    "readOnlySources": [
+      {
+        "repository": "linktrend/LiNKlibraries",
+        "ref": "development",
+        "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+        "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+        "checkout": "detached HEAD at supplied commit",
+        "role": "read-only-source",
+        "didNotEditOrPush": true
+      }
+    ]
+  },
+  "allowedPaths": [
+    "docs/end-to-end-delivery/upstreams/linklibraries/",
+    "docs/evidence/end-to-end-delivery/lsg0-03/",
+    "docs/evidence/end-to-end-delivery/LSG0-03-HANDOFF.json",
+    "packages/factory-catalog/",
+    "apps/web-master/",
+    "tests/master-template-v2/a1/",
+    ".ide-development/state/checkpoints/issue-549.json"
+  ],
+  "prohibited": [
+    "LiNKlibraries-mutation",
+    "protected-refs",
+    "implementer-PR",
+    "self-merge",
+    "promotion",
+    "deployment",
+    "production-secrets",
+    "external-business-messages",
+    "nested-workers",
+    "Server03",
+    "image-publication"
+  ]
+}

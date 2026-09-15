@@ -14,7 +14,7 @@ scan_log=.ci-artifacts/gitleaks.log
 docker run --rm \
   --volume "$PWD:/repo:ro" \
   zricethezav/gitleaks@sha256:e1b35e12a8c6fa8901f060459cfb6b2fc4c484d3afbe3b029733a3bbfab07055 \
-  git --redact --verbose --log-opts="$log_opts" /repo 2>&1 | tee "$scan_log"
+  git --redact --verbose --config /repo/.github/gitleaks.toml --log-opts="$log_opts" /repo 2>&1 | tee "$scan_log"
 
 # Gitleaks can return zero after reporting a partial repository scan. A partial
 # or inaccessible Git history is not evidence that the changed range is safe.

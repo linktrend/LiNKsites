@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue-552-requirement-traceability-addendum",
+  "authority": "docs/evidence/end-to-end-delivery/REQUIREMENT-TRACEABILITY.json",
+  "denominatorUnchanged": true,
+  "classificationUnchanged": "done but requires testing or fixing for FR-01..FR-03 source; live/production remain HOLD",
+  "packetsBroughtOntoIssue552": [
+    "Issue 550 LSG0-04 source-compat and protected Platform/Autowork copies",
+    "Issue 546 dual-arch Alpine apk pins and OSS continuity tests",
+    "Issue 549 protected marketing-smb-v1 consumer",
+    "Issue 551 EXT-LS-01 exact A1 receipt and native harness",
+    "Issue 548 packageManager-only pnpm version"
+  ],
+  "combinedCorrections": [
+    "LS-05 identity tests bound to MASTER_TEMPLATE_PIN 998c02c",
+    "secret-scan fixtures regenerated for the combined tree",
+    "consumer admission types narrowed for ci-fast typecheck"
+  ],
+  "doesNotClear": [
+    "LSG0-03-provider-admission",
+    "LSG0-04-platform",
+    "LSG0-04-autowork",
+    "LSINT-01-completion",
+    "LSVAL-01-full-suite",
+    "LSREV-01-independent-source-review"
+  ]
+}
