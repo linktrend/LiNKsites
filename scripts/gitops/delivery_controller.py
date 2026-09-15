@@ -878,6 +878,20 @@ def merge_to_development(
                 "transition_receipt_failed",
                 "protected merge requires exact target and protected base commit/tree identities",
             )
+        receipt_decision = verify_receipt_payload(receipt, candidate_identity, "full-gate")
+        if not receipt_decision.accepted:
+            raise ControllerError(
+                "transition_receipt_failed",
+                f"{receipt_decision.code}:{receipt_decision.detail}",
+            )
+        identity_repository = str(candidate_identity.get("repository") or "")
+        identity_head = normalize_sha(str(candidate_identity.get("headCommit") or ""))
+        identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
+        if identity_repository != repository or identity_head != normalize_sha(expected_head) or identity_tree != target_tree:
+            raise ControllerError(
+                "transition_receipt_failed",
+                "candidate identity differs from the repository, expected head, or audited tree",
+            )
     try:
         github.push_protected(repository=repository, branch=config.development_branch, sha=expected_head)
     except ControllerError as exc:

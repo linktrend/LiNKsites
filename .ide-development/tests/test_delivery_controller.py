@@ -202,6 +202,39 @@ class DeliveryControllerTests(unittest.TestCase):
             )
         self.assertEqual(self.github.merges, [])
 
+    def test_mismatched_audited_tree_stops_before_merge(self) -> None:
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                candidate_tree=_sha(11),
+                protected_base_commit=_sha(9),
+                protected_base_tree=_sha(10),
+            )
+        self.assertEqual(self.github.merges, [])
+
+    def test_forged_receipt_stops_before_merge(self) -> None:
+        forged = dict(self.receipt, receiptDigest="sha256:" + ("0" * 64))
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+                receipt=forged,
+                candidate_identity=self.identity,
+                candidate_tree=self.tree,
+                protected_base_commit=_sha(9),
+                protected_base_tree=_sha(10),
+            )
+        self.assertEqual(self.github.merges, [])
+
     def test_stale_or_changed_pr_is_rejected(self) -> None:
         with self.assertRaisesRegex(controller.ControllerError, "stale_pr_head"):
             controller.accept_phase_pr(
