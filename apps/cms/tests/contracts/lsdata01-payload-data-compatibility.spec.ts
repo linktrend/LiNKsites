@@ -187,8 +187,11 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
         { actorOrgId: 'org-b', assignedSiteIds: ['site-a'] },
       ),
     ).toThrow(/Tenant authorization denied/)
-    const adoptions = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../src/collections/TemplateAdoptions.ts'), 'utf8')
-    expect(adoptions).toContain('Tenant authorization denied: org boundary is fail-closed.')
+    const boundary = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), '../../src/payload/lsdata01/tenantBoundary.ts'),
+      'utf8',
+    )
+    expect(boundary).toContain('Tenant authorization denied: org boundary is fail-closed.')
   })
 
   it('binds tenantOrgId to the owning site organisation', () => {
