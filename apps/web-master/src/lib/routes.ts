@@ -72,6 +72,17 @@ export const routes = {
    * Individual offer page
    */
   offer: (lang: string, slug: string): string => buildRoute(lang, `/offers/${slug}`),
+
+  products: (lang: string): string => buildRoute(lang, "/products"),
+  product: (lang: string, slug: string): string => buildRoute(lang, `/products/${slug}`),
+  services: (lang: string): string => buildRoute(lang, "/services"),
+  service: (lang: string, slug: string): string => buildRoute(lang, `/services/${slug}`),
+  team: (lang: string): string => buildRoute(lang, "/team"),
+  teamMember: (lang: string, slug: string): string => buildRoute(lang, `/team/${slug}`),
+  locations: (lang: string): string => buildRoute(lang, "/locations"),
+  location: (lang: string, slug: string): string => buildRoute(lang, `/locations/${slug}`),
+  serviceAreas: (lang: string): string => buildRoute(lang, "/service-areas"),
+  serviceArea: (lang: string, slug: string): string => buildRoute(lang, `/service-areas/${slug}`),
   
   // ============================================================================
   // RESOURCES
@@ -410,7 +421,17 @@ export function familyPath(locale: SupportedLanguage, family: FamilyId, slug?: s
   }
 }
 
-const COLLECTION_ROOTS = new Set(["offers", "resources", "legal"]);
+const COLLECTION_ROOTS = new Set([
+  "offers",
+  "resources",
+  "legal",
+  "products",
+  "services",
+  "team",
+  "locations",
+  "service-areas",
+]);
+export const PLAN_COLLECTION_ROOTS = new Set(["products", "services", "team", "locations", "service-areas"]);
 const RESOURCE_COLLECTIONS = new Set(["articles", "cases", "videos", "faq", "docs"]);
 const LEGAL_DETAILS = new Set(["privacy-policy", "terms-of-use", "cookie-policy"]);
 
@@ -504,6 +525,13 @@ export function resolveFamilyRoute(pathname: string): FamilyRouteDecision {
     if (rest.length === 1) return { kind: "ok", family: "collection", locale, pathname: routes.offers(locale) };
     if (rest.length === 2) return { kind: "ok", family: "detail", locale, pathname: routes.offer(locale, rest[1]) };
     return { kind: "collision", reason: "offer-depth" };
+  }
+
+  if (PLAN_COLLECTION_ROOTS.has(rest[0] ?? "")) {
+    const root = rest[0] as string;
+    if (rest.length === 1) return { kind: "ok", family: "collection", locale, pathname: buildRoute(locale, `/${root}`) };
+    if (rest.length === 2) return { kind: "ok", family: "detail", locale, pathname: buildRoute(locale, `/${root}/${rest[1]}`) };
+    return { kind: "collision", reason: `${root}-depth` };
   }
 
   if (rest[0] === "resources") {
