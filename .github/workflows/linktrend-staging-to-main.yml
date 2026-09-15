@@ -173,7 +173,9 @@ jobs:
           gh api --paginate --slurp \
             "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}/reviews?per_page=100" \
             | jq 'add // []' > source-reviews.json
-          gh api "repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs?per_page=100" > observed-checks.json
+          gh api --paginate --slurp \
+            "repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs?per_page=100" \
+            | jq '{check_runs: [.[].check_runs[]]}' > observed-checks.json
           gh api --paginate --slurp \
             "repos/${GITHUB_REPOSITORY}/pulls?state=closed&per_page=100" \
             | jq --arg digest "${receipt_digest}" \

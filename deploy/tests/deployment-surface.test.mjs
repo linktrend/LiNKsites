@@ -223,6 +223,8 @@ test('in-app CMS Dockerfile is not a release publication source', async () => {
   assert.match(dockerfile, /^FROM .+@sha256:[a-f0-9]{64}/m)
   assert.ok(dockerfile.includes('deploy/docker/cms.Dockerfile'))
   assert.ok(dockerfile.includes('exit 1'))
+  assert.ok(!dockerfile.includes('test -n "$LINKSITES_RELEASE_SHA"'))
+  assert.match(dockerfile, /RUN echo [^\n]+; exit 1/)
 })
 
 test('local Compose rehearsal is an explicit disposable overlay of the deploy bundle', async () => {

@@ -184,6 +184,7 @@ jobs:
         env:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
           W2_02_LIBRARY_REPOSITORY_PATH: ${{ github.workspace }}/.ci/linklibraries
+          # Consumed directly by the A1 case in revision2Materialization.spec.ts.
           LINKLIBRARIES_ROOT: ${{ github.workspace }}/.ci/linklibraries-a1
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           # The hosted runner already proves the image build and recovery

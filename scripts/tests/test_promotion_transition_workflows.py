@@ -6,6 +6,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CI = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+A1_MATERIALIZATION_TEST = (ROOT / "packages" / "factory-catalog" / "tests" / "revision2Materialization.spec.ts").read_text(
+    encoding="utf-8"
+)
 DOCS = (ROOT / "docs" / "contracts" / "CI-SUITE.md").read_text(encoding="utf-8")
 MANAGED_PROMOTION = (
     ("linktrend-development-to-staging.yml", "development", "staging"),
@@ -45,6 +48,8 @@ class PromotionTransitionWorkflowTests(unittest.TestCase):
             self.assertIn('gh api --paginate --slurp', text)
             self.assertIn('pulls/${SOURCE_PR}/reviews?per_page=100', text)
             self.assertIn("| jq 'add // []' > source-reviews.json", text)
+            self.assertIn('commits/${HEAD_SHA}/check-runs?per_page=100', text)
+            self.assertIn("| jq '{check_runs: [.[].check_runs[]]}' > observed-checks.json", text)
             self.assertIn('pulls?state=closed&per_page=100', text)
             self.assertIn('select(.merged_at != null)', text)
             self.assertIn('contains($digest)', text)
@@ -70,6 +75,11 @@ class PromotionTransitionWorkflowTests(unittest.TestCase):
         self.assertNotIn("ci_full_suite_receipt.py verify", CI)
         self.assertNotIn("checks: write", CI)
         self.assertNotIn("checks: read", CI)
+
+    def test_full_suite_a1_checkout_is_bound_to_its_exact_consumer(self) -> None:
+        self.assertIn("path: .ci/linklibraries-a1", CI)
+        self.assertIn("LINKLIBRARIES_ROOT: ${{ github.workspace }}/.ci/linklibraries-a1", CI)
+        self.assertIn("process.env.LINKLIBRARIES_ROOT", A1_MATERIALIZATION_TEST)
 
     def test_managed_promotion_authorities_are_independently_produced(self) -> None:
         for name, _source, target in MANAGED_PROMOTION:
