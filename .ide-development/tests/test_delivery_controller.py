@@ -121,6 +121,7 @@ class DeliveryControllerTests(unittest.TestCase):
         self.github.refs["development"] = _sha(9)
         self.github.refs["staging"] = _sha(7)
         self.github.refs["main"] = _sha(6)
+        self.github.commit_trees[self.head] = self.tree
         self.github.ref_trees["development"] = _sha(10)
         self.github.ref_trees["staging"] = _sha(70)
         self.github.ref_trees["main"] = _sha(60)
@@ -254,6 +255,88 @@ class DeliveryControllerTests(unittest.TestCase):
                 replacement_proof=True,
             )
         self.assertEqual(calls, [])
+
+    def test_administrator_recovery_rejects_empty_target_before_any_operation(self) -> None:
+        calls: list[str] = []
+
+        class RecoveryGitHub:
+            def push_protected(self, **kwargs):
+                calls.append("push")
+
+            def merge_pull_request(self, **kwargs):
+                calls.append("merge")
+                return {}
+
+        class RecoveryProtections:
+            def snapshot(self, **kwargs):
+                calls.append("snapshot")
+                return {}
+
+        with self.assertRaisesRegex(ValueError, "ungoverned_target"):
+            controller.recover_phase_merge(
+                github=RecoveryGitHub(),
+                protections=RecoveryProtections(),
+                repository="owner/name",
+                pr_number=11,
+                phase_branch="phase/next",
+                expected_head=self.head,
+                expected_tree=self.tree,
+                protected_base_commit=_sha(9),
+                protected_base_tree=_sha(10),
+                live_head=self.head,
+                live_tree=self.tree,
+                named_exception="exact test recovery",
+                replacement_proof=True,
+                target_branch="",
+            )
+        self.assertEqual(calls, [])
+
+    def test_administrator_recovery_rejects_wrong_merge_readback_and_restores(self) -> None:
+        for field_name, readback, code in (
+            (
+                "parent",
+                {"parents": [{"sha": _sha(8)}], "tree": {"sha": self.tree}},
+                "protected_base_moved_during_merge",
+            ),
+            (
+                "tree",
+                {"parents": [{"sha": _sha(9)}], "tree": {"sha": _sha(8)}},
+                "protected_merge_tree_mismatch",
+            ),
+        ):
+            with self.subTest(field=field_name):
+                github = controller.MemoryGitHub(repository="owner/name")
+                github.prs[11] = dict(self.pr)
+                github.refs["development"] = _sha(9)
+                github.ref_trees["development"] = _sha(10)
+                github.commit_trees[self.head] = self.tree
+                merge_sha = hashlib.sha1(f"merge:11:{self.head}".encode("utf-8")).hexdigest()
+                github.merge_commit_readbacks[merge_sha] = readback
+                protections = controller.MemoryProtection(repository="owner/name")
+                protections.current["development"] = {"required": True}
+
+                with self.assertRaisesRegex(ValueError, "admin_match_head_commit_failed") as raised:
+                    controller.recover_phase_merge(
+                        github=github,
+                        protections=protections,
+                        repository="owner/name",
+                        pr_number=11,
+                        phase_branch="phase/next",
+                        expected_head=self.head,
+                        expected_tree=self.tree,
+                        protected_base_commit=_sha(9),
+                        protected_base_tree=_sha(10),
+                        live_head=self.head,
+                        live_tree=self.tree,
+                        named_exception="exact test recovery",
+                        replacement_proof=True,
+                    )
+                self.assertIn(code, str(raised.exception))
+                self.assertEqual(github.refs["development"], _sha(9))
+                self.assertEqual(github.ref_trees["development"], _sha(10))
+                self.assertEqual(github.merges, [])
+                self.assertEqual(len(protections.restores), 1)
+                self.assertEqual(len(protections.readbacks), 1)
 
     def test_mismatched_audited_tree_stops_before_merge(self) -> None:
         with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
@@ -416,6 +499,7 @@ class DeliveryControllerTests(unittest.TestCase):
             tree=self.tree,
             branch="development",
         )
+        self.github.commit_trees[development_head] = self.tree
         transition = receipts.create_transition_receipt(
             self.receipt,
             target_branch="development",
@@ -969,6 +1053,16 @@ class DeliveryControllerTests(unittest.TestCase):
                     repository="owner/name",
                     number=11,
                     expected_head=self.head,
+                    expected_base_branch="",
+                    expected_base=_sha(9),
+                    expected_base_tree=_sha(10),
+                    expected_result_tree=self.tree,
+                )
+            with self.assertRaisesRegex(controller.ControllerError, "protected_merge_identity_required"):
+                adapter.merge_pull_request(
+                    repository="owner/name",
+                    number=11,
+                    expected_head=self.head,
                     expected_base_branch="development",
                     expected_base=_sha(9),
                     expected_base_tree=_sha(10),
@@ -976,6 +1070,41 @@ class DeliveryControllerTests(unittest.TestCase):
                 )
         self.assertEqual(calls, [])
         self.assertEqual(self.github.merges, [])
+
+    def test_memory_merge_rejects_wrong_post_merge_parent_or_tree_without_protected_mutation(self) -> None:
+        merge_sha = hashlib.sha1(f"merge:11:{self.head}".encode("utf-8")).hexdigest()
+        for field_name, readback, code in (
+            (
+                "parent",
+                {"parents": [{"sha": _sha(8)}], "tree": {"sha": self.tree}},
+                "protected_base_moved_during_merge",
+            ),
+            (
+                "tree",
+                {"parents": [{"sha": _sha(9)}], "tree": {"sha": _sha(8)}},
+                "protected_merge_tree_mismatch",
+            ),
+        ):
+            with self.subTest(field=field_name):
+                github = controller.MemoryGitHub(repository="owner/name")
+                github.prs[11] = dict(self.pr)
+                github.refs["development"] = _sha(9)
+                github.ref_trees["development"] = _sha(10)
+                github.commit_trees[self.head] = self.tree
+                github.merge_commit_readbacks[merge_sha] = readback
+                with self.assertRaisesRegex(controller.ControllerError, code):
+                    github.merge_pull_request(
+                        repository="owner/name",
+                        number=11,
+                        expected_head=self.head,
+                        expected_base_branch="development",
+                        expected_base=_sha(9),
+                        expected_base_tree=_sha(10),
+                        expected_result_tree=self.tree,
+                    )
+                self.assertEqual(github.refs["development"], _sha(9))
+                self.assertEqual(github.ref_trees["development"], _sha(10))
+                self.assertEqual(github.merges, [])
 
     def test_invalid_expected_branch_matrix_fails_before_transport_or_mutation(self) -> None:
         calls: list[str] = []
@@ -986,6 +1115,7 @@ class DeliveryControllerTests(unittest.TestCase):
 
         live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
         invalid = (
+            "",
             " ",
             " development",
             "development ",

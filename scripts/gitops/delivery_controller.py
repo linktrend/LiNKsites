@@ -265,6 +265,8 @@ class MemoryGitHub:
     prs: dict[int, dict[str, Any]] = field(default_factory=dict)
     refs: dict[str, str] = field(default_factory=dict)
     ref_trees: dict[str, str] = field(default_factory=dict)
+    commit_trees: dict[str, str] = field(default_factory=dict)
+    merge_commit_readbacks: dict[str, dict[str, Any]] = field(default_factory=dict)
     merges: list[dict[str, Any]] = field(default_factory=list)
     deleted_refs: list[str] = field(default_factory=list)
     protected_push_attempts: list[dict[str, str]] = field(default_factory=list)
@@ -342,9 +344,34 @@ class MemoryGitHub:
                 f"live={base_tree_before}:expected={expected_base_tree}",
             )
         merge_sha = hashlib.sha1(f"merge:{number}:{head}".encode("utf-8")).hexdigest()
+        modeled_tree = normalize_sha(self.commit_trees.get(head, ""))
+        modeled_commit = {
+            "parents": [{"sha": base_before}],
+            "tree": {"sha": modeled_tree},
+        }
+        readback = self.merge_commit_readbacks.get(merge_sha, modeled_commit)
+        parents = readback.get("parents") if isinstance(readback, Mapping) else []
+        first_parent = normalize_sha(
+            str((parents[0] if isinstance(parents, list) and parents else {}).get("sha") or "")
+        )
+        tree_obj = readback.get("tree") if isinstance(readback, Mapping) else {}
+        merged_tree = normalize_sha(
+            str((tree_obj if isinstance(tree_obj, Mapping) else {}).get("sha") or "")
+        )
+        if first_parent != base_before:
+            raise ControllerError(
+                "protected_base_moved_during_merge",
+                f"merged_base={first_parent}:expected={base_before}",
+            )
+        if merged_tree != normalize_sha(expected_result_tree):
+            raise ControllerError(
+                "protected_merge_tree_mismatch",
+                f"merged_tree={merged_tree}:expected={expected_result_tree}",
+            )
+        self.merge_commit_readbacks[merge_sha] = modeled_commit
         self.refs[base] = merge_sha
-        if expected_result_tree:
-            self.ref_trees[base] = normalize_sha(expected_result_tree)
+        self.ref_trees[base] = merged_tree
+        self.commit_trees[merge_sha] = merged_tree
         pr["state"] = "merged"
         pr["merged"] = True
         pr["mergeCommitSha"] = merge_sha
@@ -359,7 +386,7 @@ class MemoryGitHub:
             "directPush": False,
             "admin": bool(admin),
             "matchHeadCommit": bool(match_head_commit),
-            "resultTree": normalize_sha(expected_result_tree or ""),
+            "resultTree": merged_tree,
         }
         self.merges.append(record)
         return dict(record)

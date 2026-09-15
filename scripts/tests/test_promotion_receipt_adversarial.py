@@ -141,6 +141,7 @@ class PromotionReceiptAdversarialTests(unittest.TestCase):
         staging_github = controller.MemoryGitHub(repository=REPOSITORY)
         staging_github.refs["staging"] = PROTECTED_BASE
         staging_github.ref_trees["staging"] = PROTECTED_BASE_TREE
+        staging_github.commit_trees[SOURCE_HEAD] = TREE
         controller.promote_to_staging(
             github=staging_github,
             repository=REPOSITORY,
