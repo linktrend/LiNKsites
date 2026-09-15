@@ -39,9 +39,10 @@ and line before adding its fingerprint; no path or rule exemption was added.
 - `60274ade7e910f814b0816e74de011281d536dc2`,
   `deploy/config/production.env.example:30`: the commented signing-secret
   example uses the explicit synthetic value `ltfx.placeholder.5e0a9b3c2eac.v1`.
-  It is a placeholder, not a usable credential. The current candidate replaces
-  that assignment with an instruction to obtain the secret from the secret
-  store. The exception binds only this historical `generic-api-key` fingerprint.
+  It is a placeholder, not a usable credential. The current candidate retains
+  this commented example and instructs operators to leave live gateway fields
+  unset in manual mode. The exception binds only this historical
+  `generic-api-key` fingerprint.
 
 Hosted changed-range scanning must pass on the resulting candidate. These
 source dispositions do not constitute independent release review.
