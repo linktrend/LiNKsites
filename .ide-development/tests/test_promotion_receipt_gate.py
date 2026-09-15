@@ -153,10 +153,11 @@ class PromotionReceiptGateTests(unittest.TestCase):
         )
 
         receipt_payload = json.loads(self.receipt.read_text(encoding="utf-8"))
-        source, base, pr_head = "a" * 40, "b" * 40, "c" * 40
+        source, base, base_tree, pr_head = "a" * 40, "b" * 40, "d" * 40, "c" * 40
         approval = {
             "sourceSha": source,
             "baseSha": base,
+            "baseTree": base_tree,
             "prHeadSha": pr_head,
             "receiptDigest": receipt_payload["receiptDigest"],
         }
@@ -165,6 +166,7 @@ class PromotionReceiptGateTests(unittest.TestCase):
                 approval,
                 source_sha=source,
                 base_sha=base,
+                base_tree=base_tree,
                 pr_head_sha=pr_head,
                 receipt=receipt_payload,
             ).accepted
@@ -174,6 +176,7 @@ class PromotionReceiptGateTests(unittest.TestCase):
                 dict(approval, receiptDigest=canonical_digest({"tampered": True})),
                 source_sha=source,
                 base_sha=base,
+                base_tree=base_tree,
                 pr_head_sha=pr_head,
                 receipt=receipt_payload,
             ).code,
@@ -206,6 +209,49 @@ class PromotionReceiptGateTests(unittest.TestCase):
         self.assertEqual(automatic.promotion_commit, self.identity.head_commit)
         self.assertEqual(automatic.to_dict()["status"], "PASS")
         self.assertIn("receiptLookupKey", automatic.to_dict())
+
+    def test_main_approval_cli_binds_and_rejects_stale_base_tree(self) -> None:
+        receipt_payload = json.loads(self.receipt.read_text(encoding="utf-8"))
+        source, base, base_tree, pr_head = "a" * 40, "b" * 40, "d" * 40, "c" * 40
+        approval_path = self.root / "approval.json"
+        approval_path.write_text(
+            json.dumps(
+                {
+                    "sourceSha": source,
+                    "baseSha": base,
+                    "baseTree": base_tree,
+                    "prHeadSha": pr_head,
+                    "receiptDigest": receipt_payload["receiptDigest"],
+                }
+            ),
+            encoding="utf-8",
+        )
+        command = [
+            "python3",
+            str(Path(__file__).resolve().parents[2] / "scripts/gitops/promotion_receipt_gate.py"),
+            "main-approval",
+            "--input",
+            str(approval_path),
+            "--source-sha",
+            source,
+            "--base-sha",
+            base,
+            "--base-tree",
+            base_tree,
+            "--pr-head-sha",
+            pr_head,
+            "--receipt",
+            str(self.receipt),
+        ]
+        accepted = subprocess.run(command, text=True, capture_output=True, check=False)
+        self.assertEqual(accepted.returncode, 0, accepted.stderr)
+        self.assertEqual(json.loads(accepted.stdout)["status"], "PASS")
+
+        stale = list(command)
+        stale[stale.index("--base-tree") + 1] = "e" * 40
+        rejected = subprocess.run(stale, text=True, capture_output=True, check=False)
+        self.assertEqual(rejected.returncode, 1, rejected.stderr)
+        self.assertEqual(json.loads(rejected.stdout)["code"], "stale_baseTree")
 
 
 if __name__ == "__main__":
