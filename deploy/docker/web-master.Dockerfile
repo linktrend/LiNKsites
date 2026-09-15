@@ -21,16 +21,15 @@ COPY apps/program-orchestrator/package.json apps/program-orchestrator/package.js
 COPY apps/intake-orchestrator/package.json apps/intake-orchestrator/package.json
 RUN pnpm install --frozen-lockfile
 
-FROM base AS builder
+# Preserve workspace node_modules links as well as the root pnpm store.
+FROM deps AS builder
 ARG NEXT_PUBLIC_PAYLOAD_API_URL
 ARG PAYLOAD_PUBLIC_SERVER_URL
 ENV NEXT_PUBLIC_PAYLOAD_API_URL=${NEXT_PUBLIC_PAYLOAD_API_URL}
 ENV PAYLOAD_PUBLIC_SERVER_URL=${PAYLOAD_PUBLIC_SERVER_URL}
 ENV NEXT_PUBLIC_CMS_PROVIDER=payload
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm install --frozen-lockfile \
- && pnpm exec turbo run build --filter=@linksites/web-master
+RUN pnpm exec turbo run build --filter=@linksites/web-master
 
 FROM base AS runner
 WORKDIR /app
