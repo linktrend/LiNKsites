@@ -47,6 +47,11 @@ class PromotionTransitionWorkflowTests(unittest.TestCase):
             self.assertIn('select(.merged_at != null)', text)
             self.assertIn('contains($digest)', text)
             self.assertIn("'{items: [.[][]", text)
+            self.assertEqual(text.count("checks: read"), 1)
+            self.assertIn(
+                "permissions:\n      contents: read\n      actions: read\n      checks: read\n      pull-requests: read",
+                text,
+            )
 
     def test_repository_ci_cannot_publish_or_duplicate_promotion_authority(self) -> None:
         self.assertNotIn("name: LiNKsites Promotion Receipt", CI)

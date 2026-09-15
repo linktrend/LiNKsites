@@ -30,6 +30,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      checks: read
       pull-requests: read
     env:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
