@@ -1,0 +1,6 @@
+{
+  "name": "catalogue-provider-handoff-reject-extra-field",
+  "expect": "reject",
+  "reason": "additional",
+  "patch": { "liveProof": true }
+}

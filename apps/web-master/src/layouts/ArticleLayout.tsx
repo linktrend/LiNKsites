@@ -4,6 +4,7 @@ import { CmsOffer } from "@/lib/repository/offers";
 import { CmsArticle as CmsResource } from "@/lib/repository/articles";
 import { buildArticleJsonLd } from "@/lib/seo";
 import { routes } from "@/lib/routes";
+import { serializeJsonLd } from "@/lib/seo/visible-facts";
 
 type Props = { lang: string; page: { data: { article?: CmsResource; related: CmsResource[]; offer?: CmsOffer } } };
 
@@ -35,7 +36,7 @@ export function ArticleLayout({ lang, page }: Props) {
   });
   return (
     <article className="container space-y-8 py-12">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }} />
       <header className="space-y-2">
         <p className="text-sm text-muted-foreground">Article</p>
         <h1 className="text-4xl font-bold">{article.title}</h1>

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 2,
+  "schemaRevision": 2,
+  "indexType": "release_index",
+  "entryId": "master-template-type-1",
+  "version": "2.0.0",
+  "manifestPath": "manifest.json",
+  "inventoryPath": "inventory.json",
+  "dependencyLockPath": "dependency-lock.json",
+  "artifactPath": "artifact",
+  "releaseManifestSha256": "f1ba6261aefd628672a4bae3333fc07827f82df1a39083e1c20ae881c2cc9916",
+  "inventorySha256": "9d94ab2d18d1c77b1a709739c38ad8ca95f1d0ef571092dd2c710573ab31cb20",
+  "dependencyLockSha256": "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
+  "payloadSha256": "fc6ed2e8748960c6cd53ac69e678a1fca8bd572105ea747941ceb9e2225c4489",
+  "artifactTreeSha1": "b599c0f0ee6bc2aad3484aa42ef1fd9e86a05758",
+  "releaseSource": {
+    "releaseSourceCommitSha": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+    "releaseSourceRepositoryTreeSha1": "873c4acc582050b416fb5a8bc59990345711df46"
+  }
+}
