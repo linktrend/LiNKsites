@@ -17,7 +17,7 @@ export const LAYOUT_COMPOSITIONS: Readonly<Record<LayoutPackId, LayoutCompositio
   A1: Object.freeze({
     pageRenderer: "composition-a1-linear-shell",
     regions: Object.freeze(["site-header", "main", "site-footer"] as const),
-    architectureReady: false,
+    architectureReady: true,
   }),
   A2: Object.freeze({
     pageRenderer: "composition-a2-split-shell",
@@ -93,7 +93,11 @@ export function assertStructurallyDistinctCompositions(
       }
     }
   }
-  if (compositions.A2.architectureReady !== true || compositions.A3.architectureReady !== true) {
-    throw new LayoutPackError("A2 and A3 must be architecture-ready");
+  if (
+    compositions.A1.architectureReady !== true ||
+    compositions.A2.architectureReady !== true ||
+    compositions.A3.architectureReady !== true
+  ) {
+    throw new LayoutPackError("A1, A2 and A3 must be architecture-ready");
   }
 }

@@ -153,10 +153,11 @@ class PromotionReceiptGateTests(unittest.TestCase):
         )
 
         receipt_payload = json.loads(self.receipt.read_text(encoding="utf-8"))
-        source, base, pr_head = "a" * 40, "b" * 40, "c" * 40
+        source, base, base_tree, pr_head = "a" * 40, "b" * 40, "d" * 40, "c" * 40
         approval = {
             "sourceSha": source,
             "baseSha": base,
+            "baseTree": base_tree,
             "prHeadSha": pr_head,
             "receiptDigest": receipt_payload["receiptDigest"],
         }
@@ -165,6 +166,7 @@ class PromotionReceiptGateTests(unittest.TestCase):
                 approval,
                 source_sha=source,
                 base_sha=base,
+                base_tree=base_tree,
                 pr_head_sha=pr_head,
                 receipt=receipt_payload,
             ).accepted
@@ -174,6 +176,7 @@ class PromotionReceiptGateTests(unittest.TestCase):
                 dict(approval, receiptDigest=canonical_digest({"tampered": True})),
                 source_sha=source,
                 base_sha=base,
+                base_tree=base_tree,
                 pr_head_sha=pr_head,
                 receipt=receipt_payload,
             ).code,
