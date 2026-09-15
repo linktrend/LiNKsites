@@ -276,7 +276,12 @@ export function validateNativeV2Bundle(bundle, options = {}) {
   if (!closed(bundle, 'bundle', ['source', 'catalogue', 'record', 'manifest', 'inventory', 'dependencyLock', 'receipt'], ['catalogueFileSha256', 'dependencyLockFileSha256'], errors)) return { ok: false, errors }
   const catalogue = validateCatalogue(bundle.catalogue, errors)
   const records = catalogue && Array.isArray(catalogue.records) ? catalogue.records : []
-  records.forEach((record, index) => validateCatalogueRecord(record, `catalogue.records[${index}]`, errors))
+  const draftCandidateProbe = options.selectionPolicy === 'draft_candidate_probe'
+  // An unindexed candidate is bound to an exact catalogue digest. Its probe
+  // must not fail merely because unrelated, selectable catalogue records have
+  // newer governance evidence fields; those bytes remain immutable through
+  // the required file and records digests below.
+  if (!draftCandidateProbe) records.forEach((record, index) => validateCatalogueRecord(record, `catalogue.records[${index}]`, errors))
   const record = validateCatalogueRecord(bundle.record, 'record', errors)
   const manifest = validateManifest(bundle.manifest, errors)
   const inventory = validateInventory(bundle.inventory, errors)
@@ -287,7 +292,7 @@ export function validateNativeV2Bundle(bundle, options = {}) {
   if (options.expectedCatalogueFileSha256 !== undefined && bundle.catalogueFileSha256 !== options.expectedCatalogueFileSha256) errors.push('catalogue file digest does not match the expected mounted catalogue bytes')
   if (options.expectedCatalogueRecordsSha256 !== undefined && catalogue?.recordsSha256 !== options.expectedCatalogueRecordsSha256) errors.push('catalogue records digest does not match the expected native catalogue')
   if (options.expectedDependencyLockSha256 !== undefined && manifest?.dependencyLockSha256 !== options.expectedDependencyLockSha256) errors.push('manifest dependency lock digest does not match the expected native lock')
-  const draftCandidateProbe = options.selectionPolicy === 'draft_candidate_probe'
+  if (draftCandidateProbe && (options.expectedCatalogueFileSha256 === undefined || options.expectedCatalogueRecordsSha256 === undefined)) errors.push('draft candidate probe requires exact catalogue file and records digests')
   if (catalogue && record && !draftCandidateProbe && !records.some((item) => canonical(item) === canonical(record))) errors.push('record is not in the catalogue snapshot')
   if (record && manifest && inventory && dependencyLock) {
     if (draftCandidateProbe) {
@@ -295,7 +300,10 @@ export function validateNativeV2Bundle(bundle, options = {}) {
     } else if (!['admitted', 'selectable'].includes(record.lifecycle) || record.selectability !== 'selectable' || record.compatibility !== 'compatible') errors.push('catalogue selected record is not admitted/selectable/compatible')
     if (record.entryId !== manifest.entryId || record.version !== manifest.version || record.artifactType !== manifest.artifactType) errors.push('release identity mismatch')
     if (record.releaseManifestSha256 !== options.releaseManifestSha256 && options.releaseManifestSha256 !== undefined) errors.push('record release manifest digest does not match the mounted manifest')
-    if (record.inventorySha256 !== manifest.inventorySha256 || manifest.inventorySha256 !== inventory.inventorySha256 || manifest.artifactTreeSha1 !== inventory.artifactTreeSha1 || record.artifactTreeSha1 !== manifest.artifactTreeSha1) errors.push('release digest or artifact identity mismatch')
+    const inventoryMatches = draftCandidateProbe
+      ? inventory.inventorySha256 === manifest.payloadSha256
+      : manifest.inventorySha256 === inventory.inventorySha256
+    if (record.inventorySha256 !== manifest.inventorySha256 || !inventoryMatches || manifest.artifactTreeSha1 !== inventory.artifactTreeSha1 || record.artifactTreeSha1 !== manifest.artifactTreeSha1) errors.push('release digest or artifact identity mismatch')
     if (options.dependencyLockFileSha256 !== undefined && manifest.dependencyLockSha256 !== options.dependencyLockFileSha256) errors.push('manifest dependency lock digest does not match the mounted dependency lock bytes')
     if (manifest.releaseSource?.releaseSourceCommitSha !== record.releaseSource?.releaseSourceCommitSha || manifest.releaseSource?.releaseSourceRepositoryTreeSha1 !== record.releaseSource?.releaseSourceRepositoryTreeSha1) errors.push('release source identity mismatch')
     projectionMatches(record.controlledMetadata, manifest.controlledMetadata, errors)

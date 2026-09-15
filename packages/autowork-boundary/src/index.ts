@@ -264,6 +264,10 @@ export class FileOutbox {
   }
   async items(): Promise<readonly OutboxItem[]> { const items = await this.read(); this.reconcileMetrics(items); return items }
   async health(): Promise<GatewayMetrics> { const items = await this.items(); this.reconcileMetrics(items); return this.metrics.snapshot() }
+  /** Late/duplicate delivery of the same logical event returns the original durable item. */
+  async durableByIdempotency(idempotencyKey: string): Promise<OutboxItem | null> {
+    return (await this.items()).find((item) => item.request.envelope.idempotency_key === idempotencyKey) ?? null
+  }
 }
 
 export const redactForLog = (request: GatewayRequest): Record<string, unknown> => ({ event_id: request.envelope.event_id, event_name: request.envelope.event_name, org_id: request.envelope.org_id, correlation_id: request.envelope.correlation_id, idempotency_key: request.envelope.idempotency_key, timestamp: request.timestamp, nonce: '[redacted]', signature: '[redacted]' })
@@ -272,3 +276,34 @@ export type CrmReadyItem = { itemId: string; envelope: unknown; attemptNumber?: 
 export interface CrmPullPort { pullReady(limit: number, nowIso: string): Promise<readonly CrmReadyItem[]> }
 export interface CrmClaimPort { claim(itemId: string, leadId: string, idempotencyKey: string, nowIso: string): Promise<{ itemId: string; claimId: string } | null> }
 export interface CrmCompletionPort { write(envelope: DemoCompletionEnvelope): Promise<void> }
+
+export {
+  AUTOWORK_RECEIPT_CONTRACT_VERSION,
+  LINKSITES_LIVE_AUDIENCE,
+  LiveModeError,
+  PLATFORM_CLAIM_CONTRACT_VERSION,
+  assertSigningKeyRef,
+  envSigningMaterialResolver,
+  parseLiveAutoworkHandoff,
+  requireLiveMode,
+  resolveLiveModeFromEnv,
+  resolveSigningMaterial,
+  type LiveAutoworkHandoff,
+  type LiveMode,
+  type SigningMaterialResolver,
+} from './live-handoff.ts'
+export {
+  CanonicalBoundaryError,
+  CanonicalIntakeBoundary,
+  LinksitesCompletionBoundary,
+  MemoryCompletionStore,
+  MemoryLeadPersister,
+  assertCanonicalLead,
+  canonicalLeadFromSignedEvent,
+  type CanonicalCompletionDecision,
+  type CanonicalIntakePersister,
+  type CanonicalIntakeRecord,
+  type CanonicalIntakeSource,
+  type CompletionStore,
+  type SignedIntakeVerifier,
+} from './canonical-boundary.ts'

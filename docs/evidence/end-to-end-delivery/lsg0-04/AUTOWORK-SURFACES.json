@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-autowork-surface-qualification",
+  "boundIdentity": {
+    "repository": "linktrend/LiNKautowork",
+    "ref": "development",
+    "commit": "a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
+    "tree": "10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
+    "subject": "Merge pull request #120 from linktrend/phase/production-readiness-20260904",
+    "mergedAtUtc": "2026-09-04T03:45:14Z",
+    "role": "protected-integration-branch-not-staging-main-not-live"
+  },
+  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
+  "liveProbesForbidden": true,
+  "secretValuesNotRequested": true,
+  "privateEndpointsNotPrinted": true,
+  "liveEvidenceAvailableToThisWorker": false,
+  "lifecycleDistinction": {
+    "finishedIssueCheckpointOnThisSha": "Phase PR 120 merged documentation of production-readiness remaining work into protected development",
+    "reviewedPhaseCandidate": "phase/production-readiness-20260904 was merged; this SHA is protected development, not an unintegrated candidate",
+    "protectedIntegration": "development a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd",
+    "liveOperation": "pending per docs/PRODUCTION-READINESS.md and docs/PRD.md",
+    "didNotClaimReviewedUnintegratedCandidateAsProtected": true,
+    "didNotClaimProtectedDevelopmentAsLiveOperation": true
+  },
+  "overall": "HOLD",
+  "surfaces": [
+    {
+      "id": "autowork-contract",
+      "requiredHandoff": "current LiNKautowork gateway/event/receipt contract bound for LiNKsites",
+      "classification": "done but requires testing/fixing",
+      "evidenceLevel": "source-and-planning-copies-not-live",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
+      "observed": {
+        "gatewaySourcePresent": true,
+        "signingSourcePresent": "gateway/src/lib/signing.ts",
+        "lsg0-02SanitizedPlanningPin": "docs/end-to-end-delivery/upstreams/linkautowork/605c8281997e4793a826ce4c82b8dcbd6017ba26/",
+        "priorMainCopyOnSitesTree": "docs/end-to-end-delivery/upstreams/linkautowork/2e30109acfb9510cd77e49f759648b2b6a666adc/",
+        "planningPinEqualsBoundDevelopment": false,
+        "priorMainCopyEqualsBoundDevelopment": false,
+        "liveContractHandoffForLiNKsites": false
+      }
+    },
+    {
+      "id": "autowork-consumer-registration",
+      "requiredHandoff": "LiNKsites consumer registration on bound Autowork development",
+      "classification": "missing and needs work",
+      "evidenceLevel": "wrong-consumer-hold-only",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
+      "observed": {
+        "existingHandoffPath": "docs/planning/pkt-03-xpkt-03/provider-consumer-handoff.hold.json",
+        "sha256": "cb3a4933eb60f7b00fef9ec6c5523f8e27ca36e2c7330b5115679e52461df8e8",
+        "kind": "provider-consumer-handoff",
+        "producerRepository": "linktrend/LiNKskills",
+        "consumerRepository": "linktrend/LiNKautowork",
+        "verdict": "blocked",
+        "acceptedReceipt": null,
+        "namesLiNKsitesAsConsumer": false,
+        "archiveLegacyProgramShellsMentionLiNKsites": true,
+        "archiveIsNotRegistration": true,
+        "disposableDbFixturesUseLinksitesSlug": true,
+        "disposableDbFixturesAreNotRegistration": true,
+        "githubPublishedLiNKsitesRegistration": false
+      }
+    },
+    {
+      "id": "autowork-event-grant",
+      "requiredHandoff": "event allowlist/grant admitting LiNKsites on this commit",
+      "classification": "missing and needs work",
+      "evidenceLevel": "unavailable-to-this-worker",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
+      "observed": {
+        "currentEventAllowlistGrantingLiNKsites": false,
+        "fixtureEventNameInDisposableDb": "linksites.reminder.run",
+        "fixtureIsNotGrantReceipt": true
+      }
+    },
+    {
+      "id": "autowork-org-environment-grant",
+      "requiredHandoff": "organisation/environment grant receipt for LiNKsites",
+      "classification": "missing and needs work",
+      "evidenceLevel": "unavailable-to-this-worker",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
+      "observed": {
+        "orgEnvironmentGrantReceiptForLiNKsites": false,
+        "activeTenantSlugInEnvExample": "linktrend_internal",
+        "envExampleIsNotLiNKsitesGrant": true
+      }
+    },
+    {
+      "id": "autowork-signing-reference",
+      "requiredHandoff": "admitted signing-reference for LiNKsites (no secret values)",
+      "classification": "done but requires testing/fixing",
+      "evidenceLevel": "source-hmac-helper-and-generic-gsm-name-not-admitted-linksites-key-ref",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
+      "observed": {
+        "signingHelper": "gateway/src/lib/signing.ts",
+        "genericProdHmacSecretName": "LINKAUTOWORK_LINK_HMAC_SHARED_SECRETS_PROD",
+        "genericProdHmacSecretNameIsNotLiNKsitesSpecific": true,
+        "admittedLiNKsitesSigningReference": false,
+        "secretValuesPrinted": false
+      }
+    },
+    {
+      "id": "autowork-private-endpoint",
+      "requiredHandoff": "admitted private endpoint identity (sanitized name/digest only)",
+      "classification": "missing and needs work",
+      "evidenceLevel": "source-routes-not-admitted-identity",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
+      "observed": {
+        "sourceHealthRoute": "/health",
+        "sourceOrgHealthRouteSanitizedName": "/v1/operations/health",
+        "admittedPrivateEndpointIdentityBound": false,
+        "liveEndpointsFetched": false,
+        "endpointValuesOmitted": true
+      }
+    },
+    {
+      "id": "autowork-health",
+      "requiredHandoff": "live health evidence for an admitted LiNKsites-bound endpoint",
+      "classification": "missing and needs work",
+      "evidenceLevel": "unavailable-to-this-worker",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
+      "observed": {
+        "sourceHealthHandlerPresent": true,
+        "authoritativeReadinessIndex": "docs/PRODUCTION-READINESS.md",
+        "liveConfiguration": "pending",
+        "stagingValidation": "pending",
+        "productionRollout": "pending",
+        "operationalAcceptance": "pending",
+        "liveHealthObserved": false,
+        "probesForbidden": true,
+        "githubReleaseLiveHealth": false
+      }
+    },
+    {
+      "id": "autowork-live-receipt",
+      "requiredHandoff": "live org-bound receipt identity for LiNKsites",
+      "classification": "missing and needs work",
+      "evidenceLevel": "unavailable-to-this-worker",
+      "status": "HOLD",
+      "reverifiedOnBoundDevelopment": true,
+      "observed": {
+        "liveOrgBoundReceiptIdentity": false,
+        "unitTestsAreNotLiveReceipts": true,
+        "productionPrdRemainingIncludesConsumerCompatibilityReceipts": true
+      }
+    }
+  ]
+}

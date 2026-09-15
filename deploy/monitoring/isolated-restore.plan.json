@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0.0",
+  "packet": "LSOPS-01",
+  "installation": "linksites-foundation",
+  "restoreExecuted": false,
+  "server03RestoreGate": "later-authorized-Server03-only",
+  "neverOverwriteProduction": true,
+  "publicActivation": false,
+  "credentialsPersisted": false,
+  "encryption": {
+    "tool": "restic",
+    "secretReference": "LINKSITES_BACKUP_ENCRYPTION_SECRET",
+    "secretSource": "runtime-provided-protected-env",
+    "checksum": "sha256"
+  },
+  "retention": {
+    "dailyDays": 35,
+    "monthlyMonths": 12,
+    "stricterCustomerOrLegalPolicyWins": true
+  },
+  "identitiesBoundToBackup": [
+    "LINKSITES_RELEASE_SHA",
+    "release tree SHA",
+    "LINKSITES_CONFIG_SCHEMA_VERSION",
+    "five image name@sha256 digests",
+    "LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA",
+    "Payload migration index SHA-256",
+    "LiNKsites supabase migration filename+SHA-256 rows",
+    "LINKSITES_TEMPLATE_RELEASE_STATE"
+  ],
+  "productionProject": "linksites-foundation",
+  "productionVolume": "linksites-foundation_linksites-runtime",
+  "isolatedRestore": {
+    "projectNamePattern": "^linksites-restore-rehearsal-[0-9]{8}T[0-9]{6}Z$",
+    "volumeNamePattern": "^linksites-restore-rehearsal-[0-9]{8}T[0-9]{6}Z_linksites-runtime$",
+    "databaseNamePattern": "^linksites_restore_[0-9]{8}T[0-9]{6}Z$",
+    "cleanupOwnResourcesOnly": true,
+    "forbiddenTargets": [
+      "linksites-foundation",
+      "linksites-foundation_linksites-runtime",
+      "any Docker project not matching the isolated restore pattern",
+      "any non-LiNKsites database or Supabase project"
+    ]
+  },
+  "backupClasses": [
+    {
+      "id": "payloadPostgres",
+      "authority": "LiNKsites",
+      "include": [
+        "schema public Payload tables",
+        "Payload migration history as recorded by payload-migrate"
+      ],
+      "exclude": [
+        "auth",
+        "storage",
+        "realtime",
+        "vault",
+        "extensions",
+        "platform"
+      ]
+    },
+    {
+      "id": "linksitesOwnedWorkingStore",
+      "authority": "LiNKsites",
+      "include": ["lsites_sites", "lsites_ledger"],
+      "exclude": [
+        "platform schema objects",
+        "other organisations or projects",
+        "Supabase Auth or Storage provider catalogs"
+      ]
+    },
+    {
+      "id": "programLedgerAndOutbox",
+      "authority": "LiNKsites",
+      "include": [
+        "/var/lib/linksites/program",
+        "LINKAUTOWORK_OUTBOX_PATH"
+      ]
+    },
+    {
+      "id": "configurationManifest",
+      "authority": "LiNKsites",
+      "include": [
+        "immutable release manifest JSON",
+        "redacted configuration fingerprints"
+      ],
+      "exclude": [
+        "protected runtime env file values",
+        "tokens",
+        "passwords",
+        "private keys"
+      ]
+    },
+    {
+      "id": "media",
+      "authority": "LiNKsites",
+      "include": ["/var/lib/linksites media objects with SHA-256"],
+      "exclude": ["customer payloads in logs", "unrelated object buckets"]
+    }
+  ],
+  "longRunningServices": [
+    "payload",
+    "web-master",
+    "autowork-worker",
+    "program-orchestrator"
+  ],
+  "oneShotMigrations": [
+    "supabase-migrate",
+    "payload-migrate"
+  ],
+  "fiveImages": [
+    "LINKSITES_CMS_IMAGE",
+    "LINKSITES_WEB_MASTER_IMAGE",
+    "LINKSITES_WORKER_IMAGE",
+    "LINKSITES_ORCHESTRATOR_IMAGE",
+    "LINKSITES_MIGRATIONS_IMAGE"
+  ],
+  "postRestoreProof": [
+    "checksums match identity.json before any write",
+    "Platform grant receipt SHA still matches the bound release",
+    "Payload and LiNKsites migrations match the bound checksums",
+    "site pins and release/config identities match",
+    "program completion and durable outbox are present",
+    "media SHA-256 matches",
+    "private preview noindex remains",
+    "production project and volume were not named"
+  ]
+}
