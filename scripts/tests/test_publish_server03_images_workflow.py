@@ -25,6 +25,9 @@ class PublishServer03ImagesWorkflowTests(unittest.TestCase):
 
     def test_cms_origin_requires_a_real_host_only_origin(self) -> None:
         self.assertIn('host = (parsed.hostname or "").lower()', WORKFLOW)
+        self.assertIn('value != raw_value', WORKFLOW)
+        self.assertIn('or not raw_value.isascii()', WORKFLOW)
+        self.assertIn('or host_is_ip_address', WORKFLOW)
         self.assertIn('or not host', WORKFLOW)
         self.assertIn('or not valid_hostname', WORKFLOW)
         self.assertIn('parsed.path not in {"", "/"}', WORKFLOW)
@@ -47,6 +50,15 @@ class PublishServer03ImagesWorkflowTests(unittest.TestCase):
             "https://cms.linktrend.one#fragment",
             "https://cms.linktrend.one:invalid",
             "https://cms.línktrend.one",
+            "https://10.0.0.1",
+            "https://192.168.1.1",
+            "https://169.254.1.1",
+            "https://8.8.8.8",
+            " https://cms.linktrend.one",
+            "https://cms.linktrend.one ",
+            "\thttps://cms.linktrend.one\n",
+            "\u00a0https://cms.linktrend.one",
+            "https://cms.linktrend.one\u00a0",
         ):
             with self.subTest(invalid=invalid):
                 result = self.run_origin_validator(invalid)

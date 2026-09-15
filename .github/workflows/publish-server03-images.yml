@@ -84,11 +84,18 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import ipaddress
           import os
           from urllib.parse import urlparse
-          value = os.environ["CMS_PRIVATE_HTTPS_URL"].strip()
+          raw_value = os.environ["CMS_PRIVATE_HTTPS_URL"]
+          value = raw_value.strip()
           parsed = urlparse(value)
           host = (parsed.hostname or "").lower()
+          try:
+              ipaddress.ip_address(host)
+              host_is_ip_address = True
+          except ValueError:
+              host_is_ip_address = False
           labels = host.split(".")
           valid_hostname = (
               len(labels) >= 2
@@ -107,8 +114,11 @@ jobs:
           except ValueError as error:
               raise SystemExit("cms_private_https_url_must_be_a_private_https_origin") from error
           invalid_origin = (
-              parsed.scheme != "https"
+              value != raw_value
+              or not raw_value.isascii()
+              or parsed.scheme != "https"
               or not host
+              or host_is_ip_address
               or not valid_hostname
               or parsed.username
               or parsed.password
