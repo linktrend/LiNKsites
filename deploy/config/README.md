@@ -11,16 +11,22 @@ formats, and safe redacted fingerprints. It never prints values.
 | `LINKSITES_CONFIG_SCHEMA_VERSION` | LiNKsites operations | no | all | exact current schema | update manifest and restart |
 | `LINKSITES_RELEASE_SHA` | release process | no | all | full Git SHA | deployment identity changes |
 | `LINKSITES_ORG_ID` | LiNKsites program owner | no | all | identifier | redeploy only after tenancy review |
+| `LINKSITES_AUTOWORK_MODE` | LiNKsites operations | no | all | exact `manual` or `live`; first private website uses `manual` | live handoff required before changing to `live` |
+| `LINKSITES_PLATFORM_STATE` | LiNKplatform release authority | no | all | exact `pending` or `ready` | pending forbids a fake applied-migration SHA |
+| `LINKSITES_HARNESS_COMMIT` / `LINKSITES_HARNESS_TREE` / `LINKSITES_HARNESS_RANGE` | LiNKharness pin | no | all | exact HC1-A commit/tree/range | rebuild/redeploy only with a lane-plan pin change |
+| `LINKSITES_PROFILE_ID` / `LINKSITES_PROFILE_VERSION` | LiNKsites profile | no | all | exact `linksites-profile` / `0.1.0` | rebuild/redeploy only with a profile pin change |
+| `LINKSITES_CMS_IMAGE` / `LINKSITES_WEB_MASTER_IMAGE` / `LINKSITES_WORKER_IMAGE` / `LINKSITES_ORCHESTRATOR_IMAGE` / `LINKSITES_MIGRATIONS_IMAGE` | release process | no | all | immutable `name@sha256:` digest references | new five-digest release |
 | `DATABASE_URI` | database owner | yes | CMS, worker, Supabase migration job | non-loopback PostgreSQL URL for CMS/worker/migration ownership | rolling restart; preserve connection compatibility |
 | `PAYLOAD_SECRET` | CMS owner | yes | CMS, worker | 32+ chars | coordinated session/key rotation; restart both |
 | `PAYLOAD_PUBLIC_SERVER_URL` | LiNKsites operations | no | CMS, worker | non-loopback HTTPS URL | coordinate CMS and frontend deployment |
-| `LINKAUTOWORK_GATEWAY_URL` | LiNKautowork | no | CMS, worker, orchestrator | non-loopback HTTPS URL | verify signed gateway before restart |
-| `LINKAUTOWORK_SIGNING_SECRET` | LiNKautowork | yes | CMS, worker, orchestrator | 32+ chars | dual-key overlap required; restart senders after gateway accepts new key |
-| `LINKAUTOWORK_SIGNING_KEY_ID` | LiNKautowork | no | CMS, worker, orchestrator | identifier | must name an accepted gateway key |
-| `LINKAUTOWORK_ENVIRONMENT` | LiNKautowork | no | CMS, worker, orchestrator | exact `production` | never substitute a development value |
+| `LINKAUTOWORK_GATEWAY_URL` | LiNKautowork | no | CMS, worker, orchestrator when `live` | non-loopback HTTPS URL; forbidden in `manual` | verify signed gateway before restart |
+| `LINKAUTOWORK_SIGNING_SECRET` | LiNKautowork | yes | CMS, worker, orchestrator when `live` | 32+ chars; forbidden in `manual` | dual-key overlap required; restart senders after gateway accepts new key |
+| `LINKAUTOWORK_SIGNING_KEY_ID` | LiNKautowork | no | CMS, worker, orchestrator when `live` | key reference, not a secret value | must name an accepted gateway key |
+| `LINKAUTOWORK_ENVIRONMENT` | LiNKautowork | no | CMS, worker, orchestrator when `live` | exact `production`; forbidden in `manual` | never substitute a development value |
 | `LINKAUTOWORK_OUTBOX_PATH` | LiNKsites operations | no | CMS, worker | absolute path | preserve/restore durable outbox before changing |
 | `LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET` | LiNKsites operations | yes | CMS, worker | 32+ chars | stop/drain then rotate with verified restore |
-| `LINKAUTOWORK_EVENT_GRANTS` | LiNKautowork policy owner | no | CMS, worker, orchestrator | non-empty JSON event/org/environment grant array; must authorize this tenant's `demo.completed` event for the orchestrator | policy change; drain and restart only after LiNKautowork acceptance |
+| `LINKAUTOWORK_EVENT_GRANTS` | LiNKautowork policy owner | no | CMS, worker, orchestrator when `live` | non-empty JSON event/org/environment grant array; forbidden in `manual` | policy change; drain and restart only after LiNKautowork acceptance |
+| `LINKAUTOWORK_ISSUER` / `LINKAUTOWORK_AUDIENCE` / `LINKAUTOWORK_RECEIPT_CONTRACT` | LiNKautowork | no | CMS, worker, orchestrator when `live` | exact live handoff pins; forbidden in `manual` | change only with an admitted live handoff |
 | `NEXT_PUBLIC_CMS_PROVIDER` | LiNKsites operations | no | web-master | exact `payload` | build-time public value; rebuild image |
 | `PAYLOAD_BASE_URL` | LiNKsites operations | no | web-master | non-loopback HTTPS URL | rebuild image when public bundle changes |
 | `NEXT_PUBLIC_PAYLOAD_API_URL` | LiNKsites operations | no | web-master | non-loopback HTTPS URL | rebuild image when public bundle changes |
@@ -67,7 +73,7 @@ and must be supplied by the Phase 2 protected deployment environment.
 | `LINKSITES_WORKER_IMAGE` | release process | no | Compose worker and Payload migration | exact immutable `name@sha256:` reference from the release manifest | new release deployment |
 | `LINKSITES_ORCHESTRATOR_IMAGE` | release process | no | Compose orchestrator | exact immutable `name@sha256:` reference from the release manifest | new release deployment |
 | `LINKSITES_MIGRATIONS_IMAGE` | release process | no | Compose Supabase migration | exact immutable `name@sha256:` reference from the release manifest | one-shot, exact release only |
-| `LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA` | LiNKplatform release authority | no | migration job and manifest | authoritative full 40-character Git SHA | external governed admission required |
+| `LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA` | LiNKplatform release authority | no | migration job and manifest when Platform is `ready` | authoritative full 40-character Git SHA; absent while `pending` | external governed admission required |
 | `LINKLIBRARIES_ARTIFACT_PATH` | LiNKlibraries release process | no | preflight and orchestrator mount when `ready` | read-only absolute Git checkout for the native v2 provider reference | remount only the exact manifest-bound provider checkout |
 | `TRAEFIK_NETWORK` | infrastructure operator | no | Compose edge | existing external Docker network name | coordinated proxy maintenance |
 | `TRAEFIK_ENTRYPOINT` | infrastructure operator | no | Traefik routers | existing TLS entrypoint name | coordinated proxy maintenance |

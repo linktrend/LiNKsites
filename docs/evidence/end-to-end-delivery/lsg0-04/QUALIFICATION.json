@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "LSG0-04-protected-handoff-qualification",
+  "packet": "LSG0-04",
+  "issue": 543,
+  "title": "Obtain Platform and LiNKautowork handoffs",
+  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
+  "overall": "HOLD",
+  "pass": false,
+  "passRule": "PASS only if every accepted handoff requirement exists in protected/released evidence on the bound identities. Source contracts, fixtures, placeholders, development-only schema, merged Phase documentation, unit tests, and advisor narrative do not prove live handoff. Unavailable live evidence is HOLD, not guessed PASS.",
+  "leanIndependentReviewer": "not-required-deterministic-qualification",
+  "parentSharedEvidenceNotEdited": [
+    "docs/evidence/end-to-end-delivery/LSG0-04-HANDOFF.json",
+    "docs/evidence/end-to-end-delivery/HOLDS.json",
+    "docs/evidence/end-to-end-delivery/INDEX.json"
+  ],
+  "requirementSources": [
+    "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md LSG0-04",
+    "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md FR-08 and full-operation item 21",
+    "docs/evidence/end-to-end-delivery/HOLDS.json LSG0-04-platform and LSG0-04-autowork",
+    "docs/evidence/end-to-end-delivery/LEAN-REVIEW-POLICY.json"
+  ],
+  "authorityUsedThisRefresh": [
+    "admitted LiNKsites commit a3a8834dee19c83dec9c19051ca4519a7ff51565 tree a24add76b5fa4a3f9522bf12fe1e90be62b7b4a1",
+    "bound LiNKplatform development 8d7af99575a5498ecda6b4396431136eb7c9c213 tree db4c50d7b9aae701a1dd1cc1422b41b8ddcb61cb",
+    "bound LiNKautowork development a13a6467fc9bc2fccdddd1de8d9e258c78e57fdd tree 10e6b59394bfd57703d6f3cee5d7bcda3aa7342f",
+    "copied prior-main upstream provenance on the admitted LiNKsites tree (not this bound identity)",
+    "GitHub issue/release lists for linktrend/LiNKplatform and linktrend/LiNKautowork",
+    "this-worker environment variable names (no matching Platform/Autowork/GSM keys)",
+    "Advisor 2 narrative recorded as narrative-not-receipt"
+  ],
+  "missingUpstreamsDoc": "docs/production-roadmap/phase-2/UPSTREAM-DEPENDENCIES.md is absent on admitted LiNKsites tree a24add76b5fa4a3f9522bf12fe1e90be62b7b4a1; qualification used HOLDS plus Phase 2 packet/PRD text.",
+  "classifications": {
+    "completed": [],
+    "doneButRequiresTestingOrFixing": [
+      "platform-migration-receipt",
+      "autowork-contract",
+      "autowork-signing-reference"
+    ],
+    "missingAndNeedsWork": [
+      "platform-catalogue-pin",
+      "platform-claim",
+      "platform-service",
+      "platform-registration",
+      "platform-credential-reference",
+      "platform-issuer",
+      "platform-audience",
+      "platform-scope",
+      "platform-live-health",
+      "autowork-consumer-registration",
+      "autowork-event-grant",
+      "autowork-org-environment-grant",
+      "autowork-private-endpoint",
+      "autowork-health",
+      "autowork-live-receipt"
+    ]
+  },
+  "allowedNow": {
+    "sanitizedSourceContracts": "docs/end-to-end-delivery/upstreams/ (LSG0-02 planning pins plus prior-main protected copies)",
+    "manualFileFirstSiteAdapter": true,
+    "livePlatformOrAutoworkClaims": false
+  },
+  "liveRefreshFinding": {
+    "boundIdentitiesAreProtectedDevelopment": true,
+    "advisor2PlatformCompleteNarrativeDoesNotClearLSG0-04": true,
+    "newLiveRegistrationGrantEndpointOrHealthEvidenceAvailableToThisWorker": false,
+    "githubReleasesFound": 0,
+    "githubIssuesMatchingLiNKsitesHandoff": "none-returned",
+    "workerEnvCredentialReferenceNames": [],
+    "didNotGuessLiveState": true,
+    "didNotProbePrivateEndpoints": true,
+    "didNotClaimReviewedUnintegratedCandidateAsProtected": true
+  },
+  "records": {
+    "identities": "IDENTITY.json",
+    "platform": "PLATFORM-SURFACES.json",
+    "autowork": "AUTOWORK-SURFACES.json",
+    "boundDevelopmentStatus": "COORDINATOR-DEVELOPMENT-INSPECTION.json",
+    "ownerActions": "OWNER-ACTIONS.json",
+    "toolchain": "TOOLCHAIN.json",
+    "leanReview": "LEAN-REVIEW.json"
+  }
+}
