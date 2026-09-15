@@ -27,6 +27,7 @@ import {
   assertOwningSiteTenantBoundary,
   owningSiteMatchesTenant,
 } from '../../src/payload/lsdata01/tenantBoundary'
+import { applyLsdata01EntitlementDefaults } from '../../src/payload/lsdata01/entitlementDefaults'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../../..')
 const PIN = (label: string): string => createHash('sha1').update(`lsdata01:${label}`).digest('hex')
@@ -275,8 +276,23 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
       }),
     ).toThrow(/without partial activation/)
     const snapshots = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../src/collections/EntitlementSnapshots.ts'), 'utf8')
+    const defaults = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), '../../src/payload/lsdata01/entitlementDefaults.ts'),
+      'utf8',
+    )
     expect(snapshots).toContain('assertLsdata01EntitlementDefaults')
-    expect(snapshots).toContain('data.grantedCredits = granted')
+    expect(snapshots).toContain('applyLsdata01EntitlementDefaults(data)')
+    expect(defaults).toContain('data.grantedCredits = granted')
+  })
+
+  it('always records the resolved plan when supplied credits match its default', () => {
+    const suppliedCredits: Record<string, unknown> = { grantedCredits: 0 }
+    applyLsdata01EntitlementDefaults(suppliedCredits)
+    expect(suppliedCredits).toMatchObject({ planId: 'L', grantedCredits: 0 })
+
+    const explicitPlan: Record<string, unknown> = { planId: 'B', grantedCredits: 15 }
+    applyLsdata01EntitlementDefaults(explicitPlan)
+    expect(explicitPlan).toMatchObject({ planId: 'B', grantedCredits: 15 })
   })
 
   it('replays the additive migration up() without changing already-applied SQL', async () => {
@@ -303,6 +319,12 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
     expect(source).toContain("DEFAULT 'rejected'")
     expect(source).toContain('"identities_provider" =')
     expect(source).toContain('"identities_adapter" =')
+    expect(source).toContain('tenant backfill incomplete')
+    expect(source).toContain('ALTER COLUMN "tenant_org_id" SET NOT NULL')
+    expect(source).toContain('AND "tenant_org_id" IS NOT NULL')
+    expect(source.indexOf('tenant backfill incomplete')).toBeLessThan(
+      source.indexOf("SET \"compatibility_class\" = 'retained-production-pin'"),
+    )
   })
 
   it('rolls back an adoption to the recorded prior pin', () => {

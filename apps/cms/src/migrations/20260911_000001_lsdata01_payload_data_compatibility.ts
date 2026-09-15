@@ -34,11 +34,24 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       AND ta."tenant_org_id" IS NULL
       AND s."org_id" IS NOT NULL;
 
+    DO $$ BEGIN
+      IF EXISTS (
+        SELECT 1
+        FROM "template_adoptions"
+        WHERE "tenant_org_id" IS NULL
+      ) THEN
+        RAISE EXCEPTION 'LSDATA-01 tenant backfill incomplete: template adoption has no owning tenant';
+      END IF;
+    END $$;
+
+    ALTER TABLE "template_adoptions" ALTER COLUMN "tenant_org_id" SET NOT NULL;
+
     UPDATE "template_adoptions"
     SET "compatibility_class" = 'retained-production-pin',
         "activation_state" = 'active'
     WHERE "identities_provider" = '0178894d6ce718bb7dff3c141892f82144e2d18c'
-      AND "identities_adapter" = '6cab53da19ba390d392157dbcc38979f1a6c86b5';
+      AND "identities_adapter" = '6cab53da19ba390d392157dbcc38979f1a6c86b5'
+      AND "tenant_org_id" IS NOT NULL;
 
     UPDATE "template_adoptions"
     SET "compatibility_class" = 'schema-compatibility-copy',
@@ -64,6 +77,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
             "compatibility_class" = 'retained-production-pin'
             AND "identities_provider" = '0178894d6ce718bb7dff3c141892f82144e2d18c'
             AND "identities_adapter" = '6cab53da19ba390d392157dbcc38979f1a6c86b5'
+            AND "tenant_org_id" IS NOT NULL
             AND "activation_state" = 'active'
           )
           OR (
