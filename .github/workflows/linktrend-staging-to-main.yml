@@ -192,6 +192,10 @@ jobs:
             --output live-facts.json \
             --consumed-ids consumed-ids.json \
             --consumed-receipts consumed-receipts.json
+          latest_base_sha="$(git ls-remote --exit-code origin "refs/heads/${TARGET_BRANCH}" | cut -f1)"
+          test "${latest_base_sha}" = "${BASE_SHA}" || { echo "receipt_gate_base_moved_during_run"; exit 1; }
+          latest_base_tree="$(git rev-parse "${latest_base_sha}^{tree}")"
+          test "${latest_base_tree}" = "${base_tree}" || { echo "receipt_gate_base_tree_moved_during_run"; exit 1; }
           python3 "$GITHUB_WORKSPACE/scripts/gitops/promotion_receipt_gate.py" authorize \
             --receipt receipt-artifact/full-suite-receipt.json \
             --transition-receipt transition-receipt.json \

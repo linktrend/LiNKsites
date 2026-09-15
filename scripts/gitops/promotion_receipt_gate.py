@@ -237,6 +237,7 @@ def evaluate_main_approval(
     *,
     source_sha: str,
     base_sha: str,
+    base_tree: str,
     pr_head_sha: str,
     receipt: Mapping[str, Any] | None = None,
 ) -> Decision:
@@ -244,6 +245,7 @@ def evaluate_main_approval(
     expected = {
         "sourceSha": _sha(source_sha),
         "baseSha": _sha(base_sha),
+        "baseTree": _sha(base_tree),
         "prHeadSha": _sha(pr_head_sha),
     }
     if not all(expected.values()):
@@ -251,6 +253,7 @@ def evaluate_main_approval(
     for key, names in {
         "sourceSha": ("sourceSha", "stagingSha", "expectedStagingSha"),
         "baseSha": ("baseSha", "mainSha", "expectedMainSha"),
+        "baseTree": ("baseTree", "mainTree", "expectedMainTree"),
         "prHeadSha": ("prHeadSha", "promotionHeadSha", "expectedPromoteHead"),
     }.items():
         if _sha(_field(approval, *names)) != expected[key]:
@@ -646,10 +649,8 @@ def evaluate_authoritative_promotion(
         (source_receipt.get("candidateIdentity") or {}).get("repository") or ""
     ):
         return Decision(False, "repository_mismatch", "live repository does not match receipt identities")
-    if str(transition_receipt.get("targetBranch") or "") != target_branch:
-        return Decision(False, "transition_mismatch", "transition receipt target is not the live protected ref")
-    if str((source_receipt.get("candidateIdentity") or {}).get("sourceBranch") or "") != source_branch:
-        return Decision(False, "transition_mismatch", "source receipt branch does not match the named transition")
+    if str(transition_receipt.get("targetBranch") or "") != source_branch:
+        return Decision(False, "transition_mismatch", "transition receipt does not represent the protected promotion source")
 
     live_base = _sha(live.get("protectedBaseCommit"))
     live_base_tree = _sha(live.get("protectedBaseTree"))
@@ -756,7 +757,7 @@ def evaluate_authoritative_promotion(
         source_receipt,
         {
             "repository": repository,
-            "sourceBranch": target_branch,
+            "sourceBranch": source_branch,
             "headCommit": live_head,
             "gitTree": live_tree,
             "dependencyDigest": source_identity.get("dependencyDigest"),
@@ -766,6 +767,7 @@ def evaluate_authoritative_promotion(
         expected_workflow_run_id=required_test.get("runId"),
         expected_workflow_run_attempt=required_test.get("runAttempt"),
         expected_base_commit=live_base,
+        expected_base_tree=live_base_tree,
     )
     if not transition_verdict.accepted:
         return Decision(False, transition_verdict.code, transition_verdict.message or transition_verdict.code)

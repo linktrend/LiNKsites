@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from scripts.gitops.coordinator.receipts import (
     verify_receipt,
     verify_transition_receipt,
 )
+from scripts.gitops import delivery_controller as controller
 from scripts.gitops.promotion_receipt_gate import (
     assemble_live_facts,
     canonical_consumption_id,
@@ -49,7 +51,7 @@ def identity(branch: str, head: str, tree: str) -> CandidateIdentity:
 
 def chain(source_branch: str, target_branch: str) -> tuple[dict, dict, dict, str, str, str]:
     source = identity(source_branch, SOURCE_HEAD, TREE)
-    target = identity(target_branch, TARGET_HEAD, TREE)
+    target = identity(source_branch, TARGET_HEAD, TREE)
     receipt = create_full_suite_receipt(
         {
             "schemaVersion": 2,
@@ -66,7 +68,7 @@ def chain(source_branch: str, target_branch: str) -> tuple[dict, dict, dict, str
     ).to_dict()
     transition = create_transition_receipt(
         receipt,
-        target_branch=target_branch,
+        target_branch=source_branch,
         target_commit=TARGET_HEAD,
         target_tree=TREE,
         protected_base_commit=PROTECTED_BASE,
@@ -90,8 +92,8 @@ def valid_live(receipt: dict, transition: dict, *, transition_name: str = "devel
         transition=transition_name,
         protected_base_commit=PROTECTED_BASE,
         protected_base_tree=PROTECTED_BASE_TREE,
-        candidate_head_commit=TARGET_HEAD,
-        candidate_head_tree=TREE,
+        candidate_head_commit=str(transition["targetCommit"]),
+        candidate_head_tree=str(transition["targetTree"]),
         workflow_file=workflow,
         check_name="Linktrend Receipt Gate",
         required_test={
@@ -119,6 +121,80 @@ def valid_live(receipt: dict, transition: dict, *, transition_name: str = "devel
 
 
 class PromotionReceiptAdversarialTests(unittest.TestCase):
+    def test_controller_markers_pass_authoritative_gate_for_both_promotions(self) -> None:
+        source_identity = identity("development", SOURCE_HEAD, TREE)
+        receipt = create_full_suite_receipt(
+            {
+                "schemaVersion": 2,
+                "candidateIdentity": source_identity.to_dict(),
+                "workflowRunId": 34165549526,
+                "workflowRunAttempt": 1,
+                "runnerLabel": "ubuntu-24.04-arm",
+                "startedAt": "2026-09-08T01:00:00Z",
+                "completedAt": "2026-09-08T01:30:00Z",
+                "conclusion": "success",
+                "commandDigest": COMMAND_DIGEST,
+                "evidenceDigests": {"full-suite-summary.txt": EVIDENCE_DIGEST},
+            }
+        ).to_dict()
+
+        staging_github = controller.MemoryGitHub(repository=REPOSITORY)
+        staging_github.refs["staging"] = PROTECTED_BASE
+        staging_github.ref_trees["staging"] = PROTECTED_BASE_TREE
+        controller.promote_to_staging(
+            github=staging_github,
+            repository=REPOSITORY,
+            development_sha=SOURCE_HEAD,
+            staging_sha=PROTECTED_BASE,
+            staging_tree=PROTECTED_BASE_TREE,
+            candidate_sha=SOURCE_HEAD,
+            candidate_tree=TREE,
+            receipt=receipt,
+            candidate_identity=source_identity.to_dict(),
+            release_gate={"status": "passed", "testProfile": "release"},
+            role="operator",
+        )
+        staging_marker = json.loads(
+            re.search(r"<!-- linktrend-promote:\s*(\{.*?\})\s*-->", staging_github.prs[1]["body"]).group(1)
+        )
+        staging_transition = staging_marker["transitionReceipt"]
+        staging_live = valid_live(receipt, staging_transition)
+        self.assertTrue(
+            evaluate_authoritative_promotion(
+                live=staging_live,
+                source_receipt=receipt,
+                transition_receipt=staging_transition,
+            ).accepted
+        )
+
+        main_github = controller.MemoryGitHub(repository=REPOSITORY)
+        main_github.refs["main"] = PROTECTED_BASE
+        main_github.ref_trees["main"] = PROTECTED_BASE_TREE
+        controller.prepare_main_promotion(
+            github=main_github,
+            repository=REPOSITORY,
+            staging_sha=SOURCE_HEAD,
+            main_sha=PROTECTED_BASE,
+            main_tree=PROTECTED_BASE_TREE,
+            candidate_sha=SOURCE_HEAD,
+            receipt=receipt,
+            candidate_identity=source_identity.to_dict(),
+            release_gate={"status": "passed", "testProfile": "release"},
+            role="operator",
+        )
+        main_marker = json.loads(
+            re.search(r"<!-- linktrend-promote:\s*(\{.*?\})\s*-->", main_github.prs[1]["body"]).group(1)
+        )
+        main_transition = main_marker["transitionReceipt"]
+        main_live = valid_live(receipt, main_transition, transition_name="staging-to-main")
+        self.assertTrue(
+            evaluate_authoritative_promotion(
+                live=main_live,
+                source_receipt=receipt,
+                transition_receipt=main_transition,
+            ).accepted
+        )
+
     def test_transition_schema_accepts_current_and_legacy_receipts(self) -> None:
         receipt, _target, transition, _source_head, _target_head, _base = chain("development", "staging")
         schema_path = Path(__file__).resolve().parents[2] / ".ide-development/schemas/transition-receipt.schema.json"
