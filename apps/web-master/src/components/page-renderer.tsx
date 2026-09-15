@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import Image from "next/image";
 
 import { NewsletterSection } from "@/components/common/NewsletterSection";
@@ -6,6 +6,12 @@ import { CTASection } from "@/components/marketing/CTASection";
 import { composeLayoutBody, pageRendererMountAttributes } from "@/components/page-renderer/compose-layout";
 import { resolveLayoutRuntime, type LayoutPackId, type PlanId } from "@/components/page-renderer/layout-packs";
 import { mapBlockToPayloadType, ProviderSemanticError } from "@/components/page-renderer/semantic-map";
+import {
+  assertConsumerAdapterSurface,
+  assertNotAllHeroProjection,
+} from "@/components/page-renderer/adapter-surface";
+import { resolvePlanActivation } from "@/components/page-renderer/plan-behavior";
+import { ContactForm } from "@/components/contact/ContactForm";
 import { CaseStudiesGrid } from "@/components/marketing/CaseStudiesGrid";
 import { DynamicBgSection } from "@/components/marketing/DynamicBgSection";
 import { OfferShowcase } from "@/components/marketing/OfferShowcase";
@@ -42,36 +48,39 @@ const getCmsImageUrl = (value: unknown): string | undefined => {
 };
 
 export const PageRenderer = ({ page, siteKey, locale, layoutPackId, planId }: PageRendererProps) => {
+  assertConsumerAdapterSurface();
   const runtime = resolveLayoutRuntime({ layoutPackId, planId });
   const layoutBlocks = Array.isArray(page.content) ? page.content : [];
-  if (process.env.NODE_ENV !== "production") {
-    const summary = layoutBlocks.map((block) => block?.blockType ?? "unknown");
-    console.debug("[PageRenderer] rendering page", {
-      siteKey,
-      locale,
-      slug: page.slug,
-      layoutPackId: runtime.layoutPackId,
-      pageRenderer: runtime.composition.pageRenderer,
-      content: summary,
-    });
-  }
-
   if (layoutBlocks.length === 0) {
     throw new ProviderSemanticError(`Public page "${page.slug}" has no semantic blocks`);
   }
 
+  const mappedBlocks = layoutBlocks.map((block) => ({
+    block,
+    mapped: mapBlockToPayloadType(block),
+  }));
+  assertNotAllHeroProjection(mappedBlocks.map((item) => item.mapped.payloadBlockType));
+  const activation = resolvePlanActivation(runtime.planId);
+
   const main = (
     <div data-region="main" className="flex-1">
-      {layoutBlocks.map((block, index) => {
-        const mapped = mapBlockToPayloadType(block);
+      {mappedBlocks.map(({ block, mapped }, index) => {
         return (
           <section
             key={block.id ?? `${mapped.payloadBlockType}-${index}`}
             className="scroll-mt-20"
             data-react-symbol={mapped.reactSymbol}
             data-provider-role={mapped.providerRole}
+            data-payload-block-type={mapped.payloadBlockType}
           >
-            {renderBlock({ ...block, blockType: mapped.payloadBlockType } as CmsPageBlock, locale, page.slug, page.title)}
+            {renderBlock(
+              { ...block, blockType: mapped.payloadBlockType } as CmsPageBlock,
+              locale,
+              page.slug,
+              page.title,
+              runtime.planId,
+              activation.newsletter,
+            )}
           </section>
         );
       })}
@@ -88,7 +97,14 @@ export const PageRenderer = ({ page, siteKey, locale, layoutPackId, planId }: Pa
   );
 };
 
-const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string, pageTitle?: string): ReactNode => {
+const renderBlock = (
+  block: CmsPageBlock,
+  locale: string,
+  pageSlug?: string,
+  pageTitle?: string,
+  planId?: PlanId,
+  newsletterEnabled = true,
+): ReactNode => {
   const type = block.blockType;
 
   switch (type) {
@@ -118,12 +134,16 @@ const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string, pag
     case "testimonial":
       return <SingleTestimonialSection block={block as SingleTestimonialBlock} />;
     case "trustFeed":
+    case "trust":
+    case "proof":
       return <TrustFeedSection block={block as TrustFeedBlock} />;
     case "locations":
       return <LocationsSection block={block as any} />;
     case "teamMembers":
+    case "team":
       return <TeamMembersSection block={block as any} />;
     case "offerShowcase":
+    case "offers":
       return (
         <div className="bg-muted/30 py-12 sm:py-14">
           <OfferShowcase lang={locale} offers={(block as OfferShowcaseBlock).offers ?? []} />
@@ -141,6 +161,8 @@ const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string, pag
         </div>
       );
     case "articles":
+    case "resources":
+    case "references":
       return (
         <div className="py-12 sm:py-14 bg-muted/30">
           <div className="container px-4 sm:px-6">
@@ -152,11 +174,91 @@ const renderBlock = (block: CmsPageBlock, locale: string, pageSlug?: string, pag
         </div>
       );
     case "newsletter":
-      return <NewsletterSection lang={locale} />;
+      return newsletterEnabled ? <NewsletterSection lang={locale} /> : null;
+    case "services":
+    case "products":
+    case "process":
+    case "localFacts":
+    case "availability":
+    case "hours":
+    case "gallery":
+    case "specifications":
+    case "answer":
+    case "author":
+      return <BoundFactsSection block={block as any} />;
+    case "breadcrumb":
+      return <BreadcrumbSection block={block as any} />;
+    case "metadata":
+      return null;
+    case "contact":
+    case "form":
+      return (
+        <div className="container px-4 sm:px-6 py-12 sm:py-14">
+          <ContactForm lang={locale} />
+        </div>
+      );
     default: {
       throw new ProviderSemanticError(`Unknown required block type "${String(type ?? "unknown")}"`);
     }
   }
+};
+
+const boundText = (value: unknown): string => (typeof value === "string" && value.trim() ? value.trim() : "");
+
+const BoundFactsSection = ({ block }: { block: Record<string, unknown> }) => {
+  const title = boundText(block.title);
+  const subtitle = boundText(block.subtitle) || boundText(block.body) || boundText(block.text);
+  const items = Array.isArray(block.items) ? block.items : [];
+  if (!title && !subtitle && items.length === 0) return null;
+  return (
+    <div className="container px-4 sm:px-6 py-12 sm:py-14 space-y-6">
+      {title ? <h2 className="text-3xl font-bold">{title}</h2> : null}
+      {subtitle ? <p className="text-lg text-muted-foreground">{subtitle}</p> : null}
+      {items.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2">
+          {items.map((item: Record<string, unknown>, index: number) => {
+            const itemTitle = boundText(item.title) || boundText(item.name);
+            const itemBody = boundText(item.description) || boundText(item.body) || boundText(item.value);
+            if (!itemTitle && !itemBody) return null;
+            return (
+              <Card key={String(item.id ?? index)} className="h-full border-slate-200">
+                <CardHeader>
+                  {itemTitle ? <CardTitle className="text-xl">{itemTitle}</CardTitle> : null}
+                </CardHeader>
+                {itemBody ? (
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">{itemBody}</p>
+                  </CardContent>
+                ) : null}
+              </Card>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+const BreadcrumbSection = ({ block }: { block: Record<string, unknown> }) => {
+  const items = Array.isArray(block.items) ? block.items : [];
+  if (items.length === 0) return null;
+  return (
+    <nav aria-label="Breadcrumb" className="container px-4 sm:px-6 py-4">
+      <ol className="flex flex-wrap gap-2 text-sm">
+        {items.map((item: Record<string, unknown>, index: number) => {
+          const name = boundText(item.name) || boundText(item.label);
+          const href = boundText(item.url) || boundText(item.href);
+          if (!name) return null;
+          return (
+            <li key={String(item.id ?? index)}>
+              {href ? <a href={href}>{name}</a> : <span>{name}</span>}
+              {index < items.length - 1 ? <span aria-hidden="true"> / </span> : null}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
 };
 
 const HeroSection = ({ block, locale, pageSlug, pageTitle }: { block: HeroBlock; locale: string; pageSlug?: string; pageTitle?: string }) => {
@@ -241,13 +343,7 @@ const FeaturesSection = ({ block, locale }: { block: FeaturesBlock; locale: stri
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
       <div className="grid gap-6 md:grid-cols-2">
-        {items.length === 0 ? (
-          <Card>
-            <CardContent className="py-6">
-              <p className="text-sm text-muted-foreground">No features available for this block.</p>
-            </CardContent>
-          </Card>
-        ) : (
+        {items.length === 0 ? null : (
           items.map((item, index) => (
             <Card key={item.id ?? index} className="h-full border-slate-200">
               <CardHeader>
@@ -322,13 +418,7 @@ const TestimonialsSection = ({ block }: { block: TestimonialsBlock }) => {
         {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
-      {testimonials.length === 0 ? (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">No testimonials available.</p>
-          </CardContent>
-        </Card>
-      ) : (
+      {testimonials.length === 0 ? null : (
         <div className="grid gap-6 md:grid-cols-2">
           {testimonials.map((testimonial, idx) => (
             <Card key={testimonial.id ?? idx} className="h-full border-slate-200">
@@ -375,7 +465,7 @@ const FaqSection = ({ block }: { block: FaqBlock }) => {
       : [];
 
   const renderAnswer = (value: unknown) => {
-    if (!value) return "No answer provided.";
+    if (!value) return "";
     if (typeof value === "string") return value;
     // Minimal Lexical JSON -> plain text (good enough for FAQ answers).
     const children = (value as any)?.root?.children ?? [];
@@ -384,7 +474,7 @@ const FaqSection = ({ block }: { block: FaqBlock }) => {
       const text = (node?.children ?? []).map((c: any) => c?.text ?? "").join(" ").trim();
       if (text) parts.push(text);
     }
-    return parts.join("\n\n") || "No answer provided.";
+    return parts.join("\n\n");
   };
 
   return (
@@ -393,13 +483,7 @@ const FaqSection = ({ block }: { block: FaqBlock }) => {
         {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
-      {questions.length === 0 ? (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">No FAQs configured for this block.</p>
-          </CardContent>
-        </Card>
-      ) : (
+      {questions.length === 0 ? null : (
         <div className="divide-y rounded-lg border border-border overflow-hidden">
           {questions.map((item, idx) => (
             <details key={item.id ?? idx} className="group border-b border-border/60 last:border-none">
@@ -426,13 +510,7 @@ const LocationsSection = ({ block }: { block: any }) => {
         {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
-      {items.length === 0 ? (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">No locations selected.</p>
-          </CardContent>
-        </Card>
-      ) : (
+      {items.length === 0 ? null : (
         <div className="grid gap-6 md:grid-cols-2">
           {items.map((loc: any, idx: number) => (
             <Card key={loc?.id ?? idx} className="h-full border-slate-200">
@@ -470,13 +548,7 @@ const TeamMembersSection = ({ block }: { block: any }) => {
         {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
         {block.subtitle ? <p className="text-lg text-muted-foreground">{block.subtitle}</p> : null}
       </div>
-      {items.length === 0 ? (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">No team members selected.</p>
-          </CardContent>
-        </Card>
-      ) : (
+      {items.length === 0 ? null : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {items.map((member: any, idx: number) => (
             <Card key={member?.id ?? idx} className="h-full border-slate-200">
@@ -590,19 +662,14 @@ const RelatedContentSection = ({ block, locale }: { block: RelatedContentBlock; 
   return (
     <div className="container px-4 sm:px-6 py-12 sm:py-14 space-y-6">
       <div className="space-y-2">
-        <h2 className="text-3xl font-bold">{block.title ?? "Related Content"}</h2>
+        {block.title ? <h2 className="text-3xl font-bold">{block.title}</h2> : null}
       </div>
-      {items.length === 0 ? (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">No related content selected.</p>
-          </CardContent>
-        </Card>
-      ) : (
+      {items.length === 0 ? null : (
         <div className="grid gap-6 md:grid-cols-2">
           {items.map((item: any, idx: number) => {
             const doc = item?.value ?? item;
-            const title = doc?.title ?? doc?.name ?? "Item";
+            const title = boundText(doc?.title) || boundText(doc?.name);
+            if (!title) return null;
             const href = resolveLink(item);
             return (
               <Card key={doc?.id ?? idx} className="h-full border-slate-200">
@@ -746,6 +813,7 @@ const MediaSection = ({ block }: { block: MediaBlock }) => {
             height={900}
             className="w-full object-cover"
             sizes="100vw"
+            style={{ aspectRatio: "16 / 9", width: "100%", height: "auto" }}
           />
         </CardContent>
         {(block.caption || block.altText) && (

@@ -10,6 +10,14 @@ on:
         description: Full 40-character protected-main commit to publish
         required: true
         type: string
+      cms_private_https_url:
+        description: Private CMS HTTPS origin baked into web-master (no public DNS, no placeholder)
+        required: true
+        type: string
+      oss_continuity_receipts_json:
+        description: Archive receipts JSON with exact checksums and LiNKtrend read-only archive locations. Use PLANNING_NOT_A_CONTINUITY_CLAIM to publish images without claiming OSS continuity. Publication cannot claim OSS continuity unless this input verifies.
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -56,12 +64,63 @@ jobs:
           requested = os.environ["REQUESTED_SHA"]
           if not re.fullmatch(r"[0-9a-f]{40}", requested):
               raise SystemExit("release_sha_must_be_a_full_lowercase_sha")
+          try:
+              subprocess.check_output(["git", "rev-parse", "--verify", f"{requested}^{{commit}}"], text=True)
+          except subprocess.CalledProcessError as error:
+              raise SystemExit("requested_release_is_not_in_protected_main_history") from error
+          subprocess.check_call(["git", "merge-base", "--is-ancestor", requested, "HEAD"])
+          subprocess.check_call(["git", "checkout", "--detach", requested])
           actual_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
           actual_tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], text=True).strip()
           if actual_sha != requested:
-              raise SystemExit("requested_release_is_not_current_protected_main")
+              raise SystemExit("requested_release_is_not_checked_out")
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write(f"release_sha={actual_sha}\nrelease_tree={actual_tree}\n")
+          PY
+
+      - name: Require private CMS HTTPS origin for web-master
+        env:
+          CMS_PRIVATE_HTTPS_URL: ${{ inputs.cms_private_https_url }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          value = os.environ["CMS_PRIVATE_HTTPS_URL"].strip()
+          parsed = urlparse(value)
+          host = (parsed.hostname or "").lower()
+          if parsed.scheme != "https" or parsed.username or parsed.password or host in {"localhost", "127.0.0.1", "0.0.0.0", "::1"} or host.startswith("127.") or "<" in value or "example" in value.lower() or "placeholder" in value.lower():
+              raise SystemExit("cms_private_https_url_must_be_a_private_https_origin")
+          PY
+
+      - name: Admit OSS continuity receipts or an explicit non-claim
+        id: oss_continuity
+        env:
+          OSS_CONTINUITY_RECEIPTS_JSON: ${{ inputs.oss_continuity_receipts_json }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          raw = os.environ["OSS_CONTINUITY_RECEIPTS_JSON"].strip()
+          sentinel = "PLANNING_NOT_A_CONTINUITY_CLAIM"
+          if not raw:
+              raise SystemExit("oss_continuity_receipts_required")
+          if raw == sentinel:
+              mode = "planning"
+          else:
+              try:
+                  payload = json.loads(raw)
+              except json.JSONDecodeError as error:
+                  raise SystemExit("oss_continuity_receipts_json_invalid") from error
+              if payload.get("kind") != "oss-continuity-archive-receipts":
+                  raise SystemExit("oss_continuity_receipts_kind_invalid")
+              Path("oss-continuity-receipts.json").write_text(raw + ("\n" if not raw.endswith("\n") else ""), encoding="utf-8")
+              mode = "archive-proof"
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"mode={mode}\n")
           PY
 
       - name: Set up Docker Buildx
@@ -109,8 +168,8 @@ jobs:
           tags: ghcr.io/linktrend/linksites-web-master:sha-${{ steps.identity.outputs.release_sha }}
           build-args: |
             LINKSITES_RELEASE_SHA=${{ steps.identity.outputs.release_sha }}
-            NEXT_PUBLIC_PAYLOAD_API_URL=https://cms.linkserver-03.tailf7e13a.ts.net
-            PAYLOAD_PUBLIC_SERVER_URL=https://cms.linkserver-03.tailf7e13a.ts.net
+            NEXT_PUBLIC_PAYLOAD_API_URL=${{ inputs.cms_private_https_url }}
+            PAYLOAD_PUBLIC_SERVER_URL=${{ inputs.cms_private_https_url }}
           provenance: mode=max
           sbom: true
 
@@ -162,6 +221,7 @@ jobs:
         run: |
           set -euo pipefail
           export LINKSITES_RELEASE_SHA="${RELEASE_SHA}"
+          export LINKSITES_AUTOWORK_MODE=manual
           export LINKSITES_TEMPLATE_RELEASE_STATE=deferred
           export LINKSITES_TEMPLATE_ID=master-template-type-1
           export LINKSITES_TEMPLATE_VERSION=2.0.0-a1.1
@@ -178,11 +238,29 @@ jobs:
           python3 - <<'PY'
           import json
           import os
+          import re
           from pathlib import Path
+
+          digest = re.compile(r"^sha256:[a-f0-9]{64}$")
+          for name in ["CMS_DIGEST", "WEB_MASTER_DIGEST", "WORKER_DIGEST", "ORCHESTRATOR_DIGEST", "MIGRATIONS_DIGEST"]:
+              value = os.environ.get(name, "")
+              if not digest.fullmatch(value):
+                  raise SystemExit(f"missing_or_mutable_image_digest={name}")
 
           path = Path("server03-release-manifest.json")
           manifest = json.loads(path.read_text())
-          manifest["repository"]["releaseTree"] = os.environ["RELEASE_TREE"]
+          if manifest.get("repository", {}).get("releaseTree") != os.environ["RELEASE_TREE"]:
+              raise SystemExit("manifest_release_tree_mismatch")
+          refs = {
+              "cms": f"ghcr.io/linktrend/linksites-cms@{os.environ['CMS_DIGEST']}",
+              "webMaster": f"ghcr.io/linktrend/linksites-web-master@{os.environ['WEB_MASTER_DIGEST']}",
+              "worker": f"ghcr.io/linktrend/linksites-autowork-worker@{os.environ['WORKER_DIGEST']}",
+              "orchestrator": f"ghcr.io/linktrend/linksites-program-orchestrator@{os.environ['ORCHESTRATOR_DIGEST']}",
+              "migrations": f"ghcr.io/linktrend/linksites-migrations@{os.environ['MIGRATIONS_DIGEST']}",
+          }
+          for reference in refs.values():
+              if "@sha256:" not in reference:
+                  raise SystemExit("mutable_image_reference")
           manifest["publication"] = {
               "registry": "ghcr.io",
               "mode": "protected-main-workflow",
@@ -190,25 +268,70 @@ jobs:
               "deploymentEligible": False,
               "requiresPlatformAdmission": True,
               "publicRoutes": False,
-              "imageRefs": {
-                  "cms": f"ghcr.io/linktrend/linksites-cms@{os.environ['CMS_DIGEST']}",
-                  "webMaster": f"ghcr.io/linktrend/linksites-web-master@{os.environ['WEB_MASTER_DIGEST']}",
-                  "worker": f"ghcr.io/linktrend/linksites-autowork-worker@{os.environ['WORKER_DIGEST']}",
-                  "orchestrator": f"ghcr.io/linktrend/linksites-program-orchestrator@{os.environ['ORCHESTRATOR_DIGEST']}",
-                  "migrations": f"ghcr.io/linktrend/linksites-migrations@{os.environ['MIGRATIONS_DIGEST']}",
-              },
+              "imageRefs": refs,
           }
           path.write_text(json.dumps(manifest, indent=2) + "\n")
           Path("server03-release.env").write_text("\n".join([
               f"LINKSITES_RELEASE_SHA={os.environ['RELEASE_SHA']}",
-              f"LINKSITES_CMS_IMAGE=ghcr.io/linktrend/linksites-cms@{os.environ['CMS_DIGEST']}",
-              f"LINKSITES_WEB_MASTER_IMAGE=ghcr.io/linktrend/linksites-web-master@{os.environ['WEB_MASTER_DIGEST']}",
-              f"LINKSITES_WORKER_IMAGE=ghcr.io/linktrend/linksites-autowork-worker@{os.environ['WORKER_DIGEST']}",
-              f"LINKSITES_ORCHESTRATOR_IMAGE=ghcr.io/linktrend/linksites-program-orchestrator@{os.environ['ORCHESTRATOR_DIGEST']}",
-              f"LINKSITES_MIGRATIONS_IMAGE=ghcr.io/linktrend/linksites-migrations@{os.environ['MIGRATIONS_DIGEST']}",
+              f"LINKSITES_CMS_IMAGE={refs['cms']}",
+              f"LINKSITES_WEB_MASTER_IMAGE={refs['webMaster']}",
+              f"LINKSITES_WORKER_IMAGE={refs['worker']}",
+              f"LINKSITES_ORCHESTRATOR_IMAGE={refs['orchestrator']}",
+              f"LINKSITES_MIGRATIONS_IMAGE={refs['migrations']}",
           ]) + "\n")
           PY
           sha256sum server03-release-manifest.json > server03-release-manifest.sha256
+
+      - name: Generate and verify OSS continuity for this publication
+        env:
+          RELEASE_SHA: ${{ steps.identity.outputs.release_sha }}
+          RELEASE_TREE: ${{ steps.identity.outputs.release_tree }}
+          CMS_DIGEST: ${{ steps.cms.outputs.digest }}
+          WEB_MASTER_DIGEST: ${{ steps.web_master.outputs.digest }}
+          WORKER_DIGEST: ${{ steps.worker.outputs.digest }}
+          ORCHESTRATOR_DIGEST: ${{ steps.orchestrator.outputs.digest }}
+          MIGRATIONS_DIGEST: ${{ steps.migrations.outputs.digest }}
+          OSS_CONTINUITY_MODE: ${{ steps.oss_continuity.outputs.mode }}
+        run: |
+          set -euo pipefail
+          export LINKSITES_RELEASE_SHA="${RELEASE_SHA}"
+          export LINKSITES_RELEASE_TREE="${RELEASE_TREE}"
+          export LINKSITES_CMS_IMAGE_DIGEST="${CMS_DIGEST}"
+          export LINKSITES_WEB_MASTER_IMAGE_DIGEST="${WEB_MASTER_DIGEST}"
+          export LINKSITES_WORKER_IMAGE_DIGEST="${WORKER_DIGEST}"
+          export LINKSITES_ORCHESTRATOR_IMAGE_DIGEST="${ORCHESTRATOR_DIGEST}"
+          export LINKSITES_MIGRATIONS_IMAGE_DIGEST="${MIGRATIONS_DIGEST}"
+          if [ "${OSS_CONTINUITY_MODE}" = planning ]; then
+            node deploy/scripts/generate-oss-continuity-manifest.mjs \
+              --output oss-continuity-manifest.json \
+              --receipts PLANNING_NOT_A_CONTINUITY_CLAIM
+            node deploy/scripts/verify-oss-continuity-manifest.mjs \
+              --manifest oss-continuity-manifest.json \
+              --allow-planning
+          else
+            node deploy/scripts/generate-oss-continuity-manifest.mjs \
+              --output oss-continuity-manifest.json \
+              --receipts oss-continuity-receipts.json \
+              --claim-continuity
+            node deploy/scripts/verify-oss-continuity-manifest.mjs \
+              --manifest oss-continuity-manifest.json \
+              --require-archive-proof
+          fi
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          manifest = json.loads(Path("oss-continuity-manifest.json").read_text())
+          if manifest.get("vendoredDependencies") or manifest.get("activeFork"):
+              raise SystemExit("oss_continuity_forbidden_vendor_or_fork")
+          mode = os.environ["OSS_CONTINUITY_MODE"]
+          claimed = manifest.get("continuityClaimed") is True
+          if mode == "planning" and (claimed or manifest.get("evidenceClass") != "planning"):
+              raise SystemExit("publication_claimed_oss_continuity_without_archive_proof")
+          if mode == "archive-proof" and not claimed:
+              raise SystemExit("archive_receipts_did_not_produce_a_verified_claim")
+          PY
+          sha256sum oss-continuity-manifest.json > oss-continuity-manifest.sha256
 
       - name: Upload immutable publication evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -218,5 +341,7 @@ jobs:
             server03-release-manifest.json
             server03-release-manifest.sha256
             server03-release.env
+            oss-continuity-manifest.json
+            oss-continuity-manifest.sha256
           if-no-files-found: error
           retention-days: 90
