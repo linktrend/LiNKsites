@@ -948,6 +948,7 @@ def promote_to_staging(
     repository: str,
     development_sha: str,
     staging_sha: str,
+    staging_tree: str,
     candidate_sha: str,
     candidate_tree: str,
     receipt: Mapping[str, Any],
@@ -983,6 +984,21 @@ def promote_to_staging(
     identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
     if identity_tree != normalize_sha(candidate_tree):
         raise ControllerError("changed_staging_content", "promotion tree differs from receipt identity")
+    base_commit = normalize_sha(staging_sha)
+    base_tree = normalize_sha(staging_tree)
+    if not is_valid_sha(base_commit) or not is_valid_sha(base_tree):
+        raise ControllerError("transition_receipt_failed", "staging base commit/tree identity is required")
+    try:
+        promotion_transition = create_transition_receipt(
+            receipt,
+            target_branch=config.development_branch,
+            target_commit=normalize_sha(development_sha),
+            target_tree=identity_tree,
+            protected_base_commit=base_commit,
+            protected_base_tree=base_tree,
+        ).to_dict()
+    except (ValueError, TypeError) as exc:
+        raise ControllerError("transition_receipt_failed", str(exc)) from exc
     short = normalize_sha(development_sha)[:12]
     branch = _promotion_branch(config, config.staging_branch, development_sha)
     marker = {
@@ -998,9 +1014,8 @@ def promote_to_staging(
         "fullRunId": _receipt_workflow_run_id(receipt),
         "fullRunAttempt": _receipt_workflow_run_attempt(receipt),
     }
-    if transition_receipt is not None:
-        marker["transitionReceiptDigest"] = compute_transition_digest(transition_receipt)
-        marker["transitionReceipt"] = dict(transition_receipt)
+    marker["transitionReceiptDigest"] = compute_transition_digest(promotion_transition)
+    marker["transitionReceipt"] = promotion_transition
     body = f"<!-- linktrend-promote: {json.dumps(marker, sort_keys=True)} -->"
     pr = call_with_infrastructure_retry(
         lambda: github.create_pull_request(
@@ -1028,6 +1043,8 @@ def promote_to_staging(
             target_branch=config.staging_branch,
             target_commit=normalize_sha(str(merged.get("mergeCommitSha") or "")),
             target_tree=normalize_sha(candidate_tree),
+            protected_base_commit=base_commit,
+            protected_base_tree=base_tree,
         ).to_dict()
     except (ValueError, TypeError) as exc:
         raise ControllerError("transition_receipt_failed", str(exc)) from exc
@@ -1056,6 +1073,7 @@ def prepare_main_promotion(
     repository: str,
     staging_sha: str,
     main_sha: str,
+    main_tree: str,
     candidate_sha: str,
     receipt: Mapping[str, Any],
     candidate_identity: Mapping[str, Any],
@@ -1084,6 +1102,22 @@ def prepare_main_promotion(
     )
     if not receipt_decision.accepted:
         raise ControllerError("receipt_rejected", f"{receipt_decision.code}:{receipt_decision.detail}")
+    identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
+    base_commit = normalize_sha(main_sha)
+    base_tree = normalize_sha(main_tree)
+    if not is_valid_sha(identity_tree) or not is_valid_sha(base_commit) or not is_valid_sha(base_tree):
+        raise ControllerError("transition_receipt_failed", "main candidate and base commit/tree identities are required")
+    try:
+        promotion_transition = create_transition_receipt(
+            receipt,
+            target_branch=config.staging_branch,
+            target_commit=normalize_sha(staging_sha),
+            target_tree=identity_tree,
+            protected_base_commit=base_commit,
+            protected_base_tree=base_tree,
+        ).to_dict()
+    except (ValueError, TypeError) as exc:
+        raise ControllerError("transition_receipt_failed", str(exc)) from exc
     short = normalize_sha(staging_sha)[:12]
     branch = _promotion_branch(config, config.main_branch, staging_sha)
     marker = {
@@ -1100,9 +1134,8 @@ def prepare_main_promotion(
         "fullRunAttempt": _receipt_workflow_run_attempt(receipt),
         "awaitingFounderApproval": True,
     }
-    if transition_receipt is not None:
-        marker["transitionReceiptDigest"] = compute_transition_digest(transition_receipt)
-        marker["transitionReceipt"] = dict(transition_receipt)
+    marker["transitionReceiptDigest"] = compute_transition_digest(promotion_transition)
+    marker["transitionReceipt"] = promotion_transition
     body = f"<!-- linktrend-promote: {json.dumps(marker, sort_keys=True)} -->"
     pr = call_with_infrastructure_retry(
         lambda: github.create_pull_request(
@@ -1546,6 +1579,7 @@ def main(argv: list[str] | None = None) -> int:
                     repository=args.repository,
                     development_sha=str(payload["developmentSha"]),
                     staging_sha=str(payload["stagingSha"]),
+                    staging_tree=str(payload["stagingTree"]),
                     candidate_sha=str(payload["candidateSha"]),
                     candidate_tree=str(payload["candidateTree"]),
                     receipt=load(args.receipt),
@@ -1563,6 +1597,7 @@ def main(argv: list[str] | None = None) -> int:
                     repository=args.repository,
                     staging_sha=str(payload["stagingSha"]),
                     main_sha=str(payload["mainSha"]),
+                    main_tree=str(payload["mainTree"]),
                     candidate_sha=str(payload["candidateSha"]),
                     receipt=load(args.receipt),
                     candidate_identity=load(args.identity_json),

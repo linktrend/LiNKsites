@@ -43,6 +43,7 @@
     },
     "failureContractDigest": {"anyOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]},
     "protectedBaseCommit": {"anyOf": [{"$ref": "#/$defs/sha"}, {"type": "null"}]},
+    "protectedBaseTree": {"$ref": "#/$defs/sha"},
     "receiptDigest": {"$ref": "#/$defs/digest"}
   },
   "$defs": {

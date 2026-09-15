@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
+
+from jsonschema import Draft202012Validator
 
 from scripts.gitops.coordinator.receipts import (
     CandidateIdentity,
@@ -116,6 +119,16 @@ def valid_live(receipt: dict, transition: dict, *, transition_name: str = "devel
 
 
 class PromotionReceiptAdversarialTests(unittest.TestCase):
+    def test_transition_schema_accepts_current_and_legacy_receipts(self) -> None:
+        receipt, _target, transition, _source_head, _target_head, _base = chain("development", "staging")
+        schema_path = Path(__file__).resolve().parents[2] / ".ide-development/schemas/transition-receipt.schema.json"
+        validator = Draft202012Validator(json.loads(schema_path.read_text(encoding="utf-8")))
+        validator.validate(transition)
+        legacy = dict(transition)
+        legacy.pop("protectedBaseTree")
+        legacy["receiptDigest"] = compute_transition_digest({**legacy, "receiptDigest": ""})
+        validator.validate(legacy)
+
     def test_valid_same_tree_transition_chains_are_accepted(self) -> None:
         for source_branch, target_branch in (("development", "staging"), ("staging", "main")):
             with self.subTest(source_branch=source_branch, target_branch=target_branch):
@@ -351,6 +364,7 @@ class PromotionReceiptAdversarialTests(unittest.TestCase):
             "repository_mismatch": dict(live, repository="linktrend/other"),
             "transition_mismatch": dict(live, transition="staging-to-main"),
             "protected_base_mismatch": dict(live, protectedBaseCommit="8" * 40),
+            "protected_base_tree_mismatch": dict(live, protectedBaseTree="7" * 40),
             "copied_receipt": dict(live, consumptionId="sha256:" + "9" * 64),
             "stale_or_expired": dict(live, now="2026-09-30T00:00:00Z"),
             "self_review": dict(live, reviewer={**live["reviewer"], "identity": "candidate-author"}),
@@ -373,6 +387,7 @@ class PromotionReceiptAdversarialTests(unittest.TestCase):
             "repository_mismatch": "repository_mismatch",
             "transition_mismatch": "transition_mismatch",
             "protected_base_mismatch": "protected_base_mismatch",
+            "protected_base_tree_mismatch": "protected_base_tree_mismatch",
             "copied_receipt": "copied_receipt",
             "stale_or_expired": "stale_or_expired",
             "self_review": "self_review",

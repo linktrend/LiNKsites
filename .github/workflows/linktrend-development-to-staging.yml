@@ -131,7 +131,8 @@ jobs:
       - name: Verify receipt identity and branch policy result
         env:
           RECEIPT_RUN_ID: ${{ steps.receipt.outputs.run_id }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          TARGET_BRANCH: staging
           SOURCE_PR: ${{ steps.receipt.outputs.source_pr }}
           EVENT_NAME: ${{ github.event_name }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -139,7 +140,9 @@ jobs:
           set -euo pipefail
           candidate_dir="$(cat candidate-dir.txt)"
           source_head="$(jq -r .sourceIdentity.headCommit transition-receipt.json)"
+          BASE_SHA="$(git ls-remote --exit-code origin "refs/heads/${TARGET_BRANCH}" | cut -f1)"
           test -n "${BASE_SHA}" || { echo "receipt_gate_base_missing"; exit 1; }
+          test "${BASE_SHA}" = "${EVENT_BASE_SHA}" || { echo "receipt_gate_base_moved"; exit 1; }
           git fetch --no-tags origin "${BASE_SHA}"
           base_tree="$(git rev-parse "${BASE_SHA}^{tree}")"
           candidate_tree="$(git -C "${candidate_dir}" rev-parse HEAD^{tree}")"

@@ -659,6 +659,8 @@ def evaluate_authoritative_promotion(
         return Decision(False, "missing_field", "protected base or candidate identity is malformed")
     if _sha(transition_receipt.get("protectedBaseCommit")) != live_base:
         return Decision(False, "protected_base_mismatch", "transition protected base is not the current protected commit")
+    if _sha(transition_receipt.get("protectedBaseTree")) != live_base_tree:
+        return Decision(False, "protected_base_tree_mismatch", "transition protected base tree is not the current protected tree")
     if _sha(transition_receipt.get("targetCommit")) != live_head or _sha(transition_receipt.get("targetTree")) != live_tree:
         return Decision(False, "transition_target_mismatch", "transition target is not the live candidate head/tree")
     source_identity = source_receipt.get("candidateIdentity") if isinstance(source_receipt.get("candidateIdentity"), Mapping) else {}
