@@ -41,6 +41,12 @@ class PromotionTransitionWorkflowTests(unittest.TestCase):
             self.assertIn("write-live-facts", text)
             self.assertIn("authorize", text)
             self.assertIn("from scripts.gitops.coordinator.receipts import compute_receipt_digest", text)
+            self.assertNotIn("search/issues?q=", text)
+            self.assertIn('gh api --paginate --slurp', text)
+            self.assertIn('pulls?state=closed&per_page=100', text)
+            self.assertIn('select(.merged_at != null)', text)
+            self.assertIn('contains($digest)', text)
+            self.assertIn("'{items: [.[][]", text)
 
     def test_repository_ci_cannot_publish_or_duplicate_promotion_authority(self) -> None:
         self.assertNotIn("name: LiNKsites Promotion Receipt", CI)

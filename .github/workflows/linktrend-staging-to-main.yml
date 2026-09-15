@@ -171,7 +171,11 @@ jobs:
           test "${receipt_digest}" = "${{ steps.receipt.outputs.receipt_digest }}" || { echo "receipt_gate_digest_mismatch"; exit 1; }
           gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}/reviews" > source-reviews.json
           gh api "repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs?per_page=100" > observed-checks.json
-          gh api "search/issues?q=repo:${GITHUB_REPOSITORY}+is:pr+is:merged+${receipt_digest}" > consumed-search.json
+          gh api --paginate --slurp \
+            "repos/${GITHUB_REPOSITORY}/pulls?state=closed&per_page=100" \
+            | jq --arg digest "${receipt_digest}" \
+                '{items: [.[][] | select(.merged_at != null) | select((.body // "") | contains($digest))]}' \
+                > consumed-search.json
           python3 "$GITHUB_WORKSPACE/scripts/gitops/promotion_receipt_gate.py" write-live-facts \
             --repository "${GITHUB_REPOSITORY}" \
             --transition staging-to-main \

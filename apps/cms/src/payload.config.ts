@@ -54,6 +54,7 @@ import { LegalGlobal } from '@/globals/LegalGlobal'
 import { SEOGlobal } from '@/globals/SEOGlobal'
 import { applyGlobalCollectionHooks } from '@/hooks/globalHooks'
 import { manageUsersAccess } from '@/access'
+import { resolveDatabaseUri } from '@/utils/databaseUri'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -66,13 +67,8 @@ const isPayloadCodegen = process.argv.some((arg) => {
   return arg.includes('generate:types') || arg.includes('generate:importmap')
 }) || process.env.LINKSITES_BUILD_NO_DATABASE === '1'
 
-const CODEGEN_DATABASE_URI = 'postgresql://' + '127.0.0.1:5432/linksites_build'
-const GAP43_TEST_PLACEHOLDER = /^ltfx\.db\.uri\.postgres(ql)?\./
 const configuredDatabaseUri = process.env.DATABASE_URI
-const databaseUri =
-  configuredDatabaseUri && GAP43_TEST_PLACEHOLDER.test(configuredDatabaseUri)
-    ? CODEGEN_DATABASE_URI
-    : (configuredDatabaseUri ?? (isPayloadCodegen ? CODEGEN_DATABASE_URI : undefined))
+const databaseUri = resolveDatabaseUri(configuredDatabaseUri, isPayloadCodegen)
 
 if (!databaseUri) {
   throw new Error('DATABASE_URI environment variable is required. Please add it to your .env file.')
