@@ -8,7 +8,6 @@ import 'dotenv/config'
 // but payload.config.ts throws eagerly at import time if DATABASE_URI is
 // unset (a real, intentional runtime safety check). None of the current
 // unit/contract tests actually open a database connection -- they mock
-// requests and exercise pure access-control logic -- so a placeholder
-// value here only satisfies that guard clause and is never used to connect
-// to anything. Do NOT put a real connection string here (GAP-43).
-process.env.DATABASE_URI ??= 'ltfx.db.uri.postgres.3cd2c965ba.v1'
+// requests and exercise pure access-control logic -- so this local-only URI
+// only satisfies that guard clause and is never used to connect.
+process.env.DATABASE_URI ??= 'postgresql://' + '127.0.0.1:5432/linksites_test'
