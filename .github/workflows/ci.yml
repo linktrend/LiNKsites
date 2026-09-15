@@ -113,7 +113,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: linktrend/LiNKlibraries
-          ref: a7193d40152747db2a03e094fa263f324a971a0b
+          ref: 998c02c29fae5acc429804d7e03dcc74df7e7a52
           path: .ci/linklibraries
           token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
           persist-credentials: false
@@ -177,6 +177,7 @@ jobs:
         env:
           LINKSITES_PLATFORM_REPOSITORY: ${{ github.workspace }}/.ci/linkplatform
           W2_02_LIBRARY_REPOSITORY_PATH: ${{ github.workspace }}/.ci/linklibraries
+          LINKLIBRARIES_ROOT: ${{ github.workspace }}/.ci/linklibraries
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           # The hosted runner already proves the image build and recovery
           # profile. Do not export the multi-GB local layer cache on this gate.
