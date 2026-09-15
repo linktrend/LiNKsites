@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-03-session-and-source-identity",
+  "packet": "LSG0-03",
+  "issue": 538,
+  "recordedAt": "2026-09-12T22:53:19Z",
+  "cloudRun": {
+    "url": "https://cursor.com/agents/bc-a070d8a3-8ca4-435c-af4d-6aef66517fe7",
+    "bcId": "bc-a070d8a3-8ca4-435c-af4d-6aef66517fe7",
+    "name": "LINKSITES-LSG0-03-ADMISSION-REFRESH-538",
+    "environmentBuildId": "bld-20260912-266e3455-5ca9-4a12-b544-7d85ef665c7a",
+    "gitSetup": "reuse_then_checkout"
+  },
+  "initialCachedIdentity": {
+    "note": "Cursor cached checkout before fetch/checkout. Reported separately from admitted starting-work identity.",
+    "linktrend/LiNKsites": {
+      "originHost": "https://github.com/linktrend/LiNKsites",
+      "branch": "cursor/linksites-lsg0-03-admission-refresh-538-85ea",
+      "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+      "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea",
+      "dirty": false
+    },
+    "linktrend/LiNKlibraries": {
+      "originHost": "https://github.com/linktrend/LiNKlibraries",
+      "branch": "cursor/linksites-lsg0-03-admission-refresh-538-85ea",
+      "commit": "96422a39979f6e1e4c068e871051ae45423a5967",
+      "tree": "384b428eb35ffa21c6eb1fdc1af90997379a99fb",
+      "dirty": false,
+      "note": "Cached checkout already matched the supplied read-only commit/tree; still fetched origin/development and verified before use."
+    }
+  },
+  "fetchedThenVerified": {
+    "linktrend/LiNKsites": {
+      "fetchedRef": "origin/issue/538-refresh-lsg0-03-against-current-protected-linkli",
+      "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+      "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea",
+      "matchesSuppliedInput": true
+    },
+    "linktrend/LiNKlibraries": {
+      "fetchedRef": "origin/development",
+      "fetchedTipCommit": "96422a39979f6e1e4c068e871051ae45423a5967",
+      "fetchedTipTree": "384b428eb35ffa21c6eb1fdc1af90997379a99fb",
+      "fetchedTipMatchesSuppliedInput": true,
+      "exactSuppliedCommitFetched": "96422a39979f6e1e4c068e871051ae45423a5967",
+      "exactSuppliedTree": "384b428eb35ffa21c6eb1fdc1af90997379a99fb",
+      "exactCommitMatchesSuppliedInput": true,
+      "didNotSubstituteBoundBranchTip": true
+    }
+  },
+  "admittedStartingWorkIdentity": {
+    "writer": {
+      "repository": "linktrend/LiNKsites",
+      "ownedIssueBranch": "issue/538-refresh-lsg0-03-against-current-protected-linkli",
+      "writerCheckout": "issue/538-refresh-lsg0-03-against-current-protected-linkli",
+      "commit": "7a88e6be88202fffe5a7f01526fadb517e2caeeb",
+      "tree": "994f57c50f6ae94157cc5cd3b88ba5f0c6e637ea",
+      "dirty": false,
+      "role": "implementation-writer-allowed-paths-only"
+    },
+    "readOnlySources": [
+      {
+        "repository": "linktrend/LiNKlibraries",
+        "ref": "development",
+        "commit": "96422a39979f6e1e4c068e871051ae45423a5967",
+        "tree": "384b428eb35ffa21c6eb1fdc1af90997379a99fb",
+        "checkout": "detached HEAD at supplied commit",
+        "role": "read-only-source",
+        "didNotEditOrPush": true
+      }
+    ]
+  },
+  "allowedPaths": [
+    "docs/evidence/end-to-end-delivery/lsg0-03/"
+  ],
+  "prohibited": [
+    "parent-evidence-index-edits",
+    "existing-LSG0-03-files-outside-owned-subdirectory",
+    "LiNKlibraries-mutation",
+    "product-code",
+    "plans",
+    "workflows",
+    "locks",
+    "migrations",
+    "protected-refs",
+    "implementer-PR",
+    "self-merge",
+    "promotion",
+    "deployment",
+    "live-systems",
+    "credentials",
+    "nested-workers"
+  ]
+}
