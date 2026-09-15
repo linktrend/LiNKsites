@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-validation",
+  "issue": 543,
+  "qualificationTimeUtc": "2026-09-13T03:47:37Z",
+  "overall": "HOLD",
+  "pass": false,
+  "qualificationVerdict": "HOLD",
+  "acceptanceCommandsPass": true,
+  "leanIndependentReviewer": "not-required",
+  "qualificationCommit": "662a3a9e4388f676cb2413c857aad76164fe37ac",
+  "evidenceHeadAtValidation": "662a3a9e4388f676cb2413c857aad76164fe37ac",
+  "baseSha": "a3a8834dee19c83dec9c19051ca4519a7ff51565",
+  "checks": [
+    {
+      "id": "json-tool",
+      "command": "find docs/evidence/end-to-end-delivery/lsg0-04 -type f -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+      "result": "pass"
+    },
+    {
+      "id": "scoped-diff",
+      "command": "test -z \"$(git diff --name-only a3a8834dee19c83dec9c19051ca4519a7ff51565...HEAD | rg -v '^docs/evidence/end-to-end-delivery/lsg0-04/')\"",
+      "result": "pass",
+      "changedPaths": [
+        "docs/evidence/end-to-end-delivery/lsg0-04/AUTOWORK-SURFACES.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/CHECKSUMS.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/COORDINATOR-DEVELOPMENT-INSPECTION.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/IDENTITY.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/LEAN-REVIEW.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/OWNER-ACTIONS.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/PLATFORM-SURFACES.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/QUALIFICATION.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/TOOLCHAIN.json",
+        "docs/evidence/end-to-end-delivery/lsg0-04/VALIDATION.json"
+      ]
+    },
+    {
+      "id": "diff-check",
+      "command": "git diff --check a3a8834dee19c83dec9c19051ca4519a7ff51565...HEAD",
+      "result": "pass"
+    },
+    {
+      "id": "changed-path-secret-scan",
+      "tool": "rg",
+      "result": "pass",
+      "matches": 0
+    },
+    {
+      "id": "relative-index-links",
+      "result": "pass",
+      "index": "INDEX.json"
+    }
+  ],
+  "didNotProbeLiveSystems": true,
+  "didNotEditProtectedBranches": true,
+  "didNotEditReadOnlySources": true,
+  "didNotCreatePr": true
+}
