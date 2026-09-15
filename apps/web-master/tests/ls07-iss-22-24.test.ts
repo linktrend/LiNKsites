@@ -22,6 +22,10 @@ import {
   newsletterSuccessAfterEnqueue,
 } from "../src/lib/forms/newsletter-policy.ts";
 import {
+  evaluateContactRequest,
+  contactSuccessAfterEnqueue,
+} from "../src/lib/forms/contact-policy.ts";
+import {
   assertJsonLdMatchesVisibleFacts,
   collectVisibleFacts,
   projectVisibleJsonLd,
@@ -226,7 +230,7 @@ test("ISS-24 accessibility matrix performance budgets and visual fixtures exist 
   assert.equal(WCAG_TARGET, "WCAG 2.2 AA");
   assert.ok(ACCESSIBILITY_MATRIX.some((row) => row.mode === "legal" && row.proof === "not-claimed"));
   assert.ok(ACCESSIBILITY_MATRIX.some((row) => row.mode === "manual"));
-  const html = `<html lang="en"><body><main><h1>Shop</h1><img src="/a.png" alt="Pump"></main></body></html>`;
+  const html = `<html lang="en"><body><main><h1>Shop</h1><img src="/a.png" alt="Pump"><style>@media (prefers-reduced-motion: reduce){*{animation:none}}</style></main></body></html>`;
   const matrix = evaluateAccessibilityMatrix(html);
   assert.equal(matrix.find((row) => row.id === "a11y.h1")?.status, "PASS");
   assert.equal(matrix.find((row) => row.id === "a11y.legal")?.status, "NOT_CLAIMED");
@@ -292,6 +296,39 @@ test("ISS-23 newsletter consent is parsed from the body and fake success is reje
   assert.equal(allowed.ok, true);
   assert.equal(newsletterSuccessAfterEnqueue(false).success, false);
   assert.equal(newsletterSuccessAfterEnqueue(true).success, true);
+});
+
+test("ISS-23 contact consent is parsed from the body and fake success is rejected", () => {
+  const env = {
+    LINKAUTOWORK_GATEWAY_URL: "https://gateway.test",
+    LINKAUTOWORK_SIGNING_SECRET: "secret",
+    LINKAUTOWORK_SIGNING_KEY_ID: "key",
+    LINKAUTOWORK_ENVIRONMENT: "sandbox",
+    LINKSITES_ORG_ID: "org",
+    LINKSITES_SITE_ID: "site",
+    LINKAUTOWORK_OUTBOX_PATH: "/tmp/outbox",
+    LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET: "ltfx." + "ls07.integrity",
+    LINKAUTOWORK_EVENT_GRANTS: "grant",
+  };
+  const refused = evaluateContactRequest(
+    { intentTag: "contact-form", formData: { name: "Ada", email: "a@example.test", message: "Need a pump quote" } },
+    env,
+  );
+  assert.equal(refused.ok, false);
+  if (!refused.ok) {
+    assert.equal(refused.stage, "policy");
+    if (refused.stage === "policy") assert.equal(refused.decision.code, "consent_required");
+  }
+  const allowed = evaluateContactRequest(
+    { intentTag: "contact-form", formData: { name: "Ada", acceptedTerms: true } },
+    env,
+  );
+  assert.equal(allowed.ok, true);
+  assert.equal(contactSuccessAfterEnqueue(false).success, false);
+  assert.equal(contactSuccessAfterEnqueue(true).success, true);
+  const contactRoute = readFileSync(resolve(root, "../src/app/api/contact/route.ts"), "utf8");
+  assert.doesNotMatch(contactRoute, /consentGranted:\s*true/);
+  assert.match(contactRoute, /evaluateContactRequest/);
 });
 
 test("ISS-22/23/24 product files exist in owned surfaces", () => {

@@ -1,6 +1,7 @@
 import { CmsFaq } from "@/lib/repository/faq";
 import { faqSchema } from "../lib/schemas";
 import { getSiteName } from "@/config";
+import { serializeJsonLd } from "@/lib/seo/visible-facts";
 
 type Props = { lang: string; page: { data: { faqs: CmsFaq[] } } };
 
@@ -10,7 +11,7 @@ export function FAQLayout({ lang, page }: Props) {
   const siteName = getSiteName();
   return (
     <div className="container space-y-6 py-12">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }} />
       <header>
         <h1 className="text-4xl font-bold">Frequently Asked Questions</h1>
         <p className="text-muted-foreground">Common questions about {siteName}.</p>
