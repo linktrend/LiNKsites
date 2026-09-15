@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "kind": "lean-review-policy",
+  "packet": "ISSUE-533",
+  "overallStateUnchanged": "PREPARED/HOLD",
+  "ready": false,
+  "denominator": {
+    "atomicPackets": 30,
+    "unchanged": true,
+    "note": "LSFULL-03 remains in the 30-packet DoD set; only its independent live reviewer is waived."
+  },
+  "policyId": "founder-approved-lean-review",
+  "appliedTo": [
+    "docs/production-roadmap/phase-2/",
+    "docs/evidence/end-to-end-delivery/"
+  ],
+  "retainedIndependentReview": {
+    "id": "LSREV-01",
+    "count": 1,
+    "scope": "exact consolidated source candidate commit/tree",
+    "covers": "the coherent source Phase; not repeated per packet, per documentation/metadata/packaging correction, or for an unchanged SHA/tree",
+    "receiptMustNameMaterialRisks": [
+      "auth/authorization and secret-handling logic",
+      "additive Payload/Postgres migration and RLS/data-boundary safety",
+      "production deployment/rollback configuration"
+    ],
+    "selfReviewForbidden": true,
+    "invalidatedBy": "substantive change to those named risk surfaces",
+    "notInvalidatedBy": "deterministic-only documentation, metadata, fixture, packaging, generated-manifest or controller-state corrections",
+    "notRepeatedForUnchangedShaTree": true,
+    "reviewerInfrastructureToolDependencyNetworkFailure": {
+      "isProductFailure": false,
+      "groundsForEquivalentReplacementReview": false
+    },
+    "agent": {
+      "transport": "Cursor-REST-API-SDK",
+      "model": "Grok-4.6-Medium",
+      "fast": false,
+      "role": "independent-read-only"
+    }
+  },
+  "issueCheckpointIndependentNarrowReview": {
+    "previous": "unconditional requiredEvidence independent_narrow_review",
+    "replacement": "risk-triggered",
+    "requiredWhenChangedSurfaces": [
+      "auth/authorization and secret-handling logic",
+      "additive Payload/Postgres migration and RLS/data-boundary safety",
+      "production deployment/rollback configuration"
+    ],
+    "note": "Material-risk issue work is covered by the one LSREV-01 receipt on the exact consolidated candidate. Issue checkpoints do not add a second independent review of the same SHA/tree."
+  },
+  "waivedGates": [
+    {
+      "id": "unconditional-independent_narrow_review-issue-checkpoint",
+      "replacementProof": "exact_pushed_commit_tree + scoped_diff + focused_tests + manifest_evidence; independent review only when the named risk surfaces change, then only as LSREV-01 on the consolidated candidate"
+    },
+    {
+      "id": "independent-review-evidence-formatting",
+      "replacementProof": "python3 -m json.tool, schema/JSON validation, checksum records, git diff --check"
+    },
+    {
+      "id": "independent-review-metadata-rebinding",
+      "replacementProof": "exact commit/tree identity records, scoped diff, checksums, controller/readback where published"
+    },
+    {
+      "id": "independent-review-fixture-restamping",
+      "replacementProof": "deterministic fixture tests plus secret scanning"
+    },
+    {
+      "id": "independent-review-deterministic-packaging",
+      "replacementProof": "packaging/manifest validators, checksums, exact identity"
+    },
+    {
+      "id": "independent-review-documentation-only-changes",
+      "replacementProof": "scoped diff, JSON/link validation, secret scanning, git diff --check"
+    },
+    {
+      "id": "independent-review-generated-manifests",
+      "replacementProof": "generator + validator commands bound to exact SHA/tree"
+    },
+    {
+      "id": "independent-review-controller-state-publication",
+      "replacementProof": "delivery-controller status, protected-ref readback, exact identity"
+    },
+    {
+      "id": "independent-review-narrow-corrections-covered-by-deterministic-tests-and-secret-scan",
+      "replacementProof": "focused/deterministic tests plus BASE_SHA/HEAD_SHA secret scan"
+    },
+    {
+      "id": "LSFULL-03-independent-live-operational-reviewer",
+      "replacementProof": "deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback evidence"
+    },
+    {
+      "id": "P2-08-independent-final-audit",
+      "replacementProof": "same deterministic live-acceptance set as LSFULL-03; founder handoff remains"
+    },
+    {
+      "id": "re-audit-by-another-reviewer-after-every-correction",
+      "replacementProof": "new LSREV-01 only after a substantive named-risk-surface change; deterministic-only corrections re-run their commands"
+    },
+    {
+      "id": "two-independent-reviews-source-plus-operational",
+      "replacementProof": "exactly one independent review (LSREV-01) plus LSVAL-01 Full Suite and deterministic live proof"
+    },
+    {
+      "id": "repeat-LSREV-01-for-unchanged-sha-tree",
+      "replacementProof": "prior LSREV-01 receipt remains valid for that exact commit/tree"
+    },
+    {
+      "id": "equivalent-replacement-review-on-reviewer-infrastructure-failure",
+      "replacementProof": "diagnose infrastructure/tool/dependency/network failure; do not treat as product FAIL or invent a second review product"
+    }
+  ],
+  "keptDeterministicGates": [
+    "LSVAL-01 one Full Suite bound to exact SHA/tree",
+    "schema validation",
+    "JSON/link validation",
+    "scoped diff",
+    "lint/type/build where applicable",
+    "focused and full tests",
+    "supply-chain/licence checks",
+    "secret scanning",
+    "CI receipts",
+    "deployment health",
+    "restore/rollback proof",
+    "controller readback"
+  ],
+  "unweakened": [
+    "self-review prohibition for the one retained material-risk review",
+    "protected integration via Phase Packager and delivery controller",
+    "production deployment authority",
+    "secret boundaries",
+    "exact identity checks"
+  ],
+  "leanGateChain": [
+    "issue checkpoint: exact commit/tree, scoped diff, focused tests, manifest evidence; independent_narrow_review only if risk-triggered",
+    "LSINT-01 consolidate exact candidate",
+    "LSVAL-01 one Full Suite on exact SHA/tree",
+    "LSREV-01 one independent review naming the three material risks",
+    "LSREL-01 Phase Packager + delivery controller protected promotion",
+    "LSART-01 five immutable images",
+    "live packets: health, privacy, backup/restore, rollback, idempotency, completion-chain",
+    "LSFULL-03 deterministic exact-release identity + live proofs + controller/readback + founder handoff (no second independent reviewer)"
+  ]
+}

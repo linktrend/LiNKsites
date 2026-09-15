@@ -1,6 +1,6 @@
 import { buildOrganizationJsonLd, buildWebSiteJsonLd } from "@/lib/seo";
 import { SITE_CONFIG, getAiActions, getSiteUrl } from "@/config";
-import { assertJsonLdMatchesVisibleFacts, collectVisibleFacts } from "@/lib/seo/visible-facts";
+import { assertJsonLdMatchesVisibleFacts, collectVisibleFacts, serializeJsonLd } from "@/lib/seo/visible-facts";
 
 export function SiteStructuredData() {
   const actions = getAiActions().actions.map((action) => ({
@@ -26,7 +26,7 @@ export function SiteStructuredData() {
         <script
           key={`jsonld-${index}`}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }}
         />
       ))}
     </>
