@@ -93,6 +93,10 @@ export class ProgramRuntime {
     return state.completion.envelope
   }
 
+  rejectAutoworkCompletion(receipt: { requestId?: string } | null | undefined): never {
+    throw new Error(`autowork_receipt_is_not_linksites_completion:${receipt?.requestId ?? 'unknown'}`)
+  }
+
   async exportState(): Promise<unknown> { const state = await this.ledger.snapshot(); return { ...(sanitize(state) as Record<string, unknown>), executionRevision: this.config.executingRevision, executableCheckpoint: this.config.executableCheckpoint, canonicalGraph: sanitize(state.program.graph), executorRegistry: this.executors.list(), persistedEvidence: state.runs.flatMap((run) => run.evidence.map((evidence) => ({ issueId: run.issueId, receiptId: evidence.receipt_id, storageLocation: evidence.storage_location, revisionSha: evidence.revision_sha, checksum: evidence.checksum }))) } }
 
   private async execute(issue: IssueRecord, runId: string, fencingToken: number ): Promise<void> {

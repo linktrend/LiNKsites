@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 2,
+  "entriesSha256": "43db7d5df7358b4ae0ef8f090148a76b4dcf91f637573ccf880e8d1f62f702b0",
+  "entries": [
+    {
+      "entryId": "action-queue-row-e7c2f94f",
+      "kind": "custom_component",
+      "name": "Action Queue Row",
+      "summary": "Historical migration record for an operator attention row; reusable implementation content is not present in this entry.",
+      "problemDomains": [
+        "attention feeds"
+      ],
+      "tags": [
+        "migrated-from-ledger",
+        "metadata-only"
+      ],
+      "languages": [
+        "typescript"
+      ],
+      "frameworks": [
+        "react"
+      ],
+      "state": "metadata_only",
+      "contentMode": "documentation",
+      "selectable": false,
+      "compatibility": {
+        "node": ">=20",
+        "runtimes": [
+          "node"
+        ]
+      },
+      "dependencies": {
+        "packages": [],
+        "services": []
+      },
+      "path": "entries/action-queue-row-e7c2f94f"
+    },
+    {
+      "entryId": "hello-world-banner",
+      "kind": "custom_component",
+      "name": "Hello World Banner",
+      "summary": "Reusable React banner that renders an accessible Hello World heading and one trimmed dynamic greeting.",
+      "problemDomains": [
+        "ui greeting",
+        "hello world demos"
+      ],
+      "tags": [
+        "react",
+        "banner",
+        "demo"
+      ],
+      "languages": [
+        "typescript"
+      ],
+      "frameworks": [
+        "react"
+      ],
+      "state": "usable",
+      "contentMode": "executable",
+      "selectable": true,
+      "compatibility": {
+        "node": ">=20",
+        "runtimes": [
+          "node",
+          "browser"
+        ]
+      },
+      "dependencies": {
+        "packages": [
+          {
+            "name": "react",
+            "version": "19.1.1",
+            "ecosystem": "npm"
+          }
+        ],
+        "services": []
+      },
+      "path": "entries/hello-world-banner"
+    },
+    {
+      "entryId": "marketing-smb-v1",
+      "kind": "template",
+      "name": "Marketing SMB v1",
+      "summary": "Portable, draft-only CMS template export with a formal content contract, neutral copy, and local asset inventory for small-business marketing sites.",
+      "problemDomains": [
+        "small-business marketing sites",
+        "CMS content modeling",
+        "reusable site templates"
+      ],
+      "tags": [
+        "marketing",
+        "smb",
+        "template",
+        "cms"
+      ],
+      "languages": [
+        "json",
+        "javascript"
+      ],
+      "frameworks": [],
+      "state": "usable",
+      "contentMode": "executable",
+      "selectable": true,
+      "compatibility": {
+        "node": ">=20",
+        "runtimes": [
+          "node"
+        ]
+      },
+      "dependencies": {
+        "packages": [],
+        "services": []
+      },
+      "path": "entries/marketing-smb-v1"
+    },
+    {
+      "entryId": "tenant-scoped-data-table-c97d274a",
+      "kind": "custom_component",
+      "name": "Tenant Scoped Data Table",
+      "summary": "Historical migration record for a tenant-scoped data table; reusable implementation content is not present in this entry.",
+      "problemDomains": [
+        "data tables"
+      ],
+      "tags": [
+        "migrated-from-ledger",
+        "metadata-only"
+      ],
+      "languages": [
+        "typescript"
+      ],
+      "frameworks": [
+        "react"
+      ],
+      "state": "metadata_only",
+      "contentMode": "documentation",
+      "selectable": false,
+      "compatibility": {
+        "node": ">=20",
+        "runtimes": [
+          "node"
+        ]
+      },
+      "dependencies": {
+        "packages": [],
+        "services": []
+      },
+      "path": "entries/tenant-scoped-data-table-c97d274a"
+    },
+    {
+      "entryId": "zod-validation-helpers-0bec088c",
+      "kind": "vetted_oss",
+      "name": "Zod Validation Helpers",
+      "summary": "Historical migration notes for composing Zod schemas; no reusable helper implementation is present in this entry.",
+      "problemDomains": [
+        "input validation"
+      ],
+      "tags": [
+        "migrated-from-ledger",
+        "metadata-only"
+      ],
+      "languages": [
+        "typescript"
+      ],
+      "frameworks": [
+        "react"
+      ],
+      "state": "metadata_only",
+      "contentMode": "documentation",
+      "selectable": false,
+      "compatibility": {
+        "node": ">=20",
+        "runtimes": [
+          "node"
+        ]
+      },
+      "dependencies": {
+        "packages": [],
+        "services": []
+      },
+      "path": "entries/zod-validation-helpers-0bec088c"
+    }
+  ]
+}

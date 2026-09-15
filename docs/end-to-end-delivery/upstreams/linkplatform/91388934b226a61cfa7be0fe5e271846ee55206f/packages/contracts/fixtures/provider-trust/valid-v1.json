@@ -1,0 +1,20 @@
+{
+  "contractVersion": "platform.provider-trust/1.0.0",
+  "principalId": "service-linksites-stage",
+  "principalKind": "service",
+  "organizationId": "org-linktrend",
+  "runtimeBindingId": "binding-linksites-stage-canary",
+  "audience": "linksites-stage-api",
+  "issuedAt": "2026-08-13T00:00:00.000Z",
+  "notBefore": "2026-08-13T00:00:00.000Z",
+  "expiresAt": "2026-08-13T00:15:00.000Z",
+  "revocationReference": "revocation-ref-stage-canary",
+  "capabilities": ["linksites.advisory.projection.read"],
+  "correlationId": "correlation-stage-canary",
+  "resourceContext": {
+    "program": "program-ref-only",
+    "environment": "stage",
+    "dataClassification": "restricted",
+    "recipient": "linksites-stage"
+  }
+}

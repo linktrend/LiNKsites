@@ -185,3 +185,64 @@ export function dispositionCreditsForPages(
   }
   return records
 }
+
+export interface CopiedEntitlementRow {
+  snapshotId?: unknown
+  siteRef?: unknown
+  planId?: unknown
+  grantedCredits?: unknown
+  budgets?: Partial<Record<CapabilityCreditPlanId, unknown>> | unknown
+  schemaVersion?: { major?: unknown; minor?: unknown }
+  digest?: unknown
+}
+
+export function deterministicCreditDefaults(planId: unknown): {
+  planId: CapabilityCreditPlanId
+  grantedCredits: number
+  budgets: Readonly<Record<CapabilityCreditPlanId, number>>
+} {
+  const resolved: CapabilityCreditPlanId = planId === 'A' || planId === 'B' || planId === 'C' || planId === 'L' ? planId : 'L'
+  return {
+    planId: resolved,
+    grantedCredits: capabilityCreditBudget(resolved),
+    budgets: Object.freeze({ ...CAPABILITY_CREDIT_BUDGETS }),
+  }
+}
+
+export function hydrateCopiedEntitlementRow(row: CopiedEntitlementRow): ImmutableEntitlementSnapshot {
+  const snapshotId = typeof row.snapshotId === 'string' ? row.snapshotId : ''
+  const siteRef = typeof row.siteRef === 'string' ? row.siteRef : ''
+  const defaults = deterministicCreditDefaults(row.planId)
+  const snapshot = freezeEntitlementSnapshot({
+    snapshotId,
+    siteRef,
+    planId: defaults.planId,
+  })
+  if (typeof row.grantedCredits === 'number' && row.grantedCredits !== snapshot.grantedCredits) {
+    throw new CapabilityCreditError('Copied entitlement credits do not match deterministic A/B/C/L defaults; rejected without partial activation.')
+  }
+  if (row.budgets && typeof row.budgets === 'object') {
+    const budgets = row.budgets as Partial<Record<CapabilityCreditPlanId, unknown>>
+    for (const plan of ['A', 'B', 'C', 'L'] as const) {
+      if (budgets[plan] != null && budgets[plan] !== CAPABILITY_CREDIT_BUDGETS[plan]) {
+        throw new CapabilityCreditError('Copied entitlement budgets are not the canonical A=30 B=15 C=6 L=0 table; rejected without partial activation.')
+      }
+    }
+  }
+  return snapshot
+}
+
+export function replayCreditHydration(row: CopiedEntitlementRow): ImmutableEntitlementSnapshot {
+  const first = hydrateCopiedEntitlementRow(row)
+  const second = hydrateCopiedEntitlementRow({
+    snapshotId: first.snapshotId,
+    siteRef: first.siteRef,
+    planId: first.planId,
+    grantedCredits: first.grantedCredits,
+    budgets: first.budgets,
+  })
+  if (canonicalJsonStringify(first) !== canonicalJsonStringify(second)) {
+    throw new CapabilityCreditError('Credit default hydration is not idempotent.')
+  }
+  return second
+}

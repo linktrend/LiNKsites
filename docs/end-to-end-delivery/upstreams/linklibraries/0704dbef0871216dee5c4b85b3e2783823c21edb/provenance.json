@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "program": "linklibraries",
+  "repository": "linktrend/LiNKlibraries",
+  "ref": "development",
+  "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+  "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+  "directory": "linklibraries/0704dbef0871216dee5c4b85b3e2783823c21edb",
+  "bundleRole": "immutable consumer input for Issue 549; Library-local selectable marketing-smb-v1 metadata plus provider admission receipts. Not LiNKsites production admission, deployment, or image publication.",
+  "status": "PARTIAL_WITHHOLD",
+  "bytesSource": "GitHub contents API at the exact supplied commit, then SHA-256 compared to git objects at that commit",
+  "copiedFileCount": 8,
+  "copiedOriginalPaths": [
+    "indexes/catalog.json",
+    "entries/marketing-smb-v1/entry.json",
+    "entries/marketing-smb-v1/content/content.schema.json",
+    "entries/marketing-smb-v1/README.md",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/admission.json",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/receipt.json",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/completion-binding.json",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/README.md"
+  ],
+  "copiedSha256": {
+    "indexes/catalog.json": "d8e9b6d7616d98f08890bb5db08a1c0aad93775c54f7eac880380285ff1ba23e",
+    "entries/marketing-smb-v1/entry.json": "bf7efdbe2cc281bbfb193aab4554a660648da5c2c4baeb40f078d7ad110bb9b7",
+    "entries/marketing-smb-v1/content/content.schema.json": "b6d809f845f8bd5c0fecfd3815209ecb6d7afb325c034bdd468197ac6088c0dd",
+    "entries/marketing-smb-v1/README.md": "040d76fc928d843fbe6ba57a5f7aeafde557d8dc468c71d905d746724b8183f0",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/admission.json": "cdb9f01e00b00b6496c985137a7aa1b4b99d0210d488f7b70d67f96d37680659",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/receipt.json": "03735e28a70d6a341283433a17b87e8a400c9437599bd57ea84753d8154d3e9e",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/completion-binding.json": "bfc7af78547bb6282859b446d77a1ab49548c65583a7ff432df06f7d885892a6",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/README.md": "ed0ecade3191a471cb83e9c49ed1986796cce2f15b1df201589d633057602e7c"
+  },
+  "entryGitTreeObjectSha1": "d146699d8d03d6f4821fe7aa57d449678c3ea170",
+  "withheldFromReadableSource": [
+    {
+      "originalPath": "entries/marketing-smb-v1/src/index.mjs",
+      "reason": "Executable implementation source. Provider tests run against the read-only LiNKlibraries checkout, not this consumer bundle."
+    },
+    {
+      "originalPath": "entries/marketing-smb-v1/tests/**",
+      "reason": "Executable tests withheld from the consumer metadata bundle."
+    },
+    {
+      "originalPath": "entries/marketing-smb-v1/assets/**",
+      "reason": "Assets/binaries withheld; inventory hashes remain in entry.json."
+    },
+    {
+      "originalPath": "entries/marketing-smb-v1/content/baseline-copy.json",
+      "reason": "Copy payload not required for consumer metadata bind."
+    },
+    {
+      "originalPath": "entries/marketing-smb-v1/design/tokens.json",
+      "reason": "Design tokens withheld; hash remains in entry.json."
+    },
+    {
+      "originalPath": "indexes/v2/catalog.json",
+      "reason": "v2 catalogue has no marketing-smb-v1 record on this identity; v1 catalog.json is the admitted selectable record."
+    }
+  ],
+  "byteCompare": "each copiedPath sha256 equals GitHub contents bytes and git object bytes at exact bound source commit",
+  "sourceBinding": {
+    "role": "read-only",
+    "checkedOutCommit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+    "checkedOutTree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+    "developmentTipNotUsed": true,
+    "didNotEditOrPushLiNKlibraries": true
+  },
+  "providerTruth": {
+    "marketing-smb-v1": "Library-local selectable (entries/marketing-smb-v1/entry.json and indexes/catalog.json: state=usable selectable=true). Admission is library-local only. LiNKsites renderer, Payload CMS, consumer live state, deployment, and production publication remain unproven.",
+    "master-template-type-1": "unchanged planning/candidate on this consumer packet; A1 lane remains separate and is not admitted here."
+  },
+  "planningPinSupersededForThisEntry": {
+    "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+    "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+    "note": "Prior copied pin remains historically quarantined/non-selectable. It is not this protected identity and must not be relabeled."
+  }
+}

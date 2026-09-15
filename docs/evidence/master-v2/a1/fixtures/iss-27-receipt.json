@@ -27,8 +27,8 @@
       "l"
     ],
     "releaseEntryVersion": "master-template-type-1@2.0.0-a1.1",
-    "providerCommit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
-    "providerTree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b",
+    "providerCommit": "998c02c29fae5acc429804d7e03dcc74df7e7a52",
+    "providerTree": "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3",
     "providerLifecycle": "draft",
     "providerSelectability": "non_selectable",
     "consumerProtectedCommit": "e89cfd49fafe7f1dc7b137f77c2ab481140a6cca",
@@ -38,15 +38,15 @@
     "providerPin": {
       "repository": "linktrend/LiNKlibraries",
       "packet": "MWT-07",
-      "commit": "f28fd53d454cbc33d97951d8e62826dae5a83e40",
-      "tree": "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b",
+      "commit": "998c02c29fae5acc429804d7e03dcc74df7e7a52",
+      "tree": "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3",
       "releaseEntryVersion": "master-template-type-1@2.0.0-a1.1"
     },
     "extLs01Receipt": {
-      "path": ".git/linktrend-evidence/execution-2026-08-25/ext-ls-01-issue321-966a4b0/consumer-proof-receipt.json",
-      "sha256": "5422616a2db650af44d3c87253066dfc5acd80054b4a6dcd35bd83ce6ca978e3",
-      "consumerCommit": "966a4b08c5fdb0fc9a9bb429a5916600b459cee9",
-      "consumerTree": "fa6f3fcbd737c9954214d79b733fe9b8f5d4f68f",
+      "path": ".git/linktrend-evidence/ext-ls-01-issue551/consumer-proof-receipt.json",
+      "sha256": "94fc8b3e9a5739aa7419f3ece03c660e8a8c696940c119f7cdb17b4cdcf3296f",
+      "consumerCommit": "25033a0cb6979c06aeedea5b9d94090e15372e14",
+      "consumerTree": "355c23879d8360fe344a11d09cab441a4fb3a450",
       "bytesEmbedded": false
     }
   },

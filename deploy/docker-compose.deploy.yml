@@ -1,13 +1,14 @@
-name: linksites
+name: linksites-foundation
 
-# Phase 1 bundle only. All ${VAR:?} values are deliberate fail-closed inputs;
-# Phase 2 creates their protected runtime file and performs no DNS/domain work
-# through this compose definition.
+# One production installation only. All ${VAR:?} values are deliberate
+# fail-closed inputs; this file never starts a second parallel installation.
 x-runtime: &runtime
   env_file:
     - ${LINKSITES_RUNTIME_ENV_FILE:?set an absolute protected runtime env file}
   restart: unless-stopped
   init: true
+  read_only: true
+  tmpfs: [/tmp]
   security_opt:
     - no-new-privileges:true
   cap_drop: [ALL]
@@ -33,6 +34,8 @@ services:
     environment:
       LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA: ${LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA:?set verified platform migration SHA}
     restart: 'no'
+    read_only: true
+    tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     networks: [internal, egress]
@@ -54,6 +57,8 @@ services:
     working_dir: /app/apps/cms
     command: ["node", "/app/deploy/scripts/entrypoint.mjs", "autowork-worker", "node_modules/.bin/payload", "migrate", "--config", "src/payload.config.ts"]
     restart: 'no'
+    read_only: true
+    tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     networks: [internal]
@@ -69,9 +74,11 @@ services:
     depends_on:
       payload-migrate:
         condition: service_completed_successfully
+    environment:
+      LINKSITES_AUTOWORK_MODE: ${LINKSITES_AUTOWORK_MODE:?set LINKSITES_AUTOWORK_MODE=manual or live}
+      LINKSITES_PLATFORM_STATE: ${LINKSITES_PLATFORM_STATE:?set pending or ready}
     volumes:
       - linksites-runtime:/var/lib/linksites
-    tmpfs: [/tmp]
     networks: [internal, edge, egress]
     labels:
       traefik.enable: 'true'
@@ -103,9 +110,10 @@ services:
       LINKSITES_TEMPLATE_FORMAT: revision2
       LINKSITES_TEMPLATE_ID: ${LINKSITES_TEMPLATE_ID:-master-template-type-1}
       LINKSITES_TEMPLATE_VERSION: ${LINKSITES_TEMPLATE_VERSION:-2.0.0-a1.1}
+      LINKSITES_AUTOWORK_MODE: ${LINKSITES_AUTOWORK_MODE:?set LINKSITES_AUTOWORK_MODE=manual or live}
+      LINKSITES_PLATFORM_STATE: ${LINKSITES_PLATFORM_STATE:?set pending or ready}
     volumes:
       - linksites-runtime:/var/lib/linksites:ro
-    tmpfs: [/tmp]
     networks: [internal, edge, egress]
     labels:
       traefik.enable: 'true'
@@ -128,6 +136,9 @@ services:
     depends_on:
       payload:
         condition: service_healthy
+    environment:
+      LINKSITES_AUTOWORK_MODE: ${LINKSITES_AUTOWORK_MODE:?set LINKSITES_AUTOWORK_MODE=manual or live}
+      LINKSITES_PLATFORM_STATE: ${LINKSITES_PLATFORM_STATE:?set pending or ready}
     networks: [internal, egress]
     volumes:
       - linksites-runtime:/var/lib/linksites
@@ -169,6 +180,8 @@ services:
       LINKSITES_TEMPLATE_FORMAT: revision2
       LINKSITES_TEMPLATE_ID: ${LINKSITES_TEMPLATE_ID:-master-template-type-1}
       LINKSITES_TEMPLATE_VERSION: ${LINKSITES_TEMPLATE_VERSION:-2.0.0-a1.1}
+      LINKSITES_AUTOWORK_MODE: ${LINKSITES_AUTOWORK_MODE:?set LINKSITES_AUTOWORK_MODE=manual or live}
+      LINKSITES_PLATFORM_STATE: ${LINKSITES_PLATFORM_STATE:?set pending or ready}
     depends_on:
       payload:
         condition: service_healthy
