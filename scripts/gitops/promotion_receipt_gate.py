@@ -868,6 +868,7 @@ def main(argv: list[str] | None = None) -> int:
     approval.add_argument("--input", required=True, type=Path)
     approval.add_argument("--source-sha", required=True)
     approval.add_argument("--base-sha", required=True)
+    approval.add_argument("--base-tree", required=True)
     approval.add_argument("--pr-head-sha", required=True)
     approval.add_argument("--receipt", type=Path)
 
@@ -933,7 +934,8 @@ def main(argv: list[str] | None = None) -> int:
             receipt_payload = load_json(args.receipt) if args.receipt else None
             decision = evaluate_main_approval(
                 approval_payload, source_sha=args.source_sha, base_sha=args.base_sha,
-                pr_head_sha=args.pr_head_sha, receipt=receipt_payload,
+                base_tree=args.base_tree, pr_head_sha=args.pr_head_sha,
+                receipt=receipt_payload,
             )
         else:
             cancelled = cancel_obsolete(args.repository, args.branch, args.live_sha)
