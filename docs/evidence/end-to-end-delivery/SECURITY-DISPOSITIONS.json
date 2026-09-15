@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "kind": "security-dispositions",
+  "githubAlertApiAccess": false,
+  "didNotInventAlertByAlertClosure": true,
+  "coordinatorObservations": {
+    "observedDate": "2026-09-12",
+    "observer": "coordinator",
+    "defaultBranchOpenDependabotAlerts": {
+      "total": 48,
+      "critical": 8,
+      "high": 15,
+      "moderate": 25
+    },
+    "evidenceLevel": "coordinator-supplied-observation",
+    "note": "GitHub Dependabot alert API was not queried in this session. Counts are recorded as coordinator-supplied observations only."
+  },
+  "integratedCandidateUpgrades": {
+    "checkpoint": {
+      "commit": "070658ea2fb5b7abacdcf9d205e37d6f7ed61f83",
+      "tree": "4ac275e48e6321010f3b77597882d35f2464aa94"
+    },
+    "next": {
+      "manifest": "16.3.3",
+      "override": "next@>=16.0.0 <16.3.3 -> 16.3.3",
+      "verifiedInTree": true,
+      "paths": [
+        "apps/cms/package.json",
+        "apps/web-master/package.json",
+        "archive/paused-applications/web-company/package.json"
+      ]
+    },
+    "sharp": {
+      "manifest": "0.35.4",
+      "override": "sharp@<0.35.4 -> 0.35.4",
+      "verifiedInTree": true,
+      "paths": [
+        "apps/cms/package.json"
+      ]
+    },
+    "jsYaml": {
+      "lockAndOverride": "4.3.2",
+      "override": "js-yaml@>=4.0.0 <4.3.2 -> 4.3.2",
+      "verifiedInLock": true
+    }
+  },
+  "coordinatorVerifiedAudit": {
+    "command": "pnpm audit --prod --audit-level=high",
+    "result": "passed",
+    "remaining": "one remaining moderate Payload advisory",
+    "evidenceLevel": "coordinator-supplied-observation",
+    "notReRunHere": true
+  },
+  "nonProduction": {
+    "vitestAndVitestMockerModerate": {
+      "classification": "non-production",
+      "requires": "major-version decision",
+      "notClosedHere": true
+    }
+  },
+  "planningBaselineDrift": {
+    "PLANNING-CONTROL-MANIFEST-on-2026-09-10": {
+      "total": 33,
+      "high": 13,
+      "medium": 20
+    },
+    "note": "Later coordinator observation on 2026-09-12 reports 48 open alerts. This is not alert-by-alert closure."
+  },
+  "releaseThresholdUnmet": "No unresolved exploitable critical/high finding may reach release. Alert-by-alert inventory/closure is not claimed. LSSEC-01 source upgrades are recorded; GitHub default-branch alert count remains coordinator-observed HOLD for exact API inventory."
+}
