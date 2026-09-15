@@ -36,10 +36,12 @@ export function ContactForm({ lang = "en" }: ContactFormProps) {
       email: "",
       message: "",
       captcha: false,
+      acceptedTerms: false,
     },
   });
 
   const captchaValue = watch("captcha");
+  const acceptedTermsValue = watch("acceptedTerms");
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
@@ -134,6 +136,20 @@ export function ContactForm({ lang = "en" }: ContactFormProps) {
           <p className="text-sm text-red-500 mt-1">{t(errors.message.message as string)}</p>
         )}
       </div>
+
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="acceptedTerms"
+          checked={acceptedTermsValue}
+          onCheckedChange={(checked) => setValue("acceptedTerms", checked === true)}
+        />
+        <Label htmlFor="acceptedTerms" className="text-sm text-muted-foreground cursor-pointer">
+          {t("legal.acceptTerms")} {t("legal.privacyPolicy")}
+        </Label>
+      </div>
+      {errors.acceptedTerms && (
+        <p className="text-sm text-red-500 mt-1">{t(errors.acceptedTerms.message as string)}</p>
+      )}
 
       {/* Captcha Checkbox */}
       <div className="flex items-center gap-2">

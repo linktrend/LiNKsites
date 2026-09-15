@@ -8,8 +8,8 @@ import {
   type LibraryConsumptionEvidence,
   type LibraryConsumptionReceipt,
 } from "@linksites/factory-catalog/library-consumer";
-import { MASTER_TEMPLATE_PIN } from "@linksites/factory-catalog/master-template-pin";
-import { FROZEN_PROVIDER_PIN, materializeRevision2WebsiteTemplate } from "@linksites/factory-catalog";
+import { MASTER_TEMPLATE_PIN, masterTemplateRevision2Pin } from "@linksites/factory-catalog/master-template-pin";
+import { materializeRevision2WebsiteTemplate } from "@linksites/factory-catalog";
 import {
   isMasterTemplateLookAndFeelProofHarnessEnabled,
   runMasterTemplateCandidatePreview,
@@ -120,6 +120,7 @@ const verifyMountedProductionRelease = (templateId: string) => {
   // The explicit path is read again by the native materializer, which runs
   // validateExactRelease() over the complete provider bundle. Shape-valid
   // JSON alone is not sufficient for production readiness.
+  const pin = masterTemplateRevision2Pin()
   const result = materializeRevision2WebsiteTemplate({
     providerRoot,
     entryId: templateId,
@@ -127,8 +128,10 @@ const verifyMountedProductionRelease = (templateId: string) => {
     pin: {
       providerCommitSha,
       providerTreeSha,
-      sourceCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
-      sourceTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
+      sourceCommitSha: pin.sourceCommitSha,
+      sourceTreeSha: pin.sourceTreeSha,
+      catalogueFileSha256: pin.catalogueFileSha256,
+      catalogueRecordsSha256: pin.catalogueRecordsSha256,
       dependencyLockSha256,
     },
     receiptPath,
@@ -141,8 +144,8 @@ const verifyMountedProductionRelease = (templateId: string) => {
     version,
     providerCommitSha,
     providerTreeSha,
-    sourceCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
-    sourceTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
+    sourceCommitSha: pin.sourceCommitSha,
+    sourceTreeSha: pin.sourceTreeSha,
     artifactTreeSha1: reference.artifactTreeSha1,
     dependencyLockSha256,
   }, { commitSha: providerCommitSha, treeSha: providerTreeSha });
@@ -253,18 +256,22 @@ export const getAdmittedRevision2Template = () => {
   assertProductionTemplateReleaseReady(process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_PIN.entryId);
   const providerRoot = process.env.LINKSITES_LINKLIBRARIES_ROOT ?? process.env.LINKSITES_ADMITTED_TEMPLATE_LIBRARY_PATH;
   if (!providerRoot) throw new TemplateAdmissionError("Revision 2 provider root is not configured");
+  const pin = masterTemplateRevision2Pin()
   const result = materializeRevision2WebsiteTemplate({
     providerRoot,
     entryId: process.env.LINKSITES_TEMPLATE_ID ?? MASTER_TEMPLATE_PIN.entryId,
     version: process.env.LINKSITES_TEMPLATE_VERSION ?? MASTER_TEMPLATE_PIN.version,
     pin: {
-      providerCommitSha: process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA ?? FROZEN_PROVIDER_PIN.providerCommitSha,
-      providerTreeSha: process.env.LINKSITES_LINKLIBRARIES_TREE_SHA ?? FROZEN_PROVIDER_PIN.providerTreeSha,
-      sourceCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
-      sourceTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
-      dependencyLockSha256: process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256 ?? FROZEN_PROVIDER_PIN.dependencyLockSha256,
+      providerCommitSha: process.env.LINKSITES_LINKLIBRARIES_COMMIT_SHA ?? pin.providerCommitSha,
+      providerTreeSha: process.env.LINKSITES_LINKLIBRARIES_TREE_SHA ?? pin.providerTreeSha,
+      sourceCommitSha: pin.sourceCommitSha,
+      sourceTreeSha: pin.sourceTreeSha,
+      catalogueFileSha256: pin.catalogueFileSha256,
+      catalogueRecordsSha256: pin.catalogueRecordsSha256,
+      dependencyLockSha256: process.env.LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256 ?? pin.dependencyLockSha256,
     },
     receiptPath: process.env.LINKSITES_LINKLIBRARIES_RECEIPT_PATH,
+    selectionPolicy: process.env.LINKSITES_MASTER_TEMPLATE_LOOK_AND_FEEL_PROOF === "1" ? "draft_candidate_probe" : undefined,
   });
   if (!result.ok) throw new TemplateAdmissionError(`Revision 2 release rejected: ${result.errors.join("|")}`);
   return result.value;

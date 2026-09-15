@@ -857,12 +857,41 @@ def merge_to_development(
     candidate_identity: Mapping[str, Any] | None = None,
     candidate_tree: str | None = None,
     protected_base_commit: str | None = None,
+    protected_base_tree: str | None = None,
     rollout: StagedRolloutConfig | None = None,
 ) -> dict[str, Any]:
     """Merge through GitHub protection. Never push directly to development."""
 
     config = _rollout_config(rollout)
     require_controller_role(role)
+    target_tree = ""
+    base_commit = ""
+    base_tree = ""
+    if receipt is not None or candidate_identity is not None:
+        if receipt is None or candidate_identity is None:
+            raise ControllerError("transition_receipt_failed", "receipt and candidate identity must be supplied together")
+        target_tree = normalize_sha(candidate_tree or "")
+        base_commit = normalize_sha(protected_base_commit or "")
+        base_tree = normalize_sha(protected_base_tree or "")
+        if not all(is_valid_sha(value) for value in (target_tree, base_commit, base_tree)):
+            raise ControllerError(
+                "transition_receipt_failed",
+                "protected merge requires exact target and protected base commit/tree identities",
+            )
+        receipt_decision = verify_receipt_payload(receipt, candidate_identity, "full-gate")
+        if not receipt_decision.accepted:
+            raise ControllerError(
+                "transition_receipt_failed",
+                f"{receipt_decision.code}:{receipt_decision.detail}",
+            )
+        identity_repository = str(candidate_identity.get("repository") or "")
+        identity_head = normalize_sha(str(candidate_identity.get("headCommit") or ""))
+        identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
+        if identity_repository != repository or identity_head != normalize_sha(expected_head) or identity_tree != target_tree:
+            raise ControllerError(
+                "transition_receipt_failed",
+                "candidate identity differs from the repository, expected head, or audited tree",
+            )
     try:
         github.push_protected(repository=repository, branch=config.development_branch, sha=expected_head)
     except ControllerError as exc:
@@ -890,19 +919,20 @@ def merge_to_development(
         "component": COMPONENT_KIND,
     }
     if receipt is not None or candidate_identity is not None:
-        if receipt is None or candidate_identity is None:
-            raise ControllerError("transition_receipt_failed", "receipt and candidate identity must be supplied together")
-        target_tree = normalize_sha(candidate_tree or "")
         merge_commit = normalize_sha(str(result.get("mergeCommitSha") or ""))
-        if not is_valid_sha(merge_commit) or not is_valid_sha(target_tree):
-            raise ControllerError("transition_receipt_failed", "protected merge did not return an exact commit/tree identity")
+        if not is_valid_sha(merge_commit):
+            raise ControllerError(
+                "transition_receipt_failed",
+                "protected merge did not return an exact commit identity",
+            )
         try:
             transition = create_transition_receipt(
                 receipt,
                 target_branch=config.development_branch,
                 target_commit=merge_commit,
                 target_tree=target_tree,
-                protected_base_commit=normalize_sha(protected_base_commit or "") or None,
+                protected_base_commit=base_commit,
+                protected_base_tree=base_tree,
             ).to_dict()
         except (ValueError, TypeError) as exc:
             raise ControllerError("transition_receipt_failed", str(exc)) from exc
@@ -1313,6 +1343,7 @@ def deliver_phase_to_development(
     conflict: bool = False,
     record_path: Path | None = None,
     protected_tree: str | None = None,
+    protected_base_tree: str | None = None,
     rollout: StagedRolloutConfig | None = None,
 ) -> dict[str, Any]:
     """End-to-end development merge for one exact Phase PR."""
@@ -1344,6 +1375,7 @@ def deliver_phase_to_development(
             candidate_identity=candidate_identity,
             candidate_tree=protected_tree or live_tree,
             protected_base_commit=str(handoff.get("baseCommit") or ""),
+            protected_base_tree=protected_base_tree,
             rollout=config,
         )
     except ControllerError as exc:
@@ -1444,6 +1476,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--expected-head", default="")
     parser.add_argument("--source-sha", default="")
     parser.add_argument("--base-sha", default="")
+    parser.add_argument("--base-tree", default="")
     parser.add_argument("--branches", default="")
     parser.add_argument("--payload-json", default="")
     parser.add_argument("--out", default="")
@@ -1503,6 +1536,7 @@ def main(argv: list[str] | None = None) -> int:
                     candidate_identity=load(args.identity_json) if args.identity_json else None,
                     candidate_tree=args.live_tree or None,
                     protected_base_commit=args.base_sha or None,
+                    protected_base_tree=args.base_tree or None,
                     rollout=rollout,
                 )
             elif args.command == "promote-staging":

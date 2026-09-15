@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
-import { readAndVerifyNativeV2Receipt } from '../config/runtime-contract.mjs'
+import { readAndVerifyNativeV2Receipt, CONFIG_SCHEMA_VERSION, HARNESS_RELEASE_PIN, PROFILE_RELEASE_PIN, AUTOWORK_MODES } from '../config/runtime-contract.mjs'
 
 const root = resolve(new URL('../..', import.meta.url).pathname)
 const outputFlag = process.argv.indexOf('--output')
@@ -15,6 +15,9 @@ const platformState = platformStateFlag >= 0 ? process.argv[platformStateFlag + 
 if (!output || !['ready', 'deferred'].includes(providerState) || !['ready', 'pending'].includes(platformState)) throw new Error('usage: node deploy/scripts/generate-deployment-manifest.mjs --output <path> [--provider-state ready|deferred] [--platform-state ready|pending]')
 
 const releaseSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim()
+const releaseTree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { cwd: root, encoding: 'utf8' }).trim()
+const contractFile = 'deploy/config/runtime-contract.mjs'
+const contractBytes = await readFile(resolve(root, contractFile))
 const lockfile = await readFile(resolve(root, 'pnpm-lock.yaml'))
 const migrationOrderKey = (file) => {
   const match = file.match(/^(\d{8})(?:_?(\d{6}))/)
@@ -56,6 +59,9 @@ required.push('LINKSITES_TEMPLATE_ID', 'LINKSITES_TEMPLATE_VERSION', 'LINKSITES_
 if (providerState === 'ready') required.push('LINKSITES_LINKLIBRARIES_ROOT', 'LINKSITES_LINKLIBRARIES_COMMIT_SHA', 'LINKSITES_LINKLIBRARIES_TREE_SHA', 'LINKSITES_LINKLIBRARIES_DEPENDENCY_LOCK_SHA256', 'LINKSITES_LINKLIBRARIES_RECEIPT_PATH', 'LINKLIBRARIES_ARTIFACT_PATH')
 if (providerState === 'ready') required.push('LINKSITES_TEMPLATE_RELEASE_RECEIPT_JSON')
 if (platformState === 'ready') required.push('LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA')
+const autoworkMode = process.env.LINKSITES_AUTOWORK_MODE || 'manual'
+if (!AUTOWORK_MODES.includes(autoworkMode)) throw new Error('LINKSITES_AUTOWORK_MODE must be manual or live')
+if (autoworkMode === 'live') throw new Error('live Autowork cannot be recorded without an exact admitted live handoff; publication remains manual until that admission exists')
 const missing = required.filter((name) => !process.env[name] || /<|replace|example|todo/i.test(process.env[name]))
 if (missing.length) throw new Error(`missing immutable release identity: ${missing.join(', ')}`)
 for (const name of required.filter((name) => name.endsWith('_DIGEST'))) if (!/^sha256:[a-f0-9]{64}$/i.test(process.env[name])) throw new Error(`${name} must be an image SHA-256 digest`)
@@ -84,9 +90,15 @@ if (providerState === 'deferred') {
 }
 
 const manifest = {
-  schemaVersion: '1.2.0',
+  schemaVersion: CONFIG_SCHEMA_VERSION,
   generatedAt: new Date().toISOString(),
-  repository: { name: 'LiNKsites', releaseSha, lockfileSha256: createHash('sha256').update(lockfile).digest('hex') },
+  repository: { name: 'LiNKsites', releaseSha, releaseTree, lockfileSha256: createHash('sha256').update(lockfile).digest('hex') },
+  configuration: { schemaVersion: CONFIG_SCHEMA_VERSION, contractFile, contractSha256: createHash('sha256').update(contractBytes).digest('hex') },
+  pins: {
+    harness: { ...HARNESS_RELEASE_PIN },
+    profile: { ...PROFILE_RELEASE_PIN },
+  },
+  autowork: { mode: autoworkMode, liveEnabled: false, adapter: autoworkMode === 'manual' ? 'manual-file' : 'signed-gateway' },
   libraries,
   deferredTemplates: [{ entryId: 'master-template-type-1', state: 'deferred', reason: 'native-v2-selectable-release-deferred', blocksActiveProvider: false }],
   platform: platformState === 'ready'
@@ -101,7 +113,7 @@ const manifest = {
       blockedCapabilities: ['production-migration-apply', 'production-data-plane-startup'],
     },
   images: { cms: process.env.LINKSITES_CMS_IMAGE_DIGEST, webMaster: process.env.LINKSITES_WEB_MASTER_IMAGE_DIGEST, orchestrator: process.env.LINKSITES_ORCHESTRATOR_IMAGE_DIGEST, autoworkWorker: process.env.LINKSITES_WORKER_IMAGE_DIGEST, migrations: process.env.LINKSITES_MIGRATIONS_IMAGE_DIGEST },
-  configurationSchema: 'deploy/config/runtime-contract.mjs@1.2.0',
+  configurationSchema: `deploy/config/runtime-contract.mjs@${CONFIG_SCHEMA_VERSION}`,
   schemas: { supabaseMigrations: migrations, payloadMigrationIndex: { file: 'apps/cms/src/migrations/index.ts', sha256: createHash('sha256').update(payloadIndex).digest('hex'), loaded: payloadMigrations }, payloadMigrations },
   privacy: { privatePreviewOnly: true, publicDnsOrDomainOperationsExecuted: false },
 }

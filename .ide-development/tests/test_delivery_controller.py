@@ -137,6 +137,7 @@ class DeliveryControllerTests(unittest.TestCase):
             receipt=self.receipt,
             candidate_identity=self.identity,
             role="operator",
+            protected_base_tree=_sha(10),
         )
         defaults.update(kwargs)
         return controller.deliver_phase_to_development(**defaults)
@@ -169,6 +170,8 @@ class DeliveryControllerTests(unittest.TestCase):
         self.assertEqual(result["stage"], "development")
         self.assertFalse(result["directPush"])
         self.assertEqual(result["component"], "delivery_controller")
+        self.assertEqual(result["transitionReceipt"]["protectedBaseCommit"], _sha(9))
+        self.assertEqual(result["transitionReceipt"]["protectedBaseTree"], _sha(10))
         self.assertEqual(len(self.github.merges), 1)
         self.assertEqual(self.github.protected_push_attempts[0]["branch"], "development")
 
@@ -183,6 +186,54 @@ class DeliveryControllerTests(unittest.TestCase):
             )
         with self.assertRaisesRegex(controller.ControllerError, "worker_self_merge_forbidden"):
             controller.require_controller_role("implementer")
+
+    def test_missing_base_tree_stops_before_merge(self) -> None:
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                candidate_tree=self.tree,
+                protected_base_commit=_sha(9),
+            )
+        self.assertEqual(self.github.merges, [])
+
+    def test_mismatched_audited_tree_stops_before_merge(self) -> None:
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                candidate_tree=_sha(11),
+                protected_base_commit=_sha(9),
+                protected_base_tree=_sha(10),
+            )
+        self.assertEqual(self.github.merges, [])
+
+    def test_forged_receipt_stops_before_merge(self) -> None:
+        forged = dict(self.receipt, receiptDigest="sha256:" + ("0" * 64))
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+                receipt=forged,
+                candidate_identity=self.identity,
+                candidate_tree=self.tree,
+                protected_base_commit=_sha(9),
+                protected_base_tree=_sha(10),
+            )
+        self.assertEqual(self.github.merges, [])
 
     def test_stale_or_changed_pr_is_rejected(self) -> None:
         with self.assertRaisesRegex(controller.ControllerError, "stale_pr_head"):
@@ -314,7 +365,9 @@ class DeliveryControllerTests(unittest.TestCase):
             target_commit=development_head,
             target_tree=self.tree,
             protected_base_commit=_sha(9),
+            protected_base_tree=_sha(10),
         ).to_dict()
+        self.assertEqual(transition["protectedBaseTree"], _sha(10))
         controller.promote_to_staging(
             github=self.github,
             repository="owner/name",
@@ -490,6 +543,7 @@ class DeliveryControllerTests(unittest.TestCase):
             receipt=self.receipt,
             candidate_identity=self.identity,
             role="operator",
+            protected_base_tree=_sha(10),
         )
         self.assertEqual(stopped["status"], "stopped")
         self.assertEqual(stopped["code"], "protected_merge_rejected")

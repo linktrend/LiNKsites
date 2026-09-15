@@ -4,8 +4,40 @@ import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs'
 import { relative, resolve, sep } from 'node:path'
 import { validateNativeV2Bundle, validateNativeV2ReceiptValue } from '../../packages/factory-catalog/src/nativeRevision2Validator.js'
 
-export const CONFIG_SCHEMA_VERSION = '1.2.0'
+export const CONFIG_SCHEMA_VERSION = '1.3.0'
 export const TEMPLATE_RELEASE_STATES = Object.freeze(['deferred', 'ready'])
+export const AUTOWORK_MODES = Object.freeze(['manual', 'live'])
+export const PLATFORM_STATES = Object.freeze(['pending', 'ready'])
+export const FIVE_IMAGE_ENV = Object.freeze([
+  'LINKSITES_CMS_IMAGE',
+  'LINKSITES_WEB_MASTER_IMAGE',
+  'LINKSITES_WORKER_IMAGE',
+  'LINKSITES_ORCHESTRATOR_IMAGE',
+  'LINKSITES_MIGRATIONS_IMAGE',
+])
+export const HARNESS_RELEASE_PIN = Object.freeze({
+  label: 'HC1-A',
+  commit: 'de0abe31736e878aad3447bf4b720a40142d8a6e',
+  tree: '526cc9ab8feec3ae95089639f03f0382b9878e63',
+  compatibleRange: '>=0.1.0 <0.2.0',
+})
+export const PROFILE_RELEASE_PIN = Object.freeze({
+  id: 'linksites-profile',
+  version: '0.1.0',
+})
+const LIVE_AUTOWORK_FIELDS = Object.freeze([
+  'LINKAUTOWORK_GATEWAY_URL',
+  'LINKAUTOWORK_ISSUER',
+  'LINKAUTOWORK_AUDIENCE',
+  'LINKAUTOWORK_RECEIPT_CONTRACT',
+  'LINKAUTOWORK_CLAIM_CONTRACT',
+  'LINKAUTOWORK_LIVE_HANDOFF',
+  'LINKAUTOWORK_SIGNING_KEY_ID',
+  'LINKAUTOWORK_SIGNING_SECRET',
+  'LINKAUTOWORK_EVENT_GRANTS',
+  'LINKAUTOWORK_ENVIRONMENT',
+  'LINKAUTOWORK_ORG_ID',
+])
 
 const placeholder = /^(?:|<[^>]+>|change[-_ ]?me|replace[-_ ]?me|example|todo|mock|undefined|null)$/i
 const sha1 = /^[a-f0-9]{40}$/i
@@ -162,18 +194,25 @@ export const SERVICE_CONFIGURATION = {
     required('LINKSITES_CONFIG_SCHEMA_VERSION', `literal:${CONFIG_SCHEMA_VERSION}`),
     required('LINKSITES_RELEASE_SHA', 'git-sha-1'),
     required('LINKSITES_ORG_ID', 'slug'),
+    required('LINKSITES_AUTOWORK_MODE', 'autowork-mode'),
+    required('LINKSITES_PLATFORM_STATE', 'platform-state'),
+    required('LINKSITES_HARNESS_COMMIT', `literal:${HARNESS_RELEASE_PIN.commit}`),
+    required('LINKSITES_HARNESS_TREE', `literal:${HARNESS_RELEASE_PIN.tree}`),
+    required('LINKSITES_HARNESS_RANGE', `literal:${HARNESS_RELEASE_PIN.compatibleRange}`),
+    required('LINKSITES_PROFILE_ID', `literal:${PROFILE_RELEASE_PIN.id}`),
+    required('LINKSITES_PROFILE_VERSION', `literal:${PROFILE_RELEASE_PIN.version}`),
+    required('LINKSITES_CMS_IMAGE', 'image-digest-ref'),
+    required('LINKSITES_WEB_MASTER_IMAGE', 'image-digest-ref'),
+    required('LINKSITES_WORKER_IMAGE', 'image-digest-ref'),
+    required('LINKSITES_ORCHESTRATOR_IMAGE', 'image-digest-ref'),
+    required('LINKSITES_MIGRATIONS_IMAGE', 'image-digest-ref'),
   ],
   cms: [
     required('DATABASE_URI', 'postgres-url', true),
     required('PAYLOAD_SECRET', 'secret-min-32', true),
     required('PAYLOAD_PUBLIC_SERVER_URL', 'https-url'),
-    required('LINKAUTOWORK_GATEWAY_URL', 'https-url'),
-    required('LINKAUTOWORK_SIGNING_SECRET', 'secret-min-32', true),
-    required('LINKAUTOWORK_SIGNING_KEY_ID', 'slug'),
-    required('LINKAUTOWORK_ENVIRONMENT', 'literal:production'),
     required('LINKAUTOWORK_OUTBOX_PATH', 'absolute-path'),
     required('LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET', 'secret-min-32', true),
-    required('LINKAUTOWORK_EVENT_GRANTS', 'nonempty-json-array'),
   ],
   'web-master': [
     required('NEXT_PUBLIC_CMS_PROVIDER', 'literal:payload'),
@@ -191,13 +230,8 @@ export const SERVICE_CONFIGURATION = {
     required('DATABASE_URI', 'postgres-url', true),
     required('PAYLOAD_SECRET', 'secret-min-32', true),
     required('PAYLOAD_PUBLIC_SERVER_URL', 'https-url'),
-    required('LINKAUTOWORK_GATEWAY_URL', 'https-url'),
-    required('LINKAUTOWORK_SIGNING_SECRET', 'secret-min-32', true),
-    required('LINKAUTOWORK_SIGNING_KEY_ID', 'slug'),
-    required('LINKAUTOWORK_ENVIRONMENT', 'literal:production'),
     required('LINKAUTOWORK_OUTBOX_PATH', 'absolute-path'),
     required('LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET', 'secret-min-32', true),
-    required('LINKAUTOWORK_EVENT_GRANTS', 'nonempty-json-array'),
     required('LINKSITES_TEMPLATE_RELEASE_STATE', 'template-release-state'),
   ],
   'program-orchestrator': [
@@ -224,11 +258,6 @@ export const SERVICE_CONFIGURATION = {
     required('LINKSITES_TEMPLATE_FORMAT', 'literal:revision2'),
     required('LINKSITES_TEMPLATE_ID', 'slug'),
     required('LINKSITES_TEMPLATE_VERSION', 'semver'),
-    required('LINKAUTOWORK_GATEWAY_URL', 'https-url'),
-    required('LINKAUTOWORK_SIGNING_SECRET', 'secret-min-32', true),
-    required('LINKAUTOWORK_SIGNING_KEY_ID', 'slug'),
-    required('LINKAUTOWORK_ENVIRONMENT', 'literal:production'),
-    required('LINKAUTOWORK_EVENT_GRANTS', 'nonempty-json-array'),
   ],
 }
 
@@ -242,6 +271,9 @@ function validateValue(value, format) {
   const trimmed = value.trim()
   if (format.startsWith('literal:')) return trimmed === format.slice('literal:'.length) ? null : `must equal ${format.slice('literal:'.length)}`
   if (format === 'git-sha-1') return sha1.test(trimmed) ? null : 'must be a full 40-character Git SHA'
+  if (format === 'autowork-mode') return AUTOWORK_MODES.includes(trimmed) ? null : 'must equal manual or live'
+  if (format === 'platform-state') return PLATFORM_STATES.includes(trimmed) ? null : 'must equal pending or ready'
+  if (format === 'image-digest-ref') return /^(?:[a-z0-9._-]+\/)+[a-z0-9._-]+:?[^@]*@sha256:[a-f0-9]{64}$/i.test(trimmed) && !/:(?:latest|main|development|staging)@/i.test(trimmed) ? null : 'must be an immutable name@sha256 digest reference'
   if (format === 'template-release-state') return TEMPLATE_RELEASE_STATES.includes(trimmed) ? null : `must equal one of ${TEMPLATE_RELEASE_STATES.join(' or ')}`
   if (format === 'semver') return /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.test(trimmed) ? null : 'must be a semantic version'
   if (format === 'sha-256') return sha256.test(trimmed) ? null : 'must be a full 64-character SHA-256'
@@ -282,6 +314,57 @@ export function validateRuntimeConfig(environment, service) {
   if (environment.NODE_ENV && environment.NODE_ENV !== 'production') errors.push({ name: 'NODE_ENV', error: 'must equal production when set', secret: false })
   if (environment.NEXT_PUBLIC_CMS_PROVIDER === 'fixture' || environment.CMS_FIXTURE_PATH) errors.push({ name: 'NEXT_PUBLIC_CMS_PROVIDER', error: 'fixture content is forbidden in the production bundle', secret: false })
   if (environment.W2_02_MODE && environment.W2_02_MODE !== 'production') errors.push({ name: 'W2_02_MODE', error: 'must equal production for the Phase 2 deployment contract', secret: false })
+  const autoworkMode = environment.LINKSITES_AUTOWORK_MODE
+  if (autoworkMode === 'manual') {
+    for (const name of LIVE_AUTOWORK_FIELDS) {
+      if (environment[name]) errors.push({ name, error: 'manual/file Autowork forbids live gateway, receipt, or admission fields', secret: name.includes('SECRET') })
+    }
+  }
+  if (autoworkMode === 'live' && ['cms', 'autowork-worker', 'program-orchestrator'].includes(service)) {
+    for (const [name, format, secret] of [
+      ['LINKAUTOWORK_GATEWAY_URL', 'https-url', false],
+      ['LINKAUTOWORK_SIGNING_SECRET', 'secret-min-32', true],
+      ['LINKAUTOWORK_SIGNING_KEY_ID', 'slug', false],
+      ['LINKAUTOWORK_ENVIRONMENT', 'literal:production', false],
+      ['LINKAUTOWORK_EVENT_GRANTS', 'nonempty-json-array', false],
+      ['LINKAUTOWORK_ISSUER', 'slug', false],
+      ['LINKAUTOWORK_AUDIENCE', 'literal:linksites', false],
+      ['LINKAUTOWORK_RECEIPT_CONTRACT', 'literal:2026-08-13.v1', false],
+    ]) {
+      const result = validateValue(environment[name], format)
+      if (result) errors.push({ name, error: result, secret })
+    }
+    if (environment.LINKAUTOWORK_SIGNING_KEY_ID && (/^ltfx[.-]/i.test(environment.LINKAUTOWORK_SIGNING_KEY_ID) || /(?:secret|token|password|credential)/i.test(environment.LINKAUTOWORK_SIGNING_KEY_ID))) {
+      errors.push({ name: 'LINKAUTOWORK_SIGNING_KEY_ID', error: 'must be a key reference, not a secret value', secret: false })
+    }
+  }
+  if (environment.LINKSITES_PLATFORM_STATE === 'ready') {
+    const result = validateValue(environment.LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA, 'git-sha-1')
+    if (result) errors.push({ name: 'LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA', error: result, secret: false })
+  } else if (environment.LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA) {
+    errors.push({ name: 'LINKSITES_PLATFORM_MIGRATIONS_APPLIED_SHA', error: 'pending Platform state must not carry a fake applied-migration SHA', secret: false })
+  }
+  if (environment.DATABASE_URI && environment.W2_02_DATABASE_URI) {
+    try {
+      const cms = new URL(environment.DATABASE_URI)
+      const orchestrator = new URL(environment.W2_02_DATABASE_URI)
+      const identity = (url) => `${url.protocol}//${url.hostname}:${url.port || '5432'}/${url.username}`
+      if (identity(cms) === identity(orchestrator)) errors.push({ name: 'W2_02_DATABASE_URI', error: 'must be a distinct least-privilege credential from DATABASE_URI', secret: true })
+    } catch { /* URL format errors are reported by field validators */ }
+  }
+  for (const name of ['PAYLOAD_PUBLIC_SERVER_URL', 'PAYLOAD_BASE_URL', 'NEXT_PUBLIC_PAYLOAD_API_URL', 'W2_02_PAYLOAD_BASE_URL', 'W2_02_WEB_MASTER_BASE_URL']) {
+    const value = environment[name]
+    if (!value) continue
+    try {
+      const hostname = new URL(value).hostname.toLowerCase()
+      if (environment.TRAEFIK_CMS_HOST && ['PAYLOAD_PUBLIC_SERVER_URL', 'PAYLOAD_BASE_URL', 'NEXT_PUBLIC_PAYLOAD_API_URL', 'W2_02_PAYLOAD_BASE_URL'].includes(name) && hostname !== environment.TRAEFIK_CMS_HOST.toLowerCase()) {
+        errors.push({ name, error: 'must use the configured private CMS hostname', secret: false })
+      }
+      if (environment.TRAEFIK_PREVIEW_HOST && name === 'W2_02_WEB_MASTER_BASE_URL' && hostname !== environment.TRAEFIK_PREVIEW_HOST.toLowerCase()) {
+        errors.push({ name, error: 'must use the configured private preview hostname', secret: false })
+      }
+    } catch { /* URL format errors are reported by field validators */ }
+  }
   if (service === 'web-master' && environment.PREVIEW_ACCESS_TOKEN && environment.W2_02_PREVIEW_ACCESS_TOKEN && environment.PREVIEW_ACCESS_TOKEN !== environment.W2_02_PREVIEW_ACCESS_TOKEN) errors.push({ name: 'PREVIEW_ACCESS_TOKEN', error: 'must equal W2_02_PREVIEW_ACCESS_TOKEN when both are supplied', secret: true })
   if (['web-master', 'program-orchestrator'].includes(service)) {
     const state = environment.LINKSITES_TEMPLATE_RELEASE_STATE
