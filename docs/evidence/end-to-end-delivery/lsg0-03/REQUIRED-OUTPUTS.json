@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-03-required-outputs-classification",
+  "packet": "LSG0-03",
+  "issue": 549,
+  "requirementSource": "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md",
+  "classificationsAllowed": [
+    "completed",
+    "done but requires testing/fixing",
+    "missing and needs work"
+  ],
+  "outputs": [
+    {
+      "id": "LSG0-03-R1",
+      "title": "current exact selectable marketing-smb-v1 release including qualification/admission and immutable digests",
+      "classification": "completed",
+      "observedOnProtectedTree": {
+        "identityPresent": true,
+        "lifecycle": "usable",
+        "selectable": true,
+        "admissionClass": "library-local-selectable",
+        "immutableDigestsPresentAndMatching": true,
+        "qualificationAdmissionSelectable": true,
+        "productionSelectable": false
+      },
+      "protectedIdentity": {
+        "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+        "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+        "entryGitTreeObjectSha1": "d146699d8d03d6f4821fe7aa57d449678c3ea170",
+        "catalogSha256": "d8e9b6d7616d98f08890bb5db08a1c0aad93775c54f7eac880380285ff1ba23e",
+        "entryJsonSha256": "bf7efdbe2cc281bbfb193aab4554a660648da5c2c4baeb40f078d7ad110bb9b7"
+      }
+    },
+    {
+      "id": "LSG0-03-R1-observation",
+      "title": "inspect current marketing-smb-v1 lifecycle/selectability/admission/digest bytes on the supplied protected tree",
+      "classification": "completed",
+      "note": "GitHub contents API bytes matched git objects. Catalog and entry SHA-256 match the supplied protected facts."
+    },
+    {
+      "id": "LSG0-03-R1-consumer",
+      "title": "materialize and validate marketing-smb-v1 through the existing LiNKsites consumer boundary",
+      "classification": "completed",
+      "note": "Exact handoff bind/materialize/restart/tamper and production fail-closed. Provider node:test passed on the read-only LiNKlibraries checkout. Not production admission."
+    },
+    {
+      "id": "LSG0-03-R2",
+      "title": "exact admitted Master Website Template A1/A2/A3 and A/B/C/L provider release/handoff",
+      "classification": "missing and needs work",
+      "observedOnProtectedTree": {
+        "currentJson": false,
+        "lifecycle": "draft",
+        "selectability": "non_selectable"
+      }
+    },
+    {
+      "id": "LSG0-03-R2-observation",
+      "title": "inspect current MWT release, pointer, A1/A2/A3, A/B/C/L, digests and validation receipts",
+      "classification": "completed",
+      "note": "current.json absent on 0704dbe. A1 lane preserved separately; this packet did not mix MWT admission into marketing-smb-v1 consumer proof."
+    },
+    {
+      "id": "LSG0-03-R2-candidate-bytes",
+      "title": "MWT 2.0.0 layout packs and plan manifests as source input",
+      "classification": "done but requires testing/fixing",
+      "note": "A1/A2/A3 and A/B/C/L remain later gaps. Not admitted/selectable."
+    }
+  ]
+}
