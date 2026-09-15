@@ -2,7 +2,7 @@
 
 Packet **LS-08** runs A1 paired consumer proof on protected `development`.
 
-It binds the exact LiNKlibraries MWT-07 pin and the accepted EXT-LS-01 receipt
+It binds the exact protected LiNKlibraries A1 pin and the EXT-LS-01 receipt
 digest. It does **not** copy provider bytes, claim provider conformance,
 production selectability, or MWT-08.
 
@@ -25,12 +25,11 @@ production selectability, or MWT-08.
 
 - Protected LiNKsites development `e89cfd49fafe7f1dc7b137f77c2ab481140a6cca` /
   tree `27c5578ab1416b7a37ddf79168b91be1547eb127`
-- LiNKlibraries MWT-07 `f28fd53d454cbc33d97951d8e62826dae5a83e40` /
-  tree `34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b`
-- Entry `master-template-type-1@2.0.0-a1.1` lifecycle `draft` / `non_selectable`
-- EXT-LS-01 receipt SHA-256 `5422616a2db650af44d3c87253066dfc5acd80054b4a6dcd35bd83ce6ca978e3`
-  at `.git/linktrend-evidence/execution-2026-08-25/ext-ls-01-issue321-966a4b0/consumer-proof-receipt.json`
-  (bytes are not fabricated; digest is bound)
+- LiNKlibraries protected development `998c02c29fae5acc429804d7e03dcc74df7e7a52` /
+  tree `63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3`
+- Entry `master-template-type-1@2.0.0-a1.1` artifact tree `6aadb2dff52efe30f512ddb2a5510a881fc027e2`, lifecycle `draft` / `non_selectable`, catalogue.bound=false
+- EXT-LS-01 receipt is out-of-tree at `.git/linktrend-evidence/ext-ls-01-issue547/consumer-proof-receipt.json`
+  (bytes are not fabricated into LiNKsites source)
 
 ## Commands
 

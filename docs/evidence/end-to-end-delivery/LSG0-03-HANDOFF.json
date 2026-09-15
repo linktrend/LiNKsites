@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "LSG0-03-handoff-status",
+  "overall": "HOLD",
+  "evidenceLevel": "coordinator-supplied-observation",
+  "independentFindingAsSupplied": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "fe769fc19b3a51ed2cc0b22438afc5b0bd766950",
+    "tree": "9f993ae485c68d46ed69c824578ec3370a0be5c6",
+    "marketingSmbV1": "quarantined and non-selectable",
+    "masterWebsiteTemplateVersions": "all observed versions draft/non-selectable/unknown",
+    "exactAdmittedProviderHandoffs": "missing"
+  },
+  "planningPinAlsoNonSelectable": {
+    "commit": "5188aaf1a9313a3746075cd6ccea0937c05f7a32",
+    "tree": "e389671f1dc19f6c1e17a2fd3520f4d9e3b1c139",
+    "copiedEntry": "docs/end-to-end-delivery/upstreams/linklibraries/5188aaf1a9313a3746075cd6ccea0937c05f7a32/entries/marketing-smb-v1/entry.json",
+    "state": "quarantined",
+    "selectable": false
+  },
+  "thisSessionDidNotFetchLiNKlibraries": true,
+  "didNotSubstituteFixtureProvider": true,
+  "upstreamOwnerActionsToClear": [
+    {
+      "owner": "linktrend/LiNKlibraries",
+      "action": "Admit an exact currently selectable marketing-smb-v1 release with qualification/admission and immutable digests on a protected identity, and admit Master Website Template A1/A2/A3 and A/B/C/L provider handoffs that are selectable rather than draft/unknown."
+    }
+  ]
+}

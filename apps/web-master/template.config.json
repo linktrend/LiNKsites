@@ -3,6 +3,8 @@
   "designSystemVersion": "v1",
   "navigation": {
     "primary": [
+      { "labelDocId": "nav-services", "slug": "/services" },
+      { "labelDocId": "nav-products", "slug": "/products" },
       { "labelDocId": "nav-offers", "slug": "/offers" },
       { "labelDocId": "nav-resources", "slug": "/resources" },
       { "labelDocId": "nav-about", "slug": "/about" },
@@ -19,33 +21,58 @@
   },
   "pages": {
     "/": {
-      "layout": "offer-index",
+      "layout": "a1-linear",
       "slots": {
-        "hero": {
-          "title": "home-hero-title",
-          "subtitle": "home-hero-subtitle",
-          "body": "home-hero-body",
-          "ctaLabel": "home-hero-cta"
-        },
-        "offers": { "collectionDocId": "home-offers-collection" },
-        "resources": { "collectionDocId": "home-resources-collection" }
+        "title": { "title": "home-title", "subtitle": "home-subtitle" },
+        "services": { "collectionDocId": "home-services-collection" },
+        "products": { "collectionDocId": "home-products-collection" },
+        "proof": { "collectionDocId": "home-proof-collection" }
       }
     },
     "/offers/[offerSlug]": {
       "layout": "offer-page",
       "slots": {
-        "hero": { "title": "offer-hero-title", "subtitle": "offer-hero-subtitle", "body": "offer-hero-body" },
+        "summary": { "title": "offer-title", "body": "offer-body" },
         "features": { "collectionDocId": "offer-features" },
-        "useCases": { "collectionDocId": "offer-usecases" },
         "pricing": { "collectionDocId": "offer-pricing" },
         "testimonials": { "collectionDocId": "offer-testimonials" },
         "relatedResources": { "collectionDocId": "offer-related-resources" }
       }
     },
+    "/products/[productSlug]": {
+      "layout": "product-page",
+      "slots": {
+        "summary": { "title": "product-title", "body": "product-body" },
+        "features": { "collectionDocId": "product-features" },
+        "specifications": { "collectionDocId": "product-specs" },
+        "pricing": { "collectionDocId": "product-pricing" }
+      }
+    },
+    "/services/[serviceSlug]": {
+      "layout": "service-page",
+      "slots": {
+        "summary": { "title": "service-title", "body": "service-body" },
+        "features": { "collectionDocId": "service-features" },
+        "pricing": { "collectionDocId": "service-pricing" }
+      }
+    },
+    "/team/[memberSlug]": {
+      "layout": "team-detail",
+      "slots": {
+        "person": { "title": "team-name", "role": "team-role", "body": "team-bio" }
+      }
+    },
+    "/locations/[locationSlug]": {
+      "layout": "location-detail",
+      "slots": {
+        "details": { "title": "location-name", "body": "location-address" },
+        "hours": { "collectionDocId": "location-hours" }
+      }
+    },
     "/resources/[articleSlug]": {
       "layout": "article",
       "slots": {
-        "hero": { "title": "article-title", "excerpt": "article-excerpt" },
+        "title": { "title": "article-title", "excerpt": "article-excerpt" },
         "body": { "contentDocId": "article-body" },
         "related": { "collectionDocId": "article-related" }
       }
@@ -53,7 +80,7 @@
     "/videos/[videoSlug]": {
       "layout": "video",
       "slots": {
-        "hero": { "title": "video-title", "excerpt": "video-excerpt" },
+        "title": { "title": "video-title", "excerpt": "video-excerpt" },
         "body": { "contentDocId": "video-body" },
         "relatedVideos": { "collectionDocId": "video-related" },
         "relatedArticles": { "collectionDocId": "video-related-articles" }
@@ -62,17 +89,17 @@
     "/about": {
       "layout": "about-index",
       "slots": {
-        "hero": { "title": "about-hero-title", "subtitle": "about-hero-subtitle" },
+        "story": { "title": "about-title", "body": "about-body" },
         "sections": { "collectionDocId": "about-sections" }
       }
     },
     "/contact": {
       "layout": "contact",
       "slots": {
-        "hero": { "title": "contact-hero-title", "subtitle": "contact-hero-subtitle" },
+        "title": { "title": "contact-title", "subtitle": "contact-subtitle" },
         "form": { "formDocId": "contact-form-def" },
         "map": { "coordinatesDocId": "contact-coordinates" },
-        "cta": { "label": "contact-cta-label", "url": "ltfx.auto.url.a1c09cd4e797.v1" }
+        "cta": { "label": "contact-cta-label", "url": "/contact" }
       }
     },
     "/legal/[legalSlug]": {
