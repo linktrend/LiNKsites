@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-03-required-outputs-classification",
+  "packet": "LSG0-03",
+  "requirementSource": "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md",
+  "classificationsAllowed": [
+    "completed",
+    "done but requires testing/fixing",
+    "missing and needs work"
+  ],
+  "outputs": [
+    {
+      "id": "LSG0-03-R1",
+      "title": "current exact selectable marketing-smb-v1 release including qualification/admission and immutable digests",
+      "classification": "missing and needs work",
+      "observedOnProtectedTree": {
+        "identityPresent": true,
+        "lifecycle": "quarantined",
+        "selectable": false,
+        "immutableDigestsPresentAndMatching": true,
+        "qualificationAdmissionSelectable": false
+      },
+      "missingArtifacts": [
+        "protected-development selectable=true marketing-smb-v1 entry and catalog record",
+        "independent qualification receipt bound to 96422a39979f6e1e4c068e871051ae45423a5967 or a later admitted protected identity that this packet would have to re-verify",
+        "governed admission receipt with admission performed, not candidate_nonselectable"
+      ]
+    },
+    {
+      "id": "LSG0-03-R1-observation",
+      "title": "inspect current marketing-smb-v1 lifecycle/selectability/admission/digest bytes on the supplied protected tree",
+      "classification": "completed",
+      "note": "Inspection completed on 96422a3. Observation remains quarantined/selectable=false with matching file SHA-256 digests. Provider bytes unchanged from superseded pin dacdf036. This is not the required selectable release."
+    },
+    {
+      "id": "LSG0-03-R2",
+      "title": "exact admitted Master Website Template A1/A2/A3 and A/B/C/L provider release/handoff",
+      "classification": "missing and needs work",
+      "observedOnProtectedTree": {
+        "currentReleaseCandidate": "master-template-type-1@2.0.0",
+        "layoutsA1A2A3Present": true,
+        "plansABCLpresent": true,
+        "artifactDigestsPresent": true,
+        "currentJson": false,
+        "lifecycle": "draft",
+        "selectability": "non_selectable",
+        "admission": "not_performed",
+        "productionPointer": false
+      },
+      "missingArtifacts": [
+        "registry/v2/entries/master-template-type-1/current.json production pointer",
+        "governance envelope with lifecycle selectable and selectability selectable",
+        "release-receipt.json with admission performed and selectability selectable for the current release",
+        "independent qualification receipt bound to the supplied protected commit/tree",
+        "v2 catalogue records with selectability selectable for the current pointer"
+      ]
+    },
+    {
+      "id": "LSG0-03-R2-observation",
+      "title": "inspect current MWT release, pointer, A1/A2/A3, A/B/C/L, digests and validation receipts",
+      "classification": "completed",
+      "note": "Candidate bytes, layouts, plans, digests, and draft receipts were re-read from the exact tree 384b428eb35ffa21c6eb1fdc1af90997379a99fb. Owner handoffs remain input, not admission. Bytes match the superseded dacdf036 inspection."
+    },
+    {
+      "id": "LSG0-03-R2-candidate-bytes",
+      "title": "MWT 2.0.0 layout packs and plan manifests as source input",
+      "classification": "done but requires testing/fixing",
+      "note": "A1/A2/A3 packs and A/B/C/L plans exist on the protected tree as a draft candidate. They are not admitted/selectable. Consumer paired proof and qualification remain outstanding on the LiNKlibraries owner side before LiNKsites may treat them as production providers."
+    }
+  ]
+}
