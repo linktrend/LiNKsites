@@ -145,7 +145,7 @@ jobs:
           test "${BASE_SHA}" = "${EVENT_BASE_SHA}" || { echo "receipt_gate_base_moved"; exit 1; }
           git fetch --no-tags origin "${BASE_SHA}"
           base_tree="$(git rev-parse "${BASE_SHA}^{tree}")"
-          candidate_tree="$(git -C "${candidate_dir}" rev-parse HEAD^{tree}")"
+          candidate_tree="$(git -C "${candidate_dir}" rev-parse 'HEAD^{tree}')"
           python3 scripts/gitops/validate_reusable_full_run.py \
             --run-json full-run.json --source-pr-json source-pr.json \
             --repo "${GITHUB_REPOSITORY}" --head "${source_head}" \

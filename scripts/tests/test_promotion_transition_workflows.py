@@ -47,6 +47,8 @@ class PromotionTransitionWorkflowTests(unittest.TestCase):
             self.assertIn('select(.merged_at != null)', text)
             self.assertIn('contains($digest)', text)
             self.assertIn("'{items: [.[][]", text)
+            self.assertIn("candidate_tree=\"$(git -C \"${candidate_dir}\" rev-parse 'HEAD^{tree}')\"", text)
+            self.assertNotIn('rev-parse HEAD^{tree}")"', text)
             self.assertEqual(text.count("checks: read"), 1)
             self.assertIn(
                 "permissions:\n      contents: read\n      actions: read\n      checks: read\n      pull-requests: read",
