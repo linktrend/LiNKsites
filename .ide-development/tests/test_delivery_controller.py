@@ -847,6 +847,7 @@ class DeliveryControllerTests(unittest.TestCase):
             expected_base_branch="development",
             expected_base=_sha(9),
             expected_base_tree=_sha(10),
+            expected_result_tree=self.tree,
         )
         self.assertEqual(merged["mergeCommitSha"], _sha(4))
         self.assertFalse(merged["directPush"])
@@ -950,6 +951,8 @@ class DeliveryControllerTests(unittest.TestCase):
                 number=11,
                 expected_head=self.head,
                 expected_base_branch="development",
+                expected_base=_sha(9),
+                expected_base_tree=_sha(10),
             )
         with self.assertRaises(TypeError):
             self.github.merge_pull_request(
@@ -957,7 +960,20 @@ class DeliveryControllerTests(unittest.TestCase):
                 number=11,
                 expected_head=self.head,
                 expected_base_branch="development",
+                expected_base=_sha(9),
+                expected_base_tree=_sha(10),
             )
+        for adapter in (live, self.github):
+            with self.assertRaisesRegex(controller.ControllerError, "protected_merge_identity_required"):
+                adapter.merge_pull_request(
+                    repository="owner/name",
+                    number=11,
+                    expected_head=self.head,
+                    expected_base_branch="development",
+                    expected_base=_sha(9),
+                    expected_base_tree=_sha(10),
+                    expected_result_tree="",
+                )
         self.assertEqual(calls, [])
         self.assertEqual(self.github.merges, [])
 

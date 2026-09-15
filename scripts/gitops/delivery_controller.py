@@ -211,10 +211,10 @@ class GitHubPort(Protocol):
         expected_base_branch: str,
         expected_base: str,
         expected_base_tree: str,
+        expected_result_tree: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
-        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         ...
 
@@ -277,19 +277,22 @@ class MemoryGitHub:
         expected_base_branch: str,
         expected_base: str,
         expected_base_tree: str,
+        expected_result_tree: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
-        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         if repository != self.repository:
             raise ControllerError("wrong_repository", repository)
-        if not expected_base_branch or not is_valid_sha(normalize_sha(expected_base)) or not is_valid_sha(
-            normalize_sha(expected_base_tree)
+        if (
+            not expected_base_branch
+            or not is_valid_sha(normalize_sha(expected_base))
+            or not is_valid_sha(normalize_sha(expected_base_tree))
+            or not is_valid_sha(normalize_sha(expected_result_tree))
         ):
             raise ControllerError(
-                "protected_base_identity_required",
-                "protected merge requires exact base branch, commit, and tree",
+                "protected_merge_identity_required",
+                "protected merge requires exact base branch, base commit, base tree, and result tree",
             )
         if number in self.merge_rejections:
             raise ControllerError("protected_merge_rejected", self.merge_rejections[number])
@@ -511,17 +514,20 @@ class LiveGitHub:
         expected_base_branch: str,
         expected_base: str,
         expected_base_tree: str,
+        expected_result_tree: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
-        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
-        if not expected_base_branch or not is_valid_sha(normalize_sha(expected_base)) or not is_valid_sha(
-            normalize_sha(expected_base_tree)
+        if (
+            not expected_base_branch
+            or not is_valid_sha(normalize_sha(expected_base))
+            or not is_valid_sha(normalize_sha(expected_base_tree))
+            or not is_valid_sha(normalize_sha(expected_result_tree))
         ):
             raise ControllerError(
-                "protected_base_identity_required",
-                "protected merge requires exact base branch, commit, and tree",
+                "protected_merge_identity_required",
+                "protected merge requires exact base branch, base commit, base tree, and result tree",
             )
         live = self.get_pull_request(repository=repository, number=number)
         head = normalize_sha(str(live.get("headSha") or ""))
@@ -573,26 +579,25 @@ class LiveGitHub:
             if not isinstance(payload, Mapping) or not payload.get("merged"):
                 raise ControllerError("protected_merge_rejected", f"PR #{number} was not merged")
             merge_sha = normalize_sha(str(payload.get("sha") or ""))
-        if expected_base or expected_result_tree:
-            merged_commit = self._request(
-                "GET", f"https://api.github.com/repos/{repository}/git/commits/{merge_sha}"
+        merged_commit = self._request(
+            "GET", f"https://api.github.com/repos/{repository}/git/commits/{merge_sha}"
+        )
+        parents = merged_commit.get("parents") if isinstance(merged_commit, Mapping) else []
+        first_parent = normalize_sha(
+            str((parents[0] if isinstance(parents, list) and parents else {}).get("sha") or "")
+        )
+        tree_obj = merged_commit.get("tree") if isinstance(merged_commit, Mapping) else {}
+        merged_tree = normalize_sha(str((tree_obj if isinstance(tree_obj, Mapping) else {}).get("sha") or ""))
+        if first_parent != normalize_sha(expected_base):
+            raise ControllerError(
+                "protected_base_moved_during_merge",
+                f"merged_base={first_parent}:expected={expected_base}",
             )
-            parents = merged_commit.get("parents") if isinstance(merged_commit, Mapping) else []
-            first_parent = normalize_sha(
-                str((parents[0] if isinstance(parents, list) and parents else {}).get("sha") or "")
+        if merged_tree != normalize_sha(expected_result_tree):
+            raise ControllerError(
+                "protected_merge_tree_mismatch",
+                f"merged_tree={merged_tree}:expected={expected_result_tree}",
             )
-            tree_obj = merged_commit.get("tree") if isinstance(merged_commit, Mapping) else {}
-            merged_tree = normalize_sha(str((tree_obj if isinstance(tree_obj, Mapping) else {}).get("sha") or ""))
-            if expected_base and first_parent != normalize_sha(expected_base):
-                raise ControllerError(
-                    "protected_base_moved_during_merge",
-                    f"merged_base={first_parent}:expected={expected_base}",
-                )
-            if expected_result_tree and merged_tree != normalize_sha(expected_result_tree):
-                raise ControllerError(
-                    "protected_merge_tree_mismatch",
-                    f"merged_tree={merged_tree}:expected={expected_result_tree}",
-                )
         return {
             "number": number,
             "method": method,

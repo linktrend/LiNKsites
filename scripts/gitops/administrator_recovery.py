@@ -75,7 +75,7 @@ class MergePort(Protocol):
         expected_base_branch: str,
         expected_base: str,
         expected_base_tree: str,
-        expected_result_tree: str | None = None,
+        expected_result_tree: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
