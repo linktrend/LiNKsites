@@ -171,7 +171,9 @@ jobs:
           PY
           )"
           test "${receipt_digest}" = "${{ steps.receipt.outputs.receipt_digest }}" || { echo "receipt_gate_digest_mismatch"; exit 1; }
-          gh api "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}/reviews" > source-reviews.json
+          gh api --paginate --slurp \
+            "repos/${GITHUB_REPOSITORY}/pulls/${SOURCE_PR}/reviews?per_page=100" \
+            | jq 'add // []' > source-reviews.json
           gh api "repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs?per_page=100" > observed-checks.json
           gh api --paginate --slurp \
             "repos/${GITHUB_REPOSITORY}/pulls?state=closed&per_page=100" \

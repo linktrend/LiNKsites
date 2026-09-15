@@ -43,6 +43,8 @@ class PromotionTransitionWorkflowTests(unittest.TestCase):
             self.assertIn("from scripts.gitops.coordinator.receipts import compute_receipt_digest", text)
             self.assertNotIn("search/issues?q=", text)
             self.assertIn('gh api --paginate --slurp', text)
+            self.assertIn('pulls/${SOURCE_PR}/reviews?per_page=100', text)
+            self.assertIn("| jq 'add // []' > source-reviews.json", text)
             self.assertIn('pulls?state=closed&per_page=100', text)
             self.assertIn('select(.merged_at != null)', text)
             self.assertIn('contains($digest)', text)
