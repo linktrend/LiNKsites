@@ -28,6 +28,7 @@ class PublishServer03ImagesWorkflowTests(unittest.TestCase):
         self.assertIn('value != raw_value', WORKFLOW)
         self.assertIn('or not raw_value.isascii()', WORKFLOW)
         self.assertIn('or host_is_ip_address', WORKFLOW)
+        self.assertIn('or reserved_hostname', WORKFLOW)
         self.assertIn('or not host', WORKFLOW)
         self.assertIn('or not valid_hostname', WORKFLOW)
         self.assertIn('parsed.path not in {"", "/"}', WORKFLOW)
@@ -50,6 +51,11 @@ class PublishServer03ImagesWorkflowTests(unittest.TestCase):
             "https://cms.linktrend.one#fragment",
             "https://cms.linktrend.one:invalid",
             "https://cms.línktrend.one",
+            "https://cms.local",
+            "https://cms.localhost",
+            "https://attacker.invalid",
+            "https://attacker.test",
+            "https://attacker.example",
             "https://10.0.0.1",
             "https://192.168.1.1",
             "https://169.254.1.1",

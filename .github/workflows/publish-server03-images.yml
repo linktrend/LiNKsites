@@ -96,6 +96,10 @@ jobs:
               host_is_ip_address = True
           except ValueError:
               host_is_ip_address = False
+          reserved_hostname = any(
+              host == suffix or host.endswith(f".{suffix}")
+              for suffix in {"example", "invalid", "local", "localhost", "test"}
+          )
           labels = host.split(".")
           valid_hostname = (
               len(labels) >= 2
@@ -119,6 +123,7 @@ jobs:
               or parsed.scheme != "https"
               or not host
               or host_is_ip_address
+              or reserved_hostname
               or not valid_hostname
               or parsed.username
               or parsed.password
