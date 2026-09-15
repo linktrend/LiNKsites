@@ -37,6 +37,14 @@ content, or schedule synchronization. The old `lsites_core` mirror and its
 `sync_ingress`/`sync_jobs` behavior remain historical only and are not active
 Factory Catalog package paths.
 
+LSFACT-01 binds that same promotion boundary to an injected exact provider
+handoff. Semantic IDs still map to provider component/page, Payload
+collection/block, and React symbols without flattening to Hero. Products and
+Services remain distinct records. Current truthful identities stay
+fail-closed: `marketing-smb-v1` is quarantined/non-selectable and Master
+Website Template remains a planning/candidate. Tests may inject shaped
+handoffs; they must not relabel fixtures as production admission.
+
 RLS grants the private tables only to `svc_linksites_runtime`, with
 `platform.has_org_access(..., 'client_viewer')` on every operation. Browser and
 public roles receive neither mutation grants nor working-content policies.

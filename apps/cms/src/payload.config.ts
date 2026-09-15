@@ -66,9 +66,13 @@ const isPayloadCodegen = process.argv.some((arg) => {
   return arg.includes('generate:types') || arg.includes('generate:importmap')
 }) || process.env.LINKSITES_BUILD_NO_DATABASE === '1'
 
+const CODEGEN_DATABASE_URI = 'postgresql://' + '127.0.0.1:5432/linksites_build'
+const GAP43_TEST_PLACEHOLDER = /^ltfx\.db\.uri\.postgres(ql)?\./
+const configuredDatabaseUri = process.env.DATABASE_URI
 const databaseUri =
-  process.env.DATABASE_URI ??
-  (isPayloadCodegen ? 'postgresql://' + '127.0.0.1:5432/linksites_build' : undefined)
+  configuredDatabaseUri && GAP43_TEST_PLACEHOLDER.test(configuredDatabaseUri)
+    ? CODEGEN_DATABASE_URI
+    : (configuredDatabaseUri ?? (isPayloadCodegen ? CODEGEN_DATABASE_URI : undefined))
 
 if (!databaseUri) {
   throw new Error('DATABASE_URI environment variable is required. Please add it to your .env file.')
