@@ -1,0 +1,26 @@
+{
+  "name": "catalogue-profile-accept-client-profile",
+  "expect": "accept",
+  "document": {
+    "contractVersion": "platform.catalogue-profile/1.0.0",
+    "catalogue": [
+      {
+        "id": "cap.plane.execution_tracking",
+        "displayName": "Plane execution tracking",
+        "owningSystem": "link-plane",
+        "licensable": true,
+        "minContractTier": "standard",
+        "commercialUseRequires": null,
+        "status": "active"
+      }
+    ],
+    "profile": {
+      "id": "org-client-example",
+      "name": "Example client tenant",
+      "kind": "client",
+      "status": "active",
+      "createdAt": "2026-08-31T00:00:00.000Z",
+      "updatedAt": "2026-08-31T00:00:00.000Z"
+    }
+  }
+}
