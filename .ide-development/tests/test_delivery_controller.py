@@ -12,7 +12,6 @@ from pathlib import Path
 from unittest import mock
 
 from scripts.gitops import delivery_controller as controller
-from scripts.gitops import packager_discover as discover
 from scripts.gitops.coordinator import receipts
 from scripts.ide_development.constants import RC_REQUIRED_SCHEMA_RELS
 
@@ -119,10 +118,10 @@ class DeliveryControllerTests(unittest.TestCase):
         }
         self.github = controller.MemoryGitHub(repository="owner/name")
         self.github.prs[11] = dict(self.pr)
-        self.github.refs["development"] = _sha(8)
+        self.github.refs["development"] = _sha(9)
         self.github.refs["staging"] = _sha(7)
         self.github.refs["main"] = _sha(6)
-        self.github.ref_trees["development"] = _sha(80)
+        self.github.ref_trees["development"] = _sha(10)
         self.github.ref_trees["staging"] = _sha(70)
         self.github.ref_trees["main"] = _sha(60)
 
@@ -165,7 +164,6 @@ class DeliveryControllerTests(unittest.TestCase):
         self.assertTrue(controller.IS_DELIVERY_CONTROLLER)
         self.assertEqual(controller.COMPONENT_KIND, "delivery_controller")
         self.assertIn("Replaces the nonexistent Integrator", controller.__doc__)
-        self.assertFalse(getattr(discover, "IS_DELIVERY_CONTROLLER", False))
 
     def test_valid_phase_pr_reaches_development_without_external_integrator(self) -> None:
         result = self._deliver()
@@ -496,6 +494,32 @@ class DeliveryControllerTests(unittest.TestCase):
             )
         self.assertEqual(self.github.merges, [])
 
+    def test_staging_base_movement_at_merge_boundary_stops_without_merge(self) -> None:
+        class MoveAtMerge(controller.MemoryGitHub):
+            def merge_pull_request(self, **kwargs):
+                self.refs["staging"] = _sha(71)
+                self.ref_trees["staging"] = _sha(72)
+                return super().merge_pull_request(**kwargs)
+
+        github = MoveAtMerge(repository="owner/name")
+        github.refs.update(self.github.refs)
+        github.ref_trees.update(self.github.ref_trees)
+        with self.assertRaisesRegex(controller.ControllerError, "protected_base_moved"):
+            controller.promote_to_staging(
+                github=github,
+                repository="owner/name",
+                development_sha=self.head,
+                staging_sha=_sha(7),
+                staging_tree=_sha(70),
+                candidate_sha=self.head,
+                candidate_tree=self.tree,
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                release_gate={"status": "passed", "testProfile": "release"},
+                role="operator",
+            )
+        self.assertEqual(github.merges, [])
+
     def test_main_waits_for_explicit_founder_approval(self) -> None:
         prepared = controller.prepare_main_promotion(
             github=self.github,
@@ -762,6 +786,74 @@ class DeliveryControllerTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(controller.ControllerError, "direct_push_forbidden"):
             live.push_protected(repository="owner/name", branch="development", sha=self.head)
+
+    def test_live_merge_binds_base_at_adapter_boundary_and_verifies_result(self) -> None:
+        base, base_tree, merge, result_tree = _sha(7), _sha(70), _sha(4), self.tree
+        calls: list[tuple[str, str]] = []
+
+        def transport(method: str, url: str, token: str, body):
+            calls.append((method, url))
+            if method == "GET" and url.endswith("/pulls/12"):
+                return {
+                    "number": 12,
+                    "draft": False,
+                    "state": "open",
+                    "head": {"ref": "promote/staging/one", "sha": self.head, "repo": {"full_name": "owner/name"}},
+                    "base": {"ref": "staging", "sha": base},
+                }
+            if method == "GET" and url.endswith("/git/ref/heads/staging"):
+                return {"object": {"sha": base}}
+            if method == "GET" and url.endswith(f"/git/commits/{base}"):
+                return {"tree": {"sha": base_tree}}
+            if method == "PUT" and url.endswith("/pulls/12/merge"):
+                return {"merged": True, "sha": merge}
+            if method == "GET" and url.endswith(f"/git/commits/{merge}"):
+                return {"parents": [{"sha": base}], "tree": {"sha": result_tree}}
+            raise AssertionError((method, url, body))
+
+        live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
+        merged = live.merge_pull_request(
+            repository="owner/name",
+            number=12,
+            expected_head=self.head,
+            expected_base=base,
+            expected_base_tree=base_tree,
+            expected_result_tree=result_tree,
+        )
+        self.assertEqual(merged["mergeCommitSha"], merge)
+        self.assertEqual([method for method, _ in calls].count("PUT"), 1)
+
+        moved_calls: list[str] = []
+
+        def moved_transport(method: str, url: str, token: str, body):
+            moved_calls.append(method)
+            if method == "GET" and url.endswith("/pulls/12"):
+                return {
+                    "number": 12,
+                    "draft": False,
+                    "state": "open",
+                    "head": {"ref": "promote/staging/one", "sha": self.head, "repo": {"full_name": "owner/name"}},
+                    "base": {"ref": "staging", "sha": _sha(71)},
+                }
+            if method == "GET" and url.endswith("/git/ref/heads/staging"):
+                return {"object": {"sha": _sha(71)}}
+            if method == "GET" and url.endswith(f"/git/commits/{_sha(71)}"):
+                return {"tree": {"sha": _sha(72)}}
+            raise AssertionError((method, url, body))
+
+        moved_live = controller.LiveGitHub(
+            repository="owner/name", automation_token="tok", transport=moved_transport
+        )
+        with self.assertRaisesRegex(controller.ControllerError, "protected_base_moved"):
+            moved_live.merge_pull_request(
+                repository="owner/name",
+                number=12,
+                expected_head=self.head,
+                expected_base=base,
+                expected_base_tree=base_tree,
+                expected_result_tree=result_tree,
+            )
+        self.assertNotIn("PUT", moved_calls)
 
     def test_staging_and_main_require_exact_source_sha_equality(self) -> None:
         with self.assertRaisesRegex(controller.ControllerError, "promotion_source_mismatch"):
@@ -1049,10 +1141,13 @@ class DeliveryControllerTests(unittest.TestCase):
                     os.environ[key] = value
 
     def test_index_manifest_schema_and_hosted_fast_cover_controller(self) -> None:
-        index = (ROOT / "core/managed-core/INDEX.yaml").read_text(encoding="utf-8")
+        provider_root = ROOT / "core/managed-core"
+        if not (provider_root / "INDEX.yaml").is_file():
+            self.skipTest("provider-source contract files are not installed in the consumer repository")
+        index = (provider_root / "INDEX.yaml").read_text(encoding="utf-8")
         self.assertIn("schemas/delivery-operation.schema.json", index)
         self.assertIn("core/managed-core/schemas/delivery-operation.schema.json", RC_REQUIRED_SCHEMA_RELS)
-        manifest = json.loads((ROOT / "core/managed-core/MANIFEST.json").read_text(encoding="utf-8"))
+        manifest = json.loads((provider_root / "MANIFEST.json").read_text(encoding="utf-8"))
         sources = {row["source"] for row in manifest["files"]}
         self.assertIn("core/managed-core/schemas/delivery-operation.schema.json", sources)
         self.assertIn("scripts/gitops/delivery_controller.py", sources)

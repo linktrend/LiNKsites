@@ -211,6 +211,9 @@ class GitHubPort(Protocol):
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
+        expected_base: str | None = None,
+        expected_base_tree: str | None = None,
+        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         ...
 
@@ -273,6 +276,9 @@ class MemoryGitHub:
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
+        expected_base: str | None = None,
+        expected_base_tree: str | None = None,
+        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         if repository != self.repository:
             raise ControllerError("wrong_repository", repository)
@@ -288,10 +294,20 @@ class MemoryGitHub:
             raise ControllerError("draft_pr", str(number))
         if str(pr.get("state") or "").lower() not in {"open", ""}:
             raise ControllerError("pr_not_open", str(number))
-        merge_sha = hashlib.sha1(f"merge:{number}:{head}".encode("utf-8")).hexdigest()
         base = str(pr.get("base") or "")
-        base_before = normalize_sha(self.refs.get(base, "0" * 40))
+        base_before = normalize_sha(self.refs.get(base, ""))
+        base_tree_before = normalize_sha(self.ref_trees.get(base, ""))
+        if expected_base and base_before != normalize_sha(expected_base):
+            raise ControllerError("protected_base_moved", f"live={base_before}:expected={expected_base}")
+        if expected_base_tree and base_tree_before != normalize_sha(expected_base_tree):
+            raise ControllerError(
+                "protected_base_tree_moved",
+                f"live={base_tree_before}:expected={expected_base_tree}",
+            )
+        merge_sha = hashlib.sha1(f"merge:{number}:{head}".encode("utf-8")).hexdigest()
         self.refs[base] = merge_sha
+        if expected_result_tree:
+            self.ref_trees[base] = normalize_sha(expected_result_tree)
         pr["state"] = "merged"
         pr["merged"] = True
         pr["mergeCommitSha"] = merge_sha
@@ -302,9 +318,11 @@ class MemoryGitHub:
             "mergeCommitSha": merge_sha,
             "base": base,
             "baseBefore": base_before,
+            "baseTreeBefore": base_tree_before,
             "directPush": False,
             "admin": bool(admin),
             "matchHeadCommit": bool(match_head_commit),
+            "resultTree": normalize_sha(expected_result_tree or ""),
         }
         self.merges.append(record)
         return dict(record)
@@ -423,6 +441,7 @@ class LiveGitHub:
             "state": "open" if payload.get("state") == "open" else str(payload.get("state") or ""),
             "head": str(head.get("ref") or ""),
             "base": str(base.get("ref") or ""),
+            "baseSha": normalize_sha(str(base.get("sha") or "")),
             "headSha": normalize_sha(str(head.get("sha") or "")),
             "mergeableState": str(payload.get("mergeable_state") or ""),
             "crossRepository": bool(
@@ -458,6 +477,9 @@ class LiveGitHub:
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
+        expected_base: str | None = None,
+        expected_base_tree: str | None = None,
+        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         live = self.get_pull_request(repository=repository, number=number)
         head = normalize_sha(str(live.get("headSha") or ""))
@@ -467,6 +489,19 @@ class LiveGitHub:
             raise ControllerError("draft_pr", str(number))
         if str(live.get("state") or "").lower() != "open":
             raise ControllerError("pr_not_open", str(number))
+        base_branch = str(live.get("base") or "")
+        if expected_base or expected_base_tree:
+            base_identity = self.get_ref_identity(repository=repository, branch=base_branch)
+            if expected_base and base_identity["commit"] != normalize_sha(expected_base):
+                raise ControllerError(
+                    "protected_base_moved",
+                    f"live={base_identity['commit']}:expected={expected_base}",
+                )
+            if expected_base_tree and base_identity["tree"] != normalize_sha(expected_base_tree):
+                raise ControllerError(
+                    "protected_base_tree_moved",
+                    f"live={base_identity['tree']}:expected={expected_base_tree}",
+                )
         if admin:
             return self._merge_with_gh_admin(
                 repository=repository,
@@ -485,15 +520,36 @@ class LiveGitHub:
         )
         if not isinstance(payload, Mapping) or not payload.get("merged"):
             raise ControllerError("protected_merge_rejected", f"PR #{number} was not merged")
+        merge_sha = normalize_sha(str(payload.get("sha") or ""))
+        if expected_base or expected_result_tree:
+            merged_commit = self._request(
+                "GET", f"https://api.github.com/repos/{repository}/git/commits/{merge_sha}"
+            )
+            parents = merged_commit.get("parents") if isinstance(merged_commit, Mapping) else []
+            first_parent = normalize_sha(
+                str((parents[0] if isinstance(parents, list) and parents else {}).get("sha") or "")
+            )
+            tree_obj = merged_commit.get("tree") if isinstance(merged_commit, Mapping) else {}
+            merged_tree = normalize_sha(str((tree_obj if isinstance(tree_obj, Mapping) else {}).get("sha") or ""))
+            if expected_base and first_parent != normalize_sha(expected_base):
+                raise ControllerError(
+                    "protected_base_moved_during_merge",
+                    f"merged_base={first_parent}:expected={expected_base}",
+                )
+            if expected_result_tree and merged_tree != normalize_sha(expected_result_tree):
+                raise ControllerError(
+                    "protected_merge_tree_mismatch",
+                    f"merged_tree={merged_tree}:expected={expected_result_tree}",
+                )
         return {
             "number": number,
             "method": method,
             "headSha": normalize_sha(expected_head),
-            "mergeCommitSha": normalize_sha(str(payload.get("sha") or "")),
+            "mergeCommitSha": merge_sha,
             "directPush": False,
             "admin": False,
             "matchHeadCommit": bool(match_head_commit),
-            "base": str(live.get("base") or ""),
+            "base": base_branch,
         }
 
     def _merge_with_gh_admin(
@@ -954,6 +1010,9 @@ def merge_to_development(
             method="merge",
             admin=False,
             match_head_commit=True,
+            expected_base=base_commit or None,
+            expected_base_tree=base_tree or None,
+            expected_result_tree=target_tree or None,
         )
     )
     result = {
@@ -1098,6 +1157,9 @@ def promote_to_staging(
             method="merge",
             admin=False,
             match_head_commit=True,
+            expected_base=base_commit,
+            expected_base_tree=base_tree,
+            expected_result_tree=candidate_tree,
         )
     )
     try:
@@ -1296,6 +1358,16 @@ def complete_main_promotion(
             method="merge",
             admin=False,
             match_head_commit=True,
+            expected_base=base_sha,
+            expected_base_tree=base_tree,
+            expected_result_tree=normalize_sha(
+                str(
+                    ((receipt.get("candidateIdentity") or {}) if isinstance(receipt, Mapping) else {}).get(
+                        "gitTree"
+                    )
+                    or ""
+                )
+            ),
         )
     )
     return {
