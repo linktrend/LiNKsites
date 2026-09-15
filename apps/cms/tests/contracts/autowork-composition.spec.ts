@@ -11,11 +11,11 @@ describe('actual CMS to LiNKautowork composition', () => {
 
   const liveEnv = (directory: string) => {
     process.env.LINKAUTOWORK_GATEWAY_URL = 'http://127.0.0.1:1/events'
-    process.env.LINKAUTOWORK_SIGNING_SECRET = process.env.LINKAUTOWORK_SIGNING_SECRET ?? 'ltfx.auto.linkautowork_signing_secret.bed6dcd92148.v1'
+    process.env.LINKAUTOWORK_SIGNING_SECRET = 'ltfx.auto.linkautowork_signing_secret.bed6dcd92148.v1'
     process.env.LINKAUTOWORK_SIGNING_KEY_ID = 'cms-test'
     process.env.LINKAUTOWORK_ENVIRONMENT = 'development'
     process.env.LINKAUTOWORK_OUTBOX_PATH = join(directory, 'outbox.json')
-    process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET = process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET ?? 'ltfx.auto.linkautowork_outbox_integrity_secret.c894e74e9421.v1'
+    process.env.LINKAUTOWORK_OUTBOX_INTEGRITY_SECRET = 'ltfx.auto.linkautowork_outbox_integrity_secret.c894e74e9421.v1'
     process.env.LINKAUTOWORK_EVENT_GRANTS = JSON.stringify([{ eventName: 'demo.completed', environments: ['development'], orgIds: ['org_demo'] }])
     process.env.LINKAUTOWORK_ISSUER = 'linkplatform-issuer'
     process.env.LINKAUTOWORK_AUDIENCE = 'linksites'

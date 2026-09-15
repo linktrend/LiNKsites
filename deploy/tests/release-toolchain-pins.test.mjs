@@ -100,7 +100,7 @@ test('CI Node and pnpm toolchain inputs are exact identities, not majors or movi
   assert.ok(nodeVersions.length >= 2, 'ci.yml must pin Node on Fast and Full')
   assert.ok(nodeVersions.every((value) => value === '22.17.0'), `unpinned CI Node: ${nodeVersions.join(',')}`)
   assert.doesNotMatch(ci, /node-version:\s*['"]?22['"]?\s*$/m)
-  assert.match(ci, /version:\s*10\.0\.0/)
+  assert.doesNotMatch(ci, /version:\s*10\.0\.0/, 'pnpm action reads the exact packageManager version')
   assert.match(ci, /supabase\/setup-cli@[0-9a-f]{40} # v1\.7\.1/)
   assert.match(ci, /version:\s*2\.81\.3/)
 })
