@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -20,6 +21,8 @@ from scripts.gitops.promotion_receipt_gate import (
     assemble_live_facts,
     canonical_consumption_id,
     evaluate_authoritative_promotion,
+    select_current_independent_review,
+    write_live_facts_from_workspace,
 )
 from scripts.gitops.receipt_seal import SealError, admit_founder_authorized_transition
 
@@ -121,6 +124,98 @@ def valid_live(receipt: dict, transition: dict, *, transition_name: str = "devel
 
 
 class PromotionReceiptAdversarialTests(unittest.TestCase):
+    def test_live_review_rejects_source_pr_moved_off_retained_candidate(self) -> None:
+        candidate = "f" * 40
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            def write(name: str, payload: object) -> Path:
+                path = root / name
+                path.write_text(json.dumps(payload), encoding="utf-8")
+                return path
+
+            receipt_path = write("receipt.json", {"candidateIdentity": {"headCommit": candidate}})
+            source_pr_path = write(
+                "source-pr.json",
+                {"user": {"login": "candidate-author"}, "head": {"sha": "e" * 40}},
+            )
+            empty_object = write("empty-object.json", {})
+            empty_list = write("empty-list.json", [])
+            with self.assertRaisesRegex(ValueError, "source PR head is not the exact retained receipt candidate"):
+                write_live_facts_from_workspace(
+                    repository=REPOSITORY,
+                    transition="development-to-staging",
+                    protected_base_commit=PROTECTED_BASE,
+                    protected_base_tree=PROTECTED_BASE_TREE,
+                    candidate_head_commit=TARGET_HEAD,
+                    candidate_head_tree=TREE,
+                    workflow_file=".github/workflows/linktrend-development-to-staging.yml",
+                    event_name="pull_request_target",
+                    current_pr="1",
+                    receipt_path=receipt_path,
+                    transition_path=empty_object,
+                    source_pr_path=source_pr_path,
+                    run_path=empty_object,
+                    reviews_path=empty_list,
+                    checks_path=empty_object,
+                    merged_path=empty_object,
+                    output_path=root / "live.json",
+                    consumed_ids_path=empty_list,
+                    consumed_receipts_path=empty_list,
+                )
+
+    def test_independent_review_must_be_current_approved_and_exact_commit(self) -> None:
+        candidate = "f" * 40
+        approved = {
+            "id": 10,
+            "submitted_at": "2026-09-15T01:00:00Z",
+            "user": {"login": "independent-reviewer"},
+            "state": "APPROVED",
+            "body": "PASS\nExact candidate reviewed.",
+            "commit_id": candidate,
+        }
+        self.assertEqual(
+            select_current_independent_review(
+                [approved], candidate_author="candidate-author", candidate_commit=candidate
+            ),
+            {
+                "identity": "independent-reviewer",
+                "result": "PASS",
+                "candidateAuthor": "candidate-author",
+            },
+        )
+
+        adversarial = {
+            "pass-body-without-approval": [{**approved, "state": "COMMENTED"}],
+            "wrong-commit": [{**approved, "commit_id": "e" * 40}],
+            "dismissed": [{**approved, "state": "DISMISSED"}],
+            "stale-approval-superseded-by-dismissal": [
+                approved,
+                {
+                    **approved,
+                    "id": 11,
+                    "submitted_at": "2026-09-15T02:00:00Z",
+                    "state": "DISMISSED",
+                },
+            ],
+            "stale-approval-superseded-by-wrong-commit": [
+                approved,
+                {
+                    **approved,
+                    "id": 11,
+                    "submitted_at": "2026-09-15T02:00:00Z",
+                    "commit_id": "e" * 40,
+                },
+            ],
+        }
+        for name, reviews in adversarial.items():
+            with self.subTest(name=name):
+                self.assertIsNone(
+                    select_current_independent_review(
+                        reviews, candidate_author="candidate-author", candidate_commit=candidate
+                    )
+                )
+
     def test_controller_markers_pass_authoritative_gate_for_both_promotions(self) -> None:
         source_identity = identity("development", SOURCE_HEAD, TREE)
         receipt = create_full_suite_receipt(

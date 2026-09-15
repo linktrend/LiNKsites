@@ -481,6 +481,44 @@ def assemble_live_facts(
     return facts
 
 
+def select_current_independent_review(
+    reviews: Sequence[Mapping[str, Any]],
+    *,
+    candidate_author: str,
+    candidate_commit: str,
+) -> dict[str, str] | None:
+    """Select a reviewer's latest exact-commit APPROVED review."""
+
+    expected_commit = _sha(candidate_commit)
+    latest_by_reviewer: dict[str, tuple[tuple[str, int, int], Mapping[str, Any]]] = {}
+    for position, row in enumerate(reviews):
+        if not isinstance(row, Mapping):
+            continue
+        login = str(((row.get("user") or {}) if isinstance(row.get("user"), Mapping) else {}).get("login") or "")
+        if not login or login == candidate_author:
+            continue
+        try:
+            review_id = int(row.get("id") or 0)
+        except (TypeError, ValueError):
+            review_id = 0
+        rank = (str(row.get("submitted_at") or ""), review_id, position)
+        if login not in latest_by_reviewer or rank > latest_by_reviewer[login][0]:
+            latest_by_reviewer[login] = (rank, row)
+
+    for login, (_rank, row) in latest_by_reviewer.items():
+        if str(row.get("state") or "").strip().upper() != "APPROVED":
+            continue
+        if not expected_commit or _sha(row.get("commit_id")) != expected_commit:
+            continue
+        body = str(row.get("body") or "").strip().upper()
+        return {
+            "identity": login,
+            "result": "PASS" if body.startswith("PASS") else "APPROVED",
+            "candidateAuthor": candidate_author,
+        }
+    return None
+
+
 def write_live_facts_from_workspace(
     *,
     repository: str,
@@ -514,18 +552,22 @@ def write_live_facts_from_workspace(
     checks = load_json(checks_path)
     merged = load_json(merged_path)
     author = str(((source_pr.get("user") or {}) if isinstance(source_pr, Mapping) else {}).get("login") or "")
-    independent = None
-    for row in reviews if isinstance(reviews, list) else []:
-        if not isinstance(row, Mapping):
-            continue
-        login = str(((row.get("user") or {}) if isinstance(row.get("user"), Mapping) else {}).get("login") or "")
-        state = str(row.get("state") or "").upper()
-        body = str(row.get("body") or "").strip().upper()
-        if login and login != author and (state == "APPROVED" or body.startswith("PASS")):
-            independent = {"identity": login, "result": "PASS" if body.startswith("PASS") else "APPROVED", "candidateAuthor": author}
-            break
+    source_identity = receipt.get("candidateIdentity") if isinstance(receipt.get("candidateIdentity"), Mapping) else {}
+    reviewed_candidate_commit = _sha(source_identity.get("headCommit"))
+    source_pr_head = _sha(
+        ((source_pr.get("head") or {}) if isinstance(source_pr.get("head"), Mapping) else {}).get("sha")
+        if isinstance(source_pr, Mapping)
+        else ""
+    )
+    if not reviewed_candidate_commit or source_pr_head != reviewed_candidate_commit:
+        raise ReceiptError("invalid_receipt", "source PR head is not the exact retained receipt candidate")
+    independent = select_current_independent_review(
+        reviews if isinstance(reviews, list) else [],
+        candidate_author=author,
+        candidate_commit=reviewed_candidate_commit,
+    )
     if independent is None:
-        raise ReceiptError("independent_review_missing", "no independent reviewer result is present")
+        raise ReceiptError("invalid_receipt", "no current exact-commit independent approval is present")
     clock = _parse_utc(now) or datetime.now(timezone.utc)
     issued = str(run.get("updated_at") or run.get("created_at") or clock.strftime("%Y-%m-%dT%H:%M:%SZ"))
     expires = (clock + timedelta(days=14)).strftime("%Y-%m-%dT%H:%M:%SZ")
