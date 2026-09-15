@@ -23,6 +23,7 @@ import {
   replayCreditHydration,
 } from '../../../../packages/factory-catalog/src/capabilityCredits.ts'
 import { migrations } from '../../src/migrations'
+import { assertLsdata01TenantBoundary } from '../../src/collections/TemplateAdoptions'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../../..')
 const PIN = (label: string): string => createHash('sha1').update(`lsdata01:${label}`).digest('hex')
@@ -187,6 +188,21 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
     expect(adoptions).toContain('Tenant authorization denied: org boundary is fail-closed.')
   })
 
+  it('binds tenantOrgId to the owning site organisation', async () => {
+    const req = {
+      user: { id: 'user-a' },
+      payload: {
+        findByID: async () => ({ id: 'site-a', orgId: 'org-a' }),
+      },
+    }
+    await expect(
+      assertLsdata01TenantBoundary({ data: { site: 'site-a', tenantOrgId: 'org-a' }, req } as never),
+    ).resolves.toBeUndefined()
+    await expect(
+      assertLsdata01TenantBoundary({ data: { site: 'site-a', tenantOrgId: 'org-b' }, req } as never),
+    ).rejects.toThrow(/org boundary is fail-closed/)
+  })
+
   it('retains prior LS02 pins and keeps schema copies inactive', () => {
     const classified = assertCompatibleAdoptionIdentities(schemaCopyIdentities(), { claimProduction: false })
     expect(classified.compatibilityClass).toBe('schema-compatibility-copy')
@@ -245,6 +261,10 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
     )
     expect(source).toContain('ADD COLUMN IF NOT EXISTS')
     expect(source).toContain('EXCEPTION WHEN duplicate_object THEN NULL')
+    expect(source).toContain("DEFAULT 'unverified'")
+    expect(source).toContain("DEFAULT 'rejected'")
+    expect(source).toContain('"identities_provider" =')
+    expect(source).toContain('"identities_adapter" =')
   })
 
   it('rolls back an adoption to the recorded prior pin', () => {

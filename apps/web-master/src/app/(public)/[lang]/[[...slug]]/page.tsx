@@ -9,6 +9,7 @@ import { PageTypeMarker } from "@/components/layouts/PageTypeMarker";
 import { requirePublicFamilyPage } from "@/lib/public-route-guard";
 import { loadAcceptedLayoutRuntime } from "@/components/page-renderer/accepted-identities";
 import { jsonLdForVisibleFamily, visibleFactsFromPage } from "@/lib/seo/family-jsonld";
+import { serializeJsonLd } from "@/lib/seo/visible-facts";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -77,7 +78,7 @@ export default async function CmsPage({ params }: PageProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
       <PageTypeMarker pageType={page.pageType ?? null} />
       <template.PageRenderer
         page={page}

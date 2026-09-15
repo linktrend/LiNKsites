@@ -400,7 +400,7 @@ export interface TemplateAdoption {
    * Fail-closed tenant org boundary copied from the owning site.
    */
   tenantOrgId: string;
-  compatibilityClass: 'retained-production-pin' | 'schema-compatibility-copy';
+  compatibilityClass: 'unverified' | 'retained-production-pin' | 'schema-compatibility-copy';
   activationState: 'inactive' | 'active' | 'rejected';
   adoptionState: 'linked' | 'adopted' | 'replaced' | 'rolled_back';
   identities: {

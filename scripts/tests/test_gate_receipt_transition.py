@@ -85,6 +85,43 @@ class GateReceiptTransitionTests(unittest.TestCase):
                     1,
                 )
 
+    def test_verify_rejects_stale_expected_base_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp_path = Path(raw)
+            receipt_path = tmp_path / "receipt.json"
+            transition_path = tmp_path / "transition.json"
+            receipt_path.write_text(json.dumps({"kind": "receipt"}), encoding="utf-8")
+            transition_path.write_text(
+                json.dumps({"kind": "transition-receipt", "protectedBaseTree": "a" * 40}),
+                encoding="utf-8",
+            )
+            verdict = SimpleNamespace(
+                accepted=True,
+                code="accepted",
+                message="ok",
+                source_commit="1" * 40,
+                promotion_commit="2" * 40,
+            )
+            with (
+                mock.patch.object(gate_receipt, "compute_candidate_identity", return_value={"identity": True}),
+                mock.patch.object(gate_receipt, "verify_receipt", return_value=verdict),
+            ):
+                self.assertEqual(
+                    gate_receipt.main(
+                        [
+                            "verify",
+                            "--receipt", str(receipt_path),
+                            "--repo", str(tmp_path),
+                            "--source-branch", "development",
+                            "--profile-file", "receipt.json",
+                            "--transition-receipt", str(transition_path),
+                            "--expected-base-tree", "b" * 40,
+                            "--gate", "full-gate",
+                        ]
+                    ),
+                    1,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -18,6 +18,7 @@ import { collectionActive, resolvePlanActivation } from "../src/components/page-
 import { mapBlockToPayloadType } from "../src/components/page-renderer/semantic-map.ts";
 import { resolveFamilyRoute } from "../src/lib/routes.ts";
 import { jsonLdForVisibleFamily, visibleFactsFromPage } from "../src/lib/seo/family-jsonld.ts";
+import { serializeJsonLd } from "../src/lib/seo/visible-facts.ts";
 import { evaluatePreHydrationHtml } from "../src/lib/seo/pre-hydration.ts";
 import { renderSlot } from "../src/lib/slotRenderer.tsx";
 
@@ -109,6 +110,15 @@ test("LSRENDER-01 visible family JSON-LD stays bound to published facts", () => 
   assert.equal(service["@type"], "Service");
   assert.equal(service.name, "Acme Pumps");
   assert.equal(service.author, undefined);
+});
+
+test("LSRENDER-01 JSON-LD serialization cannot close its script element", () => {
+  const value = { description: '</script><script>alert("stored")</script>&' };
+  const serialized = serializeJsonLd(value);
+  assert.equal(serialized.includes("<"), false);
+  assert.equal(serialized.includes(">"), false);
+  assert.equal(serialized.includes("&"), false);
+  assert.deepEqual(JSON.parse(serialized), value);
 });
 
 test("LSRENDER-01 slots and unmapped required ids fail closed", () => {

@@ -167,15 +167,25 @@ def main(argv: list[str] | None = None) -> int:
                         }
                     )
                     return 1
-            if args.expected_base_tree and not args.expected_base_tree.strip():
-                _json_output(
-                    {
-                        "accepted": False,
-                        "code": "missing_field",
-                        "message": "protected base tree is required when expected",
-                    }
-                )
-                return 1
+            if args.expected_base_tree is not None:
+                if not args.expected_base_tree.strip():
+                    _json_output(
+                        {
+                            "accepted": False,
+                            "code": "missing_field",
+                            "message": "protected base tree is required when expected",
+                        }
+                    )
+                    return 1
+                if transition is None or str(transition.get("protectedBaseTree") or "") != args.expected_base_tree:
+                    _json_output(
+                        {
+                            "accepted": False,
+                            "code": "protected_base_tree_mismatch",
+                            "message": "transition protected base tree is not the current protected tree",
+                        }
+                    )
+                    return 1
             _json_output(
                 {
                     "accepted": verdict.accepted,

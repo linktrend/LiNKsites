@@ -27,17 +27,35 @@ const identityField = (name: string, label: string): Field => ({
   },
 })
 
-export const assertLsdata01TenantBoundary: CollectionBeforeChangeHook = ({ data, req }) => {
+const relationshipId = (value: unknown): string => {
+  if (typeof value === 'string' || typeof value === 'number') return String(value)
+  if (value && typeof value === 'object' && 'id' in value) {
+    const id = (value as { id?: unknown }).id
+    if (typeof id === 'string' || typeof id === 'number') return String(id)
+  }
+  return ''
+}
+
+export const assertLsdata01TenantBoundary: CollectionBeforeChangeHook = async ({ data, req }) => {
   const tenantOrgId = typeof data?.tenantOrgId === 'string' ? data.tenantOrgId : ''
   if (!tenantOrgId) {
     throw new ImmutableRecordError('Tenant authorization denied: tenantOrgId is required.')
   }
-  const user = req.user as { assignedSites?: Array<string | number | { id?: string | number }>; orgId?: unknown } | undefined
-  if (!user) {
+  if (!req.user) {
     throw new ImmutableRecordError('Tenant authorization denied: unauthenticated actor.')
   }
-  const actorOrgId = typeof user.orgId === 'string' ? user.orgId : undefined
-  if (actorOrgId && actorOrgId !== tenantOrgId) {
+  const siteId = relationshipId(data?.site)
+  if (!siteId) {
+    throw new ImmutableRecordError('Tenant authorization denied: owning site is required.')
+  }
+  const site = (await req.payload.findByID({
+    collection: 'sites',
+    id: siteId,
+    depth: 0,
+    overrideAccess: false,
+  })) as unknown as { id?: string | number; orgId?: unknown }
+  const owningOrgId = typeof site.orgId === 'string' ? site.orgId : ''
+  if (String(site.id) !== siteId || !owningOrgId || owningOrgId !== tenantOrgId) {
     throw new ImmutableRecordError('Tenant authorization denied: org boundary is fail-closed.')
   }
 }
@@ -64,7 +82,7 @@ export const assertAdoptionIdentities: CollectionBeforeChangeHook = ({ data }) =
       throw new ImmutableRecordError('Retained production adapter pin does not match the H-09 tree.')
     }
     data.compatibilityClass = 'retained-production-pin'
-    data.activationState = data.activationState ?? 'active'
+    data.activationState = 'active'
     return
   }
   if ((LSDATA01_SCHEMA_PROVIDER_TREES as readonly string[]).includes(provider)) {
@@ -121,8 +139,9 @@ export const TemplateAdoptions: CollectionConfig = {
       name: 'compatibilityClass',
       type: 'select',
       required: true,
-      defaultValue: 'retained-production-pin',
+      defaultValue: 'unverified',
       options: [
+        { label: 'Unverified', value: 'unverified' },
         { label: 'Retained production pin', value: 'retained-production-pin' },
         { label: 'Schema compatibility copy', value: 'schema-compatibility-copy' },
       ],
@@ -131,7 +150,7 @@ export const TemplateAdoptions: CollectionConfig = {
       name: 'activationState',
       type: 'select',
       required: true,
-      defaultValue: 'active',
+      defaultValue: 'rejected',
       options: [
         { label: 'Inactive', value: 'inactive' },
         { label: 'Active', value: 'active' },
