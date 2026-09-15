@@ -775,7 +775,12 @@ class DeliveryControllerTests(unittest.TestCase):
             raise AssertionError((method, url))
 
         live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
-        merged = live.merge_pull_request(repository="owner/name", number=11, expected_head=self.head)
+        merged = live.merge_pull_request(
+            repository="owner/name",
+            number=11,
+            expected_head=self.head,
+            expected_base_branch="development",
+        )
         self.assertEqual(merged["mergeCommitSha"], _sha(4))
         self.assertFalse(merged["directPush"])
         self.assertEqual(calls[0][0], "GET")
@@ -823,6 +828,7 @@ class DeliveryControllerTests(unittest.TestCase):
             repository="owner/name",
             number=12,
             expected_head=self.head,
+            expected_base_branch="staging",
             expected_base=base,
             expected_base_tree=base_tree,
             expected_result_tree=result_tree,
@@ -856,6 +862,7 @@ class DeliveryControllerTests(unittest.TestCase):
                 repository="owner/name",
                 number=12,
                 expected_head=self.head,
+                expected_base_branch="staging",
                 expected_base=base,
                 expected_base_tree=base_tree,
                 expected_result_tree=result_tree,
@@ -900,6 +907,7 @@ class DeliveryControllerTests(unittest.TestCase):
                 repository="owner/name",
                 number=13,
                 expected_head=self.head,
+                expected_base_branch="staging",
                 expected_base=base,
                 expected_base_tree=base_tree,
                 expected_result_tree=self.tree,
@@ -934,11 +942,86 @@ class DeliveryControllerTests(unittest.TestCase):
                 repository="owner/name",
                 number=14,
                 expected_head=self.head,
+                expected_base_branch="staging",
                 expected_base=base,
                 expected_base_tree=base_tree,
                 expected_result_tree=self.tree,
             )
         self.assertNotIn("PUT", calls)
+
+    def test_live_merge_rejects_retarget_to_lookalike_unprotected_branch_before_reads(self) -> None:
+        calls: list[tuple[str, str]] = []
+
+        def transport(method: str, url: str, token: str, body):
+            calls.append((method, url))
+            if method == "GET" and url.endswith("/pulls/15"):
+                return {
+                    "number": 15,
+                    "draft": False,
+                    "state": "open",
+                    "head": {"ref": "phase/next", "sha": self.head, "repo": {"full_name": "owner/name"}},
+                    "base": {"ref": "development-lookalike", "sha": _sha(7)},
+                }
+            raise AssertionError((method, url, body))
+
+        live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
+        with self.assertRaisesRegex(controller.ControllerError, "unexpected_pr_base_branch"):
+            live.merge_pull_request(
+                repository="owner/name",
+                number=15,
+                expected_head=self.head,
+                expected_base_branch="development",
+                expected_base=_sha(7),
+                expected_base_tree=_sha(70),
+                expected_result_tree=self.tree,
+            )
+        self.assertEqual(calls, [("GET", "https://api.github.com/repos/owner/name/pulls/15")])
+
+    def test_live_merge_rejects_retarget_to_lookalike_strict_branch_before_reads(self) -> None:
+        calls: list[tuple[str, str]] = []
+
+        def transport(method: str, url: str, token: str, body):
+            calls.append((method, url))
+            if method == "GET" and url.endswith("/pulls/16"):
+                return {
+                    "number": 16,
+                    "draft": False,
+                    "state": "open",
+                    "head": {"ref": "phase/next", "sha": self.head, "repo": {"full_name": "owner/name"}},
+                    "base": {"ref": "release-shadow", "sha": _sha(7)},
+                }
+            raise AssertionError((method, url, body))
+
+        live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
+        with self.assertRaisesRegex(controller.ControllerError, "unexpected_pr_base_branch"):
+            live.merge_pull_request(
+                repository="owner/name",
+                number=16,
+                expected_head=self.head,
+                expected_base_branch="development",
+                expected_base=_sha(7),
+                expected_base_tree=_sha(70),
+                expected_result_tree=self.tree,
+            )
+        self.assertEqual(calls, [("GET", "https://api.github.com/repos/owner/name/pulls/16")])
+
+    def test_memory_merge_rejects_retarget_before_mutation(self) -> None:
+        self.github.prs[11]["base"] = "release-shadow"
+        self.github.refs["release-shadow"] = self.github.refs["development"]
+        self.github.ref_trees["release-shadow"] = self.github.ref_trees["development"]
+
+        with self.assertRaisesRegex(controller.ControllerError, "unexpected_pr_base_branch"):
+            self.github.merge_pull_request(
+                repository="owner/name",
+                number=11,
+                expected_head=self.head,
+                expected_base_branch="development",
+                expected_base=self.github.refs["development"],
+                expected_base_tree=self.github.ref_trees["development"],
+                expected_result_tree=self.tree,
+            )
+        self.assertEqual(self.github.merges, [])
+        self.assertEqual(self.github.refs["release-shadow"], self.github.refs["development"])
 
     def test_staging_and_main_require_exact_source_sha_equality(self) -> None:
         with self.assertRaisesRegex(controller.ControllerError, "promotion_source_mismatch"):

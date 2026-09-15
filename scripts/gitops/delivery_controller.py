@@ -208,6 +208,7 @@ class GitHubPort(Protocol):
         repository: str,
         number: int,
         expected_head: str,
+        expected_base_branch: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
@@ -273,6 +274,7 @@ class MemoryGitHub:
         repository: str,
         number: int,
         expected_head: str,
+        expected_base_branch: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
@@ -295,6 +297,11 @@ class MemoryGitHub:
         if str(pr.get("state") or "").lower() not in {"open", ""}:
             raise ControllerError("pr_not_open", str(number))
         base = str(pr.get("base") or "")
+        if base != expected_base_branch:
+            raise ControllerError(
+                "unexpected_pr_base_branch",
+                f"live={base}:expected={expected_base_branch}",
+            )
         base_before = normalize_sha(self.refs.get(base, ""))
         base_tree_before = normalize_sha(self.ref_trees.get(base, ""))
         if expected_base and base_before != normalize_sha(expected_base):
@@ -494,6 +501,7 @@ class LiveGitHub:
         repository: str,
         number: int,
         expected_head: str,
+        expected_base_branch: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
@@ -510,6 +518,11 @@ class LiveGitHub:
         if str(live.get("state") or "").lower() != "open":
             raise ControllerError("pr_not_open", str(number))
         base_branch = str(live.get("base") or "")
+        if base_branch != expected_base_branch:
+            raise ControllerError(
+                "unexpected_pr_base_branch",
+                f"live={base_branch}:expected={expected_base_branch}",
+            )
         if expected_base or expected_base_tree:
             base_identity = self.get_ref_identity(repository=repository, branch=base_branch)
             if expected_base and base_identity["commit"] != normalize_sha(expected_base):
@@ -1028,6 +1041,7 @@ def merge_to_development(
             repository=repository,
             number=pr_number,
             expected_head=expected_head,
+            expected_base_branch=config.development_branch,
             method="merge",
             admin=False,
             match_head_commit=True,
@@ -1175,6 +1189,7 @@ def promote_to_staging(
             repository=repository,
             number=int(pr["number"]),
             expected_head=candidate_sha,
+            expected_base_branch=config.staging_branch,
             method="merge",
             admin=False,
             match_head_commit=True,
@@ -1376,6 +1391,7 @@ def complete_main_promotion(
             repository=repository,
             number=pr_number,
             expected_head=expected_head,
+            expected_base_branch=config.main_branch,
             method="merge",
             admin=False,
             match_head_commit=True,
