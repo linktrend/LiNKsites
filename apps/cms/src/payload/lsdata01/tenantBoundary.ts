@@ -1,3 +1,5 @@
+import { hasSiteAccess } from '@/utils/resolvePermissions'
+
 export type OwningSiteIdentity = {
   id?: string | number
   orgId?: unknown
@@ -6,7 +8,7 @@ export type OwningSiteIdentity = {
 type TenantBoundaryInput = {
   data?: Record<string, unknown> | null
   user: unknown
-  findOwningSite: (siteId: string, authenticatedUser: unknown) => Promise<OwningSiteIdentity>
+  findOwningSite: (siteId: string) => Promise<OwningSiteIdentity>
 }
 
 const relationshipId = (value: unknown): string => {
@@ -38,8 +40,11 @@ export async function assertOwningSiteTenantBoundary({
 
   const siteId = relationshipId(data?.site)
   if (!siteId) throw new Error('Tenant authorization denied: owning site is required.')
+  if (!hasSiteAccess(user as Parameters<typeof hasSiteAccess>[0], siteId)) {
+    throw new Error('Tenant authorization denied: actor is not assigned to the owning site.')
+  }
 
-  const site = await findOwningSite(siteId, user)
+  const site = await findOwningSite(siteId)
   if (!owningSiteMatchesTenant(siteId, tenantOrgId, site)) {
     throw new Error('Tenant authorization denied: org boundary is fail-closed.')
   }

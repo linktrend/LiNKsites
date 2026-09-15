@@ -202,10 +202,15 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
   })
 
   it('performs the owning-site lookup as the authenticated actor and denies boundary mismatches', async () => {
-    const user = { id: 'user-a', role: 'editor' }
-    const observed: Array<{ siteId: string; user: unknown }> = []
-    const findOwningSite = async (siteId: string, authenticatedUser: unknown) => {
-      observed.push({ siteId, user: authenticatedUser })
+    const user = {
+      id: 'user-a',
+      roles: [{ name: 'editor' }],
+      assignedSites: ['site-a'],
+      allowedLocales: ['en'],
+    }
+    const observed: string[] = []
+    const findOwningSite = async (siteId: string) => {
+      observed.push(siteId)
       return { id: 'site-a', orgId: 'org-a' }
     }
 
@@ -216,7 +221,7 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
         findOwningSite,
       }),
     ).resolves.toBeUndefined()
-    expect(observed).toEqual([{ siteId: 'site-a', user }])
+    expect(observed).toEqual(['site-a'])
 
     await expect(
       assertOwningSiteTenantBoundary({
@@ -224,7 +229,8 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
         user,
         findOwningSite,
       }),
-    ).rejects.toThrow(/org boundary is fail-closed/)
+    ).rejects.toThrow(/actor is not assigned to the owning site/)
+    expect(observed).toEqual(['site-a'])
     await expect(
       assertOwningSiteTenantBoundary({
         data: { site: 'site-a', tenantOrgId: 'org-b' },
@@ -232,6 +238,7 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
         findOwningSite,
       }),
     ).rejects.toThrow(/org boundary is fail-closed/)
+    expect(observed).toEqual(['site-a', 'site-a'])
   })
 
   it('retains prior LS02 pins and keeps schema copies inactive', () => {

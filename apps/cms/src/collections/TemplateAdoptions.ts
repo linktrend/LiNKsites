@@ -33,13 +33,14 @@ export const assertLsdata01TenantBoundary: CollectionBeforeChangeHook = async ({
     await assertOwningSiteTenantBoundary({
       data,
       user: req.user,
-      findOwningSite: async (siteId, authenticatedUser) =>
+      findOwningSite: async (siteId) =>
         (await req.payload.findByID({
           collection: 'sites',
           id: siteId,
           depth: 0,
-          overrideAccess: false,
-          user: authenticatedUser as typeof req.user,
+          // The hook already proves the authenticated actor is assigned to this exact site.
+          // Bypass Sites.read because its public REST URL filter is unavailable to Local API calls.
+          overrideAccess: true,
         })) as unknown as { id?: string | number; orgId?: unknown },
     })
   } catch (error) {
