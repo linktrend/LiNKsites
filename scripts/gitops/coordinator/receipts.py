@@ -512,6 +512,7 @@ class TransitionReceipt:
     maintenance_paths: tuple[str, ...] = ()
     failure_contract_digest: str | None = None
     protected_base_commit: str | None = None
+    protected_base_tree: str | None = None
     receipt_digest: str = ""
 
     def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
@@ -532,6 +533,8 @@ class TransitionReceipt:
             "failureContractDigest": self.failure_contract_digest,
             "protectedBaseCommit": self.protected_base_commit,
         }
+        if self.protected_base_tree is not None:
+            result["protectedBaseTree"] = self.protected_base_tree
         if include_digest:
             result["receiptDigest"] = self.receipt_digest
         return result
@@ -545,8 +548,14 @@ class TransitionReceipt:
             "targetBranch", "targetCommit", "targetTree", "authenticatedBy",
             "maintenancePaths", "failureContractDigest", "protectedBaseCommit", "receiptDigest",
         }
-        allowed = expected - {"receiptDigest"} if allow_missing_digest else expected
-        if set(data) != allowed and set(data) != expected:
+        current = expected | {"protectedBaseTree"}
+        allowed_sets = {frozenset(expected), frozenset(current)}
+        if allow_missing_digest:
+            allowed_sets |= {
+                frozenset(expected - {"receiptDigest"}),
+                frozenset(current - {"receiptDigest"}),
+            }
+        if frozenset(data) not in allowed_sets:
             raise ReceiptError("transition_invalid", "transition receipt fields are incomplete or unknown")
         if data.get("schemaVersion") != TRANSITION_RECEIPT_SCHEMA_VERSION:
             raise ReceiptError("transition_invalid", "unsupported transition receipt schemaVersion")
@@ -587,6 +596,9 @@ class TransitionReceipt:
         base_commit = data.get("protectedBaseCommit")
         if base_commit is not None and not _is_sha(base_commit):
             raise ReceiptError("invalid_sha", "protectedBaseCommit is invalid")
+        base_tree = data.get("protectedBaseTree")
+        if "protectedBaseTree" in data and not _is_sha(base_tree):
+            raise ReceiptError("invalid_sha", "protectedBaseTree is invalid")
         digest = data.get("receiptDigest", "")
         if digest and not _is_digest(digest):
             raise ReceiptError("transition_digest_mismatch", "transition receiptDigest is invalid")
@@ -606,6 +618,7 @@ class TransitionReceipt:
             normalized_paths,
             failure_digest,
             base_commit,
+            base_tree,
             digest,
         )
 
@@ -634,6 +647,7 @@ def create_transition_receipt(
     maintenance_paths: Sequence[str] = (),
     failure_contract_digest: str | None = None,
     protected_base_commit: str | None = None,
+    protected_base_tree: str | None = None,
 ) -> TransitionReceipt:
     """Create the sole commit-changing bridge for an accepted Full receipt."""
 
@@ -656,6 +670,8 @@ def create_transition_receipt(
         raise ReceiptError("transition_invalid", "failureContractDigest is invalid")
     if protected_base_commit is not None and not _is_sha(protected_base_commit):
         raise ReceiptError("invalid_sha", "protectedBaseCommit is invalid")
+    if protected_base_tree is not None and not _is_sha(protected_base_tree):
+        raise ReceiptError("invalid_sha", "protectedBaseTree is invalid")
     unsigned = TransitionReceipt(
         TRANSITION_RECEIPT_SCHEMA_VERSION,
         "transition-receipt",
@@ -672,6 +688,7 @@ def create_transition_receipt(
         tuple(sorted(paths)),
         failure_contract_digest,
         protected_base_commit,
+        protected_base_tree,
         "",
     )
     return TransitionReceipt(**{**unsigned.__dict__, "receipt_digest": compute_transition_digest(unsigned)})
@@ -685,6 +702,7 @@ def verify_transition_receipt(
     expected_workflow_run_id: int | None = None,
     expected_workflow_run_attempt: int | None = None,
     expected_base_commit: str | None = None,
+    expected_base_tree: str | None = None,
 ) -> ReceiptVerdict:
     """Verify an authenticated same-tree transition and its current run."""
 
@@ -721,6 +739,8 @@ def verify_transition_receipt(
             raise ReceiptError("workflow_mismatch", "transition workflow identity changed")
         if expected_base_commit is not None and transition.protected_base_commit != expected_base_commit:
             raise ReceiptError("transition_target_mismatch", "transition protected base is stale")
+        if expected_base_tree is not None and transition.protected_base_tree != expected_base_tree:
+            raise ReceiptError("transition_target_mismatch", "transition protected base tree is stale")
         return ReceiptVerdict(True, message="authenticated same-tree transition matches", source_commit=source.candidate_identity.head_commit, promotion_commit=target.head_commit)
     except ReceiptError as error:
         return _reject(error)
