@@ -5,6 +5,7 @@ import { localeField } from '@/fields/localeField'
 import { siteField } from '@/fields/siteField'
 import { LS03_ADOPTION_STATES, SHA1_IDENTITY } from '@/payload/ls03/semanticContract'
 import { ImmutableRecordError, rejectImmutableDelete, rejectImmutableUpdate } from '@/hooks/enforceImmutableRecord'
+import { owningSiteMatchesTenant } from '@/payload/lsdata01/tenantBoundary'
 
 /** Frozen LSG0-02 / LS-02 pins mirrored from factory-catalog; CMS cannot depend on that package. */
 export const LSDATA01_RETAINED_PROVIDER = '0178894d6ce718bb7dff3c141892f82144e2d18c'
@@ -54,8 +55,7 @@ export const assertLsdata01TenantBoundary: CollectionBeforeChangeHook = async ({
     depth: 0,
     overrideAccess: false,
   })) as unknown as { id?: string | number; orgId?: unknown }
-  const owningOrgId = typeof site.orgId === 'string' ? site.orgId : ''
-  if (String(site.id) !== siteId || !owningOrgId || owningOrgId !== tenantOrgId) {
+  if (!owningSiteMatchesTenant(siteId, tenantOrgId, site)) {
     throw new ImmutableRecordError('Tenant authorization denied: org boundary is fail-closed.')
   }
 }

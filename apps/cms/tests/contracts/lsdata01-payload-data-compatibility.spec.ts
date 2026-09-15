@@ -23,7 +23,7 @@ import {
   replayCreditHydration,
 } from '../../../../packages/factory-catalog/src/capabilityCredits.ts'
 import { migrations } from '../../src/migrations'
-import { assertLsdata01TenantBoundary } from '../../src/collections/TemplateAdoptions'
+import { owningSiteMatchesTenant } from '../../src/payload/lsdata01/tenantBoundary'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../../..')
 const PIN = (label: string): string => createHash('sha1').update(`lsdata01:${label}`).digest('hex')
@@ -188,19 +188,11 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
     expect(adoptions).toContain('Tenant authorization denied: org boundary is fail-closed.')
   })
 
-  it('binds tenantOrgId to the owning site organisation', async () => {
-    const req = {
-      user: { id: 'user-a' },
-      payload: {
-        findByID: async () => ({ id: 'site-a', orgId: 'org-a' }),
-      },
-    }
-    await expect(
-      assertLsdata01TenantBoundary({ data: { site: 'site-a', tenantOrgId: 'org-a' }, req } as never),
-    ).resolves.toBeUndefined()
-    await expect(
-      assertLsdata01TenantBoundary({ data: { site: 'site-a', tenantOrgId: 'org-b' }, req } as never),
-    ).rejects.toThrow(/org boundary is fail-closed/)
+  it('binds tenantOrgId to the owning site organisation', () => {
+    expect(owningSiteMatchesTenant('site-a', 'org-a', { id: 'site-a', orgId: 'org-a' })).toBe(true)
+    expect(owningSiteMatchesTenant('site-a', 'org-b', { id: 'site-a', orgId: 'org-a' })).toBe(false)
+    expect(owningSiteMatchesTenant('site-b', 'org-a', { id: 'site-a', orgId: 'org-a' })).toBe(false)
+    expect(owningSiteMatchesTenant('site-a', 'org-a', { id: 'site-a' })).toBe(false)
   })
 
   it('retains prior LS02 pins and keeps schema copies inactive', () => {
