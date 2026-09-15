@@ -184,6 +184,11 @@ class DeliveryControllerTests(unittest.TestCase):
                 pr_number=11,
                 expected_head=self.head,
                 role="worker",
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                candidate_tree=self.tree,
+                protected_base_commit=_sha(9),
+                protected_base_tree=_sha(10),
             )
         with self.assertRaisesRegex(controller.ControllerError, "worker_self_merge_forbidden"):
             controller.require_controller_role("implementer")
@@ -200,8 +205,55 @@ class DeliveryControllerTests(unittest.TestCase):
                 candidate_identity=self.identity,
                 candidate_tree=self.tree,
                 protected_base_commit=_sha(9),
+                protected_base_tree="",
             )
         self.assertEqual(self.github.merges, [])
+
+    def test_development_merge_omission_is_rejected_before_adapter_calls(self) -> None:
+        with self.assertRaises(TypeError):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+            )
+        self.assertEqual(self.github.merges, [])
+        self.assertEqual(self.github.protected_push_attempts, [])
+
+    def test_administrator_recovery_requires_base_identity_before_any_operation(self) -> None:
+        calls: list[str] = []
+
+        class RecoveryGitHub:
+            def push_protected(self, **kwargs):
+                calls.append("push")
+
+            def merge_pull_request(self, **kwargs):
+                calls.append("merge")
+                return {}
+
+        class RecoveryProtections:
+            def snapshot(self, **kwargs):
+                calls.append("snapshot")
+                return {}
+
+        with self.assertRaisesRegex(ValueError, "protected_base_identity_required"):
+            controller.recover_phase_merge(
+                github=RecoveryGitHub(),
+                protections=RecoveryProtections(),
+                repository="owner/name",
+                pr_number=11,
+                phase_branch="phase/next",
+                expected_head=self.head,
+                expected_tree=self.tree,
+                protected_base_commit="",
+                protected_base_tree="",
+                live_head=self.head,
+                live_tree=self.tree,
+                named_exception="exact test recovery",
+                replacement_proof=True,
+            )
+        self.assertEqual(calls, [])
 
     def test_mismatched_audited_tree_stops_before_merge(self) -> None:
         with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
@@ -766,12 +818,25 @@ class DeliveryControllerTests(unittest.TestCase):
                     "base": {"ref": "development"},
                     "mergeable_state": "clean",
                 }
+            if method == "GET" and url.endswith("/git/ref/heads/development"):
+                return {"object": {"sha": _sha(9)}}
+            if method == "GET" and url.endswith(f"/git/commits/{_sha(9)}"):
+                return {"tree": {"sha": _sha(10)}}
+            if method == "GET" and url.endswith("/rules/branches/development"):
+                return [
+                    {
+                        "type": "required_status_checks",
+                        "parameters": {"strict_required_status_checks_policy": True},
+                    }
+                ]
             if method == "GET" and url.endswith("/git/ref/heads/staging"):
                 return {"object": {"sha": _sha(7)}}
             if method == "GET" and url.endswith(f"/git/commits/{_sha(7)}"):
                 return {"tree": {"sha": _sha(70)}}
             if method == "PUT" and url.endswith("/merge"):
                 return {"merged": True, "sha": _sha(4)}
+            if method == "GET" and url.endswith(f"/git/commits/{_sha(4)}"):
+                return {"parents": [{"sha": _sha(9)}], "tree": {"sha": self.tree}}
             raise AssertionError((method, url))
 
         live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
@@ -780,11 +845,13 @@ class DeliveryControllerTests(unittest.TestCase):
             number=11,
             expected_head=self.head,
             expected_base_branch="development",
+            expected_base=_sha(9),
+            expected_base_tree=_sha(10),
         )
         self.assertEqual(merged["mergeCommitSha"], _sha(4))
         self.assertFalse(merged["directPush"])
         self.assertEqual(calls[0][0], "GET")
-        self.assertEqual(calls[1][0], "PUT")
+        self.assertEqual([method for method, _ in calls].count("PUT"), 1)
         self.assertEqual(
             live.get_ref_identity(repository="owner/name", branch="staging"),
             {"commit": _sha(7), "tree": _sha(70)},
@@ -868,6 +935,31 @@ class DeliveryControllerTests(unittest.TestCase):
                 expected_result_tree=result_tree,
             )
         self.assertNotIn("PUT", moved_calls)
+
+    def test_live_and_memory_merge_omissions_fail_before_transport_or_mutation(self) -> None:
+        calls: list[str] = []
+
+        def transport(method: str, url: str, token: str, body):
+            calls.append(method)
+            raise AssertionError((method, url, body))
+
+        live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
+        with self.assertRaises(TypeError):
+            live.merge_pull_request(
+                repository="owner/name",
+                number=11,
+                expected_head=self.head,
+                expected_base_branch="development",
+            )
+        with self.assertRaises(TypeError):
+            self.github.merge_pull_request(
+                repository="owner/name",
+                number=11,
+                expected_head=self.head,
+                expected_base_branch="development",
+            )
+        self.assertEqual(calls, [])
+        self.assertEqual(self.github.merges, [])
 
     def test_live_strict_protection_rejects_move_after_final_read_before_put(self) -> None:
         base, base_tree = _sha(7), _sha(70)

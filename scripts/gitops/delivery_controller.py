@@ -209,11 +209,11 @@ class GitHubPort(Protocol):
         number: int,
         expected_head: str,
         expected_base_branch: str,
+        expected_base: str,
+        expected_base_tree: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
-        expected_base: str | None = None,
-        expected_base_tree: str | None = None,
         expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         ...
@@ -275,15 +275,22 @@ class MemoryGitHub:
         number: int,
         expected_head: str,
         expected_base_branch: str,
+        expected_base: str,
+        expected_base_tree: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
-        expected_base: str | None = None,
-        expected_base_tree: str | None = None,
         expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         if repository != self.repository:
             raise ControllerError("wrong_repository", repository)
+        if not expected_base_branch or not is_valid_sha(normalize_sha(expected_base)) or not is_valid_sha(
+            normalize_sha(expected_base_tree)
+        ):
+            raise ControllerError(
+                "protected_base_identity_required",
+                "protected merge requires exact base branch, commit, and tree",
+            )
         if number in self.merge_rejections:
             raise ControllerError("protected_merge_rejected", self.merge_rejections[number])
         pr = self.get_pull_request(repository=repository, number=number)
@@ -304,9 +311,9 @@ class MemoryGitHub:
             )
         base_before = normalize_sha(self.refs.get(base, ""))
         base_tree_before = normalize_sha(self.ref_trees.get(base, ""))
-        if expected_base and base_before != normalize_sha(expected_base):
+        if base_before != normalize_sha(expected_base):
             raise ControllerError("protected_base_moved", f"live={base_before}:expected={expected_base}")
-        if expected_base_tree and base_tree_before != normalize_sha(expected_base_tree):
+        if base_tree_before != normalize_sha(expected_base_tree):
             raise ControllerError(
                 "protected_base_tree_moved",
                 f"live={base_tree_before}:expected={expected_base_tree}",
@@ -502,13 +509,20 @@ class LiveGitHub:
         number: int,
         expected_head: str,
         expected_base_branch: str,
+        expected_base: str,
+        expected_base_tree: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
-        expected_base: str | None = None,
-        expected_base_tree: str | None = None,
         expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
+        if not expected_base_branch or not is_valid_sha(normalize_sha(expected_base)) or not is_valid_sha(
+            normalize_sha(expected_base_tree)
+        ):
+            raise ControllerError(
+                "protected_base_identity_required",
+                "protected merge requires exact base branch, commit, and tree",
+            )
         live = self.get_pull_request(repository=repository, number=number)
         head = normalize_sha(str(live.get("headSha") or ""))
         if match_head_commit and head != normalize_sha(expected_head):
@@ -523,38 +537,42 @@ class LiveGitHub:
                 "unexpected_pr_base_branch",
                 f"live={base_branch}:expected={expected_base_branch}",
             )
-        if expected_base or expected_base_tree:
-            base_identity = self.get_ref_identity(repository=repository, branch=base_branch)
-            if expected_base and base_identity["commit"] != normalize_sha(expected_base):
-                raise ControllerError(
-                    "protected_base_moved",
-                    f"live={base_identity['commit']}:expected={expected_base}",
-                )
-            if expected_base_tree and base_identity["tree"] != normalize_sha(expected_base_tree):
-                raise ControllerError(
-                    "protected_base_tree_moved",
-                    f"live={base_identity['tree']}:expected={expected_base_tree}",
-                )
-            self._require_atomic_base_protection(repository=repository, branch=base_branch)
+        base_identity = self.get_ref_identity(repository=repository, branch=base_branch)
+        if base_identity["commit"] != normalize_sha(expected_base):
+            raise ControllerError(
+                "protected_base_moved",
+                f"live={base_identity['commit']}:expected={expected_base}",
+            )
+        if base_identity["tree"] != normalize_sha(expected_base_tree):
+            raise ControllerError(
+                "protected_base_tree_moved",
+                f"live={base_identity['tree']}:expected={expected_base_tree}",
+            )
+        self._require_atomic_base_protection(repository=repository, branch=base_branch)
         if admin:
-            return self._merge_with_gh_admin(
+            self._merge_with_gh_admin(
                 repository=repository,
                 number=number,
                 expected_head=expected_head,
                 method=method,
                 live=live,
             )
-        payload = self._request(
-            "PUT",
-            f"https://api.github.com/repos/{repository}/pulls/{number}/merge",
-            {
-                "merge_method": method,
-                "sha": normalize_sha(expected_head),
-            },
-        )
-        if not isinstance(payload, Mapping) or not payload.get("merged"):
-            raise ControllerError("protected_merge_rejected", f"PR #{number} was not merged")
-        merge_sha = normalize_sha(str(payload.get("sha") or ""))
+            merged_live = self.get_pull_request(repository=repository, number=number)
+            merge_sha = normalize_sha(str(merged_live.get("mergeCommitSha") or ""))
+            if not is_valid_sha(merge_sha) or not bool(merged_live.get("merged")):
+                raise ControllerError("protected_merge_rejected", f"PR #{number} admin merge was not confirmed")
+        else:
+            payload = self._request(
+                "PUT",
+                f"https://api.github.com/repos/{repository}/pulls/{number}/merge",
+                {
+                    "merge_method": method,
+                    "sha": normalize_sha(expected_head),
+                },
+            )
+            if not isinstance(payload, Mapping) or not payload.get("merged"):
+                raise ControllerError("protected_merge_rejected", f"PR #{number} was not merged")
+            merge_sha = normalize_sha(str(payload.get("sha") or ""))
         if expected_base or expected_result_tree:
             merged_commit = self._request(
                 "GET", f"https://api.github.com/repos/{repository}/git/commits/{merge_sha}"
@@ -581,7 +599,7 @@ class LiveGitHub:
             "headSha": normalize_sha(expected_head),
             "mergeCommitSha": merge_sha,
             "directPush": False,
-            "admin": False,
+            "admin": bool(admin),
             "matchHeadCommit": bool(match_head_commit),
             "base": base_branch,
         }
@@ -992,45 +1010,39 @@ def merge_to_development(
     expected_head: str,
     role: str,
     actor: str = "delivery-controller",
-    receipt: Mapping[str, Any] | None = None,
-    candidate_identity: Mapping[str, Any] | None = None,
-    candidate_tree: str | None = None,
-    protected_base_commit: str | None = None,
-    protected_base_tree: str | None = None,
+    receipt: Mapping[str, Any],
+    candidate_identity: Mapping[str, Any],
+    candidate_tree: str,
+    protected_base_commit: str,
+    protected_base_tree: str,
     rollout: StagedRolloutConfig | None = None,
 ) -> dict[str, Any]:
     """Merge through GitHub protection. Never push directly to development."""
 
     config = _rollout_config(rollout)
     require_controller_role(role)
-    target_tree = ""
-    base_commit = ""
-    base_tree = ""
-    if receipt is not None or candidate_identity is not None:
-        if receipt is None or candidate_identity is None:
-            raise ControllerError("transition_receipt_failed", "receipt and candidate identity must be supplied together")
-        target_tree = normalize_sha(candidate_tree or "")
-        base_commit = normalize_sha(protected_base_commit or "")
-        base_tree = normalize_sha(protected_base_tree or "")
-        if not all(is_valid_sha(value) for value in (target_tree, base_commit, base_tree)):
-            raise ControllerError(
-                "transition_receipt_failed",
-                "protected merge requires exact target and protected base commit/tree identities",
-            )
-        receipt_decision = verify_receipt_payload(receipt, candidate_identity, "full-gate")
-        if not receipt_decision.accepted:
-            raise ControllerError(
-                "transition_receipt_failed",
-                f"{receipt_decision.code}:{receipt_decision.detail}",
-            )
-        identity_repository = str(candidate_identity.get("repository") or "")
-        identity_head = normalize_sha(str(candidate_identity.get("headCommit") or ""))
-        identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
-        if identity_repository != repository or identity_head != normalize_sha(expected_head) or identity_tree != target_tree:
-            raise ControllerError(
-                "transition_receipt_failed",
-                "candidate identity differs from the repository, expected head, or audited tree",
-            )
+    target_tree = normalize_sha(candidate_tree)
+    base_commit = normalize_sha(protected_base_commit)
+    base_tree = normalize_sha(protected_base_tree)
+    if not all(is_valid_sha(value) for value in (target_tree, base_commit, base_tree)):
+        raise ControllerError(
+            "transition_receipt_failed",
+            "protected merge requires exact target and protected base commit/tree identities",
+        )
+    receipt_decision = verify_receipt_payload(receipt, candidate_identity, "full-gate")
+    if not receipt_decision.accepted:
+        raise ControllerError(
+            "transition_receipt_failed",
+            f"{receipt_decision.code}:{receipt_decision.detail}",
+        )
+    identity_repository = str(candidate_identity.get("repository") or "")
+    identity_head = normalize_sha(str(candidate_identity.get("headCommit") or ""))
+    identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
+    if identity_repository != repository or identity_head != normalize_sha(expected_head) or identity_tree != target_tree:
+        raise ControllerError(
+            "transition_receipt_failed",
+            "candidate identity differs from the repository, expected head, or audited tree",
+        )
     try:
         github.push_protected(repository=repository, branch=config.development_branch, sha=expected_head)
     except ControllerError as exc:
@@ -1045,9 +1057,9 @@ def merge_to_development(
             method="merge",
             admin=False,
             match_head_commit=True,
-            expected_base=base_commit or None,
-            expected_base_tree=base_tree or None,
-            expected_result_tree=target_tree or None,
+            expected_base=base_commit,
+            expected_base_tree=base_tree,
+            expected_result_tree=target_tree,
         )
     )
     result = {
@@ -1626,6 +1638,8 @@ def recover_phase_to_development(
     pr: Mapping[str, Any],
     live_head: str,
     live_tree: str,
+    protected_base_commit: str,
+    protected_base_tree: str,
     named_exception: str,
     replacement_proof: bool,
     allow_temporary_exception: bool = False,
@@ -1651,6 +1665,8 @@ def recover_phase_to_development(
             phase_branch=str(accepted["head"]),
             expected_head=live_head,
             expected_tree=live_tree,
+            protected_base_commit=protected_base_commit,
+            protected_base_tree=protected_base_tree,
             live_head=live_head,
             live_tree=live_tree,
             named_exception=named_exception,
@@ -1754,11 +1770,11 @@ def main(argv: list[str] | None = None) -> int:
                     pr_number=args.pr_number,
                     expected_head=args.expected_head or args.live_head,
                     role=args.role,
-                    receipt=load(args.receipt) if args.receipt else None,
-                    candidate_identity=load(args.identity_json) if args.identity_json else None,
-                    candidate_tree=args.live_tree or None,
-                    protected_base_commit=args.base_sha or None,
-                    protected_base_tree=args.base_tree or None,
+                    receipt=load(args.receipt) if args.receipt else {},
+                    candidate_identity=load(args.identity_json) if args.identity_json else {},
+                    candidate_tree=args.live_tree,
+                    protected_base_commit=args.base_sha,
+                    protected_base_tree=args.base_tree,
                     rollout=rollout,
                 )
             elif args.command == "promote-staging":
@@ -1835,6 +1851,8 @@ def main(argv: list[str] | None = None) -> int:
                     pr=load(args.pr_json),
                     live_head=args.live_head,
                     live_tree=args.live_tree,
+                    protected_base_commit=args.base_sha,
+                    protected_base_tree=args.base_tree,
                     named_exception=args.named_exception,
                     replacement_proof=bool(args.replacement_proof),
                     allow_temporary_exception=bool(args.allow_temporary_exception),

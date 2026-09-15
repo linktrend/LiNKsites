@@ -73,6 +73,9 @@ class MergePort(Protocol):
         number: int,
         expected_head: str,
         expected_base_branch: str,
+        expected_base: str,
+        expected_base_tree: str,
+        expected_result_tree: str | None = None,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
@@ -230,6 +233,8 @@ def recover_phase_merge(
     phase_branch: str,
     expected_head: str,
     expected_tree: str,
+    protected_base_commit: str,
+    protected_base_tree: str,
     live_head: str,
     live_tree: str,
     named_exception: str,
@@ -242,6 +247,13 @@ def recover_phase_merge(
 
     if target_branch not in PROTECTED_BRANCHES:
         raise RecoveryError("ungoverned_target", target_branch)
+    base_commit = normalize_sha(protected_base_commit)
+    base_tree = normalize_sha(protected_base_tree)
+    if not is_valid_sha(base_commit) or not is_valid_sha(base_tree):
+        raise RecoveryError(
+            "protected_base_identity_required",
+            "administrator recovery requires exact protected base commit and tree",
+        )
     authorize_named_recovery(
         named_exception=named_exception,
         exact_head=normalize_sha(expected_head),
@@ -274,6 +286,9 @@ def recover_phase_merge(
                 number=pr_number,
                 expected_head=expected_head,
                 expected_base_branch=target_branch,
+                expected_base=base_commit,
+                expected_base_tree=base_tree,
+                expected_result_tree=expected_tree,
                 method="merge",
                 admin=True,
                 match_head_commit=True,
@@ -297,6 +312,9 @@ def recover_phase_merge(
                 number=pr_number,
                 expected_head=expected_head,
                 expected_base_branch=target_branch,
+                expected_base=base_commit,
+                expected_base_tree=base_tree,
+                expected_result_tree=expected_tree,
                 method="merge",
                 admin=True,
                 match_head_commit=True,
