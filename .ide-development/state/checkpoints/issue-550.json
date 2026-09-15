@@ -1,0 +1,14 @@
+{
+  "issue": 550,
+  "slug": "refresh-protected-platform-and-linkautowork-cons",
+  "branch": "issue/550-refresh-protected-platform-and-linkautowork-cons",
+  "startingCommit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  "startingTree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+  "role": "implementation",
+  "qualification": "HOLD",
+  "protectedSources": {
+    "LiNKplatform": "91388934b226a61cfa7be0fe5e271846ee55206f",
+    "LiNKautowork": "d5c626ba7e1bdbf783dc8df1654e33e0b70b873c"
+  },
+  "updatedAt": "2026-09-13T07:30:00Z"
+}

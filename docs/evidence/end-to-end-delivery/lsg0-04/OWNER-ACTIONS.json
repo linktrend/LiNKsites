@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-04-owner-actions",
+  "issue": 550,
+  "qualificationTimeUtc": "2026-09-13T07:18:59Z",
+  "overall": "HOLD",
+  "passForbiddenUntilAllRequiredSurfacesExistInProtectedReleasedEvidence": true,
+  "actions": [
+    {
+      "owner": "linktrend/LiNKplatform",
+      "action": "Publish a valid catalogue-profile provider pin that names LiNKsites as requestingConsumer against exact protected commit/tree 91388934b226a61cfa7be0fe5e271846ee55206f / b11ea485a3b3f69c32baac5eed62a180fca79ae3 (or a later protected identity LiNKsites re-binds). Keep the sites-service.yaml slot disabled until hosted apply. Add actor/service registration row, create GSM names without git values, issuer/audience/scopes for LiNKsites, applied stage-then-prod 000017 receipts, and live issuer/health. Do not treat the LiNKclient LCL-WP-002 pin, sites-service placeholders, or Full Suite source receipt as those hosted surfaces. Make the supplied transition receipt digest retrievable as sealed bytes if it is part of the protected identity."
+    },
+    {
+      "owner": "linktrend/LiNKautowork",
+      "action": "Wire a live LiNKsites consumer grant (organisation, environment, named events, signing-key reference, admitted private endpoint), live health, and a live org-bound receipt against d5c626ba7e1bdbf783dc8df1654e33e0b70b873c / 9018eec98a9bafefe3a638b25fb191ee454917a9. The source-only linksites-consumer-registration.v1 contract and production PACI ES256/JWKS verifier source are not that live handoff. Align Autowork named events with LiNKsites PRE_INTEGRATED_EVENTS if those events are the intended grant."
+    },
+    {
+      "owner": "linktrend/LiNKsites",
+      "action": "Keep live Platform/Autowork claims disabled. Continue manual/file plus fail-closed signed-gateway adapters. After owners publish protected/released live evidence, re-qualify LSG0-04 against those exact identities."
+    }
+  ]
+}

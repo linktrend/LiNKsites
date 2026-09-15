@@ -1,7 +1,16 @@
 import { FileWorkIntakePort } from '@linksites/intake-orchestrator'
+import { CanonicalIntakeBoundary, assertCanonicalLead, type CanonicalIntakeRecord, type GatewayRequest } from '@linksites/autowork-boundary'
 import { isLeadResearchPackage } from '../../../packages/types/src/runtime-contracts.ts'
 import type { LeadResearchPackage } from '@linksites/types'
 import type { Composition } from './composition.ts'
+
+type DurableIntakeSubmit = {
+  submit(lead: LeadResearchPackage): Promise<{ itemId: string; replay: boolean; lead: LeadResearchPackage }>
+}
+
+function hasSubmit(intake: Composition['intake']): intake is Composition['intake'] & DurableIntakeSubmit {
+  return typeof (intake as unknown as DurableIntakeSubmit).submit === 'function'
+}
 
 /**
  * Manual NDJSON is an adapter for the shared WorkIntakePort. It does not
@@ -14,6 +23,27 @@ export function templateDependentOperationsEnabled(): boolean {
     process.env.LINKSITES_LOCAL_COMPOSE_PROOF === '1' ||
     process.env.LINKSITES_DEPLOYMENT_ENV !== 'production' ||
     process.env.LINKSITES_TEMPLATE_RELEASE_STATE === 'ready'
+}
+
+export async function persistCanonicalManualLead(composition: Composition, lead: LeadResearchPackage): Promise<CanonicalIntakeRecord> {
+  const canonical = assertCanonicalLead(lead, composition.config.orgId)
+  const boundary = new CanonicalIntakeBoundary({
+    persist: async (value) => {
+      if (hasSubmit(composition.intake)) {
+        const result = await composition.intake.submit(value)
+        return { itemId: result.itemId, replay: result.replay, lead: result.lead }
+      }
+      const { appendFile } = await import('node:fs/promises')
+      await appendFile(composition.config.intakePath, `${JSON.stringify(value)}\n`, 'utf8')
+      return { itemId: `intake:${value.org_id}:${value.idempotency_key}`, replay: false, lead: value }
+    },
+  }, composition.config.orgId)
+  return boundary.acceptManual(canonical)
+}
+
+export async function acceptSignedGatewayIntake(composition: Composition, request: GatewayRequest): Promise<CanonicalIntakeRecord> {
+  if (!composition.leadResearchIngress) throw new Error('signed gateway intake is unavailable')
+  return composition.leadResearchIngress.accept(request)
 }
 
 export async function runFirstReadyLead(composition: Composition): Promise<LeadResearchPackage | null> {
