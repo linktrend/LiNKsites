@@ -977,6 +977,44 @@ class DeliveryControllerTests(unittest.TestCase):
         self.assertEqual(calls, [])
         self.assertEqual(self.github.merges, [])
 
+    def test_invalid_expected_branch_matrix_fails_before_transport_or_mutation(self) -> None:
+        calls: list[str] = []
+
+        def transport(method: str, url: str, token: str, body):
+            calls.append(method)
+            raise AssertionError((method, url, body))
+
+        live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
+        invalid = (
+            " ",
+            " development",
+            "development ",
+            "/development",
+            "development/",
+            "development//shadow",
+            "development/../main",
+            "development\\main",
+            "development^shadow",
+            "development/.shadow",
+            "development/shadow.lock",
+        )
+        for branch in invalid:
+            for adapter in (live, self.github):
+                with self.subTest(branch=branch, adapter=type(adapter).__name__), self.assertRaisesRegex(
+                    controller.ControllerError, "protected_merge_identity_required"
+                ):
+                    adapter.merge_pull_request(
+                        repository="owner/name",
+                        number=11,
+                        expected_head=self.head,
+                        expected_base_branch=branch,
+                        expected_base=_sha(9),
+                        expected_base_tree=_sha(10),
+                        expected_result_tree=self.tree,
+                    )
+        self.assertEqual(calls, [])
+        self.assertEqual(self.github.merges, [])
+
     def test_live_strict_protection_rejects_move_after_final_read_before_put(self) -> None:
         base, base_tree = _sha(7), _sha(70)
         state = {"base": base, "protectedMutation": False}

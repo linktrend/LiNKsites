@@ -93,6 +93,26 @@ REQUIRED_CHECK_NAMES = (
 )
 
 
+def _is_canonical_branch_name(value: object) -> bool:
+    """Validate the protected target with Git-compatible canonical syntax."""
+
+    if not isinstance(value, str) or not value or value != value.strip() or len(value) > 255:
+        return False
+    if not re.fullmatch(r"[A-Za-z0-9._/-]+", value):
+        return False
+    if value in {"@", "."} or value.startswith("/") or value.endswith(("/", ".")):
+        return False
+    if "//" in value or ".." in value or "@{" in value or "\\" in value:
+        return False
+    segments = value.split("/")
+    return all(
+        segment not in {"", ".", ".."}
+        and not segment.startswith(".")
+        and not segment.endswith((".", ".lock"))
+        for segment in segments
+    )
+
+
 @dataclass(frozen=True)
 class StagedRolloutConfig:
     """Configurable stage and gate identity for one rollout path."""
@@ -109,7 +129,7 @@ class StagedRolloutConfig:
             self.staging_branch,
             self.main_branch,
         )
-        if any(not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9._/-]+", value) for value in branches):
+        if any(not _is_canonical_branch_name(value) for value in branches):
             raise ValueError("invalid_rollout_branch")
         if len(set(branches)) != len(branches):
             raise ValueError("duplicate_rollout_branch")
@@ -285,7 +305,7 @@ class MemoryGitHub:
         if repository != self.repository:
             raise ControllerError("wrong_repository", repository)
         if (
-            not expected_base_branch
+            not _is_canonical_branch_name(expected_base_branch)
             or not is_valid_sha(normalize_sha(expected_base))
             or not is_valid_sha(normalize_sha(expected_base_tree))
             or not is_valid_sha(normalize_sha(expected_result_tree))
@@ -520,7 +540,7 @@ class LiveGitHub:
         match_head_commit: bool = True,
     ) -> dict[str, Any]:
         if (
-            not expected_base_branch
+            not _is_canonical_branch_name(expected_base_branch)
             or not is_valid_sha(normalize_sha(expected_base))
             or not is_valid_sha(normalize_sha(expected_base_tree))
             or not is_valid_sha(normalize_sha(expected_result_tree))
