@@ -31,6 +31,7 @@ class PublishServer03ImagesWorkflowTests(unittest.TestCase):
         self.assertIn('or reserved_hostname', WORKFLOW)
         self.assertIn('or not host', WORKFLOW)
         self.assertIn('or host != "cms.linktrend.one"', WORKFLOW)
+        self.assertIn('or parsed.netloc != "cms.linktrend.one"', WORKFLOW)
         self.assertIn('or not valid_hostname', WORKFLOW)
         self.assertIn('parsed.path not in {"", "/"}', WORKFLOW)
         self.assertIn('or parsed.params', WORKFLOW)
@@ -64,6 +65,9 @@ class PublishServer03ImagesWorkflowTests(unittest.TestCase):
             "https://010.000.000.001",
             "https://0x7f.0x0.0x0.0x1",
             "https://cms.other-company.com",
+            "https://@cms.linktrend.one",
+            "https://cms.linktrend.one:443",
+            "https://cms.linktrend.one:",
             " https://cms.linktrend.one",
             "https://cms.linktrend.one ",
             "\thttps://cms.linktrend.one\n",

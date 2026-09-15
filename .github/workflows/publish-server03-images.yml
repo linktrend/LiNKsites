@@ -123,6 +123,7 @@ jobs:
               or parsed.scheme != "https"
               or not host
               or host != "cms.linktrend.one"
+              or parsed.netloc != "cms.linktrend.one"
               or host_is_ip_address
               or reserved_hostname
               or not valid_hostname
