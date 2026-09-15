@@ -111,7 +111,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: linktrend/LiNKlibraries
-          ref: a7193d40152747db2a03e094fa263f324a971a0b
+          ref: 998c02c29fae5acc429804d7e03dcc74df7e7a52
           path: .ci/linklibraries
           token: ${{ secrets.LINKTREND_CROSS_REPO_READ_TOKEN }}
           persist-credentials: false
