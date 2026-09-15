@@ -297,6 +297,14 @@ export interface Site {
    */
   templateId: string;
   /**
+   * Canonical immutable template adoption pin for this site. Existing templateId remains a deprecated projection.
+   */
+  templateAdoption?: (number | null) | TemplateAdoption;
+  /**
+   * Canonical immutable entitlement snapshot pin for this site.
+   */
+  entitlementSnapshot?: (number | null) | EntitlementSnapshot;
+  /**
    * Canonical platform organization owning the linked Program and site
    */
   orgId: string;
@@ -368,6 +376,173 @@ export interface Site {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Immutable template adoption records. Free-text template IDs are deprecated projections only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "template-adoptions".
+ */
+export interface TemplateAdoption {
+  id: number;
+  adoptionId: string;
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  /**
+   * Fail-closed tenant org boundary copied from the owning site.
+   */
+  tenantOrgId: string;
+  compatibilityClass: 'retained-production-pin' | 'schema-compatibility-copy';
+  activationState: 'inactive' | 'active' | 'rejected';
+  adoptionState: 'linked' | 'adopted' | 'replaced' | 'rolled_back';
+  identities: {
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    provider: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    layout: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    plan: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    overlay: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    config: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    content: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    adapter: string;
+    /**
+     * Exact lowercase 40-character SHA-1 identity
+     */
+    effective: string;
+  };
+  entitlementSnapshot: number | EntitlementSnapshot;
+  /**
+   * Linked before-state for replace/rollback proof
+   */
+  beforeRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Linked after-state for replace/rollback proof
+   */
+  afterRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Rollback target recorded at adoption time
+   */
+  rollbackRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  actorId: string;
+  evidenceDigest: string;
+  /**
+   * Deprecated free-text template ID projection. Canonical identity is identities.effective.
+   */
+  deprecatedTemplateIdProjection?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Immutable A/B/C/L entitlement snapshots. Mutation is rejected and rolled back to the original snapshot.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entitlement-snapshots".
+ */
+export interface EntitlementSnapshot {
+  id: number;
+  snapshotId: string;
+  /**
+   * The site this content belongs to
+   */
+  site: number | Site;
+  /**
+   * Content locale code (e.g., en, es, fr)
+   */
+  locale: string;
+  siteRef: string;
+  planId: 'A' | 'B' | 'C' | 'L';
+  grantedCredits: number;
+  budgets: {
+    A: number;
+    B: number;
+    C: number;
+    L: number;
+  };
+  schemaVersion: {
+    major: number;
+    minor: number;
+  };
+  digest: string;
+  beforeRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  afterRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  rollbackRecord?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  actorId: string;
+  evidenceDigest: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -529,167 +704,6 @@ export interface SiteSetting {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * Immutable template adoption records. Free-text template IDs are deprecated projections only.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "template-adoptions".
- */
-export interface TemplateAdoption {
-  id: number;
-  adoptionId: string;
-  /**
-   * The site this content belongs to
-   */
-  site: number | Site;
-  /**
-   * Content locale code (e.g., en, es, fr)
-   */
-  locale: string;
-  adoptionState: 'linked' | 'adopted' | 'replaced' | 'rolled_back';
-  identities: {
-    /**
-     * Exact lowercase 40-character SHA-1 identity
-     */
-    provider: string;
-    /**
-     * Exact lowercase 40-character SHA-1 identity
-     */
-    layout: string;
-    /**
-     * Exact lowercase 40-character SHA-1 identity
-     */
-    plan: string;
-    /**
-     * Exact lowercase 40-character SHA-1 identity
-     */
-    overlay: string;
-    /**
-     * Exact lowercase 40-character SHA-1 identity
-     */
-    config: string;
-    /**
-     * Exact lowercase 40-character SHA-1 identity
-     */
-    content: string;
-    /**
-     * Exact lowercase 40-character SHA-1 identity
-     */
-    adapter: string;
-    /**
-     * Exact lowercase 40-character SHA-1 identity
-     */
-    effective: string;
-  };
-  entitlementSnapshot: number | EntitlementSnapshot;
-  /**
-   * Linked before-state for replace/rollback proof
-   */
-  beforeRecord?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Linked after-state for replace/rollback proof
-   */
-  afterRecord?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Rollback target recorded at adoption time
-   */
-  rollbackRecord?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  actorId: string;
-  evidenceDigest: string;
-  /**
-   * Deprecated free-text template ID projection. Canonical identity is identities.effective.
-   */
-  deprecatedTemplateIdProjection?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Immutable A/B/C/L entitlement snapshots. Mutation is rejected and rolled back to the original snapshot.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "entitlement-snapshots".
- */
-export interface EntitlementSnapshot {
-  id: number;
-  snapshotId: string;
-  /**
-   * The site this content belongs to
-   */
-  site: number | Site;
-  /**
-   * Content locale code (e.g., en, es, fr)
-   */
-  locale: string;
-  siteRef: string;
-  planId: 'A' | 'B' | 'C' | 'L';
-  grantedCredits: number;
-  budgets: {
-    A: number;
-    B: number;
-    C: number;
-    L: number;
-  };
-  schemaVersion: {
-    major: number;
-    minor: number;
-  };
-  digest: string;
-  beforeRecord?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  afterRecord?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  rollbackRecord?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  actorId: string;
-  evidenceDigest: string;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3877,6 +3891,8 @@ export interface SitesSelect<T extends boolean = true> {
   domain?: T;
   status?: T;
   templateId?: T;
+  templateAdoption?: T;
+  entitlementSnapshot?: T;
   orgId?: T;
   programId?: T;
   leadId?: T;
@@ -4201,6 +4217,9 @@ export interface TemplateAdoptionsSelect<T extends boolean = true> {
   adoptionId?: T;
   site?: T;
   locale?: T;
+  tenantOrgId?: T;
+  compatibilityClass?: T;
+  activationState?: T;
   adoptionState?: T;
   identities?:
     | T
