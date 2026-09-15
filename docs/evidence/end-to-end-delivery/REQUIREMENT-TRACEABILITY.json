@@ -1,0 +1,920 @@
+{
+  "schemaVersion": 1,
+  "kind": "requirement-traceability",
+  "allowedClassifications": [
+    "completed",
+    "done but requires testing or fixing",
+    "missing and needs work"
+  ],
+  "authority": [
+    "docs/production-roadmap/phase-2/END-TO-END-COMPLETION-PRD.md",
+    "docs/production-roadmap/phase-2/ATOMIC-WORK-PACKETS.md",
+    "docs/architecture/linksites-profile-v2/CANONICAL-PRD-ROADMAP.md",
+    "docs/production-roadmap/phase-2/OSS-CONTINUITY-RULE.md"
+  ],
+  "denominator": {
+    "atomicPackets": 30,
+    "milestones": 3,
+    "unchanged": true,
+    "milestoneNames": [
+      "initial-operational-acceptance",
+      "full-product-completion",
+      "deterministic-done-founder-handoff-LSFULL-03"
+    ],
+    "lsacc02_03": "not-in-30-packet-set; duties mapped to LSVAL-01 and LSFULL-03"
+  },
+  "ossContinuityClassificationsAllowed": [
+    "completed",
+    "completed but needs testing or fixing",
+    "missing",
+    "unknown"
+  ],
+  "prdFunctionalRequirements": [
+    {
+      "id": "FR-01",
+      "title": "Exact provider selection and materialisation",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01",
+        "LSG0-03"
+      ],
+      "files": [
+        "packages/factory-catalog/src/exactProviderAdoption.ts"
+      ],
+      "checkpoints": [
+        "LSFACT-01",
+        "LSG0-03"
+      ],
+      "note": "Source exists on LSFACT-01. Production selection remains HOLD until LSG0-03 admitted selectable provider."
+    },
+    {
+      "id": "FR-02",
+      "title": "Site identity, adoption and entitlements",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01",
+        "LSFACT-01"
+      ],
+      "files": [
+        "packages/factory-catalog/src/adoptionIdentities.ts",
+        "packages/factory-catalog/src/capabilityCredits.ts",
+        "apps/cms/src/collections/Sites.ts"
+      ],
+      "checkpoints": [
+        "LSDATA-01",
+        "LSFACT-01"
+      ],
+      "note": "Source exists. Full Suite / live pinning not run on this candidate."
+    },
+    {
+      "id": "FR-03",
+      "title": "Deterministic assembly",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01"
+      ],
+      "files": [
+        "packages/factory-catalog/src/exactProviderAdoption.ts"
+      ],
+      "checkpoints": [
+        "LSFACT-01"
+      ],
+      "note": "Source exists. Injected-handoff tests exist; Full Suite not run."
+    },
+    {
+      "id": "FR-04",
+      "title": "Payload content lifecycle",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01",
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/cms/src/migrations/20260911_000001_lsdata01_payload_data_compatibility.ts",
+        "apps/cms/src/payload-types.ts"
+      ],
+      "checkpoints": [
+        "LSDATA-01",
+        "LSRENDER-01"
+      ],
+      "note": "Additive migration source exists. Live applied-migration receipts missing."
+    },
+    {
+      "id": "FR-05",
+      "title": "Versioned adapter and rendering",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/components/page-renderer/adapter-surface.ts",
+        "apps/web-master/src/components/page-renderer/semantic-map.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists. Provider/browser matrix waits for LSG0-03."
+    },
+    {
+      "id": "FR-06",
+      "title": "Routes, shell and discovery",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/lib/routes.ts",
+        "apps/web-master/src/lib/seo/published-catalog.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists. Live private-site proof missing."
+    },
+    {
+      "id": "FR-07",
+      "title": "Accessibility, privacy and performance",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/tests/ls06-iss-19-21.test.ts",
+        "apps/web-master/tests/ls07-iss-22-24.test.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Fixtures/harness source exists. Lab/field live evidence missing."
+    },
+    {
+      "id": "FR-08",
+      "title": "Program and automation lifecycle",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSAUTO-01",
+        "LSG0-04"
+      ],
+      "files": [
+        "packages/autowork-boundary/src/canonical-boundary.ts",
+        "packages/autowork-boundary/src/live-handoff.ts"
+      ],
+      "checkpoints": [
+        "LSAUTO-01",
+        "LSG0-04"
+      ],
+      "note": "Manual/file adapter source exists and is the only admitted mode now. Live Platform/Autowork claims forbidden until LSG0-04 clears."
+    },
+    {
+      "id": "FR-09",
+      "title": "Release integrity five images",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDEP-01",
+        "LSART-01"
+      ],
+      "files": [
+        "deploy/scripts/generate-deployment-manifest.mjs",
+        ".github/workflows/publish-server03-images.yml"
+      ],
+      "checkpoints": [
+        "LSDEP-01",
+        "LSART-01"
+      ],
+      "note": "Source/config exists. Images not built or published in this packet."
+    },
+    {
+      "id": "FR-10",
+      "title": "One Server03 installation",
+      "classification": "missing and needs work",
+      "packets": [
+        "LSVPS-01",
+        "LSVPS-04"
+      ],
+      "files": [],
+      "checkpoints": [
+        "LSVPS-01",
+        "LSVPS-04"
+      ],
+      "note": "No linksites-foundation installation evidence in this packet. Live work forbidden."
+    },
+    {
+      "id": "FR-11",
+      "title": "Migration, recovery and rollback",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01",
+        "LSOPS-01",
+        "LSVPS-02"
+      ],
+      "files": [
+        "deploy/scripts/rehearse-local-restore.mjs",
+        "deploy/monitoring/isolated-restore.plan.json"
+      ],
+      "checkpoints": [
+        "LSDATA-01",
+        "LSOPS-01",
+        "LSVPS-02"
+      ],
+      "note": "Source/runbook exists. Isolated live restore not run."
+    },
+    {
+      "id": "FR-12",
+      "title": "Operational evidence",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSOPS-01"
+      ],
+      "files": [
+        "deploy/monitoring/SIGNALS.md",
+        "deploy/OPERATIONS.md"
+      ],
+      "checkpoints": [
+        "LSOPS-01"
+      ],
+      "note": "Source signals/runbook exist. Live health not observed."
+    },
+    {
+      "id": "FR-13",
+      "title": "Open-source continuity",
+      "classification": "missing and needs work",
+      "ossClassification": "missing",
+      "packets": [
+        "LSSEC-01",
+        "LSDEP-01",
+        "LSART-01",
+        "LSVPS-01",
+        "LSVPS-02",
+        "LSVPS-04",
+        "LSOPS-01",
+        "LSVAL-01",
+        "LSFULL-03"
+      ],
+      "files": [
+        "docs/production-roadmap/phase-2/OSS-CONTINUITY-RULE.md",
+        "docs/production-roadmap/phase-2/OSS-INVENTORY.md",
+        "docs/evidence/end-to-end-delivery/oss-continuity/COMPONENT-LEDGER.json"
+      ],
+      "checkpoints": [
+        "ISSUE-540"
+      ],
+      "note": "Rule and ledger recorded on Issue 540. No LiNKtrend-controlled OSS archive, published five-image digest set, or tested OSS rollback exists. LSACC-02/03 are not in the 30-packet set; equivalent proof is LSVAL-01 and LSFULL-03. Did not reopen FR-01..FR-12 packet completions."
+    }
+  ],
+  "profileRequirements": [
+    {
+      "id": "LS-FR-01",
+      "title": "exact release selection",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01",
+        "LSG0-03"
+      ],
+      "files": [
+        "packages/factory-catalog/src/exactProviderAdoption.ts"
+      ],
+      "checkpoints": [
+        "LSFACT-01",
+        "LSG0-03"
+      ],
+      "note": "Rejects quarantined/draft in source. Admitted provider handoff missing (LSG0-03)."
+    },
+    {
+      "id": "LS-FR-02",
+      "title": "verified local materialization",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01"
+      ],
+      "files": [
+        "packages/factory-catalog/src/exactProviderAdoption.ts"
+      ],
+      "checkpoints": [
+        "LSFACT-01"
+      ],
+      "note": "Source exists; live cache receipt missing."
+    },
+    {
+      "id": "LS-FR-03",
+      "title": "Site Specification",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01",
+        "LSFACT-01"
+      ],
+      "files": [
+        "apps/cms/src/collections/Sites.ts"
+      ],
+      "checkpoints": [
+        "LSDATA-01",
+        "LSFACT-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-04",
+      "title": "plans/entitlements",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01",
+        "LSFACT-01"
+      ],
+      "files": [
+        "packages/factory-catalog/src/capabilityCredits.ts"
+      ],
+      "checkpoints": [
+        "LSDATA-01",
+        "LSFACT-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-05",
+      "title": "customer configuration",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01",
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/template.config.json"
+      ],
+      "checkpoints": [
+        "LSFACT-01",
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-06",
+      "title": "deterministic resolver",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01"
+      ],
+      "files": [
+        "packages/factory-catalog/src/exactProviderAdoption.ts"
+      ],
+      "checkpoints": [
+        "LSFACT-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-07",
+      "title": "activation/navigation",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01",
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/lib/routes.ts"
+      ],
+      "checkpoints": [
+        "LSFACT-01",
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-08",
+      "title": "adoption/entitlement records",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01",
+        "LSFACT-01"
+      ],
+      "files": [
+        "packages/factory-catalog/src/adoptionIdentities.ts"
+      ],
+      "checkpoints": [
+        "LSDATA-01",
+        "LSFACT-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-09",
+      "title": "Payload models",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01"
+      ],
+      "files": [
+        "apps/cms/src/collections/Products.ts",
+        "apps/cms/src/collections/Services.ts"
+      ],
+      "checkpoints": [
+        "LSDATA-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-10",
+      "title": "additive migration",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01"
+      ],
+      "files": [
+        "apps/cms/src/migrations/20260911_000001_lsdata01_payload_data_compatibility.ts"
+      ],
+      "checkpoints": [
+        "LSDATA-01"
+      ],
+      "note": "Source exists; applied production receipts missing."
+    },
+    {
+      "id": "LS-FR-11",
+      "title": "working content",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01",
+        "LSRENDER-01"
+      ],
+      "files": [
+        "packages/factory-catalog/WORKING-CONTENT.md"
+      ],
+      "checkpoints": [
+        "LSFACT-01",
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-12",
+      "title": "Payload promotion",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01",
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/components/page-renderer/semantic-map.ts"
+      ],
+      "checkpoints": [
+        "LSFACT-01",
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-13",
+      "title": "versioned adapter",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/components/page-renderer/adapter-surface.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-14",
+      "title": "layout-aware React",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/components/page-renderer/layout-packs.ts",
+        "apps/web-master/src/components/page-renderer/compose-layout.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists; paired A1/A2/A3 x A/B/C/L live matrix missing."
+    },
+    {
+      "id": "LS-FR-15",
+      "title": "header/footer",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/components/layouts/MarketingLayoutClient.tsx"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-16",
+      "title": "routes/redirects",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/lib/routes.ts",
+        "apps/web-master/src/lib/public-route-guard.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-17",
+      "title": "SSR/AI-first HTML",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/app/(public)/[lang]/[[...slug]]/page.tsx"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-18",
+      "title": "structured data",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/lib/seo/family-jsonld.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-19",
+      "title": "sitemap/robots/AI",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/lib/seo/published-catalog.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-20",
+      "title": "accessibility",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/tests/ls07-iss-22-24.test.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Harness source exists; live AA evidence missing."
+    },
+    {
+      "id": "LS-FR-21",
+      "title": "performance",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/tests/ls06-iss-19-21.test.ts"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Lab fixture source exists; field data missing."
+    },
+    {
+      "id": "LS-FR-22",
+      "title": "forms/privacy",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSRENDER-01"
+      ],
+      "files": [
+        "apps/web-master/src/lib/forms/contact-policy.ts",
+        "apps/web-master/src/components/contact/ContactForm.tsx"
+      ],
+      "checkpoints": [
+        "LSRENDER-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-23",
+      "title": "existing-site pinning",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSFACT-01",
+        "LSDATA-01"
+      ],
+      "files": [
+        "packages/factory-catalog/src/adoptionIdentities.ts"
+      ],
+      "checkpoints": [
+        "LSFACT-01",
+        "LSDATA-01"
+      ],
+      "note": "Source exists."
+    },
+    {
+      "id": "LS-FR-24",
+      "title": "migration/rollback/retirement",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSDATA-01",
+        "LSOPS-01"
+      ],
+      "files": [
+        "deploy/scripts/rehearse-local-restore.mjs"
+      ],
+      "checkpoints": [
+        "LSDATA-01",
+        "LSOPS-01"
+      ],
+      "note": "Source exists; live restore missing."
+    },
+    {
+      "id": "LS-FR-25",
+      "title": "execution evidence",
+      "classification": "done but requires testing or fixing",
+      "packets": [
+        "LSAUTO-01",
+        "LSOPS-01"
+      ],
+      "files": [
+        "apps/program-orchestrator/src/intake.ts"
+      ],
+      "checkpoints": [
+        "LSAUTO-01",
+        "LSOPS-01"
+      ],
+      "note": "Source exists; live correlated chain missing."
+    }
+  ],
+  "atomicPackets": [
+    {
+      "id": "LSG0-00",
+      "classification": "done but requires testing or fixing",
+      "note": "Planning snapshot exists in docs/production-roadmap/phase-2/STARTING-POSITION.md. This packet did not refresh Server03. Identities in IDENTITY.json verified for supplied bindings only."
+    },
+    {
+      "id": "LSG0-01",
+      "classification": "done but requires testing or fixing",
+      "files": [
+        "docs/evidence/end-to-end-delivery/branch-disposition.json"
+      ],
+      "checkpoints": [
+        "d0d199afdd310be5df944ff343627ba110e0998b"
+      ],
+      "note": "Disposition JSON exists. Not re-run as a new analysis; preserved. User dirty next-env.d.ts remains HOLD."
+    },
+    {
+      "id": "LSG0-02",
+      "classification": "done but requires testing or fixing",
+      "files": [
+        "docs/end-to-end-delivery/upstreams/index.json"
+      ],
+      "checkpoints": [
+        "6996444f85f312bf1d5770357120adfb0b15b5ee",
+        "5fbb8c12e5037c5840290f7c55a60fc16abed3a8"
+      ],
+      "note": "Sanitized contracts published. Not live handoffs. Platform/Autowork copies bind planning pins 67ba864667c8e8dd2b3baed00830c28e3035cea3 and 605c8281997e4793a826ce4c82b8dcbd6017ba26, which are not the current protected default commits supplied here."
+    },
+    {
+      "id": "LSG0-03",
+      "classification": "missing and needs work",
+      "note": "Coordinator-supplied HOLD: LiNKlibraries development fe769fc19b3a51ed2cc0b22438afc5b0bd766950 / tree 9f993ae485c68d46ed69c824578ec3370a0be5c6 has marketing-smb-v1 quarantined/non-selectable and observed Master Website Template versions draft/non-selectable/unknown. Exact admitted provider handoffs missing. This session did not fetch LiNKlibraries."
+    },
+    {
+      "id": "LSG0-04",
+      "classification": "missing and needs work",
+      "files": [
+        "docs/evidence/end-to-end-delivery/LSG0-04-HANDOFF.json"
+      ],
+      "note": "Incomplete handoff repaired as HOLD against exact current Platform/Autowork default commits. Live claims forbidden."
+    },
+    {
+      "id": "LSG0-05",
+      "classification": "done but requires testing or fixing",
+      "note": "Issue 532 branch exists and is this writer. Other lane issues were previously created. Packet admission/dispatch not completed here; no worker dispatched."
+    },
+    {
+      "id": "LSDATA-01",
+      "classification": "done but requires testing or fixing",
+      "checkpoints": [
+        "888be026b5a57a698b4d70643e6184f3c2ac74b8"
+      ],
+      "note": "Source integrated. Focused tests not re-run; Full Suite forbidden this packet."
+    },
+    {
+      "id": "LSTRUST-01",
+      "classification": "done but requires testing or fixing",
+      "checkpoints": [
+        "06fe044c74fb92bf731de9297592d08f78e252a2"
+      ],
+      "note": "Source integrated. Adversarial tests not re-run here."
+    },
+    {
+      "id": "LSFACT-01",
+      "classification": "done but requires testing or fixing",
+      "checkpoints": [
+        "e492f78ed00255de48311115e20a6682afc6697c"
+      ],
+      "note": "Source integrated. Selectable provider still HOLD."
+    },
+    {
+      "id": "LSRENDER-01",
+      "classification": "done but requires testing or fixing",
+      "checkpoints": [
+        "f22680d05684d7d3cbbbe4a4622b9f2d7d15a74a"
+      ],
+      "note": "Source integrated. Browser matrix not run."
+    },
+    {
+      "id": "LSAUTO-01",
+      "classification": "done but requires testing or fixing",
+      "checkpoints": [
+        "cb6c0da3d0091815ef891ed925e10e0da99ca7cc"
+      ],
+      "note": "Source integrated. Live gateway HOLD. Manual/file only."
+    },
+    {
+      "id": "LSSEC-01",
+      "classification": "done but requires testing or fixing",
+      "checkpoints": [
+        "070658ea2fb5b7abacdcf9d205e37d6f7ed61f83"
+      ],
+      "note": "Compatible upgrades recorded. GitHub alert API not queried; coordinator observations recorded. Full Suite not used as disposition. FR-13 npm archive/rollback remains missing; lock presence is not continuity."
+    },
+    {
+      "id": "LSDEP-01",
+      "classification": "done but requires testing or fixing",
+      "checkpoints": [
+        "60274ade7e910f814b0816e74de011281d536dc2"
+      ],
+      "note": "Release source exists. Images unpublished. FR-13 base-image archive and floating-tag prohibition for production remain owner actions."
+    },
+    {
+      "id": "LSOPS-01",
+      "classification": "done but requires testing or fixing",
+      "checkpoints": [
+        "aadb6d02f1d5d1aebb953274c09401057b1296e1"
+      ],
+      "note": "Operations source exists. Live backup/restore not run. FR-13 tested rollback of OSS/image identities missing."
+    },
+    {
+      "id": "LSINT-01",
+      "classification": "missing and needs work",
+      "files": [
+        "docs/evidence/end-to-end-delivery/STATUS.json"
+      ],
+      "note": "This session prepares LSINT-01 evidence only and does not complete it. Formal dependency on LSG0-03 remains. Candidate is PREPARED/HOLD, never READY."
+    },
+    {
+      "id": "LSVAL-01",
+      "classification": "missing and needs work",
+      "note": "Full Suite not run and is forbidden in this packet. LSACC-02-equivalent licence/SBOM/supply-chain validators therefore missing."
+    },
+    {
+      "id": "LSREV-01",
+      "classification": "missing and needs work",
+      "note": "Exactly one independent review remains, at LSREV-01 of the exact consolidated candidate, naming auth/authorization and secret-handling, additive Payload/Postgres migration and RLS/data-boundary safety, and production deployment/rollback configuration. Not requested in this documentation packet; self-review forbidden. Not repeated for unchanged SHA/tree."
+    },
+    {
+      "id": "LSREL-01",
+      "classification": "missing and needs work",
+      "note": "No Phase PR, merge, or promotion. Packager/controller only."
+    },
+    {
+      "id": "LSART-01",
+      "classification": "missing and needs work",
+      "note": "No image publication. FR-13 five-image archive missing."
+    },
+    {
+      "id": "LSVPS-01",
+      "classification": "missing and needs work",
+      "note": "No Server03 mutation. FR-13 archive layout not installed."
+    },
+    {
+      "id": "LSVPS-02",
+      "classification": "missing and needs work",
+      "note": "No live backup/restore. FR-13 restore-from-owned-archive unproven."
+    },
+    {
+      "id": "LSVPS-03",
+      "classification": "missing and needs work",
+      "note": "Depends on LSG0-04 live receipts."
+    },
+    {
+      "id": "LSVPS-04",
+      "classification": "missing and needs work",
+      "note": "Installation not started. FR-13 digest-only start and prior-release rollback unproven."
+    },
+    {
+      "id": "LSVPS-05",
+      "classification": "missing and needs work",
+      "note": "Private routes not enabled."
+    },
+    {
+      "id": "LSPILOT-01",
+      "classification": "missing and needs work",
+      "note": "Depends on LSG0-03 selectable marketing-smb-v1."
+    },
+    {
+      "id": "LSPILOT-02",
+      "classification": "missing and needs work",
+      "note": "No first-site production."
+    },
+    {
+      "id": "LSPILOT-03",
+      "classification": "missing and needs work",
+      "note": "No replay/recovery live proof."
+    },
+    {
+      "id": "LSFULL-01",
+      "classification": "missing and needs work",
+      "note": "Depends on admitted MWT handoff (LSG0-03)."
+    },
+    {
+      "id": "LSFULL-02",
+      "classification": "missing and needs work",
+      "note": "Depends on LSG0-04 live handoffs."
+    },
+    {
+      "id": "LSFULL-03",
+      "classification": "missing and needs work",
+      "note": "Final DONE forbidden until HOLDs clear. Independent live operational reviewer is waived; replacement is deterministic exact-release identity, health, privacy, backup/restore, rollback, idempotency, completion-chain and controller/readback. Packet remains missing. FR-13 live rollback (LSACC-03 equivalent) is not proven."
+    }
+  ],
+  "ossContinuityRequirements": [
+    {
+      "id": "FR13-UPSTREAM-NO-VENDOR",
+      "title": "external upstream use without vendoring",
+      "classification": "completed but needs testing or fixing",
+      "packets": ["LSSEC-01", "LSDEP-01"],
+      "note": "Inspected production path uses npm lock and digest-pinned Docker FROM lines; no full upstream trees vendored. Non-production cms compose and apk packages are not a fork. Completeness of 'no vendoring' for every transitive tarball was not exhaustively proven."
+    },
+    {
+      "id": "FR13-OWNED-ARCHIVE",
+      "title": "LiNKtrend-controlled read-only archive of exact source, artifact or container",
+      "classification": "missing",
+      "packets": ["LSSEC-01", "LSART-01", "LSVPS-01"],
+      "note": "No owned archive location, checksum set or restore recipe exists in this tree. Lockfile and local caches are not the archive."
+    },
+    {
+      "id": "FR13-IMMUTABLE-IDENTITY",
+      "title": "immutable version, commit or digest without floating tags",
+      "classification": "completed but needs testing or fixing",
+      "packets": ["LSDEP-01", "LSART-01", "LSTRUST-01"],
+      "note": "Production Dockerfiles pin node 22.17.0-alpine and postgres 16.8-alpine by digest; deploy Compose requires digest env vars; publish workflow commit-pins some actions. CI still uses floating action tags and Node major 22; cms local compose uses node:18-alpine, postgres:16-alpine and pnpm@latest; apk is unpinned; five service images unpublished."
+    },
+    {
+      "id": "FR13-PROVENANCE-RECORD",
+      "title": "provenance, version, licence, source location, artifact location, checksums, compatibility",
+      "classification": "missing",
+      "packets": ["LSSEC-01", "LSART-01", "LSVAL-01"],
+      "note": "Lock integrity hashes and Dockerfile digests are source records only. Licence/SBOM/release provenance and artifact archive locations are missing. Full Suite licence validators not run."
+    },
+    {
+      "id": "FR13-REVIEWED-UPDATES",
+      "title": "reviewed updates only",
+      "classification": "completed but needs testing or fixing",
+      "packets": ["LSSEC-01", "LSDEP-01"],
+      "note": "Process is allocated (LSSEC-01/LSDEP-01). No evidence that CI or production cannot still pull floating tags (actions@v4, apk, pnpm@latest in non-prod compose)."
+    },
+    {
+      "id": "FR13-REPRODUCE-IF-UPSTREAM-GONE",
+      "title": "reproducibility if upstream disappears",
+      "classification": "missing",
+      "packets": ["LSART-01", "LSVPS-01", "LSVAL-01"],
+      "note": "Cannot reproduce npm or container bytes from a LiNKtrend archive because none exists. Upstream availability was not used as proof."
+    },
+    {
+      "id": "FR13-TESTED-ROLLBACK",
+      "title": "tested rollback to a prior immutable identity",
+      "classification": "missing",
+      "packets": ["LSOPS-01", "LSVPS-02", "LSVPS-04", "LSFULL-03"],
+      "note": "deploy/OPERATIONS.md names five-digest rollback source. Isolated live restore and prior-release selection were not run. Untested runbook is not continuity."
+    },
+    {
+      "id": "FR13-NO-ACTIVE-FORK",
+      "title": "active fork prohibited unless founder-approved unmet need",
+      "classification": "completed",
+      "packets": ["LSSEC-01", "LSDEP-01"],
+      "note": "This packet created no fork and found no founder-approved active fork in inspected allowed docs/source declarations. Absence of a fork in this documentation packet is not a live-systems survey."
+    }
+  ]
+}

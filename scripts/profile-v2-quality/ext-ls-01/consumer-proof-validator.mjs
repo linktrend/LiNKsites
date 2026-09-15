@@ -74,8 +74,8 @@ const identityErrors = (candidate) => {
   if (candidate.repository != null && candidate.repository !== 'linktrend/LiNKsites') {
     errors.push('candidate.repository must be linktrend/LiNKsites')
   }
-  if (candidate.issue != null && Number(candidate.issue) !== 301) {
-    errors.push('candidate.issue must be 301 for this validator')
+  if (candidate.issue != null && ![301, 547].includes(Number(candidate.issue))) {
+    errors.push('candidate.issue must be 301 or 547 for this validator')
   }
   return errors
 }
