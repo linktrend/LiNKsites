@@ -1,5 +1,8 @@
 node --test tests/master-template-v2/a1/harness.test.mjs
-# 14 passed, 0 failed (2026-08-26)
+# 16 passed, 0 failed (2026-09-14)
+
+pnpm --filter @linksites/factory-catalog exec vitest run tests/revision2Materialization.spec.ts
+# 8 passed, 0 failed
 
 node tests/master-template-v2/a1/scripts/validate.mjs --evidence docs/evidence/master-v2/a1
 # LS-08 ISS-25..27 paired proof: PROOF_OK packetCompletion=true overallVerdict=A1_SEMANTICS_FROZEN

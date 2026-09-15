@@ -1,0 +1,282 @@
+{
+  "identity": {
+    "identityType": "profile",
+    "id": "linksites-profile",
+    "version": "0.1.0"
+  },
+  "compatibleHarnessRange": ">=0.1.0 <0.2.0",
+  "program": {
+    "identity": {
+      "identityType": "program",
+      "id": "linksites-program",
+      "version": "0.1.0"
+    },
+    "profileId": "linksites-profile",
+    "compatibleHarnessRange": ">=0.1.0 <0.2.0",
+    "moduleIds": [
+      "mod-01",
+      "mod-02",
+      "mod-03"
+    ],
+    "budgetIds": [
+      "budget-01"
+    ],
+    "createdAt": "2026-08-22T00:00:00.000Z",
+    "updatedAt": "2026-08-22T00:00:00.000Z",
+    "actor": {
+      "identity": {
+        "identityType": "actor",
+        "id": "system",
+        "version": "0.1.0"
+      },
+      "role": "system"
+    },
+    "binding": {
+      "repository": "linktrend/example",
+      "commit": "f77b038825a854195acee5e6d58a4dc94af6dd16",
+      "tree": "7689ab31b9ba690663614cde72013e54311003cf",
+      "profileDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
+    }
+  },
+  "modules": [
+    {
+      "identity": {
+        "identityType": "module",
+        "id": "mod-01",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "phaseIds": [
+        "phase-01"
+      ],
+      "dependsOn": [],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    },
+    {
+      "identity": {
+        "identityType": "module",
+        "id": "mod-02",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "phaseIds": [
+        "phase-02"
+      ],
+      "dependsOn": [
+        "mod-01"
+      ],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    },
+    {
+      "identity": {
+        "identityType": "module",
+        "id": "mod-03",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "phaseIds": [
+        "phase-03"
+      ],
+      "dependsOn": [
+        "mod-02"
+      ],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    }
+  ],
+  "phases": [
+    {
+      "identity": {
+        "identityType": "phase",
+        "id": "phase-01",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "moduleId": "mod-01",
+      "issueIds": [
+        "issue-01"
+      ],
+      "gateIds": [
+        "gate-01"
+      ],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    },
+    {
+      "identity": {
+        "identityType": "phase",
+        "id": "phase-02",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "moduleId": "mod-02",
+      "issueIds": [
+        "issue-02"
+      ],
+      "gateIds": [
+        "gate-02"
+      ],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    },
+    {
+      "identity": {
+        "identityType": "phase",
+        "id": "phase-03",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "moduleId": "mod-03",
+      "issueIds": [
+        "issue-03"
+      ],
+      "gateIds": [
+        "gate-03"
+      ],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    }
+  ],
+  "issues": [
+    {
+      "identity": {
+        "identityType": "issue",
+        "id": "issue-01",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "moduleId": "mod-01",
+      "phaseId": "phase-01",
+      "ownedResources": [
+        "resource:issue-01"
+      ],
+      "dependsOn": [],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    },
+    {
+      "identity": {
+        "identityType": "issue",
+        "id": "issue-02",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "moduleId": "mod-02",
+      "phaseId": "phase-02",
+      "ownedResources": [
+        "resource:issue-02"
+      ],
+      "dependsOn": [],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    },
+    {
+      "identity": {
+        "identityType": "issue",
+        "id": "issue-03",
+        "version": "0.1.0"
+      },
+      "programId": "linksites-program",
+      "moduleId": "mod-03",
+      "phaseId": "phase-03",
+      "ownedResources": [
+        "resource:issue-03"
+      ],
+      "dependsOn": [],
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "updatedAt": "2026-08-22T00:00:00.000Z",
+      "actor": {
+        "identity": {
+          "identityType": "actor",
+          "id": "system",
+          "version": "0.1.0"
+        },
+        "role": "system"
+      }
+    }
+  ],
+  "adapters": [
+    {
+      "adapterId": "process",
+      "contractVersion": "0.1.0"
+    }
+  ],
+  "redaction": {
+    "deniedPaths": [
+      "secret",
+      "credential"
+    ]
+  },
+  "compatibility": {
+    "contractName": "@linktrend/linkharness-contracts",
+    "contractVersion": "0.1.0",
+    "compatibleRange": ">=0.1.0 <0.2.0",
+    "migrations": []
+  }
+}
