@@ -1,3 +1,4 @@
+export * from './autoworkClient.ts'
 export * from './contracts.ts'
 export * from './graph.ts'
 export * from './adapters.ts'

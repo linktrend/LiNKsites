@@ -1,7 +1,7 @@
 # Historical gitleaks baseline
 
-The root `.gitleaksignore` contains exact fingerprints for 33 findings across
-three historical commits. It does not allowlist paths, rules, or future
+The root `.gitleaksignore` contains exact fingerprints for 37 findings across
+six historical commits. It does not allowlist paths, rules, or future
 findings.
 
 - Commit `251cf0e52cd839489685d79c74fd687736d21a0c` contains security-test inputs,
@@ -23,3 +23,25 @@ findings.
 The CI gate continues to scan every commit introduced by a pull request or
 push. New findings fail closed unless they are separately investigated and
 added as an exact fingerprint through a reviewed change.
+
+## Successor source reconciliation (2026-09-15)
+
+Hosted run `34924739082` scanned all 40 introduced commits and reported four
+additional matches. Each historical blob was inspected at the exact commit
+and line before adding its fingerprint; no path or rule exemption was added.
+
+- `106b33f54e376cdf5842da50d6cec528b18f5adb`,
+  `docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json:32`, and
+  `685e1267fc4718eaea808afc0c36459e9d739e14`, the same path at lines 32 and 45:
+  the review command contains `Cursor-REST-API-SDK` followed by the model name
+  `Grok-4.6-Medium`. This is historical routing metadata, not authentication
+  material. These three `generic-api-key` matches are false positives.
+- `60274ade7e910f814b0816e74de011281d536dc2`,
+  `deploy/config/production.env.example:30`: the commented signing-secret
+  example uses the explicit synthetic value `ltfx.placeholder.5e0a9b3c2eac.v1`.
+  It is a placeholder, not a usable credential. The current candidate replaces
+  that assignment with an instruction to obtain the secret from the secret
+  store. The exception binds only this historical `generic-api-key` fingerprint.
+
+Hosted changed-range scanning must pass on the resulting candidate. These
+source dispositions do not constitute independent release review.

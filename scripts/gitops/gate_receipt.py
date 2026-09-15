@@ -27,6 +27,7 @@ from gitops.coordinator.receipts import (
     verify_receipt,
     write_receipt,
 )
+from gitops.promotion_receipt_gate import authorize_promotion_files
 
 
 def resolved_profile_files(repo: Path, explicit: list[str]) -> list[str]:
@@ -84,6 +85,11 @@ def _parser() -> argparse.ArgumentParser:
     verify.add_argument("--source-branch", help="protected branch represented by a detached promotion checkout")
     verify.add_argument("--transition-receipt", type=Path)
     verify.add_argument("--gate", required=True, help="required gate id")
+    verify.add_argument("--expected-base-commit", help="current protected base commit SHA")
+    verify.add_argument("--expected-base-tree", help="current protected base tree SHA")
+    verify.add_argument("--live-facts", type=Path, help="trusted-producer observed promotion facts")
+    verify.add_argument("--consumed-ids", type=Path)
+    verify.add_argument("--consumed-receipts", type=Path)
     return parser
 
 
@@ -120,6 +126,7 @@ def main(argv: list[str] | None = None) -> int:
                     workflow_files=args.workflow_file or None,
                     source_branch=args.source_branch,
                 )
+            transition = load_json(args.transition_receipt) if args.transition_receipt else None
             verdict = verify_receipt(
                 receipt,
                 identity,
@@ -127,8 +134,48 @@ def main(argv: list[str] | None = None) -> int:
                 workflow_run_id=args.workflow_run_id,
                 workflow_run_attempt=args.workflow_run_attempt,
                 workflow_head_commit=args.workflow_head_commit,
-                transition_receipt=(load_json(args.transition_receipt) if args.transition_receipt else None),
+                transition_receipt=transition,
             )
+            if not verdict.accepted:
+                _json_output(
+                    {
+                        "accepted": verdict.accepted,
+                        "code": verdict.code,
+                        "message": verdict.message,
+                    }
+                )
+                return 1
+            if args.live_facts is not None:
+                if args.transition_receipt is None:
+                    raise ReceiptError("transition_invalid", "live facts require a transition receipt")
+                authorized = authorize_promotion_files(
+                    receipt_path=args.receipt,
+                    transition_path=args.transition_receipt,
+                    live_path=args.live_facts,
+                    consumed_ids_path=args.consumed_ids,
+                    consumed_receipts_path=args.consumed_receipts,
+                )
+                _json_output(authorized.to_dict())
+                return 0 if authorized.accepted else 1
+            if args.expected_base_commit and transition is not None:
+                if str(transition.get("protectedBaseCommit") or "") != args.expected_base_commit:
+                    _json_output(
+                        {
+                            "accepted": False,
+                            "code": "protected_base_mismatch",
+                            "message": "transition protected base is not the current protected commit",
+                        }
+                    )
+                    return 1
+            if args.expected_base_tree and not args.expected_base_tree.strip():
+                _json_output(
+                    {
+                        "accepted": False,
+                        "code": "missing_field",
+                        "message": "protected base tree is required when expected",
+                    }
+                )
+                return 1
             _json_output(
                 {
                     "accepted": verdict.accepted,
