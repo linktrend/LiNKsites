@@ -1,33 +1,213 @@
+# LiNKsites Server03 one-installation Prometheus rules.
+# Expected scrape jobs: linksites-server03-foundation (orchestrator /metrics and
+# LiNKsites textfile collector), linksites-readyz, linksites-tls, cadvisor or
+# equivalent Compose container metrics, and node. Labels may include
+# release_sha, service, and organisation only when those values are already
+# non-secret scrape identity. Never put tokens, URLs with credentials,
+# customer payloads, or private endpoint values in annotations.
 groups:
   - name: linksites-server03-foundation
     rules:
       - alert: LiNKsitesFoundationTargetDown
         expr: up{job="linksites-server03-foundation"} == 0
         for: 5m
-        labels: { severity: critical }
+        labels:
+          severity: critical
+          service: program-orchestrator
+          installation: linksites-foundation
         annotations:
           summary: LiNKsites Server03 foundation health target is unavailable
       - alert: LiNKsitesFoundationRuntimeAttention
         expr: linksites_program_dead_letters_total{job="linksites-server03-foundation"} > 0 or linksites_program_manual_attention_total{job="linksites-server03-foundation"} > 0
         for: 1m
-        labels: { severity: critical }
+        labels:
+          severity: critical
+          service: program-orchestrator
+          installation: linksites-foundation
         annotations:
           summary: LiNKsites Program runtime requires attention
       - alert: LiNKsitesFoundationRuntimeMetricsMissing
         expr: absent(linksites_program_active_issues{job="linksites-server03-foundation"})
         for: 5m
-        labels: { severity: warning }
+        labels:
+          severity: warning
+          service: program-orchestrator
+          installation: linksites-foundation
         annotations:
           summary: LiNKsites Program runtime metrics are missing
       - alert: LiNKsitesFoundationBackupStale
         expr: time() - linksites_backup_last_success_timestamp_seconds > 90000
         for: 15m
-        labels: { severity: critical }
+        labels:
+          severity: critical
+          service: backup
+          installation: linksites-foundation
         annotations:
           summary: LiNKsites backup success is older than 25 hours
       - alert: LiNKsitesFoundationRestoreRehearsalStale
         expr: time() - linksites_restore_rehearsal_last_success_timestamp_seconds > 2678400
         for: 1h
-        labels: { severity: warning }
+        labels:
+          severity: warning
+          service: backup
+          installation: linksites-foundation
         annotations:
           summary: LiNKsites isolated restore rehearsal is older than 31 days
+      - alert: LiNKsitesFoundationBackupFailed
+        expr: linksites_backup_last_attempt_result{job="linksites-server03-foundation"} == 0
+        for: 15m
+        labels:
+          severity: critical
+          service: backup
+          installation: linksites-foundation
+        annotations:
+          summary: LiNKsites backup last attempt did not succeed
+      - alert: LiNKsitesFoundationReleaseDigestMismatch
+        expr: linksites_release_digest_match{job="linksites-server03-foundation"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: release
+          installation: linksites-foundation
+        annotations:
+          summary: Running five-image set does not match the bound release manifest
+      - alert: LiNKsitesFoundationLongRunningUnhealthy
+        expr: linksites_container_healthy{job="linksites-server03-foundation",service=~"payload|web-master|autowork-worker|program-orchestrator"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          installation: linksites-foundation
+        annotations:
+          summary: A long-running LiNKsites service healthcheck is failing
+      - alert: LiNKsitesFoundationContainerRestartLoop
+        expr: increase(linksites_container_restarts_total{job="linksites-server03-foundation",service=~"payload|web-master|autowork-worker|program-orchestrator"}[15m]) > 2
+        for: 10m
+        labels:
+          severity: critical
+          installation: linksites-foundation
+        annotations:
+          summary: A long-running LiNKsites container is restarting repeatedly
+      - alert: LiNKsitesFoundationMigrationJobStuck
+        expr: linksites_migration_job_running{job="linksites-server03-foundation",service=~"supabase-migrate|payload-migrate"} == 1
+        for: 30m
+        labels:
+          severity: critical
+          service: migrations
+          installation: linksites-foundation
+        annotations:
+          summary: A one-shot LiNKsites migration job is still running after 30 minutes
+      - alert: LiNKsitesFoundationMigrationStateHold
+        expr: linksites_payload_migrations_match{job="linksites-server03-foundation"} == 0 or linksites_platform_migration_receipt_match{job="linksites-server03-foundation"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: migrations
+          installation: linksites-foundation
+        annotations:
+          summary: Payload or authorized Platform migration receipt does not match the bound release
+      - alert: LiNKsitesFoundationHttpReadinessFailed
+        expr: probe_success{job="linksites-readyz"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          installation: linksites-foundation
+        annotations:
+          summary: HTTP readiness probe for a LiNKsites private origin failed
+      - alert: LiNKsitesFoundationPayloadPostgresUnavailable
+        expr: linksites_payload_ready{job="linksites-server03-foundation"} == 0 or linksites_postgres_ready{job="linksites-server03-foundation"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: payload
+          installation: linksites-foundation
+        annotations:
+          summary: Payload or its PostgreSQL availability check failed
+      - alert: LiNKsitesFoundationPrivateTlsHold
+        expr: probe_success{job="linksites-tls"} == 0 or (probe_ssl_earliest_cert_expiry{job="linksites-tls"} - time()) < 1209600
+        for: 15m
+        labels:
+          severity: critical
+          service: edge
+          installation: linksites-foundation
+        annotations:
+          summary: Private TLS probe failed or a certificate expires within 14 days
+      - alert: LiNKsitesFoundationNoindexHold
+        expr: linksites_preview_noindex{job="linksites-server03-foundation"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: web-master
+          installation: linksites-foundation
+        annotations:
+          summary: Private preview lost required noindex posture
+      - alert: LiNKsitesFoundationPrivateRouteExposure
+        expr: linksites_unauthenticated_preview_denied{job="linksites-server03-foundation"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: edge
+          installation: linksites-foundation
+        annotations:
+          summary: Unauthenticated private preview did not deny as required
+      - alert: LiNKsitesFoundationOutboxBacklog
+        expr: linksites_program_active_issues{job="linksites-server03-foundation"} > 8
+        for: 30m
+        labels:
+          severity: warning
+          service: program-orchestrator
+          installation: linksites-foundation
+        annotations:
+          summary: Program ledger backlog is elevated for 30 minutes
+      - alert: LiNKsitesFoundationRetryStorm
+        expr: increase(linksites_program_retries_total{job="linksites-server03-foundation"}[15m]) > 0
+        for: 15m
+        labels:
+          severity: warning
+          service: program-orchestrator
+          installation: linksites-foundation
+        annotations:
+          summary: Program retries have been increasing for 15 minutes
+      - alert: LiNKsitesFoundationAutoworkModeHold
+        expr: linksites_autowork_mode_live{job="linksites-server03-foundation"} == 1 and linksites_autowork_live_admitted{job="linksites-server03-foundation"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: autowork-worker
+          installation: linksites-foundation
+        annotations:
+          summary: Autowork is live without an admitted live handoff
+      - alert: LiNKsitesFoundationPlatformHold
+        expr: linksites_platform_state_ready{job="linksites-server03-foundation"} == 0
+        for: 15m
+        labels:
+          severity: warning
+          service: platform
+          installation: linksites-foundation
+        annotations:
+          summary: Platform state is HOLD/pending after the installation is expected to run
+      - alert: LiNKsitesFoundationProviderHold
+        expr: linksites_provider_ready{job="linksites-server03-foundation"} == 0 and linksites_template_publishing_attempted{job="linksites-server03-foundation"} == 1
+        for: 1m
+        labels:
+          severity: critical
+          service: web-master
+          installation: linksites-foundation
+        annotations:
+          summary: Template publishing was attempted while the provider remains on HOLD
+      - alert: LiNKsitesFoundationDiskPressure
+        expr: (node_filesystem_avail_bytes{mountpoint=~"^(/|/var/lib/linksites|/var/lib/docker)$"} / node_filesystem_size_bytes) < 0.15
+        for: 15m
+        labels:
+          severity: warning
+          service: host
+          installation: linksites-foundation
+        annotations:
+          summary: Disk availability on a LiNKsites-related mount is below 15 percent
+      - alert: LiNKsitesFoundationMemoryPressure
+        expr: (container_memory_working_set_bytes{container_label_com_docker_compose_project="linksites-foundation",container_label_com_docker_compose_service=~"payload|web-master|autowork-worker|program-orchestrator"} / container_spec_memory_limit_bytes{container_label_com_docker_compose_project="linksites-foundation",container_label_com_docker_compose_service=~"payload|web-master|autowork-worker|program-orchestrator"}) > 0.90
+        for: 15m
+        labels:
+          severity: warning
+          installation: linksites-foundation
+        annotations:
+          summary: A long-running LiNKsites container is above 90 percent of its memory limit

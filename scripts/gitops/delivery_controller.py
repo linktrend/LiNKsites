@@ -24,6 +24,7 @@ import re
 import subprocess
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -198,15 +199,22 @@ class GitHubPort(Protocol):
     def get_pull_request(self, *, repository: str, number: int) -> dict[str, Any]:
         ...
 
+    def get_ref_identity(self, *, repository: str, branch: str) -> dict[str, str]:
+        ...
+
     def merge_pull_request(
         self,
         *,
         repository: str,
         number: int,
         expected_head: str,
+        expected_base_branch: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
+        expected_base: str | None = None,
+        expected_base_tree: str | None = None,
+        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         ...
 
@@ -236,6 +244,7 @@ class MemoryGitHub:
     repository: str
     prs: dict[int, dict[str, Any]] = field(default_factory=dict)
     refs: dict[str, str] = field(default_factory=dict)
+    ref_trees: dict[str, str] = field(default_factory=dict)
     merges: list[dict[str, Any]] = field(default_factory=list)
     deleted_refs: list[str] = field(default_factory=list)
     protected_push_attempts: list[dict[str, str]] = field(default_factory=list)
@@ -251,15 +260,27 @@ class MemoryGitHub:
             raise ControllerError("pr_missing", str(number))
         return dict(pr)
 
+    def get_ref_identity(self, *, repository: str, branch: str) -> dict[str, str]:
+        if repository != self.repository:
+            raise ControllerError("wrong_repository", repository)
+        return {
+            "commit": normalize_sha(self.refs.get(branch, "")),
+            "tree": normalize_sha(self.ref_trees.get(branch, "")),
+        }
+
     def merge_pull_request(
         self,
         *,
         repository: str,
         number: int,
         expected_head: str,
+        expected_base_branch: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
+        expected_base: str | None = None,
+        expected_base_tree: str | None = None,
+        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         if repository != self.repository:
             raise ControllerError("wrong_repository", repository)
@@ -275,10 +296,25 @@ class MemoryGitHub:
             raise ControllerError("draft_pr", str(number))
         if str(pr.get("state") or "").lower() not in {"open", ""}:
             raise ControllerError("pr_not_open", str(number))
-        merge_sha = hashlib.sha1(f"merge:{number}:{head}".encode("utf-8")).hexdigest()
         base = str(pr.get("base") or "")
-        base_before = normalize_sha(self.refs.get(base, "0" * 40))
+        if base != expected_base_branch:
+            raise ControllerError(
+                "unexpected_pr_base_branch",
+                f"live={base}:expected={expected_base_branch}",
+            )
+        base_before = normalize_sha(self.refs.get(base, ""))
+        base_tree_before = normalize_sha(self.ref_trees.get(base, ""))
+        if expected_base and base_before != normalize_sha(expected_base):
+            raise ControllerError("protected_base_moved", f"live={base_before}:expected={expected_base}")
+        if expected_base_tree and base_tree_before != normalize_sha(expected_base_tree):
+            raise ControllerError(
+                "protected_base_tree_moved",
+                f"live={base_tree_before}:expected={expected_base_tree}",
+            )
+        merge_sha = hashlib.sha1(f"merge:{number}:{head}".encode("utf-8")).hexdigest()
         self.refs[base] = merge_sha
+        if expected_result_tree:
+            self.ref_trees[base] = normalize_sha(expected_result_tree)
         pr["state"] = "merged"
         pr["merged"] = True
         pr["mergeCommitSha"] = merge_sha
@@ -289,9 +325,11 @@ class MemoryGitHub:
             "mergeCommitSha": merge_sha,
             "base": base,
             "baseBefore": base_before,
+            "baseTreeBefore": base_tree_before,
             "directPush": False,
             "admin": bool(admin),
             "matchHeadCommit": bool(match_head_commit),
+            "resultTree": normalize_sha(expected_result_tree or ""),
         }
         self.merges.append(record)
         return dict(record)
@@ -410,6 +448,7 @@ class LiveGitHub:
             "state": "open" if payload.get("state") == "open" else str(payload.get("state") or ""),
             "head": str(head.get("ref") or ""),
             "base": str(base.get("ref") or ""),
+            "baseSha": normalize_sha(str(base.get("sha") or "")),
             "headSha": normalize_sha(str(head.get("sha") or "")),
             "mergeableState": str(payload.get("mergeable_state") or ""),
             "crossRepository": bool(
@@ -420,15 +459,55 @@ class LiveGitHub:
             "mergeCommitSha": normalize_sha(str(payload.get("merge_commit_sha") or "")),
         }
 
+    def get_ref_identity(self, *, repository: str, branch: str) -> dict[str, str]:
+        if repository != self.repository:
+            raise ControllerError("wrong_repository", repository)
+        encoded = urllib.parse.quote(branch, safe="")
+        ref = self._request("GET", f"https://api.github.com/repos/{repository}/git/ref/heads/{encoded}")
+        obj = ref.get("object") if isinstance(ref, Mapping) and isinstance(ref.get("object"), Mapping) else {}
+        commit = normalize_sha(str(obj.get("sha") or ""))
+        if not is_valid_sha(commit):
+            raise ControllerError("github_api_failed", f"protected ref identity missing: {branch}")
+        payload = self._request("GET", f"https://api.github.com/repos/{repository}/git/commits/{commit}")
+        tree_obj = payload.get("tree") if isinstance(payload, Mapping) and isinstance(payload.get("tree"), Mapping) else {}
+        tree = normalize_sha(str(tree_obj.get("sha") or ""))
+        if not is_valid_sha(tree):
+            raise ControllerError("github_api_failed", f"protected tree identity missing: {branch}")
+        return {"commit": commit, "tree": tree}
+
+    def _require_atomic_base_protection(self, *, repository: str, branch: str) -> None:
+        """Require GitHub to reject a merge when its base moves at transaction time."""
+
+        encoded = urllib.parse.quote(branch, safe="")
+        rules = self._request(
+            "GET", f"https://api.github.com/repos/{repository}/rules/branches/{encoded}"
+        )
+        strict = any(
+            isinstance(rule, Mapping)
+            and rule.get("type") == "required_status_checks"
+            and isinstance(rule.get("parameters"), Mapping)
+            and rule["parameters"].get("strict_required_status_checks_policy") is True
+            for rule in rules if isinstance(rules, list)
+        )
+        if not strict:
+            raise ControllerError(
+                "atomic_base_protection_missing",
+                f"{branch} must require strict up-to-date status checks before protected merge",
+            )
+
     def merge_pull_request(
         self,
         *,
         repository: str,
         number: int,
         expected_head: str,
+        expected_base_branch: str,
         method: str = "merge",
         admin: bool = False,
         match_head_commit: bool = True,
+        expected_base: str | None = None,
+        expected_base_tree: str | None = None,
+        expected_result_tree: str | None = None,
     ) -> dict[str, Any]:
         live = self.get_pull_request(repository=repository, number=number)
         head = normalize_sha(str(live.get("headSha") or ""))
@@ -438,6 +517,25 @@ class LiveGitHub:
             raise ControllerError("draft_pr", str(number))
         if str(live.get("state") or "").lower() != "open":
             raise ControllerError("pr_not_open", str(number))
+        base_branch = str(live.get("base") or "")
+        if base_branch != expected_base_branch:
+            raise ControllerError(
+                "unexpected_pr_base_branch",
+                f"live={base_branch}:expected={expected_base_branch}",
+            )
+        if expected_base or expected_base_tree:
+            base_identity = self.get_ref_identity(repository=repository, branch=base_branch)
+            if expected_base and base_identity["commit"] != normalize_sha(expected_base):
+                raise ControllerError(
+                    "protected_base_moved",
+                    f"live={base_identity['commit']}:expected={expected_base}",
+                )
+            if expected_base_tree and base_identity["tree"] != normalize_sha(expected_base_tree):
+                raise ControllerError(
+                    "protected_base_tree_moved",
+                    f"live={base_identity['tree']}:expected={expected_base_tree}",
+                )
+            self._require_atomic_base_protection(repository=repository, branch=base_branch)
         if admin:
             return self._merge_with_gh_admin(
                 repository=repository,
@@ -456,15 +554,36 @@ class LiveGitHub:
         )
         if not isinstance(payload, Mapping) or not payload.get("merged"):
             raise ControllerError("protected_merge_rejected", f"PR #{number} was not merged")
+        merge_sha = normalize_sha(str(payload.get("sha") or ""))
+        if expected_base or expected_result_tree:
+            merged_commit = self._request(
+                "GET", f"https://api.github.com/repos/{repository}/git/commits/{merge_sha}"
+            )
+            parents = merged_commit.get("parents") if isinstance(merged_commit, Mapping) else []
+            first_parent = normalize_sha(
+                str((parents[0] if isinstance(parents, list) and parents else {}).get("sha") or "")
+            )
+            tree_obj = merged_commit.get("tree") if isinstance(merged_commit, Mapping) else {}
+            merged_tree = normalize_sha(str((tree_obj if isinstance(tree_obj, Mapping) else {}).get("sha") or ""))
+            if expected_base and first_parent != normalize_sha(expected_base):
+                raise ControllerError(
+                    "protected_base_moved_during_merge",
+                    f"merged_base={first_parent}:expected={expected_base}",
+                )
+            if expected_result_tree and merged_tree != normalize_sha(expected_result_tree):
+                raise ControllerError(
+                    "protected_merge_tree_mismatch",
+                    f"merged_tree={merged_tree}:expected={expected_result_tree}",
+                )
         return {
             "number": number,
             "method": method,
             "headSha": normalize_sha(expected_head),
-            "mergeCommitSha": normalize_sha(str(payload.get("sha") or "")),
+            "mergeCommitSha": merge_sha,
             "directPush": False,
             "admin": False,
             "matchHeadCommit": bool(match_head_commit),
-            "base": str(live.get("base") or ""),
+            "base": base_branch,
         }
 
     def _merge_with_gh_admin(
@@ -658,6 +777,26 @@ def require_promotion_source_equality(
         raise ControllerError(
             "promotion_source_mismatch",
             f"{stage}:candidate={candidate or 'missing'}:source={source or 'missing'}",
+        )
+
+
+def require_live_protected_identity(
+    *,
+    github: GitHubPort,
+    repository: str,
+    branch: str,
+    expected_commit: str,
+    expected_tree: str,
+) -> None:
+    """Fail before merge when a protected target moved or was misidentified."""
+
+    observed = github.get_ref_identity(repository=repository, branch=branch)
+    actual_commit = normalize_sha(str(observed.get("commit") or ""))
+    actual_tree = normalize_sha(str(observed.get("tree") or ""))
+    if actual_commit != normalize_sha(expected_commit) or actual_tree != normalize_sha(expected_tree):
+        raise ControllerError(
+            "protected_base_moved",
+            f"{branch}:commit={actual_commit or 'missing'}:tree={actual_tree or 'missing'}",
         )
 
 
@@ -857,12 +996,41 @@ def merge_to_development(
     candidate_identity: Mapping[str, Any] | None = None,
     candidate_tree: str | None = None,
     protected_base_commit: str | None = None,
+    protected_base_tree: str | None = None,
     rollout: StagedRolloutConfig | None = None,
 ) -> dict[str, Any]:
     """Merge through GitHub protection. Never push directly to development."""
 
     config = _rollout_config(rollout)
     require_controller_role(role)
+    target_tree = ""
+    base_commit = ""
+    base_tree = ""
+    if receipt is not None or candidate_identity is not None:
+        if receipt is None or candidate_identity is None:
+            raise ControllerError("transition_receipt_failed", "receipt and candidate identity must be supplied together")
+        target_tree = normalize_sha(candidate_tree or "")
+        base_commit = normalize_sha(protected_base_commit or "")
+        base_tree = normalize_sha(protected_base_tree or "")
+        if not all(is_valid_sha(value) for value in (target_tree, base_commit, base_tree)):
+            raise ControllerError(
+                "transition_receipt_failed",
+                "protected merge requires exact target and protected base commit/tree identities",
+            )
+        receipt_decision = verify_receipt_payload(receipt, candidate_identity, "full-gate")
+        if not receipt_decision.accepted:
+            raise ControllerError(
+                "transition_receipt_failed",
+                f"{receipt_decision.code}:{receipt_decision.detail}",
+            )
+        identity_repository = str(candidate_identity.get("repository") or "")
+        identity_head = normalize_sha(str(candidate_identity.get("headCommit") or ""))
+        identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
+        if identity_repository != repository or identity_head != normalize_sha(expected_head) or identity_tree != target_tree:
+            raise ControllerError(
+                "transition_receipt_failed",
+                "candidate identity differs from the repository, expected head, or audited tree",
+            )
     try:
         github.push_protected(repository=repository, branch=config.development_branch, sha=expected_head)
     except ControllerError as exc:
@@ -873,9 +1041,13 @@ def merge_to_development(
             repository=repository,
             number=pr_number,
             expected_head=expected_head,
+            expected_base_branch=config.development_branch,
             method="merge",
             admin=False,
             match_head_commit=True,
+            expected_base=base_commit or None,
+            expected_base_tree=base_tree or None,
+            expected_result_tree=target_tree or None,
         )
     )
     result = {
@@ -890,19 +1062,20 @@ def merge_to_development(
         "component": COMPONENT_KIND,
     }
     if receipt is not None or candidate_identity is not None:
-        if receipt is None or candidate_identity is None:
-            raise ControllerError("transition_receipt_failed", "receipt and candidate identity must be supplied together")
-        target_tree = normalize_sha(candidate_tree or "")
         merge_commit = normalize_sha(str(result.get("mergeCommitSha") or ""))
-        if not is_valid_sha(merge_commit) or not is_valid_sha(target_tree):
-            raise ControllerError("transition_receipt_failed", "protected merge did not return an exact commit/tree identity")
+        if not is_valid_sha(merge_commit):
+            raise ControllerError(
+                "transition_receipt_failed",
+                "protected merge did not return an exact commit identity",
+            )
         try:
             transition = create_transition_receipt(
                 receipt,
                 target_branch=config.development_branch,
                 target_commit=merge_commit,
                 target_tree=target_tree,
-                protected_base_commit=normalize_sha(protected_base_commit or "") or None,
+                protected_base_commit=base_commit,
+                protected_base_tree=base_tree,
             ).to_dict()
         except (ValueError, TypeError) as exc:
             raise ControllerError("transition_receipt_failed", str(exc)) from exc
@@ -918,6 +1091,7 @@ def promote_to_staging(
     repository: str,
     development_sha: str,
     staging_sha: str,
+    staging_tree: str,
     candidate_sha: str,
     candidate_tree: str,
     receipt: Mapping[str, Any],
@@ -953,6 +1127,28 @@ def promote_to_staging(
     identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
     if identity_tree != normalize_sha(candidate_tree):
         raise ControllerError("changed_staging_content", "promotion tree differs from receipt identity")
+    base_commit = normalize_sha(staging_sha)
+    base_tree = normalize_sha(staging_tree)
+    if not is_valid_sha(base_commit) or not is_valid_sha(base_tree):
+        raise ControllerError("transition_receipt_failed", "staging base commit/tree identity is required")
+    require_live_protected_identity(
+        github=github,
+        repository=repository,
+        branch=config.staging_branch,
+        expected_commit=base_commit,
+        expected_tree=base_tree,
+    )
+    try:
+        promotion_transition = create_transition_receipt(
+            receipt,
+            target_branch=config.development_branch,
+            target_commit=normalize_sha(development_sha),
+            target_tree=identity_tree,
+            protected_base_commit=base_commit,
+            protected_base_tree=base_tree,
+        ).to_dict()
+    except (ValueError, TypeError) as exc:
+        raise ControllerError("transition_receipt_failed", str(exc)) from exc
     short = normalize_sha(development_sha)[:12]
     branch = _promotion_branch(config, config.staging_branch, development_sha)
     marker = {
@@ -968,9 +1164,8 @@ def promote_to_staging(
         "fullRunId": _receipt_workflow_run_id(receipt),
         "fullRunAttempt": _receipt_workflow_run_attempt(receipt),
     }
-    if transition_receipt is not None:
-        marker["transitionReceiptDigest"] = compute_transition_digest(transition_receipt)
-        marker["transitionReceipt"] = dict(transition_receipt)
+    marker["transitionReceiptDigest"] = compute_transition_digest(promotion_transition)
+    marker["transitionReceipt"] = promotion_transition
     body = f"<!-- linktrend-promote: {json.dumps(marker, sort_keys=True)} -->"
     pr = call_with_infrastructure_retry(
         lambda: github.create_pull_request(
@@ -982,14 +1177,25 @@ def promote_to_staging(
             head_sha=candidate_sha,
         )
     )
+    require_live_protected_identity(
+        github=github,
+        repository=repository,
+        branch=config.staging_branch,
+        expected_commit=base_commit,
+        expected_tree=base_tree,
+    )
     merged = call_with_infrastructure_retry(
         lambda: github.merge_pull_request(
             repository=repository,
             number=int(pr["number"]),
             expected_head=candidate_sha,
+            expected_base_branch=config.staging_branch,
             method="merge",
             admin=False,
             match_head_commit=True,
+            expected_base=base_commit,
+            expected_base_tree=base_tree,
+            expected_result_tree=candidate_tree,
         )
     )
     try:
@@ -998,6 +1204,8 @@ def promote_to_staging(
             target_branch=config.staging_branch,
             target_commit=normalize_sha(str(merged.get("mergeCommitSha") or "")),
             target_tree=normalize_sha(candidate_tree),
+            protected_base_commit=base_commit,
+            protected_base_tree=base_tree,
         ).to_dict()
     except (ValueError, TypeError) as exc:
         raise ControllerError("transition_receipt_failed", str(exc)) from exc
@@ -1026,6 +1234,7 @@ def prepare_main_promotion(
     repository: str,
     staging_sha: str,
     main_sha: str,
+    main_tree: str,
     candidate_sha: str,
     receipt: Mapping[str, Any],
     candidate_identity: Mapping[str, Any],
@@ -1054,6 +1263,29 @@ def prepare_main_promotion(
     )
     if not receipt_decision.accepted:
         raise ControllerError("receipt_rejected", f"{receipt_decision.code}:{receipt_decision.detail}")
+    identity_tree = normalize_sha(str(candidate_identity.get("gitTree") or ""))
+    base_commit = normalize_sha(main_sha)
+    base_tree = normalize_sha(main_tree)
+    if not is_valid_sha(identity_tree) or not is_valid_sha(base_commit) or not is_valid_sha(base_tree):
+        raise ControllerError("transition_receipt_failed", "main candidate and base commit/tree identities are required")
+    require_live_protected_identity(
+        github=github,
+        repository=repository,
+        branch=config.main_branch,
+        expected_commit=base_commit,
+        expected_tree=base_tree,
+    )
+    try:
+        promotion_transition = create_transition_receipt(
+            receipt,
+            target_branch=config.staging_branch,
+            target_commit=normalize_sha(staging_sha),
+            target_tree=identity_tree,
+            protected_base_commit=base_commit,
+            protected_base_tree=base_tree,
+        ).to_dict()
+    except (ValueError, TypeError) as exc:
+        raise ControllerError("transition_receipt_failed", str(exc)) from exc
     short = normalize_sha(staging_sha)[:12]
     branch = _promotion_branch(config, config.main_branch, staging_sha)
     marker = {
@@ -1063,6 +1295,7 @@ def prepare_main_promotion(
         "targetBranch": config.main_branch,
         "sourceSha": normalize_sha(staging_sha),
         "targetSha": normalize_sha(main_sha),
+        "targetTree": base_tree,
         "candidateHead": normalize_sha(candidate_sha),
         "promoteBranch": branch,
         "receiptDigest": compute_receipt_digest(receipt),
@@ -1070,9 +1303,8 @@ def prepare_main_promotion(
         "fullRunAttempt": _receipt_workflow_run_attempt(receipt),
         "awaitingFounderApproval": True,
     }
-    if transition_receipt is not None:
-        marker["transitionReceiptDigest"] = compute_transition_digest(transition_receipt)
-        marker["transitionReceipt"] = dict(transition_receipt)
+    marker["transitionReceiptDigest"] = compute_transition_digest(promotion_transition)
+    marker["transitionReceipt"] = promotion_transition
     body = f"<!-- linktrend-promote: {json.dumps(marker, sort_keys=True)} -->"
     pr = call_with_infrastructure_retry(
         lambda: github.create_pull_request(
@@ -1112,6 +1344,7 @@ def complete_main_promotion(
     expected_head: str,
     source_sha: str,
     base_sha: str,
+    base_tree: str,
     approval: Mapping[str, Any],
     receipt: Mapping[str, Any],
     role: str,
@@ -1136,6 +1369,7 @@ def complete_main_promotion(
         approval,
         source_sha=source_sha,
         base_sha=base_sha,
+        base_tree=base_tree,
         pr_head_sha=expected_head,
         receipt=receipt,
     )
@@ -1145,14 +1379,32 @@ def complete_main_promotion(
     live_head = normalize_sha(str(live.get("headSha") or ""))
     if live_head != normalize_sha(expected_head):
         raise ControllerError("stale_pr_head", live_head)
+    require_live_protected_identity(
+        github=github,
+        repository=repository,
+        branch=config.main_branch,
+        expected_commit=base_sha,
+        expected_tree=base_tree,
+    )
     merged = call_with_infrastructure_retry(
         lambda: github.merge_pull_request(
             repository=repository,
             number=pr_number,
             expected_head=expected_head,
+            expected_base_branch=config.main_branch,
             method="merge",
             admin=False,
             match_head_commit=True,
+            expected_base=base_sha,
+            expected_base_tree=base_tree,
+            expected_result_tree=normalize_sha(
+                str(
+                    ((receipt.get("candidateIdentity") or {}) if isinstance(receipt, Mapping) else {}).get(
+                        "gitTree"
+                    )
+                    or ""
+                )
+            ),
         )
     )
     return {
@@ -1313,6 +1565,7 @@ def deliver_phase_to_development(
     conflict: bool = False,
     record_path: Path | None = None,
     protected_tree: str | None = None,
+    protected_base_tree: str | None = None,
     rollout: StagedRolloutConfig | None = None,
 ) -> dict[str, Any]:
     """End-to-end development merge for one exact Phase PR."""
@@ -1344,6 +1597,7 @@ def deliver_phase_to_development(
             candidate_identity=candidate_identity,
             candidate_tree=protected_tree or live_tree,
             protected_base_commit=str(handoff.get("baseCommit") or ""),
+            protected_base_tree=protected_base_tree,
             rollout=config,
         )
     except ControllerError as exc:
@@ -1444,6 +1698,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--expected-head", default="")
     parser.add_argument("--source-sha", default="")
     parser.add_argument("--base-sha", default="")
+    parser.add_argument("--base-tree", default="")
     parser.add_argument("--branches", default="")
     parser.add_argument("--payload-json", default="")
     parser.add_argument("--out", default="")
@@ -1503,6 +1758,7 @@ def main(argv: list[str] | None = None) -> int:
                     candidate_identity=load(args.identity_json) if args.identity_json else None,
                     candidate_tree=args.live_tree or None,
                     protected_base_commit=args.base_sha or None,
+                    protected_base_tree=args.base_tree or None,
                     rollout=rollout,
                 )
             elif args.command == "promote-staging":
@@ -1512,6 +1768,7 @@ def main(argv: list[str] | None = None) -> int:
                     repository=args.repository,
                     development_sha=str(payload["developmentSha"]),
                     staging_sha=str(payload["stagingSha"]),
+                    staging_tree=str(payload["stagingTree"]),
                     candidate_sha=str(payload["candidateSha"]),
                     candidate_tree=str(payload["candidateTree"]),
                     receipt=load(args.receipt),
@@ -1529,6 +1786,7 @@ def main(argv: list[str] | None = None) -> int:
                     repository=args.repository,
                     staging_sha=str(payload["stagingSha"]),
                     main_sha=str(payload["mainSha"]),
+                    main_tree=str(payload["mainTree"]),
                     candidate_sha=str(payload["candidateSha"]),
                     receipt=load(args.receipt),
                     candidate_identity=load(args.identity_json),
@@ -1545,6 +1803,7 @@ def main(argv: list[str] | None = None) -> int:
                     expected_head=args.expected_head,
                     source_sha=args.source_sha,
                     base_sha=args.base_sha,
+                    base_tree=args.base_tree,
                     approval=load(args.approval_json),
                     receipt=load(args.receipt),
                     role=args.role,

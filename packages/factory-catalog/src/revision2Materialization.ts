@@ -11,6 +11,7 @@ import {
   validateExactRelease,
 } from './libraryProviderClient.ts'
 import { MASTER_TEMPLATE_SOURCE_COMMIT_SHA, MASTER_TEMPLATE_SOURCE_TREE_SHA } from './templateIdentity.ts'
+import { MASTER_TEMPLATE_PIN } from './masterTemplatePin.ts'
 import {
   MASTER_TEMPLATE_ADAPTER_ID,
   MASTER_TEMPLATE_ADAPTER_MAPPING_DIGEST,
@@ -72,6 +73,7 @@ const canonical = (value: unknown): string => value === null || typeof value !==
   : Array.isArray(value)
     ? `[${value.map(canonical).join(',')}]`
     : `{${Object.keys(value as Record<string, unknown>).sort().map((key) => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`).join(',')}}`
+const canonicalDigest = (value: unknown): string => sha256(canonical(value))
 const identity = (value: unknown): string => createHash('sha1').update(canonical(value), 'utf8').digest('hex')
 const SHA1 = /^[a-f0-9]{40}$/
 const SHA256 = /^[a-f0-9]{64}$/
@@ -184,22 +186,50 @@ export function materializeRevision2WebsiteTemplate(input: Revision2Materializat
   errors.push(...providerCheckoutIdentity(providerRoot, input.pin))
   if (errors.length) return failure(errors)
   let bundle: unknown
+  let inventoryFileSha256 = ''
   try {
     const cataloguePath = resolve(providerRoot, 'indexes/v2/catalog.json')
     if (!providerFileIsConfined(providerRoot, cataloguePath)) throw new Error('provider catalogue path is missing, non-regular, symlinked, or outside provider root')
     const catalogueBytes = readFileSync(cataloguePath, 'utf8')
-    const catalogue = JSON.parse(catalogueBytes) as unknown
-    const manifest = readProviderJson(providerRoot, resolve(releaseRoot, 'manifest.json'))
-    const inventory = readProviderJson(providerRoot, resolve(releaseRoot, 'inventory.json'))
+    const catalogueFileSha256 = sha256(catalogueBytes)
+    if (input.pin.catalogueFileSha256 && catalogueFileSha256 !== input.pin.catalogueFileSha256) {
+      throw new Error('catalogue file digest does not match the pinned provider checkout')
+    }
+    const catalogue = JSON.parse(catalogueBytes) as { records?: unknown[]; recordsSha256?: unknown }
+    if (typeof catalogue.recordsSha256 === 'string' && Array.isArray(catalogue.records) && canonicalDigest(catalogue.records) !== catalogue.recordsSha256) {
+      throw new Error('catalogue.recordsSha256 does not match the mounted catalogue records')
+    }
+    if (input.pin.catalogueRecordsSha256 && catalogue.recordsSha256 !== input.pin.catalogueRecordsSha256) {
+      throw new Error('catalogue records digest does not match the pinned provider checkout')
+    }
+    const manifestPath = resolve(releaseRoot, 'manifest.json')
+    const inventoryPath = resolve(releaseRoot, 'inventory.json')
+    if (!providerFileIsConfined(providerRoot, manifestPath) || !providerFileIsConfined(providerRoot, inventoryPath)) {
+      throw new Error('provider release path is missing, non-regular, symlinked, or outside provider root')
+    }
+    const manifestBytes = readFileSync(manifestPath)
+    const inventoryBytes = readFileSync(inventoryPath)
+    const computedInventoryFileSha256 = sha256(inventoryBytes)
+    inventoryFileSha256 = computedInventoryFileSha256
+    if (input.entryId === MASTER_TEMPLATE_PIN.entryId && input.version === MASTER_TEMPLATE_PIN.version) {
+      if (sha256(manifestBytes) !== MASTER_TEMPLATE_PIN.releaseManifestSha256) {
+        throw new Error('manifest file digest does not match the pinned A1 identity')
+      }
+      if (inventoryFileSha256 !== MASTER_TEMPLATE_PIN.inventorySha256) {
+        throw new Error('inventory file digest does not match the pinned A1 identity')
+      }
+    }
+    const manifest = readProviderJson(providerRoot, manifestPath)
+    const inventory = readProviderJson(providerRoot, inventoryPath) as Record<string, unknown>
     const dependencyLock = readProviderJson(providerRoot, resolve(releaseRoot, 'dependency-lock.json'))
     const candidateReceipt = readReceipt(input, releaseRoot)
     if (candidateReceipt && typeof candidateReceipt === 'object' && !Array.isArray(candidateReceipt) && (candidateReceipt as Record<string, unknown>).receiptType === 'provider_prerelease_candidate') {
       const candidate = candidateReceipt as Record<string, any>
-      const catalogRecord = catalogue as Record<string, any>
-      candidate.catalogue = { fileSha256: sha256(catalogueBytes), recordsSha256: catalogRecord.recordsSha256 }
+      candidate.catalogue = { ...candidate.catalogue, fileSha256: catalogueFileSha256, recordsSha256: catalogue.recordsSha256 }
     }
-    const record = (catalogue as { records?: unknown[] }).records?.find((item) => (item as { entryId?: unknown })?.entryId === input.entryId && (item as { version?: unknown })?.version === input.version)
-    bundle = { source: { commitSha: input.pin.sourceCommitSha, treeSha: input.pin.sourceTreeSha }, catalogue, catalogueFileSha256: sha256(catalogueBytes), record, manifest, inventory, dependencyLock, receipt: candidateReceipt }
+    const record = catalogue.records?.find((item) => (item as { entryId?: unknown })?.entryId === input.entryId && (item as { version?: unknown })?.version === input.version)
+    const draftCandidateProbe = input.selectionPolicy === 'draft_candidate_probe'
+    bundle = { source: { commitSha: input.pin.sourceCommitSha, treeSha: input.pin.sourceTreeSha }, catalogue, catalogueFileSha256, record: draftCandidateProbe ? undefined : record, manifest, inventory, dependencyLock, receipt: candidateReceipt }
   } catch (error) {
     return failure([error instanceof Error ? error.message : 'provider release files could not be read'])
   }
@@ -207,6 +237,9 @@ export function materializeRevision2WebsiteTemplate(input: Revision2Materializat
   if (!validated.ok) return validated
   const admitted = admitWebsiteTemplateMaterialization(validated, { selectionPolicy: input.selectionPolicy })
   if (!admitted.ok) return admitted
+  const reference = input.selectionPolicy === 'draft_candidate_probe' && inventoryFileSha256
+    ? Object.freeze({ ...admitted.value, inventorySha256: inventoryFileSha256 })
+    : admitted.value
   const inventory = (bundle as { inventory: { entries?: unknown[] } }).inventory
   const files: Record<string, string> = {}
   for (const item of inventory.entries ?? []) {
@@ -233,7 +266,6 @@ export function materializeRevision2WebsiteTemplate(input: Revision2Materializat
     const sourceTree = sourceInventory.sourceTree ?? sourceInventory.source?.treeSha
     if (sourceRepository !== 'LiNKsites' || sourceCommit !== MASTER_TEMPLATE_SOURCE_COMMIT_SHA || sourceTree !== MASTER_TEMPLATE_SOURCE_TREE_SHA) return failure(['provider source inventory is not bound to the preserved LiNKsites visual handoff'])
   } catch { return failure(['provider source inventory is invalid JSON']) }
-  const reference = admitted.value
   const materializationReceipt = buildMaterializationReceipt(input, reference, files, input.cacheRoot)
   if (input.cacheRoot) {
     try { writeCache(input.cacheRoot, materializationReceipt, files) } catch (error) { return failure([error instanceof Error ? error.message : 'consumer cache write failed']) }

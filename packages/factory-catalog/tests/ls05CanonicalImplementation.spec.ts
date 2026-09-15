@@ -11,6 +11,7 @@ import {
   validateA1AdapterCoverage,
 } from '../src/masterTemplateVersionedAdapter.js'
 import { bindMasterTemplateIdentities } from '../src/masterTemplateIdentityBindings.js'
+import { MASTER_TEMPLATE_PIN } from '../src/masterTemplatePin.js'
 
 describe('LS-05 canonical A1 adapter and identity bindings', () => {
   it('has complete versioned A1 role coverage and explicit unsupported results', () => {
@@ -30,7 +31,7 @@ describe('LS-05 canonical A1 adapter and identity bindings', () => {
         providerTreeSha: FROZEN_PROVIDER_PIN.providerTreeSha!,
         sourceReleaseCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
         sourceReleaseTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
-        artifactTreeSha1: 'a8c6c23fd41a5f0eb9221276998f96862a50119f',
+        artifactTreeSha1: MASTER_TEMPLATE_PIN.artifactTreeSha1,
       },
       adoption: { siteId: 'site-ls05', locale: 'en-US', payloadStatus: 'draft' },
       payload: { siteId: 'site-ls05', locale: 'en-US', documentIds: ['pages:home', 'pages:contact'] },
@@ -54,10 +55,15 @@ describe('LS-05 canonical A1 adapter and identity bindings', () => {
       providerTreeSha: FROZEN_PROVIDER_PIN.providerTreeSha!,
       sourceReleaseCommitSha: FROZEN_PROVIDER_PIN.sourceCommitSha,
       sourceReleaseTreeSha: FROZEN_PROVIDER_PIN.sourceTreeSha,
-      artifactTreeSha1: 'a8c6c23fd41a5f0eb9221276998f96862a50119f',
+      artifactTreeSha1: MASTER_TEMPLATE_PIN.artifactTreeSha1,
     } as const
     expect(() => bindMasterTemplateIdentities({
       candidate: { ...candidate, providerTreeSha: 'f'.repeat(40) },
+      adoption: { siteId: 'site-ls05', locale: 'en-US', payloadStatus: 'draft' },
+      payload: { siteId: 'site-ls05', locale: 'en-US', documentIds: [] },
+    })).toThrow(/exact pinned provider\/release identity/)
+    expect(() => bindMasterTemplateIdentities({
+      candidate: { ...candidate, artifactTreeSha1: 'a8c6c23fd41a5f0eb9221276998f96862a50119f' },
       adoption: { siteId: 'site-ls05', locale: 'en-US', payloadStatus: 'draft' },
       payload: { siteId: 'site-ls05', locale: 'en-US', documentIds: [] },
     })).toThrow(/exact pinned provider\/release identity/)

@@ -19,8 +19,8 @@ export default function Error({
       <body>
         <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
           <div className="text-center">
-            <h2 className="mb-4 text-2xl font-bold text-slate-800">Something went wrong!</h2>
-            <p className="mb-8 text-slate-600">We apologize for the inconvenience.</p>
+            <h2 className="mb-4 text-2xl font-bold text-slate-800">This page could not be displayed.</h2>
+            <p className="mb-8 text-slate-600">Please try again.</p>
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => reset()}
