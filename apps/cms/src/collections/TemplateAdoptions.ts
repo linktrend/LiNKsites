@@ -5,7 +5,7 @@ import { localeField } from '@/fields/localeField'
 import { siteField } from '@/fields/siteField'
 import { LS03_ADOPTION_STATES, SHA1_IDENTITY } from '@/payload/ls03/semanticContract'
 import { ImmutableRecordError, rejectImmutableDelete, rejectImmutableUpdate } from '@/hooks/enforceImmutableRecord'
-import { owningSiteMatchesTenant } from '@/payload/lsdata01/tenantBoundary'
+import { assertOwningSiteTenantBoundary } from '@/payload/lsdata01/tenantBoundary'
 
 /** Frozen LSG0-02 / LS-02 pins mirrored from factory-catalog; CMS cannot depend on that package. */
 export const LSDATA01_RETAINED_PROVIDER = '0178894d6ce718bb7dff3c141892f82144e2d18c'
@@ -28,35 +28,22 @@ const identityField = (name: string, label: string): Field => ({
   },
 })
 
-const relationshipId = (value: unknown): string => {
-  if (typeof value === 'string' || typeof value === 'number') return String(value)
-  if (value && typeof value === 'object' && 'id' in value) {
-    const id = (value as { id?: unknown }).id
-    if (typeof id === 'string' || typeof id === 'number') return String(id)
-  }
-  return ''
-}
-
 export const assertLsdata01TenantBoundary: CollectionBeforeChangeHook = async ({ data, req }) => {
-  const tenantOrgId = typeof data?.tenantOrgId === 'string' ? data.tenantOrgId : ''
-  if (!tenantOrgId) {
-    throw new ImmutableRecordError('Tenant authorization denied: tenantOrgId is required.')
-  }
-  if (!req.user) {
-    throw new ImmutableRecordError('Tenant authorization denied: unauthenticated actor.')
-  }
-  const siteId = relationshipId(data?.site)
-  if (!siteId) {
-    throw new ImmutableRecordError('Tenant authorization denied: owning site is required.')
-  }
-  const site = (await req.payload.findByID({
-    collection: 'sites',
-    id: siteId,
-    depth: 0,
-    overrideAccess: false,
-  })) as unknown as { id?: string | number; orgId?: unknown }
-  if (!owningSiteMatchesTenant(siteId, tenantOrgId, site)) {
-    throw new ImmutableRecordError('Tenant authorization denied: org boundary is fail-closed.')
+  try {
+    await assertOwningSiteTenantBoundary({
+      data,
+      user: req.user,
+      findOwningSite: async (siteId, authenticatedUser) =>
+        (await req.payload.findByID({
+          collection: 'sites',
+          id: siteId,
+          depth: 0,
+          overrideAccess: false,
+          user: authenticatedUser as typeof req.user,
+        })) as unknown as { id?: string | number; orgId?: unknown },
+    })
+  } catch (error) {
+    throw new ImmutableRecordError(error instanceof Error ? error.message : 'Tenant authorization denied.')
   }
 }
 

@@ -23,7 +23,10 @@ import {
   replayCreditHydration,
 } from '../../../../packages/factory-catalog/src/capabilityCredits.ts'
 import { migrations } from '../../src/migrations'
-import { owningSiteMatchesTenant } from '../../src/payload/lsdata01/tenantBoundary'
+import {
+  assertOwningSiteTenantBoundary,
+  owningSiteMatchesTenant,
+} from '../../src/payload/lsdata01/tenantBoundary'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../../..')
 const PIN = (label: string): string => createHash('sha1').update(`lsdata01:${label}`).digest('hex')
@@ -193,6 +196,39 @@ describe('LSDATA-01 additive Payload/data compatibility', () => {
     expect(owningSiteMatchesTenant('site-a', 'org-b', { id: 'site-a', orgId: 'org-a' })).toBe(false)
     expect(owningSiteMatchesTenant('site-b', 'org-a', { id: 'site-a', orgId: 'org-a' })).toBe(false)
     expect(owningSiteMatchesTenant('site-a', 'org-a', { id: 'site-a' })).toBe(false)
+  })
+
+  it('performs the owning-site lookup as the authenticated actor and denies boundary mismatches', async () => {
+    const user = { id: 'user-a', role: 'editor' }
+    const observed: Array<{ siteId: string; user: unknown }> = []
+    const findOwningSite = async (siteId: string, authenticatedUser: unknown) => {
+      observed.push({ siteId, user: authenticatedUser })
+      return { id: 'site-a', orgId: 'org-a' }
+    }
+
+    await expect(
+      assertOwningSiteTenantBoundary({
+        data: { site: 'site-a', tenantOrgId: 'org-a' },
+        user,
+        findOwningSite,
+      }),
+    ).resolves.toBeUndefined()
+    expect(observed).toEqual([{ siteId: 'site-a', user }])
+
+    await expect(
+      assertOwningSiteTenantBoundary({
+        data: { site: 'site-b', tenantOrgId: 'org-a' },
+        user,
+        findOwningSite,
+      }),
+    ).rejects.toThrow(/org boundary is fail-closed/)
+    await expect(
+      assertOwningSiteTenantBoundary({
+        data: { site: 'site-a', tenantOrgId: 'org-b' },
+        user,
+        findOwningSite,
+      }),
+    ).rejects.toThrow(/org boundary is fail-closed/)
   })
 
   it('retains prior LS02 pins and keeps schema copies inactive', () => {
