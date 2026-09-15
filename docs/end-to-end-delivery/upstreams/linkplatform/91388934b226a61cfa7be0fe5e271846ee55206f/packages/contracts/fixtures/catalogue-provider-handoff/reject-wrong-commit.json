@@ -1,0 +1,8 @@
+{
+  "name": "catalogue-provider-handoff-reject-wrong-commit",
+  "expect": "reject",
+  "reason": "commit",
+  "patch": {
+    "pin": { "commit": "0000000000000000000000000000000000000000" }
+  }
+}

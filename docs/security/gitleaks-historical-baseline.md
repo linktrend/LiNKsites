@@ -20,6 +20,30 @@ findings.
   fingerprint allowlisted here is the introducing-commit false positive under
   `generic-api-key`; it is not a production secret.
 
+Hosted Fast CI (`scripts/ci-secret-scan.sh`) loads `.github/gitleaks.toml`,
+which extends the default gitleaks rules. Issue 556 adds one exact-string
+allowlist regex: the SHA-256 of copied `design/tokens.json` in the
+LiNKlibraries WP-0 marketing-smb-v1 A1 receipt
+(`ea0415a8c9478ef8d9e829247800f3ed56c2602a0fb12cd6287b7fd8c0a8120a`). That
+digest is file-hash evidence, not a credential; the rest of the receipt is
+unchanged. Path-wide and rule-wide disables are not used.
+
+The same Phase PR #555 `generic-api-key` report also named:
+
+- The public review-route model name previously inlined next to
+  `Cursor-REST-API-SDK` in `docs/production-roadmap/phase-2/EXECUTION-MANIFEST.json`.
+  Current tip uses the low-entropy placeholder `review-route-grok-medium`.
+  Introducing-commit fingerprints remain in `.gitleaksignore`.
+- The historical commented Autowork signing-secret example assignment in
+  `deploy/config/production.env.example`. Current tip does not assign that
+  value in Git. The introducing-commit fingerprint remains in `.gitleaksignore`.
+
 The CI gate continues to scan every commit introduced by a pull request or
 push. New findings fail closed unless they are separately investigated and
-added as an exact fingerprint through a reviewed change.
+added as an exact fingerprint or an equally tight documented string regex
+through a reviewed change.
+
+The first Issue 556 repair commit `f232d3819f940576388999b1c750876ed721ab52`
+is also fingerprinted: it temporarily inlined a higher-entropy review-route
+placeholder and quoted the historical Autowork example assignment. The
+follow-up commit removes those strings from the current tree.

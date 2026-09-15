@@ -3,10 +3,11 @@
   "kind": "ls08-ext-ls-01-receipt-binding",
   "bound": true,
   "gateId": "EXT-LS-01",
-  "path": ".git/linktrend-evidence/execution-2026-08-25/ext-ls-01-issue321-966a4b0/consumer-proof-receipt.json",
-  "sha256": "5422616a2db650af44d3c87253066dfc5acd80054b4a6dcd35bd83ce6ca978e3",
-  "consumerCommit": "966a4b08c5fdb0fc9a9bb429a5916600b459cee9",
-  "consumerTree": "fa6f3fcbd737c9954214d79b733fe9b8f5d4f68f",
+  "path": ".git/linktrend-evidence/ext-ls-01-issue551/consumer-proof-receipt.json",
+  "sha256": "94fc8b3e9a5739aa7419f3ece03c660e8a8c696940c119f7cdb17b4cdcf3296f",
+  "consumerCommit": "25033a0cb6979c06aeedea5b9d94090e15372e14",
+  "consumerTree": "355c23879d8360fe344a11d09cab441a4fb3a450",
+  "consumerCacheTree": "8cc18abd172cc075e5615457b8b2711d67f7ff04",
   "bytesEmbedded": false,
-  "acceptedBinding": true
+  "acceptedBinding": false
 }
