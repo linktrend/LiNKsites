@@ -122,6 +122,9 @@ class DeliveryControllerTests(unittest.TestCase):
         self.github.refs["development"] = _sha(8)
         self.github.refs["staging"] = _sha(7)
         self.github.refs["main"] = _sha(6)
+        self.github.ref_trees["development"] = _sha(80)
+        self.github.ref_trees["staging"] = _sha(70)
+        self.github.ref_trees["main"] = _sha(60)
 
     def _deliver(self, **kwargs):
         defaults = dict(
@@ -137,6 +140,7 @@ class DeliveryControllerTests(unittest.TestCase):
             receipt=self.receipt,
             candidate_identity=self.identity,
             role="operator",
+            protected_base_tree=_sha(10),
         )
         defaults.update(kwargs)
         return controller.deliver_phase_to_development(**defaults)
@@ -169,6 +173,8 @@ class DeliveryControllerTests(unittest.TestCase):
         self.assertEqual(result["stage"], "development")
         self.assertFalse(result["directPush"])
         self.assertEqual(result["component"], "delivery_controller")
+        self.assertEqual(result["transitionReceipt"]["protectedBaseCommit"], _sha(9))
+        self.assertEqual(result["transitionReceipt"]["protectedBaseTree"], _sha(10))
         self.assertEqual(len(self.github.merges), 1)
         self.assertEqual(self.github.protected_push_attempts[0]["branch"], "development")
 
@@ -183,6 +189,54 @@ class DeliveryControllerTests(unittest.TestCase):
             )
         with self.assertRaisesRegex(controller.ControllerError, "worker_self_merge_forbidden"):
             controller.require_controller_role("implementer")
+
+    def test_missing_base_tree_stops_before_merge(self) -> None:
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                candidate_tree=self.tree,
+                protected_base_commit=_sha(9),
+            )
+        self.assertEqual(self.github.merges, [])
+
+    def test_mismatched_audited_tree_stops_before_merge(self) -> None:
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                candidate_tree=_sha(11),
+                protected_base_commit=_sha(9),
+                protected_base_tree=_sha(10),
+            )
+        self.assertEqual(self.github.merges, [])
+
+    def test_forged_receipt_stops_before_merge(self) -> None:
+        forged = dict(self.receipt, receiptDigest="sha256:" + ("0" * 64))
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.merge_to_development(
+                github=self.github,
+                repository="owner/name",
+                pr_number=11,
+                expected_head=self.head,
+                role="operator",
+                receipt=forged,
+                candidate_identity=self.identity,
+                candidate_tree=self.tree,
+                protected_base_commit=_sha(9),
+                protected_base_tree=_sha(10),
+            )
+        self.assertEqual(self.github.merges, [])
 
     def test_stale_or_changed_pr_is_rejected(self) -> None:
         with self.assertRaisesRegex(controller.ControllerError, "stale_pr_head"):
@@ -271,6 +325,7 @@ class DeliveryControllerTests(unittest.TestCase):
             repository="owner/name",
             development_sha=self.head,
             staging_sha=_sha(7),
+            staging_tree=_sha(70),
             candidate_sha=self.head,
             candidate_tree=self.tree,
             receipt=self.receipt,
@@ -282,6 +337,8 @@ class DeliveryControllerTests(unittest.TestCase):
         self.assertEqual(result["stage"], "staging")
         self.assertTrue(result["receiptReused"])
         self.assertFalse(result["fullSuiteRerun"])
+        self.assertEqual(result["transitionReceipt"]["protectedBaseCommit"], _sha(7))
+        self.assertEqual(result["transitionReceipt"]["protectedBaseTree"], _sha(70))
         marker = json.loads(
             re.search(r"<!-- linktrend-promote:\s*(\{.*?\})\s*-->", self.github.prs[1]["body"]).group(1)
         )
@@ -292,6 +349,7 @@ class DeliveryControllerTests(unittest.TestCase):
                 repository="owner/name",
                 development_sha=self.head,
                 staging_sha=_sha(7),
+                staging_tree=_sha(70),
                 candidate_sha=self.head,
                 candidate_tree=self.tree,
                 receipt=self.receipt,
@@ -314,12 +372,15 @@ class DeliveryControllerTests(unittest.TestCase):
             target_commit=development_head,
             target_tree=self.tree,
             protected_base_commit=_sha(9),
+            protected_base_tree=_sha(10),
         ).to_dict()
+        self.assertEqual(transition["protectedBaseTree"], _sha(10))
         controller.promote_to_staging(
             github=self.github,
             repository="owner/name",
             development_sha=development_head,
             staging_sha=_sha(7),
+            staging_tree=_sha(70),
             candidate_sha=development_head,
             candidate_tree=self.tree,
             receipt=self.receipt,
@@ -331,8 +392,12 @@ class DeliveryControllerTests(unittest.TestCase):
         marker = json.loads(
             re.search(r"<!-- linktrend-promote:\s*(\{.*?\})\s*-->", self.github.prs[1]["body"]).group(1)
         )
-        self.assertEqual(marker["transitionReceipt"], transition)
-        self.assertEqual(marker["transitionReceiptDigest"], receipts.compute_transition_digest(transition))
+        self.assertEqual(marker["transitionReceipt"]["protectedBaseCommit"], _sha(7))
+        self.assertEqual(marker["transitionReceipt"]["protectedBaseTree"], _sha(70))
+        self.assertEqual(
+            marker["transitionReceiptDigest"],
+            receipts.compute_transition_digest(marker["transitionReceipt"]),
+        )
 
     def test_staged_rollout_uses_configured_stage_names_on_critical_path(self) -> None:
         rollout = controller.StagedRolloutConfig.from_mapping(
@@ -344,11 +409,14 @@ class DeliveryControllerTests(unittest.TestCase):
                 "requiredChecks": ["System Fast", "System Full"],
             }
         )
+        self.github.refs["canary"] = _sha(7)
+        self.github.ref_trees["canary"] = _sha(70)
         result = controller.promote_to_staging(
             github=self.github,
             repository="owner/name",
             development_sha=self.head,
             staging_sha=_sha(7),
+            staging_tree=_sha(70),
             candidate_sha=self.head,
             candidate_tree=self.tree,
             receipt=self.receipt,
@@ -374,6 +442,7 @@ class DeliveryControllerTests(unittest.TestCase):
                 repository="owner/name",
                 development_sha=self.head,
                 staging_sha=_sha(7),
+                staging_tree=_sha(70),
                 candidate_sha=self.head,
                 candidate_tree=_sha(99),
                 receipt=self.receipt,
@@ -382,12 +451,58 @@ class DeliveryControllerTests(unittest.TestCase):
                 role="operator",
             )
 
+    def test_missing_staging_base_tree_stops_before_promotion_pr(self) -> None:
+        with self.assertRaisesRegex(controller.ControllerError, "transition_receipt_failed"):
+            controller.promote_to_staging(
+                github=self.github,
+                repository="owner/name",
+                development_sha=self.head,
+                staging_sha=_sha(7),
+                staging_tree="",
+                candidate_sha=self.head,
+                candidate_tree=self.tree,
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                release_gate={"status": "passed", "testProfile": "release"},
+                role="operator",
+            )
+        self.assertNotIn(1, self.github.prs)
+
+    def test_staging_base_movement_stops_before_merge(self) -> None:
+        original_create = self.github.create_pull_request
+
+        def create_then_move(**kwargs):
+            pr = original_create(**kwargs)
+            self.github.refs["staging"] = _sha(71)
+            self.github.ref_trees["staging"] = _sha(72)
+            return pr
+
+        with (
+            mock.patch.object(self.github, "create_pull_request", side_effect=create_then_move),
+            self.assertRaisesRegex(controller.ControllerError, "protected_base_moved"),
+        ):
+            controller.promote_to_staging(
+                github=self.github,
+                repository="owner/name",
+                development_sha=self.head,
+                staging_sha=_sha(7),
+                staging_tree=_sha(70),
+                candidate_sha=self.head,
+                candidate_tree=self.tree,
+                receipt=self.receipt,
+                candidate_identity=self.identity,
+                release_gate={"status": "passed", "testProfile": "release"},
+                role="operator",
+            )
+        self.assertEqual(self.github.merges, [])
+
     def test_main_waits_for_explicit_founder_approval(self) -> None:
         prepared = controller.prepare_main_promotion(
             github=self.github,
             repository="owner/name",
             staging_sha=self.head,
             main_sha=_sha(6),
+            main_tree=_sha(60),
             candidate_sha=self.head,
             receipt=self.receipt,
             candidate_identity=self.identity,
@@ -400,6 +515,8 @@ class DeliveryControllerTests(unittest.TestCase):
             re.search(r"<!-- linktrend-promote:\s*(\{.*?\})\s*-->", self.github.prs[1]["body"]).group(1)
         )
         self.assertEqual(marker["fullRunId"], self.receipt["workflowRunId"])
+        self.assertEqual(marker["transitionReceipt"]["protectedBaseCommit"], _sha(6))
+        self.assertEqual(marker["transitionReceipt"]["protectedBaseTree"], _sha(60))
         with self.assertRaisesRegex(controller.ControllerError, "founder_approval_missing"):
             controller.complete_main_promotion(
                 github=self.github,
@@ -408,6 +525,7 @@ class DeliveryControllerTests(unittest.TestCase):
                 expected_head=self.head,
                 source_sha=self.head,
                 base_sha=_sha(6),
+                base_tree=_sha(60),
                 approval={},
                 receipt=self.receipt,
                 role="operator",
@@ -431,6 +549,7 @@ class DeliveryControllerTests(unittest.TestCase):
             repository="owner/name",
             staging_sha=self.head,
             main_sha=_sha(6),
+            main_tree=_sha(60),
             candidate_sha=self.head,
             receipt=self.receipt,
             candidate_identity=self.identity,
@@ -445,11 +564,13 @@ class DeliveryControllerTests(unittest.TestCase):
                 expected_head=self.head,
                 source_sha=self.head,
                 base_sha=_sha(6),
+                base_tree=_sha(60),
                 approval={
                     "decision": "approve",
                     "inferredFromGreenCi": True,
                     "sourceSha": self.head,
                     "baseSha": _sha(6),
+                    "baseTree": _sha(60),
                     "prHeadSha": self.head,
                     "receiptDigest": receipts.compute_receipt_digest(self.receipt),
                 },
@@ -464,10 +585,12 @@ class DeliveryControllerTests(unittest.TestCase):
                 expected_head=self.head,
                 source_sha=self.head,
                 base_sha=_sha(6),
+                base_tree=_sha(60),
                 approval={
                     "decision": "approve",
                     "sourceSha": _sha(55),
                     "baseSha": _sha(6),
+                    "baseTree": _sha(60),
                     "prHeadSha": self.head,
                     "receiptDigest": receipts.compute_receipt_digest(self.receipt),
                 },
@@ -490,6 +613,7 @@ class DeliveryControllerTests(unittest.TestCase):
             receipt=self.receipt,
             candidate_identity=self.identity,
             role="operator",
+            protected_base_tree=_sha(10),
         )
         self.assertEqual(stopped["status"], "stopped")
         self.assertEqual(stopped["code"], "protected_merge_rejected")
@@ -569,6 +693,7 @@ class DeliveryControllerTests(unittest.TestCase):
             repository="owner/name",
             staging_sha=self.head,
             main_sha=_sha(6),
+            main_tree=_sha(60),
             candidate_sha=self.head,
             receipt=self.receipt,
             candidate_identity=self.identity,
@@ -582,10 +707,12 @@ class DeliveryControllerTests(unittest.TestCase):
             expected_head=self.head,
             source_sha=self.head,
             base_sha=_sha(6),
+            base_tree=_sha(60),
             approval={
                 "decision": "approve",
                 "sourceSha": self.head,
                 "baseSha": _sha(6),
+                "baseTree": _sha(60),
                 "prHeadSha": self.head,
                 "receiptDigest": receipts.compute_receipt_digest(self.receipt),
             },
@@ -615,6 +742,10 @@ class DeliveryControllerTests(unittest.TestCase):
                     "base": {"ref": "development"},
                     "mergeable_state": "clean",
                 }
+            if method == "GET" and url.endswith("/git/ref/heads/staging"):
+                return {"object": {"sha": _sha(7)}}
+            if method == "GET" and url.endswith(f"/git/commits/{_sha(7)}"):
+                return {"tree": {"sha": _sha(70)}}
             if method == "PUT" and url.endswith("/merge"):
                 return {"merged": True, "sha": _sha(4)}
             raise AssertionError((method, url))
@@ -625,6 +756,10 @@ class DeliveryControllerTests(unittest.TestCase):
         self.assertFalse(merged["directPush"])
         self.assertEqual(calls[0][0], "GET")
         self.assertEqual(calls[1][0], "PUT")
+        self.assertEqual(
+            live.get_ref_identity(repository="owner/name", branch="staging"),
+            {"commit": _sha(7), "tree": _sha(70)},
+        )
         with self.assertRaisesRegex(controller.ControllerError, "direct_push_forbidden"):
             live.push_protected(repository="owner/name", branch="development", sha=self.head)
 
@@ -635,6 +770,7 @@ class DeliveryControllerTests(unittest.TestCase):
                 repository="owner/name",
                 development_sha=self.head,
                 staging_sha=_sha(7),
+                staging_tree=_sha(70),
                 candidate_sha=_sha(99),
                 candidate_tree=self.tree,
                 receipt=self.receipt,
@@ -648,6 +784,7 @@ class DeliveryControllerTests(unittest.TestCase):
                 repository="owner/name",
                 staging_sha=self.head,
                 main_sha=_sha(6),
+                main_tree=_sha(60),
                 candidate_sha=_sha(88),
                 receipt=self.receipt,
                 candidate_identity=self.identity,
@@ -662,10 +799,12 @@ class DeliveryControllerTests(unittest.TestCase):
                 expected_head=self.head,
                 source_sha=_sha(55),
                 base_sha=_sha(6),
+                base_tree=_sha(60),
                 approval={
                     "decision": "approve",
                     "sourceSha": _sha(55),
                     "baseSha": _sha(6),
+                    "baseTree": _sha(60),
                     "prHeadSha": self.head,
                     "receiptDigest": receipts.compute_receipt_digest(self.receipt),
                 },
