@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "remaining-holds",
+  "overallState": "PREPARED/HOLD",
+  "ready": false,
+  "neverReadyWhileTheseHold": true,
+  "holds": [
+    {
+      "id": "LSG0-03-provider-admission",
+      "owner": "linktrend/LiNKlibraries",
+      "clearedBy": "exact selectable marketing-smb-v1 and admitted MWT handoffs with protected commit/tree/digests/receipts"
+    },
+    {
+      "id": "LSG0-04-platform",
+      "owner": "linktrend/LiNKplatform",
+      "clearedBy": "valid LiNKsites catalogue pin, actor/service registration, credential references, issuer/audience/scopes, applied migration receipts, live issuer/health"
+    },
+    {
+      "id": "LSG0-04-autowork",
+      "owner": "linktrend/LiNKautowork",
+      "clearedBy": "LiNKsites consumer registration, event allowlists, org/environment grants, admitted private endpoint, live health, live org-bound receipt"
+    },
+    {
+      "id": "LSINT-01-completion",
+      "owner": "LiNKsites coordinator after LSG0-03",
+      "action": "complete LSINT-01 only after LSG0-03 exact provider handoffs exist; this packet only prepares evidence"
+    },
+    {
+      "id": "LSVAL-01-full-suite",
+      "owner": "LiNKsites after LSINT-01",
+      "action": "one Full Suite on the exact consolidated candidate"
+    },
+    {
+      "id": "LSREV-01-independent-source-review",
+      "owner": "LiNKsites after LSVAL-01",
+      "action": "exactly one independent review of the exact consolidated SHA/tree naming auth/authorization and secret-handling, additive Payload/Postgres migration and RLS/data-boundary, and production deployment/rollback; not a second live operational reviewer"
+    },
+    {
+      "id": "github-dependabot-api-inventory",
+      "owner": "LSSEC-01/coordinator with GitHub access",
+      "action": "exact current alert-by-alert inventory; do not invent closures"
+    },
+    {
+      "id": "user-owned-next-env",
+      "owner": "founder/LSG0-01",
+      "path": "apps/cms/next-env.d.ts",
+      "action": "keep byte-identical and unstaged until a preservation packet isolates it"
+    }
+  ]
+}

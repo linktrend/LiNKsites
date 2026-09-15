@@ -1,0 +1,6 @@
+{
+  "name": "catalogue-provider-handoff-reject-integration-claimed",
+  "expect": "reject",
+  "reason": "integrationClaimed",
+  "patch": { "integrationClaimed": true }
+}

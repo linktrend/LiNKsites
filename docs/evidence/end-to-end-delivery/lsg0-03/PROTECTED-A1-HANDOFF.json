@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "lsg0-03-protected-a1-handoff-refresh",
+  "packet": "LSG0-03",
+  "note": "Historical LSG0-03 files remain the issue/538 packet. This addendum records independently recomputed protected A1 facts from the EXT-LS-01 bound LiNKlibraries identity. It does not claim admission, selectability, or live proof.",
+  "protectedLiNKlibraries": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "998c02c29fae5acc429804d7e03dcc74df7e7a52",
+    "tree": "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3"
+  },
+  "masterTemplateType1At201A11": {
+    "release": "master-template-type-1@2.0.0-a1.1",
+    "lifecycle": "draft",
+    "selectability": "non_selectable",
+    "catalogueBound": false,
+    "artifactTreeSha1": "6aadb2dff52efe30f512ddb2a5510a881fc027e2",
+    "retainedStagingArtifactTreeSha1": "95d0a2d168b60ba2b4afd32c71928efe3797d2bc",
+    "manifestSha256": "b4e0b141631694101b8daf5494499160b31e2ba6cbe66d0ec622f9690d567026",
+    "inventorySha256": "29262c08e9db2797ff292dc8179965c0ed080064a0b71d1bb477c4e0d63f0f72",
+    "payloadSha256": "884eaaa612a25167c84eb77dd271ee1413dabe6f08c56dc65464c5b464d2e4d6",
+    "dependencyLockSha256": "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23",
+    "releaseReceiptSha256": "9e53946b4dadcec3e939bd1f42bb41b1d8851d29ac7c2de3f4a66dcdd9ce1021",
+    "catalogueBindingReceiptSha256": "a1b47f09f981c4db4150ee2297a9c4cd6ca45a0f8487449ac1791147cd1aa6d3",
+    "catalogueFileSha256": "5f9c0f6bbfcede994411f8dabe04a89809d7959550985e0a7dda8c9988be22ee",
+    "catalogueRecordsSha256": "749e2d6a340fad7be1fb68bad2d03c5f472a3976275048fa7a845bf3fd99f4ee",
+    "visualSourceCommit": "1635a64f1d90efd049c959a7cf38ebac7ccbfdac",
+    "visualSourceTree": "873c4acc582050b416fb5a8bc59990345711df46",
+    "rollback": "node scripts/v2/rebind-master-template-v2-release.mjs --version 2.0.0-a1.1 --rollback",
+    "independentlyRecomputedFromProtectedSource": true
+  }
+}
