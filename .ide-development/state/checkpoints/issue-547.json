@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue-checkpoint",
+  "issue": 547,
+  "branch": "cursor/linksites-ext-ls-01-protected-a1-consumer-547-e568",
+  "ownedIssueBranch": "issue/547-prove-linksites-consumption-of-protected-master",
+  "admittedCommit": "fba2ed08d5cf3a16ca691da6eec707d584153a7f",
+  "admittedTree": "395d4dc07780ffee977be7f5d6469b06189f1475",
+  "implementationCommit": "0c6125db5367a3e7d9bedd2ad30fbb1d0bf846cc",
+  "implementationTree": "2477dbee4e78208b219edb64f78ff3b34c8d647c",
+  "extLs01Receipt": {
+    "path": ".git/linktrend-evidence/ext-ls-01-issue547/consumer-proof-receipt.json",
+    "sha256": "03e6006e533afdc77a4ed7e83b10259cc8d5d9da896833106cf322ef9c46f5ed",
+    "boundConsumerCommit": "f973999c8a16d2dcadb4b2e506da6392f5571cae",
+    "boundConsumerTree": "34a6937eeaceaa5a4b66c6c77c27551d1337548d"
+  },
+  "at": "2026-09-13T06:47:12Z",
+  "didNotCreatePr": true
+}

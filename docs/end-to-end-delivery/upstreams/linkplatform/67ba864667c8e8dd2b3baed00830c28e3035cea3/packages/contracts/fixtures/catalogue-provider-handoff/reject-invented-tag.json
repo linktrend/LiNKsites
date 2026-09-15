@@ -1,0 +1,6 @@
+{
+  "name": "catalogue-provider-handoff-reject-invented-tag",
+  "expect": "reject",
+  "reason": "tag",
+  "patch": { "pin": { "tag": "v0.0.0-not-a-release" } }
+}
