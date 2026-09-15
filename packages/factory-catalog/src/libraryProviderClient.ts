@@ -2,13 +2,13 @@ import { createHash } from "node:crypto";
 import { validateNativeV2Bundle } from "./nativeRevision2Validator.js";
 
 /** Protected LiNKlibraries development identity supplied for the A1 consumer. */
-export const FROZEN_CANDIDATE_SHA = "dbf749cb48ffa03bf2e702d37b608f14c63e0520";
-export const FROZEN_TREE_SHA = "a968c801f0fa7cbeac40edc788a4f081617e2759";
+export const FROZEN_CANDIDATE_SHA = "998c02c29fae5acc429804d7e03dcc74df7e7a52";
+export const FROZEN_TREE_SHA = "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3";
 /** Immutable provider release identity for master-template-type-1@2.0.0-a1.1. */
-export const FROZEN_SOURCE_RELEASE_SHA = "f28fd53d454cbc33d97951d8e62826dae5a83e40";
-export const FROZEN_SOURCE_RELEASE_TREE_SHA = "34dc7467f4eb382ab7fbe258c5adc0f857d8ab5b";
-export const FROZEN_CATALOGUE_FILE_SHA256 = "da2178f497593c858611a29e40c53fa7798e31fa3cc3700bcf4e1c4a1f309543";
-export const FROZEN_CATALOGUE_RECORDS_SHA256 = "66a8971e38cc9bfb06836d8427534ca96de68065d0fca3b28f992e83584c7674";
+export const FROZEN_SOURCE_RELEASE_SHA = "998c02c29fae5acc429804d7e03dcc74df7e7a52";
+export const FROZEN_SOURCE_RELEASE_TREE_SHA = "63c7f6f8811b93f90a1dcc101cdeea94bdc6d4b3";
+export const FROZEN_CATALOGUE_FILE_SHA256 = "5f9c0f6bbfcede994411f8dabe04a89809d7959550985e0a7dda8c9988be22ee";
+export const FROZEN_CATALOGUE_RECORDS_SHA256 = "749e2d6a340fad7be1fb68bad2d03c5f472a3976275048fa7a845bf3fd99f4ee";
 export const FROZEN_DEPENDENCY_LOCK_SHA256 =
   "59f4db72af5de4731c68ee44b525f494c6cd067b42f8da310c345829f1b09c23";
 
@@ -351,13 +351,17 @@ function candidateReceipt(value: unknown, errors: string[]): JsonRecord | undefi
   // receipts. Keep accepting the historical provider_release_candidate label
   // for older fixtures, but never reject the canonical prerelease label before
   // validating the rest of the receipt.
-  if (!object(value) || !isProviderCandidateReceiptType(value.receiptType) || !closed(value, "receipt", ["schemaVersion", "schemaRevision", "receiptType", "release", "source", "catalogue", "governance"], ["staging", "provider"], errors)) return undefined;
+  if (!object(value) || !isProviderCandidateReceiptType(value.receiptType) || !closed(value, "receipt", ["schemaVersion", "schemaRevision", "receiptType", "release", "source", "catalogue", "governance"], ["staging", "provider", "rollback"], errors)) return undefined;
   if (value.schemaVersion !== 2 || value.schemaRevision !== 2) errors.push("candidate receipt schema is invalid");
   if (!closed(value.release, "receipt.release", ["entryId", "version", "manifestSha256", "artifactTreeSha1", "payloadSha256", "inventoryFileSha256", "dependencyLockSha256"], ["manifestPath", "inventoryProjectionSha256", "dependencyProjectionSha256"], errors)) errors.push("candidate receipt release is invalid");
   if (object(value.release) && (!semver(value.release.version) || !digest(value.release.manifestSha256) || !digest(value.release.payloadSha256) || !digest(value.release.inventoryFileSha256) || !digest(value.release.dependencyLockSha256) || !sha1(value.release.artifactTreeSha1))) errors.push("candidate receipt release digests are invalid");
   if (!closed(value.source, "receipt.source", ["repository", "sourceCommit", "sourceTree"], ["handoffCommit", "handoffTree", "sourceRoots", "sourcePathsAreProviderCode", "visualInventoryEntries"], errors) || value.source.repository !== "LiNKsites" || !sha1(value.source.sourceCommit) || !sha1(value.source.sourceTree)) errors.push("candidate receipt source is invalid");
-  if (!closed(value.catalogue, "receipt.catalogue", ["fileSha256", "recordsSha256"], ["path", "bound", "productionPointer"], errors) || !digest(value.catalogue.fileSha256) || !digest(value.catalogue.recordsSha256)) errors.push("candidate receipt catalogue is invalid");
+  if (!closed(value.catalogue, "receipt.catalogue", ["fileSha256", "recordsSha256"], ["path", "bound", "indexed", "record", "productionPointer"], errors) || !digest(value.catalogue.fileSha256) || !digest(value.catalogue.recordsSha256)) errors.push("candidate receipt catalogue is invalid");
+  if (object(value.catalogue) && (value.catalogue.bound !== false || value.catalogue.indexed !== false || value.catalogue.record !== null || value.catalogue.productionPointer !== false || !relativePath(value.catalogue.path))) errors.push("candidate receipt catalogue is not the protected unindexed candidate shape");
   if (!closed(value.governance, "receipt.governance", ["lifecycle", "selectability", "compatibility"], ["visualMasterClaimed", "pairedProofRequired", "independentQualificationRequired", "candidateProbeOnly", "assetRights", "assetRightsReview", "admission"], errors) || value.governance.lifecycle !== "draft" || value.governance.selectability !== "non_selectable" || value.governance.compatibility !== "unknown") errors.push("candidate receipt governance is invalid");
+  if (value.rollback !== undefined) {
+    if (!closed(value.rollback, "receipt.rollback", ["method", "reference", "removes", "retains"], [], errors) || typeof value.rollback.method !== "string" || !/^node scripts\/v2\/rebind-master-template-v2-release\.mjs --version 2\.0\.0-a1\.1 --rollback$/.test(value.rollback.method) || !relativePath(value.rollback.reference) || !Array.isArray(value.rollback.removes) || !Array.isArray(value.rollback.retains) || value.rollback.removes.length !== 1 || value.rollback.retains.length !== 1 || !value.rollback.removes.every(relativePath) || !value.rollback.retains.every(relativePath) || value.rollback.removes[0] !== "registry/v2/entries/master-template-type-1/versions/2.0.0-a1.1/" || value.rollback.retains[0] !== "registry/v2/entries/master-template-type-1/staging/2.0.0-a1.1/") errors.push("candidate receipt rollback is invalid");
+  }
   return value;
 }
 export function pageCatalogue(input: unknown, limit = 25, cursor: Revision2Cursor | null = null, pin: Revision2ProviderPin = FROZEN_PROVIDER_PIN): Revision2Result<Revision2Page> {
