@@ -68,6 +68,7 @@ def issue_transition_receipt(
     maintenance_paths: Sequence[str] = (),
     failure_contract_digest: str | None = None,
     protected_base_commit: str | None = None,
+    protected_base_tree: str | None = None,
     store_repo: str | Path | None = None,
     store_root: str | Path | None = None,
     maintenance_history: Sequence[Mapping[str, Any]] = (),
@@ -89,6 +90,7 @@ def issue_transition_receipt(
         maintenance_paths=maintenance_paths,
         failure_contract_digest=failure_contract_digest,
         protected_base_commit=protected_base_commit,
+        protected_base_tree=protected_base_tree,
     )
     if transition_type == "receipt-maintenance":
         maintenance = admit_receipt_maintenance_transition(
@@ -126,6 +128,7 @@ def verify_transition_for_promotion(
     expected_workflow_run_id: int | None = None,
     expected_workflow_run_attempt: int | None = None,
     expected_base_commit: str | None = None,
+    expected_base_tree: str | None = None,
 ) -> dict[str, Any]:
     """Return a promotion-safe decision for a commit-changing same-tree merge."""
 
@@ -136,6 +139,7 @@ def verify_transition_for_promotion(
         expected_workflow_run_id=expected_workflow_run_id,
         expected_workflow_run_attempt=expected_workflow_run_attempt,
         expected_base_commit=expected_base_commit,
+        expected_base_tree=expected_base_tree,
     )
     return {
         "accepted": bool(verdict),

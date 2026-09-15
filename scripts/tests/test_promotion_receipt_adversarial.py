@@ -67,6 +67,7 @@ def chain(source_branch: str, target_branch: str) -> tuple[dict, dict, dict, str
         target_commit=TARGET_HEAD,
         target_tree=TREE,
         protected_base_commit=PROTECTED_BASE,
+        protected_base_tree=PROTECTED_BASE_TREE,
     ).to_dict()
     return receipt, target.to_dict(), transition, SOURCE_HEAD, TARGET_HEAD, PROTECTED_BASE
 
@@ -256,6 +257,7 @@ class PromotionReceiptAdversarialTests(unittest.TestCase):
             expected_workflow_run_id=34165549526,
             expected_workflow_run_attempt=1,
             expected_base_commit=protected_base,
+            expected_base_tree=PROTECTED_BASE_TREE,
         )
         self.assertTrue(accepted.accepted)
         stale_base = verify_transition_receipt(
@@ -265,9 +267,27 @@ class PromotionReceiptAdversarialTests(unittest.TestCase):
             expected_workflow_run_id=34165549526,
             expected_workflow_run_attempt=1,
             expected_base_commit="8" * 40,
+            expected_base_tree=PROTECTED_BASE_TREE,
         )
         self.assertFalse(stale_base.accepted)
         self.assertEqual(stale_base.code, "transition_target_mismatch")
+        stale_tree = verify_transition_receipt(
+            transition,
+            receipt,
+            target,
+            expected_base_commit=protected_base,
+            expected_base_tree="9" * 40,
+        )
+        self.assertFalse(stale_tree.accepted)
+        self.assertEqual(stale_tree.code, "transition_target_mismatch")
+
+    def test_legacy_transition_without_base_tree_keeps_its_digest(self) -> None:
+        receipt, target, transition, _source_head, _target_head, _base = chain("development", "staging")
+        legacy = dict(transition)
+        legacy.pop("protectedBaseTree")
+        legacy["receiptDigest"] = compute_transition_digest({**legacy, "receiptDigest": ""})
+        verdict = verify_transition_receipt(legacy, receipt, target)
+        self.assertTrue(verdict.accepted, verdict.message)
 
     def test_exact_head_receipts_still_work_without_transitions(self) -> None:
         receipt, target, _transition, source_head, _target_head, _base = chain("development", "staging")
