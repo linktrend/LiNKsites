@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "kind": "linksites.consumer-receipt",
+  "packet": "LSG0-03",
+  "issue": 549,
+  "evidenceClass": "consumer-proof",
+  "outOfTree": true,
+  "distinctFromProviderPublication": true,
+  "implementation": {
+    "repository": "linktrend/LiNKsites",
+    "branch": "issue/549-consume-protected-marketing-smb-provider-handoff",
+    "writerCheckout": "cursor/linksites-protected-marketing-smb-consumer-549-4259",
+    "commit": "962104ea031ff3fbd412f977fdf031c255b6a18b",
+    "tree": "bf70d00764d2106a19d44282b9a9fee3290fac9e",
+    "note": "This receipt names the implementation commit that added consumer bind code and the copied bundle. It is not hashed into that commit."
+  },
+  "provider": {
+    "repository": "linktrend/LiNKlibraries",
+    "ref": "development",
+    "commit": "0704dbef0871216dee5c4b85b3e2783823c21edb",
+    "tree": "183e834bf7888a5a6e675a1232a1f979c8991a42",
+    "entryPath": "entries/marketing-smb-v1",
+    "entryGitTreeObjectSha1": "d146699d8d03d6f4821fe7aa57d449678c3ea170",
+    "catalogSha256": "d8e9b6d7616d98f08890bb5db08a1c0aad93775c54f7eac880380285ff1ba23e",
+    "entryJsonSha256": "bf7efdbe2cc281bbfb193aab4554a660648da5c2c4baeb40f078d7ad110bb9b7",
+    "lifecycle": "usable",
+    "selectability": "selectable",
+    "admissionClass": "library-local-selectable"
+  },
+  "consumerProof": {
+    "handoffBound": true,
+    "materialized": true,
+    "restartedFromCache": true,
+    "tamperRejected": true,
+    "productionSelectable": false,
+    "providerCheckoutRequired": false,
+    "linksitesRendererCompatibility": "unknown",
+    "payloadCmsCompatibility": "unknown",
+    "deploymentClaimed": false,
+    "productionClaimed": false
+  },
+  "a1Lane": {
+    "preservedSeparate": true,
+    "masterTemplateAdmitted": false
+  },
+  "checks": {
+    "factoryCatalog": "pass",
+    "webMaster": "pass",
+    "providerNodeTest": "pass",
+    "gitDiffCheck": "pass",
+    "changeScopedSecretScan": "pass",
+    "fullRepoSecretScan": "pre-existing stale fixture candidateTree findings; not introduced by this packet"
+  }
+}
