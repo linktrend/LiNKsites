@@ -16,6 +16,8 @@ type Props = {
   children: ReactNode;
   trafficSource?: string;
   planId: PlanId;
+  newsletterEnabled: boolean;
+  cookiesEnabled: boolean;
 };
 
 export function MarketingLayoutClient({
@@ -25,6 +27,8 @@ export function MarketingLayoutClient({
   children,
   trafficSource,
   planId,
+  newsletterEnabled,
+  cookiesEnabled,
 }: Props) {
   const shell = resolveShell({ locale: lang, planId });
   const isolated = shell.typeLShellMode === "isolated";
@@ -41,9 +45,9 @@ export function MarketingLayoutClient({
       <main data-shell-region="main" className="flex-1">
         {children}
       </main>
-      {!isolated ? <NewsletterSection lang={lang} /> : null}
+      {!isolated && newsletterEnabled ? <NewsletterSection lang={lang} /> : null}
       <Footer lang={lang} navigation={footerNav} planId={planId} />
-      {!isolated ? <CookieConsentBanner lang={lang} /> : null}
+      {!isolated && cookiesEnabled ? <CookieConsentBanner lang={lang} /> : null}
     </div>
   );
 }
