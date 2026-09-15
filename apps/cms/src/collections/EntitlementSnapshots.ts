@@ -1,10 +1,16 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, Field } from 'payload'
 import { createAccess } from '@/access'
 import { createSiteFilteredAccess } from '@/admin/utils/siteFilterOptions'
 import { localeField } from '@/fields/localeField'
 import { siteField } from '@/fields/siteField'
 import { LS03_CAPABILITY_PLANS } from '@/payload/ls03/semanticContract'
 import { rejectImmutableDelete, rejectImmutableUpdate } from '@/hooks/enforceImmutableRecord'
+import { applyLsdata01EntitlementDefaults } from '@/payload/lsdata01/entitlementDefaults'
+
+export const assertLsdata01EntitlementDefaults: CollectionBeforeChangeHook = ({ data }) => {
+  if (!data) return
+  applyLsdata01EntitlementDefaults(data)
+}
 
 export const EntitlementSnapshots: CollectionConfig = {
   slug: 'entitlement-snapshots',
@@ -20,7 +26,7 @@ export const EntitlementSnapshots: CollectionConfig = {
     delete: () => false,
   },
   hooks: {
-    beforeChange: [rejectImmutableUpdate],
+    beforeChange: [assertLsdata01EntitlementDefaults, rejectImmutableUpdate],
     beforeDelete: [rejectImmutableDelete],
   },
   fields: [

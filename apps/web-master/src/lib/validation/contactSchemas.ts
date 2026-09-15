@@ -20,8 +20,12 @@ export const contactFormSchema = z.object({
     .boolean()
     .refine((val) => val === true, {
       message: "forms.validation.captchaRequired",
-    })
-    .optional(),
+    }),
+  acceptedTerms: z
+    .boolean()
+    .refine((val) => val === true, {
+      message: "forms.validation.termsRequired",
+    }),
 });
 
 export type ContactFormData = z.infer<typeof contactFormSchema>;
