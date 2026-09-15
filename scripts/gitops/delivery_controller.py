@@ -468,6 +468,26 @@ class LiveGitHub:
             raise ControllerError("github_api_failed", f"protected tree identity missing: {branch}")
         return {"commit": commit, "tree": tree}
 
+    def _require_atomic_base_protection(self, *, repository: str, branch: str) -> None:
+        """Require GitHub to reject a merge when its base moves at transaction time."""
+
+        encoded = urllib.parse.quote(branch, safe="")
+        rules = self._request(
+            "GET", f"https://api.github.com/repos/{repository}/rules/branches/{encoded}"
+        )
+        strict = any(
+            isinstance(rule, Mapping)
+            and rule.get("type") == "required_status_checks"
+            and isinstance(rule.get("parameters"), Mapping)
+            and rule["parameters"].get("strict_required_status_checks_policy") is True
+            for rule in rules if isinstance(rules, list)
+        )
+        if not strict:
+            raise ControllerError(
+                "atomic_base_protection_missing",
+                f"{branch} must require strict up-to-date status checks before protected merge",
+            )
+
     def merge_pull_request(
         self,
         *,
@@ -502,6 +522,7 @@ class LiveGitHub:
                     "protected_base_tree_moved",
                     f"live={base_identity['tree']}:expected={expected_base_tree}",
                 )
+            self._require_atomic_base_protection(repository=repository, branch=base_branch)
         if admin:
             return self._merge_with_gh_admin(
                 repository=repository,

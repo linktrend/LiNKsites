@@ -805,6 +805,13 @@ class DeliveryControllerTests(unittest.TestCase):
                 return {"object": {"sha": base}}
             if method == "GET" and url.endswith(f"/git/commits/{base}"):
                 return {"tree": {"sha": base_tree}}
+            if method == "GET" and url.endswith("/rules/branches/staging"):
+                return [
+                    {
+                        "type": "required_status_checks",
+                        "parameters": {"strict_required_status_checks_policy": True},
+                    }
+                ]
             if method == "PUT" and url.endswith("/pulls/12/merge"):
                 return {"merged": True, "sha": merge}
             if method == "GET" and url.endswith(f"/git/commits/{merge}"):
@@ -854,6 +861,84 @@ class DeliveryControllerTests(unittest.TestCase):
                 expected_result_tree=result_tree,
             )
         self.assertNotIn("PUT", moved_calls)
+
+    def test_live_strict_protection_rejects_move_after_final_read_before_put(self) -> None:
+        base, base_tree = _sha(7), _sha(70)
+        state = {"base": base, "protectedMutation": False}
+
+        def transport(method: str, url: str, token: str, body):
+            if method == "GET" and url.endswith("/pulls/13"):
+                return {
+                    "number": 13,
+                    "draft": False,
+                    "state": "open",
+                    "head": {"ref": "promote/staging/two", "sha": self.head, "repo": {"full_name": "owner/name"}},
+                    "base": {"ref": "staging", "sha": state["base"]},
+                }
+            if method == "GET" and url.endswith("/git/ref/heads/staging"):
+                return {"object": {"sha": state["base"]}}
+            if method == "GET" and url.endswith(f"/git/commits/{base}"):
+                return {"tree": {"sha": base_tree}}
+            if method == "GET" and url.endswith("/rules/branches/staging"):
+                return [
+                    {
+                        "type": "required_status_checks",
+                        "parameters": {"strict_required_status_checks_policy": True},
+                    }
+                ]
+            if method == "PUT" and url.endswith("/pulls/13/merge"):
+                state["base"] = _sha(71)
+                raise controller.ControllerError(
+                    "protected_merge_rejected",
+                    "strict status checks rejected a base move at merge transaction time",
+                )
+            raise AssertionError((method, url, body))
+
+        live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
+        with self.assertRaisesRegex(controller.ControllerError, "protected_merge_rejected"):
+            live.merge_pull_request(
+                repository="owner/name",
+                number=13,
+                expected_head=self.head,
+                expected_base=base,
+                expected_base_tree=base_tree,
+                expected_result_tree=self.tree,
+            )
+        self.assertFalse(state["protectedMutation"])
+
+    def test_live_merge_rejects_missing_strict_atomic_base_protection(self) -> None:
+        base, base_tree = _sha(7), _sha(70)
+        calls: list[str] = []
+
+        def transport(method: str, url: str, token: str, body):
+            calls.append(method)
+            if method == "GET" and url.endswith("/pulls/14"):
+                return {
+                    "number": 14,
+                    "draft": False,
+                    "state": "open",
+                    "head": {"ref": "promote/staging/three", "sha": self.head, "repo": {"full_name": "owner/name"}},
+                    "base": {"ref": "staging", "sha": base},
+                }
+            if method == "GET" and url.endswith("/git/ref/heads/staging"):
+                return {"object": {"sha": base}}
+            if method == "GET" and url.endswith(f"/git/commits/{base}"):
+                return {"tree": {"sha": base_tree}}
+            if method == "GET" and url.endswith("/rules/branches/staging"):
+                return []
+            raise AssertionError((method, url, body))
+
+        live = controller.LiveGitHub(repository="owner/name", automation_token="tok", transport=transport)
+        with self.assertRaisesRegex(controller.ControllerError, "atomic_base_protection_missing"):
+            live.merge_pull_request(
+                repository="owner/name",
+                number=14,
+                expected_head=self.head,
+                expected_base=base,
+                expected_base_tree=base_tree,
+                expected_result_tree=self.tree,
+            )
+        self.assertNotIn("PUT", calls)
 
     def test_staging_and_main_require_exact_source_sha_equality(self) -> None:
         with self.assertRaisesRegex(controller.ControllerError, "promotion_source_mismatch"):
