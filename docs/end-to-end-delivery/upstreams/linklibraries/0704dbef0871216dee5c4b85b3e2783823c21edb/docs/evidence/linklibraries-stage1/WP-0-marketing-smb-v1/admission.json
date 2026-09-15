@@ -1,0 +1,80 @@
+{
+  "packet": "LSG0-03-marketing-smb-v1-qualify-admit-publish",
+  "entryId": "marketing-smb-v1",
+  "kind": "template",
+  "base": {
+    "remote": "origin/issue/432-qualify-admit-and-publish-selectable-marketing-s",
+    "sha": "dacdf036312462c2373afc9cc4302e3231f7e6e9",
+    "tree": "d3c5f1e2a3450b016084ae09666ac193297ac9fc"
+  },
+  "productCandidate": {
+    "remote": "origin/issue/432-qualify-admit-and-publish-selectable-marketing-s",
+    "sha": "4f1aed3e4e6b630a6249eb33ab7e88e2bc3e978b",
+    "tree": "b1966bfa8d6b333ad687474e63651bb9b3a8baac"
+  },
+  "ownedPaths": [
+    "entries/marketing-smb-v1/",
+    "indexes/catalog.json",
+    "docs/evidence/linklibraries-stage1/WP-0-marketing-smb-v1/",
+    "scripts/validate-library.mjs",
+    "scripts/build-catalog.mjs",
+    "tests/"
+  ],
+  "forbiddenScope": [
+    "LiNKsites renderer compatibility claims",
+    "Payload CMS compatibility claims",
+    "consumer integration",
+    "provider live state",
+    "deployment",
+    "production proof",
+    "credentials",
+    "protected refs",
+    "implementer pull requests"
+  ],
+  "admission": {
+    "state": "library_local_selectable",
+    "schemaRepresentation": "schema-v2",
+    "selectionRule": "Consumers may select this entry from the LiNKlibraries catalogue only as a Library-local template. Selection is not LiNKsites renderer, Payload CMS, consumer-integration, provider-live, deployment, or production proof. Unknown or unqualified entries remain non-selectable.",
+    "mechanicalContract": "schema-v2 entry metadata, all packaged file hashes, local asset inventory, non-secret content, and generated catalog",
+    "localProofsRequired": [
+      "structural",
+      "schema",
+      "provenance",
+      "asset",
+      "secret-scan",
+      "deterministic-catalogue"
+    ],
+    "unprovenAndOutOfScope": [
+      "LiNKsites renderer compatibility",
+      "Payload CMS compatibility",
+      "consumer integration",
+      "provider live state",
+      "deployment",
+      "production publication"
+    ],
+    "librarianQualityContract": "portable export, formal input schema, baseline copy, asset licensing/provenance, concrete integration notes, gotchas, license, and security review",
+    "implementerVerdict": "library-local-selectable-pending-independent-review",
+    "selfApproval": false,
+    "independentApprovalRequired": true,
+    "governedAdmissionRequired": true,
+    "failClosed": "If any required local proof is missing, keep selectable=false and record the specific evidence gap."
+  },
+  "catalog": {
+    "path": "indexes/catalog.json",
+    "record": {
+      "entryId": "marketing-smb-v1",
+      "kind": "template",
+      "state": "usable",
+      "selectable": true,
+      "path": "entries/marketing-smb-v1"
+    }
+  },
+  "validationCommands": [
+    "node scripts/validate-library.mjs",
+    "node scripts/build-catalog.mjs --check",
+    "node --test entries/marketing-smb-v1/tests/marketing-smb-v1.test.mjs",
+    "npm run test:librarian",
+    "git diff --check"
+  ],
+  "validationNote": "Toolchain is Node 22.23.2 from Validate Library CI with npm ci against the committed package-lock.json. Cached installs from other branches are not authoritative."
+}

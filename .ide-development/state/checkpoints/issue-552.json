@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "v25-issue-checkpoint",
+  "issue": 552,
+  "branch": "issue/552-consolidate-accepted-linksites-delivery-branches",
+  "ownedIssueBranch": "issue/552-consolidate-accepted-linksites-delivery-branches",
+  "admittedStartingRef": "issue/552-consolidate-accepted-linksites-delivery-branches",
+  "admittedCommit": "4b2dbaf5c0ce34076e5d62f8703bbda197dd8ffb",
+  "admittedTree": "e29607c43146decdf81c2f132562745f6a911780",
+  "headSha": "98e36c593e5874371cb7db65bc34736738c39de4",
+  "gitTree": "d9fafbc7b280074176ef59b497c9f4c8a1062100",
+  "metadataCommitNote": "Branch tip after this file is a checkpoint-metadata commit; evidence bytes remain e3fee46e4e4f42ee1e90f5a6a4c47a03f8ae0282 / 6793972667bc2d7a065deb8a46d797c40813ad55 plus this retarget.",
+  "composeOrder": [
+    "550",
+    "546",
+    "549",
+    "551",
+    "548"
+  ],
+  "mergeCommits": [
+    "ea29a9335acea2cd220100352e745b89a1d23d43",
+    "1812a45fa9aa786f5c33cff2a9279bbc00841dfc",
+    "831a3c04ca26b19eae1d43dadc5f7e353ec5cc34",
+    "3523429db46064105dcb064c78fe52f122c0d368",
+    "694de83ecd20bf41843a7591ba1e2632e6f4acc6"
+  ],
+  "didNotCreatePr": true,
+  "proofClass": "local",
+  "claims": {
+    "accept": false,
+    "catalogueSelectable": false,
+    "production": false,
+    "deployment": false,
+    "a2": false,
+    "a3": false
+  }
+}

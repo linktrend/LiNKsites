@@ -1,0 +1,18 @@
+# Hosted LiNKsites CI gitleaks config.
+# Extends the default rule set. Do not add path-wide or rule-wide disables.
+
+title = "LiNKsites hosted secret scan"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = """
+Issue 556: exact SHA-256 of copied LiNKlibraries WP-0 marketing-smb-v1
+design/tokens.json recorded in the A1 receipt. This is a file digest, not a
+credential. The rest of the receipt is unchanged. This regex cannot match a
+distinct production secret.
+"""
+regexes = [
+  '''ea0415a8c9478ef8d9e829247800f3ed56c2602a0fb12cd6287b7fd8c0a8120a''',
+]

@@ -81,12 +81,12 @@ export function requireProtectedLs07(raw) {
 }
 
 /**
- * Bind the exact MWT-07 pin. Bound means identity match, not bytes present.
+ * Bind the exact protected A1 pin. Bound means identity match, not bytes present.
  * @param {unknown} raw
  */
 export function requireProviderPin(raw) {
   if (!isRecord(raw)) {
-    throw new ClosedFailure("provider_unbound", "providerA1 must bind the exact MWT-07 pin");
+    throw new ClosedFailure("provider_unbound", "providerA1 must bind the exact protected A1 pin");
   }
   if (raw.bound !== true) {
     throw new ClosedFailure("provider_unbound", "providerA1.bound must be true (identity pin, not bytes)");
@@ -159,6 +159,7 @@ export function requireExtLs01Receipt(raw, paths = {}) {
     candidates.push(path.join(paths.gitCommonDir, relative));
   }
   let bytesPresent = false;
+  let matchedPath = "";
   for (const candidate of candidates) {
     if (!fs.existsSync(candidate)) continue;
     const digest = sha256Hex(fs.readFileSync(candidate));
@@ -169,7 +170,15 @@ export function requireExtLs01Receipt(raw, paths = {}) {
       );
     }
     bytesPresent = true;
+    matchedPath = candidate;
     break;
+  }
+
+  if (!bytesPresent) {
+    throw new ClosedFailure(
+      "ext_ls01_unbound",
+      `EXT-LS-01 out-of-tree receipt is missing; bound=true is forbidden without bytes at ${raw.path}`,
+    );
   }
 
   return {
@@ -178,9 +187,21 @@ export function requireExtLs01Receipt(raw, paths = {}) {
     path: EXT_LS_01_RECEIPT.path,
     consumerCommit: EXT_LS_01_RECEIPT.consumerCommit,
     consumerTree: EXT_LS_01_RECEIPT.consumerTree,
-    bytesPresent,
+    bytesPresent: true,
     bytesEmbedded: false,
+    verifiedPath: matchedPath,
   };
+}
+
+/**
+ * Read verified out-of-tree EXT-LS-01 receipt bytes. Missing files fail closed.
+ *
+ * @param {unknown} raw
+ * @param {{ repoRoot?: string, gitCommonDir?: string }} [paths]
+ */
+export function loadExtLs01ReceiptBytes(raw, paths = {}) {
+  const bound = requireExtLs01Receipt(raw, paths);
+  return JSON.parse(fs.readFileSync(bound.verifiedPath, "utf8"));
 }
 
 /**
@@ -242,8 +263,8 @@ export function assertCatalogPinFiles(repoRoot) {
   const pinText = fs.readFileSync(pinPath, "utf8");
   const clientText = fs.readFileSync(clientPath, "utf8");
   for (const [label, needle] of [
-    ["MWT-07 commit", PROVIDER_PIN.commit],
-    ["MWT-07 tree", PROVIDER_PIN.tree],
+    ["protected A1 commit", PROVIDER_PIN.commit],
+    ["protected A1 tree", PROVIDER_PIN.tree],
     ["entry version", PROVIDER_PIN.version],
   ]) {
     if (!pinText.includes(needle) && !clientText.includes(needle)) {
